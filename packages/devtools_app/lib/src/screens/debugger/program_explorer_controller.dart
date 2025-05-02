@@ -71,13 +71,12 @@ class ProgramExplorerController extends DisposableController
 
     final isolate =
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
-    final libraries =
-        isolate != null
-            ? serviceConnection.serviceManager.isolateManager
-                .isolateState(isolate)
-                .isolateNow!
-                .libraries!
-            : <LibraryRef>[];
+    final libraries = isolate != null
+        ? serviceConnection.serviceManager.isolateManager
+              .isolateState(isolate)
+              .isolateNow!
+              .libraries!
+        : <LibraryRef>[];
 
     if (scriptManager.sortedScripts.value.isEmpty && isolate != null) {
       await scriptManager.retrieveAndSortScripts(isolate);
@@ -143,10 +142,9 @@ class ProgramExplorerController extends DisposableController
       final matchingNode = depthFirstTraversal(
         node,
         returnCondition: matchingNodeCondition,
-        exploreChildrenCondition:
-            includeCollapsedNodes
-                ? null
-                : (VMServiceObjectNode node) => node.isExpanded,
+        exploreChildrenCondition: includeCollapsedNodes
+            ? null
+            : (VMServiceObjectNode node) => node.isExpanded,
         action: (VMServiceObjectNode _) => index++,
       );
       if (matchingNode != null) return index;
@@ -245,13 +243,12 @@ class ProgramExplorerController extends DisposableController
   Future<void> populateNode(VMServiceObjectNode node) async {
     final object = node.object;
     final service = serviceConnection.serviceManager.service;
-    final isolateId =
-        serviceConnection
-            .serviceManager
-            .isolateManager
-            .selectedIsolate
-            .value!
-            .id;
+    final isolateId = serviceConnection
+        .serviceManager
+        .isolateManager
+        .selectedIsolate
+        .value!
+        .id;
 
     Future<List<Obj>> getObjects(Iterable<ObjRef> objs) {
       return objs.map((o) => service!.getObject(isolateId!, o.id!)).wait;
@@ -299,21 +296,19 @@ class ProgramExplorerController extends DisposableController
         return;
       } else if (object is LibraryRef) {
         final lib = await service!.getObject(isolateId!, object.id!) as Library;
-        final (variableObjects, functionObjects) =
-            await (
-              getObjects(lib.variables!),
-              getFuncs(lib.functions!, lib.variables),
-            ).wait;
+        final (variableObjects, functionObjects) = await (
+          getObjects(lib.variables!),
+          getFuncs(lib.functions!, lib.variables),
+        ).wait;
         lib.variables = variableObjects.cast<Field>();
         lib.functions = functionObjects;
         node.updateObject(lib);
       } else if (object is ClassRef) {
         final clazz = await service!.getObject(isolateId!, object.id!) as Class;
-        final (fieldObjects, functionObjects) =
-            await (
-              getObjects(clazz.fields!),
-              getFuncs(clazz.functions!, clazz.fields),
-            ).wait;
+        final (fieldObjects, functionObjects) = await (
+          getObjects(clazz.fields!),
+          getFuncs(clazz.functions!, clazz.fields),
+        ).wait;
         clazz.fields = fieldObjects.cast<Field>();
         clazz.functions = functionObjects;
         node.updateObject(clazz);
@@ -330,13 +325,12 @@ class ProgramExplorerController extends DisposableController
   /// which is the source location of the target [object].
   Future<VMServiceObjectNode> searchFileExplorer(ObjRef object) async {
     final service = serviceConnection.serviceManager.service!;
-    final isolateId =
-        serviceConnection
-            .serviceManager
-            .isolateManager
-            .selectedIsolate
-            .value!
-            .id!;
+    final isolateId = serviceConnection
+        .serviceManager
+        .isolateManager
+        .selectedIsolate
+        .value!
+        .id!;
 
     // If `object` is a library, it will always be a root node and is simple to
     // find.

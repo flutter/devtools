@@ -130,8 +130,8 @@ class _DropdownInputState<T> extends State<_DropdownInput<T>>
         padding: denseSpacing,
       ),
       isExpanded: true,
-      selectedItemBuilder:
-          (context) => _dropdownItems(withDefaultLabels: false),
+      selectedItemBuilder: (context) =>
+          _dropdownItems(withDefaultLabels: false),
       items: _dropdownItems(withDefaultLabels: true),
       onChanged: (newValue) async {
         if (newValue != widget.property.valueDisplay) {
@@ -283,9 +283,9 @@ class _TextInputState<T> extends State<_TextInput<T>>
     // set the empty selection at the end of the string.
     final newSelection =
         (newValue.length < previousSelection.end ||
-                newValue.length < previousSelection.start)
-            ? TextSelection.collapsed(offset: newValue.length)
-            : previousSelection;
+            newValue.length < previousSelection.start)
+        ? TextSelection.collapsed(offset: newValue.length)
+        : previousSelection;
     // Set the new value in the controller with the new selection.
     _controller.value = TextEditingValue(
       text: newValue,
@@ -315,10 +315,9 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
       ),
     );
     final editToNull = property.isNullable && property.isNully(valueAsString);
-    final value =
-        editToNull
-            ? null
-            : property.convertFromInputString(valueAsString) as U?;
+    final value = editToNull
+        ? null
+        : property.convertFromInputString(valueAsString) as U?;
     final response = await editPropertyCallback(name: argName, value: value);
     _handleServerResponse(response, property: property);
   }

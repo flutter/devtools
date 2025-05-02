@@ -47,34 +47,32 @@ class FrameHints extends StatelessWidget {
     final theme = Theme.of(context);
     final saveLayerCount = frameAnalysis.saveLayerCount;
     final intrinsicOperationsCount = frameAnalysis.intrinsicOperationsCount;
-    final uiHints =
-        showUiJankHints
-            ? [
-              Text('UI Jank Detected', style: theme.errorTextStyle),
-              const SizedBox(height: denseSpacing),
-              EnhanceTracingHint(
-                longestPhase: frameAnalysis.longestUiPhase,
-                enhanceTracingState: frameAnalysis.frame.enhanceTracingState,
-                enhanceTracingController: enhanceTracingController,
-              ),
-              const SizedBox(height: densePadding),
-              if (intrinsicOperationsCount > 0)
-                IntrinsicOperationsHint(intrinsicOperationsCount),
-            ]
-            : <Widget>[];
-    final rasterHints =
-        showRasterJankHints
-            ? [
-              Text('Raster Jank Detected', style: theme.errorTextStyle),
-              const SizedBox(height: denseSpacing),
-              if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
-              const SizedBox(height: denseSpacing),
-              if (frame.hasShaderTime)
-                ShaderCompilationHint(shaderTime: frame.shaderDuration),
-              const SizedBox(height: denseSpacing),
-              const GeneralRasterJankHint(),
-            ]
-            : <Widget>[];
+    final uiHints = showUiJankHints
+        ? [
+            Text('UI Jank Detected', style: theme.errorTextStyle),
+            const SizedBox(height: denseSpacing),
+            EnhanceTracingHint(
+              longestPhase: frameAnalysis.longestUiPhase,
+              enhanceTracingState: frameAnalysis.frame.enhanceTracingState,
+              enhanceTracingController: enhanceTracingController,
+            ),
+            const SizedBox(height: densePadding),
+            if (intrinsicOperationsCount > 0)
+              IntrinsicOperationsHint(intrinsicOperationsCount),
+          ]
+        : <Widget>[];
+    final rasterHints = showRasterJankHints
+        ? [
+            Text('Raster Jank Detected', style: theme.errorTextStyle),
+            const SizedBox(height: denseSpacing),
+            if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
+            const SizedBox(height: denseSpacing),
+            if (frame.hasShaderTime)
+              ShaderCompilationHint(shaderTime: frame.shaderDuration),
+            const SizedBox(height: denseSpacing),
+            const GeneralRasterJankHint(),
+          ]
+        : <Widget>[];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -340,28 +338,27 @@ class ShaderCompilationHint extends StatelessWidget {
             ),
           ],
         ),
-        childrenSpans:
-            serviceConnection.serviceManager.connectedApp!.isIosApp
-                ? [
-                  TextSpan(
-                    text:
-                        ' Note: pre-compiling shaders is a legacy solution with many '
-                        'pitfalls. Try ',
-                    style: theme.regularTextStyle,
+        childrenSpans: serviceConnection.serviceManager.connectedApp!.isIosApp
+            ? [
+                TextSpan(
+                  text:
+                      ' Note: pre-compiling shaders is a legacy solution with many '
+                      'pitfalls. Try ',
+                  style: theme.regularTextStyle,
+                ),
+                GaLinkTextSpan(
+                  link: GaLink(
+                    display: 'Impeller',
+                    url: impellerDocsUrl,
+                    gaScreenName: gac.performance,
+                    gaSelectedItemDescription:
+                        gac.PerformanceDocs.impellerDocsLink.name,
                   ),
-                  GaLinkTextSpan(
-                    link: GaLink(
-                      display: 'Impeller',
-                      url: impellerDocsUrl,
-                      gaScreenName: gac.performance,
-                      gaSelectedItemDescription:
-                          gac.PerformanceDocs.impellerDocsLink.name,
-                    ),
-                    context: context,
-                  ),
-                  TextSpan(text: ' instead!', style: theme.regularTextStyle),
-                ]
-                : [],
+                  context: context,
+                ),
+                TextSpan(text: ' instead!', style: theme.regularTextStyle),
+              ]
+            : [],
       ),
     );
   }

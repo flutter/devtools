@@ -51,14 +51,13 @@ mixin FilterControllerMixin<T> on DisposableController
 
   void setActiveFilter({String? query, SettingFilters<T>? settingFilters}) {
     _activeFilter.value = Filter(
-      queryFilter:
-          query != null
-              ? QueryFilter.parse(
-                query,
-                args: queryFilterArgs,
-                useRegExp: useRegExp.value,
-              )
-              : QueryFilter.empty(args: queryFilterArgs),
+      queryFilter: query != null
+          ? QueryFilter.parse(
+              query,
+              args: queryFilterArgs,
+              useRegExp: useRegExp.value,
+            )
+          : QueryFilter.empty(args: queryFilterArgs),
       settingFilters: settingFilters ?? this.settingFilters,
     );
   }
@@ -127,8 +126,9 @@ mixin FilterControllerMixin<T> on DisposableController
     final filter = _activeFilter.value;
     return FilterTag(
       query: filter.queryFilter.query,
-      settingFilterValues:
-          settingFilters.map((filter) => filter.valueAsJson).toList(),
+      settingFilterValues: settingFilters
+          .map((filter) => filter.valueAsJson)
+          .toList(),
       useRegExp: useRegExp.value,
     ).tag;
   }
@@ -492,12 +492,11 @@ class QueryFilter<T> {
         for (final arg in args.values.where((arg) => arg.matchesKey(part))) {
           arg
             ..isNegative = part.startsWith(QueryFilterArgument.negativePrefix)
-            ..values =
-                useRegExp
-                    ? valueStrings
-                        .map((v) => RegExp(v, caseSensitive: false))
-                        .toList()
-                    : valueStrings;
+            ..values = useRegExp
+                ? valueStrings
+                      .map((v) => RegExp(v, caseSensitive: false))
+                      .toList()
+                : valueStrings;
         }
       } else {
         substringExpressions.add(
@@ -506,9 +505,7 @@ class QueryFilter<T> {
       }
     }
 
-    final bool validArgumentFilter = args.values.any(
-      (a) => a.values.isNotEmpty,
-    );
+    final validArgumentFilter = args.values.any((a) => a.values.isNotEmpty);
     if (!validArgumentFilter && substringExpressions.isEmpty) {
       return QueryFilter.empty(args: args);
     }
@@ -530,13 +527,12 @@ class QueryFilter<T> {
 
   final bool isEmpty;
 
-  String get query =>
-      isEmpty
-          ? ''
-          : [
-            ...substringExpressions.toStringList(),
-            for (final arg in filterArguments) arg.display,
-          ].join(' ').trim();
+  String get query => isEmpty
+      ? ''
+      : [
+          ...substringExpressions.toStringList(),
+          for (final arg in filterArguments) arg.display,
+        ].join(' ').trim();
 }
 
 class QueryFilterArgument<T> {
@@ -590,10 +586,9 @@ class QueryFilterArgument<T> {
 
     var matches = false;
     for (final value in values) {
-      matches =
-          substringMatch
-              ? dataValue.caseInsensitiveContains(value)
-              : dataValue.caseInsensitiveEquals(value);
+      matches = substringMatch
+          ? dataValue.caseInsensitiveContains(value)
+          : dataValue.caseInsensitiveEquals(value);
       if (matches) break;
     }
     return isNegative ? !matches : matches;
@@ -663,37 +658,34 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                 autofocus: true,
                 hintText: 'Filter',
                 controller: queryTextFieldController,
-                prefixIcon:
-                    widget.controller.settingFilters.isNotEmpty
-                        ? Container(
-                          height: inputDecorationElementHeight,
-                          padding: const EdgeInsets.only(
-                            left: densePadding,
-                            right: denseSpacing,
-                          ),
-                          child: ValueListenableBuilder<Filter>(
-                            valueListenable: widget.controller.activeFilter,
-                            builder: (context, _, _) {
-                              return DevToolsFilterButton(
-                                message: 'More filters',
-                                onPressed: () {
-                                  unawaited(
-                                    showDialog(
-                                      context: context,
-                                      builder:
-                                          (context) => FilterDialog(
-                                            controller: widget.controller,
-                                          ),
+                prefixIcon: widget.controller.settingFilters.isNotEmpty
+                    ? Container(
+                        height: inputDecorationElementHeight,
+                        padding: const EdgeInsets.only(
+                          left: densePadding,
+                          right: denseSpacing,
+                        ),
+                        child: ValueListenableBuilder<Filter>(
+                          valueListenable: widget.controller.activeFilter,
+                          builder: (context, _, _) {
+                            return DevToolsFilterButton(
+                              message: 'More filters',
+                              onPressed: () {
+                                unawaited(
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => FilterDialog(
+                                      controller: widget.controller,
                                     ),
-                                  );
-                                },
-                                isFilterActive:
-                                    widget.controller.isFilterActive,
-                              );
-                            },
-                          ),
-                        )
-                        : null,
+                                  ),
+                                );
+                              },
+                              isFilterActive: widget.controller.isFilterActive,
+                            );
+                          },
+                        ),
+                      )
+                    : null,
                 additionalSuffixActions: [
                   if (widget.controller.queryFilterArgs.isNotEmpty)
                     InputDecorationSuffixButton.help(
@@ -819,8 +811,8 @@ class FilterTag {
     try {
       final useRegExp = parts.last == useRegExpTag;
       final query = parts[0].trim();
-      final settingFilterValues =
-          (jsonDecode(parts[1]) as List).cast<Map<String, Object?>>();
+      final settingFilterValues = (jsonDecode(parts[1]) as List)
+          .cast<Map<String, Object?>>();
       return FilterTag(
         query: query,
         settingFilterValues: settingFilterValues,

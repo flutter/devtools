@@ -153,9 +153,8 @@ class LoggingController extends DevToolsScreenController
     SettingFilter<LogData, int>(
       id: _minLogLevelFilterId,
       name: 'Hide logs below the minimum log level',
-      includeCallback:
-          (LogData element, int currentFilterValue) =>
-              element.level >= currentFilterValue,
+      includeCallback: (LogData element, int currentFilterValue) =>
+          element.level >= currentFilterValue,
       enabledCallback: (int filterValue) => filterValue > Level.ALL.value,
       possibleValues: _possibleLogLevels.map((l) => l.value).toList(),
       possibleValueDisplays: _possibleLogLevels.map((l) => l.name).toList(),
@@ -168,11 +167,9 @@ class LoggingController extends DevToolsScreenController
         name:
             'Hide verbose Flutter framework logs (initialization, frame '
             'times, image sizes)',
-        includeCallback:
-            (log) =>
-                !_verboseFlutterFrameworkLogKinds.any(
-                  (kind) => kind.caseInsensitiveEquals(log.kind),
-                ),
+        includeCallback: (log) => !_verboseFlutterFrameworkLogKinds.any(
+          (kind) => kind.caseInsensitiveEquals(log.kind),
+        ),
         defaultValue: true,
       ),
       ToggleFilter<LogData>(
@@ -180,11 +177,9 @@ class LoggingController extends DevToolsScreenController
         name:
             'Hide verbose Flutter service logs (service extension state '
             'changes)',
-        includeCallback:
-            (log) =>
-                !_verboseFlutterServiceLogKinds.any(
-                  (kind) => kind.caseInsensitiveEquals(log.kind),
-                ),
+        includeCallback: (log) => !_verboseFlutterServiceLogKinds.any(
+          (kind) => kind.caseInsensitiveEquals(log.kind),
+        ),
         defaultValue: true,
       ),
     ],
@@ -197,8 +192,8 @@ class LoggingController extends DevToolsScreenController
   ];
 
   static final _possibleLogLevels = Level.LEVELS
-  // Omit Level.OFF from the possible minimum levels.
-  .where((level) => level != Level.OFF);
+      // Omit Level.OFF from the possible minimum levels.
+      .where((level) => level != Level.OFF);
 
   static const _kindFilterId = 'logging-kind-filter';
   static const _isolateFilterId = 'logging-isolate-filter';
@@ -271,11 +266,10 @@ class LoggingController extends DevToolsScreenController
 
     String label;
 
-    label =
-        totalCount == showingCount
-            ? nf.format(totalCount)
-            : 'showing ${nf.format(showingCount)} of '
-                '${nf.format(totalCount)}';
+    label = totalCount == showingCount
+        ? nf.format(totalCount)
+        : 'showing ${nf.format(showingCount)} of '
+              '${nf.format(totalCount)}';
 
     label = '$label ${pluralize('event', totalCount)}';
 

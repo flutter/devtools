@@ -75,19 +75,19 @@ final class DevToolsClearableTextField extends StatelessWidget {
           hintStyle: theme.subtleTextStyle,
           prefixIcon: prefixIcon,
           suffixIcon: SizedBox(
-              height: inputDecorationElementHeight,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ...additionalSuffixActions,
-                  InputDecorationSuffixButton.clear(
-                    onPressed: () {
-                      controller.clear();
-                      onChanged?.call('');
-                    },
-                  ),
-                ],
-              ),
+            height: inputDecorationElementHeight,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ...additionalSuffixActions,
+                InputDecorationSuffixButton.clear(
+                  onPressed: () {
+                    controller.clear();
+                    onChanged?.call('');
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

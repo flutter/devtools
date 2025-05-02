@@ -283,8 +283,9 @@ class InspectorPreferencesController extends DisposableController
       // Set [_checkedFlutterPubRoot] to true to avoid an infinite loop on the
       // next call to [removePubRootDirectories]:
       _checkedFlutterPubRoot = true;
-      final flutterPubRootDirectories =
-          cachedDirectories.where(_isFlutterPubRoot).toList();
+      final flutterPubRootDirectories = cachedDirectories
+          .where(_isFlutterPubRoot)
+          .toList();
       await removePubRootDirectories(flutterPubRootDirectories);
       cachedDirectories.removeWhere(_isFlutterPubRoot);
     }
@@ -299,9 +300,8 @@ class InspectorPreferencesController extends DisposableController
   /// directories are for the current project so we make a best guess based on
   /// the root library for the main isolate.
   Future<String?> _inferPubRootDirectory() async {
-    final fileUriString =
-        await serviceConnection.serviceManager
-            .mainIsolateRootLibraryUriAsString();
+    final fileUriString = await serviceConnection.serviceManager
+        .mainIsolateRootLibraryUriAsString();
     if (fileUriString == null) {
       return null;
     }
@@ -324,10 +324,9 @@ class InspectorPreferencesController extends DisposableController
     pubRootDirectory ??= (parts..removeLast()).join('/');
     // Make sure the root directory ends with /, otherwise we will patch with
     // other directories that start the same.
-    pubRootDirectory =
-        pubRootDirectory.endsWith('/')
-            ? pubRootDirectory
-            : '$pubRootDirectory/';
+    pubRootDirectory = pubRootDirectory.endsWith('/')
+        ? pubRootDirectory
+        : '$pubRootDirectory/';
     return pubRootDirectory;
   }
 
@@ -383,10 +382,9 @@ class InspectorPreferencesController extends DisposableController
   Future<void> _uncachePubRootDirectories(
     List<String> pubRootDirectories,
   ) async {
-    final directoriesToCache =
-        (await readCachedPubRootDirectories())
-            .where((dir) => !pubRootDirectories.contains(dir))
-            .toList();
+    final directoriesToCache = (await readCachedPubRootDirectories())
+        .where((dir) => !pubRootDirectories.contains(dir))
+        .toList();
     await storage.setValue(
       _customPubRootStorageId(),
       jsonEncode(directoriesToCache),
@@ -438,8 +436,8 @@ class InspectorPreferencesController extends DisposableController
       final localInspectorService = _inspectorService;
       if (localInspectorService is! InspectorService) return;
 
-      final freshPubRootDirectories =
-          await localInspectorService.getPubRootDirectories();
+      final freshPubRootDirectories = await localInspectorService
+          .getPubRootDirectories();
       if (freshPubRootDirectories != null) {
         final newSet = Set<String>.of(freshPubRootDirectories);
         final oldSet = Set<String>.of(_pubRootDirectories.value);

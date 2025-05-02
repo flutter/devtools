@@ -58,8 +58,10 @@ class ToggleableServiceExtensionDescription<T extends Object>
     this.iconAsset,
     this.iconData,
     this.shortTitle,
-  }) : displayValues =
-           [enabledValue, disabledValue].map((v) => v.toString()).toList(),
+  }) : displayValues = [
+         enabledValue,
+         disabledValue,
+       ].map((v) => v.toString()).toList(),
        assert((iconAsset == null) != (iconData == null)),
        assert((documentationUrl == null) == (gaDocsItem == null));
 
@@ -296,9 +298,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
   gaDocsItem: gac.PerformanceDocs.trackWidgetBuildsDocs.name,
 );
 
-final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<
-  bool
->.from(
+final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>.from(
   extensions.profileUserWidgetBuilds,
   title: 'Trace user-created widget builds',
   iconAsset: 'icons/trackwidget-white.png',
@@ -410,9 +410,7 @@ option disabled, try to reduce the use of opacity effects in your app.''',
   gaDocsItem: gac.PerformanceDocs.disableOpacityLayersDocs.name,
 );
 
-final disablePhysicalShapeLayers = ToggleableServiceExtensionDescription<
-  bool
->.from(
+final disablePhysicalShapeLayers = ToggleableServiceExtensionDescription<bool>.from(
   extensions.disablePhysicalShapeLayers,
   title: 'Render Physical Shape layers',
   iconData: Icons.format_shapes,
@@ -510,9 +508,7 @@ summary of these counts using the Rebuild Stats tool.''',
   // TODO(https://github.com/flutter/website/issues/10666): link docs
 );
 
-final profilePlatformChannels = ToggleableServiceExtensionDescription<
-  bool
->.from(
+final profilePlatformChannels = ToggleableServiceExtensionDescription<bool>.from(
   extensions.profilePlatformChannels,
   title: 'Trace platform channels',
   iconAsset: 'icons/trackwidget-white.png',

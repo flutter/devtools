@@ -65,10 +65,9 @@ void main() {
     }
 
     setUpAll(() {
-      final rawProfile =
-          File(
-            'test/test_infra/test_data/memory/allocation_tracing/allocation_trace.json',
-          ).readAsStringSync();
+      final rawProfile = File(
+        'test/test_infra/test_data/memory/allocation_tracing/allocation_trace.json',
+      ).readAsStringSync();
       allocationTracingProfile = CpuSamples.parse(jsonDecode(rawProfile))!;
     });
 
@@ -395,10 +394,9 @@ void main() {
         await tester.tap(checkboxes.first);
         await tester.pumpAndSettle();
 
-        final tracedClassList =
-            state.filteredClassList.value
-                .where((e) => e.traceAllocations)
-                .toList();
+        final tracedClassList = state.filteredClassList.value
+            .where((e) => e.traceAllocations)
+            .toList();
         expect(tracedClassList.length, 1);
         expect(tracedClassList.first.clazz, classList.classes!.first);
 
@@ -413,10 +411,9 @@ void main() {
         await clearFilter(tester, controller);
 
         // Check tracing state wasn't corrupted
-        final updatedTracedClassList =
-            state.filteredClassList.value
-                .where((e) => e.traceAllocations)
-                .toList();
+        final updatedTracedClassList = state.filteredClassList.value
+            .where((e) => e.traceAllocations)
+            .toList();
         expect(updatedTracedClassList, containsAll(tracedClassList));
         expect(updatedTracedClassList.first.traceAllocations, true);
       });

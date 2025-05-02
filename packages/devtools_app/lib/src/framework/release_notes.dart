@@ -70,15 +70,16 @@ class ReleaseNotesController extends SidePanelController {
     // user's perspective, these tools are part of the IDE.
     if (isEmbedded()) {
       final currentUrl = getWebUrl();
-      final currentPage =
-          currentUrl != null ? extractCurrentPageFromUrl(currentUrl) : null;
+      final currentPage = currentUrl != null
+          ? extractCurrentPageFromUrl(currentUrl)
+          : null;
       if (StandaloneScreenType.includes(currentPage)) return;
     }
 
     SemanticVersion previousVersion = SemanticVersion();
     if (server.isDevToolsServerAvailable) {
-      final lastReleaseNotesShownVersion =
-          await server.getLastShownReleaseNotesVersion();
+      final lastReleaseNotesShownVersion = await server
+          .getLastShownReleaseNotesVersion();
       _log.fine('lastReleaseNotesShownVersion: $lastReleaseNotesShownVersion');
       if (lastReleaseNotesShownVersion.isNotEmpty) {
         previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);

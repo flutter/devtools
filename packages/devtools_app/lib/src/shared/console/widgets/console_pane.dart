@@ -24,8 +24,8 @@ class ConsolePaneHeader extends AreaPaneHeader {
           const ConsoleHelpLink(),
           const SizedBox(width: densePadding),
           CopyToClipboardControl(
-            dataProvider:
-                () => serviceConnection.consoleService.stdio.value.join('\n'),
+            dataProvider: () =>
+                serviceConnection.consoleService.stdio.value.join('\n'),
             buttonKey: ConsolePane.copyToClipboardButtonKey,
           ),
           const SizedBox(width: densePadding),
@@ -62,7 +62,11 @@ class ConsolePane extends StatelessWidget {
     }
 
     return Column(
-      children: [Expanded(child: Console(lines: stdio, footer: footer))],
+      children: [
+        Expanded(
+          child: Console(lines: stdio, footer: footer),
+        ),
+      ],
     );
   }
 }

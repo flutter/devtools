@@ -91,21 +91,19 @@ class _DisplayProviderState extends State<DisplayProvider> {
                   overflow: TextOverflow.ellipsis,
                   TextSpan(
                     text: hasName ? widget.variable.name : null,
-                    style:
-                        widget.variable.artificialName
-                            ? theme.subtleFixedFontStyle
-                            : theme.fixedFontStyle.apply(
-                              color: theme.colorScheme.controlFlowSyntaxColor,
-                            ),
+                    style: widget.variable.artificialName
+                        ? theme.subtleFixedFontStyle
+                        : theme.fixedFontStyle.apply(
+                            color: theme.colorScheme.controlFlowSyntaxColor,
+                          ),
                     children: [
                       if (hasName)
                         TextSpan(text: ': ', style: theme.fixedFontStyle),
                       TextSpan(
                         text: displayValue,
-                        style:
-                            widget.variable.artificialValue
-                                ? theme.subtleFixedFontStyle
-                                : _variableDisplayStyle(theme, widget.variable),
+                        style: widget.variable.artificialValue
+                            ? theme.subtleFixedFontStyle
+                            : _variableDisplayStyle(theme, widget.variable),
                       ),
                     ],
                   ),
@@ -344,8 +342,9 @@ class _InteractivityWrapperState extends State<InteractivityWrapper> {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: _onTap,
-      onSecondaryTapUp:
-          contextMenuOnSecondaryTapEnabled ? _onSecondaryTapUp : null,
+      onSecondaryTapUp: contextMenuOnSecondaryTapEnabled
+          ? _onSecondaryTapUp
+          : null,
       child: widget.child,
     );
   }

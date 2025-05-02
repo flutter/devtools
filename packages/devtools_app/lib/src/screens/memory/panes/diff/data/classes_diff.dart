@@ -132,18 +132,18 @@ class DiffClassData extends ClassData {
         dataAfter: dataAfter,
       ),
       // PathFromRoot, ObjectSetStats
-      byPath: subtractMaps<
-        PathFromRoot,
-        ObjectSetStats,
-        ObjectSetStats,
-        ObjectSetStats
-      >(
-        from: after?.byPath,
-        subtract: before?.byPath,
-        subtractor:
-            ({subtract, from}) =>
+      byPath:
+          subtractMaps<
+            PathFromRoot,
+            ObjectSetStats,
+            ObjectSetStats,
+            ObjectSetStats
+          >(
+            from: after?.byPath,
+            subtract: before?.byPath,
+            subtractor: ({subtract, from}) =>
                 ObjectSetStats.subtract(subtract: subtract, from: from),
-      ),
+          ),
     );
 
     if (result.isZero()) return null;

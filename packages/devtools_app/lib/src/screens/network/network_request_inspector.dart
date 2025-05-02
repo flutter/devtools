@@ -41,23 +41,23 @@ class NetworkRequestInspector extends StatelessWidget {
       builder: (context, data, _) {
         return data == null
             ? RoundedOutlinedBorder(
-              child: Center(
-                child: Text(
-                  'No request selected',
-                  style: Theme.of(context).regularTextStyle,
+                child: Center(
+                  child: Text(
+                    'No request selected',
+                    style: Theme.of(context).regularTextStyle,
+                  ),
                 ),
-              ),
-            )
+              )
             : ListenableBuilder(
-              listenable: data,
-              builder: (context, _) {
-                return AnalyticsTabbedView(
-                  analyticsSessionIdentifier: data.id,
-                  tabs: _generateTabs(data),
-                  gaScreen: gac.network,
-                );
-              },
-            );
+                listenable: data,
+                builder: (context, _) {
+                  return AnalyticsTabbedView(
+                    analyticsSessionIdentifier: data.id,
+                    tabs: _generateTabs(data),
+                    gaScreen: gac.network,
+                  );
+                },
+              );
       },
     );
   }
@@ -93,8 +93,8 @@ class NetworkRequestInspector extends StatelessWidget {
                   HttpResponseTrailingDropDown(
                     data,
                     currentResponseViewType: controller.currentResponseViewType,
-                    onChanged:
-                        (value) => controller.setResponseViewType = value,
+                    onChanged: (value) =>
+                        controller.setResponseViewType = value,
                   ),
                   HttpViewTrailingCopyButton(data, (data) => data.responseBody),
                 ],

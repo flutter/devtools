@@ -67,12 +67,11 @@ class ProfilerScreenController extends DevToolsScreenController
       addAutoDisposeListener(
         serviceConnection.serviceManager.isolateManager.selectedIsolate,
         () {
-          final selectedIsolate =
-              serviceConnection
-                  .serviceManager
-                  .isolateManager
-                  .selectedIsolate
-                  .value;
+          final selectedIsolate = serviceConnection
+              .serviceManager
+              .isolateManager
+              .selectedIsolate
+              .value;
           if (selectedIsolate != null) {
             switchToIsolate(selectedIsolate);
           }

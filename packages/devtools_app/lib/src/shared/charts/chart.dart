@@ -95,28 +95,25 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
     return RepaintBoundary(
       child: LayoutBuilder(
         // Inner container
-        builder:
-            (_, constraints) => GestureDetector(
-              onTapDown: (TapDownDetails details) {
-                final xLocalPosition = details.localPosition.dx;
-                final timestampIndex = controller.xCoordToTimestampIndex(
-                  xLocalPosition,
-                );
-                final timestamp = controller.xCoordToTimestamp(xLocalPosition);
-                controller.tapLocation.value = TapLocation(
-                  details,
-                  timestamp,
-                  timestampIndex,
-                );
-              },
-              child: SizedBox(
-                width: constraints.widthConstraints().maxWidth,
-                height: constraints.widthConstraints().maxHeight,
-                child: CustomPaint(
-                  painter: ChartPainter(controller, colorScheme),
-                ),
-              ),
-            ),
+        builder: (_, constraints) => GestureDetector(
+          onTapDown: (TapDownDetails details) {
+            final xLocalPosition = details.localPosition.dx;
+            final timestampIndex = controller.xCoordToTimestampIndex(
+              xLocalPosition,
+            );
+            final timestamp = controller.xCoordToTimestamp(xLocalPosition);
+            controller.tapLocation.value = TapLocation(
+              details,
+              timestamp,
+              timestampIndex,
+            );
+          },
+          child: SizedBox(
+            width: constraints.widthConstraints().maxWidth,
+            height: constraints.widthConstraints().maxHeight,
+            child: CustomPaint(painter: ChartPainter(controller, colorScheme)),
+          ),
+        ),
       ),
     );
   }
@@ -154,10 +151,9 @@ class ChartPainter extends CustomPainter {
     //              sampling 1 point per horizontal pixel.
     final startTime = DateTime.now();
 
-    final axis =
-        Paint()
-          ..strokeWidth = axisWidth
-          ..color = Colors.grey;
+    final axis = Paint()
+      ..strokeWidth = axisWidth
+      ..color = Colors.grey;
 
     if (size != chartController.size) {
       chartController.size = size;
@@ -241,8 +237,9 @@ class ChartPainter extends CustomPainter {
             drawTranslate(canvas, xTranslation, yTranslation, (canvas) {
               final xCoord = xCanvasCoord;
               final yCoord = chartController.yPositionToYCanvasCoord(yValue);
-              final hasMultipleExtensionEvents =
-                  traceData is DataAggregate ? traceData.count > 1 : false;
+              final hasMultipleExtensionEvents = traceData is DataAggregate
+                  ? traceData.count > 1
+                  : false;
 
               // Is the visible Y-axis max larger.
               if (yValue > visibleYMax) {
@@ -442,10 +439,9 @@ class ChartPainter extends CustomPainter {
   }
 
   void drawSelection(Canvas canvas, double x) {
-    final paint =
-        Paint()
-          ..strokeWidth = 2.0
-          ..color = colorScheme.hoverSelectionBarColor;
+    final paint = Paint()
+      ..strokeWidth = 2.0
+      ..color = colorScheme.hoverSelectionBarColor;
 
     // Draw the vertical selection bar.
     canvas.drawLine(
@@ -597,14 +593,12 @@ class ChartPainter extends CustomPainter {
         break;
     }
 
-    final paintFirst =
-        Paint()
-          ..style = firstStyle
-          ..strokeWidth = characteristics.strokeWidth
-          ..color =
-              aggregateEvents
-                  ? characteristics.colorAggregate!
-                  : characteristics.color;
+    final paintFirst = Paint()
+      ..style = firstStyle
+      ..strokeWidth = characteristics.strokeWidth
+      ..color = aggregateEvents
+          ? characteristics.colorAggregate!
+          : characteristics.color;
 
     switch (characteristics.symbol) {
       case ChartSymbol.dashedLine:
@@ -625,15 +619,13 @@ class ChartPainter extends CustomPainter {
         canvas.drawCircle(Offset(x, y), characteristics.diameter, paintFirst);
 
         // Inner disc.
-        final paintSecond =
-            Paint()
-              ..style = secondStyle
-              ..strokeWidth = 0
-              // TODO(terry): Aggregate for concentric maybe needed someday.
-              ..color =
-                  aggregateEvents
-                      ? characteristics.colorAggregate!
-                      : characteristics.concentricCenterColor;
+        final paintSecond = Paint()
+          ..style = secondStyle
+          ..strokeWidth = 0
+          // TODO(terry): Aggregate for concentric maybe needed someday.
+          ..color = aggregateEvents
+              ? characteristics.colorAggregate!
+              : characteristics.concentricCenterColor;
         canvas.drawCircle(
           Offset(x, y),
           characteristics.concentricCenterDiameter,
@@ -675,11 +667,10 @@ class ChartPainter extends CustomPainter {
     double endX,
     double endY,
   ) {
-    final paint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = characteristics.strokeWidth
-          ..color = characteristics.color;
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = characteristics.strokeWidth
+      ..color = characteristics.color;
 
     canvas.drawLine(Offset(startX, startY), Offset(endX, endY), paint);
   }
@@ -691,11 +682,10 @@ class ChartPainter extends CustomPainter {
     double y,
     double tickWidth,
   ) {
-    final paint =
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = characteristics.strokeWidth
-          ..color = characteristics.color;
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = characteristics.strokeWidth
+      ..color = characteristics.color;
 
     canvas.drawLine(Offset(x, y), Offset(x + tickWidth, y), paint);
   }
@@ -712,18 +702,16 @@ class ChartPainter extends CustomPainter {
     double y1,
     double y1Bottom,
   ) {
-    final paint =
-        Paint()
-          ..style = PaintingStyle.fill
-          ..strokeWidth = characteristics.strokeWidth
-          ..color = characteristics.color.withAlpha(140);
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..strokeWidth = characteristics.strokeWidth
+      ..color = characteristics.color.withAlpha(140);
 
-    final fillArea =
-        Path()
-          ..moveTo(x0, y0)
-          ..lineTo(x1, y1)
-          ..lineTo(x1, y1Bottom)
-          ..lineTo(x0, y0Bottom);
+    final fillArea = Path()
+      ..moveTo(x0, y0)
+      ..lineTo(x1, y1)
+      ..lineTo(x1, y1Bottom)
+      ..lineTo(x0, y0Bottom);
     fillArea.close();
     canvas.drawPath(fillArea, paint);
 

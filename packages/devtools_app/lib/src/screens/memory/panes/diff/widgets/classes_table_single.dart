@@ -198,11 +198,8 @@ class ClassesTableSingle extends StatelessWidget {
       dataKey: dataKey,
       keyFactory: (e) => Key(e.className.fullName),
       selectionNotifier: classesData.selection,
-      onItemSelected:
-          (_) => ga.select(
-            gac.memory,
-            gac.MemoryEvents.diffClassSingleSelect.name,
-          ),
+      onItemSelected: (_) =>
+          ga.select(gac.memory, gac.MemoryEvents.diffClassSingleSelect.name),
       defaultSortColumn: _columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );

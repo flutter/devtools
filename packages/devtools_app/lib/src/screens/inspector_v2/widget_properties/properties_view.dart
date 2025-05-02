@@ -227,8 +227,9 @@ class _PropertiesViewState extends State<PropertiesView> {
     final layoutExplorerOffset = includeLayoutExplorer ? 1 : 0;
     // If there are no properties to display, include a single row that says as
     // much.
-    final propertyRowsCount =
-        _sortedProperties.isEmpty ? 1 : _sortedProperties.length;
+    final propertyRowsCount = _sortedProperties.isEmpty
+        ? 1
+        : _sortedProperties.length;
     // If the layout explorer is available, it is the first row.
     final totalRowsCount = propertyRowsCount + layoutExplorerOffset;
 
@@ -258,8 +259,9 @@ class _PropertiesViewState extends State<PropertiesView> {
                 return DecoratedPropertiesTableRow(
                   index: index + layoutExplorerOffset,
                   child: Flex(
-                    direction:
-                        horizontalLayout ? Axis.horizontal : Axis.vertical,
+                    direction: horizontalLayout
+                        ? Axis.horizontal
+                        : Axis.vertical,
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(largeSpacing),
@@ -275,10 +277,9 @@ class _PropertiesViewState extends State<PropertiesView> {
                       ),
                       if (layoutPropertiesList != null)
                         Padding(
-                          padding:
-                              horizontalLayout
-                                  ? const EdgeInsets.only(left: largeSpacing)
-                                  : const EdgeInsets.only(bottom: largeSpacing),
+                          padding: horizontalLayout
+                              ? const EdgeInsets.only(left: largeSpacing)
+                              : const EdgeInsets.only(bottom: largeSpacing),
                           child: layoutPropertiesList,
                         ),
                     ],
@@ -345,11 +346,8 @@ class LayoutPropertiesList extends StatelessWidget {
 
   LayoutWidthsAndHeights? get widthsAndHeights =>
       widgetHeights != null && widgetWidths != null
-          ? LayoutWidthsAndHeights(
-            widths: widgetWidths!,
-            heights: widgetHeights!,
-          )
-          : null;
+      ? LayoutWidthsAndHeights(widths: widgetWidths!, heights: widgetHeights!)
+      : null;
 
   @override
   Widget build(BuildContext context) {

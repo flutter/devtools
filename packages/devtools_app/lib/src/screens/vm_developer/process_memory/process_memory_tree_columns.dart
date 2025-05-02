@@ -28,7 +28,7 @@ class MemoryColumn extends SizeAndPercentageColumn<TreemapNode> {
     : super(
         title: 'Memory Usage',
         sizeProvider: (node) => node.byteSize,
-        percentAsDoubleProvider:
-            (node) => node.byteSize / controller.treeRoot.value!.byteSize,
+        percentAsDoubleProvider: (node) =>
+            node.byteSize / controller.treeRoot.value!.byteSize,
       );
 }

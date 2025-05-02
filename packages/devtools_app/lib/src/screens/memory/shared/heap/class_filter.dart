@@ -128,14 +128,13 @@ class ClassFilter with Serializable {
   int get hashCode => Object.hash(filterType, except, only);
 
   Set<String> _filtersAsSet() {
-    Set<String> stringToSet(String? s) =>
-        s == null
-            ? {}
-            : s
-                .split(RegExp(',|\n'))
-                .map((e) => e.trim())
-                .where((e) => e.isNotEmpty)
-                .toSet();
+    Set<String> stringToSet(String? s) => s == null
+        ? {}
+        : s
+              .split(RegExp(',|\n'))
+              .map((e) => e.trim())
+              .where((e) => e.isNotEmpty)
+              .toSet();
 
     switch (filterType) {
       case ClassFilterType.showAll:
@@ -237,10 +236,9 @@ class ClassFilter with Serializable {
       throw StateError('Unexpected task: $task.');
     }
 
-    final result =
-        dataToFilter
-            .where((e) => newFilter.apply(extractClass(e), rootPackage))
-            .toList();
+    final result = dataToFilter
+        .where((e) => newFilter.apply(extractClass(e), rootPackage))
+        .toList();
 
     return result;
   }

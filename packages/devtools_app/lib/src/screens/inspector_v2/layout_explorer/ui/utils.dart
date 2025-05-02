@@ -157,22 +157,21 @@ class WidgetVisualizer extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border.all(
                 color: borderColor,
-                width:
-                    isSelected ? _borderSelectedWidth : _borderUnselectedWidth,
+                width: isSelected
+                    ? _borderSelectedWidth
+                    : _borderUnselectedWidth,
               ),
-              color:
-                  isSelected
-                      ? theme.canvasColor.brighten()
-                      : theme.canvasColor.darken(),
-              boxShadow:
-                  isSelected
-                      ? [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(255 ~/ 2),
-                          blurRadius: 10,
-                        ),
-                      ]
-                      : null,
+              color: isSelected
+                  ? theme.canvasColor.brighten()
+                  : theme.canvasColor.darken(),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(255 ~/ 2),
+                        blurRadius: 10,
+                      ),
+                    ]
+                  : null,
             ),
             child: Stack(
               children: [
@@ -187,29 +186,26 @@ class WidgetVisualizer extends StatelessWidget {
                   ),
                 Container(
                   margin: EdgeInsets.only(
-                    right:
-                        overflowSide == OverflowSide.right
-                            ? _overflowIndicatorSize
-                            : 0.0,
-                    bottom:
-                        overflowSide == OverflowSide.bottom
-                            ? _overflowIndicatorSize
-                            : 0.0,
+                    right: overflowSide == OverflowSide.right
+                        ? _overflowIndicatorSize
+                        : 0.0,
+                    bottom: overflowSide == OverflowSide.bottom
+                        ? _overflowIndicatorSize
+                        : 0.0,
                   ),
-                  child:
-                      isFlex
-                          ? FlexWidgetVisualizer(
-                            title: title,
-                            largeTitle: largeTitle,
-                            borderColor: borderColor,
-                            hint: hint,
-                            child: child,
-                          )
-                          : BoxWidgetVisualizer(
-                            borderColor: borderColor,
-                            title: title,
-                            properties: properties,
-                          ),
+                  child: isFlex
+                      ? FlexWidgetVisualizer(
+                          title: title,
+                          largeTitle: largeTitle,
+                          borderColor: borderColor,
+                          hint: hint,
+                          child: child,
+                        )
+                      : BoxWidgetVisualizer(
+                          borderColor: borderColor,
+                          title: title,
+                          properties: properties,
+                        ),
                 ),
               ],
             ),
@@ -255,10 +251,9 @@ class FlexWidgetVisualizer extends StatelessWidget {
               Flexible(
                 child: Container(
                   constraints: BoxConstraints(
-                    maxWidth:
-                        largeTitle
-                            ? defaultMaxRenderWidth
-                            : minRenderWidth * widgetTitleMaxWidthPercentage,
+                    maxWidth: largeTitle
+                        ? defaultMaxRenderWidth
+                        : minRenderWidth * widgetTitleMaxWidthPercentage,
                   ),
                   decoration: BoxDecoration(color: borderColor),
                   padding: const EdgeInsets.all(densePadding),
@@ -303,7 +298,9 @@ class BoxWidgetVisualizer extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Center(child: WidgetLabel(labelColor: borderColor, labelText: title)),
+        Center(
+          child: WidgetLabel(labelColor: borderColor, labelText: title),
+        ),
         Expanded(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -444,10 +441,10 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     final constraintsLocal = constraints!;
     return constraintsLocal.hasBoundedWidth
         ? LayoutProperties.describeAxis(
-          constraintsLocal.minWidth,
-          constraintsLocal.maxWidth,
-          'w',
-        )
+            constraintsLocal.minWidth,
+            constraintsLocal.maxWidth,
+            'w',
+          )
         : 'w=unconstrained';
   }
 
@@ -456,10 +453,10 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     final constraintsLocal = constraints!;
     return constraintsLocal.hasBoundedHeight
         ? LayoutProperties.describeAxis(
-          constraintsLocal.minHeight,
-          constraintsLocal.maxHeight,
-          'h',
-        )
+            constraintsLocal.minHeight,
+            constraintsLocal.maxHeight,
+            'h',
+          )
         : 'h=unconstrained';
   }
 
@@ -593,17 +590,15 @@ class PositionedBackgroundLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       // Push to the bottom if there is no padding on the top.
-      mainAxisAlignment:
-          !hasTopPadding && hasBottomPadding
-              ? MainAxisAlignment.end
-              : MainAxisAlignment.start,
+      mainAxisAlignment: !hasTopPadding && hasBottomPadding
+          ? MainAxisAlignment.end
+          : MainAxisAlignment.start,
       children: [
         Row(
           // Push to the right if there is no padding on the left.
-          mainAxisAlignment:
-              (!hasLeftPadding && hasRightPadding)
-                  ? MainAxisAlignment.end
-                  : MainAxisAlignment.start,
+          mainAxisAlignment: (!hasLeftPadding && hasRightPadding)
+              ? MainAxisAlignment.end
+              : MainAxisAlignment.start,
           children: [
             Flexible(
               child: WidgetLabel(

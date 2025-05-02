@@ -64,10 +64,11 @@ void main() {
     final grandchild2 = TreemapNode(name: 'package:grandchild2');
     final greatGrandchild1 = TreemapNode(name: 'package:greatGrandchild1');
     final greatGrandchild2 = TreemapNode(name: 'package:greatGrandchild2');
-    final testRoot = TreemapNode(name: 'libapp.so (Dart AOT)')..addAllChildren([
-      child1..addChild(grandchild1..addChild(greatGrandchild1)),
-      child2..addChild(grandchild2..addChild(greatGrandchild2)),
-    ]);
+    final testRoot = TreemapNode(name: 'libapp.so (Dart AOT)')
+      ..addAllChildren([
+        child1..addChild(grandchild1..addChild(greatGrandchild1)),
+        child2..addChild(grandchild2..addChild(greatGrandchild2)),
+      ]);
 
     final nodeWithDuplicatePackageNameGrandchild = TreemapNode(
       name: 'grandchild',

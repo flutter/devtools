@@ -275,22 +275,20 @@ class _TableRowState<T> extends State<TableRow<T>>
     final row = tableRowFor(context, onPressed: onPressed);
 
     final box = SizedBox(
-      height:
-          widget._rowType == _TableRowType.data
-              ? defaultRowHeight
-              : defaultHeaderHeight +
-                  (widget.tall ? scaleByFontFactor(densePadding) : 0.0),
+      height: widget._rowType == _TableRowType.data
+          ? defaultRowHeight
+          : defaultHeaderHeight +
+                (widget.tall ? scaleByFontFactor(densePadding) : 0.0),
       child: Material(
         color: _searchAwareBackgroundColor(),
-        child:
-            onPressed != null
-                ? InkWell(
-                  canRequestFocus: false,
-                  key: contentKey,
-                  onTap: onPressed,
-                  child: row,
-                )
-                : row,
+        child: onPressed != null
+            ? InkWell(
+                canRequestFocus: false,
+                key: contentKey,
+                onTap: onPressed,
+                child: row,
+              )
+            : row,
       ),
     );
     return box;
@@ -338,15 +336,14 @@ class _TableRowState<T> extends State<TableRow<T>>
     if (widget.isSelected) {
       return colorScheme.selectedRowBackgroundColor;
     }
-    final searchAwareBackgroundColor =
-        isSearchMatch
-            ? Color.alphaBlend(
-              isActiveSearchMatch
-                  ? activeSearchMatchColorOpaque
-                  : searchMatchColorOpaque,
-              backgroundColor,
-            )
-            : backgroundColor;
+    final searchAwareBackgroundColor = isSearchMatch
+        ? Color.alphaBlend(
+            isActiveSearchMatch
+                ? activeSearchMatchColorOpaque
+                : searchMatchColorOpaque,
+            backgroundColor,
+          )
+        : backgroundColor;
     return searchAwareBackgroundColor;
   }
 
@@ -481,25 +478,27 @@ class _TableRowState<T> extends State<TableRow<T>>
         }
 
         if (column == widget.expandableColumn) {
-          final expandIndicator =
-              widget.isExpandable
-                  ? ValueListenableBuilder(
-                    valueListenable: expandController,
-                    builder: (context, _, _) {
-                      return RotationTransition(
-                        turns: expandArrowAnimation,
-                        child: Icon(
-                          Icons.expand_more,
-                          color: theme.colorScheme.onSurface,
-                          size: defaultIconSize,
-                        ),
-                      );
-                    },
-                  )
-                  : SizedBox(width: defaultIconSize, height: defaultIconSize);
+          final expandIndicator = widget.isExpandable
+              ? ValueListenableBuilder(
+                  valueListenable: expandController,
+                  builder: (context, _, _) {
+                    return RotationTransition(
+                      turns: expandArrowAnimation,
+                      child: Icon(
+                        Icons.expand_more,
+                        color: theme.colorScheme.onSurface,
+                        size: defaultIconSize,
+                      ),
+                    );
+                  },
+                )
+              : SizedBox(width: defaultIconSize, height: defaultIconSize);
           content = Row(
             mainAxisSize: MainAxisSize.min,
-            children: [expandIndicator, Expanded(child: content)],
+            children: [
+              expandIndicator,
+              Expanded(child: content),
+            ],
           );
         }
         content = Padding(

@@ -18,15 +18,13 @@ class CpuBottomUpTable extends StatelessWidget {
   static final methodColumn = MethodAndSourceColumn();
   static final selfTimeColumn = SelfTimeColumn(
     titleTooltip: selfTimeTooltip,
-    dataTooltipProvider:
-        (stackFrame, context) =>
-            _bottomUpTimeTooltipBuilder(_TimeType.self, stackFrame, context),
+    dataTooltipProvider: (stackFrame, context) =>
+        _bottomUpTimeTooltipBuilder(_TimeType.self, stackFrame, context),
   );
   static final totalTimeColumn = TotalTimeColumn(
     titleTooltip: totalTimeTooltip,
-    dataTooltipProvider:
-        (stackFrame, context) =>
-            _bottomUpTimeTooltipBuilder(_TimeType.total, stackFrame, context),
+    dataTooltipProvider: (stackFrame, context) =>
+        _bottomUpTimeTooltipBuilder(_TimeType.total, stackFrame, context),
   );
   static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
     totalTimeColumn,

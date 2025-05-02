@@ -13,10 +13,9 @@ const defaultDistanceToArrow = 4.0;
 
 enum ArrowType { up, left, right, down }
 
-Axis axis(ArrowType type) =>
-    (type == ArrowType.up || type == ArrowType.down)
-        ? Axis.vertical
-        : Axis.horizontal;
+Axis axis(ArrowType type) => (type == ArrowType.up || type == ArrowType.down)
+    ? Axis.vertical
+    : Axis.horizontal;
 
 /// Widget that draws a bidirectional arrow around another widget.
 ///
@@ -49,10 +48,12 @@ class ArrowWrapper extends StatelessWidget {
   }) : assert(arrowHeadSize >= 0.0),
        assert(childMarginFromArrow >= 0.0),
        isBidirectional = true,
-       startArrowType =
-           direction == Axis.horizontal ? ArrowType.left : ArrowType.up,
-       endArrowType =
-           direction == Axis.horizontal ? ArrowType.right : ArrowType.down;
+       startArrowType = direction == Axis.horizontal
+           ? ArrowType.left
+           : ArrowType.up,
+       endArrowType = direction == Axis.horizontal
+           ? ArrowType.right
+           : ArrowType.down;
 
   final Color arrowColor;
   final double arrowHeadSize;
@@ -92,11 +93,10 @@ class ArrowWrapper extends StatelessWidget {
               headSize: arrowHeadSize,
               strokeWidth: arrowStrokeWidth,
               type: startArrowType,
-              shouldDrawHead:
-                  isBidirectional
-                      ? true
-                      : (startArrowType == ArrowType.left ||
-                          startArrowType == ArrowType.up),
+              shouldDrawHead: isBidirectional
+                  ? true
+                  : (startArrowType == ArrowType.left ||
+                        startArrowType == ArrowType.up),
             ),
           ),
         ),
@@ -112,11 +112,10 @@ class ArrowWrapper extends StatelessWidget {
               headSize: arrowHeadSize,
               strokeWidth: arrowStrokeWidth,
               type: endArrowType,
-              shouldDrawHead:
-                  isBidirectional
-                      ? true
-                      : (endArrowType == ArrowType.right ||
-                          endArrowType == ArrowType.down),
+              shouldDrawHead: isBidirectional
+                  ? true
+                  : (endArrowType == ArrowType.right ||
+                        endArrowType == ArrowType.down),
             ),
           ),
         ),
@@ -199,10 +198,9 @@ class _ArrowPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color
-          ..strokeWidth = strokeWidth;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth;
 
     final originX = size.width / 2, originY = size.height / 2;
     Offset lineStartingPoint = Offset.zero;
@@ -235,12 +233,11 @@ class _ArrowPainter extends CustomPainter {
           p3 = Offset(originX + headSizeDividedBy2, startingY);
           break;
       }
-      final path =
-          Path()
-            ..moveTo(p1.dx, p1.dy)
-            ..lineTo(p2.dx, p2.dy)
-            ..lineTo(p3.dx, p3.dy)
-            ..close();
+      final path = Path()
+        ..moveTo(p1.dx, p1.dy)
+        ..lineTo(p2.dx, p2.dy)
+        ..lineTo(p3.dx, p3.dy)
+        ..close();
       canvas.drawPath(path, paint);
 
       switch (type) {

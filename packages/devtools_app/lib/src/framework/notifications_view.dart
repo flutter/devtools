@@ -243,17 +243,17 @@ class _NotificationState extends State<_Notification>
               children: [
                 widget.message.isDismissible
                     ? Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Flexible(child: _NotificationMessage(widget: widget)),
-                        _DismissAction(
-                          onPressed: () {
-                            widget.remove(widget);
-                          },
-                        ),
-                      ],
-                    )
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Flexible(child: _NotificationMessage(widget: widget)),
+                          _DismissAction(
+                            onPressed: () {
+                              widget.remove(widget);
+                            },
+                          ),
+                        ],
+                      )
                     : _NotificationMessage(widget: widget),
                 const SizedBox(height: defaultSpacing),
                 _NotificationActions(actions: widget.message.actions),
@@ -299,10 +299,9 @@ class _NotificationMessage extends StatelessWidget {
       ),
       child: Text(
         widget.message.text,
-        style:
-            widget.message.isError
-                ? textStyle.copyWith(color: theme.colorScheme.error)
-                : textStyle,
+        style: widget.message.isError
+            ? textStyle.copyWith(color: theme.colorScheme.error)
+            : textStyle,
         overflow: TextOverflow.visible,
         maxLines: 10,
       ),

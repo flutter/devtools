@@ -52,8 +52,9 @@ class VmLibraryDisplay extends StatelessWidget {
         controller: controller,
         key: 'URI',
         preferUri: true,
-        object:
-            (library.obj.uri?.isEmpty ?? false) ? library.script! : library.obj,
+        object: (library.obj.uri?.isEmpty ?? false)
+            ? library.script!
+            : library.obj,
       ),
       selectableTextBuilderMapEntry('VM Name', library.vmName),
     ];

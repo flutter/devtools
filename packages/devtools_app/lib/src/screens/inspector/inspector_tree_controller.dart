@@ -127,12 +127,11 @@ class InspectorTreeController extends DisposableController
       gac.inspector,
       gac.inspectorTreeControllerInitialized,
       nonInteraction: true,
-      screenMetricsProvider:
-          () => InspectorScreenMetrics.legacy(
-            inspectorTreeControllerId: gaId,
-            rootSetCount: _rootSetCount,
-            rowCount: _root?.subtreeSize,
-          ),
+      screenMetricsProvider: () => InspectorScreenMetrics.legacy(
+        inspectorTreeControllerId: gaId,
+        rootSetCount: _rootSetCount,
+        rowCount: _root?.subtreeSize,
+      ),
     );
   }
 
@@ -179,12 +178,11 @@ class InspectorTreeController extends DisposableController
         gac.inspector,
         gac.inspectorTreeControllerRootChange,
         nonInteraction: true,
-        screenMetricsProvider:
-            () => InspectorScreenMetrics.legacy(
-              inspectorTreeControllerId: gaId,
-              rootSetCount: ++_rootSetCount,
-              rowCount: _root?.subtreeSize,
-            ),
+        screenMetricsProvider: () => InspectorScreenMetrics.legacy(
+          inspectorTreeControllerId: gaId,
+          rootSetCount: ++_rootSetCount,
+          rowCount: _root?.subtreeSize,
+        ),
       );
     });
   }
@@ -349,15 +347,14 @@ class InspectorTreeController extends DisposableController
 
     final rootLocal = root!;
 
-    selection =
-        rootLocal
-            .getRow(
-              (rootLocal.getRowIndex(selection!) + indexOffset).clamp(
-                0,
-                numRows - 1,
-              ),
-            )
-            ?.node;
+    selection = rootLocal
+        .getRow(
+          (rootLocal.getRowIndex(selection!) + indexOffset).clamp(
+            0,
+            numRows - 1,
+          ),
+        )
+        ?.node;
   }
 
   double get horizontalPadding => 10.0;
@@ -517,8 +514,9 @@ class InspectorTreeController extends DisposableController
       final row = getRowForNode(target);
       if (row != null) {
         final rowRect = getBoundingBox(row);
-        targetRect =
-            targetRect == null ? rowRect : targetRect.expandToInclude(rowRect);
+        targetRect = targetRect == null
+            ? rowRect
+            : targetRect.expandToInclude(rowRect);
       }
     }
 
@@ -872,14 +870,12 @@ class _InspectorTreeState extends State<InspectorTree>
 
     final initialX = rect.left;
     final initialY = rect.top;
-    final yOffsetAtViewportTop =
-        _scrollControllerY.hasClients
-            ? _scrollControllerY.offset
-            : _scrollControllerY.initialScrollOffset;
-    final xOffsetAtViewportLeft =
-        _scrollControllerX.hasClients
-            ? _scrollControllerX.offset
-            : _scrollControllerX.initialScrollOffset;
+    final yOffsetAtViewportTop = _scrollControllerY.hasClients
+        ? _scrollControllerY.offset
+        : _scrollControllerY.initialScrollOffset;
+    final xOffsetAtViewportLeft = _scrollControllerX.hasClients
+        ? _scrollControllerX.offset
+        : _scrollControllerX.initialScrollOffset;
 
     final viewPortInScrollControllerSpace = Rect.fromLTWH(
       xOffsetAtViewportLeft,
@@ -1017,10 +1013,9 @@ class _InspectorTreeState extends State<InspectorTree>
         ga.timeEnd(
           screenId,
           gac.pageReady,
-          screenMetricsProvider:
-              () => InspectorScreenMetrics.legacy(
-                rowCount: treeControllerLocal.numRows,
-              ),
+          screenMetricsProvider: () => InspectorScreenMetrics.legacy(
+            rowCount: treeControllerLocal.numRows,
+          ),
         );
         unawaited(
           serviceConnection.sendDwdsEvent(
@@ -1081,9 +1076,9 @@ class _InspectorTreeState extends State<InspectorTree>
                           viewportWidth: viewportWidth,
                           error:
                               widget.widgetErrors != null &&
-                                      inspectorRef != null
-                                  ? widget.widgetErrors![inspectorRef]
-                                  : null,
+                                  inspectorRef != null
+                              ? widget.widgetErrors![inspectorRef]
+                              : null,
                         );
                       }, childCount: treeControllerLocal.numRows + 1),
                       controller: _scrollControllerY,
@@ -1099,8 +1094,8 @@ class _InspectorTreeState extends State<InspectorTree>
         if (shouldShowBreadcrumbs) {
           final inspectorTreeController = widget.summaryTreeController!;
 
-          final parents =
-              inspectorTreeController.getPathFromSelectedRowToRoot();
+          final parents = inspectorTreeController
+              .getPathFromSelectedRowToRoot();
           return Column(
             children: [
               InspectorBreadcrumbNavigator(
@@ -1121,10 +1116,9 @@ class _InspectorTreeState extends State<InspectorTree>
   bool get wantKeepAlive => true;
 }
 
-Paint _defaultPaint(ColorScheme colorScheme) =>
-    Paint()
-      ..color = colorScheme.treeGuidelineColor
-      ..strokeWidth = chartLineStrokeWidth;
+Paint _defaultPaint(ColorScheme colorScheme) => Paint()
+  ..color = colorScheme.treeGuidelineColor
+  ..strokeWidth = chartLineStrokeWidth;
 
 /// Custom painter that draws lines indicating how parent and child rows are
 /// connected to each other.
@@ -1165,10 +1159,9 @@ class _RowPainter extends CustomPainter {
       currentX =
           _controller.getDepthIndent(row.depth - 1) -
           inspectorColumnWidth * 0.5;
-      final width =
-          showExpandCollapse
-              ? inspectorColumnWidth * 0.5
-              : inspectorColumnWidth;
+      final width = showExpandCollapse
+          ? inspectorColumnWidth * 0.5
+          : inspectorColumnWidth;
       canvas.drawLine(
         Offset(currentX, 0.0),
         Offset(currentX, inspectorRowHeight * 0.5),
@@ -1237,10 +1230,9 @@ class InspectorRowContent extends StatelessWidget {
 
     Color? backgroundColor;
     if (row.isSelected) {
-      backgroundColor =
-          hasError
-              ? colorScheme.errorContainer
-              : colorScheme.selectedRowBackgroundColor;
+      backgroundColor = hasError
+          ? colorScheme.errorContainer
+          : colorScheme.selectedRowBackgroundColor;
     }
 
     final node = row.node;
@@ -1257,16 +1249,16 @@ class InspectorRowContent extends StatelessWidget {
               children: [
                 node.showExpandCollapse
                     ? InkWell(
-                      onTap: onToggle,
-                      child: RotationTransition(
-                        turns: expandArrowAnimation,
-                        child: Icon(Icons.expand_more, size: defaultIconSize),
-                      ),
-                    )
+                        onTap: onToggle,
+                        child: RotationTransition(
+                          turns: expandArrowAnimation,
+                          child: Icon(Icons.expand_more, size: defaultIconSize),
+                        ),
+                      )
                     : const SizedBox(
-                      width: defaultSpacing,
-                      height: defaultSpacing,
-                    ),
+                        width: defaultSpacing,
+                        height: defaultSpacing,
+                      ),
                 Expanded(
                   child: Container(
                     color: backgroundColor,
@@ -1287,12 +1279,12 @@ class InspectorRowContent extends StatelessWidget {
                           errorText: error?.errorMessage,
                           nodeDescriptionHighlightStyle:
                               searchValue.isEmpty || !row.isSearchMatch
-                                  ? DiagnosticsTextStyles.regular(
-                                    Theme.of(context).colorScheme,
-                                  )
-                                  : row.isSelected
-                                  ? theme.searchMatchHighlightStyleFocused
-                                  : theme.searchMatchHighlightStyle,
+                              ? DiagnosticsTextStyles.regular(
+                                  Theme.of(context).colorScheme,
+                                )
+                              : row.isSelected
+                              ? theme.searchMatchHighlightStyleFocused
+                              : theme.searchMatchHighlightStyle,
                         ),
                       ),
                     ),

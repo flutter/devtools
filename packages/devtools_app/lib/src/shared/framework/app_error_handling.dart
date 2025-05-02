@@ -113,8 +113,9 @@ SingleMapping? _cachedJsSourceMapping;
 SingleMapping? _cachedWasmSourceMapping;
 
 Future<SingleMapping?> _fetchSourceMapping() async {
-  final cachedSourceMapping =
-      kIsWasm ? _cachedWasmSourceMapping : _cachedJsSourceMapping;
+  final cachedSourceMapping = kIsWasm
+      ? _cachedWasmSourceMapping
+      : _cachedJsSourceMapping;
 
   return cachedSourceMapping ?? (await _initializeSourceMapping());
 }
@@ -141,10 +142,9 @@ Future<stack_trace.Trace?> _sourceMapStackTrace(StackTrace? stack) async {
 
   final mappedStackTrace = await _maybeMapStackTrace(originalStackTrace);
   // If mapping fails, revert back to the original stack trace:
-  final stackTrace =
-      mappedStackTrace.toString().isEmpty
-          ? originalStackTrace
-          : mappedStackTrace;
+  final stackTrace = mappedStackTrace.toString().isEmpty
+      ? originalStackTrace
+      : mappedStackTrace;
   return stack_trace.Trace.from(stackTrace);
 }
 

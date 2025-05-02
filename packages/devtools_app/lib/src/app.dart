@@ -87,16 +87,17 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     if (FeatureFlags.devToolsExtensions) {
       // TODO(https://github.com/flutter/devtools/issues/6273): stop special
       // casing the package:provider extension.
-      final containsProviderExtension =
-          extensionService.currentExtensions.value.visibleExtensions
-              .where((e) => e.name == 'provider')
-              .isNotEmpty;
-      final devToolsScreens =
-          containsProviderExtension
-              ? _originalScreens
-                  .where((s) => s.screenId != ScreenMetaData.provider.id)
-                  .toList()
-              : _originalScreens;
+      final containsProviderExtension = extensionService
+          .currentExtensions
+          .value
+          .visibleExtensions
+          .where((e) => e.name == 'provider')
+          .isNotEmpty;
+      final devToolsScreens = containsProviderExtension
+          ? _originalScreens
+                .where((s) => s.screenId != ScreenMetaData.provider.id)
+                .toList()
+          : _originalScreens;
       return [...devToolsScreens, ..._extensionScreens];
     }
     return _originalScreens;
@@ -287,16 +288,15 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           extensionService.currentExtensions,
         ],
         builder: (_, _, child) {
-          final screensInScaffold =
-              _visibleScreens()
-                  .where(
-                    (s) => maybeIncludeOnlyEmbeddedScreen(
-                      s,
-                      page: page,
-                      embedMode: embedMode,
-                    ),
-                  )
-                  .toList();
+          final screensInScaffold = _visibleScreens()
+              .where(
+                (s) => maybeIncludeOnlyEmbeddedScreen(
+                  s,
+                  page: page,
+                  embedMode: embedMode,
+                ),
+              )
+              .toList();
 
           removeHiddenScreens(screensInScaffold, queryParams);
 
@@ -354,26 +354,25 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               embedMode: embedMode,
               page: page,
               screens: screensInScaffold,
-              actions:
-                  isEmbedded()
-                      ? []
-                      : [
-                        if (paramsContainVmServiceUri) ...[
-                          // Hide the hot reload button for Dart web apps, where the
-                          // hot reload service extension is not avilable and where the
-                          // [service.reloadServices] RPC is not implemented.
-                          // TODO(https://github.com/flutter/devtools/issues/6441): find
-                          // a way to show this for Dart web apps when supported.
-                          if (!connectedToDartWebApp)
-                            HotReloadButton(
-                              callOnVmServiceDirectly: !connectedToFlutterApp,
-                            ),
-                          // This button will hide itself based on whether the
-                          // hot restart service is available for the connected app.
-                          const HotRestartButton(),
-                        ],
-                        ...DevToolsScaffold.defaultActions(),
+              actions: isEmbedded()
+                  ? []
+                  : [
+                      if (paramsContainVmServiceUri) ...[
+                        // Hide the hot reload button for Dart web apps, where the
+                        // hot reload service extension is not avilable and where the
+                        // [service.reloadServices] RPC is not implemented.
+                        // TODO(https://github.com/flutter/devtools/issues/6441): find
+                        // a way to show this for Dart web apps when supported.
+                        if (!connectedToDartWebApp)
+                          HotReloadButton(
+                            callOnVmServiceDirectly: !connectedToFlutterApp,
+                          ),
+                        // This button will hide itself based on whether the
+                        // hot restart service is available for the connected app.
+                        const HotRestartButton(),
                       ],
+                      ...DevToolsScaffold.defaultActions(),
+                    ],
             );
           }
           return scaffold;
@@ -657,8 +656,8 @@ class ScreenUnavailable extends StatelessWidget {
           if (embedMode == EmbedMode.none) ...[
             const SizedBox(height: defaultSpacing),
             ElevatedButton(
-              onPressed:
-                  () => routerDelegate.navigateHome(clearScreenParam: true),
+              onPressed: () =>
+                  routerDelegate.navigateHome(clearScreenParam: true),
               child: const Text('Go to Home screen'),
             ),
           ],
@@ -702,9 +701,8 @@ List<DevToolsScreen> defaultScreens({
     ),
     DevToolsScreen<DebuggerController>(
       DebuggerScreen(),
-      createController:
-          (routerDelegate) =>
-              DebuggerController(routerDelegate: routerDelegate),
+      createController: (routerDelegate) =>
+          DebuggerController(routerDelegate: routerDelegate),
     ),
     DevToolsScreen<NetworkController>(
       NetworkScreen(),

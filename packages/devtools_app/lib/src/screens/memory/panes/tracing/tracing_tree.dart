@@ -196,23 +196,21 @@ class _TracingTreeHeader extends StatelessWidget {
         ExpandAllButton(
           gaScreen: gac.memory,
           gaSelection: gac.MemoryEvents.tracingTreeExpandAll.name,
-          onPressed:
-              () => updateTreeStateCallback(() {
-                for (final root in _currentDataRoots) {
-                  root.expandCascading();
-                }
-              }),
+          onPressed: () => updateTreeStateCallback(() {
+            for (final root in _currentDataRoots) {
+              root.expandCascading();
+            }
+          }),
         ),
         const SizedBox(width: denseSpacing),
         CollapseAllButton(
           gaScreen: gac.memory,
           gaSelection: gac.MemoryEvents.tracingTreeCollapseAll.name,
-          onPressed:
-              () => updateTreeStateCallback(() {
-                for (final root in _currentDataRoots) {
-                  root.collapseCascading();
-                }
-              }),
+          onPressed: () => updateTreeStateCallback(() {
+            for (final root in _currentDataRoots) {
+              root.collapseCascading();
+            }
+          }),
         ),
       ],
     );

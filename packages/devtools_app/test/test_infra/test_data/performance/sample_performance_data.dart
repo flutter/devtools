@@ -4,8 +4,6 @@
 
 // This is the Perfetto data from [samplePerformanceData] as data class objects.
 
-// ignore_for_file: avoid_classes_with_only_static_members
-
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
@@ -17,16 +15,14 @@ import '../../utils/test_utils.dart';
 
 part '_perfetto_events_raw.dart';
 
-PerfettoTimeline perfettoVmTimeline =
-    PerfettoTimeline.parse({
-      'trace': base64Encode(
-        (rawPerformanceData[OfflinePerformanceData.traceBinaryKey]
-                as List<Object?>)
-            .cast<int>(),
-      ),
-      'timeOriginMicros': 0,
-      'timeExtentMicros': 800000000000,
-    })!;
+PerfettoTimeline perfettoVmTimeline = PerfettoTimeline.parse({
+  'trace': base64Encode(
+    (rawPerformanceData[OfflinePerformanceData.traceBinaryKey] as List<Object?>)
+        .cast<int>(),
+  ),
+  'timeOriginMicros': 0,
+  'timeExtentMicros': 800000000000,
+})!;
 
 Map<String, Object?> rawPerformanceData =
     (samplePerformanceData[ScreenMetaData.performance.id] as Map)
@@ -131,7 +127,7 @@ final timelineEventWithShaderJank = testTimelineEvent(
 );
 
 /// Data for Frame (id: 2)
-abstract class FlutterFrame2 {
+extension FlutterFrame2 on Never {
   static final frame =
       FlutterFrame.fromJson({
           'number': 2,
@@ -180,34 +176,34 @@ abstract class FlutterFrame2 {
     endMicros: 713834379102,
   );
 
-  static final rasterEvent =
-      rasterizerDoDrawEvent..addChild(
-        rasterizerDrawToSurfacesEvent..addAllChildren([
-          gpuSurfaceMetalImpellerAcquireFrameEvent..addChild(
-            surfaceMTLWrapCurrentMetalLayerDrawableEvent
-              ..addChild(waitForNextDrawableEvent),
-          ),
-          compositorContextScopedFrameRasterEvent..addAllChildren([
-            layerTreePrerollEvent,
-            iOSExternalViewEmbedderPostPrerollActionEvent,
-            layerTreePaintEvent,
-          ]),
-          surfaceFrameSubmitEvent..addAllChildren([
-            surfaceFrameBuildDisplayListEvent,
-            displayListDispatcherEndRecordingAsPictureEvent,
-            rendererRenderEvent..addChild(
-              entityPassOnRenderEvent..addChild(
-                createGlyphAtlasEvent..addAllChildren([
-                  canAppendToExistingAtlasEvent,
-                  optimumAtlasSizeForFontGlyphPairsEvent,
-                  createAtlasBitmapEvent,
-                  uploadGlyphTextureAtlasEvent,
-                ]),
-              ),
-            ),
-          ]),
+  static final rasterEvent = rasterizerDoDrawEvent
+    ..addChild(
+      rasterizerDrawToSurfacesEvent..addAllChildren([
+        gpuSurfaceMetalImpellerAcquireFrameEvent..addChild(
+          surfaceMTLWrapCurrentMetalLayerDrawableEvent
+            ..addChild(waitForNextDrawableEvent),
+        ),
+        compositorContextScopedFrameRasterEvent..addAllChildren([
+          layerTreePrerollEvent,
+          iOSExternalViewEmbedderPostPrerollActionEvent,
+          layerTreePaintEvent,
         ]),
-      );
+        surfaceFrameSubmitEvent..addAllChildren([
+          surfaceFrameBuildDisplayListEvent,
+          displayListDispatcherEndRecordingAsPictureEvent,
+          rendererRenderEvent..addChild(
+            entityPassOnRenderEvent..addChild(
+              createGlyphAtlasEvent..addAllChildren([
+                canAppendToExistingAtlasEvent,
+                optimumAtlasSizeForFontGlyphPairsEvent,
+                createAtlasBitmapEvent,
+                uploadGlyphTextureAtlasEvent,
+              ]),
+            ),
+          ),
+        ]),
+      ]),
+    );
   static final rasterizerDoDrawEvent = testTimelineEvent(
     name: 'Rasterizer::DoDraw',
     type: TimelineEventType.raster,
@@ -366,21 +362,19 @@ abstract class FlutterFrame2 {
 }
 
 /// Data for Frame (id: 4)
-abstract class FlutterFrame4 {
-  static final frame =
-      FlutterFrame.fromJson(_frameJson)
-        ..setEventFlow(uiEvent)
-        ..setEventFlow(rasterEvent);
+extension FlutterFrame4 on Never {
+  static final frame = FlutterFrame.fromJson(_frameJson)
+    ..setEventFlow(uiEvent)
+    ..setEventFlow(rasterEvent);
 
   /// A frame with extra timeline events for the purpose of testing.
   ///
   /// Some events included in [uiEventWithExtras] (and `rasterEventWithExtras`
   /// if un-commented) are not part of the original trace from with
   /// [FlutterFrame4] was formed.
-  static final frameWithExtras =
-      FlutterFrame.fromJson(_frameJson)
-        ..setEventFlow(uiEventWithExtras)
-        ..setEventFlow(rasterEvent);
+  static final frameWithExtras = FlutterFrame.fromJson(_frameJson)
+    ..setEventFlow(uiEventWithExtras)
+    ..setEventFlow(rasterEvent);
 
   static final _frameJson = {
     'number': 4,
@@ -425,17 +419,16 @@ abstract class FlutterFrame4 {
             CreateGlyphAtlas [713836210893 μs - 713836210899 μs]
 ''';
 
-  static final uiEvent =
-      animatorBeginFrameEvent..addAllChildren([
-        layoutRootEvent..addChild(layoutEvent),
-        updatingCompositingBitsRootEvent
-          ..addChild(updatingCompositingBitsEvent),
-        paintRootEvent..addChild(paintEvent),
-        compositingEvent..addChild(animatorRenderEvent),
-        semanticsRootEvent..addChild(semanticsEvent),
-        finalizeTreeEvent,
-        postFrameEvent,
-      ]);
+  static final uiEvent = animatorBeginFrameEvent
+    ..addAllChildren([
+      layoutRootEvent..addChild(layoutEvent),
+      updatingCompositingBitsRootEvent..addChild(updatingCompositingBitsEvent),
+      paintRootEvent..addChild(paintEvent),
+      compositingEvent..addChild(animatorRenderEvent),
+      semanticsRootEvent..addChild(semanticsEvent),
+      finalizeTreeEvent,
+      postFrameEvent,
+    ]);
 
   static FlutterTimelineEvent uiEventWithExtras =
       animatorBeginFrameEvent.shallowCopy()..addAllChildren([
@@ -751,27 +744,27 @@ abstract class FlutterFrame4 {
     endMicros: 713836202360,
   );
 
-  static final rasterEvent =
-      rasterizerDoDrawEvent..addChild(
-        rasterizerDrawToSurfacesEvent..addAllChildren([
-          gpuSurfaceMetalImpellerAcquireFrameEvent..addChild(
-            surfaceMTLWrapCurrentMetalLayerDrawableEvent
-              ..addChild(waitForNextDrawableEvent),
-          ),
-          compositorContextScopedFrameRasterEvent..addAllChildren([
-            layerTreePrerollEvent,
-            iOSExternalViewEmbedderPostPrerollActionEvent,
-            layerTreePaintEvent,
-          ]),
-          surfaceFrameSubmitEvent..addAllChildren([
-            surfaceFrameBuildDisplayListEvent,
-            displayListDispatcherEndRecordingAsPictureEvent,
-            rendererRenderEvent..addChild(
-              entityPassOnRenderEvent..addChild(createGlyphAtlasEvent),
-            ),
-          ]),
+  static final rasterEvent = rasterizerDoDrawEvent
+    ..addChild(
+      rasterizerDrawToSurfacesEvent..addAllChildren([
+        gpuSurfaceMetalImpellerAcquireFrameEvent..addChild(
+          surfaceMTLWrapCurrentMetalLayerDrawableEvent
+            ..addChild(waitForNextDrawableEvent),
+        ),
+        compositorContextScopedFrameRasterEvent..addAllChildren([
+          layerTreePrerollEvent,
+          iOSExternalViewEmbedderPostPrerollActionEvent,
+          layerTreePaintEvent,
         ]),
-      );
+        surfaceFrameSubmitEvent..addAllChildren([
+          surfaceFrameBuildDisplayListEvent,
+          displayListDispatcherEndRecordingAsPictureEvent,
+          rendererRenderEvent..addChild(
+            entityPassOnRenderEvent..addChild(createGlyphAtlasEvent),
+          ),
+        ]),
+      ]),
+    );
 
   // static final rasterEventWithExtras = rasterizerDoDrawEvent.shallowCopy()
   //   ..addChild(
@@ -934,11 +927,10 @@ abstract class FlutterFrame4 {
 }
 
 /// Data for Frame (id: 6)
-abstract class FlutterFrame6 {
-  static final frame =
-      FlutterFrame.fromJson(_frameJson)
-        ..setEventFlow(uiEvent)
-        ..setEventFlow(rasterEvent);
+extension FlutterFrame6 on Never {
+  static final frame = FlutterFrame.fromJson(_frameJson)
+    ..setEventFlow(uiEvent)
+    ..setEventFlow(rasterEvent);
 
   static final frameWithoutTimelineEvents = FlutterFrame.fromJson(_frameJson);
 
@@ -985,17 +977,16 @@ abstract class FlutterFrame6 {
             CreateGlyphAtlas [713836331499 μs - 713836331505 μs]
 ''';
 
-  static final uiEvent =
-      animatorBeginFrameEvent..addAllChildren([
-        layoutRootEvent..addChild(layoutEvent),
-        updatingCompositingBitsRootEvent
-          ..addChild(updatingCompositingBitsEvent),
-        paintRootEvent..addChild(paintEvent),
-        compositingEvent..addChild(animatorRenderEvent),
-        semanticsRootEvent..addChild(semanticsEvent),
-        finalizeTreeEvent,
-        postFrameEvent,
-      ]);
+  static final uiEvent = animatorBeginFrameEvent
+    ..addAllChildren([
+      layoutRootEvent..addChild(layoutEvent),
+      updatingCompositingBitsRootEvent..addChild(updatingCompositingBitsEvent),
+      paintRootEvent..addChild(paintEvent),
+      compositingEvent..addChild(animatorRenderEvent),
+      semanticsRootEvent..addChild(semanticsEvent),
+      finalizeTreeEvent,
+      postFrameEvent,
+    ]);
 
   static final animatorBeginFrameEvent = testTimelineEvent(
     name: 'Animator::BeginFrame',
@@ -1209,27 +1200,27 @@ abstract class FlutterFrame6 {
     endMicros: 713836330989,
   );
 
-  static final rasterEvent =
-      rasterizerDoDrawEvent..addChild(
-        rasterizerDrawToSurfacesEvent..addAllChildren([
-          gpuSurfaceMetalImpellerAcquireFrameEvent..addChild(
-            surfaceMTLWrapCurrentMetalLayerDrawableEvent
-              ..addChild(waitForNextDrawableEvent),
-          ),
-          compositorContextScopedFrameRasterEvent..addAllChildren([
-            layerTreePrerollEvent,
-            iOSExternalViewEmbedderPostPrerollActionEvent,
-            layerTreePaintEvent,
-          ]),
-          surfaceFrameSubmitEvent..addAllChildren([
-            surfaceFrameBuildDisplayListEvent,
-            displayListDispatcherEndRecordingAsPictureEvent,
-            rendererRenderEvent..addChild(
-              entityPassOnRenderEvent..addChild(createGlyphAtlasEvent),
-            ),
-          ]),
+  static final rasterEvent = rasterizerDoDrawEvent
+    ..addChild(
+      rasterizerDrawToSurfacesEvent..addAllChildren([
+        gpuSurfaceMetalImpellerAcquireFrameEvent..addChild(
+          surfaceMTLWrapCurrentMetalLayerDrawableEvent
+            ..addChild(waitForNextDrawableEvent),
+        ),
+        compositorContextScopedFrameRasterEvent..addAllChildren([
+          layerTreePrerollEvent,
+          iOSExternalViewEmbedderPostPrerollActionEvent,
+          layerTreePaintEvent,
         ]),
-      );
+        surfaceFrameSubmitEvent..addAllChildren([
+          surfaceFrameBuildDisplayListEvent,
+          displayListDispatcherEndRecordingAsPictureEvent,
+          rendererRenderEvent..addChild(
+            entityPassOnRenderEvent..addChild(createGlyphAtlasEvent),
+          ),
+        ]),
+      ]),
+    );
 
   static final rasterizerDoDrawEvent = testTimelineEvent(
     name: 'Rasterizer::DoDraw',

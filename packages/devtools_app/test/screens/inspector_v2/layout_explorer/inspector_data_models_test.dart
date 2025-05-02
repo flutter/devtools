@@ -224,12 +224,12 @@ void main() {
             required MainAxisAlignment mainAxisAlignment,
           }) => Row(
             textDirection: flipMainAxis ? TextDirection.rtl : TextDirection.ltr,
-            mainAxisAlignment:
-                flipMainAxis ? mainAxisAlignment.reversed : mainAxisAlignment,
-            children:
-                flipMainAxis
-                    ? childrenWidgets.reversed.toList()
-                    : childrenWidgets,
+            mainAxisAlignment: flipMainAxis
+                ? mainAxisAlignment.reversed
+                : mainAxisAlignment,
+            children: flipMainAxis
+                ? childrenWidgets.reversed.toList()
+                : childrenWidgets,
           );
           for (final mainAxisAlignment in MainAxisAlignment.values) {
             final originalWidgetRenderProperties = childrenRenderProperties(

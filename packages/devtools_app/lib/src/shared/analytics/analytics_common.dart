@@ -61,10 +61,9 @@ Map<String, String?> createStackTraceForAnalytics(
   const maxCharacterLimit = stackTraceChunksLimit * ga4ParamValueCharacterLimit;
 
   // Reduce whitespace characters to optimize available space.
-  final trimmedStackFrames =
-      stackTrace.frames
-          .map((f) => '${_normalizePath(f.location)} | ${f.member}\n')
-          .toList();
+  final trimmedStackFrames = stackTrace.frames
+      .map((f) => '${_normalizePath(f.location)} | ${f.member}\n')
+      .toList();
   final stackTraceAsString = trimmedStackFrames.join();
 
   var stackTraceChunksForGa = chunkForGa(

@@ -233,10 +233,9 @@ class ChartController extends DisposableController
           return false;
         });
 
-        final ticksVisible =
-            startOfLastNMinutes != null
-                ? timestampsLength - timestamps.indexOf(startOfLastNMinutes)
-                : timestampsLength + 1;
+        final ticksVisible = startOfLastNMinutes != null
+            ? timestampsLength - timestamps.indexOf(startOfLastNMinutes)
+            : timestampsLength + 1;
         _tickWidth = canvasChartWidth / ticksVisible;
       } else {
         // No but lets scale x-axis based on the last two timestamps diffs we have.
@@ -367,8 +366,9 @@ class ChartController extends DisposableController
       timestamps.last,
     );
 
-    final nSeconds =
-        rightMostTimestampDT.difference(rightMostLabelDT).inSeconds;
+    final nSeconds = rightMostTimestampDT
+        .difference(rightMostLabelDT)
+        .inSeconds;
 
     if (nSeconds >= labelInterval) {
       late int foundTimestamp;

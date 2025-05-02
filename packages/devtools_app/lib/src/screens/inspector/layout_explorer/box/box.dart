@@ -77,10 +77,9 @@ class BoxLayoutExplorerWidgetState
     setState(() {
       // This implementation will need to change if we support showing more than
       // a single widget in the box visualization for the layout explorer.
-      highlighted =
-          newProperties != null && selectedNode == newProperties.node
-              ? newProperties
-              : null;
+      highlighted = newProperties != null && selectedNode == newProperties.node
+          ? newProperties
+          : null;
     });
   }
 
@@ -225,8 +224,9 @@ class BoxLayoutExplorerWidgetState
           height: constraints.maxHeight,
           decoration: BoxDecoration(
             border: Border.all(
-              color:
-                  WidgetTheme.fromName(propertiesLocal.node.description).color,
+              color: WidgetTheme.fromName(
+                propertiesLocal.node.description,
+              ).color,
             ),
           ),
           child: Stack(

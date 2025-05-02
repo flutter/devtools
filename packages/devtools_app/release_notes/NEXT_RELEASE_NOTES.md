@@ -18,6 +18,7 @@ To learn more about DevTools, check out the
 - Prevent web apps from remaining paused after triggering a hot-restart from
 DevTools. - [#9125](https://github.com/flutter/devtools/pull/9125)
 - Dismiss stale banner messages when the connected app state changes. - [#9148](https://github.com/flutter/devtools/pull/9148)
+- Fix a focus traversal issue with search fields. [#9166](https://github.com/flutter/devtools/pull/9166)
 
 ## Inspector updates
 
@@ -25,7 +26,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+- Fixes a bug where the Performance page would hang when connected to a paused
+Flutter app. - [#9162](https://github.com/flutter/devtools/pull/9162)
 
 ## CPU profiler updates
 

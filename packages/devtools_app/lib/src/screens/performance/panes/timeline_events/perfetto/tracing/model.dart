@@ -39,10 +39,9 @@ class PerfettoTrackDescriptorEvent extends _PerfettoTracePacket {
 
   final TrackDescriptor trackDescriptor;
 
-  String get name =>
-      trackDescriptor.name.isNotEmpty
-          ? trackDescriptor.name
-          : trackDescriptor.thread.threadName;
+  String get name => trackDescriptor.name.isNotEmpty
+      ? trackDescriptor.name
+      : trackDescriptor.thread.threadName;
 
   Int64 get id => trackDescriptor.uuid;
 

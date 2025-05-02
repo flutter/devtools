@@ -104,23 +104,22 @@ List<double> computeRenderSizes({
 }
 
 /// Data pattern containing a widget's widths or heights.
-typedef WidgetSizes =
-    ({
-      /// Whether this record represents a widget's widths or heights.
-      SizeType type,
+typedef WidgetSizes = ({
+  /// Whether this record represents a widget's widths or heights.
+  SizeType type,
 
-      /// Either the widget's left (if [type] is [SizeType.widths]) or top (if
-      /// [type] is [SizeType.heights]) padding.
-      double paddingA,
+  /// Either the widget's left (if [type] is [SizeType.widths]) or top (if
+  /// [type] is [SizeType.heights]) padding.
+  double paddingA,
 
-      /// Either the widget's width (if [type] is [SizeType.widths]) or height (if
-      /// [type] is [SizeType.heights]).
-      double widgetSize,
+  /// Either the widget's width (if [type] is [SizeType.widths]) or height (if
+  /// [type] is [SizeType.heights]).
+  double widgetSize,
 
-      /// Either the widget's right (if [type] is [SizeType.widths]) or bottom (if
-      /// [type] is [SizeType.heights]) padding.
-      double paddingB,
-    });
+  /// Either the widget's right (if [type] is [SizeType.widths]) or bottom (if
+  /// [type] is [SizeType.heights]) padding.
+  double paddingB,
+});
 
 enum SizeType { widths, heights }
 
@@ -134,16 +133,14 @@ class LayoutProperties {
       isFlex = node.isFlex,
       flexFactor = node.flexFactor,
       flexFit = node.flexFit,
-      children =
-          copyLevel == 0
-              ? []
-              : node.childrenNow
-                  .where((child) => child.size != null)
-                  .map(
-                    (child) =>
-                        LayoutProperties(child, copyLevel: copyLevel - 1),
-                  )
-                  .toList(growable: false) {
+      children = copyLevel == 0
+          ? []
+          : node.childrenNow
+                .where((child) => child.size != null)
+                .map(
+                  (child) => LayoutProperties(child, copyLevel: copyLevel - 1),
+                )
+                .toList(growable: false) {
     for (final child in children) {
       child.parent = this;
     }
@@ -206,10 +203,10 @@ class LayoutProperties {
     if (constraintsLocal == null) return '';
     return constraintsLocal.hasBoundedWidth
         ? describeAxis(
-          constraintsLocal.minWidth,
-          constraintsLocal.maxWidth,
-          'w',
-        )
+            constraintsLocal.minWidth,
+            constraintsLocal.maxWidth,
+            'w',
+          )
         : 'width is unconstrained';
   }
 
@@ -218,10 +215,10 @@ class LayoutProperties {
     if (constraintsLocal == null) return '';
     return constraintsLocal.hasBoundedHeight
         ? describeAxis(
-          constraintsLocal.minHeight,
-          constraintsLocal.maxHeight,
-          'h',
-        )
+            constraintsLocal.minHeight,
+            constraintsLocal.maxHeight,
+            'h',
+          )
         : 'height is unconstrained';
   }
 
@@ -459,9 +456,8 @@ class FlexLayoutProperties extends LayoutProperties {
 
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
     final renderObjectJson = node.renderObject!.json;
-    final properties =
-        (renderObjectJson['properties'] as List<Object?>)
-            .cast<Map<String, Object?>>();
+    final properties = (renderObjectJson['properties'] as List<Object?>)
+        .cast<Map<String, Object?>>();
 
     final data = {
       for (final property in properties)
@@ -500,8 +496,9 @@ class FlexLayoutProperties extends LayoutProperties {
   List<LayoutProperties> get displayChildren {
     final displayChildren = _displayChildren;
     if (displayChildren != null) return displayChildren;
-    return _displayChildren =
-        startIsTopLeft ? children : children.reversed.toList();
+    return _displayChildren = startIsTopLeft
+        ? children
+        : children.reversed.toList();
   }
 
   int? _totalFlex;
@@ -522,11 +519,10 @@ class FlexLayoutProperties extends LayoutProperties {
 
   num get totalFlex {
     if (children.isEmpty) return 0;
-    _totalFlex ??=
-        children
-            .map((child) => child.flexFactor ?? 0)
-            .reduce((value, element) => value + element)
-            .toInt();
+    _totalFlex ??= children
+        .map((child) => child.flexFactor ?? 0)
+        .reduce((value, element) => value + element)
+        .toInt();
     return _totalFlex!;
   }
 
@@ -584,8 +580,9 @@ class FlexLayoutProperties extends LayoutProperties {
   }) {
     /// calculate the render empty spaces
     final freeSpace = dimension(direction) - sum(childrenDimensions(direction));
-    final displayMainAxisAlignment =
-        startIsTopLeft ? mainAxisAlignment : mainAxisAlignment?.reversed;
+    final displayMainAxisAlignment = startIsTopLeft
+        ? mainAxisAlignment
+        : mainAxisAlignment?.reversed;
 
     double leadingSpace(double freeSpace) {
       if (children.isEmpty) return 0.0;
@@ -633,8 +630,9 @@ class FlexLayoutProperties extends LayoutProperties {
     }
 
     double largestRenderSize(Axis axis) {
-      final lrs =
-          axis == Axis.horizontal ? largestRenderWidth : largestRenderHeight;
+      final lrs = axis == Axis.horizontal
+          ? largestRenderWidth
+          : largestRenderHeight;
       // use all the space when visualizing cross axis
       return (axis == direction) ? lrs : maxSizeAvailable(axis);
     }
@@ -660,12 +658,11 @@ class FlexLayoutProperties extends LayoutProperties {
         );
       } else {
         // uniform cross axis sizes.
-        double size =
-            crossAxisAlignment == CrossAxisAlignment.stretch
-                ? maxSizeAvailable(axis)
-                : largestSize /
-                    math.max(dimension(axis), 1.0) *
-                    maxSizeAvailable(axis);
+        double size = crossAxisAlignment == CrossAxisAlignment.stretch
+            ? maxSizeAvailable(axis)
+            : largestSize /
+                  math.max(dimension(axis), 1.0) *
+                  maxSizeAvailable(axis);
         size = math.max(size, smallestRenderSize(axis));
         return sizes.map((_) => size).toList();
       }
@@ -674,10 +671,9 @@ class FlexLayoutProperties extends LayoutProperties {
     final widths = renderSizes(Axis.horizontal);
     final heights = renderSizes(Axis.vertical);
 
-    final renderFreeSpace =
-        freeSpace > 0.0
-            ? (isMainAxisHorizontal ? widths.last : heights.last)
-            : 0.0;
+    final renderFreeSpace = freeSpace > 0.0
+        ? (isMainAxisHorizontal ? widths.last : heights.last)
+        : 0.0;
 
     final renderLeadingSpace = leadingSpace(renderFreeSpace);
     final renderBetweenSpace = betweenSpace(renderFreeSpace);
@@ -708,8 +704,9 @@ class FlexLayoutProperties extends LayoutProperties {
 
     double calculateCrossAxisOffset(int i) {
       final maxDimension = maxSizeAvailable(crossAxisDirection);
-      final usedDimension =
-          crossAxisDirection == Axis.horizontal ? widths[i] : heights[i];
+      final usedDimension = crossAxisDirection == Axis.horizontal
+          ? widths[i]
+          : heights[i];
 
       if (crossAxisAlignment == CrossAxisAlignment.start ||
           crossAxisAlignment == CrossAxisAlignment.stretch ||
@@ -815,10 +812,9 @@ class FlexLayoutProperties extends LayoutProperties {
                 renderProperties.crossAxisOffset,
         );
       } else {
-        space.crossAxisOffset =
-            crossAxisAlignment == CrossAxisAlignment.end
-                ? 0
-                : renderProperties.crossAxisDimension;
+        space.crossAxisOffset = crossAxisAlignment == CrossAxisAlignment.end
+            ? 0
+            : renderProperties.crossAxisDimension;
         spaces.add(space);
       }
     }
@@ -826,14 +822,14 @@ class FlexLayoutProperties extends LayoutProperties {
   }
 
   static final _directionNamesToValues = Axis.values.asNameMap();
-  static final _mainAxisAlignmentNamesToValues =
-      MainAxisAlignment.values.asNameMap();
+  static final _mainAxisAlignmentNamesToValues = MainAxisAlignment.values
+      .asNameMap();
   static final _mainAxisSizeNamesToValues = MainAxisSize.values.asNameMap();
-  static final _crossAxisAlignmentNamesToValues =
-      CrossAxisAlignment.values.asNameMap();
+  static final _crossAxisAlignmentNamesToValues = CrossAxisAlignment.values
+      .asNameMap();
   static final _textDirectionNamesToValues = TextDirection.values.asNameMap();
-  static final _verticalDirectionNamesToValues =
-      VerticalDirection.values.asNameMap();
+  static final _verticalDirectionNamesToValues = VerticalDirection.values
+      .asNameMap();
   static final _textBaselineNamesToValues = TextBaseline.values.asNameMap();
 }
 

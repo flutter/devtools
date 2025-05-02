@@ -75,10 +75,9 @@ class FlutterFramesController extends PerformanceFeatureController {
         // Default to true for profile builds only.
         _badgeTabForJankyFrames.value = await connectedApp.isProfileBuild;
 
-        final refreshRate =
-            connectedApp.isFlutterAppNow!
-                ? await serviceConnection.queryDisplayRefreshRate
-                : defaultRefreshRate;
+        final refreshRate = connectedApp.isFlutterAppNow!
+            ? await serviceConnection.queryDisplayRefreshRate
+            : defaultRefreshRate;
 
         _displayRefreshRate.value = refreshRate ?? defaultRefreshRate;
       }

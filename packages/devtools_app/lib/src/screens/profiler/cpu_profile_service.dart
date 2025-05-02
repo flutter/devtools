@@ -18,13 +18,12 @@ extension CpuProfilerExtension on VmService {
     // Grab the value of this flag before doing asynchronous work.
     final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
 
-    final isolateId =
-        serviceConnection
-            .serviceManager
-            .isolateManager
-            .selectedIsolate
-            .value!
-            .id!;
+    final isolateId = serviceConnection
+        .serviceManager
+        .isolateManager
+        .selectedIsolate
+        .value!
+        .id!;
     final cpuSamples = await serviceConnection.serviceManager.service!
         .getCpuSamples(isolateId, startMicros, extentMicros);
 
@@ -37,8 +36,8 @@ extension CpuProfilerExtension on VmService {
     const kSamples = 'samples';
     const kCodeStack = '_codeStack';
 
-    final rawSamples =
-        (cpuSamples.json![kSamples] as List).cast<Map<String, Object?>>();
+    final rawSamples = (cpuSamples.json![kSamples] as List)
+        .cast<Map<String, Object?>>();
 
     bool buildCodeProfile = false;
     if (rawSamples.isNotEmpty && rawSamples.first.containsKey(kCodeStack)) {

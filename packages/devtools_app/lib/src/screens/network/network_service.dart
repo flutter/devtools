@@ -29,8 +29,8 @@ class NetworkService {
     bool alreadyRecordingSocketData = false,
   }) async {
     // Set the current timeline time as the time of the last refresh.
-    final timestampObj =
-        await serviceConnection.serviceManager.service!.getVMTimelineMicros();
+    final timestampObj = await serviceConnection.serviceManager.service!
+        .getVMTimelineMicros();
 
     final timestamp = timestampObj.timestamp!;
     if (!alreadyRecordingSocketData) {
@@ -68,8 +68,8 @@ class NetworkService {
     DebounceCancelledCallback? cancelledCallback,
   }) async {
     if (serviceConnection.serviceManager.service == null) return;
-    final timestampObj =
-        await serviceConnection.serviceManager.service!.getVMTimelineMicros();
+    final timestampObj = await serviceConnection.serviceManager.service!
+        .getVMTimelineMicros();
     if (cancelledCallback?.call() ?? false) return;
 
     final timestamp = timestampObj.timestamp!;

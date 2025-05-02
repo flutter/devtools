@@ -27,8 +27,8 @@ import '../scene_test_extensions.dart';
 // To run:
 // flutter run -t test/test_infra/scenes/memory/default.stager_app.g.dart -d macos
 
-// ignore: avoid_classes_with_only_static_members, enum like classes are ok
-abstract class MemoryDefaultSceneHeaps {
+/// A namespace for stubbed data used in memory tests.
+extension MemoryDefaultSceneHeaps on Never {
   /// Many instances of the same class with different long paths.
   ///
   /// If sorted by retaining path this class will be the second from the top.
@@ -56,14 +56,18 @@ abstract class MemoryDefaultSceneHeaps {
             {'B': 1, 'C': 2, 'D': 3},
             {'B': 1, 'C': 2, 'D': 3},
           ]
-          .map((e) => () async => FakeHeapSnapshotGraph()..addClassInstances(e))
+          .map(
+            (e) =>
+                () async => FakeHeapSnapshotGraph()..addClassInstances(e),
+          )
           .toList();
 
-  static final golden =
-      goldenHeapTests
-          // ignore: avoid-redundant-async, match signature
-          .map((e) => () async => e.loadHeap())
-          .toList();
+  static final golden = goldenHeapTests
+      .map(
+        (e) =>
+            () => e.loadHeap(),
+      )
+      .toList();
 
   static List<HeapProvider> get all => [
     ...forDiffTesting,
@@ -154,11 +158,11 @@ class MemoryDefaultScene extends Scene {
     final profileController = ProfilePaneController(rootPackage: 'root')
       ..setFilter(showAllFilter);
 
-    controller =
-        MemoryController()..init(
-          connectedDiff: diffController,
-          connectedProfile: profileController,
-        );
+    controller = MemoryController()
+      ..init(
+        connectedDiff: diffController,
+        connectedProfile: profileController,
+      );
 
     await controller.initialized;
 

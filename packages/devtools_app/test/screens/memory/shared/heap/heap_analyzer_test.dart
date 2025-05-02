@@ -39,23 +39,23 @@ final _sizeTests = [
   ),
   _SizeTest(
     name: 'Two objects heap',
-    heap:
-        FakeHeapSnapshotGraph()..setObjects({
-          1: [2],
-          2: [],
-        }),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects({
+        1: [2],
+        2: [],
+      }),
     rootRetainedSize: 2,
     unreachableSize: 0,
   ),
   _SizeTest(
     name: 'Four objects heap',
-    heap:
-        FakeHeapSnapshotGraph()..setObjects({
-          1: [2, 3, 4],
-          2: [],
-          3: [],
-          4: [],
-        }),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects({
+        1: [2, 3, 4],
+        2: [],
+        3: [],
+        4: [],
+      }),
     rootRetainedSize: 4,
     unreachableSize: 0,
   ),
@@ -69,20 +69,20 @@ final _sizeTests = [
   ),
   _SizeTest(
     name: 'Many unreachable objects heap',
-    heap:
-        FakeHeapSnapshotGraph()..setObjects({
-          // Reachable:
-          1: [2, 3, 4],
-          2: [],
-          3: [],
-          4: [],
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects({
+        // Reachable:
+        1: [2, 3, 4],
+        2: [],
+        3: [],
+        4: [],
 
-          // Unreachable:
-          5: [6, 7, 8],
-          6: [],
-          7: [],
-          8: [],
-        }),
+        // Unreachable:
+        5: [6, 7, 8],
+        6: [],
+        7: [],
+        8: [],
+      }),
     rootRetainedSize: 4,
     unreachableSize: 4,
   ),
@@ -95,15 +95,14 @@ final _sizeTests = [
     //  2w 3
     //  |
     //  4
-    heap:
-        FakeHeapSnapshotGraph()
-          ..setObjects({
-            1: [2, 3],
-          })
-          ..addObjects({
-            2: [4],
-          }, weak: true)
-          ..addObjects({3: [], 4: []}),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects({
+        1: [2, 3],
+      })
+      ..addObjects({
+        2: [4],
+      }, weak: true)
+      ..addObjects({3: [], 4: []}),
     rootRetainedSize: 3,
     unreachableSize: 1,
   ),
@@ -114,16 +113,15 @@ final _sizeTests = [
     //  2w 3w
     //  |   \
     //  4   5
-    heap:
-        FakeHeapSnapshotGraph()
-          ..setObjects({
-            1: [2, 3],
-          })
-          ..addObjects({
-            2: [4],
-            3: [5],
-          }, weak: true)
-          ..addObjects({4: [], 5: []}),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects({
+        1: [2, 3],
+      })
+      ..addObjects({
+        2: [4],
+        3: [5],
+      }, weak: true)
+      ..addObjects({4: [], 5: []}),
     rootRetainedSize: 3,
     unreachableSize: 2,
   ),
@@ -133,13 +131,13 @@ final _sizeTests = [
     name: 'Diamond',
     //  |\
     //  \|
-    heap:
-        FakeHeapSnapshotGraph()..setObjects({
-          1: [2, 3],
-          2: [4],
-          3: [4],
-          4: [],
-        }),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects({
+        1: [2, 3],
+        2: [4],
+        3: [4],
+        4: [],
+      }),
     rootRetainedSize: 4,
     unreachableSize: 0,
   ),
@@ -148,14 +146,14 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap:
-        FakeHeapSnapshotGraph()..setObjects({
-          1: [2],
-          2: [3, 4],
-          3: [5],
-          4: [5],
-          5: [],
-        }),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects({
+        1: [2],
+        2: [3, 4],
+        3: [5],
+        4: [5],
+        5: [],
+      }),
     rootRetainedSize: 5,
     unreachableSize: 0,
   ),
@@ -164,19 +162,18 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap:
-        FakeHeapSnapshotGraph()
-          ..setObjects({
-            1: [2],
-            2: [3, 4],
-          })
-          ..addObjects({
-            3: [5],
-          }, weak: true)
-          ..addObjects({
-            4: [5],
-            5: [],
-          }),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects({
+        1: [2],
+        2: [3, 4],
+      })
+      ..addObjects({
+        3: [5],
+      }, weak: true)
+      ..addObjects({
+        4: [5],
+        5: [],
+      }),
     rootRetainedSize: 5,
     unreachableSize: 0,
   ),
@@ -185,17 +182,16 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap:
-        FakeHeapSnapshotGraph()
-          ..setObjects({
-            1: [2],
-            2: [3, 4],
-          })
-          ..addObjects({
-            3: [5],
-            4: [5],
-          }, weak: true)
-          ..addObjects({5: []}),
+    heap: FakeHeapSnapshotGraph()
+      ..setObjects({
+        1: [2],
+        2: [3, 4],
+      })
+      ..addObjects({
+        3: [5],
+        4: [5],
+      }, weak: true)
+      ..addObjects({5: []}),
     rootRetainedSize: 4,
     unreachableSize: 1,
   ),

@@ -9,8 +9,8 @@ import 'package:collection/collection.dart';
 import 'package:string_scanner/string_scanner.dart';
 
 //TODO(jacobr): cleanup.
-// ignore: avoid_classes_with_only_static_members
-abstract class SpanParser {
+/// A namespace for [SpanParser] utilities.
+extension SpanParser on Never {
   /// Takes a TextMate [Grammar] and a [String] and outputs a list of
   /// [ScopeSpan]s corresponding to the parsed input.
   static List<ScopeSpan> parse(Grammar grammar, String src) {
@@ -165,9 +165,8 @@ class ScopeSpan {
 /// using the 'includes' keyword.
 class Repository {
   Repository.build(Map<String, Object?> grammarJson) {
-    final repositoryJson =
-        (grammarJson['repository'] as Map<String, Object?>?)
-            ?.cast<String, Map<String, Object?>>();
+    final repositoryJson = (grammarJson['repository'] as Map<String, Object?>?)
+        ?.cast<String, Map<String, Object?>>();
     if (repositoryJson == null) {
       return;
     }
@@ -259,9 +258,8 @@ abstract class GrammarMatcher {
 class _SimpleMatcher extends GrammarMatcher {
   _SimpleMatcher(super.json)
     : match = RegExp(json['match'] as String, multiLine: true),
-      captures =
-          (json['captures'] as Map<String, Object?>?)
-              ?.cast<String, Map<String, Object?>>(),
+      captures = (json['captures'] as Map<String, Object?>?)
+          ?.cast<String, Map<String, Object?>>(),
       super._();
 
   static bool isType(Map<String, Object?> json) {
@@ -299,21 +297,18 @@ class _MultilineMatcher extends GrammarMatcher {
     : begin = RegExp(json['begin'] as String, multiLine: true),
       beginCaptures = json['beginCaptures'] as Map<String, Object?>?,
       contentName = json['contentName'] as String?,
-      end =
-          json['end'] == null
-              ? null
-              : RegExp(json['end'] as String, multiLine: true),
+      end = json['end'] == null
+          ? null
+          : RegExp(json['end'] as String, multiLine: true),
       endCaptures = json['endCaptures'] as Map<String, Object?>?,
       captures = json['captures'] as Map<String, Object?>?,
-      whileCond =
-          json['while'] == null
-              ? null
-              : RegExp(json['while'] as String, multiLine: true),
-      patterns =
-          (json['patterns'] as List<Object?>?)
-              ?.cast<Map<String, Object?>>()
-              .map((e) => GrammarMatcher.fromJson(e))
-              .toList(),
+      whileCond = json['while'] == null
+          ? null
+          : RegExp(json['while'] as String, multiLine: true),
+      patterns = (json['patterns'] as List<Object?>?)
+          ?.cast<Map<String, Object?>>()
+          .map((e) => GrammarMatcher.fromJson(e))
+          .toList(),
       super._();
 
   static bool isType(Map<String, Object?> json) {
@@ -523,11 +518,10 @@ class _MultilineMatcher extends GrammarMatcher {
 
 class _PatternMatcher extends GrammarMatcher {
   _PatternMatcher(super.json)
-    : patterns =
-          (json['patterns'] as List<Object?>?)
-              ?.cast<Map<String, Object?>>()
-              .map((e) => GrammarMatcher.fromJson(e))
-              .toList(),
+    : patterns = (json['patterns'] as List<Object?>?)
+          ?.cast<Map<String, Object?>>()
+          .map((e) => GrammarMatcher.fromJson(e))
+          .toList(),
       super._();
 
   static bool isType(Map<String, Object?> json) {

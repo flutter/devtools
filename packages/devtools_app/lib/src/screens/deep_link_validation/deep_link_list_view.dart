@@ -37,9 +37,8 @@ class _DeepLinkListViewState extends State<DeepLinkListView> {
   @override
   void initState() {
     super.initState();
-    controller =
-        screenControllers.lookup<DeepLinksController>()
-          ..firstLoadWithDefaultConfigurations();
+    controller = screenControllers.lookup<DeepLinksController>()
+      ..firstLoadWithDefaultConfigurations();
   }
 
   @override
@@ -143,23 +142,22 @@ class _ValidatedDeepLinksView extends StatelessWidget {
               Expanded(
                 child: ValueListenableBuilder<LinkData?>(
                   valueListenable: controller.selectedLink,
-                  builder:
-                      (context, _, _) => TabBarView(
-                        children: [
-                          ValidationDetailView(
-                            controller: controller,
-                            viewType: TableViewType.domainView,
-                          ),
-                          ValidationDetailView(
-                            controller: controller,
-                            viewType: TableViewType.pathView,
-                          ),
-                          ValidationDetailView(
-                            controller: controller,
-                            viewType: TableViewType.singleUrlView,
-                          ),
-                        ],
+                  builder: (context, _, _) => TabBarView(
+                    children: [
+                      ValidationDetailView(
+                        controller: controller,
+                        viewType: TableViewType.domainView,
                       ),
+                      ValidationDetailView(
+                        controller: controller,
+                        viewType: TableViewType.pathView,
+                      ),
+                      ValidationDetailView(
+                        controller: controller,
+                        viewType: TableViewType.singleUrlView,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -268,12 +266,11 @@ class _DeepLinkListViewTopPanel extends StatelessWidget {
           _ConfigurationDropdown(
             title: 'iOS Configuration:',
             valueListenable: controller.selectedIosConfigurationIndex,
-            configurations:
-                controller
-                    .selectedProject
-                    .value!
-                    .iosBuildOptions
-                    .configurations,
+            configurations: controller
+                .selectedProject
+                .value!
+                .iosBuildOptions
+                .configurations,
             onChanged: controller.updateSelectedIosConfigurationIndex,
           ),
           const SizedBox(width: denseSpacing),
@@ -357,10 +354,9 @@ class _AllDeepLinkDataTable extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
                   child: SizedBox(
-                    width:
-                        controller.displayOptions.showSplitScreen
-                            ? _kSearchFieldSplitScreenWidth
-                            : _kSearchFieldFullWidth,
+                    width: controller.displayOptions.showSplitScreen
+                        ? _kSearchFieldSplitScreenWidth
+                        : _kSearchFieldFullWidth,
                     child: DevToolsClearableTextField(
                       labelText: '',
                       hintText: 'Search a URL, domain or path',
@@ -394,26 +390,25 @@ class _AllDeepLinkDataTable extends StatelessWidget {
         Expanded(
           child: ValueListenableBuilder<ValidatedLinkDatas>(
             valueListenable: controller.displayLinkDatasNotifier,
-            builder:
-                (context, linkDatas, _) => TabBarView(
-                  children: [
-                    _DataTable(
-                      viewType: TableViewType.domainView,
-                      linkDatas: linkDatas.byDomain,
-                      controller: controller,
-                    ),
-                    _DataTable(
-                      viewType: TableViewType.pathView,
-                      linkDatas: linkDatas.byPath,
-                      controller: controller,
-                    ),
-                    _DataTable(
-                      viewType: TableViewType.singleUrlView,
-                      linkDatas: linkDatas.all,
-                      controller: controller,
-                    ),
-                  ],
+            builder: (context, linkDatas, _) => TabBarView(
+              children: [
+                _DataTable(
+                  viewType: TableViewType.domainView,
+                  linkDatas: linkDatas.byDomain,
+                  controller: controller,
                 ),
+                _DataTable(
+                  viewType: TableViewType.pathView,
+                  linkDatas: linkDatas.byPath,
+                  controller: controller,
+                ),
+                _DataTable(
+                  viewType: TableViewType.singleUrlView,
+                  linkDatas: linkDatas.all,
+                  controller: controller,
+                ),
+              ],
+            ),
           ),
         ),
       ],

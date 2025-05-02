@@ -63,10 +63,9 @@ void main() {
   late final CpuSamples allocationTracingProfile;
 
   setUpAll(() {
-    final rawProfile =
-        File(
-          'test/test_infra/test_data/memory/allocation_tracing/allocation_trace.json',
-        ).readAsStringSync();
+    final rawProfile = File(
+      'test/test_infra/test_data/memory/allocation_tracing/allocation_trace.json',
+    ).readAsStringSync();
     allocationTracingProfile = CpuSamples.parse(jsonDecode(rawProfile))!;
   });
 

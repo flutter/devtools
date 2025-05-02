@@ -23,8 +23,12 @@ import '_memory_desktop.dart' if (dart.library.js_interop) '_memory_web.dart';
 /// `toBytes` - total memory usage after the reduction request is completed.
 /// `success` - whether the reduction in memory brought DevTools memory usage
 /// below the threshold [MemoryObserver._memoryPressureLimitGb].
-typedef ReduceMemoryResult =
-    ({bool success, int? fromBytes, int? toBytes, String? error});
+typedef ReduceMemoryResult = ({
+  bool success,
+  int? fromBytes,
+  int? toBytes,
+  String? error,
+});
 
 /// Observes the memory usage of the DevTools app (web only) and shows a memory
 /// pressure warning to users when DevTools is nearing the memory limit.
@@ -86,10 +90,9 @@ class MemoryObserver extends DisposableController {
   static Future<bool> _memoryExceedsThreshold({
     @visibleForTesting Future<int?> Function()? debugMeasureUsageInBytes,
   }) async {
-    final memoryUsageInBytes =
-        debugMeasureUsageInBytes != null
-            ? await debugMeasureUsageInBytes()
-            : await measureMemoryUsageInBytes();
+    final memoryUsageInBytes = debugMeasureUsageInBytes != null
+        ? await debugMeasureUsageInBytes()
+        : await measureMemoryUsageInBytes();
     _lastMemoryUsageInBytes = memoryUsageInBytes;
     if (memoryUsageInBytes == null) return false;
 
@@ -132,10 +135,9 @@ class MemoryObserver extends DisposableController {
       });
     }
 
-    final success =
-        !(await _memoryExceedsThreshold(
-          debugMeasureUsageInBytes: debugMeasureUsageInBytes,
-        ));
+    final success = !(await _memoryExceedsThreshold(
+      debugMeasureUsageInBytes: debugMeasureUsageInBytes,
+    ));
     final toBytes = _lastMemoryUsageInBytes;
     return (
       success: success,
@@ -186,12 +188,11 @@ class _MemoryPressureBannerMessage extends banner_messages.BannerWarning {
             ),
           ];
         },
-        buildActions:
-            (_) => [
-              // Wrapping with an `Expanded` is okay because this list is set as
-              // the `children` parameter of a `Row` widget in `BannerMessage`.
-              const Expanded(child: _ReduceMemoryButton()),
-            ],
+        buildActions: (_) => [
+          // Wrapping with an `Expanded` is okay because this list is set as
+          // the `children` parameter of a `Row` widget in `BannerMessage`.
+          const Expanded(child: _ReduceMemoryButton()),
+        ],
       );
 
   static const _messageKey = Key('MemoryPressureBannerMessage');
@@ -229,19 +230,18 @@ class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
         Flexible(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-            child:
-                inProgress
-                    ? SizedBox(
-                      height: actionsIconSize,
-                      width: actionsIconSize,
-                      child: const CircularProgressIndicator(),
-                    )
-                    : ValueListenableBuilder(
-                      valueListenable: result,
-                      builder: (context, result, _) {
-                        return _SuccessOrFailureMessage(result: result);
-                      },
-                    ),
+            child: inProgress
+                ? SizedBox(
+                    height: actionsIconSize,
+                    width: actionsIconSize,
+                    child: const CircularProgressIndicator(),
+                  )
+                : ValueListenableBuilder(
+                    valueListenable: result,
+                    builder: (context, result, _) {
+                      return _SuccessOrFailureMessage(result: result);
+                    },
+                  ),
           ),
         ),
       ],

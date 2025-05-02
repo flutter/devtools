@@ -13,8 +13,8 @@ import '../../../../../../shared/charts/chart_trace.dart'
 import '../../../../shared/primitives/memory_timeline.dart';
 import '../../data/charts.dart';
 
-// ignore: avoid_classes_with_only_static_members, enum-like classes are ok
-class _Colors {
+/// A namespace for VM memory chart color constants.
+extension _Colors on Never {
   static final capacity = Colors.grey[400]!;
   static const used = Color(0xff33b5e5);
   static const externals = Color(0xff4ddeff);

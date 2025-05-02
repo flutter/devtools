@@ -5,9 +5,8 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-// Enum-like static classes are ok.
-// ignore: avoid_classes_with_only_static_members
-class DiagnosticsTextStyles {
+/// A namespace for diagnostic text styles and utilities.
+extension DiagnosticsTextStyles on Never {
   static TextStyle unimportant(ColorScheme colorScheme) => TextStyle(
     color: colorScheme.isLight ? Colors.grey.shade500 : Colors.grey.shade600,
   );
@@ -20,8 +19,9 @@ class DiagnosticsTextStyles {
   );
 
   static TextStyle warning(ColorScheme colorScheme) => TextStyle(
-    color:
-        colorScheme.isLight ? Colors.orange.shade900 : Colors.orange.shade400,
+    color: colorScheme.isLight
+        ? Colors.orange.shade900
+        : Colors.orange.shade400,
   );
 
   static TextStyle error(ColorScheme colorScheme) =>

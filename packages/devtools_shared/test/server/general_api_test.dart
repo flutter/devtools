@@ -115,7 +115,7 @@ void main() {
           required Uri root,
           required bool connected,
         }) async {
-          await server.Handler.updateDtdWorkspaceRoots(
+          await server.VmServiceHandler.updateDtdWorkspaceRoots(
             testDtdConnection!,
             dtdConnectionInfo: dtd!.info!,
             rootFromVmService: root,
@@ -180,11 +180,11 @@ void main() {
         test('succeeds for a connect event', () async {
           final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
           expect(vmServiceUri, isNotNull);
-          final response = await server.Handler.detectRootPackageForVmService(
+          final response =
+              await server.VmServiceHandler.detectRootPackageForVmService(
             vmServiceUriAsString: vmServiceUriString!,
             vmServiceUri: vmServiceUri!,
             connected: true,
-            api: ServerApi(),
             dtd: testDtdConnection!,
           );
           expect(response.success, true);
@@ -194,11 +194,11 @@ void main() {
         });
 
         test('succeeds for a disconnect event when cache is empty', () async {
-          final response = await server.Handler.detectRootPackageForVmService(
+          final response =
+              await server.VmServiceHandler.detectRootPackageForVmService(
             vmServiceUriAsString: vmServiceUriString!,
             vmServiceUri: Uri.parse('ws://127.0.0.1:63555/fake-uri=/ws'),
             connected: false,
-            api: ServerApi(),
             dtd: testDtdConnection!,
           );
           expect(response, (success: true, message: null, uri: null));
@@ -209,11 +209,11 @@ void main() {
           () async {
             final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
             expect(vmServiceUri, isNotNull);
-            final response = await server.Handler.detectRootPackageForVmService(
+            final response =
+                await server.VmServiceHandler.detectRootPackageForVmService(
               vmServiceUriAsString: vmServiceUriString!,
               vmServiceUri: vmServiceUri!,
               connected: true,
-              api: ServerApi(),
               dtd: testDtdConnection!,
             );
             expect(response.success, true);
@@ -222,11 +222,10 @@ void main() {
             expect(response.uri!.toString(), endsWith(app!.directory.path));
 
             final disconnectResponse =
-                await server.Handler.detectRootPackageForVmService(
+                await server.VmServiceHandler.detectRootPackageForVmService(
               vmServiceUriAsString: vmServiceUriString!,
               vmServiceUri: vmServiceUri,
               connected: false,
-              api: ServerApi(),
               dtd: testDtdConnection!,
             );
             expect(disconnectResponse.success, true);

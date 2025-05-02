@@ -89,11 +89,10 @@ class MemoryChartPaneController extends DisposableController
     if (!isChartVisible.value) return;
     if (!offlineDataController.showingOfflineData.value) {
       if (_chartConnection == null) {
-        _chartConnection ??=
-            _chartConnection = ChartVmConnection(
-              data.timeline,
-              isAndroidChartVisible: isAndroidChartVisible,
-            );
+        _chartConnection ??= _chartConnection = ChartVmConnection(
+          data.timeline,
+          isAndroidChartVisible: isAndroidChartVisible,
+        );
         if (serviceConnection.serviceManager.connectedState.value.connected) {
           _chartConnection!.init();
           resume();

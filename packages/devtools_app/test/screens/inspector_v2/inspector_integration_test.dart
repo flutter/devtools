@@ -301,8 +301,9 @@ void main() {
     final diagnostics = state.controller.inspectorTree.rowsInTree.value.map(
       (row) => row!.node.diagnostic,
     );
-    final textDiagnostic =
-        diagnostics.firstWhere((d) => d?.description == 'Text')!;
+    final textDiagnostic = diagnostics.firstWhere(
+      (d) => d?.description == 'Text',
+    )!;
     expect(textDiagnostic.isCreatedByLocalProject, isTrue);
 
     // Toggle implementation widgets off.

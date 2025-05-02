@@ -43,19 +43,18 @@ final testClass = Class(
 );
 
 // We need to invoke `Script.parse` to build the internal token position table.
-final testScript =
-    Script.parse(
-      Script(
-        uri: 'fooScript.dart',
-        library: testLibRef,
-        id: '1234',
-        tokenPosTable: [
-          [10, 10, 1],
-          [20, 20, 1],
-          [30, 30, 1],
-        ],
-      ).toJson(),
-    )!;
+final testScript = Script.parse(
+  Script(
+    uri: 'fooScript.dart',
+    library: testLibRef,
+    id: '1234',
+    tokenPosTable: [
+      [10, 10, 1],
+      [20, 20, 1],
+      [30, 30, 1],
+    ],
+  ).toJson(),
+)!;
 
 final testFunction = Func(
   name: 'fooFunction',

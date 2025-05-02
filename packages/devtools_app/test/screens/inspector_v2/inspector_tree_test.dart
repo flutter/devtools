@@ -74,12 +74,11 @@ void main() {
     testWidgets('Row with negative index regression test', (
       WidgetTester tester,
     ) async {
-      final treeController =
-          InspectorTreeController()
-            ..config = InspectorTreeConfig(
-              onNodeAdded: (_, _) {},
-              onClientActiveChange: (_) {},
-            );
+      final treeController = InspectorTreeController()
+        ..config = InspectorTreeConfig(
+          onNodeAdded: (_, _) {},
+          onClientActiveChange: (_) {},
+        );
       await pumpInspectorTree(tester, treeController: treeController);
 
       expect(treeController.rowForOffset(const Offset(0, -100.0)), isNull);
@@ -88,8 +87,8 @@ void main() {
       expect(treeController.rowForOffset(const Offset(0, 0.0)), isNull);
       expect(treeController.rowOffset(0), equals(0));
 
-      treeController.root =
-          InspectorTreeNode()..appendChild(InspectorTreeNode());
+      treeController.root = InspectorTreeNode()
+        ..appendChild(InspectorTreeNode());
 
       await pumpInspectorTree(tester, treeController: treeController);
 
@@ -120,7 +119,12 @@ void main() {
     testWidgets('Shows preview from Text.rich', (WidgetTester tester) async {
       final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
         widget: const Text.rich(
-          TextSpan(children: [TextSpan(text: 'Rich '), TextSpan(text: 'text')]),
+          TextSpan(
+            children: [
+              TextSpan(text: 'Rich '),
+              TextSpan(text: 'text'),
+            ],
+          ),
         ),
         tester: tester,
       );

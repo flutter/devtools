@@ -178,7 +178,11 @@ class _FrameBlockGroup extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [Text(title), const SizedBox(height: denseSpacing), content],
+      children: [
+        Text(title),
+        const SizedBox(height: denseSpacing),
+        content,
+      ],
     );
   }
 
@@ -191,12 +195,9 @@ class _FrameBlockGroup extends StatelessWidget {
     BoxConstraints constraints,
     int totalFlex,
   ) {
-    final unadjustedBlockWidths =
-        data
-            .map(
-              (blockData) => constraints.maxWidth * blockData.flex / totalFlex,
-            )
-            .toList();
+    final unadjustedBlockWidths = data
+        .map((blockData) => constraints.maxWidth * blockData.flex / totalFlex)
+        .toList();
 
     var adjustment = 0.0;
     var widestBlockIndex = 0;
@@ -211,13 +212,11 @@ class _FrameBlockGroup extends StatelessWidget {
       }
     }
 
-    final adjustedBlockWidths =
-        unadjustedBlockWidths
-            .map(
-              (blockWidth) =>
-                  math.max(blockWidth, _FramePhaseBlock.minBlockWidth),
-            )
-            .toList();
+    final adjustedBlockWidths = unadjustedBlockWidths
+        .map(
+          (blockWidth) => math.max(blockWidth, _FramePhaseBlock.minBlockWidth),
+        )
+        .toList();
     final widest = adjustedBlockWidths[widestBlockIndex];
     adjustedBlockWidths[widestBlockIndex] = math.max(
       widest - adjustment,
@@ -303,14 +302,13 @@ class _FramePhaseBlockData {
   final IconData icon;
 
   String get display {
-    final text =
-        duration != Duration.zero
-            ? durationText(
-              duration,
-              unit: DurationDisplayUnit.milliseconds,
-              allowRoundingToZero: false,
-            )
-            : '--';
+    final text = duration != Duration.zero
+        ? durationText(
+            duration,
+            unit: DurationDisplayUnit.milliseconds,
+            allowRoundingToZero: false,
+          )
+        : '--';
     return '$title - $text';
   }
 }

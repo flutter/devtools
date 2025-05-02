@@ -10,16 +10,11 @@ import '../devtools_recorder.dart';
 typedef RecorderFactory = Recorder Function();
 
 final benchmarks = <String, RecorderFactory>{
-  DevToolsBenchmark.navigateThroughOfflineScreens.id:
-      () => DevToolsRecorder(
-        benchmark: DevToolsBenchmark.navigateThroughOfflineScreens,
-      ),
-  DevToolsBenchmark.offlineCpuProfilerScreen.id:
-      () => DevToolsRecorder(
-        benchmark: DevToolsBenchmark.offlineCpuProfilerScreen,
-      ),
-  DevToolsBenchmark.offlinePerformanceScreen.id:
-      () => DevToolsRecorder(
-        benchmark: DevToolsBenchmark.offlinePerformanceScreen,
-      ),
+  DevToolsBenchmark.navigateThroughOfflineScreens.id: () => DevToolsRecorder(
+    benchmark: DevToolsBenchmark.navigateThroughOfflineScreens,
+  ),
+  DevToolsBenchmark.offlineCpuProfilerScreen.id: () =>
+      DevToolsRecorder(benchmark: DevToolsBenchmark.offlineCpuProfilerScreen),
+  DevToolsBenchmark.offlinePerformanceScreen.id: () =>
+      DevToolsRecorder(benchmark: DevToolsBenchmark.offlinePerformanceScreen),
 };

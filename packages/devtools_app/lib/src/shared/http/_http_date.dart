@@ -14,10 +14,8 @@
 
 part of 'http.dart';
 
-// TODO(jacobr): cleanup this class with only static members.
-// ignore: avoid_classes_with_only_static_members
-/// Utility functions for working with dates with HTTP specific date formats.
-class HttpDate {
+/// A namespace for HTTP date utilities.
+extension HttpDate on Never {
   // Parse a cookie date string.
   static DateTime _parseCookieDate(String date) {
     const monthsLowerCase = const <String>[

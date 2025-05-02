@@ -67,8 +67,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       (tracesCount * hoverItemHeight) +
       (extensionEventsCount > 0
           ? (extensionEventsCount == 1
-              ? _hoverOneEventsHeight
-              : _hoverEventsHeight)
+                ? _hoverOneEventsHeight
+                : _hoverEventsHeight)
           : 0);
 
   static int get _timestamp => DateTime.now().millisecondsSinceEpoch;
@@ -272,12 +272,11 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     double totalHoverHeight;
     int totalTraces;
-    totalTraces =
-        widget.chart.isAndroidChartVisible.value
-            ? chartsValues.vmData.entries.length -
-                1 +
-                chartsValues.androidData.entries.length
-            : chartsValues.vmData.entries.length - 1;
+    totalTraces = widget.chart.isAndroidChartVisible.value
+        ? chartsValues.vmData.entries.length -
+              1 +
+              chartsValues.androidData.entries.length
+        : chartsValues.vmData.entries.length - 1;
 
     totalHoverHeight = _computeHoverHeight(
       chartsValues.eventCount,
@@ -289,41 +288,37 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     final overlayState = Overlay.of(context);
     _hoverOverlayEntry ??= OverlayEntry(
-      builder:
-          (context) => Positioned(
-            top: position.dy + _hoverYOffset,
-            left: xPosition,
-            height: totalHoverHeight,
-            child: Container(
-              padding: const EdgeInsets.only(top: 5, bottom: 8),
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                border: Border.all(
-                  color: focusColor,
-                  width: _hoverCardBorderWidth,
-                ),
-                borderRadius: defaultBorderRadius,
-              ),
-              width: _hoverWidth,
-              child: ListView(
-                children: [
-                  Container(
-                    width: _hoverWidth,
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Text(
-                      'Time $displayTimestamp',
-                      style: theme.legendTextStyle,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  ..._displayEventsInHover(chartsValues),
-                  ..._displayVmDataInHover(chartsValues),
-                  ..._displayAndroidDataInHover(chartsValues),
-                  ..._displayExtensionEventsInHover(chartsValues),
-                ],
-              ),
-            ),
+      builder: (context) => Positioned(
+        top: position.dy + _hoverYOffset,
+        left: xPosition,
+        height: totalHoverHeight,
+        child: Container(
+          padding: const EdgeInsets.only(top: 5, bottom: 8),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border.all(color: focusColor, width: _hoverCardBorderWidth),
+            borderRadius: defaultBorderRadius,
           ),
+          width: _hoverWidth,
+          child: ListView(
+            children: [
+              Container(
+                width: _hoverWidth,
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  'Time $displayTimestamp',
+                  style: theme.legendTextStyle,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              ..._displayEventsInHover(chartsValues),
+              ..._displayVmDataInHover(chartsValues),
+              ..._displayAndroidDataInHover(chartsValues),
+              ..._displayExtensionEventsInHover(chartsValues),
+            ],
+          ),
+        ),
+      ),
     );
 
     overlayState.insert(_hoverOverlayEntry!);
@@ -339,14 +334,15 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     for (final entry in dataToDisplay.entries) {
       final keys = entry.value.keys;
-      final image =
-          keys.contains(renderImage)
-              ? entry.value[renderImage] as String?
-              : null;
-      final color =
-          keys.contains(renderLine) ? entry.value[renderLine] as Color? : null;
-      final dashedLine =
-          keys.contains(renderDashed) ? entry.value[renderDashed] : false;
+      final image = keys.contains(renderImage)
+          ? entry.value[renderImage] as String?
+          : null;
+      final color = keys.contains(renderLine)
+          ? entry.value[renderLine] as Color?
+          : null;
+      final dashedLine = keys.contains(renderDashed)
+          ? entry.value[renderDashed]
+          : false;
 
       results.add(
         _hoverRow(
@@ -398,15 +394,15 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       // Logic would be hard to read as a conditional expression.
       // ignore: prefer-conditional-expression
       if (colorPatch != null) {
-        traceColor =
-            dashed ? createDashWidget(colorPatch) : createSolidLine(colorPatch);
+        traceColor = dashed
+            ? createDashWidget(colorPatch)
+            : createSolidLine(colorPatch);
       } else {
-        traceColor =
-            image == null
-                ? const SizedBox()
-                : scaleImage
-                ? Image(image: AssetImage(image), width: 20, height: 10)
-                : Image(image: AssetImage(image));
+        traceColor = image == null
+            ? const SizedBox()
+            : scaleImage
+            ? Image(image: AssetImage(image), width: 20, height: 10)
+            : Image(image: AssetImage(image));
       }
 
       return [

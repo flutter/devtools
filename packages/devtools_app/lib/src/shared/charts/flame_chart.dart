@@ -159,13 +159,12 @@ abstract class FlameChartState<
 
   TimeRange get visibleTimeRange {
     final horizontalScrollOffset = horizontalControllerGroup.offset;
-    final startMicros =
-        horizontalScrollOffset < widget.startInset
-            ? startTimeOffset
-            : startTimeOffset +
-                (horizontalScrollOffset - widget.startInset) /
-                    currentZoom /
-                    startingPxPerMicro;
+    final startMicros = horizontalScrollOffset < widget.startInset
+        ? startTimeOffset
+        : startTimeOffset +
+              (horizontalScrollOffset - widget.startInset) /
+                  currentZoom /
+                  startingPxPerMicro;
 
     final endMicros =
         startTimeOffset +
@@ -236,9 +235,8 @@ abstract class FlameChartState<
     )..addListener(_handleZoomControllerValueUpdate);
 
     verticalExtentDelegate = FixedExtentDelegate(
-      computeExtent:
-          (index) =>
-              rows[index].nodes.isEmpty ? sectionSpacing : rowHeightWithPadding,
+      computeExtent: (index) =>
+          rows[index].nodes.isEmpty ? sectionSpacing : rowHeightWithPadding,
       computeLength: () => rows.length,
     );
 
@@ -396,11 +394,10 @@ abstract class FlameChartState<
       return;
     }
 
-    final hoverNodeData =
-        _binarySearchForNode(
-          x: event.localPosition.dx + horizontalControllerGroup.offset,
-          nodesInRow: nodes,
-        )?.data;
+    final hoverNodeData = _binarySearchForNode(
+      x: event.localPosition.dx + horizontalControllerGroup.offset,
+      nodesInRow: nodes,
+    )?.data;
     _hoveredNodeNotifier.value = hoverNodeData;
   }
 
@@ -506,13 +503,10 @@ abstract class FlameChartState<
     final fixedX = safeMouseHoverX + lastScrollOffset - widget.startInset;
 
     // Calculate the new horizontal scroll position.
-    final newScrollOffset =
-        fixedX >= 0
-            ? fixedX * newZoom / previousZoom +
-                widget.startInset -
-                safeMouseHoverX
-            // We are in the fixed portion of the window - no need to transform.
-            : lastScrollOffset;
+    final newScrollOffset = fixedX >= 0
+        ? fixedX * newZoom / previousZoom + widget.startInset - safeMouseHoverX
+        // We are in the fixed portion of the window - no need to transform.
+        : lastScrollOffset;
 
     setState(() {
       currentZoom = zoomController.value;
@@ -895,9 +889,8 @@ extension NodeListExtension on List<FlameChartNode> {
   }
 }
 
-// TODO(jacobr): cleanup up this util class with just static members.
-// ignore: avoid_classes_with_only_static_members
-class FlameChartUtils {
+/// A namespace for flame chart utilities.
+extension FlameChartUtils on Never {
   static double leftPaddingForNode(
     int index,
     List<FlameChartNode> nodes, {
@@ -940,12 +933,11 @@ class FlameChartUtils {
     // Node right with zoom and insets taken into consideration.
     final nodeRight =
         (node.rect.right - chartStartInset) * nodeZoom + chartStartInset;
-    final padding =
-        nextNode == null
-            ? chartWidth - nodeRight
-            : ((nextNode.rect.left - chartStartInset) * nextNodeZoom +
-                    chartStartInset) -
-                nodeRight;
+    final padding = nextNode == null
+        ? chartWidth - nodeRight
+        : ((nextNode.rect.left - chartStartInset) * nextNodeZoom +
+                  chartStartInset) -
+              nodeRight;
     // Floating point rounding error can result in slightly negative padding.
     return math.max(0.0, padding);
   }
@@ -1090,22 +1082,21 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
         activeSearchMatch: activeSearchMatch,
         colorScheme: theme.colorScheme,
       ),
-      child:
-          zoomedWidth >= _minWidthForText
-              ? Text(
-                text,
-                textAlign: TextAlign.left,
-                overflow: TextOverflow.ellipsis,
-                style: theme.regularTextStyleWithColor(
-                  _textColor(
-                    selected: selected,
-                    searchMatch: searchMatch,
-                    activeSearchMatch: activeSearchMatch,
-                    colorScheme: theme.colorScheme,
-                  ),
+      child: zoomedWidth >= _minWidthForText
+          ? Text(
+              text,
+              textAlign: TextAlign.left,
+              overflow: TextOverflow.ellipsis,
+              style: theme.regularTextStyleWithColor(
+                _textColor(
+                  selected: selected,
+                  searchMatch: searchMatch,
+                  activeSearchMatch: activeSearchMatch,
+                  colorScheme: theme.colorScheme,
                 ),
-              )
-              : const SizedBox(),
+              ),
+            )
+          : const SizedBox(),
     );
     return (hovered || !selectable)
         ? DevToolsTooltip(key: key, message: data.tooltip, child: node)
@@ -1346,11 +1337,9 @@ class TimelineGridPainter extends FlameChartPainter {
     final microsPerInterval = _microsPerInterval(intervalWidth);
     int timestampMicros = _startingTimestamp(intervalWidth, microsPerInterval);
     double lineX;
-    lineX =
-        visible.left <= chartStartInset
-            ? chartStartInset - visible.left
-            : intervalWidth -
-                ((visible.left - chartStartInset) % intervalWidth);
+    lineX = visible.left <= chartStartInset
+        ? chartStartInset - visible.left
+        : intervalWidth - ((visible.left - chartStartInset) % intervalWidth);
 
     while (lineX < constraints.maxWidth) {
       _paintTimestamp(canvas, timestampMicros, intervalWidth, lineX);
@@ -1422,10 +1411,9 @@ class TimelineGridPainter extends FlameChartPainter {
   }
 
   int _startingTimestamp(double intervalWidth, int microsPerInterval) {
-    final startingIntervalIndex =
-        horizontalScrollOffset < chartStartInset
-            ? 0
-            : (horizontalScrollOffset - chartStartInset) ~/ intervalWidth + 1;
+    final startingIntervalIndex = horizontalScrollOffset < chartStartInset
+        ? 0
+        : (horizontalScrollOffset - chartStartInset) ~/ intervalWidth + 1;
     return startingIntervalIndex * microsPerInterval;
   }
 

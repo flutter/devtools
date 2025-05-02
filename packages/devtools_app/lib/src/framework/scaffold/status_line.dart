@@ -48,10 +48,12 @@ class StatusLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final backgroundColor =
-        highlightForConnection ? theme.colorScheme.primary : null;
-    final foregroundColor =
-        highlightForConnection ? theme.colorScheme.onPrimary : null;
+    final backgroundColor = highlightForConnection
+        ? theme.colorScheme.primary
+        : null;
+    final foregroundColor = highlightForConnection
+        ? theme.colorScheme.onPrimary
+        : null;
     final height = statusLineHeight + padding.top + padding.bottom;
     return ValueListenableBuilder<bool>(
       valueListenable: currentScreen.showIsolateSelector,
@@ -81,8 +83,9 @@ class StatusLine extends StatelessWidget {
 
   List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
     final theme = Theme.of(context);
-    final foregroundColor =
-        highlightForConnection ? theme.colorScheme.onPrimary : null;
+    final foregroundColor = highlightForConnection
+        ? theme.colorScheme.onPrimary
+        : null;
     final screenWidth = ScreenSize(context).width;
     // TODO(https://github.com/flutter/devtools/issues/8913): this builds the
     // wrong status items for offline mode.
@@ -146,10 +149,9 @@ class StatusLine extends StatelessWidget {
             description = vm.deviceDisplay;
           }
 
-          final color =
-              highlightForConnection
-                  ? theme.colorScheme.onPrimary
-                  : theme.regularTextStyle.color;
+          final color = highlightForConnection
+              ? theme.colorScheme.onPrimary
+              : theme.regularTextStyle.color;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -160,12 +162,11 @@ class StatusLine extends StatelessWidget {
                   return SizedBox(
                     width: smallProgressSize,
                     height: smallProgressSize,
-                    child:
-                        isBusy
-                            ? SmallCircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color?>(color),
-                            )
-                            : const SizedBox(),
+                    child: isBusy
+                        ? SmallCircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color?>(color),
+                          )
+                        : const SizedBox(),
                   );
                 },
               ),
@@ -174,12 +175,11 @@ class StatusLine extends StatelessWidget {
                 message: 'Connected device',
                 child: Text(
                   description,
-                  style:
-                      highlightForConnection
-                          ? theme.regularTextStyle.copyWith(
-                            color: theme.colorScheme.onPrimary,
-                          )
-                          : theme.regularTextStyle,
+                  style: highlightForConnection
+                      ? theme.regularTextStyle.copyWith(
+                          color: theme.colorScheme.onPrimary,
+                        )
+                      : theme.regularTextStyle,
                   overflow: TextOverflow.clip,
                 ),
               ),
@@ -189,13 +189,12 @@ class StatusLine extends StatelessWidget {
           return child!;
         }
       },
-      child:
-          screenWidth <= MediaSize.xxs
-              ? DevToolsTooltip(
-                message: noConnectionMsg,
-                child: Icon(Icons.warning_amber_rounded, size: actionsIconSize),
-              )
-              : Text(noConnectionMsg, style: theme.regularTextStyle),
+      child: screenWidth <= MediaSize.xxs
+          ? DevToolsTooltip(
+              message: noConnectionMsg,
+              child: Icon(Icons.warning_amber_rounded, size: actionsIconSize),
+            )
+          : Text(noConnectionMsg, style: theme.regularTextStyle),
     );
   }
 }
@@ -218,8 +217,9 @@ class DocumentationLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        highlightForConnection ? Theme.of(context).colorScheme.onPrimary : null;
+    final color = highlightForConnection
+        ? Theme.of(context).colorScheme.onPrimary
+        : null;
     final docPageId = screen.docPageId ?? '';
     return LinkIconLabel(
       icon: Icons.library_books_outlined,
@@ -256,8 +256,9 @@ class VideoTutorialLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        highlightForConnection ? Theme.of(context).colorScheme.onPrimary : null;
+    final color = highlightForConnection
+        ? Theme.of(context).colorScheme.onPrimary
+        : null;
     return LinkIconLabel(
       icon: Icons.ondemand_video_rounded,
       link: GaLink(
@@ -290,19 +291,17 @@ class IsolateSelector extends StatelessWidget {
           tooltip: 'Selected Isolate',
           initialValue: selectedIsolateRef,
           onSelected: isolateManager.selectIsolate,
-          itemBuilder:
-              (BuildContext context) =>
-                  isolates.map((ref) {
-                    return PopupMenuItem<IsolateRef>(
-                      value: ref,
-                      child: _IsolateOption(
-                        ref,
-                        // This is always rendered against the background color
-                        // for the pop up menu, which is the `surface` color.
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    );
-                  }).toList(),
+          itemBuilder: (BuildContext context) => isolates.map((ref) {
+            return PopupMenuItem<IsolateRef>(
+              value: ref,
+              child: _IsolateOption(
+                ref,
+                // This is always rendered against the background color
+                // for the pop up menu, which is the `surface` color.
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            );
+          }).toList(),
           child: _IsolateOption(
             isolateManager.selectedIsolate.value,
             color: foregroundColor,

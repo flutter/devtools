@@ -9,6 +9,7 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_registrations.dart' as registrations;
@@ -83,8 +84,8 @@ class PerformanceController extends DevToolsScreenController
   /// any selection modifications that occur while the data is displayed.
   OfflinePerformanceData? offlinePerformanceData;
 
-  bool get impellerEnabled => _impellerEnabled;
-  bool _impellerEnabled = false;
+  ValueListenable<bool> get impellerEnabled => _impellerEnabled;
+  final _impellerEnabled = ValueNotifier<bool>(false);
 
   Future<void> get initialized => _initialized.future;
   final _initialized = Completer<void>();
@@ -124,11 +125,19 @@ class PerformanceController extends DevToolsScreenController
 
       if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
           false) {
-        final impellerEnabledResponse = await serviceConnection.serviceManager
-            .callServiceExtensionOnMainIsolate(registrations.isImpellerEnabled);
-        _impellerEnabled = impellerEnabledResponse.json?['enabled'] == true;
+        // Do not await this future because this will hang if the app is paused
+        // upon connection.
+        unawaited(
+          serviceConnection.serviceManager
+              .callServiceExtensionOnMainIsolate(
+                registrations.isImpellerEnabled,
+              )
+              .then((response) {
+                _impellerEnabled.value = response.json?['enabled'] == true;
+              }),
+        );
       } else {
-        _impellerEnabled = false;
+        _impellerEnabled.value = false;
       }
 
       enhanceTracingController.init();
@@ -264,20 +273,20 @@ class PerformanceController extends DevToolsScreenController
     _applyToFeatureControllers((c) => c.dispose());
     enhanceTracingController.dispose();
     rebuildCountModel.dispose();
+    _impellerEnabled.dispose();
     super.dispose();
   }
 
   @override
   OfflineScreenData prepareOfflineScreenData() => OfflineScreenData(
     screenId: PerformanceScreen.id,
-    data:
-        OfflinePerformanceData(
-          perfettoTraceBinary: timelineEventsController.fullPerfettoTrace,
-          frames: flutterFramesController.flutterFrames.value,
-          selectedFrame: flutterFramesController.selectedFrame.value,
-          rebuildCountModel: rebuildCountModel,
-          displayRefreshRate: flutterFramesController.displayRefreshRate.value,
-        ).toJson(),
+    data: OfflinePerformanceData(
+      perfettoTraceBinary: timelineEventsController.fullPerfettoTrace,
+      frames: flutterFramesController.flutterFrames.value,
+      selectedFrame: flutterFramesController.selectedFrame.value,
+      rebuildCountModel: rebuildCountModel,
+      displayRefreshRate: flutterFramesController.displayRefreshRate.value,
+    ).toJson(),
   );
 
   @override

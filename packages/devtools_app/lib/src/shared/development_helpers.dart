@@ -66,8 +66,9 @@ ExtensionEnabledState debugHandleExtensionEnabledState({
   bool? enable,
 }) {
   if (enable != null) {
-    stubExtensionEnabledStates[extensionName] =
-        enable ? ExtensionEnabledState.enabled : ExtensionEnabledState.disabled;
+    stubExtensionEnabledStates[extensionName] = enable
+        ? ExtensionEnabledState.enabled
+        : ExtensionEnabledState.disabled;
   }
   return stubExtensionEnabledStates.putIfAbsent(
     extensionName,
@@ -83,8 +84,10 @@ void resetDevToolsExtensionEnabledStates() =>
 /// server connection.
 final stubExtensionEnabledStates = <String, ExtensionEnabledState>{};
 
-// ignore: avoid_classes_with_only_static_members, useful for testing.
-abstract class StubDevToolsExtensions {
+/// A namespace for stubbed DevTools extensions.
+///
+/// These are useful for testing and local development.
+extension StubDevToolsExtensions on Never {
   /// Extension for package:foo detected from a running app that requires a
   /// connected app.
   static final fooExtension = DevToolsExtensionConfig.parse({

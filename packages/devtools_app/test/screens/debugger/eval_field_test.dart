@@ -155,9 +155,8 @@ void main() {
           final objects = await _setupEvalFieldObjects(tester);
 
           await tester.enterText(objects.textField, 'someValue.');
-          objects
-              .searchTextEditingController
-              .selection = const TextSelection.collapsed(offset: 0);
+          objects.searchTextEditingController.selection =
+              const TextSelection.collapsed(offset: 0);
           await tester.pumpAndSettle();
 
           expect(objects.searchTextEditingController.text, 'someValue.');
