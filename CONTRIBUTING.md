@@ -41,7 +41,7 @@ You can do this online, and it only takes a minute.
 2. [Running and debugging DevTools](#running-and-debugging-devtools)
     - [Frontend only (most common)](#frontend-only-most-common)
     - [Frontend + DevTools server](#frontend--devtools-server)
-    - [DevTools + VS Code integration](#devtools--vs-code-integration-ide-embedded-devtools-experience)
+    - [DevTools + VS Code integration](#ide-embedded-devtools-experience)
 3. [Testing for DevTools](#testing-for-devtools)
 4. [Appendix](#appendix)
 
