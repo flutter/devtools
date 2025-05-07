@@ -225,9 +225,9 @@ command palette (`F1`)) and add the following to your settings:
 
 ```js
 "dart.customDevTools": {
-	"path": "/absolute/path/to/devtools",
+	"path": "/absolute/path/to/devtools/repo",
 	"env": {
-		"LOCAL_DART_SDK": "/absolute/path/to/sdk"
+		"LOCAL_DART_SDK": "/absolute/path/to/sdk",
 		// Path to the Flutter SDK that will be used to build DevTools. This may
 		// be the path to the included Flutter SDK under the tool/ directory or
 		// the path to your local Flutter SDK git checkout.
