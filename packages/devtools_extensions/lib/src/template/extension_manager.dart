@@ -19,6 +19,12 @@ class ExtensionManager {
   /// notifications from this notifier.
   final darkThemeEnabled = ValueNotifier<bool>(useDarkThemeAsDefault);
 
+  /// The [IdeTheme] which has been parsed from the query parameters.
+  ///
+  /// Ultimately, the theme is fetched from [globals], but this [ValueNotifier]
+  /// notifies listeners when it changes.
+  final theme = ValueNotifier<IdeTheme?>(null);
+
   /// Registers an event handler for [DevToolsExtensionEvent]s of type [type].
   ///
   /// When an event of type [type] is received by the extension, [handler] will
@@ -50,7 +56,9 @@ class ExtensionManager {
       _handleMessageListener = _handleMessage.toJS,
     );
 
-    // TODO(kenz): handle the ide theme that may be part of the query params.
+    setGlobal(IdeTheme, getIdeTheme());
+    theme.value = ideTheme;
+
     final queryParams = loadQueryParams();
     final themeValue = queryParams[ExtensionEventParameters.theme];
     _setThemeForValue(themeValue);
