@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app/src/shared/memory/heap_graph_loader.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -55,7 +57,7 @@ class HeapGraphLoaderGoldens implements HeapGraphLoader {
   }
 }
 
-typedef HeapProvider = Future<HeapSnapshotGraph> Function();
+typedef HeapProvider = FutureOr<HeapSnapshotGraph> Function();
 
 /// Provides test snapshots, provided in constructor.
 class HeapGraphLoaderProvided implements HeapGraphLoader {

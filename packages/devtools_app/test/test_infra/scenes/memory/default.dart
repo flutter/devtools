@@ -33,7 +33,7 @@ extension MemoryDefaultSceneHeaps on Never {
   ///
   /// If sorted by retaining path this class will be the second from the top.
   /// It is needed to measure if selection of this class will cause UI to jank.
-  static Future<HeapSnapshotGraph> manyPaths() async {
+  static HeapSnapshotGraph manyPaths() {
     const pathLen = 100;
     const pathCount = 100;
     final result = FakeHeapSnapshotGraph();
