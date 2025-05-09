@@ -19,8 +19,7 @@ import 'package:mockito/mockito.dart';
 import '../../test_infra/utils/deep_links_utils.dart';
 
 void main() {
-  // ignore: avoid-redundant-async, false positive.
-  setUp(() async {
+  setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(
       DevToolsEnvironmentParameters,

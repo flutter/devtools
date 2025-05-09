@@ -65,7 +65,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   @override
-  void didChangeDependencies() async {
+  void didChangeDependencies() {
     super.didChangeDependencies();
 
     if (serviceConnection.inspectorService == null) {

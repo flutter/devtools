@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
+
 import 'package:web/web.dart';
 
 import '../../globals.dart';
@@ -51,7 +52,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     dragLeave();
   }
 
-  void _onDrop(MouseEvent event) async {
+  void _onDrop(MouseEvent event) {
     drop();
 
     // Stop the browser from redirecting.

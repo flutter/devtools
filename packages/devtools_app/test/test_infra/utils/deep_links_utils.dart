@@ -83,7 +83,7 @@ class TestDeepLinksController extends DeepLinksController {
   }
 
   @override
-  void selectLink(LinkData linkdata) async {
+  void selectLink(LinkData linkdata) {
     selectedLink.value = linkdata;
     if (linkdata.domainErrors.isNotEmpty) {
       generatedAssetLinksForSelectedLink.value = GenerateAssetLinksResult(

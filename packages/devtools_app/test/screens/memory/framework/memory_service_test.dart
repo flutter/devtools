@@ -27,7 +27,7 @@ void main() {
       const FlutterRunConfiguration(withDebugger: true),
     );
 
-    env.afterNewSetup = () async {
+    env.afterNewSetup = () {
       memoryController = MemoryController();
     };
   }
