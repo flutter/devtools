@@ -127,6 +127,7 @@ linter:
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     - unawaited_futures
+    - unnecessary_async
     - unnecessary_brace_in_string_interps
     - unnecessary_const
     - unnecessary_getters_setters

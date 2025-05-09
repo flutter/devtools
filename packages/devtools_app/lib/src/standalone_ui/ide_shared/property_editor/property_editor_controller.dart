@@ -89,7 +89,7 @@ class PropertyEditorController extends DisposableController
 
     // Update in response to ActiveLocationChanged events.
     autoDisposeStreamSubscription(
-      editorClient.activeLocationChangedStream.listen((event) async {
+      editorClient.activeLocationChangedStream.listen((event) {
         if (_waitingForFirstEvent) _waitingForFirstEvent = false;
         final textDocument = event.textDocument;
         final cursorPosition = event.selections.first.active;

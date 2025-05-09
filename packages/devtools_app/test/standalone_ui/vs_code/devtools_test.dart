@@ -30,8 +30,7 @@ void main() {
     setTestMode();
   });
 
-  // ignore: avoid-redundant-async, false positive.
-  setUp(() async {
+  setUp(() {
     mockEditorClient = MockEditorClient();
     when(mockEditorClient.supportsGetDevices).thenReturn(true);
     when(mockEditorClient.supportsSelectDevice).thenReturn(true);

@@ -36,8 +36,7 @@ final mockProjectRootUris =
         .toList();
 
 void main() {
-  // ignore: avoid-redundant-async, false positive.
-  setUp(() async {
+  setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(
       DevToolsEnvironmentParameters,

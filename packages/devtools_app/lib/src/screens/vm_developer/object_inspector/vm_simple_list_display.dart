@@ -49,7 +49,7 @@ class _VmSimpleListDisplayState extends State<VmSimpleListDisplay> {
     _initialize();
   }
 
-  void _initialize() async {
+  void _initialize() {
     entries.clear();
     final elementsInstance = widget.vmObject.elementsAsInstance;
     if (elementsInstance != null) {
