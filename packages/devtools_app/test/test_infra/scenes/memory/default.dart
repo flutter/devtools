@@ -58,7 +58,7 @@ extension MemoryDefaultSceneHeaps on Never {
           ]
           .map(
             (e) =>
-                () async => FakeHeapSnapshotGraph()..addClassInstances(e),
+                () => FakeHeapSnapshotGraph()..addClassInstances(e),
           )
           .toList();
 

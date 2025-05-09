@@ -45,7 +45,7 @@ class DevToolsRouteInformationParser
   @override
   Future<DevToolsRouteConfiguration> parseRouteInformation(
     RouteInformation routeInformation,
-  ) async {
+  ) {
     var uri = routeInformation.uri;
     if (_testQueryParams != null) {
       uri = uri.replace(queryParameters: _testQueryParams.params);

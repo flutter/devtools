@@ -34,7 +34,7 @@ class MockedHeapTest extends HeapTest {
   MockedHeapTest({required super.appClassName});
 
   @override
-  Future<HeapSnapshotGraph> loadHeap() async {
+  Future<HeapSnapshotGraph> loadHeap() {
     throw UnimplementedError();
   }
 }
