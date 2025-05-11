@@ -156,6 +156,7 @@ class _DevToolsExtensionState extends State<DevToolsExtension>
     }
 
     addAutoDisposeListener(extensionManager.darkThemeEnabled);
+    addAutoDisposeListener(extensionManager.theme);
   }
 
   void _initGlobals() {
