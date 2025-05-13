@@ -47,18 +47,33 @@ final _log = Logger('devtools_server_client');
 bool get isDevToolsServerAvailable =>
     kIsWeb && storage is ServerConnectionStorage;
 
-const _debugDevToolsServerFlag = 'debug_devtools_server';
+const _debugDevToolsServerEnvironmentVariable = String.fromEnvironment(
+  'debug_devtools_server',
+);
+
+/// Whether DevTools was run using the `dt run` command, which runs DevTools in
+/// debug mode using `flutter run` and connects it to an instance of the
+/// DevTools server.
+bool get usingDebugDevToolsServer =>
+    _debugDevToolsServerEnvironmentVariable.isNotEmpty && !kReleaseMode;
 
 String get devToolsServerUriAsString {
-  const debugDevToolsServerUriAsString = String.fromEnvironment(
-    _debugDevToolsServerFlag,
-  );
   // Ensure we only use the debug DevTools server URI in non-release
   // builds. By running `dt run`, an instance of DevTools run with `flutter run`
   // can be connected to the DevTools server on a different port.
-  return debugDevToolsServerUriAsString.isNotEmpty && !kReleaseMode
-      ? debugDevToolsServerUriAsString
+  return usingDebugDevToolsServer
+      ? _debugDevToolsServerEnvironmentVariable
       : Uri.base.toString();
+}
+
+/// Helper to build a request URI to the DevTools server, which may not be on
+/// the same origin as the DevTools app window.
+Uri buildDevToolsServerRequestUri(String url) {
+  // [_debugDevToolsServerEnvironmentVariable] will be the empty string if the
+  // [_debugDevToolsServerFlag] environment variable declaration was not set
+  // using `--dart-define`.
+  const baseUri = _debugDevToolsServerEnvironmentVariable;
+  return Uri.parse(path.join(baseUri, url));
 }
 
 /// Helper to catch any server request which could fail.
@@ -68,10 +83,7 @@ Future<Response?> request(String url) async {
   Response? response;
 
   try {
-    // This will be the empty string if this environment declaration was not
-    // set using `--dart-define`.
-    const baseUri = String.fromEnvironment(_debugDevToolsServerFlag);
-    response = await post(Uri.parse(path.join(baseUri, url)));
+    response = await post(buildDevToolsServerRequestUri(url));
   } catch (_) {}
 
   return response;

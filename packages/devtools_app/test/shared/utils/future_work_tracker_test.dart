@@ -75,7 +75,7 @@ void main() {
 
     test('tracks failed work', () {
       _wrapAndRunAsync((async) async {
-        await runZonedGuarded(
+        runZonedGuarded(
           () {
             final tracker = FutureWorkTracker();
             expect(tracker.active.value, isFalse);

@@ -20,6 +20,7 @@ import '../diagnostics/inspector_service.dart';
 import '../feature_flags.dart';
 import '../globals.dart';
 import '../primitives/query_parameters.dart';
+import '../server/server.dart';
 import '../utils/utils.dart';
 
 part '_cpu_profiler_preferences.dart';
@@ -216,12 +217,6 @@ class PreferencesController extends DisposableController
       return;
     }
 
-    // Whether DevTools was run using the `dt run` command, which runs DevTools
-    // using `flutter run` and connects it to a locally running instance of the
-    // DevTools server.
-    final usingDebugDevToolsServer =
-        (const String.fromEnvironment('debug_devtools_server')).isNotEmpty &&
-        !kReleaseMode;
     final shouldEnableWasm =
         (enabledFromStorage || enabledFromQueryParams) &&
         kIsWeb &&
