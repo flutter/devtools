@@ -11,7 +11,7 @@ Future<bool> checkServerHttpApiAvailable() async {
     // in the server in the SDK (see `pkg\dds\lib\src\devtools\handler.dart`)
     // and not delegated back to DevTools shared code.
     final response = await get(
-      Uri.parse('${apiPrefix}ping'),
+      buildDevToolsServerRequestUri('${apiPrefix}ping'),
     ).timeout(const Duration(seconds: 5));
     // When running with the local dev server Flutter may serve its index page
     // for missing files to support the hashless url strategy. Check the response
