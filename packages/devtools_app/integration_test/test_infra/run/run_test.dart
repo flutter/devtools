@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
@@ -11,6 +12,10 @@ import 'package:devtools_shared/devtools_test_utils.dart';
 import '_in_file_args.dart';
 import '_test_app_driver.dart';
 import '_utils.dart';
+
+/// The identifier for the stdout line that contains the DevTools server
+/// address when starting from the `dart devtools` command.
+const _devToolsServerAddressLine = 'Serving DevTools at ';
 
 /// Runs one test.
 ///
@@ -23,6 +28,54 @@ Future<void> runFlutterIntegrationTest(
 }) async {
   IntegrationTestApp? testApp;
   late String testAppUri;
+
+  String? devToolsServerAddress;
+  Process? devToolsServerProcess;
+  if (testFileArgs.startDevToolsServer) {
+    // Start the DevTools server. This will use the DevTools server that is
+    // shipped with the Dart SDK.
+    // TODO(file issue): launch the DevTools server from source so that end to
+    // end changes (server + app) can be tested. In the current form, this would
+    // be complex to do, but this may get simpler once DevTools is moved to the
+    // Dart SDK.
+    // TODO: currently we cannot connect to the server because of a CORS issue.
+    // do we have to try to hook up serve_local flow now?
+    devToolsServerProcess = await Process.start('dart', [
+      'devtools',
+      // Do not launch DevTools app in the browser. This DevTools server
+      // instance will be used to connect to the DevTools app that is run from
+      // Flutter driver from the integration test runner.
+      '--no-launch-browser',
+    ]);
+
+    final addressCompleter = Completer<void>();
+    final sub = devToolsServerProcess.stdout.transform(utf8.decoder).listen((
+      line,
+    ) {
+      if (line.startsWith(_devToolsServerAddressLine)) {
+        // This will pull the server address from a String like:
+        // "Serving DevTools at http://127.0.0.1:9104.".
+        final regexp = RegExp(
+          r'http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+',
+        );
+        final match = regexp.firstMatch(line);
+        if (match != null) {
+          devToolsServerAddress = match.group(0);
+          addressCompleter.complete();
+        }
+      }
+    });
+
+    await addressCompleter.future.timeout(
+      const Duration(seconds: 10),
+      onTimeout: () async {
+        await sub.cancel();
+        devToolsServerProcess?.kill();
+        throw Exception('Timed out waiting for DevTools server to start.');
+      },
+    );
+    await sub.cancel();
+  }
 
   if (!offline) {
     if (testRunnerArgs.testAppUri == null) {
@@ -72,6 +125,9 @@ Future<void> runFlutterIntegrationTest(
         'test_args=${jsonEncode(testArgs)}',
         if (testFileArgs.experimentsOn) 'enable_experiments=true',
         if (testRunnerArgs.updateGoldens) 'update_goldens=true',
+        if (devToolsServerAddress != null)
+          // Add the trailing slash because this is what DevTools app expects.
+          'debug_devtools_server=$devToolsServerAddress/',
       ],
       debugLogging: debugTestScript,
     );
@@ -79,6 +135,11 @@ Future<void> runFlutterIntegrationTest(
     if (testApp != null) {
       debugLog('killing the test app');
       await testApp.stop();
+    }
+
+    if (devToolsServerProcess != null) {
+      debugLog('killing the DevTools server');
+      devToolsServerProcess.kill();
     }
 
     debugLog('cancelling stream subscriptions');

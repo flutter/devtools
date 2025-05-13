@@ -160,7 +160,7 @@ class _ExtensionIFrameController extends DisposableController
     // (https://flutter.dev/) in the extension iFrame, so trying to post a
     // message causes a cross-origin security error. Return early when
     // [integrationTestMode] is true so that [_postMessage] calls are a no-op.
-    if (integrationTestMode) return;
+    // if (integrationTestMode) return;
 
     await _iFrameReady.future;
     final message = event.toJson();

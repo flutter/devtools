@@ -17,6 +17,8 @@ Future<bool> checkServerHttpApiAvailable() async {
     // for missing files to support the hashless url strategy. Check the response
     // content to confirm it came from our server.
     // See https://github.com/flutter/flutter/issues/67053
+    print('response.statusCode: ${response.statusCode}');
+    print('response.body: ${response.body}');
     if (response.statusCode != 200 || response.body != 'OK') {
       _log.info('DevTools server not available (${response.statusCode})');
       return false;
