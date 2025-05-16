@@ -80,6 +80,15 @@ extension BuildCommandArgsExtension on ArgParser {
       help: 'Enable debugging for the DevTools server.',
     );
   }
+
+  void addServeWithSdkOption() {
+    addOption(
+      SharedCommandArgs.serveWithDartSdk.flagName,
+      help: 'Uses the specified Dart SDK to serve the DevTools server',
+      valueHelp:
+          '/Users/me/absolute_path_to/sdk/xcodebuild/ReleaseX64/dart-sdk/bin/dart',
+    );
+  }
 }
 
 enum SharedCommandArgs {
@@ -89,6 +98,7 @@ enum SharedCommandArgs {
   wasm('wasm'),
   noStripWasm('no-strip-wasm'),
   runApp('run-app'),
+  serveWithDartSdk('serve-with-dart-sdk'),
   updateFlutter('update-flutter'),
   updatePerfetto('update-perfetto');
 
