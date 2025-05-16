@@ -33,8 +33,11 @@ class DTDManager {
     await disconnect();
 
     try {
-      _connection.value = await DartToolingDaemon.connect(uri);
+      final connection = await DartToolingDaemon.connect(uri);
       _uri = uri;
+      // Set this after setting the value of [_uri] so that [_uri] can be used
+      // by any listeners of the [_connection] notifier.
+      _connection.value = connection;
       _log.info('Successfully connected to DTD at: $uri');
     } catch (e, st) {
       onError?.call(e, st);
