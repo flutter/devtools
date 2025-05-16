@@ -3,6 +3,8 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
+# 11.3.0
+
 # 11.2.1
 * Rename `Handler` extension methods to `VmServiceHandler`. This member was
 marked `@visibleForTesting` and should not be used outside of this package, so
