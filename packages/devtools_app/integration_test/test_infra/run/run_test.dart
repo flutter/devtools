@@ -32,14 +32,15 @@ Future<void> runFlutterIntegrationTest(
   String? devToolsServerAddress;
   Process? devToolsServerProcess;
   if (testFileArgs.startDevToolsServer) {
+    // TODO(https://github.com/flutter/devtools/issues/9196): support starting
+    // DTD and passing the URI to DevTools server. Workspace roots should be set
+    // on the DTD instance based on the connected test app.
+
     // Start the DevTools server. This will use the DevTools server that is
     // shipped with the Dart SDK.
-    // TODO(file issue): launch the DevTools server from source so that end to
-    // end changes (server + app) can be tested. In the current form, this would
-    // be complex to do, but this may get simpler once DevTools is moved to the
-    // Dart SDK.
-    // TODO: currently we cannot connect to the server because of a CORS issue.
-    // do we have to try to hook up serve_local flow now?
+    // TODO(https://github.com/flutter/devtools/issues/9197): launch the
+    // DevTools server from source so that end to end changes (server + app) can
+    // be tested.
     devToolsServerProcess = await Process.start('dart', [
       'devtools',
       // Do not launch DevTools app in the browser. This DevTools server
