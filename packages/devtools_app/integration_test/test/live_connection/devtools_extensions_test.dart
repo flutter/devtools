@@ -4,6 +4,7 @@
 
 // Do not delete these arguments. They are parsed by test runner.
 // test-argument:startDevToolsServer=true
+// test-argument:appPath="../devtools_extensions/example/app_that_uses_foo"
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/embedded/view.dart';
@@ -43,32 +44,32 @@ void main() {
   testWidgets('end to end extensions flow', (tester) async {
     await pumpDevTools(tester);
 
-    logStatus(
-      'verify static extensions are available before connecting to an app',
-    );
-    expect(extensionService.availableExtensions.length, 3);
-    expect(extensionService.visibleExtensions.length, 3);
-    await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.none, // bar
-      ExtensionEnabledState.none, // baz
-      ExtensionEnabledState.none, // foo
-    ]);
+    // TODO(https://github.com/flutter/devtools/issues/9196): re-enable this
+    // test verification once DTD can be started from the integration test
+    // harness.
+    // logStatus(
+    //   'verify static extensions are available before connecting to an app',
+    // );
+    // expect(extensionService.availableExtensions.length, 2);
+    // expect(extensionService.visibleExtensions.length, 2);
+    // await _verifyExtensionsSettingsMenu(tester, [
+    //   ExtensionEnabledState.none, // dart_foo
+    //   ExtensionEnabledState.none, // standalone_extension
+    // ]);
 
     await connectToTestApp(tester, testApp);
 
-    expect(extensionService.availableExtensions.length, 5);
-    expect(extensionService.visibleExtensions.length, 5);
+    expect(extensionService.availableExtensions.length, 3);
+    expect(extensionService.visibleExtensions.length, 3);
     await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.none, // bar
-      ExtensionEnabledState.none, // baz
+      ExtensionEnabledState.none, // dart_foo
       ExtensionEnabledState.none, // foo
-      ExtensionEnabledState.none, // provider
-      ExtensionEnabledState.none, // some_tool
+      ExtensionEnabledState.none, // standalone_extension
     ], closeMenuWhenDone: false);
 
     await _verifyExtensionVisibilitySetting(tester);
 
-    // Bar extension.
+    // dart_foo extension.
     // Enable, test context menu actions, then disable from context menu.
     await _switchToExtensionScreen(
       tester,
@@ -77,31 +78,27 @@ void main() {
     );
     await _answerEnableExtensionPrompt(tester, enable: true);
     await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.enabled, // bar
-      ExtensionEnabledState.none, // baz
+      ExtensionEnabledState.enabled, // dart_foo
       ExtensionEnabledState.none, // foo
-      ExtensionEnabledState.none, // provider
-      ExtensionEnabledState.none, // some_tool
+      ExtensionEnabledState.none, // standalone_extension
     ]);
 
     await _verifyContextMenuActionsAndDisable(tester);
 
-    expect(extensionService.availableExtensions.length, 5);
-    expect(extensionService.visibleExtensions.length, 4);
+    expect(extensionService.availableExtensions.length, 3);
+    expect(extensionService.visibleExtensions.length, 2);
     await _verifyExtensionTabVisibility(
       tester,
       extensionIndex: 0,
       visible: false,
     );
     await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.disabled, // bar
-      ExtensionEnabledState.none, // baz
+      ExtensionEnabledState.disabled, // dart_foo
       ExtensionEnabledState.none, // foo
-      ExtensionEnabledState.none, // provider
-      ExtensionEnabledState.none, // some_tool
+      ExtensionEnabledState.none, // standalone_extension
     ]);
 
-    // Baz extension. Hide immediately.
+    // foo extension. Hide immediately.
     await _switchToExtensionScreen(
       tester,
       extensionIndex: 1,
@@ -109,40 +106,36 @@ void main() {
     );
     await _answerEnableExtensionPrompt(tester, enable: false);
 
-    expect(extensionService.availableExtensions.length, 5);
-    expect(extensionService.visibleExtensions.length, 3);
+    expect(extensionService.availableExtensions.length, 3);
+    expect(extensionService.visibleExtensions.length, 1);
     await _verifyExtensionTabVisibility(
       tester,
       extensionIndex: 1,
       visible: false,
     );
     await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.disabled, // bar
-      ExtensionEnabledState.disabled, // baz
-      ExtensionEnabledState.none, // foo
-      ExtensionEnabledState.none, // provider
-      ExtensionEnabledState.none, // some_tool
+      ExtensionEnabledState.disabled, // dart_foo
+      ExtensionEnabledState.disabled, // foo
+      ExtensionEnabledState.none, // standalone_extension
     ]);
 
-    // Re-enable Baz extension from the extensions settings menu.
+    // Re-enable foo extension from the extensions settings menu.
     logStatus('verify we can re-enable an extension from the settings menu');
     await _changeExtensionSetting(tester, extensionIndex: 1, enable: true);
 
-    expect(extensionService.availableExtensions.length, 5);
-    expect(extensionService.visibleExtensions.length, 4);
+    expect(extensionService.availableExtensions.length, 3);
+    expect(extensionService.visibleExtensions.length, 2);
     await _switchToExtensionScreen(tester, extensionIndex: 1);
     expect(find.byType(EnableExtensionPrompt), findsNothing);
     expect(find.byType(EmbeddedExtensionView), findsOneWidget);
     expect(find.byType(HtmlElementView), findsOneWidget);
     await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.disabled, // bar
-      ExtensionEnabledState.enabled, // baz
-      ExtensionEnabledState.none, // foo
-      ExtensionEnabledState.none, // provider
-      ExtensionEnabledState.none, // some_tool
+      ExtensionEnabledState.disabled, // dart_foo
+      ExtensionEnabledState.enabled, // foo
+      ExtensionEnabledState.none, // standalone_extension
     ]);
 
-    // Foo extension. Disable directly from settings menu.
+    // standalone_extension. Disable directly from settings menu.
     logStatus(
       'verify we can disable an extension screen directly from the settings menu',
     );
@@ -154,19 +147,17 @@ void main() {
 
     logStatus('disable the extension from the settings menu');
     await _changeExtensionSetting(tester, extensionIndex: 2, enable: false);
-    expect(extensionService.availableExtensions.length, 5);
-    expect(extensionService.visibleExtensions.length, 3);
+    expect(extensionService.availableExtensions.length, 3);
+    expect(extensionService.visibleExtensions.length, 1);
     await _verifyExtensionTabVisibility(
       tester,
       extensionIndex: 2,
       visible: false,
     );
     await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.disabled, // bar
-      ExtensionEnabledState.enabled, // baz
-      ExtensionEnabledState.disabled, // foo
-      ExtensionEnabledState.none, // provider
-      ExtensionEnabledState.none, // some_tool
+      ExtensionEnabledState.disabled, // dart_foo
+      ExtensionEnabledState.enabled, // foo
+      ExtensionEnabledState.disabled, // standalone_extension
     ]);
   });
 }
@@ -335,7 +326,7 @@ Future<void> _verifyExtensionVisibilitySetting(WidgetTester tester) async {
     preferences.devToolsExtensions.showOnlyEnabledExtensions.value,
     isFalse,
   );
-  expect(extensionService.visibleExtensions.length, 5);
+  expect(extensionService.visibleExtensions.length, 3);
   // No need to open the settings menu as it should already be open.
   await _toggleShowOnlyEnabledExtensions(tester);
   expect(
@@ -350,7 +341,7 @@ Future<void> _verifyExtensionVisibilitySetting(WidgetTester tester) async {
     preferences.devToolsExtensions.showOnlyEnabledExtensions.value,
     isFalse,
   );
-  expect(extensionService.visibleExtensions.length, 5);
+  expect(extensionService.visibleExtensions.length, 3);
 
   await _closeExtensionSettingsMenu(tester);
 }
