@@ -20,7 +20,6 @@ const _buildAppFlag = 'build-app';
 const _machineFlag = 'machine';
 const _dtdUriFlag = 'dtd-uri';
 const _allowEmbeddingFlag = 'allow-embedding';
-const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 
 /// This command builds DevTools in release mode by running the
 /// `dt build` command and then serves DevTools with a locally
@@ -86,6 +85,7 @@ class ServeCommand extends Command {
             ' directly from the DevTools server.',
       )
       ..addDebugServerFlag()
+      ..addServeWithSdkOption()
       ..addUpdateFlutterFlag()
       ..addUpdatePerfettoFlag()
       ..addPubGetFlag()
@@ -105,12 +105,6 @@ class ServeCommand extends Command {
       ..addFlag(
         _allowEmbeddingFlag,
         help: 'Allow embedding DevTools inside an iframe.',
-      )
-      ..addOption(
-        _serveWithDartSdkFlag,
-        help: 'Uses the specified Dart SDK to serve the DevTools server',
-        valueHelp:
-            '/Users/me/absolute_path_to/sdk/xcodebuild/ReleaseX64/dart-sdk/bin/dart',
       );
   }
 
@@ -156,7 +150,8 @@ class ServeCommand extends Command {
     final runPubGet = results[SharedCommandArgs.pubGet.flagName] as bool;
     final devToolsAppBuildMode =
         results[SharedCommandArgs.buildMode.flagName] as String;
-    final serveWithDartSdk = results[_serveWithDartSdkFlag] as String?;
+    final serveWithDartSdk =
+        results[SharedCommandArgs.serveWithDartSdk.flagName] as String?;
     final forMachine = results[_machineFlag] as bool;
 
     // TODO(https://github.com/flutter/devtools/issues/8643): Support running in
@@ -188,7 +183,9 @@ class ServeCommand extends Command {
                 element.startsWith(SharedCommandArgs.buildMode.asArg()),
           )
           ..removeWhere(
-            (element) => element.startsWith(valueAsArg(_serveWithDartSdkFlag)),
+            (element) => element.startsWith(
+              valueAsArg(SharedCommandArgs.serveWithDartSdk.flagName),
+            ),
           );
 
     final localDartSdkLocation = Platform.environment['LOCAL_DART_SDK'];
