@@ -15,7 +15,9 @@ import '../utils.dart';
 /// flag to this command.
 class RunCommand extends Command {
   RunCommand() {
-    argParser.addDebugServerFlag();
+    argParser
+      ..addDebugServerFlag()
+      ..addServeWithSdkOption();
   }
 
   @override
