@@ -39,13 +39,18 @@ class TestFileArgs {
   TestFileArgs._parse(
     Map<_TestFileArgItems, dynamic> args, {
     required this.appPath,
-  }) : experimentsOn = args[_TestFileArgItems.experimentsOn] ?? false;
+  }) : experimentsOn = args[_TestFileArgItems.experimentsOn] ?? false,
+       startDevToolsServer =
+           args[_TestFileArgItems.startDevToolsServer] ?? false;
+
+  /// The path to the application to connect to.
+  final String appPath;
 
   /// Whether experiments are enabled in the test.
   final bool experimentsOn;
 
-  /// The path to the application to connect to.
-  final String appPath;
+  /// Whether the DevTools server should be started and connected to DevTools.
+  final bool startDevToolsServer;
 
   /// Parses 'test-argument' comments in [fileContent].
   static Map<_TestFileArgItems, dynamic> _parseFileContent(String fileContent) {
@@ -62,4 +67,15 @@ class TestFileArgs {
 }
 
 /// The different arguments accepted as "file args."
-enum _TestFileArgItems { experimentsOn, appPath }
+enum _TestFileArgItems {
+  /// The path to the Dart or Flutter application to run and connect to DevTools
+  /// for this test.
+  appPath,
+
+  /// Whether to enable DevTools experimental features for this test.
+  experimentsOn,
+
+  /// Whether to start the DevTools server and connect it to DevTools for this
+  /// test.
+  startDevToolsServer,
+}
