@@ -46,6 +46,9 @@ Future<void> runFlutterIntegrationTest(
       // instance will be used to connect to the DevTools app that is run from
       // Flutter driver from the integration test runner.
       '--no-launch-browser',
+      // Disable CORS restrictions so that we can connect to the server from
+      // DevTools app that is served on a different origin.
+      '--disable-cors',
     ]);
 
     final addressCompleter = Completer<void>();
