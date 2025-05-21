@@ -11,6 +11,7 @@ import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
+import '../../../shared/feature_flags.dart';
 import '../../../shared/ui/filter.dart';
 import '../../../shared/utils/utils.dart';
 import 'property_editor_types.dart';
@@ -208,12 +209,17 @@ class PropertyEditorController extends DisposableController
       position: cursorPosition,
       screenId: gac.PropertyEditorSidebar.id,
     );
-    // Get any supported refactors for the current position.
-    final refactorsResult = await editorClient.getRefactors(
-      textDocument: textDocument,
-      range: EditorRange(start: cursorPosition, end: cursorPosition),
-      screenId: gac.PropertyEditorSidebar.id,
-    );
+    CodeActionResult? refactorsResult;
+    // TODO(https://github.com/flutter/devtools/issues/8652): Enable refactors
+    // in the Property Editor by default.
+    if (FeatureFlags.propertyEditorRefactors) {
+      // Get any supported refactors for the current position.
+      refactorsResult = await editorClient.getRefactors(
+        textDocument: textDocument,
+        range: EditorRange(start: cursorPosition, end: cursorPosition),
+        screenId: gac.PropertyEditorSidebar.id,
+      );
+    }
     // Update the widget data.
     final name = editableArgsResult?.name;
     _editableWidgetData.value = (

@@ -362,7 +362,7 @@ class EditorClient extends DisposableController
     if (!requestMethod.isRegistered) {
       return GenericApiResponse(
         success: false,
-        errorMessage: 'API is not available.',
+        errorMessage: 'API is unavailable.',
       );
     }
 

@@ -61,10 +61,19 @@
             "request": "attach",
         },
         {
-            "name": "standalone_ui/property_editor_sidebar",
+            "name": "property_editor_sidebar",
             "request": "launch",
             "type": "dart",
             "program": "test/test_infra/scenes/standalone_ui/property_editor_sidebar.stager_app.g.dart",
+        },
+        {
+            "name": "property_editor_sidebar + experiments",
+            "request": "launch",
+            "type": "dart",
+            "program": "test/test_infra/scenes/standalone_ui/property_editor_sidebar.stager_app.g.dart",
+            "args": [
+                "--dart-define=enable_experiments=true"
+            ]
         },
         
     ]
