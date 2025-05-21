@@ -587,6 +587,7 @@ void main() {
           position: argThat(isNotNull, named: 'position'),
           name: argThat(isNotNull, named: 'name'),
           value: argThat(anything, named: 'value'),
+          screenId: 'propertyEditorSidebar',
         ),
       ).thenAnswer((realInvocation) {
         final calledWithArgs = realInvocation.namedArguments;
@@ -598,7 +599,7 @@ void main() {
         );
 
         return Future.value(
-          EditArgumentResponse(
+          GenericApiResponse(
             success: success,
             errorCode: success ? null : -32019,
           ),

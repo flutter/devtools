@@ -17,6 +17,7 @@ import 'property_editor_types.dart';
 
 typedef EditableWidgetData = ({
   List<EditableProperty> properties,
+  List<CodeAction> refactors,
   String? name,
   String? documentation,
   String? fileUri,
@@ -24,7 +25,7 @@ typedef EditableWidgetData = ({
 });
 
 typedef EditArgumentFunction =
-    Future<EditArgumentResponse?> Function<T>({
+    Future<GenericApiResponse?> Function<T>({
       required String name,
       required T value,
     });
@@ -59,11 +60,11 @@ class PropertyEditorController extends DisposableController
   bool get waitingForFirstEvent => _waitingForFirstEvent;
   bool _waitingForFirstEvent = true;
 
-  late final Debouncer _editableArgsDebouncer;
+  late final Debouncer _requestDebouncer;
 
   late final Timer _checkConnectionTimer;
 
-  static const _editableArgsDebounceDuration = Duration(milliseconds: 600);
+  static const _requestDebounceDuration = Duration(milliseconds: 600);
 
   static const _checkConnectionInterval = Duration(minutes: 1);
 
@@ -82,7 +83,7 @@ class PropertyEditorController extends DisposableController
   @override
   void init() {
     super.init();
-    _editableArgsDebouncer = Debouncer(duration: _editableArgsDebounceDuration);
+    _requestDebouncer = Debouncer(duration: _requestDebounceDuration);
     _checkConnectionTimer = _periodicallyCheckConnection(
       _checkConnectionInterval,
     );
@@ -111,6 +112,7 @@ class PropertyEditorController extends DisposableController
         if (!textDocument.uriAsString.endsWith('.dart')) {
           _editableWidgetData.value = (
             properties: [],
+            refactors: [],
             name: null,
             documentation: null,
             range: null,
@@ -118,8 +120,8 @@ class PropertyEditorController extends DisposableController
           );
           return;
         }
-        _editableArgsDebouncer.run(
-          () => _updateWithEditableArgs(
+        _requestDebouncer.run(
+          () => _updateWithEditableWidgetData(
             textDocument: textDocument,
             cursorPosition: cursorPosition,
           ),
@@ -130,7 +132,7 @@ class PropertyEditorController extends DisposableController
 
   @override
   void dispose() {
-    _editableArgsDebouncer.dispose();
+    _requestDebouncer.dispose();
     _checkConnectionTimer.cancel();
     super.dispose();
   }
@@ -152,7 +154,7 @@ class PropertyEditorController extends DisposableController
       ..addAll(filtered);
   }
 
-  Future<EditArgumentResponse?> editArgument<T>({
+  Future<GenericApiResponse?> editArgument<T>({
     required String name,
     required T value,
   }) async {
@@ -164,6 +166,7 @@ class PropertyEditorController extends DisposableController
       position: position,
       name: name,
       value: value,
+      screenId: gac.PropertyEditorSidebar.id,
     );
   }
 
@@ -193,32 +196,33 @@ class PropertyEditorController extends DisposableController
           );
   }
 
-  Future<void> _updateWithEditableArgs({
+  Future<void> _updateWithEditableWidgetData({
     required TextDocument textDocument,
     required CursorPosition cursorPosition,
   }) async {
     _currentDocument = textDocument;
     _currentCursorPosition = cursorPosition;
     // Get the editable arguments for the current position.
-    final result = await editorClient.getEditableArguments(
+    final editableArgsResult = await editorClient.getEditableArguments(
       textDocument: textDocument,
       position: cursorPosition,
+      screenId: gac.PropertyEditorSidebar.id,
     );
-    final properties = (result?.args ?? <EditableArgument>[])
-        .map(argToProperty)
-        .nonNulls
-        // Filter out any deprecated properties that aren't set.
-        .where((property) => !property.isDeprecated || property.hasArgument)
-        .toList();
-    final name = result?.name;
-    final range = result?.range;
-
+    // Get any supported refactors for the current position.
+    final refactorsResult = await editorClient.getRefactors(
+      textDocument: textDocument,
+      range: EditorRange(start: cursorPosition, end: cursorPosition),
+      screenId: gac.PropertyEditorSidebar.id,
+    );
+    // Update the widget data.
+    final name = editableArgsResult?.name;
     _editableWidgetData.value = (
-      properties: properties,
+      properties: _extractProperties(editableArgsResult),
+      refactors: _extractRefactors(refactorsResult),
       name: name,
-      documentation: result?.documentation,
+      documentation: editableArgsResult?.documentation,
       fileUri: _currentDocument?.uriAsString,
-      range: range,
+      range: editableArgsResult?.range,
     );
     filterData(activeFilter.value);
     // Register impression.
@@ -227,6 +231,19 @@ class PropertyEditorController extends DisposableController
       gac.PropertyEditorSidebar.widgetPropertiesUpdate(name: name),
     );
   }
+
+  List<EditableProperty> _extractProperties(EditableArgumentsResult? result) =>
+      (result?.args ?? <EditableArgument>[])
+          .map(argToProperty)
+          .nonNulls
+          // Filter out any deprecated properties that aren't set.
+          .where((property) => !property.isDeprecated || property.hasArgument)
+          .toList();
+
+  List<CodeAction> _extractRefactors(CodeActionResult? result) =>
+      (result?.actions ?? <CodeAction>[])
+          .where((action) => action.title != null && action.command != null)
+          .toList();
 
   Timer _periodicallyCheckConnection(Duration interval) {
     return Timer.periodic(interval, (timer) {
@@ -259,6 +276,9 @@ class PropertyEditorController extends DisposableController
             .map(argToProperty)
             .nonNulls
             .toList(),
+        // TODO(https://github.com/flutter/devtools/issues/8652): Add tests for
+        // refactors.
+        refactors: [],
         name: editableArgsResult.name,
         documentation: editableArgsResult.documentation,
         fileUri: document?.uriAsString,

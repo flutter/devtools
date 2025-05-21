@@ -380,14 +380,15 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
   }
 
   void _handleServerResponse(
-    EditArgumentResponse? errorResponse, {
+    GenericApiResponse? errorResponse, {
     required EditableProperty property,
   }) {
     final succeeded = errorResponse == null || errorResponse.success;
     if (!succeeded) {
       setState(() {
+        final errorType = EditArgumentError.fromCode(errorResponse.errorCode);
         _serverError =
-            '${errorResponse.errorType?.message ?? 'Encountered unknown error.'} (Property: ${property.name})';
+            '${errorType ?? 'Encountered unknown error.'} (Property: ${property.name})';
       });
       ga.reportError('property-editor $_serverError');
     }
