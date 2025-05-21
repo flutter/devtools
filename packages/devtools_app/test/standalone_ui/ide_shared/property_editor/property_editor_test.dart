@@ -45,11 +45,8 @@ void main() {
 
     mockEditorClient = MockEditorClient();
     when(
-      mockEditorClient.editArgumentMethodName,
-    ).thenReturn(ValueNotifier(LspMethod.editArgument.methodName));
-    when(
-      mockEditorClient.editableArgumentsMethodName,
-    ).thenReturn(ValueNotifier(LspMethod.editableArguments.methodName));
+      mockEditorClient.editableArgumentsApiIsRegistered,
+    ).thenReturn(ValueNotifier(true));
     when(
       mockEditorClient.activeLocationChangedStream,
     ).thenAnswer((_) => eventStream);
@@ -99,6 +96,7 @@ void main() {
           mockEditorClient.getEditableArguments(
             textDocument: location.document,
             position: location.position,
+            screenId: 'propertyEditorSidebar',
           ),
         ).thenAnswer((realInvocation) {
           getEditableArgsCalled?.complete();
