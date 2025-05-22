@@ -372,11 +372,30 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   String toString() {
     if (text != null) return text!;
 
+    // If the name is provided, use it followed by the instanceRef.
     final instanceRef = ref!.instanceRef;
-    final value = instanceRef is InstanceRef
-        ? instanceRef.valueAsString
-        : instanceRef;
-    return '$name - $value';
+    if ((name ?? '').isNotEmpty) {
+      final value = instanceRef is InstanceRef
+          ? instanceRef.valueAsString
+          : instanceRef;
+      return '$name - $value';
+    }
+
+    // Use the diagnostics node (if it exists). This is only provided for
+    // Inspector nodes.
+    final diagnostic = ref?.diagnostic;
+    final description = diagnostic?.description;
+    if (diagnostic != null && description != null) {
+      final separator = diagnostic.separator;
+      final textPreview = diagnostic.json['textPreview'];
+      return textPreview != null
+          ? '$description$separator $textPreview'
+          : description;
+    }
+
+    // Fallback to returning the instanceRef as a String if none of the above
+    // cases are true.
+    return instanceRef.toString();
   }
 
   /// Selects the object in the Flutter Widget inspector.
