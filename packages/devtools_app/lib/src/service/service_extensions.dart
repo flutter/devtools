@@ -436,8 +436,8 @@ final httpEnableTimelineLogging =
     );
 
 /// The icon used for all "Select widget mode" buttons, both in DevTools and in
-/// the Flutter framework. 
-/// 
+/// the Flutter framework.
+///
 /// This is a generic unicode icon which lets us have one consistent icon across
 /// Material and Cupertino-styled apps.
 const selectWidgetModeIcon = IconData(0x1F74A);
