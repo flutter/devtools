@@ -105,4 +105,41 @@ void main() {
     expect(str.childCount, equals(0));
     expect(str.isPartialObject, isFalse);
   });
+
+  group('toString', () {
+    test('string variable', () {
+      final str = buildStringVariable('Hello there!');
+      expect(str.toString(), equals('root1 - Hello there!'));
+    });
+
+    test('boolean variable', () {
+      final boolean = buildBooleanVariable(true);
+      expect(boolean.toString(), equals('root1 - true'));
+    });
+
+    test('set variable', () {
+      final set = buildSetVariable(length: 3);
+      expect(set.toString(), equals('root1 - Set (3)'));
+    });
+
+    test('map variable', () {
+      final map = buildMapVariable(length: 3);
+      expect(map.toString(), equals('root1 - Map (3)'));
+    });
+
+    test('string variable', () {
+      final list = buildListVariable(length: 3);
+      expect(list.toString(), equals('root1 - List (3)'));
+    });
+
+    testWidgets('Text widget', (WidgetTester tester) async {
+      final textWidget = buildTextWidgetVariable();
+      expect(textWidget.toString(), equals('Text: Hello world!'));
+    });
+
+    testWidgets('Row widget', (WidgetTester tester) async {
+      final rowWidget = buildRowWidgetVariable();
+      expect(rowWidget.toString(), equals('Row'));
+    });
+  });
 }
