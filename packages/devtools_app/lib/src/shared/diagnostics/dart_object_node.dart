@@ -374,11 +374,13 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     // If the name is provided, use it followed by the instanceRef.
     final instanceRef = ref!.instanceRef;
-    if ((name ?? '').isNotEmpty) {
-      final value = instanceRef is InstanceRef
-          ? instanceRef.valueAsString
-          : instanceRef;
-      return '$name - $value';
+    if (instanceRef != null && (name ?? '').isNotEmpty) {
+      final length = instanceRef.length;
+      if (instanceRef.length != null) {
+        return '$name - ${instanceRef.kind} ($length)';
+      }
+
+      return '$name - ${instanceRef.valueAsString}';
     }
 
     // Use the diagnostics node (if it exists). This is only provided for
@@ -393,9 +395,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
           : description;
     }
 
-    // Fallback to returning the instanceRef as a String if none of the above
-    // cases are true.
-    return instanceRef.toString();
+    // Fallback to returning the runtime type as a catch-all.
+    return ref.runtimeType.toString();
   }
 
   /// Selects the object in the Flutter Widget inspector.
