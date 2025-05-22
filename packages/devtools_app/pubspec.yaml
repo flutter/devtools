@@ -20,7 +20,6 @@ resolution: workspace
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
-  cupertino_icons: ^1.0.0
   dap: ^1.1.0
   dds_service_extensions: ^2.0.0
   devtools_app_shared:
