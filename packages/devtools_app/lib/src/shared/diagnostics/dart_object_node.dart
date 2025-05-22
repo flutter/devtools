@@ -372,14 +372,17 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   String toString() {
     if (text != null) return text!;
 
-    // If the name is provided, use it followed by the instanceRef.
     final instanceRef = ref!.instanceRef;
     if (instanceRef != null && (name ?? '').isNotEmpty) {
       final length = instanceRef.length;
+      // Show the variable name, kind, and length for instance kinds that have a
+      // length (maps, lists, sets, etc).
       if (instanceRef.length != null) {
         return '$name - ${instanceRef.kind} ($length)';
       }
 
+      // Show the variable name and value for instance kinds without a length
+      //(e.g. strings, booleans, ints).
       return '$name - ${instanceRef.valueAsString}';
     }
 
