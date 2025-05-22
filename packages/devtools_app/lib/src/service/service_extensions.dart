@@ -435,6 +435,13 @@ final httpEnableTimelineLogging =
       tooltip: 'Toggle HTTP timeline logging',
     );
 
+/// The icon used for all "Select widget mode" buttons, both in DevTools and in
+/// the Flutter framework. 
+/// 
+/// This is a generic unicode icon which lets us have one consistent icon across
+/// Material and Cupertino-styled apps.
+const selectWidgetModeIcon = IconData(0x1F74A);
+
 // Legacy extension to show the inspector and enable inspector select mode.
 final toggleOnDeviceWidgetInspector =
     ToggleableServiceExtensionDescription<bool>.from(
@@ -444,7 +451,7 @@ final toggleOnDeviceWidgetInspector =
       // toggling widget select mode as it is the only way to toggle that mode.
       title: 'Select Widget Mode',
       shortTitle: 'Select',
-      iconData: const IconData(0x1F74A),
+      iconData: selectWidgetModeIcon,
       gaScreenName: gac.inspector,
       gaItem: gac.showOnDeviceInspector,
       tooltip: 'Toggle select widget mode',
@@ -458,7 +465,7 @@ final toggleOnDeviceWidgetInspector =
 final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>.from(
   extensions.toggleSelectWidgetMode,
   title: 'Select widget mode',
-  iconData: const IconData(0x1F74A),
+  iconData: selectWidgetModeIcon,
   gaScreenName: gac.inspector,
   gaItem: gac.selectWidgetMode,
   tooltip: 'Toggle select widget mode',
