@@ -298,16 +298,16 @@ class EditorClient extends DisposableController
     screenId: screenId,
   );
 
-  /// Requests that the Analysis Server makes a code edit for an argument.
-  Future<GenericApiResponse> applyRefactor({
+  /// Requests that the Analysis Server execute the given [commandName].
+  Future<GenericApiResponse> executeCommand({
     required String commandName,
-    required List<CodeActionArgument> commandArgs,
+    required List<Object?> commandArgs,
     required String screenId,
   }) => _callLspApiAndRespond(
     requestMethod: LspMethod.executeCommand,
     requestParams: {
       'command': commandName,
-      'arguments': commandArgs.map((e) => e.toJson()).toList(),
+      'arguments': commandArgs,
     },
     screenId: screenId,
   );

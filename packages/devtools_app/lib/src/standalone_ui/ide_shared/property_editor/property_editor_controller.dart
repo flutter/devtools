@@ -18,7 +18,7 @@ import 'property_editor_types.dart';
 
 typedef EditableWidgetData = ({
   List<EditableProperty> properties,
-  List<CodeAction> refactors,
+  List<CodeActionCommand> refactors,
   String? name,
   String? documentation,
   String? fileUri,
@@ -214,6 +214,9 @@ class PropertyEditorController extends DisposableController
     // in the Property Editor by default.
     if (FeatureFlags.propertyEditorRefactors) {
       // Get any supported refactors for the current position.
+      // TODO(elliette): Consider updating the widget data immediately without
+      // waiting for the refactors result, then updating the refactor buttons
+      // once the refactors result is available.
       refactorsResult = await editorClient.getRefactors(
         textDocument: textDocument,
         range: EditorRange(start: cursorPosition, end: cursorPosition),
@@ -246,8 +249,8 @@ class PropertyEditorController extends DisposableController
           .where((property) => !property.isDeprecated || property.hasArgument)
           .toList();
 
-  List<CodeAction> _extractRefactors(CodeActionResult? result) =>
-      (result?.actions ?? <CodeAction>[])
+  List<CodeActionCommand> _extractRefactors(CodeActionResult? result) =>
+      (result?.actions ?? <CodeActionCommand>[])
           .where((action) => action.title != null && action.command != null)
           .toList();
 

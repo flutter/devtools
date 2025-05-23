@@ -41,14 +41,14 @@ enum LspMethod {
   /// Returns the [LspMethod] for the given [methodName].
   ///
   /// If the [methodName] does not exist, returns null.
-  static LspMethod? fromMethodName(String methodName) {
-    for (final method in LspMethod.values) {
-      if (method.methodName == methodName) return method;
-    }
-    return null;
-  }
+  static LspMethod? fromMethodName(String methodName) =>
+      _methodNameToMethodLookup[methodName];
 
   final String methodName;
+
+  static final _methodNameToMethodLookup = <String, LspMethod>{
+    for (final method in LspMethod.values) method.methodName: method,
+  };
 
   static final _registrationStatus = <LspMethod, bool>{
     for (final method in LspMethod.values) method: false,
@@ -141,7 +141,6 @@ abstract class Field {
   static const isRequired = 'isRequired';
   static const kind = 'kind';
   static const line = 'line';
-  static const loggedAction = 'loggedAction';
   static const name = 'name';
   static const options = 'options';
   static const page = 'page';
@@ -528,22 +527,22 @@ class EditableArgumentsResult with Serializable {
   };
 }
 
-/// Constants for [CodeAction] prefixes used to filter the results returned by
-/// an [LspMethod.codeAction] request.
+/// Constants for [CodeActionCommand] prefixes used to filter the results
+/// returned by an [LspMethod.codeAction] request.
 abstract class CodeActionPrefixes {
   static const flutterWrap = 'refactor.flutter.wrap';
 }
 
 /// The result of an [LspMethod.codeAction] request to the Analysis Server.
 ///
-/// Contains a list of [CodeAction]s that can be performed.
+/// Contains a list of [CodeActionCommand]s that can be performed.
 class CodeActionResult with Serializable {
   CodeActionResult({required this.actions});
 
   CodeActionResult.fromJson(List<Map<String, Object?>> list)
-    : this(actions: list.map(CodeAction.fromJson).toList());
+    : this(actions: list.map(CodeActionCommand.fromJson).toList());
 
-  final List<CodeAction> actions;
+  final List<CodeActionCommand> actions;
 
   @override
   Map<String, Object?> toJson() => {Field.actions: actions};
@@ -553,17 +552,18 @@ class CodeActionResult with Serializable {
 /// via an [LspMethod.executeCommand] request.
 ///
 /// For example, "Wrap with Center" or "Wrap with Container".
-class CodeAction with Serializable {
-  CodeAction({required this.command, required this.title, required this.args});
+class CodeActionCommand with Serializable {
+  CodeActionCommand({
+    required this.command,
+    required this.title,
+    required this.args,
+  });
 
-  CodeAction.fromJson(Map<String, Object?> map)
+  CodeActionCommand.fromJson(Map<String, Object?> map)
     : this(
         command: map[Field.command] as String,
         title: map[Field.title] as String,
-        args: (map[Field.arguments] as List<Object?>? ?? <Object?>[])
-            .cast<Map<String, Object?>>()
-            .map(CodeActionArgument.fromJson)
-            .toList(),
+        args: map[Field.arguments] as List<Object?>? ?? <Object?>[],
       );
 
   /// The command identifier to send to [LspMethod.executeCommand].
@@ -574,56 +574,13 @@ class CodeAction with Serializable {
 
   /// Arguments that should be passed to [LspMethod.executeCommand] when
   /// invoking this action.
-  final List<CodeActionArgument> args;
+  final List<Object?> args;
 
   @override
   Map<String, Object?> toJson() => {
     Field.command: command,
     Field.title: title,
     Field.arguments: args,
-  };
-}
-
-/// An argument for a [CodeAction].
-///
-/// This includes information about the document and range to which the
-/// [CodeAction] should be applied.
-class CodeActionArgument with Serializable {
-  CodeActionArgument({
-    required this.textDocument,
-    required this.range,
-    required this.kind,
-    required this.loggedAction,
-  });
-
-  CodeActionArgument.fromJson(Map<String, Object?> map)
-    : this(
-        textDocument: TextDocument.fromJson(
-          map[Field.textDocument] as Map<String, Object?>,
-        ),
-        range: EditorRange.fromJson(map[Field.range] as Map<String, Object?>),
-        kind: map[Field.kind] as String?,
-        loggedAction: map[Field.loggedAction] as String?,
-      );
-
-  /// The document to which the [CodeAction] applies.
-  final TextDocument textDocument;
-
-  /// The range within the [textDocument] to which the [CodeAction] applies.
-  final EditorRange range;
-
-  /// The kind of action, often a string like "refactor.flutter.wrap.container".
-  final String? kind;
-
-  /// An identifier used for logging or analytics purposes related to this action.
-  final String? loggedAction;
-
-  @override
-  Map<String, Object?> toJson() => {
-    Field.textDocument: textDocument.toJson(),
-    Field.range: range.toJson(),
-    Field.kind: kind,
-    Field.loggedAction: loggedAction,
   };
 }
 
@@ -680,7 +637,7 @@ enum EditArgumentError {
   }
 }
 
-/// Generic response representing whether a reqeust was a [success].
+/// Generic response representing whether a request was a [success].
 class GenericApiResponse {
   GenericApiResponse({
     required this.success,
