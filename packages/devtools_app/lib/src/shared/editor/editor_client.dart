@@ -305,10 +305,7 @@ class EditorClient extends DisposableController
     required String screenId,
   }) => _callLspApiAndRespond(
     requestMethod: LspMethod.executeCommand,
-    requestParams: {
-      'command': commandName,
-      'arguments': commandArgs,
-    },
+    requestParams: {'command': commandName, 'arguments': commandArgs},
     screenId: screenId,
   );
 
