@@ -1135,9 +1135,12 @@ String devtoolsAssetsBasePath({required String origin, required String path}) {
 /// human-readable text.
 bool isTextMimeType(String? mimeType) {
   if (mimeType == null) return false;
-  return mimeType.startsWith('text/') ||
-      mimeType == 'application/json' ||
-      mimeType == 'application/javascript' ||
-      mimeType == 'application/xml' ||
-      mimeType == 'application/x-www-form-urlencoded';
+
+  // Strip charset if present
+  final cleanedMime = mimeType.split(';').first.trim().toLowerCase();
+
+  return cleanedMime.startsWith('text/') ||
+      cleanedMime == 'application/json' ||
+      cleanedMime == 'application/javascript' ||
+      cleanedMime == 'application/xml';
 }
