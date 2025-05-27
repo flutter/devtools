@@ -567,10 +567,10 @@ class CodeActionCommand with Serializable {
       );
 
   /// The command identifier to send to [LspMethod.executeCommand].
-  final String? command;
+  final String command;
 
   /// The human-readable title of the command, e.g., "Wrap with Center".
-  final String? title;
+  final String title;
 
   /// Arguments that should be passed to [LspMethod.executeCommand] when
   /// invoking this action.

@@ -250,9 +250,7 @@ class PropertyEditorController extends DisposableController
           .toList();
 
   List<CodeActionCommand> _extractRefactors(CodeActionResult? result) =>
-      (result?.actions ?? <CodeActionCommand>[])
-          .where((action) => action.title != null && action.command != null)
-          .toList();
+      (result?.actions ?? <CodeActionCommand>[]).toList();
 
   Timer _periodicallyCheckConnection(Duration interval) {
     return Timer.periodic(interval, (timer) {
