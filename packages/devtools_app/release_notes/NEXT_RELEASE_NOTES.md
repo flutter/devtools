@@ -19,6 +19,7 @@ To learn more about DevTools, check out the
 DevTools. - [#9125](https://github.com/flutter/devtools/pull/9125)
 - Dismiss stale banner messages when the connected app state changes. - [#9148](https://github.com/flutter/devtools/pull/9148)
 - Fix a focus traversal issue with search fields. [#9166](https://github.com/flutter/devtools/pull/9166)
+- Fix an issue where copying all logs in the console would show `null` for any inspected widgets. - [#9204](https://github.com/flutter/devtools/pull/9204)
 
 ## Inspector updates
 
