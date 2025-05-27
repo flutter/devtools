@@ -386,8 +386,7 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
     final succeeded = errorResponse == null || errorResponse.success;
     if (!succeeded) {
       setState(() {
-        _serverError =
-            '${errorResponse.errorType?.message ?? 'Encountered unknown error.'} (Property: ${property.name})';
+        _serverError = _errorMessage(errorResponse, property: property);
       });
       ga.reportError('property-editor $_serverError');
     }
@@ -399,5 +398,21 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
         succeeded: succeeded,
       ),
     );
+  }
+
+  String _errorMessage(
+    EditArgumentResponse errorResponse, {
+    required EditableProperty property,
+  }) {
+    final errorType = errorResponse.errorType;
+    final messageFromType = errorType?.message;
+    final messageFromResponse = errorResponse.errorMessage;
+    final errorMessage =
+        (messageFromType != null && messageFromResponse != null)
+        ? '$messageFromType / $messageFromResponse'
+        : messageFromType ?? messageFromResponse ?? 'Unknown error.';
+    final propertyInfo = '(Property: ${property.name})';
+    final errorCode = errorType?.code != null ? '${errorType!.code}: ' : '';
+    return '$errorCode$errorMessage $propertyInfo';
   }
 }
