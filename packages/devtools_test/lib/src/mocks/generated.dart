@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/service.dart';
+import 'package:dtd/dtd.dart';
 import 'package:mockito/annotations.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -51,5 +52,6 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<PerfettoTrackDescriptorEvent>(),
   MockSpec<PerfettoTrackEvent>(),
   MockSpec<DTDManager>(),
+  MockSpec<DartToolingDaemon>(),
 ])
 void main() {}

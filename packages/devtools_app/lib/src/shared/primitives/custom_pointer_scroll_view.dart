@@ -821,7 +821,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
       if (child.isTagged(RenderViewport.excludeFromScrolling)) {
         excluded.add(child);
       } else {
-        if (!child.hasFlag(SemanticsFlag.isHidden)) {
+        if (!child.flagsCollection.isHidden) {
           firstVisibleIndex ??= child.indexInParent;
         }
         included.add(child);

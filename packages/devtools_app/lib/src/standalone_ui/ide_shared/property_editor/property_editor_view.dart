@@ -24,20 +24,16 @@ class PropertyEditorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiValueListenableBuilder(
       listenables: [
-        controller.editorClient.editArgumentMethodName,
-        controller.editorClient.editableArgumentsMethodName,
+        controller.editorClient.editableArgumentsApiIsRegistered,
         controller.editableWidgetData,
       ],
       builder: (_, values, _) {
-        final editArgumentMethodName = values.first as String?;
-        final editableArgumentsMethodName = values.second as String?;
-
-        if (editArgumentMethodName == null ||
-            editableArgumentsMethodName == null) {
+        final editableArgumentsApiIsRegistered = values.first as bool;
+        if (!editableArgumentsApiIsRegistered) {
           return const CenteredCircularProgressIndicator();
         }
 
-        final editableWidgetData = values.third as EditableWidgetData?;
+        final editableWidgetData = values.second as EditableWidgetData?;
         return SelectionArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,7 +52,7 @@ class PropertyEditorView extends StatelessWidget {
       return [introSentence, const HowToUseMessage()];
     }
 
-    final (:properties, :name, :documentation, :fileUri, :range) =
+    final (:properties, :refactors, :name, :documentation, :fileUri, :range) =
         editableWidgetData;
     if (fileUri != null && !fileUri.endsWith('.dart')) {
       return [const NoDartCodeMessage(), const HowToUseMessage()];
