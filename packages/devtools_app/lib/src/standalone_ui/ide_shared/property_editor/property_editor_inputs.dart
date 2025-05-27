@@ -380,7 +380,7 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
   }
 
   void _handleServerResponse(
-    EditArgumentResponse? errorResponse, {
+    GenericApiResponse? errorResponse, {
     required EditableProperty property,
   }) {
     final succeeded = errorResponse == null || errorResponse.success;
@@ -401,10 +401,10 @@ mixin _PropertyInputMixin<T extends StatefulWidget, U> on State<T> {
   }
 
   String _errorMessage(
-    EditArgumentResponse errorResponse, {
+    GenericApiResponse errorResponse, {
     required EditableProperty property,
   }) {
-    final errorType = errorResponse.errorType;
+    final errorType = EditArgumentError.fromCode(errorResponse.errorCode);
     final messageFromType = errorType?.message;
     final messageFromResponse = errorResponse.errorMessage;
     final errorMessage =

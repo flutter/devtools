@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/shared/analytics/constants.dart' as gac;
 import 'package:devtools_app/src/shared/editor/api_classes.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_controller.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_types.dart';
@@ -45,11 +46,8 @@ void main() {
 
     mockEditorClient = MockEditorClient();
     when(
-      mockEditorClient.editArgumentMethodName,
-    ).thenReturn(ValueNotifier(LspMethod.editArgument.methodName));
-    when(
-      mockEditorClient.editableArgumentsMethodName,
-    ).thenReturn(ValueNotifier(LspMethod.editableArguments.methodName));
+      mockEditorClient.editableArgumentsApiIsRegistered,
+    ).thenReturn(ValueNotifier(true));
     when(
       mockEditorClient.activeLocationChangedStream,
     ).thenAnswer((_) => eventStream);
@@ -99,6 +97,7 @@ void main() {
           mockEditorClient.getEditableArguments(
             textDocument: location.document,
             position: location.position,
+            screenId: gac.PropertyEditorSidebar.id,
           ),
         ).thenAnswer((realInvocation) {
           getEditableArgsCalled?.complete();
@@ -587,6 +586,7 @@ void main() {
           position: argThat(isNotNull, named: 'position'),
           name: argThat(isNotNull, named: 'name'),
           value: argThat(anything, named: 'value'),
+          screenId: 'propertyEditorSidebar',
         ),
       ).thenAnswer((realInvocation) {
         final calledWithArgs = realInvocation.namedArguments;
@@ -598,7 +598,7 @@ void main() {
         );
 
         return Future.value(
-          EditArgumentResponse(
+          GenericApiResponse(
             success: success,
             errorCode: success ? null : -32019,
           ),

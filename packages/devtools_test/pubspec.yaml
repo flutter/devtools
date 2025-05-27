@@ -20,6 +20,7 @@ dependencies:
   devtools_app:
   devtools_app_shared:
   devtools_shared:
+  dtd: ^2.5.1
   flutter:
     sdk: flutter
   flutter_test:
