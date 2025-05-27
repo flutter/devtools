@@ -373,10 +373,33 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     if (text != null) return text!;
 
     final instanceRef = ref!.instanceRef;
-    final value = instanceRef is InstanceRef
-        ? instanceRef.valueAsString
-        : instanceRef;
-    return '$name - $value';
+    if (instanceRef != null && !name.isNullOrEmpty) {
+      final length = instanceRef.length;
+      // Show the variable name, kind, and length for instance kinds that have a
+      // length (maps, lists, sets, etc).
+      if (instanceRef.length != null) {
+        return '$name - ${instanceRef.kind} ($length)';
+      }
+
+      // Show the variable name and value for instance kinds without a length
+      //(e.g. strings, booleans, ints).
+      return '$name - ${instanceRef.valueAsString}';
+    }
+
+    // Use the diagnostics node (if it exists). This is only provided for
+    // Inspector nodes.
+    final diagnostic = ref?.diagnostic;
+    final description = diagnostic?.description;
+    if (description != null) {
+      final separator = diagnostic!.separator;
+      final textPreview = diagnostic.json['textPreview'];
+      return textPreview != null
+          ? '$description$separator $textPreview'
+          : description;
+    }
+
+    // Fallback to returning the runtime type as a catch-all.
+    return ref.runtimeType.toString();
   }
 
   /// Selects the object in the Flutter Widget inspector.
