@@ -373,7 +373,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     if (text != null) return text!;
 
     final instanceRef = ref!.instanceRef;
-    if (instanceRef != null && (name ?? '').isNotEmpty) {
+    if (instanceRef != null && !name.isNullOrEmpty) {
       final length = instanceRef.length;
       // Show the variable name, kind, and length for instance kinds that have a
       // length (maps, lists, sets, etc).
@@ -390,8 +390,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     // Inspector nodes.
     final diagnostic = ref?.diagnostic;
     final description = diagnostic?.description;
-    if (diagnostic != null && description != null) {
-      final separator = diagnostic.separator;
+    if (description != null) {
+      final separator = diagnostic!.separator;
       final textPreview = diagnostic.json['textPreview'];
       return textPreview != null
           ? '$description$separator $textPreview'
