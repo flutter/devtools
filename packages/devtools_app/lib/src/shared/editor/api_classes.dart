@@ -31,14 +31,36 @@ enum EditorMethod {
 /// TODO(https://github.com/flutter/devtools/issues/8824): Add tests that these
 /// are in-sync with analysis_server.
 enum LspMethod {
+  codeAction(methodName: 'textDocument/codeAction'),
   editableArguments(methodName: 'dart/textDocument/editableArguments'),
-  editArgument(methodName: 'dart/textDocument/editArgument');
+  editArgument(methodName: 'dart/textDocument/editArgument'),
+  executeCommand(methodName: 'workspace/executeCommand');
 
   const LspMethod({required this.methodName});
 
+  /// Returns the [LspMethod] for the given [methodName].
+  ///
+  /// If the [methodName] does not exist, returns null.
+  static LspMethod? fromMethodName(String methodName) =>
+      _methodNameToMethodLookup[methodName];
+
   final String methodName;
 
-  String get experimentalMethodName => 'experimental/$methodName';
+  static final _methodNameToMethodLookup = <String, LspMethod>{
+    for (final method in LspMethod.values) method.methodName: method,
+  };
+
+  static final _registrationStatus = <LspMethod, bool>{
+    for (final method in LspMethod.values) method: false,
+  };
+
+  /// Sets the registration status for this LSP method.
+  set isRegistered(bool isRegistered) {
+    _registrationStatus[this] = isRegistered;
+  }
+
+  /// Gets the current registration status of this LSP method.
+  bool get isRegistered => _registrationStatus[this] ?? false;
 }
 
 /// Known kinds of events that may come from the editor.
@@ -82,12 +104,14 @@ enum EditorEventKind {
 /// Constants for all fields used in JSON maps to avoid literal strings that
 /// may have typos sprinkled throughout the API classes.
 abstract class Field {
+  static const actions = 'actions';
   static const active = 'active';
   static const anchor = 'anchor';
   static const arguments = 'arguments';
   static const backgroundColor = 'backgroundColor';
   static const category = 'category';
   static const character = 'character';
+  static const command = 'command';
   static const debuggerType = 'debuggerType';
   static const debugSession = 'debugSession';
   static const debugSessionId = 'debugSessionId';
@@ -115,6 +139,7 @@ abstract class Field {
   static const isEditable = 'isEditable';
   static const isNullable = 'isNullable';
   static const isRequired = 'isRequired';
+  static const kind = 'kind';
   static const line = 'line';
   static const name = 'name';
   static const options = 'options';
@@ -133,6 +158,7 @@ abstract class Field {
   static const supportsForceExternal = 'supportsForceExternal';
   static const textDocument = 'textDocument';
   static const theme = 'theme';
+  static const title = 'title';
   static const type = 'type';
   static const uri = 'uri';
   static const value = 'value';
@@ -501,6 +527,63 @@ class EditableArgumentsResult with Serializable {
   };
 }
 
+/// Constants for [CodeActionCommand] prefixes used to filter the results
+/// returned by an [LspMethod.codeAction] request.
+abstract class CodeActionPrefixes {
+  static const flutterWrap = 'refactor.flutter.wrap';
+}
+
+/// The result of an [LspMethod.codeAction] request to the Analysis Server.
+///
+/// Contains a list of [CodeActionCommand]s that can be performed.
+class CodeActionResult with Serializable {
+  CodeActionResult({required this.actions});
+
+  CodeActionResult.fromJson(List<Map<String, Object?>> list)
+    : this(actions: list.map(CodeActionCommand.fromJson).toList());
+
+  final List<CodeActionCommand> actions;
+
+  @override
+  Map<String, Object?> toJson() => {Field.actions: actions};
+}
+
+/// A code action (also known as a "Refactor" or "Quick Fix") that can be called
+/// via an [LspMethod.executeCommand] request.
+///
+/// For example, "Wrap with Center" or "Wrap with Container".
+class CodeActionCommand with Serializable {
+  CodeActionCommand({
+    required this.command,
+    required this.title,
+    required this.args,
+  });
+
+  CodeActionCommand.fromJson(Map<String, Object?> map)
+    : this(
+        command: map[Field.command] as String,
+        title: map[Field.title] as String,
+        args: map[Field.arguments] as List<Object?>? ?? <Object?>[],
+      );
+
+  /// The command identifier to send to [LspMethod.executeCommand].
+  final String command;
+
+  /// The human-readable title of the command, e.g., "Wrap with Center".
+  final String title;
+
+  /// Arguments that should be passed to [LspMethod.executeCommand] when
+  /// invoking this action.
+  final List<Object?> args;
+
+  @override
+  Map<String, Object?> toJson() => {
+    Field.command: command,
+    Field.title: title,
+    Field.arguments: args,
+  };
+}
+
 /// Errors that the Analysis Server returns for failed argument edits.
 ///
 /// These should be kept in sync with the error coes defined at
@@ -554,16 +637,17 @@ enum EditArgumentError {
   }
 }
 
-/// Response to an edit argument request.
-class EditArgumentResponse {
-  EditArgumentResponse({required this.success, this.errorMessage, errorCode})
-    : _errorCode = errorCode;
+/// Generic response representing whether a request was a [success].
+class GenericApiResponse {
+  GenericApiResponse({
+    required this.success,
+    this.errorMessage,
+    this.errorCode,
+  });
 
   final bool success;
   final String? errorMessage;
-  final int? _errorCode;
-
-  EditArgumentError? get errorType => EditArgumentError.fromCode(_errorCode);
+  final int? errorCode;
 }
 
 /// Information about a single editable argument of a widget.

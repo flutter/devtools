@@ -9,13 +9,6 @@ extension PropertyEditorSidebar on Never {
   /// Analytics id to track events that come from the DTD editor sidebar.
   static String get id => 'propertyEditorSidebar';
 
-  /// Identifier for errors returned from the getEditableArguments API.
-  static String get getEditableArgumentsIdentifier =>
-      '${id}Error-getEditableArguments';
-
-  /// Identifier for errors returned from the editArgument API.
-  static String get editArgumentIdentifier => '${id}Error-editArgument';
-
   /// Analytics id for opening the documentation.
   static String get documentationLink => 'propertyEditorDocumentation';
 
