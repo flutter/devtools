@@ -98,6 +98,7 @@ flutter:
     - icons/inspector/widget_icons/
     - icons/memory/
     - icons/perf/
+    - icons/preview/
     # We have to explicitly list every asset under `packages/perfetto_ui_compiled/`
     # since directory support is not available for assets under `packages/`.
     # See (https://github.com/flutter/flutter/issues/112019).
