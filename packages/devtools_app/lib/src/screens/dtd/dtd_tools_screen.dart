@@ -43,7 +43,7 @@ class _DTDTools extends StatelessWidget {
       valueListenable: controller.dtdConnection,
       builder: (context, connection, _) => connection != null
           ? DtdConnectedView(
-              dtd: connection!,
+              dtd: connection,
               dtdUri: controller.localDtdManager.uri!.toString(),
               onDisconnect: () => controller.localDtdManager.disconnect(),
             )

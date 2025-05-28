@@ -50,12 +50,6 @@ class EventsController extends FeatureController {
     scrollController.dispose();
     super.dispose();
   }
-
-  @override
-  void reset() {
-    _events.clear();
-    _selectedEvent.value = null;
-  }
 }
 
 class EventsView extends StatelessWidget {
