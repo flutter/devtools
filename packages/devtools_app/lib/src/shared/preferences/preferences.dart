@@ -47,6 +47,9 @@ enum _ExperimentPreferences {
 /// DevTools preferences for UI-related settings.
 enum _UiPreferences {
   darkMode,
+  // TODO(kenz): consider renaming this to 'advancedDeveloperMode' if the DTD
+  //  tools tab stays in DevTools indefinitely. This will depend on whether
+  //  https://github.com/flutter/devtools/issues/7594 is resolved.
   vmDeveloperMode;
 
   String get storageKey => '$storagePrefix.$name';
@@ -72,7 +75,12 @@ class PreferencesController extends DisposableController
   /// theme user preference.
   final darkModeEnabled = ValueNotifier<bool>(useDarkThemeAsDefault);
 
-  final vmDeveloperModeEnabled = ValueNotifier<bool>(false);
+  /// Whether the user has enabled advanced developer mode.
+  ///
+  /// When enabled, DevTools will show additional features that are intended for
+  /// advanced development journeys, such as inspecting the internal state of
+  /// the Dart VM or the Dart Tooling Daemon.
+  final advancedDeveloperModeEnabled = ValueNotifier<bool>(false);
 
   /// Whether DevTools should loaded with the dart2wasm + skwasm instead of
   /// dart2js + canvaskit
@@ -109,7 +117,7 @@ class PreferencesController extends DisposableController
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     await _initDarkMode();
-    await _initVmDeveloperMode();
+    await _initAdvancedDeveloperMode();
     if (FeatureFlags.wasmOptInSetting) {
       await _initWasmEnabled();
     }
@@ -145,17 +153,17 @@ class PreferencesController extends DisposableController
     });
   }
 
-  Future<void> _initVmDeveloperMode() async {
-    final vmDeveloperModeValue = await boolValueFromStorage(
+  Future<void> _initAdvancedDeveloperMode() async {
+    final advancedDeveloperModeValue = await boolValueFromStorage(
       _UiPreferences.vmDeveloperMode.storageKey,
       defaultsTo: false,
     );
-    toggleVmDeveloperMode(vmDeveloperModeValue);
-    addAutoDisposeListener(vmDeveloperModeEnabled, () {
+    toggleAdvancedDeveloperMode(advancedDeveloperModeValue);
+    addAutoDisposeListener(advancedDeveloperModeEnabled, () {
       safeUnawaited(
         storage.setValue(
           _UiPreferences.vmDeveloperMode.storageKey,
-          '${vmDeveloperModeEnabled.value}',
+          '${advancedDeveloperModeEnabled.value}',
         ),
       );
     });
@@ -264,11 +272,11 @@ class PreferencesController extends DisposableController
     }
   }
 
-  /// Change the value of the VM developer mode setting.
-  void toggleVmDeveloperMode(bool? enableVmDeveloperMode) {
-    if (enableVmDeveloperMode != null) {
-      vmDeveloperModeEnabled.value = enableVmDeveloperMode;
-      VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
+  /// Change the value of the advanced developer mode setting.
+  void toggleAdvancedDeveloperMode(bool? enable) {
+    if (enable != null) {
+      advancedDeveloperModeEnabled.value = enable;
+      VmServiceWrapper.enablePrivateRpcs = enable;
     }
   }
 

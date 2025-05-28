@@ -32,8 +32,8 @@ class UserTagDropdown extends StatelessWidget {
           child: DevToolsTooltip(
             message: tooltip,
             child: ValueListenableBuilder<bool>(
-              valueListenable: preferences.vmDeveloperModeEnabled,
-              builder: (context, vmDeveloperModeEnabled, _) {
+              valueListenable: preferences.advancedDeveloperModeEnabled,
+              builder: (context, advancedDeveloperModeEnabled, _) {
                 return RoundedDropDownButton<String>(
                   isDense: true,
                   value: userTag,
@@ -58,7 +58,7 @@ class UserTagDropdown extends StatelessWidget {
                         value: CpuProfilerController.groupByUserTag,
                       ),
                     ],
-                    if (vmDeveloperModeEnabled)
+                    if (advancedDeveloperModeEnabled)
                       _buildMenuItem(
                         display: 'Group by: VM Tag',
                         value: CpuProfilerController.groupByVmTag,

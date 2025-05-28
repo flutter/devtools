@@ -280,11 +280,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         vmServiceUri != null && vmServiceUri.isNotEmpty;
 
     Widget scaffoldBuilder() {
-      // Force regeneration of visible screens when VM developer mode is
+      // Force regeneration of visible screens when Advanced Developer Mode is
       // enabled and when the list of available extensions change.
       return MultiValueListenableBuilder(
         listenables: [
-          preferences.vmDeveloperModeEnabled,
+          preferences.advancedDeveloperModeEnabled,
           extensionService.currentExtensions,
         ],
         builder: (_, _, child) {

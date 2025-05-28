@@ -115,7 +115,7 @@ enum ScreenMetaData {
     'vm-tools',
     title: 'VM Tools',
     icon: Icons.settings_applications,
-    requiresVmDeveloperMode: true,
+    requiresAdvancedDeveloperMode: true,
   ),
   simple('simple');
 
@@ -128,7 +128,7 @@ enum ScreenMetaData {
     this.requiresDartVm = false,
     this.requiresFlutter = false,
     this.requiresDebugBuild = false,
-    this.requiresVmDeveloperMode = false,
+    this.requiresAdvancedDeveloperMode = false,
     this.worksWithOfflineData = false,
     this.requiresLibrary,
     this.tutorialVideoTimestamp,
@@ -145,7 +145,7 @@ enum ScreenMetaData {
   final bool requiresDartVm;
   final bool requiresFlutter;
   final bool requiresDebugBuild;
-  final bool requiresVmDeveloperMode;
+  final bool requiresAdvancedDeveloperMode;
   final bool worksWithOfflineData;
   final String? requiresLibrary;
 
@@ -194,7 +194,7 @@ abstract class Screen {
     this.requiresDartVm = false,
     this.requiresFlutter = false,
     this.requiresDebugBuild = false,
-    this.requiresVmDeveloperMode = false,
+    this.requiresAdvancedDeveloperMode = false,
     this.worksWithOfflineData = false,
     this.showFloatingDebuggerControls = true,
   }) : assert(
@@ -213,7 +213,7 @@ abstract class Screen {
     bool requiresDartVm = false,
     bool requiresFlutter = false,
     bool requiresDebugBuild = false,
-    bool requiresVmDeveloperMode = false,
+    bool requiresAdvancedDeveloperMode = false,
     bool worksWithOfflineData = false,
     bool Function(FlutterVersion? currentVersion)? shouldShowForFlutterVersion,
     bool showFloatingDebuggerControls = true,
@@ -229,7 +229,7 @@ abstract class Screen {
          requiresDartVm: requiresDartVm,
          requiresFlutter: requiresFlutter,
          requiresDebugBuild: requiresDebugBuild,
-         requiresVmDeveloperMode: requiresVmDeveloperMode,
+         requiresAdvancedDeveloperMode: requiresAdvancedDeveloperMode,
          worksWithOfflineData: worksWithOfflineData,
          showFloatingDebuggerControls: showFloatingDebuggerControls,
          title: title,
@@ -252,7 +252,7 @@ abstract class Screen {
          requiresDartVm: metadata.requiresDartVm,
          requiresFlutter: metadata.requiresFlutter,
          requiresDebugBuild: metadata.requiresDebugBuild,
-         requiresVmDeveloperMode: metadata.requiresVmDeveloperMode,
+         requiresAdvancedDeveloperMode: metadata.requiresAdvancedDeveloperMode,
          worksWithOfflineData: metadata.worksWithOfflineData,
          shouldShowForFlutterVersion: shouldShowForFlutterVersion,
          showFloatingDebuggerControls: showFloatingDebuggerControls,
@@ -326,8 +326,9 @@ abstract class Screen {
   /// Whether this screen should only be included when the app is debuggable.
   final bool requiresDebugBuild;
 
-  /// Whether this screen should only be included when VM developer mode is enabled.
-  final bool requiresVmDeveloperMode;
+  /// Whether this screen should only be included when advanced developer mode
+  /// is enabled.
+  final bool requiresAdvancedDeveloperMode;
 
   /// Whether this screen works offline and should show in offline mode even if conditions are not met.
   final bool worksWithOfflineData;
@@ -546,12 +547,12 @@ abstract class Screen {
       );
     }
   }
-  if (screen.requiresVmDeveloperMode) {
-    if (!preferences.vmDeveloperModeEnabled.value) {
-      _log.finest('screen requires vm developer mode: returning false');
+  if (screen.requiresAdvancedDeveloperMode) {
+    if (!preferences.advancedDeveloperModeEnabled.value) {
+      _log.finest('screen requires advanced developer mode: returning false');
       return (
         show: false,
-        disabledReason: ScreenDisabledReason.requiresVmDeveloperMode,
+        disabledReason: ScreenDisabledReason.requiresAdvancedDeveloperMode,
       );
     }
   }
@@ -628,7 +629,9 @@ enum ScreenDisabledReason {
   requiresDartVm('requires the Dart VM, but it is not available.'),
   requiresDebugBuild('only supports debug builds.'),
   requiresFlutter('only supports Flutter applications.'),
-  requiresVmDeveloperMode('only works when VM Developer Mode is enabled'),
+  requiresAdvancedDeveloperMode(
+    'only works when Advanced Developer Mode is enabled',
+  ),
   serviceNotReady(
     'requires a connected application, but there is no connection available.',
   );

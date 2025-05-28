@@ -98,10 +98,10 @@ class ServiceConnectionManager {
   }
 
   Future<void> _afterOpenVmService(VmServiceWrapper? service) async {
-    // Re-initialize isolates when VM developer mode is enabled/disabled to
-    // display/hide system isolates.
-    preferences.vmDeveloperModeEnabled.addListener(
-      _handleVmDeveloperModeChanged,
+    // Re-initialize isolates when advanced developer mode is enabled/disabled
+    // to display/hide system isolates.
+    preferences.advancedDeveloperModeEnabled.addListener(
+      _handleAdvancedDeveloperModeChanged,
     );
 
     // This needs to be called before calling
@@ -161,17 +161,18 @@ class ServiceConnectionManager {
     _inspectorService?.dispose();
     _inspectorService = null;
     serviceTrafficLogger?.dispose();
-    preferences.vmDeveloperModeEnabled.removeListener(
-      _handleVmDeveloperModeChanged,
+    preferences.advancedDeveloperModeEnabled.removeListener(
+      _handleAdvancedDeveloperModeChanged,
     );
   }
 
-  Future<void> _handleVmDeveloperModeChanged() async {
+  Future<void> _handleAdvancedDeveloperModeChanged() async {
     final vm = await serviceConnection.serviceManager.service!.getVM();
     final isolates = vm.isolatesForDevToolsMode();
-    final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
+    final advancedDeveloperModeEnabled =
+        preferences.advancedDeveloperModeEnabled.value;
     if (serviceManager.isolateManager.selectedIsolate.value!.isSystemIsolate! &&
-        !vmDeveloperModeEnabled) {
+        !advancedDeveloperModeEnabled) {
       serviceManager.isolateManager.selectIsolate(
         serviceManager.isolateManager.isolates.value.first,
       );

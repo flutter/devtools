@@ -243,30 +243,31 @@ void main() {
       offlineDataController.stopShowingOfflineData();
     });
 
-    testWidgets('are correct for Dart CLI app with VM developer mode enabled', (
-      WidgetTester tester,
-    ) async {
-      preferences.toggleVmDeveloperMode(true);
-      setupMockValues();
-      expect(
-        visibleScreenTypes,
-        equals([
-          HomeScreen,
-          // InspectorScreen,
-          // LegacyPerformanceScreen,
-          PerformanceScreen,
-          ProfilerScreen,
-          MemoryScreen,
-          DebuggerScreen,
-          NetworkScreen,
-          LoggingScreen,
-          AppSizeScreen,
-          DeepLinksScreen,
-          VMDeveloperToolsScreen,
-        ]),
-      );
-      preferences.toggleVmDeveloperMode(false);
-    });
+    testWidgets(
+      'are correct for Dart CLI app with advanced developer mode enabled',
+      (WidgetTester tester) async {
+        preferences.toggleAdvancedDeveloperMode(true);
+        setupMockValues();
+        expect(
+          visibleScreenTypes,
+          equals([
+            HomeScreen,
+            // InspectorScreen,
+            // LegacyPerformanceScreen,
+            PerformanceScreen,
+            ProfilerScreen,
+            MemoryScreen,
+            DebuggerScreen,
+            NetworkScreen,
+            LoggingScreen,
+            AppSizeScreen,
+            DeepLinksScreen,
+            VMDeveloperToolsScreen,
+          ]),
+        );
+        preferences.toggleAdvancedDeveloperMode(false);
+      },
+    );
   });
 }
 
