@@ -6,8 +6,13 @@ import 'package:args/command_runner.dart';
 import 'package:io/io.dart';
 
 import '../utils.dart';
+import 'shared.dart';
 
 class SyncCommand extends Command {
+  SyncCommand() {
+    argParser.addUpdateOnPathFlag();
+  }
+
   @override
   String get name => 'sync';
 
@@ -21,7 +26,14 @@ class SyncCommand extends Command {
     await processManager.runProcess(
       CliCommand.git(['pull', 'upstream', 'master']),
     );
-    await processManager.runProcess(CliCommand.tool(['update-flutter-sdk']));
+    final updateOnPath =
+        argResults![SharedCommandArgs.updateOnPath.flagName] as bool;
+    await processManager.runProcess(
+      CliCommand.tool([
+        'update-flutter-sdk',
+        if (updateOnPath) SharedCommandArgs.updateOnPath.asArg(),
+      ]),
+    );
     await processManager.runProcess(
       CliCommand.tool(['generate-code', '--upgrade']),
     );
