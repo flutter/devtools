@@ -171,6 +171,14 @@ class PropertyEditorController extends DisposableController
     );
   }
 
+  Future<GenericApiResponse?> executeCommand(CodeActionCommand refactor) {
+    return editorClient.executeCommand(
+      commandName: refactor.command,
+      commandArgs: refactor.args,
+      screenId: gac.PropertyEditorSidebar.id,
+    );
+  }
+
   int hashProperty(EditableProperty property) {
     final widgetData = editableWidgetData.value;
     if (widgetData == null) {

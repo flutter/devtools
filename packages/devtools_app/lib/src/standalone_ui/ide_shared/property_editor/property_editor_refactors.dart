@@ -9,9 +9,12 @@ import '../../../shared/editor/api_classes.dart';
 import 'property_editor_common.dart';
 import 'property_editor_controller.dart';
 
+typedef ExecuteCommandFunction =
+    Future<GenericApiResponse?> Function(CodeActionCommand refactor);
+
 /// Widget for displaying the available refactors.
 ///
-/// Each refactor is given a [_RefactorButton].
+/// Each refactor is  in a [_RefactorButton].
 class Refactors extends StatefulWidget {
   const Refactors({
     required this.refactors,
@@ -27,8 +30,8 @@ class Refactors extends StatefulWidget {
 }
 
 class _RefactorsState extends State<Refactors> {
-  final _mainRefactors = <CodeActionCommand>[];
-  final _otherRefactors = <CodeActionCommand>[];
+  final _mainRefactorsGroup = <CodeActionCommand>[];
+  final _otherRefactorsGroup = <CodeActionCommand>[];
 
   bool _showAllRefactors = false;
 
@@ -38,7 +41,7 @@ class _RefactorsState extends State<Refactors> {
     _categorizeRefactors();
   }
 
-    @override
+  @override
   void didUpdateWidget(covariant Refactors oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.refactors != oldWidget.refactors) {
@@ -46,25 +49,44 @@ class _RefactorsState extends State<Refactors> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    final widgetName = widget.controller.widgetName;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(densePadding),
-          child: _wrapWithLabel(widgetName),
+        const Padding(
+          padding: EdgeInsets.all(densePadding),
+          child: Text('Wrap with:'),
         ),
-
         Wrap(
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            for (final refactor in _mainRefactors) _RefactorButton(refactor),
-            if (_showAllRefactors)
-              for (final refactor in _otherRefactors) _RefactorButton(refactor),
-            if (_otherRefactors.isNotEmpty)
+            for (final refactor in _mainRefactorsGroup)
+              _RefactorButton(
+                refactor,
+                executeCommand: widget.controller.executeCommand,
+                iconOnly: true,
+              ),
+          ],
+        ),
+        if (_showAllRefactors)
+          Padding(
+            padding: const EdgeInsets.only(top: densePadding / 2),
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                for (final refactor in _otherRefactorsGroup)
+                  _RefactorButton(
+                    refactor,
+                    executeCommand: widget.controller.executeCommand,
+                    iconOnly: false,
+                  ),
+              ],
+            ),
+          ),
+        if (_otherRefactorsGroup.isNotEmpty)
+          Row(
+            children: [
               Padding(
                 padding: const EdgeInsets.all(densePadding),
                 child: ExpandableTextButton(
@@ -76,52 +98,43 @@ class _RefactorsState extends State<Refactors> {
                   },
                 ),
               ),
-          ],
-        ),
+            ],
+          ),
         const PaddedDivider.noPadding(),
       ],
     );
   }
 
   void _categorizeRefactors() {
-    _mainRefactors.clear();
-    _otherRefactors.clear();
+    _mainRefactorsGroup.clear();
+    _otherRefactorsGroup.clear();
     for (final refactor in widget.refactors) {
-      print(refactor.title);
-    final category = _refactorsWithIconAsset.contains(refactor.title) || refactor.title.startsWith('Wrap with widget')
-          ? _mainRefactors
-          : _otherRefactors;
+      // Ignore any unexpected refactors that don't begin with "Wrap with".
+      if (!refactor.title.startsWith('Wrap with')) continue;
+
+      final category = _mainRefactors.contains(refactor.title)
+          ? _mainRefactorsGroup
+          : _otherRefactorsGroup;
       category.add(refactor);
     }
   }
-
-  Widget _wrapWithLabel(String? widgetName) => Text.rich(
-    TextSpan(
-      children: [
-        const TextSpan(text: 'Wrap '),
-        if (widgetName != null)
-          TextSpan(
-            text: widgetName,
-            style: Theme.of(
-              context,
-            ).fixedFontStyle.copyWith(fontWeight: FontWeight.bold),
-          ),
-        TextSpan(text: '${widgetName != null ? ' ' : ''}with:'),
-      ],
-    ),
-  );
 }
 
 /// A button which triggers a single refactor.
 ///
 /// Buttons for refactors in [_refactorsWithIconAsset] have an icon.
 class _RefactorButton extends StatelessWidget {
-  const _RefactorButton(this.action);
+  const _RefactorButton(
+    this.action, {
+    required this.executeCommand,
+    required this.iconOnly,
+  });
 
   final CodeActionCommand action;
+  final ExecuteCommandFunction executeCommand;
+  final bool iconOnly;
 
-  // static const _iconAssetPath = 'icons/preview/';
-    static const _iconAssetPath = 'icons/inspector/widget_icons/';
+  static const _iconAssetPath = 'icons/property_editor/';
 
   String get label {
     final wrapperName = action.title.split('Wrap with ').last;
@@ -136,88 +149,80 @@ class _RefactorButton extends StatelessWidget {
     }
 
     final path = '$_iconAssetPath${label.toLowerCase()}';
-    if (darkMode) {
-      return '${path}.png';
-    } else {
-      return '$path.png';
-    }
+    return '${path}_${darkMode ? 'dark' : 'light'}_theme.png';
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final iconAsset = _iconAsset(darkMode: theme.isDarkTheme);
-    const darkColor = 0x7f7f7f;
 
-    final widgetStyle = theme.regularTextStyle.copyWith(
-      fontWeight: FontWeight.bold,
-      color: Color(0xFF7f7f7f),
-      fontSize: 15,
+    final button = OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
+        side: BorderSide(
+          color: iconOnly ? Colors.transparent : theme.colorScheme.onSurface,
+        ),
+        padding: const EdgeInsets.all(densePadding),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: iconAsset != null
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Image.asset(iconAsset, height: actionsIconSize),
+              ],
+            )
+          : _buttonText(label, theme: theme),
+      onPressed: () async {
+        await executeCommand(action);
+      },
     );
 
     return Padding(
-      padding: const EdgeInsets.all(densePadding),
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4.0),
-          
-          ),
-          side: BorderSide(color: Color(0xFF0d9ed3),),
-          padding: const EdgeInsets.symmetric(
-            horizontal: denseSpacing / 2,
-            vertical: denseSpacing / 2,
-          ),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          minimumSize:
-              Size.zero, // Allow the button to be smaller than the default
-          // VisualDensity.compact can also be used if further density is needed.
-        ),
-        child: iconAsset != null
-            ? Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Image.asset(iconAsset, height: actionsIconSize),
-                  // const SizedBox(width: denseSpacing),
-                  // Text(label, style: theme.regularTextStyle.copyWith(fontSize: 10)),
-                ],
-              )
-            : _buttonText(label, theme: theme),
-        onPressed: () {
-          print('pressed $command');
-        },
-      ),
+      padding: EdgeInsets.all(iconOnly ? densePadding / 2 : densePadding),
+      child: iconOnly ? DevToolsTooltip(message: label, child: button) : button,
     );
   }
 
   Text _buttonText(String label, {required ThemeData theme}) {
-    if (label == 'Widget') {
+    // Show the first letter of the label as the icon.
+    if (_refactorsWithLetterIcon.contains(action.title)) {
       return Text(
         label[0],
         style: theme.regularTextStyle.copyWith(
           fontWeight: FontWeight.bold,
-          // color: Color(0xFF7f7f7f),
-          color: Color(0xFF0d9ed3),
-          fontSize: 15,
+          fontSize: unscaledExtraLargeFontSize,
+          color: theme.isDarkTheme ? Colors.white : Colors.black,
         ),
       );
     }
 
-    return Text(label, style: theme.regularTextStyle.copyWith(color: Color(0xFF0d9ed3)));
+    return Text(label, style: theme.regularTextStyle);
   }
 }
 
-const _wrapWithPadding = 'Wrap with Padding'; //
-const _wrapWithContainer = 'Wrap with Container'; //
-const _wrapWithColumn = 'Wrap with Column'; //
-const _wrapWithRow = 'Wrap with Row'; // 
+const _wrapWithPadding = 'Wrap with Padding';
+const _wrapWithContainer = 'Wrap with Container';
+const _wrapWithColumn = 'Wrap with Column';
+const _wrapWithRow = 'Wrap with Row';
 const _wrapWithCenter = 'Wrap with Center';
+const _wrapWithSizedBox = 'Wrap with SizedBox';
+const _wrapWithWidget = 'Wrap with widget...';
 
-const _refactorsWithIconAsset = [
+const _refactorsWithIconAsset = {
   _wrapWithPadding,
   _wrapWithContainer,
   _wrapWithColumn,
   _wrapWithRow,
   _wrapWithCenter,
-];
+  _wrapWithSizedBox,
+};
+
+const _refactorsWithLetterIcon = {_wrapWithWidget};
+
+const _mainRefactors = {
+  ..._refactorsWithIconAsset,
+  ..._refactorsWithLetterIcon,
+};
