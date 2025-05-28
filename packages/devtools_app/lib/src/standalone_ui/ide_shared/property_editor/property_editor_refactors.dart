@@ -120,7 +120,8 @@ class _RefactorButton extends StatelessWidget {
 
   final CodeActionCommand action;
 
-  static const _iconAssetPath = 'icons/preview/';
+  // static const _iconAssetPath = 'icons/preview/';
+    static const _iconAssetPath = 'icons/inspector/widget_icons/';
 
   String get label {
     final wrapperName = action.title.split('Wrap with ').last;
@@ -136,7 +137,7 @@ class _RefactorButton extends StatelessWidget {
 
     final path = '$_iconAssetPath${label.toLowerCase()}';
     if (darkMode) {
-      return '${path}_dark.png';
+      return '${path}.png';
     } else {
       return '$path.png';
     }
@@ -160,7 +161,9 @@ class _RefactorButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4.0),
+          
           ),
+          side: BorderSide(color: Color(0xFF0d9ed3),),
           padding: const EdgeInsets.symmetric(
             horizontal: denseSpacing / 2,
             vertical: denseSpacing / 2,
@@ -194,20 +197,21 @@ class _RefactorButton extends StatelessWidget {
         label[0],
         style: theme.regularTextStyle.copyWith(
           fontWeight: FontWeight.bold,
-          color: Color(0xFF7f7f7f),
+          // color: Color(0xFF7f7f7f),
+          color: Color(0xFF0d9ed3),
           fontSize: 15,
         ),
       );
     }
 
-    return Text(label, style: theme.regularTextStyle.copyWith(color: Color(0xFF7f7f7f)));
+    return Text(label, style: theme.regularTextStyle.copyWith(color: Color(0xFF0d9ed3)));
   }
 }
 
-const _wrapWithPadding = 'Wrap with Padding';
-const _wrapWithContainer = 'Wrap with Container';
-const _wrapWithColumn = 'Wrap with Column';
-const _wrapWithRow = 'Wrap with Row';
+const _wrapWithPadding = 'Wrap with Padding'; //
+const _wrapWithContainer = 'Wrap with Container'; //
+const _wrapWithColumn = 'Wrap with Column'; //
+const _wrapWithRow = 'Wrap with Row'; // 
 const _wrapWithCenter = 'Wrap with Center';
 
 const _refactorsWithIconAsset = [
