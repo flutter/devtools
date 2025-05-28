@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/common_widgets.dart';
 import '../../../shared/ui/filter.dart';
+import 'property_editor_common.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_inputs.dart';
 import 'property_editor_messages.dart';
@@ -68,7 +69,7 @@ class PropertyEditorView extends StatelessWidget {
 
     if (refactors.isNotEmpty) {
       contents.add(
-        Refactors(refactors: refactors, controller: controller),
+        WrapWithRefactors(refactors: refactors, controller: controller),
       );
     }
 
@@ -524,15 +525,7 @@ class _ExpandableWidgetDocumentationState
             ),
           ),
         const SizedBox(height: denseSpacing),
-        InkWell(
-          onTap: _toggleExpansion,
-          child: Text(
-            _isExpanded ? 'Show less' : 'Show more',
-            style: theme.boldTextStyle.copyWith(
-              color: theme.colorScheme.primary,
-            ),
-          ),
-        ),
+        ExpandableTextButton(isExpanded: _isExpanded, onTap: _toggleExpansion),
       ],
     );
   }

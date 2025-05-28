@@ -5,24 +5,27 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+/// A text button that displays "Show more" or "Show less" depending on whether
+/// it [isExpanded].
 class ExpandableTextButton extends StatelessWidget {
-  const ExpandableTextButton({super.key, required this.isExpanded, required this.onTap});
+  const ExpandableTextButton({
+    super.key,
+    required this.isExpanded,
+    required this.onTap,
+  });
 
   final bool isExpanded;
   final VoidCallback onTap;
 
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-        return InkWell(
-          onTap: onTap,
-          child: Text(
-            isExpanded ? 'Show less' : 'Show more',
-            style: theme.boldTextStyle.copyWith(
-              color: theme.colorScheme.primary,
-            ),
-          ),
-        );
+    return InkWell(
+      onTap: onTap,
+      child: Text(
+        isExpanded ? 'Show less' : 'Show more',
+        style: theme.boldTextStyle.copyWith(color: theme.colorScheme.primary),
+      ),
+    );
   }
 }

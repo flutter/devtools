@@ -12,11 +12,11 @@ import 'property_editor_controller.dart';
 typedef ExecuteCommandFunction =
     Future<GenericApiResponse?> Function(CodeActionCommand refactor);
 
-/// Widget for displaying the available refactors.
+/// Widget for displaying the available "Wrap with" refactors.
 ///
-/// Each refactor is  in a [_RefactorButton].
-class Refactors extends StatefulWidget {
-  const Refactors({
+/// Each refactor is  in a [_WrapWithButton].
+class WrapWithRefactors extends StatefulWidget {
+  const WrapWithRefactors({
     required this.refactors,
     required this.controller,
     super.key,
@@ -26,10 +26,10 @@ class Refactors extends StatefulWidget {
   final PropertyEditorController controller;
 
   @override
-  State<Refactors> createState() => _RefactorsState();
+  State<WrapWithRefactors> createState() => _RefactorsState();
 }
 
-class _RefactorsState extends State<Refactors> {
+class _RefactorsState extends State<WrapWithRefactors> {
   final _mainRefactorsGroup = <CodeActionCommand>[];
   final _otherRefactorsGroup = <CodeActionCommand>[];
 
@@ -42,7 +42,7 @@ class _RefactorsState extends State<Refactors> {
   }
 
   @override
-  void didUpdateWidget(covariant Refactors oldWidget) {
+  void didUpdateWidget(covariant WrapWithRefactors oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.refactors != oldWidget.refactors) {
       _categorizeRefactors();
@@ -62,7 +62,7 @@ class _RefactorsState extends State<Refactors> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             for (final refactor in _mainRefactorsGroup)
-              _RefactorButton(
+              _WrapWithButton(
                 refactor,
                 executeCommand: widget.controller.executeCommand,
                 iconOnly: true,
@@ -76,7 +76,7 @@ class _RefactorsState extends State<Refactors> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 for (final refactor in _otherRefactorsGroup)
-                  _RefactorButton(
+                  _WrapWithButton(
                     refactor,
                     executeCommand: widget.controller.executeCommand,
                     iconOnly: false,
@@ -120,11 +120,11 @@ class _RefactorsState extends State<Refactors> {
   }
 }
 
-/// A button which triggers a single refactor.
+/// A button which triggers a single "Wrap with" refactor.
 ///
 /// Buttons for refactors in [_refactorsWithIconAsset] have an icon.
-class _RefactorButton extends StatelessWidget {
-  const _RefactorButton(
+class _WrapWithButton extends StatelessWidget {
+  const _WrapWithButton(
     this.action, {
     required this.executeCommand,
     required this.iconOnly,
