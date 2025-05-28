@@ -38,6 +38,15 @@ class _RefactorsState extends State<Refactors> {
     _categorizeRefactors();
   }
 
+    @override
+  void didUpdateWidget(covariant Refactors oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.refactors != oldWidget.refactors) {
+      _categorizeRefactors();
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final widgetName = widget.controller.widgetName;
@@ -78,7 +87,8 @@ class _RefactorsState extends State<Refactors> {
     _mainRefactors.clear();
     _otherRefactors.clear();
     for (final refactor in widget.refactors) {
-      final category = _refactorsWithIconAsset.contains(refactor.title)
+      print(refactor.title);
+    final category = _refactorsWithIconAsset.contains(refactor.title) || refactor.title.startsWith('Wrap with widget')
           ? _mainRefactors
           : _otherRefactors;
       category.add(refactor);
@@ -136,26 +146,61 @@ class _RefactorButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final iconAsset = _iconAsset(darkMode: theme.isDarkTheme);
+    const darkColor = 0x7f7f7f;
+
+    final widgetStyle = theme.regularTextStyle.copyWith(
+      fontWeight: FontWeight.bold,
+      color: Color(0xFF7f7f7f),
+      fontSize: 15,
+    );
 
     return Padding(
       padding: const EdgeInsets.all(densePadding),
       child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4.0),
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: denseSpacing / 2,
+            vertical: denseSpacing / 2,
+          ),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          minimumSize:
+              Size.zero, // Allow the button to be smaller than the default
+          // VisualDensity.compact can also be used if further density is needed.
+        ),
         child: iconAsset != null
             ? Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Image.asset(iconAsset, height: actionsIconSize),
-                  const SizedBox(width: denseSpacing),
-                  Text(label),
+                  // const SizedBox(width: denseSpacing),
+                  // Text(label, style: theme.regularTextStyle.copyWith(fontSize: 10)),
                 ],
               )
-            : Text(label),
+            : _buttonText(label, theme: theme),
         onPressed: () {
           print('pressed $command');
         },
       ),
     );
+  }
+
+  Text _buttonText(String label, {required ThemeData theme}) {
+    if (label == 'Widget') {
+      return Text(
+        label[0],
+        style: theme.regularTextStyle.copyWith(
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF7f7f7f),
+          fontSize: 15,
+        ),
+      );
+    }
+
+    return Text(label, style: theme.regularTextStyle.copyWith(color: Color(0xFF7f7f7f)));
   }
 }
 
