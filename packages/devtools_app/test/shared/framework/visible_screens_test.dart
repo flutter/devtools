@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/dtd/dtd_tools_screen.dart';
 import 'package:devtools_app/src/shared/framework/framework_controller.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -86,6 +87,7 @@ void main() {
           AppSizeScreen,
           DeepLinksScreen,
           // VMDeveloperToolsScreen,
+          // DTDToolsScreen,
         ]),
       );
     });
@@ -108,6 +110,7 @@ void main() {
           // AppSizeScreen,
           // DeepLinksScreen,
           // VMDeveloperToolsScreen,
+          // DTDToolsScreen,
         ]),
       );
     });
@@ -132,6 +135,7 @@ void main() {
           AppSizeScreen,
           DeepLinksScreen,
           // VMDeveloperToolsScreen,
+          // DTDToolsScreen,
         ]),
       );
     });
@@ -156,6 +160,7 @@ void main() {
           AppSizeScreen,
           DeepLinksScreen,
           // VMDeveloperToolsScreen,
+          // DTDToolsScreen,
         ]),
       );
     });
@@ -180,6 +185,7 @@ void main() {
           // AppSizeScreen,
           // DeepLinksScreen,
           // VMDeveloperToolsScreen,
+          // DTDToolsScreen,
         ]),
       );
     });
@@ -214,6 +220,7 @@ void main() {
           AppSizeScreen,
           DeepLinksScreen,
           // VMDeveloperToolsScreen,
+          // DTDToolsScreen,
         ]),
       );
     });
@@ -238,6 +245,7 @@ void main() {
           // AppSizeScreen,
           // DeepLinksScreen,
           // VMDeveloperToolsScreen,
+          // DTDToolsScreen,
         ]),
       );
       offlineDataController.stopShowingOfflineData();
@@ -263,6 +271,7 @@ void main() {
             AppSizeScreen,
             DeepLinksScreen,
             VMDeveloperToolsScreen,
+            DTDToolsScreen,
           ]),
         );
         preferences.toggleAdvancedDeveloperMode(false);

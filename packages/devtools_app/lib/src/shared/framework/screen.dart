@@ -117,6 +117,12 @@ enum ScreenMetaData {
     icon: Icons.settings_applications,
     requiresAdvancedDeveloperMode: true,
   ),
+  dtdTools(
+    'dtdTools',
+    title: 'DTD Tools',
+    icon: Icons.settings_applications,
+    requiresAdvancedDeveloperMode: true,
+  ),
   simple('simple');
 
   const ScreenMetaData(

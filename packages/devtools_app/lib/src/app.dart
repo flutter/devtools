@@ -29,6 +29,8 @@ import 'screens/debugger/debugger_controller.dart';
 import 'screens/debugger/debugger_screen.dart';
 import 'screens/deep_link_validation/deep_links_controller.dart';
 import 'screens/deep_link_validation/deep_links_screen.dart';
+import 'screens/dtd/dtd_tools_controller.dart';
+import 'screens/dtd/dtd_tools_screen.dart';
 import 'screens/inspector_shared/inspector_screen.dart';
 import 'screens/inspector_shared/inspector_screen_controller.dart';
 import 'screens/logging/logging_controller.dart';
@@ -724,6 +726,10 @@ List<DevToolsScreen> defaultScreens({
     DevToolsScreen<VMDeveloperToolsController>(
       VMDeveloperToolsScreen(),
       createController: (_) => VMDeveloperToolsController(),
+    ),
+    DevToolsScreen<DTDToolsController>(
+      DTDToolsScreen(),
+      createController: (_) => DTDToolsController(),
     ),
   ];
 }
