@@ -17,9 +17,8 @@ import 'events.dart';
 import 'services.dart';
 import 'shared.dart';
 
-// TODO(file-issue): ship this screen as a DevTools extension instead of a first
-// party DevTools screen. This will depend on
-// https://github.com/flutter/devtools/issues/7594 getting resolved.
+// TODO(https://github.com/flutter/devtools/issues/9216): ship this screen as a
+// DevTools extension instead of a first party DevTools screen.
 
 /// A screen for inspecting a Dart Tooling Daemon instance.
 /// 

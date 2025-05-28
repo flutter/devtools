@@ -49,7 +49,7 @@ enum _UiPreferences {
   darkMode,
   // TODO(kenz): consider renaming this to 'advancedDeveloperMode' if the DTD
   //  tools tab stays in DevTools indefinitely. This will depend on whether
-  //  https://github.com/flutter/devtools/issues/7594 is resolved.
+  //  https://github.com/flutter/devtools/issues/9216 is resolved.
   vmDeveloperMode;
 
   String get storageKey => '$storagePrefix.$name';
