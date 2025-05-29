@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-import 'dart:async';
-
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart' show DartToolingDaemon, DTDEvent;
@@ -12,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'dtd_tools_model.dart';
 import 'shared.dart';
 
+/// Manages business logic for the [EventsView] widget, which displays
+/// information about events sent and received over DTD event streams.
 class EventsController extends FeatureController {
   late DartToolingDaemon dtd;
 
@@ -28,16 +28,14 @@ class EventsController extends FeatureController {
       autoDisposeStreamSubscription(
         dtd.onEvent(stream).listen((event) {
           _events.add(event);
-          // Schedule a scroll to the bottom after the frame is built
-          unawaited(
-            Future.microtask(() {
-              if (scrollController.hasClients) {
-                scrollController.jumpTo(
-                  scrollController.position.maxScrollExtent,
-                );
-              }
-            }),
-          );
+          // Schedule a scroll to the bottom after the frame is built.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (scrollController.hasClients) {
+              scrollController.jumpTo(
+                scrollController.position.maxScrollExtent,
+              );
+            }
+          });
         }),
       );
     }
@@ -52,6 +50,7 @@ class EventsController extends FeatureController {
   }
 }
 
+/// Displays information about events sent and received over DTD event streams.
 class EventsView extends StatelessWidget {
   const EventsView({super.key, required this.controller});
 
@@ -97,7 +96,7 @@ class EventsView extends StatelessWidget {
                       child: ListView.builder(
                         controller: controller.scrollController,
                         itemCount: events.length,
-                        itemBuilder: (context, index) => EventListTile(
+                        itemBuilder: (context, index) => _EventListTile(
                           event: events[index],
                           selected: events[index] == selectedEvent,
                           onTap: () {
@@ -110,7 +109,7 @@ class EventsView extends StatelessWidget {
                   OutlineDecoration.onlyTop(
                     child: Padding(
                       padding: const EdgeInsets.all(denseSpacing),
-                      child: EventDetailView(event: selectedEvent),
+                      child: _EventDetailView(event: selectedEvent),
                     ),
                   ),
                 ],
@@ -123,9 +122,9 @@ class EventsView extends StatelessWidget {
   }
 }
 
-class EventListTile extends StatelessWidget {
-  const EventListTile({
-    super.key,
+/// A display tile for a single event in [EventsView].
+class _EventListTile extends StatelessWidget {
+  const _EventListTile({
     required this.event,
     this.selected = false,
     this.onTap,
@@ -171,8 +170,9 @@ class EventListTile extends StatelessWidget {
   }
 }
 
-class EventDetailView extends StatelessWidget {
-  const EventDetailView({super.key, required this.event});
+/// The details view for a single [DTDEvent] selected from [EventsView].
+class _EventDetailView extends StatelessWidget {
+  const _EventDetailView({required this.event});
 
   final DTDEvent? event;
 
