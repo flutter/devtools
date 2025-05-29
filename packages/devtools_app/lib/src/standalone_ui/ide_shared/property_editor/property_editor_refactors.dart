@@ -5,7 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/editor/api_classes.dart';
+import '../../../shared/ui/common_widgets.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_types.dart';
 
@@ -23,10 +23,10 @@ class WrapWithRefactors extends StatefulWidget {
   final PropertyEditorController controller;
 
   @override
-  State<WrapWithRefactors> createState() => _RefactorsState();
+  State<WrapWithRefactors> createState() => _WrapWithRefactorsState();
 }
 
-class _RefactorsState extends State<WrapWithRefactors> {
+class _WrapWithRefactorsState extends State<WrapWithRefactors> {
   final _mainRefactorsGroup = <WrapWithRefactorAction>[];
   final _otherRefactorsGroup = <WrapWithRefactorAction>[];
 
@@ -61,23 +61,22 @@ class _RefactorsState extends State<WrapWithRefactors> {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               for (final refactor in _mainRefactorsGroup)
-                _WrapWithButton(
-                  refactor,
-                  executeCommand: executeCommand,
-                  iconOnly: true,
+                Padding(
+                  padding: const EdgeInsets.all(densePadding),
+                  child: _WrapWithButton(
+                    refactor,
+                    executeCommand: executeCommand,
+                  ),
+                ),
+              if (showOtherRefactors)
+                Padding(
+                  padding: const EdgeInsets.all(densePadding),
+                  child: _WrapWithOverflowButton(
+                    refactors: _otherRefactorsGroup,
+                    executeCommand: executeCommand,
+                  ),
                 ),
             ],
-          ),
-        if (showOtherRefactors)
-          Padding(
-            padding: const EdgeInsets.all(densePadding),
-            child: _WrapWithDropdown(
-              placeholderText: showMainRefactors
-                  ? 'More widgets...'
-                  : 'Select widget',
-              refactors: _otherRefactorsGroup,
-              executeCommand: executeCommand,
-            ),
           ),
         const PaddedDivider.noPadding(),
       ],
@@ -103,42 +102,42 @@ class _RefactorsState extends State<WrapWithRefactors> {
   }
 }
 
-/// Dropdown button for any available refactors not in [_mainRefactors].
-class _WrapWithDropdown extends StatelessWidget {
-  const _WrapWithDropdown({
-    required this.placeholderText,
+/// Overflow button for any available refactors not in [_mainRefactors].
+class _WrapWithOverflowButton extends StatelessWidget {
+  const _WrapWithOverflowButton({
     required this.refactors,
     required this.executeCommand,
   });
 
-  final String placeholderText;
   final List<WrapWithRefactorAction> refactors;
   final ExecuteCommandFunction executeCommand;
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton<WrapWithRefactorAction>(
-      hint: Text(placeholderText),
-      underline:
-          const SizedBox.shrink(), // Hide the default underline, UI looks cluttered with it.
-      isDense: true,
-      items: refactors
-          .map(
-            (refactor) => DropdownMenuItem<WrapWithRefactorAction>(
-              value: refactor,
-              child: Text(refactor.label),
-            ),
-          )
-          .toList(),
-      onChanged: (WrapWithRefactorAction? refactor) async {
-        if (refactor != null) {
+    return DevToolsTooltip(
+      message: 'More widgets...',
+      child: ContextMenuButton(
+        icon: Icons.keyboard_double_arrow_right_sharp,
+        iconSize: actionsIconSize,
+        buttonWidth: buttonMinWidth,
+        style: _wrapWithButtonStyle,
+        menuChildren: _refactorOptions(),
+      ),
+    );
+  }
+
+  List<Widget> _refactorOptions() {
+    return refactors.map((refactor) {
+      return MenuItemButton(
+        child: Text(refactor.label),
+        onPressed: () async {
           await executeCommand(
             commandName: refactor.command,
             commandArgs: refactor.args,
           );
-        }
-      },
-    );
+        },
+      );
+    }).toList();
   }
 }
 
@@ -146,15 +145,10 @@ class _WrapWithDropdown extends StatelessWidget {
 ///
 /// Buttons for refactors in [_refactorsWithIconAsset] have an icon.
 class _WrapWithButton extends StatelessWidget {
-  const _WrapWithButton(
-    this.refactor, {
-    required this.executeCommand,
-    required this.iconOnly,
-  });
+  const _WrapWithButton(this.refactor, {required this.executeCommand});
 
   final WrapWithRefactorAction refactor;
   final ExecuteCommandFunction executeCommand;
-  final bool iconOnly;
 
   static const _iconAssetPath = 'icons/property_editor/';
 
@@ -172,37 +166,26 @@ class _WrapWithButton extends StatelessWidget {
     final theme = Theme.of(context);
     final iconAsset = _iconAsset(darkMode: theme.isDarkTheme);
 
-    final button = OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0)),
-        side: BorderSide(
-          color: iconOnly ? Colors.transparent : theme.colorScheme.onSurface,
-        ),
-        padding: const EdgeInsets.all(densePadding),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return DevToolsTooltip(
+      message: refactor.label,
+      child: TextButton(
+        style: _wrapWithButtonStyle,
+        child: iconAsset != null
+            ? Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Image.asset(iconAsset, height: actionsIconSize),
+                ],
+              )
+            : _buttonText(theme: theme),
+        onPressed: () async {
+          await executeCommand(
+            commandName: refactor.command,
+            commandArgs: refactor.args,
+          );
+        },
       ),
-      child: iconAsset != null
-          ? Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Image.asset(iconAsset, height: actionsIconSize),
-              ],
-            )
-          : _buttonText(theme: theme),
-      onPressed: () async {
-        await executeCommand(
-          commandName: refactor.command,
-          commandArgs: refactor.args,
-        );
-      },
-    );
-
-    return Padding(
-      padding: EdgeInsets.all(iconOnly ? densePadding / 2 : densePadding),
-      child: iconOnly
-          ? DevToolsTooltip(message: refactor.label, child: button)
-          : button,
     );
   }
 
@@ -223,6 +206,17 @@ class _WrapWithButton extends StatelessWidget {
     return Text(label, style: theme.regularTextStyle);
   }
 }
+
+const _wrapWithButtonBorderRadius = 4.0;
+
+final _wrapWithButtonStyle = TextButton.styleFrom(
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(_wrapWithButtonBorderRadius),
+  ),
+  padding: const EdgeInsets.all(densePadding),
+  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  minimumSize: Size.square(buttonMinWidth),
+);
 
 const _wrapWithPadding = 'Padding';
 const _wrapWithContainer = 'Container';
