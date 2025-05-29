@@ -5,9 +5,15 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../../shared/analytics/analytics.dart' as ga;
+import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/editor/api_classes.dart';
 import '../../../shared/ui/common_widgets.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_types.dart';
+
+typedef ApplyRefactorFunction =
+    Future<GenericApiResponse?> Function(WrapWithRefactorAction refactor);
 
 /// Widget for displaying the available "Wrap with" refactors.
 ///
@@ -18,6 +24,9 @@ class WrapWithRefactors extends StatefulWidget {
     required this.controller,
     super.key,
   });
+
+  static final buttonIconSize = actionsIconSize;
+  static Color buttonColor(ThemeData theme) => theme.colorScheme.onSurface;
 
   final List<WrapWithRefactorAction> refactors;
   final PropertyEditorController controller;
@@ -48,7 +57,6 @@ class _WrapWithRefactorsState extends State<WrapWithRefactors> {
   Widget build(BuildContext context) {
     final showMainRefactors = _mainRefactorsGroup.isNotEmpty;
     final showOtherRefactors = _otherRefactorsGroup.isNotEmpty;
-    final executeCommand = widget.controller.executeCommand;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -65,7 +73,7 @@ class _WrapWithRefactorsState extends State<WrapWithRefactors> {
                   padding: const EdgeInsets.all(densePadding),
                   child: _WrapWithButton(
                     refactor,
-                    executeCommand: executeCommand,
+                    applyRefactor: _applyRefactor,
                   ),
                 ),
               if (showOtherRefactors)
@@ -73,7 +81,7 @@ class _WrapWithRefactorsState extends State<WrapWithRefactors> {
                   padding: const EdgeInsets.all(densePadding),
                   child: _WrapWithOverflowButton(
                     refactors: _otherRefactorsGroup,
-                    executeCommand: executeCommand,
+                    applyRefactor: _applyRefactor,
                   ),
                 ),
             ],
@@ -100,25 +108,40 @@ class _WrapWithRefactorsState extends State<WrapWithRefactors> {
           .compareTo(mainRefactorsOrder.indexOf(b.label));
     });
   }
+
+  Future<GenericApiResponse?> _applyRefactor(WrapWithRefactorAction refactor) {
+    ga.select(
+      gac.PropertyEditorSidebar.id,
+      gac.PropertyEditorSidebar.applyWrapWithRefactorRequest(
+        refactorName: refactor.label,
+      ),
+    );
+
+    return widget.controller.executeCommand(
+      commandName: refactor.command,
+      commandArgs: refactor.args,
+    );
+  }
 }
 
 /// Overflow button for any available refactors not in [_mainRefactors].
 class _WrapWithOverflowButton extends StatelessWidget {
   const _WrapWithOverflowButton({
     required this.refactors,
-    required this.executeCommand,
+    required this.applyRefactor,
   });
 
   final List<WrapWithRefactorAction> refactors;
-  final ExecuteCommandFunction executeCommand;
+  final ApplyRefactorFunction applyRefactor;
 
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
       message: 'More widgets...',
       child: ContextMenuButton(
+        color: WrapWithRefactors.buttonColor(Theme.of(context)),
         icon: Icons.keyboard_double_arrow_right_sharp,
-        iconSize: actionsIconSize,
+        iconSize: WrapWithRefactors.buttonIconSize,
         buttonWidth: buttonMinWidth,
         style: _wrapWithButtonStyle,
         menuChildren: _refactorOptions(),
@@ -131,10 +154,7 @@ class _WrapWithOverflowButton extends StatelessWidget {
       return MenuItemButton(
         child: Text(refactor.label),
         onPressed: () async {
-          await executeCommand(
-            commandName: refactor.command,
-            commandArgs: refactor.args,
-          );
+          await applyRefactor(refactor);
         },
       );
     }).toList();
@@ -145,26 +165,27 @@ class _WrapWithOverflowButton extends StatelessWidget {
 ///
 /// Buttons for refactors in [_refactorsWithIconAsset] have an icon.
 class _WrapWithButton extends StatelessWidget {
-  const _WrapWithButton(this.refactor, {required this.executeCommand});
+  const _WrapWithButton(this.refactor, {required this.applyRefactor});
 
   final WrapWithRefactorAction refactor;
-  final ExecuteCommandFunction executeCommand;
+  final ApplyRefactorFunction applyRefactor;
 
-  static const _iconAssetPath = 'icons/property_editor/';
+  // TODO(elliette): Move the inspector icons into a common directory.
+  static const _iconAssetPath = 'icons/inspector/widget_icons/';
+  static const _textButtonFontSize = 16.0;
 
-  String? _iconAsset({bool darkMode = false}) {
+  String? get _iconAsset {
     if (!_refactorsWithIconAsset.contains(refactor.label)) {
       return null;
     }
 
-    final path = '$_iconAssetPath${refactor.label.toLowerCase()}';
-    return '${path}_${darkMode ? 'dark' : 'light'}_theme.png';
+    return '$_iconAssetPath${refactor.label.toLowerCase()}.png';
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final iconAsset = _iconAsset(darkMode: theme.isDarkTheme);
+    final iconAsset = _iconAsset;
 
     return DevToolsTooltip(
       message: refactor.label,
@@ -175,15 +196,16 @@ class _WrapWithButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Image.asset(iconAsset, height: actionsIconSize),
+                  Image.asset(
+                    iconAsset,
+                    height: WrapWithRefactors.buttonIconSize,
+                    color: WrapWithRefactors.buttonColor(theme),
+                  ),
                 ],
               )
             : _buttonText(theme: theme),
         onPressed: () async {
-          await executeCommand(
-            commandName: refactor.command,
-            commandArgs: refactor.args,
-          );
+          await applyRefactor(refactor);
         },
       ),
     );
@@ -191,14 +213,15 @@ class _WrapWithButton extends StatelessWidget {
 
   Text _buttonText({required ThemeData theme}) {
     final label = refactor.label;
+    assert(label.isNotEmpty);
     // Show the first letter of the label as the icon.
     if (_refactorsWithLetterIcon.contains(label)) {
       return Text(
         label[0],
         style: theme.regularTextStyle.copyWith(
           fontWeight: FontWeight.bold,
-          fontSize: unscaledExtraLargeFontSize,
-          color: theme.isDarkTheme ? Colors.white : Colors.black,
+          fontSize: _textButtonFontSize,
+          color: WrapWithRefactors.buttonColor(theme),
         ),
       );
     }

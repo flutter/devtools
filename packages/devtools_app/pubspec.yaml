@@ -95,10 +95,11 @@ flutter:
     - icons/general/
     - icons/gutter/
     - icons/inspector/
+    # TODO(elliette): The inspector icons are also used in the Property Editor.
+    # They should be moved to a common directory.
     - icons/inspector/widget_icons/
     - icons/memory/
     - icons/perf/
-    - icons/property_editor/
     # We have to explicitly list every asset under `packages/perfetto_ui_compiled/`
     # since directory support is not available for assets under `packages/`.
     # See (https://github.com/flutter/flutter/issues/112019).

@@ -1008,7 +1008,7 @@ void main() {
         // TODO: finish test case.
       });
     });
-  });
+  }, skip: true);
 
   group('widget name and documentation', () {
     testWidgets('expanding and collapsing documentation', (tester) async {

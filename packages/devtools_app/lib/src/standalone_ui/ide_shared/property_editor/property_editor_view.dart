@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/common_widgets.dart';
 import '../../../shared/ui/filter.dart';
-import 'property_editor_common.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_inputs.dart';
 import 'property_editor_messages.dart';
@@ -529,7 +528,15 @@ class _ExpandableWidgetDocumentationState
             ),
           ),
         const SizedBox(height: denseSpacing),
-        ExpandableTextButton(isExpanded: _isExpanded, onTap: _toggleExpansion),
+        InkWell(
+          onTap: _toggleExpansion,
+          child: Text(
+            _isExpanded ? 'Show less' : 'Show more',
+            style: theme.boldTextStyle.copyWith(
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ),
       ],
     );
   }

@@ -31,12 +31,6 @@ typedef EditArgumentFunction =
       required T value,
     });
 
-typedef ExecuteCommandFunction =
-    Future<GenericApiResponse?> Function({
-      required String commandName,
-      required List<Object?> commandArgs,
-    });
-
 class PropertyEditorController extends DisposableController
     with AutoDisposeControllerMixin, FilterControllerMixin<EditableProperty> {
   PropertyEditorController(this.editorClient) {

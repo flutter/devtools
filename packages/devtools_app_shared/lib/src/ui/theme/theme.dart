@@ -332,8 +332,6 @@ double get mediumProgressSize => scaleByFontFactor(24.0);
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 
 // Font size constants:
-const unscaledExtraLargeFontSize = 16.0;
-
 double get largeFontSize => scaleByFontFactor(unscaledLargeFontSize);
 const unscaledLargeFontSize = 14.0;
 
