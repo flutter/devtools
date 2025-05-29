@@ -31,6 +31,12 @@ typedef EditArgumentFunction =
       required T value,
     });
 
+typedef ExecuteCommandFunction =
+    Future<GenericApiResponse?> Function({
+      required String commandName,
+      required List<Object?> commandArgs,
+    });
+
 class PropertyEditorController extends DisposableController
     with AutoDisposeControllerMixin, FilterControllerMixin<EditableProperty> {
   PropertyEditorController(this.editorClient) {
@@ -171,10 +177,13 @@ class PropertyEditorController extends DisposableController
     );
   }
 
-  Future<GenericApiResponse?> executeCommand(CodeActionCommand refactor) {
+  Future<GenericApiResponse?> executeCommand({
+    required String commandName,
+    required List<Object?> commandArgs,
+  }) {
     return editorClient.executeCommand(
-      commandName: refactor.command,
-      commandArgs: refactor.args,
+      commandName: commandName,
+      commandArgs: commandArgs,
       screenId: gac.PropertyEditorSidebar.id,
     );
   }

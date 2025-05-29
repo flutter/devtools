@@ -56,7 +56,7 @@ class PropertyEditorView extends StatelessWidget {
 
     final (:properties, :refactors, :name, :documentation, :fileUri, :range) =
         editableWidgetData;
-        if (fileUri != null && !fileUri.endsWith('.dart')) {
+    if (fileUri != null && !fileUri.endsWith('.dart')) {
       return [const NoDartCodeMessage(), const HowToUseMessage()];
     }
 
@@ -68,8 +68,12 @@ class PropertyEditorView extends StatelessWidget {
     }
 
     if (refactors.isNotEmpty) {
+      final wrapWithRefactors = refactors
+          .where((refactor) => refactor.title.startsWith('Wrap with'))
+          .map((refactor) => WrapWithRefactorAction(refactor))
+          .toList();
       contents.add(
-        WrapWithRefactors(refactors: refactors, controller: controller),
+        WrapWithRefactors(refactors: wrapWithRefactors, controller: controller),
       );
     }
 
