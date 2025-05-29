@@ -10,8 +10,13 @@ import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/primitives/utils.dart';
+import '../../shared/ui/common_widgets.dart';
 import 'dtd_tools_model.dart';
 
+/// Manages business logic for the [ServicesView] widget, which displays
+/// information about service methods registered on DTD and provides
+/// functionality for calling them.
 class ServicesController extends FeatureController {
   late DartToolingDaemon dtd;
 
@@ -33,34 +38,35 @@ class ServicesController extends FeatureController {
   }
 
   Future<void> refresh() async {
-    await dtd.getRegisteredServices().then((response) {
-      _services.value = <DtdServiceMethod>[
-        ...response.dtdServices.map((value) {
-          // If the DTD service has the form 'service.method', split up the two
-          // values. Otherwise, leave the service null and use the entire name
-          // as the method.
-          String? service;
-          String method;
-          final parts = value.split('.');
-          if (parts.length > 1) {
-            service = parts[0];
-          }
-          method = parts.last;
-          return DtdServiceMethod(service: service, method: method);
-        }),
-        for (final service in response.clientServices) ...[
-          for (final method in service.methods.values)
-            DtdServiceMethod(
-              service: service.name,
-              method: method.name,
-              capabilities: method.capabilities,
-            ),
-        ],
-      ];
-    });
+    final response = await dtd.getRegisteredServices();
+    _services.value = <DtdServiceMethod>[
+      ...response.dtdServices.map((value) {
+        // If the DTD service has the form 'service.method', split up the two
+        // values. Otherwise, leave the service null and use the entire name
+        // as the method.
+        String? service;
+        String method;
+        final parts = value.split('.');
+        if (parts.length > 1) {
+          service = parts[0];
+        }
+        method = parts.last;
+        return DtdServiceMethod(service: service, method: method);
+      }),
+      for (final service in response.clientServices) ...[
+        for (final method in service.methods.values)
+          DtdServiceMethod(
+            service: service.name,
+            method: method.name,
+            capabilities: method.capabilities,
+          ),
+      ],
+    ];
   }
 }
 
+/// Displays information about service methods registered on DTD and provides
+/// functionality for calling them.
 class ServicesView extends StatelessWidget {
   const ServicesView({super.key, required this.controller});
 
@@ -95,34 +101,31 @@ class ServicesView extends StatelessWidget {
             ),
           ],
           children: [
-            ValueListenableBuilder(
-              valueListenable: controller._services,
-              builder: (context, services, child) {
-                return ValueListenableBuilder<DtdServiceMethod?>(
-                  valueListenable: controller._selectedService,
-                  builder: (context, selectedService, _) {
-                    final sortedServices = services.toList()..sort();
-                    return Scrollbar(
-                      thumbVisibility: true,
-                      child: ListView.builder(
-                        primary: true,
-                        itemCount: sortedServices.length,
-                        itemBuilder: (context, index) {
-                          final service = sortedServices[index];
-                          return ListTile(
-                            title: Text(
-                              service.displayName,
-                              style: Theme.of(context).regularTextStyle,
-                            ),
-                            selected: selectedService == service,
-                            onTap: () {
-                              controller._selectedService.value = service;
-                            },
-                          );
+            MultiValueListenableBuilder(
+              listenables: [controller._services, controller._selectedService],
+              builder: (context, values, _) {
+                final services = values.first as List<DtdServiceMethod>;
+                final selectedService = values.second as DtdServiceMethod?;
+                final sortedServices = services.toList()..sort();
+                return Scrollbar(
+                  thumbVisibility: true,
+                  child: ListView.builder(
+                    primary: true,
+                    itemCount: sortedServices.length,
+                    itemBuilder: (context, index) {
+                      final service = sortedServices[index];
+                      return ListTile(
+                        title: Text(
+                          service.displayName,
+                          style: theme.regularTextStyle,
+                        ),
+                        selected: selectedService == service,
+                        onTap: () {
+                          controller._selectedService.value = service;
                         },
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -142,6 +145,8 @@ class ServicesView extends StatelessWidget {
   }
 }
 
+/// A widget that provides support for manually calling a DTD service method and
+/// viewing the result.
 class _ManuallyCallService extends StatefulWidget {
   const _ManuallyCallService({required this.serviceMethod, required this.dtd});
 
@@ -203,7 +208,7 @@ class _ManuallyCallServiceState extends State<_ManuallyCallService> {
           const SizedBox(height: denseSpacing),
           Row(
             children: [
-              const Text('Additional params (json encoded):'),
+              const Text('Additional parameters (JSON encoded):'),
               const SizedBox(width: defaultSpacing),
               Expanded(
                 child: DevToolsClearableTextField(
@@ -242,7 +247,7 @@ class _ManuallyCallServiceState extends State<_ManuallyCallService> {
               child: Text(
                 callResult == null
                     ? 'Call the service to view the response'
-                    : (callResult ?? {}).toString(),
+                    : callResult.toString(),
               ),
             ),
           ),
