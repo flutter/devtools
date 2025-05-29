@@ -894,6 +894,8 @@ void main() {
   });
 
   group('refactors', () {
+    late Completer<String> nextRefactorCompleter;
+
     void initWithRefactors(List<String> refactorNames) {
       controller.initForTestsOnly(
         document: textDocument1,
@@ -902,6 +904,21 @@ void main() {
         refactors: refactorNames.map(_createCommand).toList(),
       );
     }
+
+    List<String> wrapWithButtonLabels(WidgetTester tester) => tester
+        .widgetList<DevToolsTooltip>(
+          find.descendant(
+            of: find.byType(WrapWithButton),
+            matching: find.byType(DevToolsTooltip),
+          ),
+        )
+        .map((tooltip) => tooltip.message!)
+        .toList();
+
+    Finder wrapWithOverflowMenuFinder() => find.descendant(
+      of: find.byType(DevToolsTooltip),
+      matching: find.byType(ContextMenuButton),
+    );
 
     setUp(() {
       FeatureFlags.propertyEditorRefactors = true;
@@ -927,25 +944,22 @@ void main() {
 
         // Verify the main refactor buttons are displayed in the expected order.
         final expectedMainRefactorsOrder = mainRefactors.toList();
-        final mainRefactorButtons = tester
-            .widgetList<DevToolsTooltip>(
-              find.descendant(
-                of: find.byType(WrapWithRefactors),
-                matching: find.byType(DevToolsTooltip),
-              ),
-            )
-            .toList();
+        final mainRefactorButtonLabels = wrapWithButtonLabels(tester);
 
-        expect(mainRefactorButtons)
-        expect(mainRefactorButtons.length, expectedMainRefactorsOrder.length);
+        expect(
+          mainRefactorButtonLabels.length,
+          expectedMainRefactorsOrder.length,
+        );
 
         for (int i = 0; i < expectedMainRefactorsOrder.length; i++) {
-          expect(mainRefactorButtons[i].message, expectedMainRefactorsOrder[i]);
+          expect(mainRefactorButtonLabels[i], expectedMainRefactorsOrder[i]);
         }
       });
     });
 
-    testWidgets('shows all available refactors', (tester) async {
+    testWidgets('shows all available refactors in buttons / dropdown menu', (
+      tester,
+    ) async {
       return await tester.runAsync(() async {
         // Load the property editor.
         initWithRefactors([
@@ -960,48 +974,75 @@ void main() {
         // Verify the "Wrap with:" text is displayed.
         expect(find.text('Wrap with:'), findsOneWidget);
 
-        // Verify the expected refactors match.
-        final expectedRefactors = [
-          'Row',
-          'Expanded',
-          'Container',
-          'Column',
-          'SizedBox',
-        ];
+        // Verify the main refactors are expected.
+        expect(
+          wrapWithButtonLabels(tester),
+          containsAll(['Row', 'Container', 'Column', 'SizedBox']),
+        );
 
-        // TODO: Finish test case
+        // Verify the buttons in the dropdown menu are hidden.
+        expect(find.text('Expanded'), findsNothing);
 
-        // Verify the "Show more" button is displayed for other refactors.
-        expect(find.text('Show more'), findsOneWidget);
+        // Tap on the overflow menu.
+        final overflowMenu = wrapWithOverflowMenuFinder();
+        await tester.tap(overflowMenu);
+        await tester.pumpAndSettle();
+
+        // Verify the buttons in the dropdown menu are shown.
+        expect(find.text('Expanded'), findsOneWidget);
       });
     });
 
-    testWidgets('extra refactors are hidden behind "show more"', (
-      tester,
-    ) async {
+    testWidgets(
+      'excludes dropdown button if no extra refactors are available',
+      (tester) async {
+        return await tester.runAsync(() async {
+          // Load the property editor.
+          initWithRefactors([
+            'Wrap with Row',
+            'Wrap with Container',
+            'Wrap with Column',
+            'Wrap with SizedBox',
+          ]);
+          await tester.pumpWidget(wrap(propertyEditor));
+
+          // Verify the "Wrap with:" text is displayed.
+          expect(find.text('Wrap with:'), findsOneWidget);
+
+          // Verify the main refactors are expected.
+          expect(
+            wrapWithButtonLabels(tester),
+            containsAll(['Row', 'Container', 'Column', 'SizedBox']),
+          );
+
+          // Verify there is no overflow menu.
+          expect(wrapWithOverflowMenuFinder(), findsNothing);
+        });
+      },
+    );
+
+    testWidgets('clicking refactor button triggers refactor', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
         initWithRefactors([
           'Wrap with Row',
-          'Wrap with widget...',
-          'Wrap with Padding',
-          'Wrap with Expanded',
           'Wrap with Container',
-          'Wrap with Center',
           'Wrap with Column',
           'Wrap with SizedBox',
-          'Wrap with FutureBuilder',
-          'Wrap with Flexible',
         ]);
         await tester.pumpWidget(wrap(propertyEditor));
 
-        // Verify the "Show more" button is displayed for other refactors.
-        expect(find.text('Show more'), findsOneWidget);
+        // Verify the main refactors are expected.
+        expect(
+          wrapWithButtonLabels(tester),
+          containsAll(['Row', 'Container', 'Column', 'SizedBox']),
+        );
 
-        // TODO: finish test case.
+        // Verify there is no overflow menu.
+        expect(wrapWithOverflowMenuFinder(), findsNothing);
       });
     });
-  }, skip: true);
+  });
 
   group('widget name and documentation', () {
     testWidgets('expanding and collapsing documentation', (tester) async {

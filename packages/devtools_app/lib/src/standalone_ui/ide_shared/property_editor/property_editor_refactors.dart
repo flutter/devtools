@@ -72,8 +72,8 @@ class _WrapWithRefactorsState extends State<WrapWithRefactors> {
               for (final refactor in _mainRefactorsGroup)
                 Padding(
                   padding: const EdgeInsets.all(densePadding),
-                  child: _WrapWithButton(
-                    refactor,
+                  child: WrapWithButton(
+                    refactor: refactor,
                     applyRefactor: _applyRefactor,
                   ),
                 ),
@@ -163,10 +163,13 @@ class _WrapWithOverflowButton extends StatelessWidget {
 }
 
 /// A button which triggers a single "Wrap with" refactor.
-///
-/// Buttons for refactors in [_refactorsWithIconAsset] have an icon.
-class _WrapWithButton extends StatelessWidget {
-  const _WrapWithButton(this.refactor, {required this.applyRefactor});
+@visibleForTesting
+class WrapWithButton extends StatelessWidget {
+  const WrapWithButton({
+    super.key,
+    required this.refactor,
+    required this.applyRefactor,
+  });
 
   final WrapWithRefactorAction refactor;
   final ApplyRefactorFunction applyRefactor;
@@ -262,7 +265,4 @@ const _refactorsWithIconAsset = {
 const _refactorsWithLetterIcon = {_wrapWithWidget};
 
 @visibleForTesting
-const mainRefactors = {
-  ..._refactorsWithLetterIcon,
-  ..._refactorsWithIconAsset,
-};
+const mainRefactors = {..._refactorsWithLetterIcon, ..._refactorsWithIconAsset};
