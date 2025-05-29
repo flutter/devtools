@@ -56,7 +56,7 @@ class PropertyEditorView extends StatelessWidget {
 
     final (:properties, :refactors, :name, :documentation, :fileUri, :range) =
         editableWidgetData;
-    if (fileUri != null && !fileUri.endsWith('.dart')) {
+        if (fileUri != null && !fileUri.endsWith('.dart')) {
       return [const NoDartCodeMessage(), const HowToUseMessage()];
     }
 

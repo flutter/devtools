@@ -283,6 +283,7 @@ class PropertyEditorController extends DisposableController
     TextDocument? document,
     CursorPosition? cursorPosition,
     EditorRange? range,
+    List<CodeActionCommand>? refactors,
   }) {
     setActiveFilter();
     if (editableArgsResult != null) {
@@ -291,9 +292,7 @@ class PropertyEditorController extends DisposableController
             .map(argToProperty)
             .nonNulls
             .toList(),
-        // TODO(https://github.com/flutter/devtools/issues/8652): Add tests for
-        // refactors.
-        refactors: [],
+        refactors: refactors ?? [],
         name: editableArgsResult.name,
         documentation: editableArgsResult.documentation,
         fileUri: document?.uriAsString,

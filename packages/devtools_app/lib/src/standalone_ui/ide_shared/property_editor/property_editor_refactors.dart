@@ -117,6 +117,13 @@ class _RefactorsState extends State<WrapWithRefactors> {
           : _otherRefactorsGroup;
       category.add(refactor);
     }
+    // Sort the refactors to match the order in the _mainRefactors set.
+    final mainRefactorsOrder = _mainRefactors.toList();
+    _mainRefactorsGroup.sort((a, b) {
+      return mainRefactorsOrder
+          .indexOf(a.title)
+          .compareTo(mainRefactorsOrder.indexOf(b.title));
+    });
   }
 }
 
@@ -223,6 +230,6 @@ const _refactorsWithIconAsset = {
 const _refactorsWithLetterIcon = {_wrapWithWidget};
 
 const _mainRefactors = {
-  ..._refactorsWithIconAsset,
   ..._refactorsWithLetterIcon,
+  ..._refactorsWithIconAsset,
 };
