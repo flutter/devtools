@@ -45,13 +45,15 @@ class _DTDTools extends StatelessWidget {
           ? DtdConnectedView(
               dtd: connection,
               dtdUri: controller.localDtdManager.uri!.toString(),
-              onDisconnect: () => controller.localDtdManager.disconnect(),
+              onDisconnect: controller.localDtdManager.disconnect,
             )
           : DtdNotConnectedView(localDtdManager: controller.localDtdManager),
     );
   }
 }
 
+/// Displays information about a live instance of the Dart Tooling Daemon and
+/// provides functionality for calling DTD service methods.
 class DtdConnectedView extends StatefulWidget {
   const DtdConnectedView({
     super.key,
@@ -119,9 +121,10 @@ class _DtdConnectedViewState extends State<DtdConnectedView> {
             child: Row(
               children: [
                 Text(
-                  'DTD connection:  ',
+                  'DTD connection:',
                   style: Theme.of(context).boldTextStyle,
                 ),
+                const SizedBox(width: denseSpacing),
                 Text(widget.dtdUri),
                 const SizedBox(width: defaultSpacing),
                 DevToolsButton(
@@ -153,6 +156,8 @@ class _DtdConnectedViewState extends State<DtdConnectedView> {
   }
 }
 
+/// Displays a text field for entering a DTD URI to connect the DTD Tools screen
+/// to.
 class DtdNotConnectedView extends StatefulWidget {
   const DtdNotConnectedView({super.key, required this.localDtdManager});
 
