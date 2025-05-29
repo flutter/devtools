@@ -30,11 +30,11 @@ class DTDToolsScreen extends Screen {
   static final id = ScreenMetaData.dtdTools.id;
 
   @override
-  Widget buildScreenBody(BuildContext context) => const _DTDTools();
+  Widget buildScreenBody(BuildContext _) => const DTDToolsScreenBody();
 }
 
-class _DTDTools extends StatelessWidget {
-  const _DTDTools();
+class DTDToolsScreenBody extends StatelessWidget {
+  const DTDToolsScreenBody({super.key});
 
   @override
   Widget build(BuildContext context) {

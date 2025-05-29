@@ -6,10 +6,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/common_widgets.dart';
 import 'dtd_tools_model.dart';
@@ -276,7 +276,7 @@ class _ManuallyCallServiceState extends State<_ManuallyCallService> {
 
   Future<void> _callService() async {
     if (methodController.text.isEmpty) {
-      extensionManager.showNotification('Method is required');
+      notificationService.push('Method is required');
       return;
     }
 
@@ -287,7 +287,7 @@ class _ManuallyCallServiceState extends State<_ManuallyCallService> {
           params = (jsonDecode(paramsController.text) as Map)
               .cast<String, Object?>();
         } catch (e) {
-          extensionManager.showNotification(
+          notificationService.push(
             'Failed to JSON decode parameters: "${paramsController.text}"',
           );
           return;
