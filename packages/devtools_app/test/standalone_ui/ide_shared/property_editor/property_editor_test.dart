@@ -16,7 +16,6 @@ import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/proper
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_view.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
@@ -894,7 +893,7 @@ void main() {
   });
 
   group('refactors', () {
-    late Completer<String> nextRefactorCompleter;
+    int refactorCount = 0;
 
     void initWithRefactors(List<String> refactorNames) {
       controller.initForTestsOnly(
@@ -915,6 +914,13 @@ void main() {
         .map((tooltip) => tooltip.message!)
         .toList();
 
+    Finder wrapWithButtonFinder(String label) => find.ancestor(
+      of: find.byWidgetPredicate(
+        (widget) => widget is DevToolsTooltip && widget.message == label,
+      ),
+      matching: find.byType(WrapWithButton),
+    );
+
     Finder wrapWithOverflowMenuFinder() => find.descendant(
       of: find.byType(DevToolsTooltip),
       matching: find.byType(ContextMenuButton),
@@ -922,6 +928,19 @@ void main() {
 
     setUp(() {
       FeatureFlags.propertyEditorRefactors = true;
+
+      refactorCount = 0;
+      when(
+        // ignore: discarded_futures, for mocking purposes.
+        mockEditorClient.executeCommand(
+          commandName: argThat(isNotNull, named: 'commandName'),
+          commandArgs: argThat(isNotNull, named: 'commandArgs'),
+          screenId: 'propertyEditorSidebar',
+        ),
+      ).thenAnswer((realInvocation) {
+        refactorCount++;
+        return Future.value(GenericApiResponse(success: true));
+      });
     });
 
     testWidgets('main refactors are displayed in a consistent order', (
@@ -1021,6 +1040,35 @@ void main() {
       },
     );
 
+    testWidgets('selecting overflow menu triggers refactor', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        initWithRefactors([
+          'Wrap with Row',
+          'Wrap with Container',
+          'Wrap with Column',
+          'Wrap with SizedBox',
+          'Wrap with Expanded',
+        ]);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Verify no refactors have been triggered.
+        expect(refactorCount, equals(0));
+
+        // Tap on the overflow menu.
+        final overflowMenu = wrapWithOverflowMenuFinder();
+        await tester.tap(overflowMenu);
+        await tester.pumpAndSettle();
+
+        // Select a refactor in the overflow menu.
+        await tester.tap(find.text('Expanded'));
+        await tester.pumpAndSettle();
+
+        // Verify a refactor has been triggered.
+        expect(refactorCount, equals(1));
+      });
+    });
+
     testWidgets('clicking refactor button triggers refactor', (tester) async {
       return await tester.runAsync(() async {
         // Load the property editor.
@@ -1032,14 +1080,15 @@ void main() {
         ]);
         await tester.pumpWidget(wrap(propertyEditor));
 
-        // Verify the main refactors are expected.
-        expect(
-          wrapWithButtonLabels(tester),
-          containsAll(['Row', 'Container', 'Column', 'SizedBox']),
-        );
+        // Verify no refactors have been triggered.
+        expect(refactorCount, equals(0));
 
-        // Verify there is no overflow menu.
-        expect(wrapWithOverflowMenuFinder(), findsNothing);
+        // Click on a "Wrap with" button.
+        final wrapWithRowButton = wrapWithButtonFinder('Row');
+        await tester.tap(wrapWithRowButton);
+
+        // Verify a refactor has been triggered.
+        expect(refactorCount, equals(1));
       });
     });
   });
@@ -1674,26 +1723,21 @@ const exampleWidgetText =
 const noDartCodeText = 'No Dart code found at the current cursor location.';
 const noWidgetText = 'No Flutter widget found at the current cursor location.';
 
-const _documentUri = 'file:///Users/me/flutter_app/lib/main.dart';
-const _documentVersion = 1;
-const _cursorLine = 10;
-const _cursorChar = 20;
-const commandArg =
-    '''
+const commandArg = '''
 [
   {
     "textDocument": {
-      "uri": "$_documentUri",
-      "version": $_documentVersion
+      "uri": "file:///Users/me/flutter_app/lib/main.dart",
+      "version": 1
     },
     "range": {
       "end": {
-        "character": $_cursorChar,
-        "line": $_cursorLine
+        "character": 10,
+        "line": 20
       },
       "start": {
-        "character": $_cursorChar,
-        "line": $_cursorLine
+        "character": 10,
+        "line": 20
       }
     },
     "kind": "refactor.flutter.wrap.generic",
