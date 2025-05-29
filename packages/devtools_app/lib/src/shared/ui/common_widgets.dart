@@ -669,11 +669,13 @@ class SmallAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final button = TextButton(
-      style: buttonStyle ?? TextButton.styleFrom(
-        padding: EdgeInsets.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        textStyle: style,
-      ),
+      style:
+          buttonStyle ??
+          TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            textStyle: style,
+          ),
       onPressed: () {
         if (gaScreen != null && gaSelection != null) {
           ga.select(gaScreen!, gaSelection!);

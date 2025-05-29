@@ -25,6 +25,7 @@ class WrapWithRefactors extends StatefulWidget {
     super.key,
   });
 
+  static const wrapWithPrefix = 'Wrap with';
   static final buttonIconSize = actionsIconSize;
   static Color buttonColor(ThemeData theme) => theme.colorScheme.onSurface;
 
@@ -95,13 +96,13 @@ class _WrapWithRefactorsState extends State<WrapWithRefactors> {
     _mainRefactorsGroup.clear();
     _otherRefactorsGroup.clear();
     for (final refactor in widget.refactors) {
-      final category = _mainRefactors.contains(refactor.label)
+      final category = mainRefactors.contains(refactor.label)
           ? _mainRefactorsGroup
           : _otherRefactorsGroup;
       category.add(refactor);
     }
-    // Sort the refactors to match the order in the _mainRefactors set.
-    final mainRefactorsOrder = _mainRefactors.toList();
+    // Sort the refactors to match the order in the mainRefactors set.
+    final mainRefactorsOrder = mainRefactors.toList();
     _mainRefactorsGroup.sort((a, b) {
       return mainRefactorsOrder
           .indexOf(a.label)
@@ -124,7 +125,7 @@ class _WrapWithRefactorsState extends State<WrapWithRefactors> {
   }
 }
 
-/// Overflow button for any available refactors not in [_mainRefactors].
+/// Overflow button for any available refactors not in [mainRefactors].
 class _WrapWithOverflowButton extends StatelessWidget {
   const _WrapWithOverflowButton({
     required this.refactors,
@@ -140,7 +141,7 @@ class _WrapWithOverflowButton extends StatelessWidget {
       message: 'More widgets...',
       child: ContextMenuButton(
         color: WrapWithRefactors.buttonColor(Theme.of(context)),
-        icon: Icons.keyboard_double_arrow_right_sharp,
+        icon: Icons.arrow_drop_down,
         iconSize: WrapWithRefactors.buttonIconSize,
         buttonWidth: buttonMinWidth,
         style: _wrapWithButtonStyle,
@@ -260,7 +261,8 @@ const _refactorsWithIconAsset = {
 
 const _refactorsWithLetterIcon = {_wrapWithWidget};
 
-const _mainRefactors = {
+@visibleForTesting
+const mainRefactors = {
   ..._refactorsWithLetterIcon,
   ..._refactorsWithIconAsset,
 };

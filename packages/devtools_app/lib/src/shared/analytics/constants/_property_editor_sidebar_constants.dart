@@ -24,9 +24,8 @@ extension PropertyEditorSidebar on Never {
   }) => 'applyEditRequest-$argType-$argName';
 
   /// Analytics event for a "Wrap with" refactor request.
-  static String applyWrapWithRefactorRequest({
-    required String refactorName,
-  }) => 'wrapWithRefactor-$refactorName';
+  static String applyWrapWithRefactorRequest({required String refactorName}) =>
+      'wrapWithRefactor-$refactorName';
 
   /// Analytics event on completion of an edit.
   static String applyEditComplete({

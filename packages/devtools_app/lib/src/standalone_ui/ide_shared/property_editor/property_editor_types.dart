@@ -223,6 +223,7 @@ EditableProperty? argToProperty(EditableArgument argument) {
       return null;
   }
 }
+
 /// Represents a "Wrap with" refactor action.
 class WrapWithRefactorAction {
   WrapWithRefactorAction(this._refactor);

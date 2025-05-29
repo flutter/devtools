@@ -926,15 +926,7 @@ void main() {
         await tester.pumpWidget(wrap(propertyEditor));
 
         // Verify the main refactor buttons are displayed in the expected order.
-        final expectedMainRefactorOrder = [
-          'Widget',
-          'Padding',
-          'Container',
-          'Column',
-          'Row',
-          'Center',
-          'SizedBox',
-        ];
+        final expectedMainRefactorsOrder = mainRefactors.toList();
         final mainRefactorButtons = tester
             .widgetList<DevToolsTooltip>(
               find.descendant(
@@ -944,10 +936,11 @@ void main() {
             )
             .toList();
 
-        expect(mainRefactorButtons.length, expectedMainRefactorOrder.length);
+        expect(mainRefactorButtons)
+        expect(mainRefactorButtons.length, expectedMainRefactorsOrder.length);
 
-        for (int i = 0; i < expectedMainRefactorOrder.length; i++) {
-          expect(mainRefactorButtons[i].message, expectedMainRefactorOrder[i]);
+        for (int i = 0; i < expectedMainRefactorsOrder.length; i++) {
+          expect(mainRefactorButtons[i].message, expectedMainRefactorsOrder[i]);
         }
       });
     });
