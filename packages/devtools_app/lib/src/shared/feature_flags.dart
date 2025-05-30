@@ -93,7 +93,7 @@ extension FeatureFlags on Never {
   /// Flag to enable refactors in the Flutter Property Editor sidebar.
   ///
   /// https://github.com/flutter/devtools/issues/9214
-  static bool propertyEditorRefactors = enableExperiments;
+  static bool propertyEditorRefactors = true;
 
   /// Stores a map of all the feature flags for debugging purposes.
   ///
