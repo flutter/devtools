@@ -4,8 +4,6 @@
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:dtd/dtd.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
@@ -26,10 +24,6 @@ class DTDToolsController extends DevToolsScreenController
   /// to inspect them without affecting other screens.
   final localDtdManager = DTDManager();
 
-  /// The [DartToolingDaemon] connection that the `DTDTools` screen is
-  /// inspecting.
-  final dtdConnection = ValueNotifier<DartToolingDaemon?>(null);
-
   @override
   Future<void> init() async {
     if (dtdManager.hasConnection) {
@@ -40,14 +34,10 @@ class DTDToolsController extends DevToolsScreenController
         await localDtdManager.connect(dtdManager.uri!);
       }
     });
-    addAutoDisposeListener(localDtdManager.connection, () {
-      dtdConnection.value = localDtdManager.connection.value;
-    });
   }
 
   @override
   Future<void> dispose() async {
-    dtdConnection.dispose();
     await localDtdManager.disconnect();
     await localDtdManager.dispose();
     super.dispose();

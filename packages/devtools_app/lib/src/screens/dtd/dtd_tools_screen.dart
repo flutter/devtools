@@ -40,7 +40,7 @@ class DTDToolsScreenBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = screenControllers.lookup<DTDToolsController>();
     return ValueListenableBuilder(
-      valueListenable: controller.dtdConnection,
+      valueListenable: controller.localDtdManager.connection,
       builder: (context, connection, _) => connection != null
           ? DtdConnectedView(
               dtd: connection,
