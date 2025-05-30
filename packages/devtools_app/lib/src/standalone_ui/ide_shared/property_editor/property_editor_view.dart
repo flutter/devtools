@@ -68,7 +68,10 @@ class PropertyEditorView extends StatelessWidget {
 
     if (refactors.isNotEmpty) {
       final wrapWithRefactors = refactors
-          .where((refactor) => refactor.title.startsWith(WrapWithRefactors.wrapWithPrefix))
+          .where(
+            (refactor) =>
+                refactor.title.startsWith(WrapWithRefactors.wrapWithPrefix),
+          )
           .map((refactor) => WrapWithRefactorAction(refactor))
           .toList();
       contents.add(

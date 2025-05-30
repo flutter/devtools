@@ -17,7 +17,8 @@ typedef ApplyRefactorFunction =
 
 /// Widget for displaying the available "Wrap with" refactors.
 ///
-/// Each refactor is  in a [_WrapWithButton].
+/// - The [mainRefactors] are each displayed in a [WrapWithButton].
+/// - Any other refactors are menu options behind the [_WrapWithOverflowButton].
 class WrapWithRefactors extends StatefulWidget {
   const WrapWithRefactors({
     required this.refactors,
