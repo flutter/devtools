@@ -166,8 +166,9 @@ void main() {
         expect(hideableNodeFinder, findsNothing);
 
         // Expand the hidden group that contains the HeroControllerScope:
-        final expandButton = findExpandCollapseButtonForNode(
-          nodeDescription: '71 more widgets...',
+        final moreWidgetsRow = findChildRowOf('MaterialApp');
+        final expandButton = findExpandCollapseButtonForRow(
+          rowFinder: moreWidgetsRow,
           isExpand: true,
         );
         await tester.tap(expandButton);
@@ -177,6 +178,9 @@ void main() {
           matchesDevToolsGolden(
             '../../test_infra/goldens/integration_inspector_v2_implementation_widgets_expanded.png',
           ),
+          // Re-enable and update goldens once Flutter version in DevTools
+          // includes https://github.com/flutter/flutter/pull/169229.
+          skip: 'https://github.com/flutter/devtools/issues/9206',
         );
 
         // Confirm the HeroControllerScope is visible, and select it:
@@ -188,11 +192,15 @@ void main() {
           matchesDevToolsGolden(
             '../../test_infra/goldens/integration_inspector_v2_hideable_widget_selected.png',
           ),
+          // Re-enable and update goldens once Flutter version in DevTools
+          // includes https://github.com/flutter/flutter/pull/169229.
+          skip: 'https://github.com/flutter/devtools/issues/9206',
         );
 
         // Collapse the hidden group that contains the HeroControllerScope:
-        final collapseButton = findExpandCollapseButtonForNode(
-          nodeDescription: 'ScrollConfiguration',
+        final scrollConfigurationRow = findChildRowOf('MaterialApp');
+        final collapseButton = findExpandCollapseButtonForRow(
+          rowFinder: scrollConfigurationRow,
           isExpand: false,
         );
         await tester.tap(collapseButton);
@@ -237,6 +245,9 @@ void main() {
         matchesDevToolsGolden(
           '../../test_infra/goldens/integration_inspector_v2_hideable_widget_selected_from_search.png',
         ),
+        // Re-enable and update goldens once Flutter version in DevTools
+        // includes https://github.com/flutter/flutter/pull/169229.
+        skip: 'https://github.com/flutter/devtools/issues/9206',
       );
     });
   });
@@ -645,15 +656,22 @@ Finder findNodeMatching(String text) => find.ancestor(
   matching: find.byType(DescriptionDisplay),
 );
 
-Finder findExpandCollapseButtonForNode({
-  required String nodeDescription,
+Finder findChildRowOf(String description) {
+  final parentRowFinder = _findTreeRowMatching(description);
+  final parentWidget = _getWidgetFromFinder<InspectorRowContent>(
+    parentRowFinder,
+  );
+  final parentIndex = parentWidget.row.index;
+
+  return find.byType(InspectorRowContent).at(parentIndex + 1);
+}
+
+Finder findExpandCollapseButtonForRow({
+  required Finder rowFinder,
   required bool isExpand,
 }) {
-  final hiddenNodeFinder = findNodeMatching(nodeDescription);
-  expect(hiddenNodeFinder, findsOneWidget);
-
   final expandCollapseButtonFinder = find.descendant(
-    of: hiddenNodeFinder,
+    of: rowFinder,
     matching: find.byType(TextButton),
   );
   expect(expandCollapseButtonFinder, findsOneWidget);
