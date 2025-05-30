@@ -22,12 +22,13 @@ The triager should spend about ~1 hour per week on maintaining the health of the
 
 1. Triage any [new flutter/devtools issues](https://github.com/flutter/devtools/issues?q=is%3Aopen+is%3Aissue+-label%3AP0%2CP1%2CP2%2CP3)
 by applying [proper labels](#label-the-issue) and [assigning priority](#prioritize-the-issue).
-2. Triage any new [flutter/flutter issues related to DevTools](https://github.com/flutter/flutter/labels/d%3A%20devtools).
+2. Triage any new flutter/flutter issues [related to DevTools](https://github.com/flutter/flutter/labels/a%3A%20devtools) or
+[owned by the DevTools team](https://github.com/flutter/flutter/issues?q=is%3Aissue%20state%3Aopen%20label%3Ateam-devexp).
 Transfer any issues to the `flutter/devtools` repo that should be tracked on our own issue tracker, and close issues you
 find that are obsolete.
-3. Try to reproduce any issues with the [reproduce to verify](https://github.com/flutter/devtools/labels/reproduce%20to%20verify) label.
-4. Spend at least 20 minutes [cleaning up the issue backlog](#clean-up-the-issue-backlog).
-5. Look through the DevTools discord [channel](https://discord.com/channels/608014603317936148/958862085297672282) for any recent user
+4. Try to reproduce any issues with the [reproduce to verify](https://github.com/flutter/devtools/labels/reproduce%20to%20verify) label.
+5. Spend at least 20 minutes [cleaning up the issue backlog](#clean-up-the-issue-backlog).
+6. Look through the DevTools discord [channel](https://discord.com/channels/608014603317936148/958862085297672282) for any recent user
 questions or concerns that require a response.
 
 ### Label the issue
