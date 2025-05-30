@@ -178,6 +178,9 @@ void main() {
           matchesDevToolsGolden(
             '../../test_infra/goldens/integration_inspector_v2_implementation_widgets_expanded.png',
           ),
+          // Re-enable and update goldens once Flutter version in DevTools
+          // includes https://github.com/flutter/flutter/pull/169229.
+          skip: 'https://github.com/flutter/devtools/issues/9206',
         );
 
         // Confirm the HeroControllerScope is visible, and select it:
@@ -189,6 +192,9 @@ void main() {
           matchesDevToolsGolden(
             '../../test_infra/goldens/integration_inspector_v2_hideable_widget_selected.png',
           ),
+          // Re-enable and update goldens once Flutter version in DevTools
+          // includes https://github.com/flutter/flutter/pull/169229.
+          skip: 'https://github.com/flutter/devtools/issues/9206',
         );
 
         // Collapse the hidden group that contains the HeroControllerScope:
@@ -239,6 +245,9 @@ void main() {
         matchesDevToolsGolden(
           '../../test_infra/goldens/integration_inspector_v2_hideable_widget_selected_from_search.png',
         ),
+        // Re-enable and update goldens once Flutter version in DevTools
+        // includes https://github.com/flutter/flutter/pull/169229.
+        skip: 'https://github.com/flutter/devtools/issues/9206',
       );
     });
   });
