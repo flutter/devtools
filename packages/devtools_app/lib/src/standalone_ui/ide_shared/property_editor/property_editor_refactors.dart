@@ -138,26 +138,34 @@ class _WrapWithOverflowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DevToolsTooltip(
       message: 'More widgets...',
       child: ContextMenuButton(
-        color: WrapWithRefactors.buttonColor(Theme.of(context)),
+        color: WrapWithRefactors.buttonColor(theme),
         icon: Icons.arrow_drop_down,
         iconSize: WrapWithRefactors.buttonIconSize,
         buttonWidth: buttonMinWidth,
         style: _wrapWithButtonStyle,
-        menuChildren: _refactorOptions(),
+        menuChildren: _refactorOptions(theme),
       ),
     );
   }
 
-  List<Widget> _refactorOptions() {
+  List<Widget> _refactorOptions(ThemeData theme) {
+    final colorScheme = theme.colorScheme;
     return refactors.map((refactor) {
       return MenuItemButton(
-        child: Text(refactor.label),
+        style: MenuItemButton.styleFrom(
+          foregroundColor: colorScheme.onSurface,
+          backgroundColor: theme.isDarkTheme
+              ? colorScheme.surface.brighten()
+              : colorScheme.surface.darken(),
+        ),
         onPressed: () async {
           await applyRefactor(refactor);
         },
+        child: Text(refactor.label),
       );
     }).toList();
   }
