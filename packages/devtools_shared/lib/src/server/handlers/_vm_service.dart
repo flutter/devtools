@@ -63,6 +63,20 @@ extension VmServiceHandler on Never {
     try {
       dartToolingDaemon = await DartToolingDaemon.connect(dtd!.localUri);
 
+      // ignore: unnecessary_null_comparison, intentionally added to guard against future logic changes.
+      if (dtdSecret != null) {
+        final uriAsString = vmServiceUri.toString();
+        connected
+            ? await dartToolingDaemon.registerVmService(
+                uri: uriAsString,
+                secret: dtdSecret,
+              )
+            : await dartToolingDaemon.unregisterVmService(
+                uri: uriAsString,
+                secret: dtdSecret,
+              );
+      }
+
       final detectRootResponse = await detectRootPackageForVmService(
         vmServiceUriAsString: vmServiceUriAsString,
         vmServiceUri: vmServiceUri,
