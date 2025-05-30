@@ -67,10 +67,23 @@ class ServicesController extends FeatureController {
 
 /// Displays information about service methods registered on DTD and provides
 /// functionality for calling them.
-class ServicesView extends StatelessWidget {
+class ServicesView extends StatefulWidget {
   const ServicesView({super.key, required this.controller});
 
   final ServicesController controller;
+
+  @override
+  State<ServicesView> createState() => _ServicesViewState();
+}
+
+class _ServicesViewState extends State<ServicesView> {
+  final scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +103,7 @@ class ServicesView extends StatelessWidget {
               actions: [
                 DevToolsButton.iconOnly(
                   icon: Icons.refresh,
-                  onPressed: controller.refresh,
+                  onPressed: widget.controller.refresh,
                 ),
               ],
             ),
@@ -102,15 +115,19 @@ class ServicesView extends StatelessWidget {
           ],
           children: [
             MultiValueListenableBuilder(
-              listenables: [controller._services, controller._selectedService],
+              listenables: [
+                widget.controller._services,
+                widget.controller._selectedService,
+              ],
               builder: (context, values, _) {
                 final services = values.first as List<DtdServiceMethod>;
                 final selectedService = values.second as DtdServiceMethod?;
                 final sortedServices = services.toList()..sort();
                 return Scrollbar(
+                  controller: scrollController,
                   thumbVisibility: true,
                   child: ListView.builder(
-                    primary: true,
+                    controller: scrollController,
                     itemCount: sortedServices.length,
                     itemBuilder: (context, index) {
                       final service = sortedServices[index];
@@ -121,7 +138,7 @@ class ServicesView extends StatelessWidget {
                         ),
                         selected: selectedService == service,
                         onTap: () {
-                          controller._selectedService.value = service;
+                          widget.controller._selectedService.value = service;
                         },
                       );
                     },
@@ -130,11 +147,11 @@ class ServicesView extends StatelessWidget {
               },
             ),
             ValueListenableBuilder(
-              valueListenable: controller._selectedService,
+              valueListenable: widget.controller._selectedService,
               builder: (context, service, child) {
                 return _ManuallyCallService(
                   serviceMethod: service,
-                  dtd: controller.dtd,
+                  dtd: widget.controller.dtd,
                 );
               },
             ),

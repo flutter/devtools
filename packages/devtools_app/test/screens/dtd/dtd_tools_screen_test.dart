@@ -93,6 +93,16 @@ void main() {
           mockGlobalDTDManager.connection,
         ).thenReturn(globalConnectionNotifier);
 
+        // Set up [mockGlobalDtd].
+        when(mockGlobalDtd.getRegisteredServices()).thenAnswer((_) {
+          return Future.value(
+            const RegisteredServicesResponse(
+              dtdServices: [],
+              clientServices: [],
+            ),
+          );
+        });
+
         // Set up mock [DTDToolsController].
         final dtdToolsController = MockDTDToolsController();
         final mockLocalDtdManager = MockDTDManager();
@@ -147,6 +157,17 @@ void main() {
         expect(find.byType(DtdNotConnectedView), findsOneWidget);
         expect(find.byType(DtdConnectedView), findsNothing);
         expect(mockLocalDtdManager.connection.value, null);
+
+        final textFieldFinder = find.byType(DevToolsClearableTextField);
+        expect(textFieldFinder, findsOneWidget);
+        await tester.enterText(textFieldFinder, 'foo'); // Text does not matter.
+        await tester.tap(find.text('Connect'));
+        await tester.pumpAndSettle();
+
+        // Should now be connected to the locally connected DTD.
+        expect(find.byType(DtdNotConnectedView), findsNothing);
+        expect(find.byType(DtdConnectedView), findsOneWidget);
+        expect(mockLocalDtdManager.connection.value, mockLocalDtd);
       },
     );
   });
