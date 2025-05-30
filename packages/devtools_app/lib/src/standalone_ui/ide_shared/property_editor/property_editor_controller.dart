@@ -223,14 +223,18 @@ class PropertyEditorController extends DisposableController
     CodeActionResult? refactorsResult;
     // TODO(https://github.com/flutter/devtools/issues/8652): Enable refactors
     // in the Property Editor by default.
-    if (FeatureFlags.propertyEditorRefactors) {
-      // Get any supported refactors for the current position.
+    if (editableArgsResult != null && FeatureFlags.propertyEditorRefactors) {
+      // Fetch the refactors using the start of the editable arguments' range,
+      // which corresponds to the widget constructor name. This ensures that the
+      // refactors are always available, even when the cursor is within the
+      // parameter list. See https://github.com/flutter/devtools/issues/9221.
+      final position = editableArgsResult.range?.start ?? cursorPosition;
       // TODO(elliette): Consider updating the widget data immediately without
       // waiting for the refactors result, then updating the refactor buttons
       // once the refactors result is available.
       refactorsResult = await editorClient.getRefactors(
         textDocument: textDocument,
-        range: EditorRange(start: cursorPosition, end: cursorPosition),
+        range: EditorRange(start: position, end: position),
         screenId: gac.PropertyEditorSidebar.id,
       );
     }
