@@ -144,7 +144,7 @@ void main() {
       late ProfilerScreenController controller;
 
       setUp(() async {
-        preferences.toggleVmDeveloperMode(false);
+        preferences.toggleAdvancedDeveloperMode(false);
 
         controller = ProfilerScreenController();
 
@@ -158,7 +158,7 @@ void main() {
       });
 
       testWidgetsWithWindowSize(
-        'shows function / code view selector when in VM developer mode',
+        'shows function / code view selector when in advanced developer mode',
         windowSize,
         (WidgetTester tester) async {
           await tester.runAsync(() async {
@@ -176,9 +176,9 @@ void main() {
             // Verify the profile view dropdown is not visible.
             expect(find.byType(ModeDropdown), findsNothing);
 
-            // Enabling VM developer mode will clear the current profile as it's
-            // possible there's no code profile associated with it.
-            preferences.toggleVmDeveloperMode(true);
+            // Enabling advanced developer mode will clear the current profile
+            // as it's possible there's no code profile associated with it.
+            preferences.toggleAdvancedDeveloperMode(true);
             await tester.pumpAndSettle();
             expect(find.byType(CpuProfiler), findsNothing);
 
@@ -189,7 +189,7 @@ void main() {
             expect(find.byType(ModeDropdown), findsOneWidget);
 
             // Verify the profile view dropdown is no longer visible.
-            preferences.toggleVmDeveloperMode(false);
+            preferences.toggleAdvancedDeveloperMode(false);
             await tester.pumpAndSettle();
             expect(find.byType(ModeDropdown), findsNothing);
           });
@@ -197,7 +197,7 @@ void main() {
       );
 
       testWidgetsWithWindowSize(
-        'resets view to function when leaving VM developer mode',
+        'resets view to function when leaving advanced developer mode',
         windowSize,
         (WidgetTester tester) async {
           await tester.runAsync(() async {
@@ -222,8 +222,8 @@ void main() {
               CpuProfilerViewType.function,
             );
 
-            // Enable VM developer mode and reset the profile data.
-            preferences.toggleVmDeveloperMode(true);
+            // Enable advanced developer mode and reset the profile data.
+            preferences.toggleAdvancedDeveloperMode(true);
             await tester.pumpAndSettle();
             expect(find.byType(CpuProfiler), findsNothing);
             await loadData(controller);
@@ -250,9 +250,9 @@ void main() {
             expect(find.byType(ModeDropdown), findsOneWidget);
             expect(find.text('View: Code'), findsOneWidget);
 
-            // Disabling VM developer mode will reset the view to the function
-            // profile as the dropdown will no longer be visible.
-            preferences.toggleVmDeveloperMode(false);
+            // Disabling advanced developer mode will reset the view to the
+            // function profile as the dropdown will no longer be visible.
+            preferences.toggleAdvancedDeveloperMode(false);
             await tester.pumpAndSettle();
             expect(
               controller.cpuProfilerController.viewType.value,
@@ -554,7 +554,7 @@ void main() {
         // initialization.
         await Future.delayed(const Duration(seconds: 1));
 
-        preferences.toggleVmDeveloperMode(true);
+        preferences.toggleAdvancedDeveloperMode(true);
         cpuProfileData = CpuProfileData.fromJson(
           cpuProfileDataWithUserTagsJson,
         );
@@ -639,9 +639,9 @@ void main() {
           expect(find.richText('vmTagB'), findsOneWidget);
           expect(find.richText('vmTagC'), findsOneWidget);
 
-          // Check that disabling VM developer mode when grouping by VM tag
-          // automatically resets the view to 'Filter by tag: none'.
-          preferences.toggleVmDeveloperMode(false);
+          // Check that disabling advanced developer mode when grouping by VM
+          // tag automatically resets the view to 'Filter by tag: none'.
+          preferences.toggleAdvancedDeveloperMode(false);
           await tester.pumpAndSettle();
           expect(find.byType(CpuCallTreeTable), findsOneWidget);
           expect(find.text('Filter by tag: none'), findsOneWidget);

@@ -53,5 +53,6 @@ import 'package:vm_service/vm_service.dart';
   MockSpec<PerfettoTrackEvent>(),
   MockSpec<DTDManager>(),
   MockSpec<DartToolingDaemon>(),
+  MockSpec<DTDToolsController>(),
 ])
 void main() {}

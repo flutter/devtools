@@ -25,8 +25,8 @@ final _log = Logger('lib/src/screens/profiler/cpu_profile_model');
 /// A convenience wrapper for managing CPU profiles with both function and code
 /// profile views.
 ///
-/// `codeProfile` is null for CPU profiles collected when VM developer mode is
-/// disabled.
+/// `codeProfile` is null for CPU profiles collected when advanced developer
+/// mode is disabled.
 class CpuProfilePair {
   const CpuProfilePair({
     required this.functionProfile,
@@ -109,7 +109,7 @@ class CpuProfilePair {
   /// rather than functions. Individual code objects can contain code for
   /// multiple functions if they are inlined by the compiler.
   ///
-  /// `codeProfile` is null when VM developer mode is not enabled.
+  /// `codeProfile` is null when advanced developer mode is not enabled.
   final CpuProfileData? codeProfile;
 
   // Both function and code profiles will have the same metadata, processing
@@ -129,13 +129,14 @@ class CpuProfilePair {
   /// selected profile view.
   ///
   /// This method will throw a [StateError] when given
-  /// `CpuProfilerViewType.code` as its parameter when VM developer mode is
+  /// `CpuProfilerViewType.code` as its parameter when advanced developer mode is
   /// disabled.
   CpuProfileData getActive(CpuProfilerViewType activeType) {
     if (activeType == CpuProfilerViewType.code &&
-        !preferences.vmDeveloperModeEnabled.value) {
+        !preferences.advancedDeveloperModeEnabled.value) {
       throw StateError(
-        'Attempting to display a code profile with VM developer mode disabled.',
+        'Attempting to display a code profile with advanced developer mode '
+        'disabled.',
       );
     }
     return activeType == CpuProfilerViewType.function
@@ -1256,7 +1257,7 @@ class _CpuProfileTimelineTree {
   String? get resolvedUrl => isCodeTree && _function is vm_service.FuncRef?
       ?
         // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
-        // critical since this is only displayed when VM developer mode is
+        // critical since this is only displayed when advanced developer mode is
         // enabled.
         (_function as vm_service.FuncRef?)?.location?.script?.uri
       : samples.functions?[index].resolvedUrl;

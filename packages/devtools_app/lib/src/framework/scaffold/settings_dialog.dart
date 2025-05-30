@@ -70,9 +70,9 @@ class SettingsDialog extends StatelessWidget {
             ),
           Flexible(
             child: CheckboxSetting(
-              title: 'Enable VM developer mode',
-              notifier: preferences.vmDeveloperModeEnabled,
-              onChanged: preferences.toggleVmDeveloperMode,
+              title: 'Enable advanced developer mode',
+              notifier: preferences.advancedDeveloperModeEnabled,
+              onChanged: preferences.toggleAdvancedDeveloperMode,
               gaScreen: gac.settingsDialog,
               gaItem: gac.vmDeveloperMode,
             ),

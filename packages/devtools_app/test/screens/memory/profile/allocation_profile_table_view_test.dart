@@ -45,18 +45,19 @@ void main() {
     }
 
     testWidgetsWithWindowSize(
-      'respects VM Developer Mode setting',
+      'respects Advanced Developer Mode setting',
       windowSize,
       (WidgetTester tester) async {
         await scene.pump(tester);
 
         final allocationProfileController = scene.controller.profile!;
 
-        preferences.toggleVmDeveloperMode(false);
+        preferences.toggleAdvancedDeveloperMode(false);
         await navigateToAllocationProfile(tester, allocationProfileController);
 
-        // Only "total" statistics are shown when VM Developer Mode is disabled.
-        expect(preferences.vmDeveloperModeEnabled.value, isFalse);
+        // Only "total" statistics are shown when Advanced Developer Mode is
+        // disabled.
+        expect(preferences.advancedDeveloperModeEnabled.value, isFalse);
         expect(find.text('Class'), findsOneWidget);
         expect(find.text('Instances'), findsOneWidget);
         expect(find.text('Total Size'), findsOneWidget);
@@ -69,12 +70,12 @@ void main() {
         expect(find.text('Collections'), findsNothing);
         expect(find.text('Latency'), findsNothing);
 
-        // Enable VM Developer Mode to display new/old space column groups as
-        // well as GC statistics.
-        preferences.toggleVmDeveloperMode(true);
+        // Enable Advanced Developer Mode to display new/old space column groups
+        // as well as GC statistics.
+        preferences.toggleAdvancedDeveloperMode(true);
         await tester.pumpAndSettle();
 
-        expect(preferences.vmDeveloperModeEnabled.value, isTrue);
+        expect(preferences.advancedDeveloperModeEnabled.value, isTrue);
         expect(find.text('Class'), findsOneWidget);
         expect(find.text('Instances'), findsNWidgets(3));
         expect(find.text('Total Size'), findsNWidgets(3));

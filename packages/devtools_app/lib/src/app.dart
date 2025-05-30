@@ -29,6 +29,8 @@ import 'screens/debugger/debugger_controller.dart';
 import 'screens/debugger/debugger_screen.dart';
 import 'screens/deep_link_validation/deep_links_controller.dart';
 import 'screens/deep_link_validation/deep_links_screen.dart';
+import 'screens/dtd/dtd_tools_controller.dart';
+import 'screens/dtd/dtd_tools_screen.dart';
 import 'screens/inspector_shared/inspector_screen.dart';
 import 'screens/inspector_shared/inspector_screen_controller.dart';
 import 'screens/logging/logging_controller.dart';
@@ -280,11 +282,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         vmServiceUri != null && vmServiceUri.isNotEmpty;
 
     Widget scaffoldBuilder() {
-      // Force regeneration of visible screens when VM developer mode is
+      // Force regeneration of visible screens when Advanced Developer Mode is
       // enabled and when the list of available extensions change.
       return MultiValueListenableBuilder(
         listenables: [
-          preferences.vmDeveloperModeEnabled,
+          preferences.advancedDeveloperModeEnabled,
           extensionService.currentExtensions,
         ],
         builder: (_, _, child) {
@@ -724,6 +726,10 @@ List<DevToolsScreen> defaultScreens({
     DevToolsScreen<VMDeveloperToolsController>(
       VMDeveloperToolsScreen(),
       createController: (_) => VMDeveloperToolsController(),
+    ),
+    DevToolsScreen<DTDToolsController>(
+      DTDToolsScreen(),
+      createController: (_) => DTDToolsController(),
     ),
   ];
 }

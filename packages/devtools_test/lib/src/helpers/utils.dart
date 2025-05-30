@@ -47,6 +47,7 @@ final screenIds = <String>[
   ProfilerScreen.id,
   ProviderScreen.id,
   VMDeveloperToolsScreen.id,
+  DTDToolsScreen.id,
 ];
 
 /// Scoping method which registers `listener` as a listener for `listenable`,

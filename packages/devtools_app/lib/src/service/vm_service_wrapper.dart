@@ -143,10 +143,10 @@ class VmServiceWrapper extends VmService {
         'timeOriginMicros': timeOriginMicros,
         'timeExtentMicros': timeExtentMicros,
         // Requests the code profile in addition to the function profile when
-        // running with VM developer mode enabled. This data isn't accessible
-        // in non-VM developer mode, so not requesting the code profile will
-        // save on space and network usage.
-        '_code': preferences.vmDeveloperModeEnabled.value,
+        // running with advanced developer mode enabled. This data isn't
+        // accessible in non-advanced developer mode, so not requesting the code
+        // profile will save on space and network usage.
+        '_code': preferences.advancedDeveloperModeEnabled.value,
       },
     ).then((e) => e as CpuSamples);
   }
@@ -392,7 +392,7 @@ class VmServiceWrapper extends VmService {
   /// Adds support for private VM RPCs that can only be used when VM developer
   /// mode is enabled. Not for use outside of VM developer pages.
   /// Allows callers to invoke extension methods for private RPCs. This should
-  /// only be set by [PreferencesController.toggleVmDeveloperMode] or tests.
+  /// only be set by [PreferencesController.toggleAdvancedDeveloperMode] or tests.
   static bool enablePrivateRpcs = false;
 
   Future<T?> _privateRpcInvoke<T>(

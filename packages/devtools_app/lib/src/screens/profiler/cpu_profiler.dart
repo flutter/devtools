@@ -168,9 +168,9 @@ class _CpuProfilerState extends State<CpuProfiler>
             UserTagDropdown(widget.controller),
             const SizedBox(width: denseSpacing),
             ValueListenableBuilder<bool>(
-              valueListenable: preferences.vmDeveloperModeEnabled,
-              builder: (context, vmDeveloperModeEnabled, _) {
-                if (!vmDeveloperModeEnabled) {
+              valueListenable: preferences.advancedDeveloperModeEnabled,
+              builder: (context, advancedDeveloperModeEnabled, _) {
+                if (!advancedDeveloperModeEnabled) {
                   return const SizedBox();
                 }
                 return Padding(
