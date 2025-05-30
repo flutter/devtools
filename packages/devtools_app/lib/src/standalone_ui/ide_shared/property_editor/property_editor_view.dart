@@ -12,6 +12,7 @@ import '../../../shared/ui/filter.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_inputs.dart';
 import 'property_editor_messages.dart';
+import 'property_editor_refactors.dart';
 import 'property_editor_types.dart';
 import 'utils/utils.dart';
 
@@ -64,6 +65,20 @@ class PropertyEditorView extends StatelessWidget {
         _WidgetNameAndDocumentation(name: name, documentation: documentation),
       );
     }
+
+    if (refactors.isNotEmpty) {
+      final wrapWithRefactors = refactors
+          .where(
+            (refactor) =>
+                refactor.title.startsWith(WrapWithRefactors.wrapWithPrefix),
+          )
+          .map((refactor) => WrapWithRefactorAction(refactor))
+          .toList();
+      contents.add(
+        WrapWithRefactors(refactors: wrapWithRefactors, controller: controller),
+      );
+    }
+
     if (properties.isEmpty) {
       if (name != null) {
         contents.add(_NoEditablePropertiesMessage(name: name));

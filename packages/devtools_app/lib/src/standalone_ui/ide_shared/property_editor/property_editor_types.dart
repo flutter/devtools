@@ -224,6 +224,24 @@ EditableProperty? argToProperty(EditableArgument argument) {
   }
 }
 
+/// Represents a "Wrap with" refactor action.
+class WrapWithRefactorAction {
+  WrapWithRefactorAction(this._refactor);
+
+  final CodeActionCommand _refactor;
+
+  String get label => _extractLabel(_refactor.title);
+
+  String get command => _refactor.command;
+
+  List<Object?> get args => _refactor.args;
+
+  String _extractLabel(String title) {
+    final wrapperName = title.split('Wrap with ').last;
+    return wrapperName == 'widget...' ? 'Widget' : wrapperName;
+  }
+}
+
 /// The following types should match those returned by the Analysis Server. See:
 /// https://github.com/dart-lang/sdk/blob/154b473cdb65c2686bb44fedec03ba2deddb80fd/pkg/analysis_server/lib/src/lsp/handlers/custom/editable_arguments/handler_editable_arguments.dart#L182
 const stringType = 'string';

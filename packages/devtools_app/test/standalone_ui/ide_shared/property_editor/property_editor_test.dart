@@ -3,12 +3,15 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/analytics/constants.dart' as gac;
 import 'package:devtools_app/src/shared/editor/api_classes.dart';
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_controller.dart';
+import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_refactors.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_types.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_view.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -889,6 +892,207 @@ void main() {
     });
   });
 
+  group('refactors', () {
+    int refactorCount = 0;
+
+    void initWithRefactors(List<String> refactorNames) {
+      controller.initForTestsOnly(
+        document: textDocument1,
+        cursorPosition: activeCursorPosition1,
+        editableArgsResult: result1,
+        refactors: refactorNames.map(_createCommand).toList(),
+      );
+    }
+
+    List<String> wrapWithButtonLabels(WidgetTester tester) => tester
+        .widgetList<DevToolsTooltip>(
+          find.descendant(
+            of: find.byType(WrapWithButton),
+            matching: find.byType(DevToolsTooltip),
+          ),
+        )
+        .map((tooltip) => tooltip.message!)
+        .toList();
+
+    Finder wrapWithButtonFinder(String label) => find.ancestor(
+      of: find.byWidgetPredicate(
+        (widget) => widget is DevToolsTooltip && widget.message == label,
+      ),
+      matching: find.byType(WrapWithButton),
+    );
+
+    Finder wrapWithOverflowMenuFinder() => find.descendant(
+      of: find.byType(DevToolsTooltip),
+      matching: find.byType(ContextMenuButton),
+    );
+
+    setUp(() {
+      FeatureFlags.propertyEditorRefactors = true;
+
+      refactorCount = 0;
+      when(
+        // ignore: discarded_futures, for mocking purposes.
+        mockEditorClient.executeCommand(
+          commandName: argThat(isNotNull, named: 'commandName'),
+          commandArgs: argThat(isNotNull, named: 'commandArgs'),
+          screenId: 'propertyEditorSidebar',
+        ),
+      ).thenAnswer((realInvocation) {
+        refactorCount++;
+        return Future.value(GenericApiResponse(success: true));
+      });
+    });
+
+    testWidgets('main refactors are displayed in a consistent order', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        initWithRefactors([
+          'Wrap with Row',
+          'Wrap with widget...',
+          'Wrap with Padding',
+          'Wrap with Expanded',
+          'Wrap with Container',
+          'Wrap with Center',
+          'Wrap with Column',
+          'Wrap with SizedBox',
+        ]);
+
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Verify the main refactor buttons are displayed in the expected order.
+        final expectedMainRefactorsOrder = mainRefactors.toList();
+        final mainRefactorButtonLabels = wrapWithButtonLabels(tester);
+
+        expect(
+          mainRefactorButtonLabels.length,
+          expectedMainRefactorsOrder.length,
+        );
+
+        for (int i = 0; i < expectedMainRefactorsOrder.length; i++) {
+          expect(mainRefactorButtonLabels[i], expectedMainRefactorsOrder[i]);
+        }
+      });
+    });
+
+    testWidgets('shows all available refactors in buttons / dropdown menu', (
+      tester,
+    ) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        initWithRefactors([
+          'Wrap with Row',
+          'Wrap with Expanded',
+          'Wrap with Container',
+          'Wrap with Column',
+          'Wrap with SizedBox',
+        ]);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Verify the "Wrap with:" text is displayed.
+        expect(find.text('Wrap with:'), findsOneWidget);
+
+        // Verify the main refactors are expected.
+        expect(
+          wrapWithButtonLabels(tester),
+          containsAll(['Row', 'Container', 'Column', 'SizedBox']),
+        );
+
+        // Verify the buttons in the dropdown menu are hidden.
+        expect(find.text('Expanded'), findsNothing);
+
+        // Tap on the overflow menu.
+        final overflowMenu = wrapWithOverflowMenuFinder();
+        await tester.tap(overflowMenu);
+        await tester.pumpAndSettle();
+
+        // Verify the buttons in the dropdown menu are shown.
+        expect(find.text('Expanded'), findsOneWidget);
+      });
+    });
+
+    testWidgets(
+      'excludes dropdown button if no extra refactors are available',
+      (tester) async {
+        return await tester.runAsync(() async {
+          // Load the property editor.
+          initWithRefactors([
+            'Wrap with Row',
+            'Wrap with Container',
+            'Wrap with Column',
+            'Wrap with SizedBox',
+          ]);
+          await tester.pumpWidget(wrap(propertyEditor));
+
+          // Verify the "Wrap with:" text is displayed.
+          expect(find.text('Wrap with:'), findsOneWidget);
+
+          // Verify the main refactors are expected.
+          expect(
+            wrapWithButtonLabels(tester),
+            containsAll(['Row', 'Container', 'Column', 'SizedBox']),
+          );
+
+          // Verify there is no overflow menu.
+          expect(wrapWithOverflowMenuFinder(), findsNothing);
+        });
+      },
+    );
+
+    testWidgets('selecting overflow menu triggers refactor', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        initWithRefactors([
+          'Wrap with Row',
+          'Wrap with Container',
+          'Wrap with Column',
+          'Wrap with SizedBox',
+          'Wrap with Expanded',
+        ]);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Verify no refactors have been triggered.
+        expect(refactorCount, equals(0));
+
+        // Tap on the overflow menu.
+        final overflowMenu = wrapWithOverflowMenuFinder();
+        await tester.tap(overflowMenu);
+        await tester.pumpAndSettle();
+
+        // Select a refactor in the overflow menu.
+        await tester.tap(find.text('Expanded'));
+        await tester.pumpAndSettle();
+
+        // Verify a refactor has been triggered.
+        expect(refactorCount, equals(1));
+      });
+    });
+
+    testWidgets('clicking refactor button triggers refactor', (tester) async {
+      return await tester.runAsync(() async {
+        // Load the property editor.
+        initWithRefactors([
+          'Wrap with Row',
+          'Wrap with Container',
+          'Wrap with Column',
+          'Wrap with SizedBox',
+        ]);
+        await tester.pumpWidget(wrap(propertyEditor));
+
+        // Verify no refactors have been triggered.
+        expect(refactorCount, equals(0));
+
+        // Click on a "Wrap with" button.
+        final wrapWithRowButton = wrapWithButtonFinder('Row');
+        await tester.tap(wrapWithRowButton);
+
+        // Verify a refactor has been triggered.
+        expect(refactorCount, equals(1));
+      });
+    });
+  });
+
   group('widget name and documentation', () {
     testWidgets('expanding and collapsing documentation', (tester) async {
       // Load the property editor.
@@ -1518,3 +1722,32 @@ const exampleWidgetText =
     'For example, the highlighted code below is a constructor invocation of a Text widget:';
 const noDartCodeText = 'No Dart code found at the current cursor location.';
 const noWidgetText = 'No Flutter widget found at the current cursor location.';
+
+const commandArg = '''
+[
+  {
+    "textDocument": {
+      "uri": "file:///Users/me/flutter_app/lib/main.dart",
+      "version": 1
+    },
+    "range": {
+      "end": {
+        "character": 10,
+        "line": 20
+      },
+      "start": {
+        "character": 10,
+        "line": 20
+      }
+    },
+    "kind": "refactor.flutter.wrap.generic",
+    "loggedAction": "dart.assist.flutter.wrap.generic"
+  }
+]
+''';
+
+CodeActionCommand _createCommand(String title) => CodeActionCommand(
+  command: 'dart.edit.codeAction.apply',
+  args: json.decode(commandArg),
+  title: title,
+);

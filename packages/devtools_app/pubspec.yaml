@@ -95,6 +95,8 @@ flutter:
     - icons/general/
     - icons/gutter/
     - icons/inspector/
+    # TODO(elliette): The inspector icons are also used in the Property Editor.
+    # They should be moved to a common directory.
     - icons/inspector/widget_icons/
     - icons/memory/
     - icons/perf/
