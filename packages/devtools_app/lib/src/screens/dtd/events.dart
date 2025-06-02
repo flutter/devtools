@@ -1,7 +1,3 @@
-// Copyright 2025 The Flutter Authors
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
-
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart' show DartToolingDaemon, DTDEvent;
@@ -15,9 +11,11 @@ import 'shared.dart';
 class EventsController extends FeatureController {
   late DartToolingDaemon dtd;
 
-  final _events = ListValueNotifier<DTDEvent>([]);
+  @visibleForTesting
+  final events = ListValueNotifier<DTDEvent>([]);
 
-  final _selectedEvent = ValueNotifier<DTDEvent?>(null);
+  @visibleForTesting
+  final selectedEvent = ValueNotifier<DTDEvent?>(null);
 
   final scrollController = ScrollController();
 
@@ -27,7 +25,7 @@ class EventsController extends FeatureController {
     for (final stream in knownDtdStreams) {
       autoDisposeStreamSubscription(
         dtd.onEvent(stream).listen((event) {
-          _events.add(event);
+          events.add(event);
           // Schedule a scroll to the bottom after the frame is built.
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (scrollController.hasClients) {
@@ -43,8 +41,8 @@ class EventsController extends FeatureController {
 
   @override
   void dispose() {
-    _events.dispose();
-    _selectedEvent.dispose();
+    events.dispose();
+    selectedEvent.dispose();
     scrollController.dispose();
     super.dispose();
   }
@@ -69,21 +67,21 @@ class EventsView extends StatelessWidget {
             icon: Icons.delete,
             label: 'Clear',
             onPressed: () {
-              controller._events.clear();
-              controller._selectedEvent.value = null;
+              controller.events.clear();
+              controller.selectedEvent.value = null;
             },
           ),
         ],
       ),
       child: ValueListenableBuilder<List<DTDEvent>>(
-        valueListenable: controller._events,
+        valueListenable: controller.events,
         builder: (context, events, _) {
           if (events.isEmpty) {
             return const Center(child: Text('No events received'));
           }
 
           return ValueListenableBuilder<DTDEvent?>(
-            valueListenable: controller._selectedEvent,
+            valueListenable: controller.selectedEvent,
             builder: (context, selectedEvent, _) {
               return SplitPane(
                 initialFractions: const [0.7, 0.3],
@@ -100,7 +98,7 @@ class EventsView extends StatelessWidget {
                           event: events[index],
                           selected: events[index] == selectedEvent,
                           onTap: () {
-                            controller._selectedEvent.value = events[index];
+                            controller.selectedEvent.value = events[index];
                           },
                         ),
                       ),
@@ -109,7 +107,7 @@ class EventsView extends StatelessWidget {
                   OutlineDecoration.onlyTop(
                     child: Padding(
                       padding: const EdgeInsets.all(denseSpacing),
-                      child: _EventDetailView(event: selectedEvent),
+                      child: EventDetailView(event: selectedEvent),
                     ),
                   ),
                 ],
@@ -171,14 +169,16 @@ class _EventListTile extends StatelessWidget {
 }
 
 /// The details view for a single [DTDEvent] selected from [EventsView].
-class _EventDetailView extends StatelessWidget {
-  const _EventDetailView({required this.event});
+@visibleForTesting
+class EventDetailView extends StatelessWidget {
+  const EventDetailView({super.key, required this.event});
 
   final DTDEvent? event;
 
   @override
   Widget build(BuildContext context) {
-    if (event == null) {
+    final localEvent = event;
+    if (localEvent == null) {
       return const Center(child: Text('No event selected'));
     }
 
@@ -187,15 +187,15 @@ class _EventDetailView extends StatelessWidget {
       children: [
         Text('Event Details', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: defaultSpacing),
-        _buildDetailRow('Stream', event!.stream),
-        _buildDetailRow('Kind', event!.kind),
-        _buildDetailRow('Timestamp', DateTime.now().toString()),
+        _buildDetailRow('Stream', localEvent.stream),
+        _buildDetailRow('Kind', localEvent.kind),
+        _buildDetailRow('Timestamp', localEvent.timestamp.toString()),
         const SizedBox(height: defaultSpacing),
         Text('Data:', style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: denseSpacing),
         Expanded(
           child: SingleChildScrollView(
-            child: SelectableText(event!.data.toString()),
+            child: SelectableText(localEvent.data.toString()),
           ),
         ),
       ],
