@@ -5,7 +5,7 @@
 import 'package:devtools_app_shared/service.dart';
 import 'package:dtd/dtd.dart';
 // ignore: implementation_imports, intentional use of extension methods in DTD
-import 'package:dtd/src/unified_analytics_service.dart';
+import 'package:dtd/src/services/unified_analytics_service.dart';
 import 'package:logging/logging.dart';
 import 'package:unified_analytics/unified_analytics.dart' as ua;
 
