@@ -612,12 +612,14 @@ class ToolbarAction extends StatelessWidget {
     super.key,
     this.size,
     this.style,
+    this.buttonStyle,
     this.color,
     this.gaScreen,
     this.gaSelection,
   }) : assert((gaScreen == null) == (gaSelection == null));
 
   final TextStyle? style;
+  final ButtonStyle? buttonStyle;
   final IconData icon;
   final Color? color;
   final String? tooltip;
@@ -632,6 +634,7 @@ class ToolbarAction extends StatelessWidget {
       onPressed: onPressed,
       tooltip: tooltip,
       style: style,
+      buttonStyle: buttonStyle,
       gaScreen: gaScreen,
       gaSelection: gaSelection,
       child: Icon(
@@ -650,11 +653,13 @@ class SmallAction extends StatelessWidget {
     this.tooltip,
     super.key,
     this.style,
+    this.buttonStyle,
     this.gaScreen,
     this.gaSelection,
   }) : assert((gaScreen == null) == (gaSelection == null));
 
   final TextStyle? style;
+  final ButtonStyle? buttonStyle;
   final Widget child;
   final String? tooltip;
   final VoidCallback? onPressed;
@@ -664,11 +669,13 @@ class SmallAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final button = TextButton(
-      style: TextButton.styleFrom(
-        padding: EdgeInsets.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        textStyle: style,
-      ),
+      style:
+          buttonStyle ??
+          TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            textStyle: style,
+          ),
       onPressed: () {
         if (gaScreen != null && gaSelection != null) {
           ga.select(gaScreen!, gaSelection!);
@@ -2126,6 +2133,7 @@ class ContextMenuButton extends StatelessWidget {
     this.gaItem,
     this.buttonWidth = defaultWidth,
     this.icon = Icons.more_vert,
+    this.style,
     double? iconSize,
   }) : iconSize = iconSize ?? tableIconSize;
 
@@ -2138,6 +2146,7 @@ class ContextMenuButton extends StatelessWidget {
   final List<Widget> menuChildren;
   final IconData icon;
   final double iconSize;
+  final ButtonStyle? style;
   final double buttonWidth;
 
   @override
@@ -2152,6 +2161,7 @@ class ContextMenuButton extends StatelessWidget {
                 icon: icon,
                 size: iconSize,
                 color: color,
+                buttonStyle: style,
                 onPressed: () {
                   if (gaScreen != null && gaItem != null) {
                     ga.select(gaScreen!, gaItem!);
