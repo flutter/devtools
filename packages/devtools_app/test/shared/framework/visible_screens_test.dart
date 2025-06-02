@@ -39,7 +39,7 @@ void main() {
       );
     });
 
-    void setupMockValues({
+    void setupMockConnectedApp({
       bool web = false,
       bool flutter = false,
       bool debugMode = true,
@@ -69,7 +69,7 @@ void main() {
     }
 
     testWidgets('are correct for Dart CLI app', (WidgetTester tester) async {
-      setupMockValues();
+      setupMockConnectedApp();
 
       expect(
         visibleScreenTypes,
@@ -92,7 +92,7 @@ void main() {
     });
 
     testWidgets('are correct for Dart Web app', (WidgetTester tester) async {
-      setupMockValues(web: true);
+      setupMockConnectedApp(web: true);
 
       expect(
         visibleScreenTypes,
@@ -117,7 +117,7 @@ void main() {
     testWidgets('are correct for Flutter (non-web) debug app', (
       WidgetTester tester,
     ) async {
-      setupMockValues(flutter: true);
+      setupMockConnectedApp(flutter: true);
 
       expect(
         visibleScreenTypes,
@@ -142,7 +142,7 @@ void main() {
     testWidgets('are correct for Flutter (non-web) profile app', (
       WidgetTester tester,
     ) async {
-      setupMockValues(flutter: true, debugMode: false);
+      setupMockConnectedApp(flutter: true, debugMode: false);
 
       expect(
         visibleScreenTypes,
@@ -167,7 +167,7 @@ void main() {
     testWidgets('are correct for Flutter web debug app', (
       WidgetTester tester,
     ) async {
-      setupMockValues(flutter: true, web: true);
+      setupMockConnectedApp(flutter: true, web: true);
 
       expect(
         visibleScreenTypes,
@@ -192,7 +192,7 @@ void main() {
     testWidgets('are correct for Flutter app on old Flutter version', (
       WidgetTester tester,
     ) async {
-      setupMockValues(
+      setupMockConnectedApp(
         flutter: true,
         flutterVersion: SemanticVersion(
           major: 2,
@@ -228,7 +228,7 @@ void main() {
       offlineDataController.startShowingOfflineData(
         offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
-      setupMockValues(web: true); // Web apps would normally hide
+      setupMockConnectedApp(web: true); // Web apps would normally hide
 
       expect(
         visibleScreenTypes,
@@ -250,11 +250,35 @@ void main() {
       offlineDataController.stopShowingOfflineData();
     });
 
+    testWidgets('are correct with no connected app', (
+      WidgetTester tester,
+    ) async {
+      // Ensure the service manager is not connected to an app.
+      await fakeServiceConnection.serviceManager.manuallyDisconnect();
+      expect(
+        visibleScreenTypes,
+        equals([
+          HomeScreen,
+          // InspectorScreen,
+          PerformanceScreen,
+          ProfilerScreen,
+          MemoryScreen,
+          // DebuggerScreen,
+          NetworkScreen,
+          // LoggingScreen,
+          AppSizeScreen,
+          DeepLinksScreen,
+          // VMDeveloperToolsScreen,
+          DTDToolsScreen,
+        ]),
+      );
+    });
+
     testWidgets(
       'are correct for Dart CLI app with advanced developer mode enabled',
       (WidgetTester tester) async {
         preferences.toggleAdvancedDeveloperMode(true);
-        setupMockValues();
+        setupMockConnectedApp();
         expect(
           visibleScreenTypes,
           equals([

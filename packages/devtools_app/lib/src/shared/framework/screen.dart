@@ -122,6 +122,7 @@ enum ScreenMetaData {
     title: 'DTD Tools',
     icon: Icons.settings_applications,
     requiresAdvancedDeveloperMode: true,
+    requiresConnection: false,
   ),
   simple('simple');
 
