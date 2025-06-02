@@ -113,7 +113,7 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.text(ConnectedAppServiceConstants.unregisterVmService),
+        find.text(ConnectedAppServiceConstants.vmServiceUnregistered),
         findsOneWidget,
       );
     });
@@ -170,7 +170,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selectedEvent.value, controller.events.value.last);
-      expect(_findInDetailsView(find.text('Event Details')), findsOneWidget);
+      expect(_findInDetailsView(find.text('Event details')), findsOneWidget);
 
       expect(_findInDetailsView(find.text('Stream:')), findsOneWidget);
       expect(

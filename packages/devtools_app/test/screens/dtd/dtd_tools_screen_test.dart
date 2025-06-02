@@ -65,23 +65,7 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
-      'builds for existing DTD connection',
-      windowSize,
-      (WidgetTester tester) async {
-        final mockDtd = MockDartToolingDaemon();
-        when(
-          mockGlobalDTDManager.connection,
-        ).thenReturn(FixedValueListenable(mockDtd));
-        await pumpScreen(tester);
-        expect(find.byType(DtdNotConnectedView), findsNothing);
-        expect(find.byType(DtdConnectedView), findsOneWidget);
-        expect(find.byType(ServicesView), findsOneWidget);
-        expect(find.byType(EventsView), findsOneWidget);
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'can disconnect from existing connection and connect to a different one',
+      'connects to existing connection by default but can connect to a different one',
       windowSize,
       (WidgetTester tester) async {
         // Set up [mockGlobalDTDManager].
