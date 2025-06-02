@@ -10,48 +10,24 @@ import 'package:devtools_tool/model.dart';
 import 'package:io/io.dart';
 
 import '../utils.dart';
-
-const _updateOnPath = 'update-on-path';
-const _useCacheFlag = 'use-cache';
+import 'shared.dart';
 
 final _flutterPreReleaseTagRegExp = RegExp(r'[0-9]+.[0-9]+.0-[0-9]+.0.pre');
 
 /// This command updates the the Flutter SDK contained in the 'tool/' directory
-/// to the latest Flutter candidate branch.
+/// to the latest Flutter candidate branch, as specified by the commit hash in
+/// the flutter-candidate.txt file in the repository root.
 ///
-/// When the '--from-path' flag is passed, the Flutter SDK that is on PATH (your
-/// local flutter/flutter git checkout) will be updated as well.
-///
-/// This command will use the Flutter version from the 'flutter-candidate.txt'
-/// file in the repository root, unless the '--no-use-cache' flag is passed,
-/// in which case it will run the 'tool/latest_flutter_candidate.sh' script to
-/// fetch the latest version from upstream.
-///
-/// The version from 'flutter-candidate.txt' should be identical most of the
-/// time since the GitHub workflow that updates this file runs twice per day.
+/// When the '--update-on-path' flag is passed, the Flutter SDK that is on PATH
+/// (your local flutter/flutter git checkout) will be updated as well.
 ///
 /// To run this script:
-/// `dt update-flutter-sdk [--from-path] [--no-use-cache]`
+/// `dt update-flutter-sdk [--update-on-path]`
 class UpdateFlutterSdkCommand extends Command {
   UpdateFlutterSdkCommand() {
-    argParser
-      ..addFlag(
-        _updateOnPath,
-        negatable: false,
-        help:
-            'Also update the Flutter SDK that is on PATH (your local '
-            'flutter/flutter git checkout)',
-      )
-      ..addFlag(
-        _useCacheFlag,
-        negatable: true,
-        defaultsTo: true,
-        help:
-            'Update the Flutter SDK(s) to the cached Flutter version stored '
-            'in "flutter-candidate.txt" instead of the latest version at '
-            '"https://flutter.googlesource.com/mirrors/flutter/"',
-      );
+    argParser.addUpdateOnPathFlag();
   }
+
   @override
   String get name => 'update-flutter-sdk';
 
@@ -63,49 +39,22 @@ class UpdateFlutterSdkCommand extends Command {
 
   @override
   Future run() async {
-    final updateOnPath = argResults![_updateOnPath] as bool;
-    final useCachedVersion = argResults![_useCacheFlag] as bool;
+    final updateOnPath =
+        argResults![SharedCommandArgs.updateOnPath.flagName] as bool;
     final log = Logger.standard();
-
-    // TODO(kenz): we can remove this if we can rewrite the
-    // 'latest_flutter_candidate.sh' script as a Dart script, or if we instead
-    // duplicate it as a Windows script (we may need this to be a non-Dart
-    // script for execution on the bots before we have a Dart SDK available).
-    if (Platform.isWindows && !useCachedVersion) {
-      log.stderr(
-        'On windows, you can only use the cached Flutter version from '
-        '"flutter-candidate.txt". Please remove the "--no-use-cache" flag and '
-        'try again.',
-      );
-      return 1;
-    }
-
     final repo = DevToolsRepo.getInstance();
     final processManager = ProcessManager();
 
     final String? flutterVersion;
+    final versionStr = repo.readFile(Uri.parse('flutter-candidate.txt')).trim();
+    // If the version string doesn't match the expected pattern for a
+    // pre-release tag, then assume it's a commit hash:
+    flutterVersion =
+        _flutterPreReleaseTagRegExp.hasMatch(versionStr)
+            ? 'tags/$versionStr'
+            : versionStr;
 
-    if (useCachedVersion) {
-      final versionStr =
-          repo.readFile(Uri.parse('flutter-candidate.txt')).trim();
-      // If the version string doesn't match the expected pattern for a
-      // pre-release tag, then assume it's a commit hash:
-      flutterVersion =
-          _flutterPreReleaseTagRegExp.hasMatch(versionStr)
-              ? 'tags/$versionStr'
-              : versionStr;
-    } else {
-      flutterVersion =
-          (await processManager.runProcess(
-            CliCommand('sh', ['latest_flutter_candidate.sh']),
-            workingDirectory: repo.toolDirectoryPath,
-          )).stdout.replaceFirst('refs/', '').trim();
-    }
-
-    log.stdout(
-      'Updating to Flutter version '
-      '${useCachedVersion ? 'from cache' : 'from upstream'}: $flutterVersion',
-    );
+    log.stdout('Updating to Flutter version from cache: $flutterVersion');
 
     final flutterSdkDirName = repo.sdkDirectoryName;
     final toolSdkPath = repo.toolFlutterSdkPath;

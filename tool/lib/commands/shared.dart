@@ -52,6 +52,18 @@ extension BuildCommandArgsExtension on ArgParser {
     );
   }
 
+  void addUpdateOnPathFlag() {
+    addFlag(
+      SharedCommandArgs.updateOnPath.flagName,
+      negatable: false,
+      help:
+          'Update the Flutter SDK that is on PATH (your local '
+          'flutter/flutter git checkout). This flag is to be used in '
+          'combination with the ${SharedCommandArgs.updateFlutter.asArg()} '
+          'flag.',
+    );
+  }
+
   void addWasmFlag() {
     addFlag(
       SharedCommandArgs.wasm.flagName,
@@ -100,6 +112,7 @@ enum SharedCommandArgs {
   runApp('run-app'),
   serveWithDartSdk('serve-with-dart-sdk'),
   updateFlutter('update-flutter'),
+  updateOnPath('update-on-path'),
   updatePerfetto('update-perfetto');
 
   const SharedCommandArgs(this.flagName);
