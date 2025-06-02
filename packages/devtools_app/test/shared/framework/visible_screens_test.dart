@@ -269,6 +269,31 @@ void main() {
           AppSizeScreen,
           DeepLinksScreen,
           // VMDeveloperToolsScreen,
+          // DTDToolsScreen,
+        ]),
+      );
+    });
+
+    testWidgets('are correct with no connected app (advanced developer mode)', (
+      WidgetTester tester,
+    ) async {
+      // Ensure the service manager is not connected to an app.
+      await fakeServiceConnection.serviceManager.manuallyDisconnect();
+      preferences.toggleAdvancedDeveloperMode(true);
+      expect(
+        visibleScreenTypes,
+        equals([
+          HomeScreen,
+          // InspectorScreen,
+          PerformanceScreen,
+          ProfilerScreen,
+          MemoryScreen,
+          // DebuggerScreen,
+          NetworkScreen,
+          // LoggingScreen,
+          AppSizeScreen,
+          DeepLinksScreen,
+          // VMDeveloperToolsScreen,
           DTDToolsScreen,
         ]),
       );

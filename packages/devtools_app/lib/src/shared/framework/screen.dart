@@ -498,6 +498,16 @@ abstract class Screen {
     );
   }
 
+  if (screen.requiresAdvancedDeveloperMode) {
+    if (!preferences.advancedDeveloperModeEnabled.value) {
+      _log.finest('screen requires advanced developer mode: returning false');
+      return (
+        show: false,
+        disabledReason: ScreenDisabledReason.requiresAdvancedDeveloperMode,
+      );
+    }
+  }
+
   final serviceReady =
       serviceConnection.serviceManager.isServiceAvailable &&
       serviceConnection.serviceManager.connectedApp!.connectedAppInitialized;
@@ -551,15 +561,6 @@ abstract class Screen {
       return (
         show: false,
         disabledReason: ScreenDisabledReason.requiresDebugBuild,
-      );
-    }
-  }
-  if (screen.requiresAdvancedDeveloperMode) {
-    if (!preferences.advancedDeveloperModeEnabled.value) {
-      _log.finest('screen requires advanced developer mode: returning false');
-      return (
-        show: false,
-        disabledReason: ScreenDisabledReason.requiresAdvancedDeveloperMode,
       );
     }
   }
