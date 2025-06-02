@@ -135,7 +135,7 @@ void main() {
 
       expect(controller.selectedEvent.value, controller.events.value.first);
       expect(_findInDetailsView(find.text('No event selected')), findsNothing);
-      expect(_findInDetailsView(find.text('Event Details')), findsOneWidget);
+      expect(_findInDetailsView(find.text('Event details')), findsOneWidget);
 
       expect(_findInDetailsView(find.text('Stream:')), findsOneWidget);
       expect(

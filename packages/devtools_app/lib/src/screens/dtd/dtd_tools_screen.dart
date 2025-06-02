@@ -21,7 +21,7 @@ import 'shared.dart';
 // DevTools extension instead of a first party DevTools screen.
 
 /// A screen for inspecting a Dart Tooling Daemon instance.
-/// 
+///
 /// By default, this screen will connect to the DTD connection available from
 /// DevTools, but the tool can also connect to a DTD instance manually.
 class DTDToolsScreen extends Screen {
@@ -100,8 +100,8 @@ class _DtdConnectedViewState extends State<DtdConnectedView> {
   void _initForDtdConnection() {
     _registeredServicesController!
       ..cancelStreamSubscriptions()
-      ..dtd = widget.dtd
-      ..init();
+      ..dtd = widget.dtd;
+    unawaited(_registeredServicesController!.init());
     _eventsController!
       ..cancelStreamSubscriptions()
       ..dtd = widget.dtd
@@ -120,10 +120,7 @@ class _DtdConnectedViewState extends State<DtdConnectedView> {
             padding: const EdgeInsets.all(densePadding),
             child: Row(
               children: [
-                Text(
-                  'DTD connection:',
-                  style: Theme.of(context).boldTextStyle,
-                ),
+                Text('DTD connection:', style: Theme.of(context).boldTextStyle),
                 const SizedBox(width: denseSpacing),
                 Text(widget.dtdUri),
                 const SizedBox(width: defaultSpacing),

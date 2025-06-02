@@ -185,7 +185,7 @@ class EventDetailView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Event Details', style: Theme.of(context).textTheme.titleMedium),
+        Text('Event details', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: defaultSpacing),
         _buildDetailRow('Stream', localEvent.stream),
         _buildDetailRow('Kind', localEvent.kind),

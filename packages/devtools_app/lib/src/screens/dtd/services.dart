@@ -1,7 +1,3 @@
-// Copyright 2025 The Flutter Authors
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -20,26 +16,32 @@ import 'dtd_tools_model.dart';
 class ServicesController extends FeatureController {
   late DartToolingDaemon dtd;
 
-  final _services = ValueNotifier<List<DtdServiceMethod>>([]);
+  @visibleForTesting
+  final services = ValueNotifier<List<DtdServiceMethod>>([]);
 
-  final _selectedService = ValueNotifier<DtdServiceMethod?>(null);
+  @visibleForTesting
+  final selectedService = ValueNotifier<DtdServiceMethod?>(null);
 
   @override
-  void init() {
+  Future<void> init() async {
     super.init();
-    unawaited(refresh());
+    await refresh();
   }
 
   @override
   void dispose() {
-    _services.dispose();
-    _selectedService.dispose();
+    services.dispose();
+    selectedService.dispose();
     super.dispose();
   }
 
+  // TODO(kenz): listen on DTD's 'Service' stream to update this list for
+  //  service registered and unregistered events.
+  /// Refreshes [services] with the current set of services registered on
+  /// [dtd].
   Future<void> refresh() async {
     final response = await dtd.getRegisteredServices();
-    _services.value = <DtdServiceMethod>[
+    services.value = <DtdServiceMethod>[
       ...response.dtdServices.map((value) {
         // If the DTD service has the form 'service.method', split up the two
         // values. Otherwise, leave the service null and use the entire name
@@ -116,8 +118,8 @@ class _ServicesViewState extends State<ServicesView> {
           children: [
             MultiValueListenableBuilder(
               listenables: [
-                widget.controller._services,
-                widget.controller._selectedService,
+                widget.controller.services,
+                widget.controller.selectedService,
               ],
               builder: (context, values, _) {
                 final services = values.first as List<DtdServiceMethod>;
@@ -138,7 +140,7 @@ class _ServicesViewState extends State<ServicesView> {
                         ),
                         selected: selectedService == service,
                         onTap: () {
-                          widget.controller._selectedService.value = service;
+                          widget.controller.selectedService.value = service;
                         },
                       );
                     },
@@ -147,9 +149,9 @@ class _ServicesViewState extends State<ServicesView> {
               },
             ),
             ValueListenableBuilder(
-              valueListenable: widget.controller._selectedService,
+              valueListenable: widget.controller.selectedService,
               builder: (context, service, child) {
-                return _ManuallyCallService(
+                return ManuallyCallService(
                   serviceMethod: service,
                   dtd: widget.controller.dtd,
                 );
@@ -164,18 +166,24 @@ class _ServicesViewState extends State<ServicesView> {
 
 /// A widget that provides support for manually calling a DTD service method and
 /// viewing the result.
-class _ManuallyCallService extends StatefulWidget {
-  const _ManuallyCallService({required this.serviceMethod, required this.dtd});
+@visibleForTesting
+class ManuallyCallService extends StatefulWidget {
+  const ManuallyCallService({
+    super.key,
+    required this.serviceMethod,
+    required this.dtd,
+  });
 
   final DtdServiceMethod? serviceMethod;
 
   final DartToolingDaemon dtd;
 
   @override
-  State<_ManuallyCallService> createState() => _ManuallyCallServiceState();
+  State<ManuallyCallService> createState() => ManuallyCallServiceState();
 }
 
-class _ManuallyCallServiceState extends State<_ManuallyCallService> {
+@visibleForTesting
+class ManuallyCallServiceState extends State<ManuallyCallService> {
   final serviceController = TextEditingController();
   final methodController = TextEditingController();
   final paramsController = TextEditingController();
@@ -189,7 +197,7 @@ class _ManuallyCallServiceState extends State<_ManuallyCallService> {
   }
 
   @override
-  void didUpdateWidget(covariant _ManuallyCallService oldWidget) {
+  void didUpdateWidget(covariant ManuallyCallService oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.serviceMethod != widget.serviceMethod) {
       callResult = null;
