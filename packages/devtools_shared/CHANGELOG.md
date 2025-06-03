@@ -4,7 +4,7 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
 # 12.0.0
-* Update `dtd` dependency to `^3.0.0`.
+* Update `dtd` dependency to `^4.0.0`.
 * Register and unregister VM service connections on DTD. This change only
 applies to the case where the DevTools server starts DTD (i.e. when a DTD
 connection was not passed to the server on startup).
