@@ -22,6 +22,8 @@ export 'src/screens/debugger/span_parser.dart';
 export 'src/screens/debugger/syntax_highlighter.dart';
 export 'src/screens/deep_link_validation/deep_links_controller.dart';
 export 'src/screens/deep_link_validation/deep_links_screen.dart';
+export 'src/screens/dtd/dtd_tools_controller.dart';
+export 'src/screens/dtd/dtd_tools_screen.dart';
 export 'src/screens/inspector/inspector_controller.dart';
 export 'src/screens/inspector/inspector_screen_body.dart';
 export 'src/screens/inspector/inspector_tree_controller.dart';

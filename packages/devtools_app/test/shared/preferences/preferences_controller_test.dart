@@ -47,19 +47,22 @@ void main() {
       expect(controller.darkModeEnabled.value, isNot(originalValue));
     });
 
-    test('toggleVmDeveloperMode', () {
+    test('toggleAdvancedDeveloperMode', () {
       bool valueChanged = false;
-      final originalValue = controller.vmDeveloperModeEnabled.value;
+      final originalValue = controller.advancedDeveloperModeEnabled.value;
 
-      controller.vmDeveloperModeEnabled.addListener(() {
+      controller.advancedDeveloperModeEnabled.addListener(() {
         valueChanged = true;
       });
 
-      controller.toggleVmDeveloperMode(
-        !controller.vmDeveloperModeEnabled.value,
+      controller.toggleAdvancedDeveloperMode(
+        !controller.advancedDeveloperModeEnabled.value,
       );
       expect(valueChanged, isTrue);
-      expect(controller.vmDeveloperModeEnabled.value, isNot(originalValue));
+      expect(
+        controller.advancedDeveloperModeEnabled.value,
+        isNot(originalValue),
+      );
     });
   });
 

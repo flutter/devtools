@@ -59,11 +59,12 @@ bool isDarkThemeEnabled() {
 
 extension VmExtension on VM {
   List<IsolateRef> isolatesForDevToolsMode() {
-    final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
+    final advancedDeveloperModeEnabled =
+        preferences.advancedDeveloperModeEnabled.value;
     final vmIsolates = isolates ?? <IsolateRef>[];
     return [
       ...vmIsolates,
-      if (vmDeveloperModeEnabled || vmIsolates.isEmpty)
+      if (advancedDeveloperModeEnabled || vmIsolates.isEmpty)
         ...systemIsolates ?? <IsolateRef>[],
     ];
   }
