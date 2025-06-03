@@ -21,6 +21,7 @@ dependencies:
   async: ^2.0.0
   collection: ^1.15.0
   dap: ^1.1.0
+  dart_service_protocol_shared: ^0.0.3
   dds_service_extensions: ^2.0.0
   devtools_app_shared:
   devtools_extensions:

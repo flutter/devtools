@@ -95,6 +95,7 @@ Widget wrapWithControllers(
   AnalyticsController? analytics,
   ReleaseNotesController? releaseNotes,
   VMDeveloperToolsController? vmDeveloperTools,
+  DTDToolsController? dtdTools,
   bool includeRouter = true,
   DevToolsQueryParams? queryParams,
 }) {
@@ -163,6 +164,12 @@ Widget wrapWithControllers(
   if (vmDeveloperTools != null) {
     screenControllers.register<VMDeveloperToolsController>(
       () => vmDeveloperTools,
+      offline: offline,
+    );
+  }
+  if (dtdTools != null) {
+    screenControllers.register<DTDToolsController>(
+      () => dtdTools,
       offline: offline,
     );
   }
