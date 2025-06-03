@@ -48,6 +48,22 @@ void main() {
       );
     }
 
+    void addTimerData(String message, {required IsolateRef isolateRef}) {
+      controller.log(
+        LogData(
+          'TimerSignificantlyOverdue',
+          jsonEncode({
+            'kind': 'TimerSignificantlyOverdue',
+            'details': message,
+            'isolateRef': isolateRef.toJson(),
+          }),
+          ++timestampCounter,
+          summary: message,
+          isolateRef: isolateRef,
+        ),
+      );
+    }
+
     void addGcData(String message) {
       controller.log(
         LogData(
@@ -102,6 +118,15 @@ void main() {
       );
       addLog(
         kind: 'stdout',
+        isolateRef: IsolateRef(
+          id: 'isolates/123',
+          number: '1',
+          name: 'abc-isolate',
+          isSystemIsolate: false,
+        ),
+      );
+      addTimerData(
+        'timer event',
         isolateRef: IsolateRef(
           id: 'isolates/123',
           number: '1',
@@ -173,8 +198,8 @@ void main() {
     test('matchesForSearch - default filters', () {
       prepareTestLogs();
 
-      expect(controller.filteredData.value, hasLength(10));
-      expect(controller.matchesForSearch('abc').length, equals(4));
+      expect(controller.filteredData.value, hasLength(11));
+      expect(controller.matchesForSearch('abc').length, equals(5));
       expect(controller.matchesForSearch('ghi').length, equals(2));
       expect(controller.matchesForSearch('abcd').length, equals(0));
       expect(controller.matchesForSearch('Flutter*').length, equals(2));
@@ -190,7 +215,7 @@ void main() {
       expect(controller.matchesForSearch('severe').length, equals(3));
 
       // Search by isolateRef name.
-      expect(controller.matchesForSearch('-isolate').length, equals(1));
+      expect(controller.matchesForSearch('-isolate').length, equals(2));
 
       // Search by zone name.
       expect(controller.matchesForSearch('root').length, equals(1));
@@ -202,8 +227,8 @@ void main() {
       disableAllFilters();
       prepareTestLogs();
 
-      expect(controller.filteredData.value, hasLength(17));
-      expect(controller.matchesForSearch('abc').length, equals(5));
+      expect(controller.filteredData.value, hasLength(18));
+      expect(controller.matchesForSearch('abc').length, equals(6));
       expect(controller.matchesForSearch('ghi').length, equals(3));
       expect(controller.matchesForSearch('abcd').length, equals(0));
       expect(controller.matchesForSearch('Flutter*').length, equals(7));
@@ -219,7 +244,7 @@ void main() {
       expect(controller.matchesForSearch('severe').length, equals(3));
 
       // Search by isolateRef name.
-      expect(controller.matchesForSearch('-isolate').length, equals(1));
+      expect(controller.matchesForSearch('-isolate').length, equals(2));
 
       // Search by zone name.
       expect(controller.matchesForSearch('root').length, equals(1));
@@ -230,10 +255,10 @@ void main() {
     test('matchesForSearch sets isSearchMatch property', () {
       prepareTestLogs();
 
-      expect(controller.filteredData.value, hasLength(10));
+      expect(controller.filteredData.value, hasLength(11));
       controller.search = 'abc';
       var matches = controller.searchMatches.value;
-      expect(matches.length, equals(4));
+      expect(matches.length, equals(5));
       verifyIsSearchMatch(controller.filteredData.value, matches);
 
       controller.search = 'Flutter.';
@@ -246,40 +271,40 @@ void main() {
       prepareTestLogs();
 
       // At this point data is filtered by the default setting filter values.
-      expect(controller.data, hasLength(17));
-      expect(controller.filteredData.value, hasLength(10));
+      expect(controller.data, hasLength(18));
+      expect(controller.filteredData.value, hasLength(11));
 
       controller.setActiveFilter(query: 'abc');
-      expect(controller.data, hasLength(17));
-      expect(controller.filteredData.value, hasLength(4));
+      expect(controller.data, hasLength(18));
+      expect(controller.filteredData.value, hasLength(5));
 
       controller.setActiveFilter(query: 'def');
-      expect(controller.data, hasLength(17));
+      expect(controller.data, hasLength(18));
       expect(controller.filteredData.value, hasLength(2));
 
       controller.setActiveFilter(query: 'abc def');
-      expect(controller.data, hasLength(17));
-      expect(controller.filteredData.value, hasLength(6));
+      expect(controller.data, hasLength(18));
+      expect(controller.filteredData.value, hasLength(7));
 
       controller.setActiveFilter(query: 'k:stdout');
-      expect(controller.data, hasLength(17));
+      expect(controller.data, hasLength(18));
       expect(controller.filteredData.value, hasLength(6));
 
       controller.setActiveFilter(query: '-k:stdout');
-      expect(controller.data, hasLength(17));
-      expect(controller.filteredData.value, hasLength(4));
+      expect(controller.data, hasLength(18));
+      expect(controller.filteredData.value, hasLength(5));
 
       controller.setActiveFilter(query: 'k:stdout abc');
-      expect(controller.data, hasLength(17));
+      expect(controller.data, hasLength(18));
       expect(controller.filteredData.value, hasLength(3));
 
       controller.setActiveFilter(query: 'k:stdout,flutter.navigation');
-      expect(controller.data, hasLength(17));
+      expect(controller.data, hasLength(18));
       expect(controller.filteredData.value, hasLength(7));
 
       controller.setActiveFilter();
-      expect(controller.data, hasLength(17));
-      expect(controller.filteredData.value, hasLength(10));
+      expect(controller.data, hasLength(18));
+      expect(controller.filteredData.value, hasLength(11));
 
       // Test setting filters.
       final minimumLogLevelFilter =
@@ -292,22 +317,22 @@ void main() {
 
       verboseFlutterFrameworkFilter.setting.value = false;
       controller.setActiveFilter();
-      expect(controller.data, hasLength(17));
-      expect(controller.filteredData.value, hasLength(14));
+      expect(controller.data, hasLength(18));
+      expect(controller.filteredData.value, hasLength(15));
 
       verboseFlutterServiceFilter.setting.value = false;
       controller.setActiveFilter();
-      expect(controller.data, hasLength(17));
-      expect(controller.filteredData.value, hasLength(15));
+      expect(controller.data, hasLength(18));
+      expect(controller.filteredData.value, hasLength(16));
 
       gcFilter.setting.value = false;
       controller.setActiveFilter();
-      expect(controller.data, hasLength(17));
-      expect(controller.filteredData.value, hasLength(17));
+      expect(controller.data, hasLength(18));
+      expect(controller.filteredData.value, hasLength(18));
 
       minimumLogLevelFilter.setting.value = Level.SEVERE.value;
       controller.setActiveFilter();
-      expect(controller.data, hasLength(17));
+      expect(controller.data, hasLength(18));
       expect(controller.filteredData.value, hasLength(3));
     });
 
@@ -330,8 +355,8 @@ void main() {
       });
 
       test('releaseMemory - partial release', () {
-        expect(controller.data, hasLength(17));
-        expect(controller.filteredData.value, hasLength(10));
+        expect(controller.data, hasLength(18));
+        expect(controller.filteredData.value, hasLength(11));
         controller.releaseMemory(partial: true);
         expect(controller.data, hasLength(9));
         expect(controller.filteredData.value, hasLength(2));

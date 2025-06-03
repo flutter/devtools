@@ -246,6 +246,13 @@ class VmServiceWrapper extends VmService {
     );
   }
 
+  Stream<Event> get onTimerEventWithHistorySafe {
+    return _maybeReturnStreamWithHistory(
+      onTimerEventWithHistory,
+      fallbackStream: onTimerEvent,
+    );
+  }
+
   Stream<Event> _maybeReturnStreamWithHistory(
     Stream<Event> ddsStream, {
     required Stream<Event> fallbackStream,
