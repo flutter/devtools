@@ -23,7 +23,11 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+- Added a Queued Microtasks tab to the Performance View, which allows a user to
+  see details about the microtasks scheduled in an isolate's microtask queue.
+  This tab currently only appears when DevTools is connected to a Flutter or
+  Dart app started with `--profile-microtasks`. -
+  [#9239](https://github.com/flutter/devtools/pull/9239).
 
 ## CPU profiler updates
 

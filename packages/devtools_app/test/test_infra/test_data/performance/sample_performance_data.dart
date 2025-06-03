@@ -1359,3 +1359,15 @@ extension FlutterFrame6 on Never {
     endMicros: 713836331505,
   );
 }
+
+final testMicrotask = Microtask.parse({
+  'type': 'Microtask',
+  'id': 123,
+  'stackTrace': 'stack trace',
+});
+
+final testQueuedMicrotasks = QueuedMicrotasks.parse({
+  'type': 'QueuedMicrotasks',
+  'timestamp': DateTime(2001).microsecondsSinceEpoch,
+  'microtasks': [testMicrotask],
+});

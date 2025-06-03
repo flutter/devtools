@@ -16,6 +16,9 @@ const profiler = 'profiler';
 // Defined in SDK: https://github.com/dart-lang/sdk/blob/master/runtime/vm/profiler.cc#L36
 const profilePeriod = 'profile_period';
 
+// Defined in SDK: https://github.com/dart-lang/sdk/blob/main/runtime/vm/microtask_mirror_queues.cc#L18-L23.
+const profileMicrotasks = 'profile_microtasks';
+
 class VmFlagManager with DisposerMixin {
   VmServiceWrapper get service => _service;
   late VmServiceWrapper _service;

@@ -22,6 +22,7 @@ import '../../shared/offline/offline_data.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
+import 'panes/queued_microtasks/queued_microtasks_controller.dart';
 import 'panes/rebuild_stats/rebuild_stats_controller.dart';
 import 'panes/rebuild_stats/rebuild_stats_model.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
@@ -52,6 +53,8 @@ class PerformanceController extends DevToolsScreenController
   late final FlutterFramesController flutterFramesController;
 
   late final TimelineEventsController timelineEventsController;
+
+  late final QueuedMicrotasksController queuedMicrotasksController;
 
   late final RebuildStatsController rebuildStatsController;
 
@@ -90,6 +93,8 @@ class PerformanceController extends DevToolsScreenController
   Future<void> get initialized => _initialized.future;
   final _initialized = Completer<void>();
 
+  final isQueuedMicrotasksFeatureActive = ValueNotifier<bool>(false);
+
   @override
   void init() {
     super.init();
@@ -97,10 +102,12 @@ class PerformanceController extends DevToolsScreenController
     // only create a controller when it is needed,
     flutterFramesController = FlutterFramesController(this);
     timelineEventsController = TimelineEventsController(this);
+    queuedMicrotasksController = QueuedMicrotasksController(this);
     rebuildStatsController = RebuildStatsController(this);
     _featureControllers = [
       flutterFramesController,
       timelineEventsController,
+      queuedMicrotasksController,
       rebuildStatsController,
     ];
 
@@ -251,6 +258,8 @@ class PerformanceController extends DevToolsScreenController
         featureController != null && c == featureController,
       ),
     );
+    isQueuedMicrotasksFeatureActive.value =
+        queuedMicrotasksController.isActiveFeature;
   }
 
   /// Clears the timeline data currently stored by the controller as well the
