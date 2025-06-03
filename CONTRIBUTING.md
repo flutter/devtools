@@ -191,13 +191,14 @@ you will need to perform the following set up steps (first time only).
 1. Clone the [Dart SDK](https://github.com/dart-lang/sdk) fron GitHub.
 2. The `LOCAL_DART_SDK` environment variable needs to point to this path: `export LOCAL_DART_SDK=/path/to/dart/sdk`
 
-If you are also developing server side code (e.g. the `devtools_shared` package), you will need to add a
-dependency override to `sdk/pkg/dds/pubspec.yaml`.
+If you are also developing server side code (e.g. the `devtools_shared` package), you will need to modify
+the `devtools_shared` dependency override in `sdk/pubspec.yaml` to point to your local `devtools_shared`
+package:
 
 ```yaml
 dependency_overrides:
   devtools_shared:
-    path: relative/path/to/devtools/packages/devtools_shared
+    path: /path/to/devtools/packages/devtools_shared
 ```
 
 Then you can run DevTools with the server by running the following from anywhere under the `devtools/` directory:
