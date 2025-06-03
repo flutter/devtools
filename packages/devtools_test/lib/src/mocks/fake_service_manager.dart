@@ -116,6 +116,7 @@ class FakeServiceManager extends Fake
 
   static FakeVmServiceWrapper createFakeService({
     PerfettoTimeline? timelineData,
+    QueuedMicrotasks? queuedMicrotasks,
     SocketProfile? socketProfile,
     HttpProfile? httpProfile,
     SamplesMemoryJson? memoryData,
@@ -128,6 +129,7 @@ class FakeServiceManager extends Fake
   }) => FakeVmServiceWrapper(
     _flagManager,
     timelineData,
+    queuedMicrotasks,
     socketProfile,
     httpProfile,
     memoryData,

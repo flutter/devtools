@@ -41,6 +41,7 @@ export 'src/screens/performance/panes/flutter_frames/flutter_frame_model.dart';
 export 'src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 export 'src/screens/performance/panes/flutter_frames/flutter_frames_controller.dart';
 export 'src/screens/performance/panes/frame_analysis/frame_analysis_model.dart';
+export 'src/screens/performance/panes/queued_microtasks/queued_microtasks_controller.dart';
 export 'src/screens/performance/panes/rebuild_stats/rebuild_stats_controller.dart';
 export 'src/screens/performance/panes/rebuild_stats/rebuild_stats_model.dart';
 export 'src/screens/performance/panes/timeline_events/perfetto/tracing/model.dart';
