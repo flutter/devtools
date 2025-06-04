@@ -33,21 +33,24 @@ class EditorClient extends DisposableController
 
   Future<void> _initialize() async {
     autoDisposeStreamSubscription(
-      _dtd.onEvent('Service').listen((data) {
+      _dtd.onEvent(CoreDtdServiceConstants.servicesStreamId).listen((data) {
         final kind = data.kind;
-        if (kind != 'ServiceRegistered' && kind != 'ServiceUnregistered') {
+        if (kind != CoreDtdServiceConstants.serviceRegisteredKind &&
+            kind != CoreDtdServiceConstants.serviceUnregisteredKind) {
           return;
         }
 
-        final service = data.data['service'] as String?;
+        final service = data.data[DtdParameters.service] as String?;
         if (service == null ||
             (service != editorServiceName && service != lspServiceName)) {
           return;
         }
 
-        final isRegistered = kind == 'ServiceRegistered';
-        final method = data.data['method'] as String;
-        final capabilities = data.data['capabilities'] as Map<String, Object?>?;
+        final isRegistered =
+            kind == CoreDtdServiceConstants.serviceRegisteredKind;
+        final method = data.data[DtdParameters.method] as String;
+        final capabilities =
+            data.data[DtdParameters.capabilities] as Map<String, Object?>?;
         final lspMethod = LspMethod.fromMethodName(method);
         if (lspMethod != null) {
           lspMethod.isRegistered = isRegistered;
@@ -126,7 +129,7 @@ class EditorClient extends DisposableController
       }),
     );
     await [
-      _dtd.streamListen('Service'),
+      _dtd.streamListen(CoreDtdServiceConstants.servicesStreamId),
       _dtd.streamListen(editorStreamName).catchError((_) {
         // Because we currently call streamListen in two places (here and
         // ThemeManager) this can fail. It doesn't matter if this happens,

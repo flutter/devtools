@@ -4,7 +4,7 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
 ## 0.4.0
-* Bump `dtd` dependency to `^3.0.0`.
+* Bump `dtd` dependency to `^4.0.0`.
 * Bump `devtools_shared` dependency to `^12.0.0`.
 * Add `DisposableController.init` method and `DisposableController.disposed`
 getter.
