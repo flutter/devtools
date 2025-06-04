@@ -431,11 +431,9 @@ class LoggingController extends DevToolsScreenController
   }
 
   void _handleTimerEvent(Event e) {
-    final kind = e.kind!;
-
     log(
       LogData(
-        kind,
+        e.kind!,
         jsonEncode(e.json),
         e.timestamp,
         summary: e.details,

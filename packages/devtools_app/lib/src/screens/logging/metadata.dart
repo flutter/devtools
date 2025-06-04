@@ -201,6 +201,8 @@ class KindMetaDataChip extends MetadataChip {
     String? kindIconAsset;
     if (kind == 'stdout' || kind == 'stderr') {
       kindIcon = Icons.terminal_rounded;
+    } else if (kind == 'TimerSignificantlyOverdue') {
+      kindIcon = Icons.timer_rounded;
     } else if (RegExp(r'^flutter\..*$').hasMatch(kind)) {
       kindIconAsset = 'icons/flutter.png';
       kindIcon = null;
