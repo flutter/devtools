@@ -33,10 +33,10 @@ class EditorClient extends DisposableController
 
   Future<void> _initialize() async {
     autoDisposeStreamSubscription(
-      _dtd.onEvent(DtdInternalServiceConstants.servicesStreamId).listen((data) {
+      _dtd.onEvent(CoreDtdServiceConstants.servicesStreamId).listen((data) {
         final kind = data.kind;
-        if (kind != DtdInternalServiceConstants.serviceRegisteredKind &&
-            kind != DtdInternalServiceConstants.serviceUnregisteredKind) {
+        if (kind != CoreDtdServiceConstants.serviceRegisteredKind &&
+            kind != CoreDtdServiceConstants.serviceUnregisteredKind) {
           return;
         }
 
@@ -47,7 +47,7 @@ class EditorClient extends DisposableController
         }
 
         final isRegistered =
-            kind == DtdInternalServiceConstants.serviceRegisteredKind;
+            kind == CoreDtdServiceConstants.serviceRegisteredKind;
         final method = data.data[DtdParameters.method] as String;
         final capabilities =
             data.data[DtdParameters.capabilities] as Map<String, Object?>?;
@@ -129,7 +129,7 @@ class EditorClient extends DisposableController
       }),
     );
     await [
-      _dtd.streamListen(DtdInternalServiceConstants.servicesStreamId),
+      _dtd.streamListen(CoreDtdServiceConstants.servicesStreamId),
       _dtd.streamListen(editorStreamName).catchError((_) {
         // Because we currently call streamListen in two places (here and
         // ThemeManager) this can fail. It doesn't matter if this happens,
