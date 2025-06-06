@@ -51,9 +51,9 @@ void main() {
     void addTimerData(String message, {required IsolateRef isolateRef}) {
       controller.log(
         LogData(
-          'TimerSignificantlyOverdue',
+          EventKind.kTimerSignificantlyOverdue,
           jsonEncode({
-            'kind': 'TimerSignificantlyOverdue',
+            'kind': EventKind.kTimerSignificantlyOverdue,
             'details': message,
             'isolateRef': isolateRef.toJson(),
           }),
