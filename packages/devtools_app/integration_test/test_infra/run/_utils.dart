@@ -4,7 +4,7 @@
 
 // ignore_for_file: avoid_print
 
-bool debugTestScript = true;
+bool debugTestScript = false;
 
 void debugLog(String log) {
   if (debugTestScript) {
