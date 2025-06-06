@@ -17,6 +17,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   FakeVmServiceWrapper(
     this._vmFlagManager,
     this._timelineData,
+    this._queuedMicrotasks,
     this._socketProfile,
     this._httpProfile,
     this._memoryData,
@@ -74,6 +75,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   final VmFlagManager _vmFlagManager;
   final PerfettoTimeline? _timelineData;
+  final QueuedMicrotasks? _queuedMicrotasks;
   SocketProfile? _socketProfile;
   final List<SocketStatistic> _startingSockets;
   HttpProfile? _httpProfile;
@@ -371,6 +373,17 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> clearVMTimeline() => Future.value(Success());
+
+  @override
+  Future<QueuedMicrotasks> getQueuedMicrotasks(String isolateId) {
+    if (_queuedMicrotasks == null) {
+      throw StateError(
+        'An argument to the queuedMicrotasks parameter was not provided to '
+        'createFakeService',
+      );
+    }
+    return Future.value(_queuedMicrotasks);
+  }
 
   @override
   Future<ClassList> getClassList(String isolateId) {
