@@ -311,6 +311,11 @@ class LoggingController extends DevToolsScreenController
     autoDisposeStreamSubscription(
       service.onExtensionEventWithHistorySafe.listen(_handleExtensionEvent),
     );
+
+    // Log timer events.
+    autoDisposeStreamSubscription(
+      service.onTimerEventWithHistorySafe.listen(_handleTimerEvent),
+    );
   }
 
   void _handleExtensionEvent(Event e) {
@@ -423,6 +428,18 @@ class LoggingController extends DevToolsScreenController
         ),
       );
     }
+  }
+
+  void _handleTimerEvent(Event e) {
+    log(
+      LogData(
+        e.kind!,
+        jsonEncode(e.json),
+        e.timestamp,
+        summary: e.details,
+        isolateRef: e.isolateRef,
+      ),
+    );
   }
 
   void _handleGCEvent(Event e) {

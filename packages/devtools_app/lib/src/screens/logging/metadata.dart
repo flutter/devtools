@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:vm_service/vm_service.dart' show EventKind;
 
 import '../../shared/primitives/utils.dart';
 import 'logging_controller.dart';
@@ -201,6 +202,8 @@ class KindMetaDataChip extends MetadataChip {
     String? kindIconAsset;
     if (kind == 'stdout' || kind == 'stderr') {
       kindIcon = Icons.terminal_rounded;
+    } else if (kind == EventKind.kTimerSignificantlyOverdue) {
+      kindIcon = Icons.timer_rounded;
     } else if (RegExp(r'^flutter\..*$').hasMatch(kind)) {
       kindIconAsset = 'icons/flutter.png';
       kindIcon = null;
