@@ -7,7 +7,7 @@ publish_to: none
 
 # Note: this version should only be updated by running the 'dt update-version'
 # command that updates the version here and in 'devtools.dart'.
-version: 2.46.0
+version: 2.48.0-dev.0
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
@@ -20,13 +20,13 @@ resolution: workspace
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
-  cupertino_icons: ^1.0.0
   dap: ^1.1.0
+  dart_service_protocol_shared: ^0.0.3
   dds_service_extensions: ^2.0.0
   devtools_app_shared:
   devtools_extensions:
   devtools_shared:
-  dtd: ^2.5.0
+  dtd: ^4.0.0
   file: ^7.0.0
   file_selector: ^1.0.0
   fixnum: ^1.1.0
@@ -96,6 +96,8 @@ flutter:
     - icons/general/
     - icons/gutter/
     - icons/inspector/
+    # TODO(elliette): The inspector icons are also used in the Property Editor.
+    # They should be moved to a common directory.
     - icons/inspector/widget_icons/
     - icons/memory/
     - icons/perf/

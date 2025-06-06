@@ -100,9 +100,9 @@ of launch configurations for running and debugging DevTools:
 
 ### Workflow for making changes
 
-1. Change your local Flutter SDK to the latest flutter candidate branch:
+1. Ensure your local Flutter SDK, DevTools dependencies, and generated code are up-to-date:
 	```sh
-	dt update-flutter-sdk --update-on-path
+	dt sync --update-on-path
 	```
 	> Warning: this will delete any local changes in your Flutter SDK you checked out from git.
 
@@ -111,23 +111,18 @@ of launch configurations for running and debugging DevTools:
 	git checkout -b myBranch
 	```
 
-3. Ensure your branch, dependencies, and generated code are up-to-date:
-	```sh
-	dt sync
-	```
-
-4. Implement your changes, and commit to your branch:
+3. Implement your changes, and commit to your branch:
 	```sh
 	git commit -m “description”
 	```
 	If your improvement is user-facing, [document it](packages/devtools_app/release_notes/README.md) in the same PR.
 
-5. Push to your branch to GitHub:
+4. Push to your branch to GitHub:
 	```sh
 	git push origin myBranch
 	```
 
-6. Navigate to the [Pull Requests](https://github.com/flutter/devtools/pulls) tab in the main
+5. Navigate to the [Pull Requests](https://github.com/flutter/devtools/pulls) tab in the main
 [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull
 request from the branch in your cloned repo to the DevTools `master` branch. Create a pull request.
 
@@ -137,9 +132,18 @@ request from the branch in your cloned repo to the DevTools `master` branch. Cre
 	```
 	dt sync
 	```
-	This will pull the latest code from the upstream DevTools, upgrade dependencies, and perform code generation.
+	This command will:
+	- pull the latest code from the upstream DevTools master branch
+	- update `tool/flutter-sdk`	to the Flutter version DevTools is built and tested
+	with on the CI
+	- upgrade dependencies
+	- perform code generation
 
-- If you want to upgrade dependencies and re-generate code (like mocks), but do not want to merge `upstream/master`, instead run
+	Optionally, pass the `--update-on-path` flag to also update your local Flutter SDK
+	git checkout along with the `tool/flutter-sdk`. 
+
+- If you want to upgrade dependencies and re-generate code (like mocks), but do
+not want to merge `upstream/master` or update your Flutter SDK version, instead run
 	```
 	dt generate-code --upgrade
 	```
@@ -187,13 +191,14 @@ you will need to perform the following set up steps (first time only).
 1. Clone the [Dart SDK](https://github.com/dart-lang/sdk) fron GitHub.
 2. The `LOCAL_DART_SDK` environment variable needs to point to this path: `export LOCAL_DART_SDK=/path/to/dart/sdk`
 
-If you are also developing server side code (e.g. the `devtools_shared` package), you will need to add a
-dependency override to `sdk/pkg/dds/pubspec.yaml`.
+If you are also developing server side code (e.g. the `devtools_shared` package), you will need to modify
+the `devtools_shared` dependency override in `sdk/pubspec.yaml` to point to your local `devtools_shared`
+package:
 
 ```yaml
 dependency_overrides:
   devtools_shared:
-    path: relative/path/to/devtools/packages/devtools_shared
+    path: /path/to/devtools/packages/devtools_shared
 ```
 
 Then you can run DevTools with the server by running the following from anywhere under the `devtools/` directory:

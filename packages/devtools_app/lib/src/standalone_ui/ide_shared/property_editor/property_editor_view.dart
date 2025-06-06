@@ -12,6 +12,7 @@ import '../../../shared/ui/filter.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_inputs.dart';
 import 'property_editor_messages.dart';
+import 'property_editor_refactors.dart';
 import 'property_editor_types.dart';
 import 'utils/utils.dart';
 
@@ -24,20 +25,16 @@ class PropertyEditorView extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiValueListenableBuilder(
       listenables: [
-        controller.editorClient.editArgumentMethodName,
-        controller.editorClient.editableArgumentsMethodName,
+        controller.editorClient.editableArgumentsApiIsRegistered,
         controller.editableWidgetData,
       ],
       builder: (_, values, _) {
-        final editArgumentMethodName = values.first as String?;
-        final editableArgumentsMethodName = values.second as String?;
-
-        if (editArgumentMethodName == null ||
-            editableArgumentsMethodName == null) {
+        final editableArgumentsApiIsRegistered = values.first as bool;
+        if (!editableArgumentsApiIsRegistered) {
           return const CenteredCircularProgressIndicator();
         }
 
-        final editableWidgetData = values.third as EditableWidgetData?;
+        final editableWidgetData = values.second as EditableWidgetData?;
         return SelectionArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,7 +53,7 @@ class PropertyEditorView extends StatelessWidget {
       return [introSentence, const HowToUseMessage()];
     }
 
-    final (:properties, :name, :documentation, :fileUri, :range) =
+    final (:properties, :refactors, :name, :documentation, :fileUri, :range) =
         editableWidgetData;
     if (fileUri != null && !fileUri.endsWith('.dart')) {
       return [const NoDartCodeMessage(), const HowToUseMessage()];
@@ -68,6 +65,20 @@ class PropertyEditorView extends StatelessWidget {
         _WidgetNameAndDocumentation(name: name, documentation: documentation),
       );
     }
+
+    if (refactors.isNotEmpty) {
+      final wrapWithRefactors = refactors
+          .where(
+            (refactor) =>
+                refactor.title.startsWith(WrapWithRefactors.wrapWithPrefix),
+          )
+          .map((refactor) => WrapWithRefactorAction(refactor))
+          .toList();
+      contents.add(
+        WrapWithRefactors(refactors: wrapWithRefactors, controller: controller),
+      );
+    }
+
     if (properties.isEmpty) {
       if (name != null) {
         contents.add(_NoEditablePropertiesMessage(name: name));

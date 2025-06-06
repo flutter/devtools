@@ -114,18 +114,18 @@ void main() {
     await pumpDebuggerScreen(tester, debuggerController);
     expect(find.text('Variables'), findsOneWidget);
 
-    final listFinder = find.text('Root 1: List (2 items)');
+    final listFinder = find.text('root1: List (2 items)');
 
     expect(listFinder, findsOneWidget);
 
-    final mapFinder = find.textContaining('Root 2: Map (2 items)');
+    final mapFinder = find.textContaining('root2: Map (2 items)');
     final mapElement1Finder = find.textContaining("['key1']: 1.0");
     final mapElement2Finder = find.textContaining("['key2']: 2.0");
 
     expect(listFinder, findsOneWidget);
     expect(mapFinder, findsOneWidget);
-    expect(find.textContaining("Root 3: 'test str...'"), findsOneWidget);
-    expect(find.textContaining('Root 4: true'), findsOneWidget);
+    expect(find.textContaining("root3: 'test str...'"), findsOneWidget);
+    expect(find.textContaining('root4: true'), findsOneWidget);
 
     // Initially list is not expanded.
     expect(find.textContaining('0: 3'), findsNothing);
@@ -148,7 +148,7 @@ void main() {
     expect(mapElement2Finder, findsOneWidget);
 
     // Expect a tooltip for the set instance.
-    final setFinder = find.text('Root 5: Set (2 items)');
+    final setFinder = find.text('root5: Set (2 items)');
     expect(setFinder, findsOneWidget);
 
     // Initially set is not expanded.
@@ -174,7 +174,7 @@ void main() {
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final listFinder = find.text('Root 1: List (243,621 items)');
+      final listFinder = find.text('root1: List (243,621 items)');
       await verifyGroupings(tester, parentFinder: listFinder);
     },
   );
@@ -191,7 +191,7 @@ void main() {
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final mapFinder = find.text('Root 1: Map (243,621 items)');
+      final mapFinder = find.text('root1: Map (243,621 items)');
       await verifyGroupings(tester, parentFinder: mapFinder);
     },
   );
@@ -208,7 +208,7 @@ void main() {
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final setFinder = find.text('Root 1: Set (243,621 items)');
+      final setFinder = find.text('root1: Set (243,621 items)');
       await verifyGroupings(tester, parentFinder: setFinder);
     },
   );

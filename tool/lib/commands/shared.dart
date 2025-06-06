@@ -52,6 +52,18 @@ extension BuildCommandArgsExtension on ArgParser {
     );
   }
 
+  void addUpdateOnPathFlag() {
+    addFlag(
+      SharedCommandArgs.updateOnPath.flagName,
+      negatable: false,
+      help:
+          'Update the Flutter SDK that is on PATH (your local '
+          'flutter/flutter git checkout). This flag is to be used in '
+          'combination with the ${SharedCommandArgs.updateFlutter.asArg()} '
+          'flag.',
+    );
+  }
+
   void addWasmFlag() {
     addFlag(
       SharedCommandArgs.wasm.flagName,
@@ -80,6 +92,15 @@ extension BuildCommandArgsExtension on ArgParser {
       help: 'Enable debugging for the DevTools server.',
     );
   }
+
+  void addServeWithSdkOption() {
+    addOption(
+      SharedCommandArgs.serveWithDartSdk.flagName,
+      help: 'Uses the specified Dart SDK to serve the DevTools server',
+      valueHelp:
+          '/Users/me/absolute_path_to/sdk/xcodebuild/ReleaseX64/dart-sdk/bin/dart',
+    );
+  }
 }
 
 enum SharedCommandArgs {
@@ -89,7 +110,9 @@ enum SharedCommandArgs {
   wasm('wasm'),
   noStripWasm('no-strip-wasm'),
   runApp('run-app'),
+  serveWithDartSdk('serve-with-dart-sdk'),
   updateFlutter('update-flutter'),
+  updateOnPath('update-on-path'),
   updatePerfetto('update-perfetto');
 
   const SharedCommandArgs(this.flagName);

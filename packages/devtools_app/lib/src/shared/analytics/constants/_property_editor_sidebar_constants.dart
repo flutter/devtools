@@ -9,13 +9,6 @@ extension PropertyEditorSidebar on Never {
   /// Analytics id to track events that come from the DTD editor sidebar.
   static String get id => 'propertyEditorSidebar';
 
-  /// Identifier for errors returned from the getEditableArguments API.
-  static String get getEditableArgumentsIdentifier =>
-      '${id}Error-getEditableArguments';
-
-  /// Identifier for errors returned from the editArgument API.
-  static String get editArgumentIdentifier => '${id}Error-editArgument';
-
   /// Analytics id for opening the documentation.
   static String get documentationLink => 'propertyEditorDocumentation';
 
@@ -29,6 +22,10 @@ extension PropertyEditorSidebar on Never {
     required String argName,
     required String argType,
   }) => 'applyEditRequest-$argType-$argName';
+
+  /// Analytics event for a "Wrap with" refactor request.
+  static String applyWrapWithRefactorRequest({required String refactorName}) =>
+      'wrapWithRefactor-$refactorName';
 
   /// Analytics event on completion of an edit.
   static String applyEditComplete({

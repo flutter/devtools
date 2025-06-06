@@ -36,7 +36,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
-        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Load Cached Flutter SDK
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
         with:
@@ -57,7 +57,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Clone Flutter DevTools
-        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
         with:
           ref: "${{ github.event.pull_request.head.sha }}"
       - name: Load Cached Flutter SDK
@@ -97,7 +97,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
-        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Load Cached Flutter SDK
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
         with:
@@ -119,7 +119,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
-        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Load Cached Flutter SDK
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
         with:
@@ -144,7 +144,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
-        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Load Cached Flutter SDK
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
         with:
@@ -171,7 +171,7 @@ jobs:
 
     steps:
       - name: git clone
-        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Load Cached Flutter SDK
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
         with:
@@ -242,7 +242,7 @@ jobs:
             shard: 3/3
     steps:
       - name: git clone
-        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Load Cached Flutter SDK
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
         with:
@@ -276,7 +276,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
-        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Load Cached Flutter SDK
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
         with:
@@ -297,7 +297,7 @@ jobs:
       fail-fast: false
     steps:
       - name: git clone
-        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Load Cached Flutter SDK
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
         with:
@@ -315,7 +315,7 @@ jobs:
       fail-fast: false
     steps:
       - name: git clone
-        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Load Cached Flutter SDK
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
         with:
@@ -338,7 +338,7 @@ jobs:
 #          - test_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+#        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
 #
 #      - name: tool/ci/bots.sh
 #        env:
@@ -358,7 +358,7 @@ jobs:
 #          - integration_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+#        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
 #      - name: tool/ci/bots.sh
 #        env:
 #          BOT: ${{ matrix.bot }}

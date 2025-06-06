@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:convert';
+
 import 'package:devtools_app/src/shared/diagnostics/dart_object_node.dart';
+import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/generic_instance_reference.dart';
 
 import 'package:vm_service/vm_service.dart';
@@ -213,6 +216,22 @@ DartObjectNode buildBooleanVariable(bool value) {
   );
 }
 
+DartObjectNode buildTextWidgetVariable() {
+  return DartObjectNode.fromValue(
+    value: null,
+    isolateRef: _isolateRef,
+    diagnostic: _textWidgetDiagnosticNode,
+  );
+}
+
+DartObjectNode buildRowWidgetVariable() {
+  return DartObjectNode.fromValue(
+    value: null,
+    isolateRef: _isolateRef,
+    diagnostic: _rowWidgetDiagnosticNode,
+  );
+}
+
 InstanceRef _buildInstanceRefForMap({required int length}) => InstanceRef(
   id: _incrementRef(),
   kind: InstanceKind.kMap,
@@ -266,5 +285,63 @@ int _rootNumber = 0;
 
 String _incrementRoot() {
   _rootNumber++;
-  return 'Root $_rootNumber';
+  return 'root$_rootNumber';
 }
+
+final _textWidgetDiagnosticNode = RemoteDiagnosticsNode(
+  jsonDecode(_textWidgetDiagnosticJson),
+  null,
+  false,
+  null,
+);
+
+final _rowWidgetDiagnosticNode = RemoteDiagnosticsNode(
+  jsonDecode(_rowWidgetDiagnosticJson),
+  null,
+  false,
+  null,
+);
+
+const _textWidgetDiagnosticJson = '''
+{
+  "description": "Text",
+  "type": "_ElementDiagnosticableTreeNode",
+  "style": "dense",
+  "hasChildren": true,
+  "allowWrap": false,
+  "summaryTree": true,
+  "locationId": 0,
+  "creationLocation": {
+    "file": "file:///Users/prismo/flutter_app/main.dart",
+    "line": 109,
+    "column": 23,
+    "name": "Text"
+  },
+  "createdByLocalProject": true,
+  "textPreview": "Hello world!",
+  "children": [],
+  "widgetRuntimeType": "Text",
+  "stateful": false
+}
+''';
+
+const _rowWidgetDiagnosticJson = '''
+{
+  "description": "Row",
+  "type": "_ElementDiagnosticableTreeNode",
+  "hasChildren": true,
+  "allowWrap": false,
+  "summaryTree": true,
+  "locationId": 0,
+  "creationLocation": {
+    "file": "file:///Users/prismo/flutter_app/main.dart",
+    "line": 109,
+    "column": 23,
+    "name": "Row"
+  },
+  "createdByLocalProject": true,
+  "children": [],
+  "widgetRuntimeType": "Row",
+  "stateful": false
+}
+''';

@@ -18,7 +18,7 @@ import '../memory/panes/profile/profile_view.dart';
 /// NOTE: this file contains extensions to classes provided by
 /// `package:vm_service` in order to expose VM internal fields in a controlled
 /// fashion. Objects and extensions in this class should not be used in
-/// contexts where [PreferencesController.vmDeveloperModeEnabled] is not set to
+/// contexts where [PreferencesController.advancedDeveloperModeEnabled] is not set to
 /// `true`.
 
 const _vmNameKey = '_vmName';

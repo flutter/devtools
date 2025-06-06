@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/foundation.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
@@ -32,23 +33,33 @@ class EditorClient extends DisposableController
 
   Future<void> _initialize() async {
     autoDisposeStreamSubscription(
-      _dtd.onEvent('Service').listen((data) {
+      _dtd.onEvent(CoreDtdServiceConstants.servicesStreamId).listen((data) {
         final kind = data.kind;
-        if (kind != 'ServiceRegistered' && kind != 'ServiceUnregistered') {
+        if (kind != CoreDtdServiceConstants.serviceRegisteredKind &&
+            kind != CoreDtdServiceConstants.serviceUnregisteredKind) {
           return;
         }
 
-        final service = data.data['service'] as String?;
+        final service = data.data[DtdParameters.service] as String?;
         if (service == null ||
             (service != editorServiceName && service != lspServiceName)) {
           return;
         }
 
-        final isRegistered = kind == 'ServiceRegistered';
-        final method = data.data['method'] as String;
-        final capabilities = data.data['capabilities'] as Map<String, Object?>?;
-
-        if (method == EditorMethod.getDevices.name) {
+        final isRegistered =
+            kind == CoreDtdServiceConstants.serviceRegisteredKind;
+        final method = data.data[DtdParameters.method] as String;
+        final capabilities =
+            data.data[DtdParameters.capabilities] as Map<String, Object?>?;
+        final lspMethod = LspMethod.fromMethodName(method);
+        if (lspMethod != null) {
+          lspMethod.isRegistered = isRegistered;
+          if (lspMethod == LspMethod.editableArguments) {
+            // Update the notifier so that the Property Editor is aware that the
+            // editableArguments API is registered.
+            _editableArgumentsApiIsRegistered.value = isRegistered;
+          }
+        } else if (method == EditorMethod.getDevices.name) {
           _supportsGetDevices = isRegistered;
         } else if (method == EditorMethod.getDebugSessions.name) {
           _supportsGetDebugSessions = isRegistered;
@@ -62,18 +73,6 @@ class EditorClient extends DisposableController
           _supportsOpenDevToolsPage = isRegistered;
           _supportsOpenDevToolsForceExternal =
               capabilities?[Field.supportsForceExternal] == true;
-        } else if (method == LspMethod.editArgument.methodName) {
-          _editArgumentMethodName.value = LspMethod.editArgument.methodName;
-        } else if (method == LspMethod.editArgument.experimentalMethodName) {
-          _editArgumentMethodName.value =
-              LspMethod.editArgument.experimentalMethodName;
-        } else if (method == LspMethod.editableArguments.methodName) {
-          _editableArgumentsMethodName.value =
-              LspMethod.editableArguments.methodName;
-        } else if (method ==
-            LspMethod.editableArguments.experimentalMethodName) {
-          _editableArgumentsMethodName.value =
-              LspMethod.editableArguments.experimentalMethodName;
         } else {
           return;
         }
@@ -130,7 +129,7 @@ class EditorClient extends DisposableController
       }),
     );
     await [
-      _dtd.streamListen('Service'),
+      _dtd.streamListen(CoreDtdServiceConstants.servicesStreamId),
       _dtd.streamListen(editorStreamName).catchError((_) {
         // Because we currently call streamListen in two places (here and
         // ThemeManager) this can fail. It doesn't matter if this happens,
@@ -165,13 +164,9 @@ class EditorClient extends DisposableController
       _supportsOpenDevToolsForceExternal;
   var _supportsOpenDevToolsForceExternal = false;
 
-  ValueListenable<String?> get editArgumentMethodName =>
-      _editArgumentMethodName;
-  final _editArgumentMethodName = ValueNotifier<String?>(null);
-
-  ValueListenable<String?> get editableArgumentsMethodName =>
-      _editableArgumentsMethodName;
-  final _editableArgumentsMethodName = ValueNotifier<String?>(null);
+  ValueListenable<bool> get editableArgumentsApiIsRegistered =>
+      _editableArgumentsApiIsRegistered;
+  final _editableArgumentsApiIsRegistered = ValueNotifier<bool>(false);
 
   /// A stream of [ActiveLocationChangedEvent]s from the edtior.
   Stream<ActiveLocationChangedEvent> get activeLocationChangedStream =>
@@ -256,26 +251,87 @@ class EditorClient extends DisposableController
   Future<EditableArgumentsResult?> getEditableArguments({
     required TextDocument textDocument,
     required CursorPosition position,
+    required String screenId,
+  }) => _callLspApiAndDeserializeResponse(
+    requestMethod: LspMethod.editableArguments,
+    requestParams: {
+      'textDocument': textDocument.toJson(),
+      'position': position.toJson(),
+    },
+    responseDeserializer: (rawJson) =>
+        EditableArgumentsResult.fromJson(rawJson as Map<String, Object?>),
+    screenId: screenId,
+  );
+
+  /// Gets the supported refactors from the Analysis Server.
+  Future<CodeActionResult?> getRefactors({
+    required TextDocument textDocument,
+    required EditorRange range,
+    required String screenId,
+  }) => _callLspApiAndDeserializeResponse(
+    requestMethod: LspMethod.codeAction,
+    requestParams: {
+      'textDocument': textDocument.toJson(),
+      'range': range.toJson(),
+      'context': {
+        'diagnostics': [],
+        'only': [CodeActionPrefixes.flutterWrap],
+      },
+    },
+    responseDeserializer: (rawJson) => CodeActionResult.fromJson(
+      (rawJson as List<Object?>).cast<Map<String, Object?>>(),
+    ),
+    screenId: screenId,
+  );
+
+  /// Requests that the Analysis Server makes a code edit for an argument.
+  Future<GenericApiResponse> editArgument<T>({
+    required TextDocument textDocument,
+    required CursorPosition position,
+    required String name,
+    required T value,
+    required String screenId,
+  }) => _callLspApiAndRespond(
+    requestMethod: LspMethod.editArgument,
+    requestParams: {
+      'textDocument': textDocument.toJson(),
+      'position': position.toJson(),
+      'edit': {'name': name, 'newValue': value},
+    },
+    screenId: screenId,
+  );
+
+  /// Requests that the Analysis Server execute the given [commandName].
+  Future<GenericApiResponse> executeCommand({
+    required String commandName,
+    required List<Object?> commandArgs,
+    required String screenId,
+  }) => _callLspApiAndRespond(
+    requestMethod: LspMethod.executeCommand,
+    requestParams: {'command': commandName, 'arguments': commandArgs},
+    screenId: screenId,
+  );
+
+  Future<T?> _callLspApiAndDeserializeResponse<T extends Serializable>({
+    required LspMethod requestMethod,
+    required Map<String, Object?> requestParams,
+    required T? Function(Object? rawJson) responseDeserializer,
+    required String screenId,
   }) async {
-    final method = editableArgumentsMethodName.value;
-    if (method == null) return null;
+    if (!requestMethod.isRegistered) {
+      return null;
+    }
 
     String? errorMessage;
     StackTrace? stack;
-    EditableArgumentsResult? result;
+    T? result;
     try {
       final response = await _callLspApi(
-        method,
-        params: {
-          'type': 'Object', // This is required by DTD.
-          'textDocument': textDocument.toJson(),
-          'position': position.toJson(),
-        },
+        requestMethod.methodName,
+        params: _addRequiredDtdParams(requestParams),
       );
-      final rawResult = response.result[Field.result];
-      result = rawResult != null
-          ? EditableArgumentsResult.fromJson(rawResult as Map<String, Object?>)
-          : null;
+      final rawJson = response.result[Field.result];
+      result = rawJson != null ? responseDeserializer(rawJson) : null;
     } on RpcException catch (e, st) {
       // We expect content modified errors if a user edits their code before the
       // request completes. Therefore it is safe to ignore.
@@ -290,25 +346,21 @@ class EditorClient extends DisposableController
       if (errorMessage != null) {
         reportError(
           errorMessage,
-          errorType: PropertyEditorSidebar.getEditableArgumentsIdentifier,
+          errorType: _lspErrorType(screenId: screenId, method: requestMethod),
           stack: stack,
         );
       }
     }
-
     return result;
   }
 
-  /// Requests that the Analysis Server makes a code edit for an argument.
-  Future<EditArgumentResponse> editArgument<T>({
-    required TextDocument textDocument,
-    required CursorPosition position,
-    required String name,
-    required T value,
+  Future<GenericApiResponse> _callLspApiAndRespond({
+    required LspMethod requestMethod,
+    required Map<String, Object?> requestParams,
+    required String screenId,
   }) async {
-    final method = editArgumentMethodName.value;
-    if (method == null) {
-      return EditArgumentResponse(
+    if (!requestMethod.isRegistered) {
+      return GenericApiResponse(
         success: false,
         errorMessage: 'API is unavailable.',
       );
@@ -318,15 +370,10 @@ class EditorClient extends DisposableController
     StackTrace? stack;
     try {
       await _callLspApi(
-        method,
-        params: {
-          'type': 'Object', // This is required by DTD.
-          'textDocument': textDocument.toJson(),
-          'position': position.toJson(),
-          'edit': {'name': name, 'newValue': value},
-        },
+        requestMethod.methodName,
+        params: _addRequiredDtdParams(requestParams),
       );
-      return EditArgumentResponse(success: true);
+      return GenericApiResponse(success: true);
     } on RpcException catch (e, st) {
       errorMessage = e.message;
       stack = st;
@@ -337,12 +384,21 @@ class EditorClient extends DisposableController
       if (errorMessage != null) {
         reportError(
           errorMessage,
-          errorType: PropertyEditorSidebar.editArgumentIdentifier,
+          errorType: _lspErrorType(screenId: screenId, method: requestMethod),
           stack: stack,
         );
       }
     }
-    return EditArgumentResponse(success: false, errorMessage: errorMessage);
+    return GenericApiResponse(success: false, errorMessage: errorMessage);
+  }
+
+  String _lspErrorType({required String screenId, required LspMethod method}) =>
+      '${screenId}Error-${method.name}';
+
+  Map<String, Object?> _addRequiredDtdParams(Map<String, Object?> params) {
+    // Specifying type as 'Object' is required by DTD.
+    params.putIfAbsent('type', () => 'Object');
+    return params;
   }
 
   Future<DTDResponse> _call(

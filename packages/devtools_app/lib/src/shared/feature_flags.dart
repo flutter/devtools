@@ -90,10 +90,10 @@ extension FeatureFlags on Never {
   /// https://github.com/flutter/devtools/issues/7856
   static bool wasmOptInSetting = true;
 
-  /// Flag to enable the Flutter Property Editor sidebar.
+  /// Flag to enable refactors in the Flutter Property Editor sidebar.
   ///
-  /// https://github.com/flutter/devtools/issues/7854
-  static bool propertyEditor = enableExperiments;
+  /// https://github.com/flutter/devtools/issues/9214
+  static bool propertyEditorRefactors = true;
 
   /// Stores a map of all the feature flags for debugging purposes.
   ///
@@ -107,7 +107,7 @@ extension FeatureFlags on Never {
     'dapDebugging': dapDebugging,
     'inspectorV2': inspectorV2,
     'wasmOptInSetting': wasmOptInSetting,
-    'propertyEditor': propertyEditor,
+    'propertyEditorRefactors': propertyEditorRefactors,
   };
 
   /// A helper to print the status of all the feature flags.

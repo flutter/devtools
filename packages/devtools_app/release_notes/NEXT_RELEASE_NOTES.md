@@ -6,19 +6,16 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.46.0 release notes
+# DevTools 2.48.0 release notes
 
-The 2.46.0 release of the Dart and Flutter DevTools
+The 2.48.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](/tools/devtools/overview).
 
 ## General updates
 
-- Prevent web apps from remaining paused after triggering a hot-restart from
-DevTools. - [#9125](https://github.com/flutter/devtools/pull/9125)
-- Dismiss stale banner messages when the connected app state changes. - [#9148](https://github.com/flutter/devtools/pull/9148)
-- Fix a focus traversal issue with search fields. [#9166](https://github.com/flutter/devtools/pull/9166)
+TODO: Remove this section if there are not any general updates.
 
 ## Inspector updates
 
@@ -26,8 +23,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-- Fixes a bug where the Performance page would hang when connected to a paused
-Flutter app. - [#9162](https://github.com/flutter/devtools/pull/9162)
+TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
@@ -68,4 +64,4 @@ TODO: Remove this section if there are not any general updates.
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.46.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.48.0).

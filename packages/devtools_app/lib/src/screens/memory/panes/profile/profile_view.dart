@@ -458,9 +458,9 @@ class AllocationProfileTableViewState
           child: _AllocationProfileTableControls(controller: widget.controller),
         ),
         ValueListenableBuilder<bool>(
-          valueListenable: preferences.vmDeveloperModeEnabled,
-          builder: (context, vmDeveloperModeEnabled, _) {
-            if (!vmDeveloperModeEnabled) return const SizedBox.shrink();
+          valueListenable: preferences.advancedDeveloperModeEnabled,
+          builder: (context, advancedDeveloperModeEnabled, _) {
+            if (!advancedDeveloperModeEnabled) return const SizedBox.shrink();
             return Column(
               children: [
                 SizedBox(
@@ -485,7 +485,7 @@ class AllocationProfileTableViewState
 class _AllocationProfileTable extends StatelessWidget {
   _AllocationProfileTable({required this.controller});
 
-  /// List of columns displayed in VM developer mode state.
+  /// List of columns displayed in advanced developer mode state.
   static final _vmModeColumnGroups = [
     ColumnGroup.fromText(title: '', range: const Range(0, 1)),
     ColumnGroup.fromText(
@@ -517,7 +517,7 @@ class _AllocationProfileTable extends StatelessWidget {
     _FieldDartHeapSizeColumn(heap: HeapGeneration.total),
   ];
 
-  late final _vmDeveloperModeColumns = [
+  late final _advancedDeveloperModeColumns = [
     _FieldExternalSizeColumn(heap: HeapGeneration.total),
     _FieldInstanceCountColumn(heap: HeapGeneration.newSpace),
     _FieldSizeColumn(heap: HeapGeneration.newSpace),
@@ -543,18 +543,19 @@ class _AllocationProfileTable extends StatelessWidget {
           return const CenteredCircularProgressIndicator();
         }
         return ValueListenableBuilder<bool>(
-          valueListenable: preferences.vmDeveloperModeEnabled,
-          builder: (context, vmDeveloperModeEnabled, _) {
+          valueListenable: preferences.advancedDeveloperModeEnabled,
+          builder: (context, advancedDeveloperModeEnabled, _) {
             return FlatTable<ProfileRecord>(
               keyFactory: (element) => Key(element.heapClass.fullName),
               data: profile.records,
               dataKey: 'allocation-profile',
-              columnGroups: vmDeveloperModeEnabled
+              columnGroups: advancedDeveloperModeEnabled
                   ? _AllocationProfileTable._vmModeColumnGroups
                   : null,
               columns: [
                 ..._columns,
-                if (vmDeveloperModeEnabled) ..._vmDeveloperModeColumns,
+                if (advancedDeveloperModeEnabled)
+                  ..._advancedDeveloperModeColumns,
               ],
               defaultSortColumn: _AllocationProfileTable._fieldSizeColumn,
               defaultSortDirection: SortDirection.descending,
