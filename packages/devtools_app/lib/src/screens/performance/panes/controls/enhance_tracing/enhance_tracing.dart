@@ -346,15 +346,19 @@ class TraceWidgetBuildsScopeSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textStyle = enabled ? theme.regularTextStyle : theme.subtleTextStyle;
-    return Row(
-      children: [
-        ..._scopeSetting(
-          TraceWidgetBuildsScope.userCreated,
-          textStyle: textStyle,
-        ),
-        const SizedBox(width: defaultSpacing),
-        ..._scopeSetting(TraceWidgetBuildsScope.all, textStyle: textStyle),
-      ],
+    return RadioGroup<TraceWidgetBuildsScope>(
+      groupValue: scope,
+      onChanged: _changeScope,
+      child: Row(
+        children: [
+          ..._scopeSetting(
+            TraceWidgetBuildsScope.userCreated,
+            textStyle: textStyle,
+          ),
+          const SizedBox(width: defaultSpacing),
+          ..._scopeSetting(TraceWidgetBuildsScope.all, textStyle: textStyle),
+        ],
+      ),
     );
   }
 
@@ -364,18 +368,17 @@ class TraceWidgetBuildsScopeSelector extends StatelessWidget {
   }) {
     return [
       Radio<TraceWidgetBuildsScope>(
+        enabled: enabled,
         value: type,
-        groupValue: scope,
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        onChanged: enabled ? _changeScope : null,
       ),
       Text(type.radioDisplay, style: textStyle),
     ];
   }
 
   Future<void> _changeScope(TraceWidgetBuildsScope? type) async {
-    assert(enabled);
-    final extension = type!.extensionForScope;
+    if (type == null) return;
+    final extension = type.extensionForScope;
     final opposite = type.opposite.extensionForScope;
     await [
       serviceConnection.serviceManager.serviceExtensionManager
