@@ -101,14 +101,16 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
     final textFieldLeftPadding = scaleByFontFactor(40.0);
     void onTypeChanged(ClassFilterType? type) => setState(() => _type = type!);
 
-    RadioButton<ClassFilterType> radio(ClassFilterType type, String label) =>
-        RadioButton<ClassFilterType>(
-          label: label,
-          itemValue: type,
-          groupValue: _type,
-          onChanged: onTypeChanged,
-          radioKey: Key(type.toString()),
-        );
+    Widget radio(ClassFilterType type, String label) => Row(
+      children: [
+        Radio<ClassFilterType>(
+          value: type,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          key: Key(type.toString()),
+        ),
+        Expanded(child: Text(label, overflow: TextOverflow.ellipsis)),
+      ],
+    );
 
     Widget textField(TextEditingController controller) => Padding(
       padding: EdgeInsets.only(left: textFieldLeftPadding),
@@ -143,18 +145,22 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
         );
         widget.onChanged(newFilter);
       },
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          radio(ClassFilterType.showAll, 'Show all classes'),
-          const SizedBox(height: defaultSpacing),
-          radio(ClassFilterType.except, 'Show all classes except:'),
-          textField(_except),
-          const SizedBox(height: defaultSpacing),
-          radio(ClassFilterType.only, 'Show only:'),
-          textField(_only),
-        ],
+      child: RadioGroup(
+        groupValue: _type,
+        onChanged: onTypeChanged,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            radio(ClassFilterType.showAll, 'Show all classes'),
+            const SizedBox(height: defaultSpacing),
+            radio(ClassFilterType.except, 'Show all classes except:'),
+            textField(_except),
+            const SizedBox(height: defaultSpacing),
+            radio(ClassFilterType.only, 'Show only:'),
+            textField(_only),
+          ],
+        ),
       ),
     );
   }
