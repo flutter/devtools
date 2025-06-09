@@ -346,18 +346,25 @@ class TraceWidgetBuildsScopeSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textStyle = enabled ? theme.regularTextStyle : theme.subtleTextStyle;
-    return RadioGroup<TraceWidgetBuildsScope>(
-      groupValue: scope,
-      onChanged: _changeScope,
-      child: Row(
-        children: [
-          ..._scopeSetting(
-            TraceWidgetBuildsScope.userCreated,
-            textStyle: textStyle,
-          ),
-          const SizedBox(width: defaultSpacing),
-          ..._scopeSetting(TraceWidgetBuildsScope.all, textStyle: textStyle),
-        ],
+    // `Semantics` widget added as a workaround for the bug fixed in
+    // https://github.com/flutter/flutter/pull/170273. This `Semantics` widget
+    // can be removed once that PR is landed and DevTools is updated to use a
+    // version of Flutter with the fix, but it is not an urgent clean up.
+    return Semantics(
+      explicitChildNodes: true,
+      child: RadioGroup<TraceWidgetBuildsScope>(
+        groupValue: scope,
+        onChanged: _changeScope,
+        child: Row(
+          children: [
+            ..._scopeSetting(
+              TraceWidgetBuildsScope.userCreated,
+              textStyle: textStyle,
+            ),
+            const SizedBox(width: defaultSpacing),
+            ..._scopeSetting(TraceWidgetBuildsScope.all, textStyle: textStyle),
+          ],
+        ),
       ),
     );
   }
