@@ -54,7 +54,7 @@ bool debugShowAnalyticsConsentMessage = false;
 /// This flag should never be checked in with a value of true - this is covered
 /// by a test.
 final debugDevToolsExtensions =
-    _debugDevToolsExtensions || integrationTestMode || testMode || stagerMode;
+    _debugDevToolsExtensions || testMode || stagerMode;
 const _debugDevToolsExtensions = false;
 
 List<DevToolsExtensionConfig> debugHandleRefreshAvailableExtensions({
