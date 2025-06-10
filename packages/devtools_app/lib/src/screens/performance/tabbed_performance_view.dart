@@ -181,7 +181,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         (
           tab: _buildTab(
             tabName: 'Queued Microtasks',
-            trailing: QueuedMicrotasksTabControls(
+            trailing: RefreshQueuedMicrotasksButton(
               controller: controller.queuedMicrotasksController,
             ),
           ),

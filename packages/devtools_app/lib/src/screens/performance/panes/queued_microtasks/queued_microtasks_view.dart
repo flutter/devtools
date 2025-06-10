@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:collection/collection.dart' show ListExtensions;
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
@@ -12,51 +13,32 @@ import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/primitives/utils.dart' show SortDirection;
 import '../../../../shared/table/table.dart' show FlatTable;
 import '../../../../shared/table/table_data.dart';
-import '../../../../shared/ui/common_widgets.dart' show RefreshButton;
+import '../../../../shared/ui/common_widgets.dart'
+    show CenteredMessage, RefreshButton;
 import 'queued_microtasks_controller.dart';
 
 class RefreshQueuedMicrotasksButton extends StatelessWidget {
-  const RefreshQueuedMicrotasksButton({
-    super.key,
-    required QueuedMicrotasksController controller,
-  }) : _controller = controller;
+  const RefreshQueuedMicrotasksButton({super.key, required this.controller});
 
-  final QueuedMicrotasksController _controller;
+  final QueuedMicrotasksController controller;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<QueuedMicrotasksControllerStatus>(
-      valueListenable: _controller.status,
+      valueListenable: controller.status,
       builder: (_, status, _) {
         return RefreshButton(
           iconOnly: true,
           outlined: false,
           onPressed: status == QueuedMicrotasksControllerStatus.refreshing
               ? null
-              : _controller.refresh,
+              : controller.refresh,
           tooltip:
               "Take a new snapshot of the selected isolate's microtask queue.",
           gaScreen: gac.performance,
           gaSelection: gac.PerformanceEvents.refreshQueuedMicrotasks.name,
         );
       },
-    );
-  }
-}
-
-class QueuedMicrotasksTabControls extends StatelessWidget {
-  const QueuedMicrotasksTabControls({
-    super.key,
-    required QueuedMicrotasksController controller,
-  }) : _controller = controller;
-
-  final QueuedMicrotasksController _controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [RefreshQueuedMicrotasksButton(controller: _controller)],
     );
   }
 }
@@ -85,60 +67,52 @@ class RefreshQueuedMicrotasksInstructions extends StatelessWidget {
   }
 }
 
-// In the response returned by the VM Service, microtasks are sorted in
-// ascending order of when they will be dequeued, i.e. the microtask that will
-// run earliest is at index 0 of the returned list. We use those indices of the
-// returned list to sort the entries of the microtask selector, so that they
-// they also appear in ascending order of when they will be dequeued.
-typedef IndexedMicrotask = (int, Microtask);
+/// In the response returned by the VM Service, microtasks are sorted in
+/// ascending order of when they will be dequeued, i.e. the microtask that will
+/// run earliest is at index 0 of the returned list. We use those indices of the
+/// returned list to sort the entries of the microtask selector, so that they
+/// they also appear in ascending order of when they will be dequeued.
+typedef IndexedMicrotask = ({int index, Microtask microtask});
 
 class _MicrotaskIdColumn extends ColumnData<IndexedMicrotask> {
   _MicrotaskIdColumn()
     : super.wide('Microtask ID', alignment: ColumnAlignment.center);
 
   @override
-  int getValue(IndexedMicrotask indexedMicrotask) => indexedMicrotask.$1;
+  int getValue(IndexedMicrotask indexedMicrotask) => indexedMicrotask.index;
 
   @override
   String getDisplayValue(IndexedMicrotask indexedMicrotask) =>
-      indexedMicrotask.$2.id!.toString();
+      indexedMicrotask.microtask.id!.toString();
 }
 
 class QueuedMicrotaskSelector extends StatelessWidget {
   const QueuedMicrotaskSelector({
     super.key,
     required List<IndexedMicrotask> indexedMicrotasks,
-    required void Function(Microtask?) setSelectedMicrotask,
+    required void Function(Microtask?) onMicrotaskSelected,
   }) : _indexedMicrotasks = indexedMicrotasks,
-       _setSelectedMicrotask = setSelectedMicrotask;
+       _setSelectedMicrotask = onMicrotaskSelected;
 
   static final _idColumn = _MicrotaskIdColumn();
   final List<IndexedMicrotask> _indexedMicrotasks;
   final void Function(Microtask?) _setSelectedMicrotask;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Expanded(
-        child: FlatTable<IndexedMicrotask>(
-          keyFactory: (IndexedMicrotask microtask) =>
-              ValueKey<int>(microtask.$1),
-          data: _indexedMicrotasks,
-          dataKey: 'queued-microtask-selector',
-          columns: [_idColumn],
-          defaultSortColumn: _idColumn,
-          defaultSortDirection: SortDirection.ascending,
-          onItemSelected: (indexedMicrotask) =>
-              _setSelectedMicrotask(indexedMicrotask?.$2),
-        ),
-      ),
-    ],
+  Widget build(BuildContext context) => FlatTable<IndexedMicrotask>(
+    keyFactory: (IndexedMicrotask microtask) => ValueKey<int>(microtask.index),
+    data: _indexedMicrotasks,
+    dataKey: 'queued-microtask-selector',
+    columns: [_idColumn],
+    defaultSortColumn: _idColumn,
+    defaultSortDirection: SortDirection.ascending,
+    onItemSelected: (indexedMicrotask) =>
+        _setSelectedMicrotask(indexedMicrotask?.microtask),
   );
 }
 
-class StackTraceView extends StatelessWidget {
-  const StackTraceView({super.key, required selectedMicrotask})
+class MicrotaskStackTraceView extends StatelessWidget {
+  const MicrotaskStackTraceView({super.key, required selectedMicrotask})
     : _selectedMicrotask = selectedMicrotask;
 
   final Microtask? _selectedMicrotask;
@@ -149,14 +123,11 @@ class StackTraceView extends StatelessWidget {
 
     return Column(
       children: [
-        SizedBox.fromSize(
-          size: Size.fromHeight(defaultHeaderHeight),
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border(bottom: defaultBorderSide(theme)),
-            ),
-            padding: const EdgeInsets.only(left: defaultSpacing),
-            alignment: Alignment.centerLeft,
+        Container(
+          height: defaultHeaderHeight,
+          padding: const EdgeInsets.only(left: defaultSpacing),
+          alignment: Alignment.centerLeft,
+          child: OutlineDecoration.onlyBottom(
             child: const Row(
               children: [
                 Text('Stack trace captured when microtask was enqueued'),
@@ -207,20 +178,20 @@ class _QueuedMicrotasksTabViewState extends State<QueuedMicrotasksTabView>
         if (status == QueuedMicrotasksControllerStatus.empty) {
           return const RefreshQueuedMicrotasksInstructions();
         } else if (status == QueuedMicrotasksControllerStatus.refreshing) {
-          return Center(
-            child: Text(
-              style: Theme.of(context).regularTextStyle,
-              'Refreshing...',
-            ),
-          );
+          return const CenteredMessage(message: 'Refreshing...');
         } else {
           return ValueListenableBuilder(
             valueListenable: widget.controller.queuedMicrotasks,
             builder: (_, queuedMicrotasks, _) {
               assert(queuedMicrotasks != null);
+              if (queuedMicrotasks == null) {
+                return const CenteredMessage(message: 'Unexpected null value');
+              }
 
-              final indexedMicrotasks = queuedMicrotasks!.microtasks!.indexed
-                  .cast<IndexedMicrotask>()
+              final indexedMicrotasks = queuedMicrotasks.microtasks!
+                  .mapIndexed(
+                    (index, microtask) => (index: index, microtask: microtask),
+                  )
                   .toList();
               final formattedTimestamp = _dateTimeFormat.format(
                 DateTime.fromMicrosecondsSinceEpoch(
@@ -244,25 +215,28 @@ class _QueuedMicrotasksTabViewState extends State<QueuedMicrotasksTabView>
                       axis: Axis.horizontal,
                       initialFractions: const [0.15, 0.85],
                       children: [
-                        QueuedMicrotaskSelector(
-                          indexedMicrotasks: indexedMicrotasks,
-                          setSelectedMicrotask:
-                              widget.controller.setSelectedMicrotask,
+                        OutlineDecoration(
+                          child: QueuedMicrotaskSelector(
+                            indexedMicrotasks: indexedMicrotasks,
+                            onMicrotaskSelected:
+                                widget.controller.setSelectedMicrotask,
+                          ),
                         ),
                         ValueListenableBuilder(
                           valueListenable: widget.controller.selectedMicrotask,
                           builder: (_, selectedMicrotask, _) =>
-                              selectedMicrotask == null
-                              ? const Center(
-                                  child: Text(
-                                    'Select a microtask ID on the left '
-                                    'to see information about the '
-                                    'corresponding microtask.',
-                                  ),
-                                )
-                              : StackTraceView(
-                                  selectedMicrotask: selectedMicrotask,
-                                ),
+                              OutlineDecoration(
+                                child: selectedMicrotask == null
+                                    ? const CenteredMessage(
+                                        message:
+                                            'Select a microtask ID on the left '
+                                            'to see information about the '
+                                            'corresponding microtask.',
+                                      )
+                                    : MicrotaskStackTraceView(
+                                        selectedMicrotask: selectedMicrotask,
+                                      ),
+                              ),
                         ),
                       ],
                     ),

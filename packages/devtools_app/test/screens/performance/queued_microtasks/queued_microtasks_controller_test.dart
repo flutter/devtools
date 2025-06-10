@@ -28,7 +28,11 @@ void main() {
     });
 
     test('refresh', () async {
+      expect(controller.status.value, QueuedMicrotasksControllerStatus.empty);
+      expect(controller.queuedMicrotasks.value, null);
+
       await controller.refresh();
+
       expect(controller.status.value, QueuedMicrotasksControllerStatus.ready);
       expect(controller.queuedMicrotasks.value, testQueuedMicrotasks);
     });

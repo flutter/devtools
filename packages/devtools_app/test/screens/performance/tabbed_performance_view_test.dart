@@ -34,7 +34,7 @@ void main() {
         vmFlags: [
           (
             flagName: profileMicrotasks,
-            value: shouldEnableMicrotaskProfiling ? 'true' : 'false',
+            value: shouldEnableMicrotaskProfiling.toString(),
           ),
         ],
       ),
@@ -260,11 +260,14 @@ void main() {
           final mockQueuedMicrotasksController =
               controller.queuedMicrotasksController
                   as MockQueuedMicrotasksController;
-          when(mockQueuedMicrotasksController.status).thenReturn(
-            const FixedValueListenable<QueuedMicrotasksControllerStatus>(
-              QueuedMicrotasksControllerStatus.empty,
-            ),
-          );
+
+          final mockQueuedMicrotasksControllerStatus =
+              ValueNotifier<QueuedMicrotasksControllerStatus>(
+                QueuedMicrotasksControllerStatus.empty,
+              );
+          when(
+            mockQueuedMicrotasksController.status,
+          ).thenReturn(mockQueuedMicrotasksControllerStatus);
 
           await pumpView(tester);
 
@@ -284,11 +287,8 @@ void main() {
           // Then, we verify that details about the queued microtasks are shown
           // when [controller.queuedMicrotasksController]'s status is ready.
 
-          when(mockQueuedMicrotasksController.status).thenReturn(
-            const FixedValueListenable<QueuedMicrotasksControllerStatus>(
-              QueuedMicrotasksControllerStatus.ready,
-            ),
-          );
+          mockQueuedMicrotasksControllerStatus.value =
+              QueuedMicrotasksControllerStatus.ready;
           when(
             mockQueuedMicrotasksController.selectedMicrotask,
           ).thenReturn(FixedValueListenable(testMicrotask));
@@ -296,13 +296,10 @@ void main() {
             mockQueuedMicrotasksController.queuedMicrotasks,
           ).thenReturn(FixedValueListenable(testQueuedMicrotasks));
 
-          await tester.tap(find.text('Timeline Events'));
-          await tester.pumpAndSettle();
-          await tester.tap(find.text('Queued Microtasks'));
           await tester.pumpAndSettle();
 
           expect(find.byType(QueuedMicrotaskSelector), findsOneWidget);
-          expect(find.byType(StackTraceView), findsOneWidget);
+          expect(find.byType(MicrotaskStackTraceView), findsOneWidget);
         });
       },
     );

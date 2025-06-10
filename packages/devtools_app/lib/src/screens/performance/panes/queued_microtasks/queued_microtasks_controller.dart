@@ -29,16 +29,16 @@ class QueuedMicrotasksController extends PerformanceFeatureController
     });
   }
 
+  ValueListenable<QueuedMicrotasksControllerStatus> get status => _status;
   final _status = ValueNotifier<QueuedMicrotasksControllerStatus>(
     QueuedMicrotasksControllerStatus.empty,
   );
-  ValueListenable<QueuedMicrotasksControllerStatus> get status => _status;
 
-  final _queuedMicrotasks = ValueNotifier<QueuedMicrotasks?>(null);
   ValueListenable<QueuedMicrotasks?> get queuedMicrotasks => _queuedMicrotasks;
+  final _queuedMicrotasks = ValueNotifier<QueuedMicrotasks?>(null);
 
-  final _selectedMicrotask = ValueNotifier<Microtask?>(null);
   ValueListenable<Microtask?> get selectedMicrotask => _selectedMicrotask;
+  final _selectedMicrotask = ValueNotifier<Microtask?>(null);
 
   final _refreshWorkTracker = FutureWorkTracker();
 
