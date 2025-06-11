@@ -27,6 +27,8 @@ import 'commands/update_version.dart';
 
 const _flutterFromPathFlag = 'flutter-from-path';
 
+const _flutterSdkPathFlag = 'flutter-sdk-path';
+
 class DevToolsCommandRunner extends CommandRunner {
   DevToolsCommandRunner()
     : super('dt', 'A repo management tool for DevTools.') {
@@ -49,20 +51,38 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(UpdateFlutterSdkCommand());
     addCommand(UpdatePerfettoCommand());
 
-    argParser.addFlag(
-      _flutterFromPathFlag,
-      abbr: 'p',
-      negatable: false,
-      help:
-          'Use the Flutter SDK on PATH for any `flutter`, `dart` and '
-          '`dt` commands spawned by this process, instead of the '
-          'Flutter SDK from tool/flutter-sdk which is used by default.',
-    );
+    argParser
+      ..addFlag(
+        _flutterFromPathFlag,
+        abbr: 'p',
+        negatable: false,
+        help:
+            'Use the Flutter SDK on PATH for any `flutter`, `dart` and '
+            '`dt` commands spawned by this process, instead of the '
+            'Flutter SDK from tool/flutter-sdk which is used by default. '
+            'This is incompatible with the `$_flutterSdkPathFlag` flag.',
+      )
+      ..addOption(
+        _flutterSdkPathFlag,
+        help:
+            'Use the Flutter SDK from the specified path for any `flutter`, '
+            '`dart`, and `dt` commands spawned by this process, instead of the '
+            'Flutter SDK from tool/flutter-sdk which is used by default. '
+            'This is incompatible with the `$_flutterFromPathFlag` flag.',
+      );
   }
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) {
-    if (topLevelResults[_flutterFromPathFlag]) {
+    if (topLevelResults.flag(_flutterFromPathFlag) &&
+        topLevelResults.wasParsed(_flutterSdkPathFlag)) {
+      throw ArgParserException(
+        'Only one of `$_flutterFromPathFlag` and `$_flutterSdkPathFlag` may be passed',
+      );
+    }
+    if (topLevelResults.wasParsed(_flutterSdkPathFlag)) {
+      FlutterSdk.useFromPath(topLevelResults.option(_flutterSdkPathFlag)!);
+    } else if (topLevelResults.flag(_flutterFromPathFlag)) {
       FlutterSdk.useFromPathEnvironmentVariable();
     } else {
       FlutterSdk.useFromCurrentVm();
