@@ -59,23 +59,31 @@ class DevToolsCommandRunner extends CommandRunner {
         help:
             'Use the Flutter SDK on PATH for any `flutter`, `dart` and '
             '`dt` commands spawned by this process, instead of the '
-            'Flutter SDK from tool/flutter-sdk which is used by default.',
+            'Flutter SDK from tool/flutter-sdk which is used by default. '
+            'This is incompatible with the `$_flutterSdkPathFlag` flag.',
       )
       ..addOption(
         _flutterSdkPathFlag,
         help:
             'Use the Flutter SDK from the specified path for any `flutter`, '
             '`dart`, and `dt` commands spawned by this process, instead of the '
-            'Flutter SDK from tool/flutter-sdk which is used by default.',
+            'Flutter SDK from tool/flutter-sdk which is used by default. '
+            'This is incompatible with the `$_flutterFromPathFlag` flag.',
       );
   }
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) {
-    if (topLevelResults.flag(_flutterFromPathFlag)) {
-      FlutterSdk.useFromPathEnvironmentVariable();
-    } else if (topLevelResults.wasParsed(_flutterSdkPathFlag)) {
+    if (topLevelResults.flag(_flutterFromPathFlag) &&
+        topLevelResults.wasParsed(_flutterSdkPathFlag)) {
+      throw ArgParserException(
+        'Only one of `$_flutterFromPathFlag` and `$_flutterSdkPathFlag` may be passed',
+      );
+    }
+    if (topLevelResults.wasParsed(_flutterSdkPathFlag)) {
       FlutterSdk.useFromPath(topLevelResults.option(_flutterSdkPathFlag)!);
+    } else if (topLevelResults.flag(_flutterFromPathFlag)) {
+      FlutterSdk.useFromPathEnvironmentVariable();
     } else {
       FlutterSdk.useFromCurrentVm();
     }
