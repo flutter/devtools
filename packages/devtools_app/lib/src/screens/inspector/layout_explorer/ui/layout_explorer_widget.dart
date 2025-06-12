@@ -167,12 +167,12 @@ abstract class LayoutExplorerWidgetState<
 
   void _animateProperties() {
     if (_animatedProperties != null) {
-      changeController.forward();
+      unawaited(changeController.forward());
     }
     if (_previousProperties != null) {
-      entranceController.reverse();
+      unawaited(entranceController.reverse());
     } else {
-      entranceController.forward();
+      unawaited(entranceController.forward());
     }
   }
 
@@ -214,7 +214,7 @@ abstract class LayoutExplorerWidgetState<
     updateHighlighted(nextProperties);
     setState(() {
       _animatedProperties = computeAnimatedProperties(nextProperties);
-      changeController.forward(from: 0.0);
+      unawaited(changeController.forward(from: 0.0));
     });
   }
 
@@ -237,7 +237,7 @@ abstract class LayoutExplorerWidgetState<
         if (status == AnimationStatus.dismissed) {
           setState(() {
             _previousProperties = null;
-            entranceController.forward();
+            unawaited(entranceController.forward());
           });
         }
       });
