@@ -130,25 +130,25 @@ class InspectorDefaultDetailsViewOption extends StatelessWidget {
               style: theme.subtleTextStyle,
             ),
             const SizedBox(height: denseSpacing),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Radio<InspectorDetailsViewType>(
-                  value: InspectorDetailsViewType.layoutExplorer,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  groupValue: selection,
-                  onChanged: _onChanged,
-                ),
-                Text(InspectorDetailsViewType.layoutExplorer.key),
-                const SizedBox(width: denseSpacing),
-                Radio<InspectorDetailsViewType>(
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  value: InspectorDetailsViewType.widgetDetailsTree,
-                  groupValue: selection,
-                  onChanged: _onChanged,
-                ),
-                Text(InspectorDetailsViewType.widgetDetailsTree.key),
-              ],
+            RadioGroup(
+              groupValue: selection,
+              onChanged: _onChanged,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Radio<InspectorDetailsViewType>(
+                    value: InspectorDetailsViewType.layoutExplorer,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  Text(InspectorDetailsViewType.layoutExplorer.key),
+                  const SizedBox(width: denseSpacing),
+                  const Radio<InspectorDetailsViewType>(
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    value: InspectorDetailsViewType.widgetDetailsTree,
+                  ),
+                  Text(InspectorDetailsViewType.widgetDetailsTree.key),
+                ],
+              ),
             ),
           ],
         );

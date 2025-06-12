@@ -76,15 +76,10 @@ void main() {
           tester.widget(find.byType(Checkbox)) as Checkbox;
       expect(traceWidgetBuildsCheckbox.value, isFalse);
 
-      final userCreatedWidgetsRadio =
-          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
-              as Radio<TraceWidgetBuildsScope>;
-      expect(userCreatedWidgetsRadio.groupValue, isNull);
-
-      final allWidgetsRadio =
-          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).at(1))
-              as Radio<TraceWidgetBuildsScope>;
-      expect(allWidgetsRadio.groupValue, isNull);
+      final radioGroup = tester.widget<RadioGroup<TraceWidgetBuildsScope>>(
+        find.byType(RadioGroup<TraceWidgetBuildsScope>),
+      );
+      expect(radioGroup.groupValue, null);
     });
 
     testWidgets('builds with profileWidgetBuilds enabled', (
@@ -108,18 +103,10 @@ void main() {
           tester.widget(find.byType(Checkbox)) as Checkbox;
       expect(traceWidgetBuildsCheckbox.value, isTrue);
 
-      final userCreatedWidgetsRadio =
-          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
-              as Radio<TraceWidgetBuildsScope>;
-      expect(
-        userCreatedWidgetsRadio.groupValue,
-        equals(TraceWidgetBuildsScope.all),
+      final radioGroup = tester.widget<RadioGroup<TraceWidgetBuildsScope>>(
+        find.byType(RadioGroup<TraceWidgetBuildsScope>),
       );
-
-      final allWidgetsRadio =
-          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).at(1))
-              as Radio<TraceWidgetBuildsScope>;
-      expect(allWidgetsRadio.groupValue, equals(TraceWidgetBuildsScope.all));
+      expect(radioGroup.groupValue, equals(TraceWidgetBuildsScope.all));
     });
 
     testWidgets('builds with profileUserWidgetBuilds enabled', (
@@ -143,21 +130,10 @@ void main() {
           tester.widget(find.byType(Checkbox)) as Checkbox;
       expect(traceWidgetBuildsCheckbox.value, isTrue);
 
-      final userCreatedWidgetsRadio =
-          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
-              as Radio<TraceWidgetBuildsScope>;
-      expect(
-        userCreatedWidgetsRadio.groupValue,
-        equals(TraceWidgetBuildsScope.userCreated),
+      final radioGroup = tester.widget<RadioGroup<TraceWidgetBuildsScope>>(
+        find.byType(RadioGroup<TraceWidgetBuildsScope>),
       );
-
-      final allWidgetsRadio =
-          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).at(1))
-              as Radio<TraceWidgetBuildsScope>;
-      expect(
-        allWidgetsRadio.groupValue,
-        equals(TraceWidgetBuildsScope.userCreated),
-      );
+      expect(radioGroup.groupValue, equals(TraceWidgetBuildsScope.userCreated));
     });
 
     testWidgets(
@@ -195,19 +171,11 @@ void main() {
             tester.widget(find.byType(Checkbox)) as Checkbox;
         expect(traceWidgetBuildsCheckbox.value, isTrue);
 
-        final userCreatedWidgetsRadio =
-            tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
-                as Radio<TraceWidgetBuildsScope>;
-        expect(
-          userCreatedWidgetsRadio.groupValue,
-          equals(TraceWidgetBuildsScope.userCreated),
+        final radioGroup = tester.widget<RadioGroup<TraceWidgetBuildsScope>>(
+          find.byType(RadioGroup<TraceWidgetBuildsScope>),
         );
-
-        final allWidgetsRadio =
-            tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).at(1))
-                as Radio<TraceWidgetBuildsScope>;
         expect(
-          allWidgetsRadio.groupValue,
+          radioGroup.groupValue,
           equals(TraceWidgetBuildsScope.userCreated),
         );
       },
@@ -298,24 +266,16 @@ void main() {
         traceUserCreatedWidgets: true,
       );
 
-      var userCreatedWidgetsRadio =
-          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
-              as Radio<TraceWidgetBuildsScope>;
-      expect(
-        userCreatedWidgetsRadio.groupValue,
-        equals(TraceWidgetBuildsScope.userCreated),
-      );
+      RadioGroup<TraceWidgetBuildsScope> radioGroup() =>
+          tester.widget<RadioGroup<TraceWidgetBuildsScope>>(
+            find.byType(RadioGroup<TraceWidgetBuildsScope>),
+          );
+
+      expect(radioGroup().groupValue, TraceWidgetBuildsScope.userCreated);
 
       await tester.tap(find.byType(Radio<TraceWidgetBuildsScope>).at(1));
       await tester.pumpAndSettle();
-
-      userCreatedWidgetsRadio =
-          tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
-              as Radio<TraceWidgetBuildsScope>;
-      expect(
-        userCreatedWidgetsRadio.groupValue,
-        equals(TraceWidgetBuildsScope.all),
-      );
+      expect(radioGroup().groupValue, TraceWidgetBuildsScope.all);
 
       verifyExtensionStates(
         mockServiceManager: mockServiceManager,
@@ -336,38 +296,34 @@ void main() {
           traceUserCreatedWidgets: false,
         );
 
-        var userCreatedWidgetsRadio =
+        RadioGroup<TraceWidgetBuildsScope> radioGroup() =>
+            tester.widget<RadioGroup<TraceWidgetBuildsScope>>(
+              find.byType(RadioGroup<TraceWidgetBuildsScope>),
+            );
+        Radio<TraceWidgetBuildsScope> userCreatedWidgetsRadio() =>
             tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
                 as Radio<TraceWidgetBuildsScope>;
-        expect(userCreatedWidgetsRadio.groupValue, isNull);
-        var allWidgetsRadio =
+        Radio<TraceWidgetBuildsScope> allWidgetsRadio() =>
             tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).at(1))
                 as Radio<TraceWidgetBuildsScope>;
-        expect(allWidgetsRadio.groupValue, isNull);
+
+        expect(radioGroup().groupValue, null);
+        expect(userCreatedWidgetsRadio().enabled, false);
+        expect(allWidgetsRadio().enabled, false);
 
         await tester.tap(find.byType(Radio<TraceWidgetBuildsScope>).first);
         await tester.pumpAndSettle();
 
-        userCreatedWidgetsRadio =
-            tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
-                as Radio<TraceWidgetBuildsScope>;
-        expect(userCreatedWidgetsRadio.groupValue, isNull);
-        allWidgetsRadio =
-            tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).at(1))
-                as Radio<TraceWidgetBuildsScope>;
-        expect(allWidgetsRadio.groupValue, isNull);
+        expect(radioGroup().groupValue, null);
+        expect(userCreatedWidgetsRadio().enabled, false);
+        expect(allWidgetsRadio().enabled, false);
 
         await tester.tap(find.byType(Radio<TraceWidgetBuildsScope>).at(1));
         await tester.pumpAndSettle();
 
-        userCreatedWidgetsRadio =
-            tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).first)
-                as Radio<TraceWidgetBuildsScope>;
-        expect(userCreatedWidgetsRadio.groupValue, isNull);
-        allWidgetsRadio =
-            tester.widget(find.byType(Radio<TraceWidgetBuildsScope>).at(1))
-                as Radio<TraceWidgetBuildsScope>;
-        expect(allWidgetsRadio.groupValue, isNull);
+        expect(radioGroup().groupValue, null);
+        expect(userCreatedWidgetsRadio().enabled, false);
+        expect(allWidgetsRadio().enabled, false);
 
         verifyExtensionStates(
           mockServiceManager: mockServiceManager,

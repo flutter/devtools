@@ -346,15 +346,26 @@ class TraceWidgetBuildsScopeSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textStyle = enabled ? theme.regularTextStyle : theme.subtleTextStyle;
-    return Row(
-      children: [
-        ..._scopeSetting(
-          TraceWidgetBuildsScope.userCreated,
-          textStyle: textStyle,
+    // `Semantics` widget added as a workaround for the bug fixed in
+    // https://github.com/flutter/flutter/pull/170273. This `Semantics` widget
+    // can be removed once that PR is landed and DevTools is updated to use a
+    // version of Flutter with the fix, but it is not an urgent clean up.
+    return Semantics(
+      explicitChildNodes: true,
+      child: RadioGroup<TraceWidgetBuildsScope>(
+        groupValue: scope,
+        onChanged: _changeScope,
+        child: Row(
+          children: [
+            ..._scopeSetting(
+              TraceWidgetBuildsScope.userCreated,
+              textStyle: textStyle,
+            ),
+            const SizedBox(width: defaultSpacing),
+            ..._scopeSetting(TraceWidgetBuildsScope.all, textStyle: textStyle),
+          ],
         ),
-        const SizedBox(width: defaultSpacing),
-        ..._scopeSetting(TraceWidgetBuildsScope.all, textStyle: textStyle),
-      ],
+      ),
     );
   }
 
@@ -364,18 +375,17 @@ class TraceWidgetBuildsScopeSelector extends StatelessWidget {
   }) {
     return [
       Radio<TraceWidgetBuildsScope>(
+        enabled: enabled,
         value: type,
-        groupValue: scope,
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        onChanged: enabled ? _changeScope : null,
       ),
       Text(type.radioDisplay, style: textStyle),
     ];
   }
 
   Future<void> _changeScope(TraceWidgetBuildsScope? type) async {
-    assert(enabled);
-    final extension = type!.extensionForScope;
+    if (type == null) return;
+    final extension = type.extensionForScope;
     final opposite = type.opposite.extensionForScope;
     await [
       serviceConnection.serviceManager.serviceExtensionManager
