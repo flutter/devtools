@@ -8,17 +8,14 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../shared/globals.dart';
-import '../../../../shared/utils/future_work_tracker.dart';
-import '../../performance_controller.dart';
-import '../../performance_model.dart';
-import '../flutter_frames/flutter_frame_model.dart';
+import '../../../shared/globals.dart';
+import '../../../shared/utils/future_work_tracker.dart';
 
 enum QueuedMicrotasksControllerStatus { empty, refreshing, ready }
 
-class QueuedMicrotasksController extends PerformanceFeatureController
+class QueuedMicrotasksController extends DisposableController
     with AutoDisposeControllerMixin {
-  QueuedMicrotasksController(super.controller) {
+  QueuedMicrotasksController() {
     addAutoDisposeListener(_refreshWorkTracker.active, () {
       final active = _refreshWorkTracker.active.value;
       if (active) {
@@ -42,9 +39,6 @@ class QueuedMicrotasksController extends PerformanceFeatureController
 
   final _refreshWorkTracker = FutureWorkTracker();
 
-  @override
-  void onBecomingActive() {}
-
   Future<void> refresh() => _refreshWorkTracker.track(() async {
     _selectedMicrotask.value = null;
 
@@ -63,18 +57,6 @@ class QueuedMicrotasksController extends PerformanceFeatureController
 
   void setSelectedMicrotask(Microtask? microtask) {
     _selectedMicrotask.value = microtask;
-  }
-
-  @override
-  Future<void> handleSelectedFrame(FlutterFrame frame) async {}
-
-  @override
-  Future<void> setOfflineData(OfflinePerformanceData offlineData) async {}
-
-  @override
-  Future<void> clearData({bool partial = false}) async {
-    _selectedMicrotask.value = null;
-    _queuedMicrotasks.value = null;
   }
 
   @override

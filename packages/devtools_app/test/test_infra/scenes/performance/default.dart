@@ -21,7 +21,7 @@ class PerformanceDefaultScene extends Scene {
   @override
   Widget build(BuildContext context) {
     return wrapWithControllers(
-      PerformanceScreenBody(showIsolateSelector: ValueNotifier<bool>(false)),
+      const PerformanceScreenBody(),
       performance: controller,
     );
   }

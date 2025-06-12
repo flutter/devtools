@@ -20,7 +20,6 @@ import 'generated.mocks.dart';
 MockPerformanceController createMockPerformanceControllerWithDefaults() {
   final controller = MockPerformanceController();
   final timelineEventsController = MockTimelineEventsController();
-  final queuedMicrotasksController = MockQueuedMicrotasksController();
   final flutterFramesController = MockFlutterFramesController();
   when(
     controller.enhanceTracingController,
@@ -48,11 +47,6 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(timelineEventsController.status).thenReturn(
     ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty),
   );
-
-  // Stubs for Queued Microtasks feature.
-  when(
-    controller.queuedMicrotasksController,
-  ).thenReturn(queuedMicrotasksController);
 
   // Stubs for Rebuild Count feature
   when(controller.rebuildCountModel).thenReturn(RebuildCountModel());

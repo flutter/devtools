@@ -7,7 +7,6 @@ part of '../constants.dart';
 enum PerformanceEvents {
   refreshTimelineEvents,
   includeCpuSamplesInTimeline,
-  refreshQueuedMicrotasks,
   performanceOverlay,
   framesChartVisibility,
   selectFlutterFrame,

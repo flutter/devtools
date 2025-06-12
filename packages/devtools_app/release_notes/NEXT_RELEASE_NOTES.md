@@ -23,7 +23,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 
-- Added a Queued Microtasks tab to the Performance View, which allows a user to
+- Added a Queued Microtasks tab to the VM Tools screen, which allows a user to
   see details about the microtasks scheduled in an isolate's microtask queue.
   This tab currently only appears when DevTools is connected to a Flutter or
   Dart app started with `--profile-microtasks`. -

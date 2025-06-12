@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
-import 'package:devtools_app/src/screens/performance/panes/queued_microtasks/queued_microtasks_view.dart';
 import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_stats.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/perfetto.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
@@ -25,22 +24,12 @@ void main() {
   late FakeServiceConnectionManager fakeServiceConnection;
   late MockPerformanceController controller;
 
-  Future<void> setUpServiceManagerWithTimeline({
-    bool shouldEnableMicrotaskProfiling = false,
-  }) async {
+  Future<void> setUpServiceManagerWithTimeline() async {
     fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
         timelineData: perfettoVmTimeline,
-        vmFlags: [
-          (
-            flagName: profileMicrotasks,
-            value: shouldEnableMicrotaskProfiling.toString(),
-          ),
-        ],
       ),
     );
-    await fakeServiceConnection.serviceManager.flagsInitialized.future;
-
     final app = fakeServiceConnection.serviceManager.connectedApp!;
     mockConnectedApp(
       app,
@@ -62,7 +51,8 @@ void main() {
   }
 
   group('TabbedPerformanceView', () {
-    setUp(() {
+    setUp(() async {
+      await setUpServiceManagerWithTimeline();
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),
@@ -115,47 +105,21 @@ void main() {
 
     const windowSize = Size(2225.0, 1000.0);
 
-    testWidgetsWithWindowSize(
-      'builds content successfully when connected to a Flutter app and '
-      'microtask profiling is disabled',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.runAsync(() async {
-          await setUpServiceManagerWithTimeline();
-          await pumpView(tester);
+    testWidgetsWithWindowSize('builds content successfully', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await tester.runAsync(() async {
+        await setUpServiceManagerWithTimeline();
+        await pumpView(tester);
 
-          expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(3));
+        expect(find.byType(AnalyticsTabbedView), findsOneWidget);
+        expect(find.byType(DevToolsTab), findsNWidgets(3));
 
-          expect(find.text('Timeline Events'), findsOneWidget);
-          expect(find.text('Frame Analysis'), findsOneWidget);
-          expect(find.text('Rebuild Stats'), findsOneWidget);
-          expect(find.text('Queued Microtasks'), findsNothing);
-        });
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'builds content successfully when connected to a Flutter app and '
-      'microtask profiling is enabled',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.runAsync(() async {
-          await setUpServiceManagerWithTimeline(
-            shouldEnableMicrotaskProfiling: true,
-          );
-          await pumpView(tester);
-
-          expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(4));
-
-          expect(find.text('Frame Analysis'), findsOneWidget);
-          expect(find.text('Rebuild Stats'), findsOneWidget);
-          expect(find.text('Timeline Events'), findsOneWidget);
-          expect(find.text('Queued Microtasks'), findsOneWidget);
-        });
-      },
-    );
+        expect(find.text('Timeline Events'), findsOneWidget);
+        expect(find.text('Frame Analysis'), findsOneWidget);
+        expect(find.text('Rebuild Stats'), findsOneWidget);
+      });
+    });
 
     testWidgetsWithWindowSize(
       'builds content for Frame Analysis tab with selected frame',
@@ -244,69 +208,7 @@ void main() {
     );
 
     testWidgetsWithWindowSize(
-      'builds content for Queued Microtasks tab when microtask profiling is '
-      'enabled',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.runAsync(() async {
-          await setUpServiceManagerWithTimeline(
-            shouldEnableMicrotaskProfiling: true,
-          );
-
-          // First, we verify that instructions are shown in the Queued
-          // Microtasks tab when [controller.queuedMicrotasksController]'s
-          // status is empty.
-
-          final mockQueuedMicrotasksController =
-              controller.queuedMicrotasksController
-                  as MockQueuedMicrotasksController;
-
-          final mockQueuedMicrotasksControllerStatus =
-              ValueNotifier<QueuedMicrotasksControllerStatus>(
-                QueuedMicrotasksControllerStatus.empty,
-              );
-          when(
-            mockQueuedMicrotasksController.status,
-          ).thenReturn(mockQueuedMicrotasksControllerStatus);
-
-          await pumpView(tester);
-
-          expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(4));
-
-          await tester.tap(find.text('Queued Microtasks'));
-          await tester.pumpAndSettle();
-
-          expect(find.byType(RefreshQueuedMicrotasksButton), findsOneWidget);
-          expect(find.byType(QueuedMicrotasksTabView), findsOneWidget);
-          expect(
-            find.byType(RefreshQueuedMicrotasksInstructions),
-            findsOneWidget,
-          );
-
-          // Then, we verify that details about the queued microtasks are shown
-          // when [controller.queuedMicrotasksController]'s status is ready.
-
-          mockQueuedMicrotasksControllerStatus.value =
-              QueuedMicrotasksControllerStatus.ready;
-          when(
-            mockQueuedMicrotasksController.selectedMicrotask,
-          ).thenReturn(FixedValueListenable(testMicrotask));
-          when(
-            mockQueuedMicrotasksController.queuedMicrotasks,
-          ).thenReturn(FixedValueListenable(testQueuedMicrotasks));
-
-          await tester.pumpAndSettle();
-
-          expect(find.byType(QueuedMicrotaskSelector), findsOneWidget);
-          expect(find.byType(MicrotaskStackTraceView), findsOneWidget);
-        });
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'only shows Timeline Events tab when connected to a non-Flutter app and '
-      'microtask profiling is disabled',
+      'only shows Timeline Events tab for non-flutter app',
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
@@ -325,37 +227,6 @@ void main() {
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
           expect(find.byType(DevToolsTab), findsOneWidget);
           expect(find.text('Timeline Events'), findsOneWidget);
-          expect(find.text('Queued Microtasks'), findsNothing);
-          expect(find.text('Frame Analysis'), findsNothing);
-          expect(find.text('Rebuild Stats'), findsNothing);
-        });
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'only shows Timeline Events and Queued Microtasks tabs when connected to '
-      'a non-flutter app and microtask profiling is enabled',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.runAsync(() async {
-          await setUpServiceManagerWithTimeline(
-            shouldEnableMicrotaskProfiling: true,
-          );
-          final app = fakeServiceConnection.serviceManager.connectedApp!;
-          mockConnectedApp(
-            app,
-            isFlutterApp: false,
-            isProfileBuild: false,
-            isWebApp: false,
-          );
-          when(app.flutterVersionNow).thenReturn(null);
-
-          await pumpView(tester);
-          await tester.pumpAndSettle();
-          expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-          expect(find.byType(DevToolsTab), findsNWidgets(2));
-          expect(find.text('Timeline Events'), findsOneWidget);
-          expect(find.text('Queued Microtasks'), findsOneWidget);
           expect(find.text('Frame Analysis'), findsNothing);
           expect(find.text('Rebuild Stats'), findsNothing);
         });

@@ -7,7 +7,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../../test_infra/test_data/performance/sample_performance_data.dart';
+import '../vm_developer_test_utils.dart';
 
 void main() {
   late FakeServiceConnectionManager fakeServiceConnection;
@@ -22,9 +22,7 @@ void main() {
       );
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
 
-      controller = QueuedMicrotasksController(
-        createMockPerformanceControllerWithDefaults(),
-      );
+      controller = QueuedMicrotasksController();
     });
 
     test('refresh', () async {

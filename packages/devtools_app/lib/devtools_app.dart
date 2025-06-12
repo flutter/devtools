@@ -41,7 +41,6 @@ export 'src/screens/performance/panes/flutter_frames/flutter_frame_model.dart';
 export 'src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 export 'src/screens/performance/panes/flutter_frames/flutter_frames_controller.dart';
 export 'src/screens/performance/panes/frame_analysis/frame_analysis_model.dart';
-export 'src/screens/performance/panes/queued_microtasks/queued_microtasks_controller.dart';
 export 'src/screens/performance/panes/rebuild_stats/rebuild_stats_controller.dart';
 export 'src/screens/performance/panes/rebuild_stats/rebuild_stats_model.dart';
 export 'src/screens/performance/panes/timeline_events/perfetto/tracing/model.dart';
@@ -58,6 +57,7 @@ export 'src/screens/vm_developer/object_inspector/class_hierarchy_explorer.dart'
 export 'src/screens/vm_developer/object_inspector/class_hierarchy_explorer_controller.dart';
 export 'src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
 export 'src/screens/vm_developer/object_inspector/vm_object_model.dart';
+export 'src/screens/vm_developer/queued_microtasks/queued_microtasks_controller.dart';
 export 'src/screens/vm_developer/vm_developer_tools_controller.dart';
 export 'src/screens/vm_developer/vm_developer_tools_screen.dart';
 export 'src/screens/vm_developer/vm_service_private_extensions.dart';

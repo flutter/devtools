@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
@@ -36,18 +35,13 @@ class PerformanceScreen extends Screen {
   @override
   String get docPageId => id;
 
-  final _showIsolateSelector = ValueNotifier<bool>(false);
-
-  @override
-  ValueListenable<bool> get showIsolateSelector => _showIsolateSelector;
-
   @override
   Widget buildScreenBody(BuildContext context) {
     if (serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
         false) {
       return const WebPerformanceScreenBody();
     }
-    return PerformanceScreenBody(showIsolateSelector: _showIsolateSelector);
+    return const PerformanceScreenBody();
   }
 
   @override
@@ -57,14 +51,7 @@ class PerformanceScreen extends Screen {
 }
 
 class PerformanceScreenBody extends StatefulWidget {
-  const PerformanceScreenBody({
-    super.key,
-    // This allows the body to modify the value that gets returned by the
-    // enclosing [PerformanceScreen]'s `showIsolateSelector` [ValueListenable].
-    required this.showIsolateSelector,
-  });
-
-  final ValueNotifier<bool> showIsolateSelector;
+  const PerformanceScreenBody({super.key});
 
   @override
   PerformanceScreenBodyState createState() => PerformanceScreenBodyState();
@@ -81,10 +68,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     controller = screenControllers.lookup<PerformanceController>();
     addAutoDisposeListener(offlineDataController.showingOfflineData);
     addAutoDisposeListener(controller.loadingOfflineData);
-    addAutoDisposeListener(controller.isQueuedMicrotasksFeatureActive, () {
-      widget.showIsolateSelector.value =
-          controller.isQueuedMicrotasksFeatureActive.value;
-    });
   }
 
   @override

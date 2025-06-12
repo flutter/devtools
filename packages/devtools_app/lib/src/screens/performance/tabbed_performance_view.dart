@@ -8,7 +8,6 @@ import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../service/vm_flags.dart' as vm_flags;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/globals.dart';
 import '../../shared/ui/common_widgets.dart';
@@ -16,7 +15,6 @@ import '../../shared/ui/tab.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
-import 'panes/queued_microtasks/queued_microtasks_view.dart';
 import 'panes/rebuild_stats/rebuild_stats.dart';
 import 'panes/timeline_events/timeline_events_view.dart';
 import 'performance_controller.dart';
@@ -71,20 +69,9 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
           offlineData.rebuildCountModel != null;
     }
 
-    // The value of the `--profile-microtasks` VM flag cannot be modified once
-    // the VM has started running.
-    final showQueuedMicrotasks =
-        !isOffline &&
-        serviceConnection.vmFlagManager
-                .flag(vm_flags.profileMicrotasks)
-                ?.value
-                .valueAsString ==
-            'true';
-
     final tabsAndControllers = _generateTabs(
       showFrameAnalysis: showFrameAnalysis,
       showRebuildStats: showRebuildStats,
-      showQueuedMicrotasks: showQueuedMicrotasks,
     );
     final tabs = tabsAndControllers
         .map((t) => (tab: t.tab, tabView: t.tabView))
@@ -129,7 +116,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
   _generateTabs({
     required bool showFrameAnalysis,
     required bool showRebuildStats,
-    required bool showQueuedMicrotasks,
   }) {
     if (showFrameAnalysis || showRebuildStats) {
       assert(serviceConnection.serviceManager.connectedApp!.isFlutterAppNow!);
@@ -177,19 +163,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         ),
         featureController: controller.timelineEventsController,
       ),
-      if (showQueuedMicrotasks)
-        (
-          tab: _buildTab(
-            tabName: 'Queued Microtasks',
-            trailing: RefreshQueuedMicrotasksButton(
-              controller: controller.queuedMicrotasksController,
-            ),
-          ),
-          tabView: QueuedMicrotasksTabView(
-            controller: controller.queuedMicrotasksController,
-          ),
-          featureController: controller.queuedMicrotasksController,
-        ),
     ];
   }
 
