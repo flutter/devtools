@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
@@ -58,9 +60,9 @@ mixin CollapsibleAnimationMixin<T extends StatefulWidget>
   void setExpanded(bool expanded) {
     setState(() {
       if (expanded) {
-        expandController.forward();
+        unawaited(expandController.forward());
       } else {
-        expandController.reverse();
+        unawaited(expandController.reverse());
       }
       onExpandChanged(expanded);
     });
@@ -70,9 +72,9 @@ mixin CollapsibleAnimationMixin<T extends StatefulWidget>
   void didUpdateWidget(Widget oldWidget) {
     super.didUpdateWidget(oldWidget as T);
     if (isExpanded) {
-      expandController.forward();
+      unawaited(expandController.forward());
     } else {
-      expandController.reverse();
+      unawaited(expandController.reverse());
     }
   }
 }
