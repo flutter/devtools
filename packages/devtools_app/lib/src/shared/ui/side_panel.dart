@@ -76,9 +76,9 @@ class SidePanelViewerState extends State<SidePanelViewer>
       setState(() {
         isVisible = widget.controller.isVisible.value;
         if (isVisible) {
-          visibilityController.forward();
+          unawaited(visibilityController.forward());
         } else {
-          visibilityController.reverse();
+          unawaited(visibilityController.reverse());
         }
       });
     });
