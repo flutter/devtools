@@ -43,7 +43,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any general updates.
+* Started displaying events related to timers in the Logging View. -
+  [#9238](https://github.com/flutter/devtools/pull/9238).
 
 ## App size tool updates
 
