@@ -6,11 +6,13 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../service/vm_flags.dart' as vm_flags;
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
 import 'isolate_statistics/isolate_statistics_view.dart';
 import 'object_inspector/object_inspector_view.dart';
 import 'process_memory/process_memory_view.dart';
+import 'queued_microtasks/queued_microtasks_view.dart';
 import 'vm_developer_tools_controller.dart';
 import 'vm_statistics/vm_statistics_view.dart';
 
@@ -49,11 +51,21 @@ class VMDeveloperToolsScreen extends Screen {
 class VMDeveloperToolsScreenBody extends StatelessWidget {
   const VMDeveloperToolsScreenBody({super.key});
 
+  // The value of the `--profile-microtasks` VM flag cannot be modified once
+  // the VM has started running.
+  static final showQueuedMicrotasks =
+      serviceConnection.vmFlagManager
+          .flag(vm_flags.profileMicrotasks)
+          ?.value
+          .valueAsString ==
+      'true';
+
   static final views = <VMDeveloperView>[
     const VMStatisticsView(),
     const IsolateStatisticsView(),
     ObjectInspectorView(),
     const VMProcessMemoryView(),
+    if (showQueuedMicrotasks) const QueuedMicrotasksView(),
   ];
 
   @override
