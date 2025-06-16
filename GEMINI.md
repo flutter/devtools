@@ -19,4 +19,6 @@ for `packages/devtools_shared`, whose tests should be run with `dart test`.
 - Prefer to use MCP server tools over shell commands whenever possible.
 - When you are done making code changes, ensure the code does not have analysis
 errors or warnings. Also ensure it is formatted properly. You should have MCP
-server tools available to you to perform these tasks.
+server tools available to you to perform these tasks. If not, you can get
+analysis errors and warnings by running the `dart analyze` shell command, and
+you can perform Dart formatting with the `dart format` shell command.
