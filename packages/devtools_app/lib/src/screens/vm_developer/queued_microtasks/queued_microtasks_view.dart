@@ -64,6 +64,10 @@ class RefreshQueuedMicrotasksInstructions extends StatelessWidget {
   }
 }
 
+/// Record containing details about a particular microtask that was in a
+/// microtask queue snapshot, and an index representing how close to the front
+/// of the queue that microtask was when the snapshot was taken.
+///
 /// In the response returned by the VM Service, microtasks are sorted in
 /// ascending order of when they will be dequeued, i.e. the microtask that will
 /// run earliest is at index 0 of the returned list. We use those indices of the
