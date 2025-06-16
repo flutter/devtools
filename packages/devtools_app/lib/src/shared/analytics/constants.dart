@@ -115,6 +115,7 @@ const refreshIsolateStatistics = 'refreshIsolateStatistics';
 const refreshVmStatistics = 'refreshVmStatistics';
 const refreshProcessMemoryStatistics = 'refreshProcessMemoryStatistics';
 const requestSize = 'requestSize';
+const refreshQueuedMicrotasks = 'refreshQueuedMicrotasks';
 
 // Settings actions:
 const settingsDialog = 'settings';
