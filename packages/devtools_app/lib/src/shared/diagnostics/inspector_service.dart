@@ -510,10 +510,10 @@ abstract class InspectorObjectGroupBase
           groupName,
         );
       }
-    } catch (e) {
+    } on RPCError catch (e) {
       // Swallow exceptions related to trying to dispose an Inspector group on
       // an already disposed service connection. Otherwise, rethrow.
-      if (!e.toString().contains('Service connection disposed')) {
+      if (!e.message.contains('Service connection disposed')) {
         rethrow;
       }
     }
