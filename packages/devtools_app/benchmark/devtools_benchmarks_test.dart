@@ -123,7 +123,7 @@ void _verifyScoresAgainstThresholds(
 }) {
   final identifier = '${devToolsBenchmark.id}.${useWasm ? 'wasm' : 'js'}';
   stdout.writeln('Verifying $identifier scores against expected thresholds.');
-  final benchmarkThresholds = _benchmarkThresholds(useWasm);
+  final benchmarkThresholds = _benchmarkThresholds(/*useWasm*/);
   expect(
     benchmarkThresholds.containsKey(devToolsBenchmark),
     isTrue,
@@ -171,10 +171,10 @@ void _verifyScoresAgainstThresholds(
 }
 
 const _frameTimeFor60FPSInMicros = 16666.6;
-const _frameTimeFor30FPSInMicros = 33333.3;
+// const _frameTimeFor30FPSInMicros = 33333.3;
 
 /// Creates the expected [DevToolsBenchmark]s for the specified compiler.
-Map<DevToolsBenchmark, Map<String, num>> _benchmarkThresholds(bool isWasm) => {
+Map<DevToolsBenchmark, Map<String, num>> _benchmarkThresholds(/*bool isWasm*/) => {
   DevToolsBenchmark.navigateThroughOfflineScreens: {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameTotalTime,
