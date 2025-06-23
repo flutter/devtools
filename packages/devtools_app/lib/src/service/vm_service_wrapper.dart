@@ -510,3 +510,24 @@ class TrackedFuture<T> {
   final String name;
   final Future<T> future;
 }
+
+extension RpcErrorExtension on RPCError {
+  /// Whether this [RPCError] is some kind of "VM Service connection has gone"
+  /// error that may occur if the VM is shut down.
+  bool get isServiceDisposedError {
+    if (code == RPCErrorKind.kServiceDisappeared.code ||
+        code == RPCErrorKind.kConnectionDisposed.code) {
+      return true;
+    }
+
+    if (code == RPCErrorKind.kServerError.code) {
+      // Always ignore "client is closed" and "closed with pending request"
+      // errors because these can always occur during shutdown if we were
+      // just starting to send (or had just sent) a request.
+      return message.contains('The client is closed') ||
+          message.contains('The client closed with pending request') ||
+          message.contains('Service connection dispose');
+    }
+    return false;
+  }
+}
