@@ -22,6 +22,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../service/vm_service_wrapper.dart';
 import '../console/primitives/simple_items.dart';
 import '../globals.dart';
 import '../utils/utils.dart';
@@ -501,13 +502,22 @@ abstract class InspectorObjectGroupBase
   /// attempt carefully cancel futures.
   @override
   Future<void> dispose() {
-    // No need to dispose the group if the isolate is already gone.
-    final disposeComplete = inspectorService.isolateRef != null
-        ? invokeVoidServiceMethod(
-            WidgetInspectorServiceExtensions.disposeGroup.name,
-            groupName,
-          )
-        : Future<void>.value();
+    var disposeComplete = Future<void>.value();
+    try {
+      // Only dispose the group if the isolate still exists.
+      if (inspectorService.isolateRef != null) {
+        disposeComplete = invokeVoidServiceMethod(
+          WidgetInspectorServiceExtensions.disposeGroup.name,
+          groupName,
+        );
+      }
+    } on RPCError catch (e) {
+      if (!e.isServiceDisposedError) {
+        // Swallow exceptions related to trying to dispose an Inspector group on
+        // an already disposed service connection. Otherwise, rethrow.
+        rethrow;
+      }
+    }
     disposed = true;
     return disposeComplete;
   }
