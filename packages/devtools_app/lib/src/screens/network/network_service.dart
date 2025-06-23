@@ -4,6 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/utils/utils.dart';
@@ -68,23 +69,31 @@ class NetworkService {
     DebounceCancelledCallback? cancelledCallback,
   }) async {
     if (serviceConnection.serviceManager.service == null) return;
-    final timestampObj = await serviceConnection.serviceManager.service!
-        .getVMTimelineMicros();
-    if (cancelledCallback?.call() ?? false) return;
+    try {
+      final timestampObj = await serviceConnection.serviceManager.service!
+          .getVMTimelineMicros();
+      if (cancelledCallback?.call() ?? false) return;
 
-    final timestamp = timestampObj.timestamp!;
-    final sockets = await _refreshSockets();
-    if (cancelledCallback?.call() ?? false) return;
+      final timestamp = timestampObj.timestamp!;
+      final sockets = await _refreshSockets();
+      if (cancelledCallback?.call() ?? false) return;
 
-    networkController.lastSocketDataRefreshMicros = timestamp;
-    List<HttpProfileRequest>? httpRequests;
-    httpRequests = await _refreshHttpProfile();
-    if (cancelledCallback?.call() ?? false) return;
+      networkController.lastSocketDataRefreshMicros = timestamp;
+      List<HttpProfileRequest>? httpRequests;
+      httpRequests = await _refreshHttpProfile();
+      if (cancelledCallback?.call() ?? false) return;
 
-    networkController.processNetworkTraffic(
-      sockets: sockets,
-      httpRequests: httpRequests,
-    );
+      networkController.processNetworkTraffic(
+        sockets: sockets,
+        httpRequests: httpRequests,
+      );
+    } on RPCError catch (e) {
+      if (!e.isServiceDisposedError) {
+        // Swallow exceptions related to trying to interact with an
+        // already-disposed service connection. Otherwise, rethrow.
+        rethrow;
+      }
+    }
   }
 
   Future<List<HttpProfileRequest>> _refreshHttpProfile() async {
