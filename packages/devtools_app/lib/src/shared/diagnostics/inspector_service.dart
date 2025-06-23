@@ -501,11 +501,12 @@ abstract class InspectorObjectGroupBase
   /// and it is simpler return an empty result that will be ignored anyway than to
   /// attempt carefully cancel futures.
   @override
-  Future<void> dispose() async {
+  Future<void> dispose() {
+    var disposeComplete = Future<void>.value();
     try {
       // Only dispose the group if the isolate still exists.
       if (inspectorService.isolateRef != null) {
-        await invokeVoidServiceMethod(
+        disposeComplete = invokeVoidServiceMethod(
           WidgetInspectorServiceExtensions.disposeGroup.name,
           groupName,
         );
@@ -518,6 +519,7 @@ abstract class InspectorObjectGroupBase
       }
     }
     disposed = true;
+    return disposeComplete;
   }
 
   Future<RemoteDiagnosticsNode?> invokeServiceMethodReturningNodeInspectorRef(
