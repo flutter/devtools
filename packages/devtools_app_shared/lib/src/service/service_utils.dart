@@ -63,12 +63,22 @@ extension VmServiceExtension on VmService {
     required int column,
     required String source,
   }) async {
-    await postEvent('ToolEvent', 'navigate', <String, Object>{
-      'fileUri': fileUriString,
-      'line': line,
-      'column': column,
-      'source': source,
-    });
+    try {
+      await postEvent('ToolEvent', 'navigate', <String, Object>{
+        'fileUri': fileUriString,
+        'line': line,
+        'column': column,
+        'source': source,
+      });
+    } on RPCError catch (e) {
+      // An [RPCErrorKind.kCustomStreamDoesNotExist] error is expected if the
+      // custom 'ToolEvent' stream does not have any listeners (i.e. there are
+      // no IDEs listening to this stream).
+      if (e.code == RPCErrorKind.kCustomStreamDoesNotExist.code) {
+        return;
+      }
+      rethrow;
+    }
   }
 }
 
