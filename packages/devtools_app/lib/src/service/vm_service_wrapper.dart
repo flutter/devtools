@@ -69,10 +69,19 @@ class VmServiceWrapper extends VmService {
   // in https://github.com/flutter/devtools/pull/4119 as a workaround for
   // profiling the analysis server.
   Future<void> _initSupportedProtocols() async {
-    final supportedProtocols = await getSupportedProtocols();
-    final ddsProtocol = supportedProtocols.protocols?.firstWhereOrNull(
-      (Protocol p) => p.protocolName?.caseInsensitiveEquals('DDS') ?? false,
-    );
+    Protocol? ddsProtocol;
+    try {
+      final supportedProtocols = await getSupportedProtocols();
+      ddsProtocol = supportedProtocols.protocols?.firstWhereOrNull(
+        (Protocol p) => p.protocolName?.caseInsensitiveEquals('DDS') ?? false,
+      );
+    } on RPCError catch (e) {
+      if (!e.isServiceDisposedError) {
+        // Swallow exceptions related to trying to interact with an
+        // already-disposed service connection. Otherwise, rethrow.
+        rethrow;
+      }
+    }
     _ddsSupported = ddsProtocol != null;
     _supportedProtocolsInitialized.complete();
   }
