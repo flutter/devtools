@@ -18,7 +18,7 @@ export DEVTOOLS_TOOL_FLUTTER_FROM_PATH=true
 cd tool
 flutter pub get
 
-dt pub-get --upgrade
-dt generate-code --no-pub-get
+# This will run `dt pub-get --upgrade` before generating code with build_runner.
+dt generate-code --upgrade
 
 cd ..
