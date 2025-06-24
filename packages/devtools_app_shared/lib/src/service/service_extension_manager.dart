@@ -245,25 +245,30 @@ final class ServiceExtensionManager with DisposerMixin {
   }
 
   Future<void> _addServiceExtension(String name) async {
-    if (!_serviceExtensions.add(name)) {
+    if (_serviceExtensions.contains(name)) {
       // If the service extension was already added we do not need to add it
       // again. This can happen depending on the timing between when extension
       // added events were received and when we requested the list of all
       // service extensions already defined for the isolate.
       return;
     }
-    _hasServiceExtension(name).value = true;
 
-    if (_enabledServiceExtensions.containsKey(name)) {
+    final enabledServiceExtension = _enabledServiceExtensions[name];
+    if (enabledServiceExtension != null) {
       // Restore any previously enabled states by calling their service
       // extension. This will restore extension states on the device after a hot
       // restart. [_enabledServiceExtensions] will be empty on page refresh or
       // initial start.
       try {
-        return await _callServiceExtension(
+        final called = await _callServiceExtension(
           name,
-          _enabledServiceExtensions[name]!.value,
+          enabledServiceExtension.value,
         );
+        if (called) {
+          _serviceExtensions.add(name);
+          _hasServiceExtension(name).value = true;
+        }
+        return;
       } on SentinelException catch (_) {
         // Service extension stopped existing while calling, so do nothing.
         // This typically happens during hot restarts.
@@ -271,18 +276,25 @@ final class ServiceExtensionManager with DisposerMixin {
     } else {
       // Set any extensions that are already enabled on the device. This will
       // enable extension states in DevTools on page refresh or initial start.
-      return await _restoreExtensionFromDevice(name);
+      final restored = await _restoreExtensionFromDevice(name);
+      if (restored) {
+        _serviceExtensions.add(name);
+        _hasServiceExtension(name).value = true;
+      }
     }
   }
 
   IsolateRef? get _mainIsolate => _isolateManager.mainIsolate.value;
 
-  Future<void> _restoreExtensionFromDevice(String name) async {
+  /// Restores the service extension named [name] from the device.
+  ///
+  /// Returns whether the service extension was actually restored.
+  Future<bool> _restoreExtensionFromDevice(String name) async {
     final isolateRef = _isolateManager.mainIsolate.value;
-    if (isolateRef == null) return;
+    if (isolateRef == null) return false;
 
     if (!extensions.serviceExtensionsAllowlist.containsKey(name)) {
-      return;
+      return false;
     }
     final expectedValueType =
         extensions.serviceExtensionsAllowlist[name]!.values.first.runtimeType;
@@ -327,10 +339,10 @@ final class ServiceExtensionManager with DisposerMixin {
       }
     }
 
-    if (isolateRef != _mainIsolate) return;
+    if (isolateRef != _mainIsolate) return false;
 
     final isolate = await _isolateManager.isolateState(isolateRef).isolate;
-    if (isolateRef != _mainIsolate) return;
+    if (isolateRef != _mainIsolate) return false;
 
     // Do not try to restore Dart IO extensions for a paused isolate.
     if (extensions.isDartIoExtension(name) &&
@@ -339,6 +351,8 @@ final class ServiceExtensionManager with DisposerMixin {
     } else {
       await restore();
     }
+
+    return true;
   }
 
   Future<void> _maybeRestoreExtension(String name, Object? value) async {
@@ -362,14 +376,15 @@ final class ServiceExtensionManager with DisposerMixin {
     }
   }
 
-  Future<void> _callServiceExtension(String name, Object? value) async {
-    if (_service == null) {
-      return;
-    }
+  /// Calls the service extension named [name] with [value].
+  ///
+  /// Returns whether the service extension was successfully called.
+  Future<bool> _callServiceExtension(String name, Object? value) async {
+    if (_service == null) return false;
 
-    final mainIsolate = _isolateManager.mainIsolate.value;
-    Future<void> callExtension() async {
-      if (_isolateManager.mainIsolate.value != mainIsolate) return;
+    final mainIsolate = _mainIsolate;
+    Future<bool> callExtension() async {
+      if (_mainIsolate != mainIsolate) return false;
 
       assert(value != null);
       try {
@@ -411,16 +426,19 @@ final class ServiceExtensionManager with DisposerMixin {
         }
       } on RPCError catch (e) {
         if (e.code == RPCErrorKind.kServerError.code) {
-          // Connection disappeared
-          return;
+          // The connection disappeared.
+          return false;
         }
         rethrow;
       }
+
+      return true;
     }
 
-    if (mainIsolate == null) return;
+    if (mainIsolate == null) return false;
+
     final isolate = await _isolateManager.isolateState(mainIsolate).isolate;
-    if (_isolateManager.mainIsolate.value != mainIsolate) return;
+    if (_mainIsolate != mainIsolate) return false;
 
     // Do not try to call Dart IO extensions for a paused isolate.
     if (extensions.isDartIoExtension(name) &&
@@ -431,6 +449,7 @@ final class ServiceExtensionManager with DisposerMixin {
     } else {
       await callExtension();
     }
+    return true;
   }
 
   void vmServiceClosed() {
