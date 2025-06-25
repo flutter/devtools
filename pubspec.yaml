@@ -13,5 +13,5 @@ workspace:
   - tool
 
 dev_dependencies:
-  build_runner: ^2.3.3
+  build_runner: ^2.5.4
   flutter_lints: ^5.0.0

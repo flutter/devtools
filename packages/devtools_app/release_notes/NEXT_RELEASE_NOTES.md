@@ -43,7 +43,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any general updates.
+* Started displaying events related to timers in the Logging View. -
+  [#9238](https://github.com/flutter/devtools/pull/9238).
 
 ## App size tool updates
 
@@ -60,6 +61,14 @@ TODO: Remove this section if there are not any general updates.
 ## DevTools Extension updates
 
 TODO: Remove this section if there are not any general updates.
+
+## Advanced developer mode updates
+
+- Added a Queued Microtasks tab to the VM Tools screen, which allows a user to
+  see details about the microtasks scheduled in an isolate's microtask queue.
+  This tab currently only appears when DevTools is connected to a Flutter or
+  Dart app started with `--profile-microtasks`. -
+  [#9239](https://github.com/flutter/devtools/pull/9239).
 
 ## Full commit history
 

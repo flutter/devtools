@@ -54,7 +54,7 @@ void main() {
           serviceConnection.timelineStreamManager.recordedStreams;
       expect(
         initialStreams.map((stream) => stream.name).toList(),
-        equals(['Dart', 'Embedder', 'GC']),
+        equals(['Dart', 'Embedder', 'GC', 'Microtask']),
       );
 
       await serviceConnection.serviceManager.service!.setVMTimelineFlags([
