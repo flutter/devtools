@@ -114,7 +114,7 @@ class VmServiceWrapper extends VmService {
   /// A sequence number incremented and attached to each DAP request.
   static int _dapSeq = 0;
 
-  /// Executes `callback` for each isolate, and waiting for all callbacks to
+  /// Executes [callback] for each isolate, and waits for all callbacks to
   /// finish before completing.
   Future<void> forEachIsolate(
     Future<void> Function(IsolateRef) callback,
