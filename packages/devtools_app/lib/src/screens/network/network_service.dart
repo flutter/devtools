@@ -63,7 +63,7 @@ class NetworkService {
   /// Force refreshes the HTTP requests logged to the timeline as well as any
   /// recorded Socket traffic.
   ///
-  /// This method calls `cancelledCallback` after each async gap to ensure that
+  /// This method calls [cancelledCallback] after each async gap to ensure that
   /// this operation has not been cancelled during the async gap.
   Future<void> refreshNetworkData({
     DebounceCancelledCallback? cancelledCallback,
@@ -149,19 +149,17 @@ class NetworkService {
 
     // TODO(https://github.com/flutter/devtools/issues/5057):
     // Filter lastrefreshMicros inside [service.getSocketProfile] instead.
-    return sockets
-        .where(
-          (element) =>
-              element.startTime >
-                  networkController.lastSocketDataRefreshMicros ||
-              (element.endTime ?? 0) >
-                  networkController.lastSocketDataRefreshMicros ||
-              (element.lastReadTime ?? 0) >
-                  networkController.lastSocketDataRefreshMicros ||
-              (element.lastWriteTime ?? 0) >
-                  networkController.lastSocketDataRefreshMicros,
-        )
-        .toList();
+    final lastSocketDataRefreshMicros =
+        networkController.lastSocketDataRefreshMicros;
+    return [
+      ...sockets.where(
+        (element) =>
+            element.startTime > lastSocketDataRefreshMicros ||
+            (element.endTime ?? 0) > lastSocketDataRefreshMicros ||
+            (element.lastReadTime ?? 0) > lastSocketDataRefreshMicros ||
+            (element.lastWriteTime ?? 0) > lastSocketDataRefreshMicros,
+      ),
+    ];
   }
 
   Future<void> _clearSocketProfile() async {
