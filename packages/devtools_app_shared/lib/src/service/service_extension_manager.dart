@@ -252,6 +252,7 @@ final class ServiceExtensionManager with DisposerMixin {
       // service extensions already defined for the isolate.
       return;
     }
+    _hasServiceExtension(name).value = true;
 
     final enabledServiceExtension = _enabledServiceExtensions[name];
     if (enabledServiceExtension != null) {
@@ -266,7 +267,6 @@ final class ServiceExtensionManager with DisposerMixin {
         );
         if (called) {
           _serviceExtensions.add(name);
-          _hasServiceExtension(name).value = true;
         }
         return;
       } on SentinelException catch (_) {
@@ -279,7 +279,6 @@ final class ServiceExtensionManager with DisposerMixin {
       final restored = await _restoreExtensionFromDevice(name);
       if (restored) {
         _serviceExtensions.add(name);
-        _hasServiceExtension(name).value = true;
       }
     }
   }
@@ -299,35 +298,35 @@ final class ServiceExtensionManager with DisposerMixin {
     final expectedValueType =
         extensions.serviceExtensionsAllowlist[name]!.values.first.runtimeType;
 
-    Future<void> restore() async {
+    Future<bool> restore() async {
       // The restore request is obsolete if the isolate has changed.
-      if (isolateRef != _mainIsolate) return;
+      if (isolateRef != _mainIsolate) return false;
       try {
         final response = await _service!.callServiceExtension(
           name,
           isolateId: isolateRef.id,
         );
 
-        if (isolateRef != _mainIsolate) return;
+        if (isolateRef != _mainIsolate) return false;
 
         switch (expectedValueType) {
           case const (bool):
             final enabled = response.json!['enabled'] == 'true' ? true : false;
             await _maybeRestoreExtension(name, enabled);
-            return;
+            return true;
           case const (String):
             final String? value = response.json!['value'];
             await _maybeRestoreExtension(name, value);
-            return;
+            return true;
           case const (int):
           case const (double):
             final value = num.parse(
               response.json![name.substring(name.lastIndexOf('.') + 1)],
             );
             await _maybeRestoreExtension(name, value);
-            return;
+            return true;
           default:
-            return;
+            return false;
         }
       } catch (e) {
         // Do not report an error if the VMService has gone away or the
@@ -337,6 +336,7 @@ final class ServiceExtensionManager with DisposerMixin {
         // of allowed network related exceptions rather than ignoring all
         // exceptions.
       }
+      return false;
     }
 
     if (isolateRef != _mainIsolate) return false;
@@ -423,6 +423,8 @@ final class ServiceExtensionManager with DisposerMixin {
             // of the extension name (ext.flutter.extensionName => extensionName).
             args: {name.substring(name.lastIndexOf('.') + 1): value},
           );
+        } else {
+          return false;
         }
       } on RPCError catch (e) {
         if (e.code == RPCErrorKind.kServerError.code) {
@@ -446,10 +448,10 @@ final class ServiceExtensionManager with DisposerMixin {
       _callbacksOnIsolateResume
           .putIfAbsent(mainIsolate, () => [])
           .add(callExtension);
+      return true;
     } else {
-      await callExtension();
+      return await callExtension();
     }
-    return true;
   }
 
   void vmServiceClosed() {
