@@ -69,10 +69,19 @@ class VmServiceWrapper extends VmService {
   // in https://github.com/flutter/devtools/pull/4119 as a workaround for
   // profiling the analysis server.
   Future<void> _initSupportedProtocols() async {
-    final supportedProtocols = await getSupportedProtocols();
-    final ddsProtocol = supportedProtocols.protocols?.firstWhereOrNull(
-      (Protocol p) => p.protocolName?.caseInsensitiveEquals('DDS') ?? false,
-    );
+    Protocol? ddsProtocol;
+    try {
+      final supportedProtocols = await getSupportedProtocols();
+      ddsProtocol = supportedProtocols.protocols?.firstWhereOrNull(
+        (Protocol p) => p.protocolName?.caseInsensitiveEquals('DDS') ?? false,
+      );
+    } on RPCError catch (e) {
+      if (!e.isServiceDisposedError) {
+        // Swallow exceptions related to trying to interact with an
+        // already-disposed service connection. Otherwise, rethrow.
+        rethrow;
+      }
+    }
     _ddsSupported = ddsProtocol != null;
     _supportedProtocolsInitialized.complete();
   }
@@ -105,7 +114,7 @@ class VmServiceWrapper extends VmService {
   /// A sequence number incremented and attached to each DAP request.
   static int _dapSeq = 0;
 
-  /// Executes `callback` for each isolate, and waiting for all callbacks to
+  /// Executes [callback] for each isolate, and waits for all callbacks to
   /// finish before completing.
   Future<void> forEachIsolate(
     Future<void> Function(IsolateRef) callback,
@@ -509,4 +518,25 @@ class TrackedFuture<T> {
 
   final String name;
   final Future<T> future;
+}
+
+extension RpcErrorExtension on RPCError {
+  /// Whether this [RPCError] is some kind of "VM Service connection has gone"
+  /// error that may occur if the VM is shut down.
+  bool get isServiceDisposedError {
+    if (code == RPCErrorKind.kServiceDisappeared.code ||
+        code == RPCErrorKind.kConnectionDisposed.code) {
+      return true;
+    }
+
+    if (code == RPCErrorKind.kServerError.code) {
+      // Always ignore "client is closed" and "closed with pending request"
+      // errors because these can always occur during shutdown if we were
+      // just starting to send (or had just sent) a request.
+      return message.contains('The client is closed') ||
+          message.contains('The client closed with pending request') ||
+          message.contains('Service connection dispose');
+    }
+    return false;
+  }
 }
