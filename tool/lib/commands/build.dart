@@ -45,7 +45,8 @@ class BuildCommand extends Command {
       ..addPubGetFlag()
       ..addBulidModeOption()
       ..addWasmFlag()
-      ..addNoStripWasmFlag();
+      ..addNoStripWasmFlag()
+      ..addNoMinifyWasmFlag();
   }
 
   @override
@@ -67,6 +68,8 @@ class BuildCommand extends Command {
     final buildMode = results[SharedCommandArgs.buildMode.flagName] as String;
     final useWasm = results[SharedCommandArgs.wasm.flagName] as bool;
     final noStripWasm = results[SharedCommandArgs.noStripWasm.flagName] as bool;
+    final noMinifyWasm =
+        results[SharedCommandArgs.noMinifyWasm.flagName] as bool;
 
     final webBuildDir = Directory(
       path.join(repo.devtoolsAppDirectoryPath, 'build', 'web'),
@@ -105,6 +108,7 @@ class BuildCommand extends Command {
           if (useWasm) ...[
             SharedCommandArgs.wasm.asArg(),
             if (noStripWasm) SharedCommandArgs.noStripWasm.asArg(),
+            if (noMinifyWasm) SharedCommandArgs.noMinifyWasm.asArg(),
           ] else ...[
             // Do not minify stack traces in debug mode.
             if (buildMode == 'debug') '--dart2js-optimization=O1',
