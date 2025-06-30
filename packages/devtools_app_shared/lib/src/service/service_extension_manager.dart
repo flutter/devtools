@@ -266,6 +266,11 @@ final class ServiceExtensionManager with DisposerMixin {
           enabledServiceExtension.value,
         );
         if (called) {
+          // Only mark `name` as an "added service extension" if it was truly
+          // added. If it was added, then subsequent calls to
+          // `_addServiceExtension` with `name` will return early. If it was not
+          // really added, then subsequent calls to `_addServiceExtension` with
+          // `name` will proceed as usual.
           _serviceExtensions.add(name);
         }
         return;
@@ -278,6 +283,11 @@ final class ServiceExtensionManager with DisposerMixin {
       // enable extension states in DevTools on page refresh or initial start.
       final restored = await _restoreExtensionFromDevice(name);
       if (restored) {
+        // Only mark `name` as an "added service extension" if it was truly
+        // restored. If it was restored, then subsequent calls to
+        // `_addServiceExtension` with `name` will return early. If it was not
+        // really restored, then subsequent calls to `_addServiceExtension`
+        // with `name` will proceed as usual.
         _serviceExtensions.add(name);
       }
     }
@@ -298,6 +308,9 @@ final class ServiceExtensionManager with DisposerMixin {
     final expectedValueType =
         extensions.serviceExtensionsAllowlist[name]!.values.first.runtimeType;
 
+    /// Restores the service extension named [name].
+    ///
+    /// Returns whether the service extension was actually restored.
     Future<bool> restore() async {
       // The restore request is obsolete if the isolate has changed.
       if (isolateRef != _mainIsolate) return false;
@@ -348,11 +361,10 @@ final class ServiceExtensionManager with DisposerMixin {
     if (extensions.isDartIoExtension(name) &&
         isolate?.pauseEvent?.kind?.contains('Pause') == true) {
       _callbacksOnIsolateResume.putIfAbsent(isolateRef, () => []).add(restore);
+      return true;
     } else {
-      await restore();
+      return await restore();
     }
-
-    return true;
   }
 
   Future<void> _maybeRestoreExtension(String name, Object? value) async {
