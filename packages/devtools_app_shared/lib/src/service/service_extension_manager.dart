@@ -297,20 +297,20 @@ final class ServiceExtensionManager with DisposerMixin {
 
   /// Restores the service extension named [name] from the device.
   ///
-  /// Returns whether the service extension was actually restored.
+  /// Returns whether isolates in the test app are prepared for the restore.
   Future<bool> _restoreExtensionFromDevice(String name) async {
     final isolateRef = _isolateManager.mainIsolate.value;
     if (isolateRef == null) return false;
 
     if (!extensions.serviceExtensionsAllowlist.containsKey(name)) {
-      return false;
+      return true;
     }
     final expectedValueType =
         extensions.serviceExtensionsAllowlist[name]!.values.first.runtimeType;
 
     /// Restores the service extension named [name].
     ///
-    /// Returns whether the service extension was actually restored.
+    /// Returns whether isolates in the test app are prepared for the restore.
     Future<bool> restore() async {
       // The restore request is obsolete if the isolate has changed.
       if (isolateRef != _mainIsolate) return false;
@@ -390,7 +390,7 @@ final class ServiceExtensionManager with DisposerMixin {
 
   /// Calls the service extension named [name] with [value].
   ///
-  /// Returns whether the service extension was successfully called.
+  /// Returns whether isolates in the test app are prepared for the call.
   Future<bool> _callServiceExtension(String name, Object? value) async {
     if (_service == null) return false;
 
