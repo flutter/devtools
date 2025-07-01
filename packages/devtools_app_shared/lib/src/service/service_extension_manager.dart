@@ -297,7 +297,7 @@ final class ServiceExtensionManager with DisposerMixin {
 
   /// Restores the service extension named [name] from the device.
   ///
-  /// Returns whether isolates in the test app are prepared for the restore.
+  /// Returns whether isolates in the connected app are prepared for the restore.
   Future<bool> _restoreExtensionFromDeviceIfReady(String name) async {
     final isolateRef = _isolateManager.mainIsolate.value;
     if (isolateRef == null) return false;
