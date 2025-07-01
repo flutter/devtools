@@ -326,16 +326,16 @@ final class ServiceExtensionManager with DisposerMixin {
         switch (expectedValueType) {
           case const (bool):
             final enabled = response.json!['enabled'] == 'true' ? true : false;
-            return await _maybeRestoreExtension(name, enabled);
+            await _maybeRestoreExtension(name, enabled);
           case const (String):
             final String? value = response.json!['value'];
-            return await _maybeRestoreExtension(name, value);
+            await _maybeRestoreExtension(name, value);
           case const (int):
           case const (double):
             final value = num.parse(
               response.json![name.substring(name.lastIndexOf('.') + 1)],
             );
-            return await _maybeRestoreExtension(name, value);
+            await _maybeRestoreExtension(name, value);
           default:
             return true;
         }
@@ -366,9 +366,7 @@ final class ServiceExtensionManager with DisposerMixin {
   }
 
   /// Maybe restores the service extension named [name] with [value].
-  ///
-  /// Returns whether the service extension's state is set.
-  Future<bool> _maybeRestoreExtension(String name, Object? value) async {
+  Future<void> _maybeRestoreExtension(String name, Object? value) async {
     final extensionDescription = extensions.serviceExtensionsAllowlist[name];
     if (extensionDescription is extensions.ToggleableServiceExtension) {
       if (value == extensionDescription.enabledValue) {
@@ -378,9 +376,7 @@ final class ServiceExtensionManager with DisposerMixin {
           value: value,
           callExtension: false,
         );
-        return true;
       }
-      return false;
     } else {
       await setServiceExtensionState(
         name,
@@ -388,7 +384,6 @@ final class ServiceExtensionManager with DisposerMixin {
         value: value,
         callExtension: false,
       );
-      return true;
     }
   }
 
@@ -439,8 +434,6 @@ final class ServiceExtensionManager with DisposerMixin {
             // of the extension name (ext.flutter.extensionName => extensionName).
             args: {name.substring(name.lastIndexOf('.') + 1): value},
           );
-        } else {
-          return false;
         }
       } on RPCError catch (e) {
         if (e.code == RPCErrorKind.kServerError.code) {
