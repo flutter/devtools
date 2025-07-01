@@ -261,7 +261,7 @@ final class ServiceExtensionManager with DisposerMixin {
       // restart. [_enabledServiceExtensions] will be empty on page refresh or
       // initial start.
       try {
-        final called = await _callServiceExtension(
+        final called = await _callServiceExtensionIfReady(
           name,
           enabledServiceExtension.value,
         );
@@ -281,7 +281,7 @@ final class ServiceExtensionManager with DisposerMixin {
     } else {
       // Set any extensions that are already enabled on the device. This will
       // enable extension states in DevTools on page refresh or initial start.
-      final restored = await _restoreExtensionFromDevice(name);
+      final restored = await _restoreExtensionFromDeviceIfReady(name);
       if (restored) {
         // Only mark `name` as an "added service extension" if it was truly
         // restored. If it was restored, then subsequent calls to
@@ -298,7 +298,7 @@ final class ServiceExtensionManager with DisposerMixin {
   /// Restores the service extension named [name] from the device.
   ///
   /// Returns whether isolates in the test app are prepared for the restore.
-  Future<bool> _restoreExtensionFromDevice(String name) async {
+  Future<bool> _restoreExtensionFromDeviceIfReady(String name) async {
     final isolateRef = _isolateManager.mainIsolate.value;
     if (isolateRef == null) return false;
 
@@ -310,7 +310,8 @@ final class ServiceExtensionManager with DisposerMixin {
 
     /// Restores the service extension named [name].
     ///
-    /// Returns whether isolates in the test app are prepared for the restore.
+    /// Returns whether isolates in the connected app are prepared for the
+    /// restore.
     Future<bool> restore() async {
       // The restore request is obsolete if the isolate has changed.
       if (isolateRef != _mainIsolate) return false;
@@ -325,21 +326,18 @@ final class ServiceExtensionManager with DisposerMixin {
         switch (expectedValueType) {
           case const (bool):
             final enabled = response.json!['enabled'] == 'true' ? true : false;
-            await _maybeRestoreExtension(name, enabled);
-            return true;
+            return await _maybeRestoreExtension(name, enabled);
           case const (String):
             final String? value = response.json!['value'];
-            await _maybeRestoreExtension(name, value);
-            return true;
+            return await _maybeRestoreExtension(name, value);
           case const (int):
           case const (double):
             final value = num.parse(
               response.json![name.substring(name.lastIndexOf('.') + 1)],
             );
-            await _maybeRestoreExtension(name, value);
-            return true;
+            return await _maybeRestoreExtension(name, value);
           default:
-            return false;
+            return true;
         }
       } catch (e) {
         // Do not report an error if the VMService has gone away or the
@@ -349,7 +347,7 @@ final class ServiceExtensionManager with DisposerMixin {
         // of allowed network related exceptions rather than ignoring all
         // exceptions.
       }
-      return false;
+      return true;
     }
 
     if (isolateRef != _mainIsolate) return false;
@@ -367,7 +365,10 @@ final class ServiceExtensionManager with DisposerMixin {
     }
   }
 
-  Future<void> _maybeRestoreExtension(String name, Object? value) async {
+  /// Maybe restores the service extension named [name] with [value].
+  ///
+  /// Returns whether the service extension's state is set.
+  Future<bool> _maybeRestoreExtension(String name, Object? value) async {
     final extensionDescription = extensions.serviceExtensionsAllowlist[name];
     if (extensionDescription is extensions.ToggleableServiceExtension) {
       if (value == extensionDescription.enabledValue) {
@@ -377,7 +378,9 @@ final class ServiceExtensionManager with DisposerMixin {
           value: value,
           callExtension: false,
         );
+        return true;
       }
+      return false;
     } else {
       await setServiceExtensionState(
         name,
@@ -385,13 +388,14 @@ final class ServiceExtensionManager with DisposerMixin {
         value: value,
         callExtension: false,
       );
+      return true;
     }
   }
 
   /// Calls the service extension named [name] with [value].
   ///
-  /// Returns whether isolates in the test app are prepared for the call.
-  Future<bool> _callServiceExtension(String name, Object? value) async {
+  /// Returns whether isolates in the connected app are prepared for the call.
+  Future<bool> _callServiceExtensionIfReady(String name, Object? value) async {
     if (_service == null) return false;
 
     final mainIsolate = _mainIsolate;
@@ -521,7 +525,7 @@ final class ServiceExtensionManager with DisposerMixin {
     bool callExtension = true,
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {
-      await _callServiceExtension(name, value);
+      await _callServiceExtensionIfReady(name, value);
     } else if (callExtension) {
       _log.info(
         'Attempted to call extension \'$name\', but no service with that name exists',
