@@ -39,7 +39,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed network logging after a hot restart. -
+  [#9271](https://github.com/flutter/devtools/pull/9271).
 
 ## Logging updates
 
