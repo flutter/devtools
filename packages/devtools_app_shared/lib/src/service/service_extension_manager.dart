@@ -14,6 +14,7 @@ import '../utils/auto_dispose.dart';
 import 'connected_app.dart';
 import 'constants.dart';
 import 'isolate_manager.dart';
+import 'rpc_error_extension.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_utils.dart';
 
@@ -338,6 +339,10 @@ final class ServiceExtensionManager with DisposerMixin {
             await _maybeRestoreExtension(name, value);
           default:
             return true;
+        }
+      } on RPCError catch (e) {
+        if (e.isServiceDisposedError) {
+          return false;
         }
       } catch (e) {
         // Do not report an error if the VMService has gone away or the

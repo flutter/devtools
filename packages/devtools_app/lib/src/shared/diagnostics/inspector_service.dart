@@ -22,7 +22,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../service/vm_service_wrapper.dart';
 import '../console/primitives/simple_items.dart';
 import '../globals.dart';
 import '../utils/utils.dart';
