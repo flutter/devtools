@@ -541,31 +541,27 @@ final class ServiceExtensionManager with DisposerMixin {
     }
   }
 
-  bool isServiceExtensionAvailable(String name) {
-    return _serviceExtensions.contains(name) ||
-        _pendingServiceExtensions.contains(name);
-  }
+  bool isServiceExtensionAvailable(String name) =>
+      _serviceExtensions.contains(name) ||
+      _pendingServiceExtensions.contains(name);
 
   Future<bool> waitForServiceExtensionAvailable(String name) {
     if (isServiceExtensionAvailable(name)) return Future.value(true);
 
-    Completer<bool> createCompleter() {
-      // Listen for when the service extension is added and use it.
-      final completer = Completer<bool>();
-      final listenable = hasServiceExtension(name);
-      late VoidCallback listener;
-      listener = () {
-        if (listenable.value || !completer.isCompleted) {
-          listenable.removeListener(listener);
-          completer.complete(true);
-        }
-      };
-      hasServiceExtension(name).addListener(listener);
-      return completer;
-    }
+    // Listen for when the service extension is added and use it.
+    final completer = Completer<bool>();
+    final listenable = hasServiceExtension(name);
+    late final VoidCallback listener;
+    listener = () {
+      if (listenable.value || !completer.isCompleted) {
+        listenable.removeListener(listener);
+        completer.complete(true);
+      }
+    };
+    hasServiceExtension(name).addListener(listener);
 
-    _maybeRegisteringServiceExtensions[name] ??= createCompleter();
-    return _maybeRegisteringServiceExtensions[name]!.future;
+    _maybeRegisteringServiceExtensions[name] ??= completer;
+    return completer.future;
   }
 
   ValueListenable<bool> hasServiceExtension(String name) {
@@ -587,10 +583,9 @@ final class ServiceExtensionManager with DisposerMixin {
     return _serviceExtensionStates.putIfAbsent(
       name,
       () {
-        return ValueNotifier<ServiceExtensionState>(
-          _enabledServiceExtensions.containsKey(name)
-              ? _enabledServiceExtensions[name]!
-              : ServiceExtensionState(enabled: false, value: null),
+        final state = _enabledServiceExtensions[name];
+        return ValueNotifier(
+          state ?? ServiceExtensionState(enabled: false, value: null),
         );
       },
     );
