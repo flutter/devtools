@@ -309,6 +309,11 @@ final class ServiceExtensionManager with DisposerMixin {
     final expectedValueType =
         extensions.serviceExtensionsAllowlist[name]!.values.first.runtimeType;
 
+    if (isolateRef != _mainIsolate) return false;
+
+    final isolate = await _isolateManager.isolateState(isolateRef).isolate;
+    if (isolateRef != _mainIsolate) return false;
+
     /// Restores the service extension named [name].
     ///
     /// Returns whether isolates in the connected app are prepared for the
@@ -354,11 +359,6 @@ final class ServiceExtensionManager with DisposerMixin {
       }
       return true;
     }
-
-    if (isolateRef != _mainIsolate) return false;
-
-    final isolate = await _isolateManager.isolateState(isolateRef).isolate;
-    if (isolateRef != _mainIsolate) return false;
 
     // Do not try to restore Dart IO extensions for a paused isolate.
     if (extensions.isDartIoExtension(name) &&
