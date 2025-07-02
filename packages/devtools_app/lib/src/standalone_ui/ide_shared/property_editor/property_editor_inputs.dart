@@ -121,7 +121,7 @@ class _DropdownInputState<T> extends State<_DropdownInput<T>>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return DropdownButtonFormField(
-      value: widget.property.valueDisplay,
+      initialValue: widget.property.valueDisplay,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (text) => inputValidator(text, property: widget.property),
       decoration: decoration(
