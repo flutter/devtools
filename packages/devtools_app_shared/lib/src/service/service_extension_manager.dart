@@ -127,18 +127,14 @@ final class ServiceExtensionManager with DisposerMixin {
     }
   }
 
-  Object? _getExtensionValue(String name, String encodedValue) {
-    final expectedValueType =
-        extensions.serviceExtensionsAllowlist[name]!.values.first.runtimeType;
-    switch (expectedValueType) {
-      case const (bool):
-        return encodedValue == 'true';
-      case const (int):
-      case const (double):
-        return num.parse(encodedValue);
-      default:
-        return encodedValue;
-    }
+  Object _getExtensionValue(String name, String encodedValue) {
+    final firstValue =
+        extensions.serviceExtensionsAllowlist[name]!.values.first;
+    return switch (firstValue) {
+      bool() => encodedValue == 'true',
+      num() => num.parse(encodedValue),
+      _ => encodedValue,
+    };
   }
 
   Future<void> _onFrameEventReceived() async {
@@ -180,20 +176,19 @@ final class ServiceExtensionManager with DisposerMixin {
       return;
     }
 
-    if (mainIsolate.extensionRPCs != null) {
+    if (mainIsolate.extensionRPCs case final extensionRpcs?) {
       if (await connectedApp.isFlutterApp) {
         if (expectedMainIsolateRef != _isolateManager.mainIsolate.value) {
           // Isolate has changed again.
           return;
         }
         await [
-          for (final extension in mainIsolate.extensionRPCs!)
+          for (final extension in extensionRpcs)
             _maybeAddServiceExtension(extension)
         ].wait;
       } else {
         await [
-          for (final extension in mainIsolate.extensionRPCs!)
-            _addServiceExtension(extension)
+          for (final extension in extensionRpcs) _addServiceExtension(extension)
         ].wait;
       }
     }
@@ -303,11 +298,11 @@ final class ServiceExtensionManager with DisposerMixin {
     final isolateRef = _isolateManager.mainIsolate.value;
     if (isolateRef == null) return false;
 
-    if (!extensions.serviceExtensionsAllowlist.containsKey(name)) {
+    final serviceExtension = extensions.serviceExtensionsAllowlist[name];
+    if (serviceExtension == null) {
       return true;
     }
-    final expectedValueType =
-        extensions.serviceExtensionsAllowlist[name]!.values.first.runtimeType;
+    final firstValue = serviceExtension.values.first;
 
     /// Restores the service extension named [name].
     ///
@@ -324,21 +319,18 @@ final class ServiceExtensionManager with DisposerMixin {
 
         if (isolateRef != _mainIsolate) return false;
 
-        switch (expectedValueType) {
-          case const (bool):
-            final enabled = response.json!['enabled'] == 'true' ? true : false;
+        switch (firstValue) {
+          case bool():
+            final enabled = response.json!['enabled'] == 'true';
             await _maybeRestoreExtension(name, enabled);
-          case const (String):
+          case String():
             final String? value = response.json!['value'];
             await _maybeRestoreExtension(name, value);
-          case const (int):
-          case const (double):
+          case num():
             final value = num.parse(
               response.json![name.substring(name.lastIndexOf('.') + 1)],
             );
             await _maybeRestoreExtension(name, value);
-          default:
-            return true;
         }
       } on RPCError catch (e) {
         if (e.isServiceDisposedError) {
