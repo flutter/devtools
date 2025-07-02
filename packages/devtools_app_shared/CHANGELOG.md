@@ -5,6 +5,7 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 -->
 ## 0.4.1 (not released)
 * Ignore expected exceptions from the `navigateToCode` extension method.
+* Add `RpcErrorExtension` extension with an `isServiceDisposedError` getter.
 
 ## 0.4.0
 * Bump `dtd` dependency to `^4.0.0`.
