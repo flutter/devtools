@@ -399,6 +399,11 @@ final class ServiceExtensionManager with DisposerMixin {
     if (_service == null) return false;
 
     final mainIsolate = _mainIsolate;
+    if (mainIsolate == null) return false;
+
+    final isolate = await _isolateManager.isolateState(mainIsolate).isolate;
+    if (_mainIsolate != mainIsolate) return false;
+
     Future<bool> callExtension() async {
       if (_mainIsolate != mainIsolate) return false;
 
@@ -423,18 +428,18 @@ final class ServiceExtensionManager with DisposerMixin {
               await call(isolate.id, value);
             });
           } else {
-            await call(mainIsolate?.id, value);
+            await call(mainIsolate.id, value);
           }
         } else if (value is String) {
           await _service!.callServiceExtension(
             name,
-            isolateId: mainIsolate?.id,
+            isolateId: mainIsolate.id,
             args: {'value': value},
           );
         } else if (value is double) {
           await _service!.callServiceExtension(
             name,
-            isolateId: mainIsolate?.id!,
+            isolateId: mainIsolate.id,
             // The param name for a numeric service extension will be the last part
             // of the extension name (ext.flutter.extensionName => extensionName).
             args: {name.substring(name.lastIndexOf('.') + 1): value},
@@ -450,11 +455,6 @@ final class ServiceExtensionManager with DisposerMixin {
 
       return true;
     }
-
-    if (mainIsolate == null) return false;
-
-    final isolate = await _isolateManager.isolateState(mainIsolate).isolate;
-    if (_mainIsolate != mainIsolate) return false;
 
     // Do not try to call Dart IO extensions for a paused isolate.
     if (extensions.isDartIoExtension(name) &&
