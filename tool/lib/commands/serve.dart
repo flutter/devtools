@@ -92,6 +92,7 @@ class ServeCommand extends Command {
       ..addBulidModeOption()
       ..addWasmFlag()
       ..addNoStripWasmFlag()
+      ..addNoMinifyWasmFlag()
       // Flags defined in the server in DDS.
       ..addFlag(
         _machineFlag,
@@ -147,6 +148,7 @@ class ServeCommand extends Command {
         results[SharedCommandArgs.updatePerfetto.flagName] as bool;
     final useWasm = results[SharedCommandArgs.wasm.flagName] as bool;
     final noStripWasm = results[SharedCommandArgs.noStripWasm.flagName] as bool;
+    final noMinifyWasm = results[SharedCommandArgs.noMinifyWasm.flagName] as bool;
     final runPubGet = results[SharedCommandArgs.pubGet.flagName] as bool;
     final devToolsAppBuildMode =
         results[SharedCommandArgs.buildMode.flagName] as String;
@@ -172,6 +174,7 @@ class ServeCommand extends Command {
           ..remove(SharedCommandArgs.updatePerfetto.asArg())
           ..remove(SharedCommandArgs.wasm.asArg())
           ..remove(SharedCommandArgs.noStripWasm.asArg())
+          ..remove(SharedCommandArgs.noMinifyWasm.asArg())
           ..remove(valueAsArg(_buildAppFlag))
           ..remove(valueAsArg(_buildAppFlag, negated: true))
           ..remove(SharedCommandArgs.runApp.asArg())
@@ -221,6 +224,7 @@ class ServeCommand extends Command {
           if (updatePerfetto) SharedCommandArgs.updatePerfetto.asArg(),
           if (useWasm) SharedCommandArgs.wasm.asArg(),
           if (noStripWasm) SharedCommandArgs.noStripWasm.asArg(),
+          if (noMinifyWasm) SharedCommandArgs.noMinifyWasm.asArg(),
           '${SharedCommandArgs.buildMode.asArg()}=$devToolsAppBuildMode',
           SharedCommandArgs.pubGet.asArg(negated: !runPubGet),
         ]),
