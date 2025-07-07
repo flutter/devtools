@@ -174,7 +174,9 @@ const _frameTimeFor60FPSInMicros = 16666.6;
 // const _frameTimeFor30FPSInMicros = 33333.3;
 
 /// Creates the expected [DevToolsBenchmark]s for the specified compiler.
-Map<DevToolsBenchmark, Map<String, num>> _benchmarkThresholds(/*bool isWasm*/) => {
+Map<DevToolsBenchmark, Map<String, num>> _benchmarkThresholds(
+  /*bool isWasm*/
+) => {
   DevToolsBenchmark.navigateThroughOfflineScreens: {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameTotalTime,
