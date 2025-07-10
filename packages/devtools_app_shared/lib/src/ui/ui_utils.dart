@@ -25,10 +25,6 @@ IdeTheme get ideTheme {
   return theme as IdeTheme;
 }
 
-double scaleByFountFactor(double original) {
-  return (original * ideTheme.fontSizeFactor).roundToDouble();
-}
-
 Color? tryParseColor(String? input, {Logger? logger}) {
   if (input == null) return null;
 
