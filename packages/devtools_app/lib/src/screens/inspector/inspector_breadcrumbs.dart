@@ -39,7 +39,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
         child: Row(
           children: breadcrumbs.map((item) {
             if (item.isChevron) {
-              return Icon(Icons.chevron_right, size: defaultIconSize);
+              return const Icon(Icons.chevron_right, size: defaultIconSize);
             }
 
             return Flexible(
@@ -186,7 +186,7 @@ class _InspectorBreadcrumbData {
 
   Widget? get icon {
     if (alternativeIcon != null) {
-      return Icon(_breadcrumbSeparatorIcon, size: defaultIconSize);
+      return const Icon(_breadcrumbSeparatorIcon, size: defaultIconSize);
     }
 
     return node?.diagnostic?.icon;

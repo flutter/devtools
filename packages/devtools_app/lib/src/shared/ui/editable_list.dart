@@ -178,10 +178,10 @@ class EditableListActionBar extends StatelessWidget {
           ),
           const SizedBox(width: densePadding),
           isRefreshing?.value ?? false
-              ? SizedBox(
+              ? const SizedBox(
                   width: defaultTextFieldHeight,
                   height: defaultTextFieldHeight,
-                  child: const Padding(
+                  child: Padding(
                     padding: EdgeInsets.all(densePadding),
                     child: CircularProgressIndicator(),
                   ),

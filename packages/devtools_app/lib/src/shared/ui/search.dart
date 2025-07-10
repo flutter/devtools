@@ -857,7 +857,7 @@ class SearchTextEditingController extends TextEditingController {
 /// If these elements need to be used by the widget state that builds the search
 /// field, consider using [StatelessSearchField] instead.
 class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
-  SearchField({
+  const SearchField({
     required this.searchController,
     this.searchFieldEnabled = true,
     this.shouldRequestFocus = false,
@@ -1043,7 +1043,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
               hintStyle: theme.subtleTextStyle,
               labelText: label,
               labelStyle: theme.subtleTextStyle,
-              prefixIcon: Icon(Icons.search, size: defaultIconSize),
+              prefixIcon: const Icon(Icons.search, size: defaultIconSize),
               prefix: prefix != null
                   ? Row(
                       mainAxisSize: MainAxisSize.min,

@@ -188,13 +188,13 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
                   onTap: _onExpanded,
                   child: RotationTransition(
                     turns: expandArrowAnimation,
-                    child: Icon(
+                    child: const Icon(
                       Icons.keyboard_arrow_down,
                       size: defaultIconSize,
                     ),
                   ),
                 )
-              : SizedBox(width: defaultIconSize),
+              : const SizedBox(width: defaultIconSize),
           Expanded(child: widget.buildDisplay(_onSelected)),
         ],
       ),

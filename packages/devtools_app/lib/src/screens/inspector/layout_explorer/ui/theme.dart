@@ -114,7 +114,7 @@ const negativeSpaceDarkAssetName =
 const negativeSpaceLightAssetName =
     'assets/img/layout_explorer/negative_space_light.png';
 
-final dimensionIndicatorTextStyle = TextStyle(
+const dimensionIndicatorTextStyle = TextStyle(
   height: 1.0,
   letterSpacing: 1.1,
   color: emphasizedTextColor,

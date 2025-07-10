@@ -17,7 +17,7 @@ import 'utils.dart';
 double get _maxHoverCardHeight => 250.0;
 
 TextStyle get _hoverTitleTextStyle => fixBlurryText(
-  TextStyle(
+  const TextStyle(
     fontWeight: FontWeight.normal,
     fontSize: 15.0,
     decoration: TextDecoration.none,

@@ -556,9 +556,9 @@ class InboundReferencesTree extends StatelessWidget {
                 dataDisplayProvider: (node, _) =>
                     InboundReferenceWidget(controller: controller, node: node),
                 emptyTreeViewBuilder: () {
-                  return Padding(
+                  return const Padding(
                     padding: EdgeInsets.all(defaultRowHeight / 2),
-                    child: const Text(
+                    child: Text(
                       'There are no inbound references for this object',
                     ),
                   );

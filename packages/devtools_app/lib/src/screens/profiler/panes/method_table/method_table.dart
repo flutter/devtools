@@ -13,7 +13,7 @@ import '../../../../shared/utils/profiler_utils.dart';
 import 'method_table_controller.dart';
 import 'method_table_model.dart';
 
-final _methodColumnMinWidth = 800.0;
+const _methodColumnMinWidth = 800.0;
 
 /// Widget that displays a method table for a CPU profile.
 class CpuMethodTable extends StatelessWidget {

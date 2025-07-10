@@ -9,7 +9,6 @@
 /// This allows tests of the complicated logic in this class to run on the VM.
 library;
 
-import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../diagnostics/diagnostics_node.dart';

@@ -376,7 +376,7 @@ class _RegisteredServiceExtensionButtonState
         }),
       ),
       child: Container(
-        constraints: BoxConstraints.tightFor(
+        constraints: const BoxConstraints.tightFor(
           width: actionWidgetSize,
           height: actionWidgetSize,
         ),
@@ -631,7 +631,7 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
 /// A button that, when pressed, will display an overlay directly below that has
 /// a list of service extension checkbox settings.
 class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
-  ServiceExtensionCheckboxGroupButton({
+  const ServiceExtensionCheckboxGroupButton({
     super.key,
     required this.title,
     required this.icon,

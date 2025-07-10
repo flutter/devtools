@@ -1252,7 +1252,10 @@ class InspectorRowContent extends StatelessWidget {
                         onTap: onToggle,
                         child: RotationTransition(
                           turns: expandArrowAnimation,
-                          child: Icon(Icons.expand_more, size: defaultIconSize),
+                          child: const Icon(
+                            Icons.expand_more,
+                            size: defaultIconSize,
+                          ),
                         ),
                       )
                     : const SizedBox(

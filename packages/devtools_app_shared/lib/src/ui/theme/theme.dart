@@ -80,14 +80,14 @@ ThemeData _baseTheme({
     iconButtonTheme: IconButtonThemeData(
       style: IconButton.styleFrom(
         padding: const EdgeInsets.all(densePadding),
-        minimumSize: Size(defaultButtonHeight, defaultButtonHeight),
-        fixedSize: Size(defaultButtonHeight, defaultButtonHeight),
+        minimumSize: const Size(defaultButtonHeight, defaultButtonHeight),
+        fixedSize: const Size(defaultButtonHeight, defaultButtonHeight),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
-        fixedSize: Size.fromHeight(defaultButtonHeight),
+        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: const Size.fromHeight(defaultButtonHeight),
         foregroundColor: theme.colorScheme.onSurface,
         padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
       ),
@@ -95,14 +95,14 @@ ThemeData _baseTheme({
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         padding: const EdgeInsets.all(densePadding),
-        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
-        fixedSize: Size.fromHeight(defaultButtonHeight),
+        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: const Size.fromHeight(defaultButtonHeight),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        minimumSize: Size(buttonMinWidth, defaultButtonHeight),
-        fixedSize: Size.fromHeight(defaultButtonHeight),
+        minimumSize: const Size(buttonMinWidth, defaultButtonHeight),
+        fixedSize: const Size.fromHeight(defaultButtonHeight),
         backgroundColor: theme.colorScheme.primary,
         foregroundColor: theme.colorScheme.onPrimary,
         padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
@@ -117,7 +117,7 @@ ThemeData _baseTheme({
     dropdownMenuTheme: DropdownMenuThemeData(
       textStyle: theme.regularTextStyle,
     ),
-    progressIndicatorTheme: ProgressIndicatorThemeData(
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
       linearMinHeight: defaultLinearProgressIndicatorHeight,
     ),
     primaryTextTheme: _devToolsTextTheme(theme, theme.primaryTextTheme),

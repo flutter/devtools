@@ -279,7 +279,7 @@ class FlexLayoutExplorerWidgetState
     final flexDescription = Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        margin: EdgeInsets.only(
+        margin: const EdgeInsets.only(
           top: mainAxisArrowIndicatorSize,
           left: crossAxisArrowIndicatorSize + margin,
         ),
@@ -314,7 +314,7 @@ class FlexLayoutExplorerWidgetState
     final verticalAxisDescription = Align(
       alignment: Alignment.bottomLeft,
       child: Container(
-        margin: EdgeInsets.only(top: mainAxisArrowIndicatorSize + margin),
+        margin: const EdgeInsets.only(top: mainAxisArrowIndicatorSize + margin),
         width: crossAxisArrowIndicatorSize,
         child: Column(
           children: [
@@ -350,7 +350,9 @@ class FlexLayoutExplorerWidgetState
     final horizontalAxisDescription = Align(
       alignment: Alignment.topRight,
       child: Container(
-        margin: EdgeInsets.only(left: crossAxisArrowIndicatorSize + margin),
+        margin: const EdgeInsets.only(
+          left: crossAxisArrowIndicatorSize + margin,
+        ),
         height: mainAxisArrowIndicatorSize,
         child: Row(
           children: [

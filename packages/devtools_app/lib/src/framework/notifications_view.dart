@@ -151,7 +151,7 @@ class _NotificationOverlay extends StatelessWidget {
       child: Padding(
         // Position the notifications in the lower right of the app window, and
         // high enough up that we don't obscure the status line.
-        padding: EdgeInsets.only(
+        padding: const EdgeInsets.only(
           right: defaultSpacing,
           bottom: statusLineHeight + defaultSpacing,
         ),

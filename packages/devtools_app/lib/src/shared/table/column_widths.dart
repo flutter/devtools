@@ -23,7 +23,7 @@ const columnGroupSpacingWithPadding = columnGroupSpacing + 2 * defaultSpacing;
 const columnSpacing = defaultSpacing;
 
 /// The minimum width that can be used for variable width columns.
-final defaultVariableWidthColumnSize = 1200.0;
+const defaultVariableWidthColumnSize = 1200.0;
 
 extension FlatColumnWidthExtension<T> on FlatTableController<T> {
   /// Calculates [FlatTable] column widths when the columns should be sized as

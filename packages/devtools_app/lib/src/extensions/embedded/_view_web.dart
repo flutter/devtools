@@ -317,7 +317,7 @@ class _ExtensionIFrameController extends DisposableController
       buildTextSpans: (_) => [
         TextSpan(
           text: showBannerMessageEvent.message,
-          style: TextStyle(fontSize: defaultFontSize),
+          style: const TextStyle(fontSize: defaultFontSize),
         ),
       ],
     );

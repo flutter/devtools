@@ -2122,7 +2122,7 @@ class RadioButton<T> extends StatelessWidget {
 }
 
 class ContextMenuButton extends StatelessWidget {
-  ContextMenuButton({
+  const ContextMenuButton({
     super.key,
     required this.menuChildren,
     this.color,

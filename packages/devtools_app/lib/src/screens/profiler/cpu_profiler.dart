@@ -334,11 +334,11 @@ class _CpuProfilerState extends State<CpuProfiler>
 // for filtered profiles (e.g. 'Sample count: 10/14), or to at least show the
 // original value in the tooltip for each of these stats.
 class CpuProfileStats extends StatelessWidget {
-  CpuProfileStats({super.key, required this.metadata});
+  const CpuProfileStats({super.key, required this.metadata});
+
+  static const _statsRowHeight = 25.0;
 
   final CpuProfileMetaData metadata;
-
-  final _statsRowHeight = 25.0;
 
   @override
   Widget build(BuildContext context) {

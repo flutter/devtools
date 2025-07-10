@@ -243,7 +243,7 @@ final _wrapWithButtonStyle = TextButton.styleFrom(
   ),
   padding: const EdgeInsets.all(densePadding),
   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  minimumSize: Size.square(buttonMinWidth),
+  minimumSize: const Size.square(buttonMinWidth),
 );
 
 const _wrapWithPadding = 'Padding';

@@ -491,7 +491,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                     );
                   },
                 )
-              : SizedBox(width: defaultIconSize, height: defaultIconSize);
+              : const SizedBox(width: defaultIconSize, height: defaultIconSize);
           content = Row(
             mainAxisSize: MainAxisSize.min,
             children: [

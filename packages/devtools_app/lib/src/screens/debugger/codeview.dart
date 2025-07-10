@@ -930,7 +930,7 @@ class GutterItem extends StatelessWidget {
     final subtleColor = theme.unselectedWidgetColor;
 
     final bpBoxSize = breakpointRadius * 2;
-    final executionPointIndent = 10.0;
+    const executionPointIndent = 10.0;
     Color? color;
     TextStyle? coverageTextStyleOverride;
     final hasCoverage = coverageHit;
@@ -975,7 +975,7 @@ class GutterItem extends StatelessWidget {
               style: coverageTextStyleOverride,
             ),
             Container(
-              padding: EdgeInsets.only(left: executionPointIndent),
+              padding: const EdgeInsets.only(left: executionPointIndent),
               alignment: Alignment.centerLeft,
               child: AnimatedOpacity(
                 duration: defaultDuration,
@@ -1416,7 +1416,7 @@ class ScriptPopupMenu extends StatelessWidget {
                 .buildExtraDebuggerScriptPopupMenuOptions())
           extensionMenuOption.build(),
       ],
-      child: Icon(Icons.more_vert, size: actionsIconSize),
+      child: const Icon(Icons.more_vert, size: actionsIconSize),
     );
   }
 }
@@ -1442,11 +1442,11 @@ class ScriptHistoryPopupMenu extends StatelessWidget {
       tooltip: 'Select recent script',
       enabled: enabled,
       onSelected: onSelected,
-      offset: Offset(
+      offset: const Offset(
         actionsIconSize + denseSpacing,
         buttonMinWidth + denseSpacing,
       ),
-      child: Icon(Icons.history, size: actionsIconSize),
+      child: const Icon(Icons.history, size: actionsIconSize),
     );
   }
 }
@@ -1585,7 +1585,7 @@ class GoToLineDialog extends StatelessWidget {
                 );
               }
             },
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Line Number',
               contentPadding: EdgeInsets.all(5.0),
             ),
