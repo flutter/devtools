@@ -265,41 +265,41 @@ bool isValidLightColor(Color? color) {
 }
 
 // Size constants:
-double get defaultToolbarHeight => scaleByFontFactor(32.0);
-double get defaultHeaderHeight => scaleByFontFactor(28.0);
-double get defaultButtonHeight => scaleByFontFactor(26.0);
-double get defaultRowHeight => scaleByFontFactor(24.0);
-double get defaultLinearProgressIndicatorHeight => scaleByFontFactor(4.0);
-double get defaultLinearProgressIndicatorWidth => scaleByFontFactor(200.0);
-double get buttonMinWidth => scaleByFontFactor(26.0);
+double get defaultToolbarHeight => 32.0;
+double get defaultHeaderHeight => 28.0;
+double get defaultButtonHeight => 26.0;
+double get defaultRowHeight => 24.0;
+double get defaultLinearProgressIndicatorHeight => 4.0;
+double get defaultLinearProgressIndicatorWidth => 200.0;
+double get buttonMinWidth => 26.0;
 
 const defaultIconSizeBeforeScaling = 14.0;
 const defaultActionsIconSizeBeforeScaling = 18.0;
-double get defaultIconSize => scaleByFontFactor(defaultIconSizeBeforeScaling);
+double get defaultIconSize => defaultIconSizeBeforeScaling;
 double get actionsIconSize =>
-    scaleByFontFactor(defaultActionsIconSizeBeforeScaling);
-double get tooltipIconSize => scaleByFontFactor(12.0);
-double get tableIconSize => scaleByFontFactor(12.0);
-double get defaultListItemHeight => scaleByFontFactor(24.0);
-double get defaultDialogWidth => scaleByFontFactor(700.0);
+    defaultActionsIconSizeBeforeScaling;
+double get tooltipIconSize => 12.0;
+double get tableIconSize => 12.0;
+double get defaultListItemHeight => 24.0;
+double get defaultDialogWidth => 700.0;
 
 const extraWideSearchFieldWidth = 600.0;
 const wideSearchFieldWidth = 400.0;
 const defaultSearchFieldWidth = 200.0;
 
-double get defaultTextFieldHeight => scaleByFontFactor(26.0);
-double get defaultTextFieldNumberWidth => scaleByFontFactor(100.0);
+double get defaultTextFieldHeight => 26.0;
+double get defaultTextFieldNumberWidth => 100.0;
 
 // TODO(jacobr) define a more sophisticated formula for chart height.
 // The chart height does need to increase somewhat to leave room for the legend
 // and tick marks but does not need to scale linearly with the font factor.
-double get defaultChartHeight => scaleByFontFactor(110.0);
+double get defaultChartHeight => 110.0;
 
-double get actionWidgetSize => scaleByFontFactor(48.0);
+double get actionWidgetSize => 48.0;
 
-double get statusLineHeight => scaleByFontFactor(20.0);
+double get statusLineHeight => 20.0;
 
-double get inputDecorationElementHeight => scaleByFontFactor(20.0);
+double get inputDecorationElementHeight => 20.0;
 
 // Padding / spacing constants:
 const extraLargeSpacing = 32.0;
@@ -326,19 +326,19 @@ const _defaultBorderRadiusValue = 16.0;
 
 const defaultElevation = 4.0;
 
-double get smallProgressSize => scaleByFontFactor(12.0);
-double get mediumProgressSize => scaleByFontFactor(24.0);
+double get smallProgressSize => 12.0;
+double get mediumProgressSize => 24.0;
 
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 
 // Font size constants:
-double get largeFontSize => scaleByFontFactor(unscaledLargeFontSize);
+double get largeFontSize => unscaledLargeFontSize;
 const unscaledLargeFontSize = 14.0;
 
-double get defaultFontSize => scaleByFontFactor(unscaledDefaultFontSize);
+double get defaultFontSize => unscaledDefaultFontSize;
 const unscaledDefaultFontSize = 12.0;
 
-double get smallFontSize => scaleByFontFactor(unscaledSmallFontSize);
+double get smallFontSize => unscaledSmallFontSize;
 const unscaledSmallFontSize = 10.0;
 
 extension DevToolsSharedColorScheme on ColorScheme {
@@ -556,7 +556,7 @@ bool isScreenWiderThan(
   double? width,
 ) {
   return width == null ||
-      MediaQuery.of(context).size.width > scaleByFontFactor(width);
+      MediaQuery.of(context).size.width > width;
 }
 
 ButtonStyle denseAwareOutlinedButtonStyle(

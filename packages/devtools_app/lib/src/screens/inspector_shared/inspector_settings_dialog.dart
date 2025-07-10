@@ -23,7 +23,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dialogHeight = scaleByFontFactor(500.0);
+    final dialogHeight = 500.0;
 
     return ValueListenableBuilder(
       valueListenable: preferences.inspector.legacyInspectorEnabled,

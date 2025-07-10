@@ -340,7 +340,7 @@ class CpuProfileStats extends StatelessWidget {
 
   final CpuProfileMetaData metadata;
 
-  final _statsRowHeight = scaleByFontFactor(25.0);
+  final _statsRowHeight = 25.0;
 
   @override
   Widget build(BuildContext context) {

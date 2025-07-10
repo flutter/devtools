@@ -96,7 +96,7 @@ class _InspectorBreadcrumb extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
       style: DiagnosticsTextStyles.regular(
         Theme.of(context).colorScheme,
-      ).copyWith(fontSize: scaleByFontFactor(11)),
+      ).copyWith(fontSize: 11),
     );
 
     final icon = data.icon == null

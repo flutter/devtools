@@ -129,7 +129,7 @@ abstract class MetadataChip extends StatelessWidget {
   static const verticalPadding = borderPadding;
   static const iconPadding = densePadding;
   static const _borderRadius = 4.0;
-  static final _metadataIconSize = scaleByFontFactor(12.0);
+  static final _metadataIconSize = 12.0;
 
   @override
   Widget build(BuildContext context) {

@@ -42,10 +42,7 @@ class CustomIcon extends StatelessWidget {
           Text(
             text,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: scaleByFontFactor(9.0),
-              color: const Color(0xFF231F20),
-            ),
+            style: TextStyle(fontSize: 9.0, color: const Color(0xFF231F20)),
           ),
         ],
       ),
@@ -81,7 +78,7 @@ class CircleIcon extends StatelessWidget {
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: scaleByFontFactor(9.0), color: textColor),
+        style: TextStyle(fontSize: 9.0, color: textColor),
       ),
     );
   }

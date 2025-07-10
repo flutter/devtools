@@ -27,7 +27,7 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
     : super(
         'Class',
         titleTooltip: 'Class name',
-        fixedWidthPx: scaleByFontFactor(200.0),
+        fixedWidthPx: 200.0,
         alignment: ColumnAlignment.left,
       );
 
@@ -77,7 +77,7 @@ class _InstanceColumn extends ColumnData<SingleClassData>
     : super(
         'Instances',
         titleTooltip: nonGcableInstancesColumnTooltip,
-        fixedWidthPx: scaleByFontFactor(80.0),
+        fixedWidthPx: 80.0,
         alignment: ColumnAlignment.right,
       );
 
@@ -111,7 +111,7 @@ class _ShallowSizeColumn extends ColumnData<SingleClassData> {
     : super(
         'Shallow Dart Size',
         titleTooltip: SizeType.shallow.description,
-        fixedWidthPx: scaleByFontFactor(120.0),
+        fixedWidthPx: 120.0,
         alignment: ColumnAlignment.right,
       );
 
@@ -131,7 +131,7 @@ class _RetainedSizeColumn extends ColumnData<SingleClassData> {
     : super(
         'Retained Dart Size',
         titleTooltip: SizeType.retained.description,
-        fixedWidthPx: scaleByFontFactor(130.0),
+        fixedWidthPx: 130.0,
         alignment: ColumnAlignment.right,
       );
 

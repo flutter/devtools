@@ -26,18 +26,18 @@ import '../utils/utils.dart';
 const rowPadding = 2.0;
 // Flame chart rows contain text so are not readable if they do not scale with
 // the font factor.
-double get chartRowHeight => scaleByFontFactor(22.0);
+double get chartRowHeight => 22.0;
 double get rowHeightWithPadding => chartRowHeight + rowPadding;
 
 // This spacing needs to be scaled by the font factor otherwise section
 // labels will not have enough room. Typically spacing values should not depend
 // on the font size scale factor. TODO(jacobr): clean up the section spacing so
 // it is not used in a case where it is not really spacing.
-double get sectionSpacing => scaleByFontFactor(16.0);
+double get sectionSpacing => 16.0;
 const sideInset = 70.0;
 const sideInsetSmall = 60.0;
 
-double get baseTimelineGridIntervalPx => scaleByFontFactor(150.0);
+double get baseTimelineGridIntervalPx => 150.0;
 
 // TODO(kenz): add some indication that we are scrolled out of the relevant area
 // so that users don't get lost in the extra pixels at the end of the chart.
@@ -1456,7 +1456,7 @@ class FlameChartHelpButton extends StatelessWidget {
 
   /// A fixed width for the first column in the help dialog to ensure that the
   /// subsections are aligned.
-  double get firstColumnWidth => scaleByFontFactor(120.0);
+  double get firstColumnWidth => 120.0;
 
   @override
   Widget build(BuildContext context) {

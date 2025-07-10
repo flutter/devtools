@@ -1377,8 +1377,8 @@ class SearchNavigationControls extends StatelessWidget {
                 Opacity(
                   opacity: isSearchInProgress ? 1 : 0,
                   child: SizedBox(
-                    width: scaleByFontFactor(smallProgressSize),
-                    height: scaleByFontFactor(smallProgressSize),
+                    width: smallProgressSize,
+                    height: smallProgressSize,
                     child: isSearchInProgress
                         ? SmallCircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color?>(

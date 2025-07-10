@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 
 const margin = 6.0;
 
-double get arrowHeadSize => scaleByFontFactor(8.0);
-double get arrowMargin => scaleByFontFactor(4.0);
+double get arrowHeadSize => 8.0;
+double get arrowMargin => 4.0;
 const arrowStrokeWidth = 1.5;
 
 /// Hardcoded sizes for scaling the flex children widget properly.
-double get minRenderWidth => scaleByFontFactor(250.0);
-double get minRenderHeight => scaleByFontFactor(250.0);
+double get minRenderWidth => 250.0;
+double get minRenderHeight => 250.0;
 
 const minPadding = 2.0;
 const overflowTextHorizontalPadding = 8.0;
@@ -21,30 +21,30 @@ const overflowTextHorizontalPadding = 8.0;
 /// The size to shrink a widget by when animating it in.
 const entranceMargin = 50.0;
 
-double get defaultMaxRenderWidth => scaleByFontFactor(400.0);
-double get defaultMaxRenderHeight => scaleByFontFactor(400.0);
+double get defaultMaxRenderWidth => 400.0;
+double get defaultMaxRenderHeight => 400.0;
 
 const widgetTitleMaxWidthPercentage = 0.75;
 
 /// Hardcoded arrow size respective to its cross axis (because it's unconstrained).
-double get heightAndConstraintIndicatorSize => scaleByFontFactor(48.0);
-double get widthAndConstraintIndicatorSize => scaleByFontFactor(56.0);
-double get mainAxisArrowIndicatorSize => scaleByFontFactor(48.0);
-double get crossAxisArrowIndicatorSize => scaleByFontFactor(48.0);
+double get heightAndConstraintIndicatorSize => 48.0;
+double get widthAndConstraintIndicatorSize => 56.0;
+double get mainAxisArrowIndicatorSize => 48.0;
+double get crossAxisArrowIndicatorSize => 48.0;
 
-double get heightOnlyIndicatorSize => scaleByFontFactor(72.0);
+double get heightOnlyIndicatorSize => 72.0;
 
 /// Minimum size to display width/height inside the arrow
-double get minWidthToDisplayWidthInsideArrow => scaleByFontFactor(200.0);
-double get minHeightToDisplayHeightInsideArrow => scaleByFontFactor(200.0);
+double get minWidthToDisplayWidthInsideArrow => 200.0;
+double get minHeightToDisplayHeightInsideArrow => 200.0;
 
 const smallTextScaleFactor = 0.8;
 
 /// Height for limiting asset image (selected one in the drop down).
-double get axisAlignmentAssetImageHeight => scaleByFontFactor(24.0);
+double get axisAlignmentAssetImageHeight => 24.0;
 
-double get minHeightToAllowTruncating => scaleByFontFactor(375.0);
-double get minWidthToAllowTruncating => scaleByFontFactor(375.0);
+double get minHeightToAllowTruncating => 375.0;
+double get minWidthToAllowTruncating => 375.0;
 
 // Story of Layout colors
 const mainAxisLightColor = Color(0xff2c5daa);

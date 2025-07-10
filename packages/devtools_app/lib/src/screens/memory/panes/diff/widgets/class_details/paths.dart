@@ -40,7 +40,7 @@ class _InstanceColumn extends ColumnData<PathData> {
         titleTooltip:
             'Number of instances of the class\n'
             'retained by the path.',
-        fixedWidthPx: scaleByFontFactor(80.0),
+        fixedWidthPx: 80.0,
         alignment: ColumnAlignment.right,
       );
 
@@ -56,7 +56,7 @@ class _ShallowSizeColumn extends ColumnData<PathData> {
     : super(
         isDiff ? 'Shallow\nSize Delta' : 'Shallow\nDart Size',
         titleTooltip: SizeType.shallow.description,
-        fixedWidthPx: scaleByFontFactor(80.0),
+        fixedWidthPx: 80.0,
         alignment: ColumnAlignment.right,
       );
 
@@ -76,7 +76,7 @@ class _RetainedSizeColumn extends ColumnData<PathData> {
     : super(
         isDiff ? 'Retained\nSize Delta' : 'Retained\nDart Size',
         titleTooltip: SizeType.retained.description,
-        fixedWidthPx: scaleByFontFactor(80.0),
+        fixedWidthPx: 80.0,
         alignment: ColumnAlignment.right,
       );
 

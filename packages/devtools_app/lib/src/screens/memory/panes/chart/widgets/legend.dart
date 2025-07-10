@@ -11,10 +11,10 @@ import '../controller/charts/android_chart_controller.dart';
 import '../controller/charts/vm_chart_controller.dart';
 import '../data/charts.dart';
 
-final _legendWidth = scaleByFontFactor(200.0);
-final _legendTextWidth = scaleByFontFactor(55.0);
-final _legendHeight1Chart = scaleByFontFactor(200.0);
-final _legendHeight2Charts = scaleByFontFactor(323.0);
+final _legendWidth = 200.0;
+final _legendTextWidth = 55.0;
+final _legendHeight1Chart = 200.0;
+final _legendHeight2Charts = 323.0;
 
 /// Padding for each title in the legend.
 const _legendTitlePadding = EdgeInsets.only(left: 5, bottom: 4);

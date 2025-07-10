@@ -89,7 +89,7 @@ class _FlutterFramesChart extends StatefulWidget {
 
   final ValueListenable<bool> impellerEnabled;
 
-  static double get frameNumberSectionHeight => scaleByFontFactor(20.0);
+  static double get frameNumberSectionHeight => 20.0;
 
   static double get frameChartScrollbarOffset => defaultScrollBarOffset;
 
@@ -214,7 +214,7 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
 
   static const _outlineBorderWidth = 1.0;
 
-  double get _yAxisUnitsSpace => scaleByFontFactor(48.0);
+  double get _yAxisUnitsSpace => 48.0;
 
   late final ScrollController _framesScrollController;
 
@@ -934,7 +934,7 @@ class FPSLinePainter extends CustomPainter {
     required this.bottomMargin,
   });
 
-  double get fpsTextSpace => scaleByFontFactor(45.0);
+  double get fpsTextSpace => 45.0;
 
   final BoxConstraints constraints;
 

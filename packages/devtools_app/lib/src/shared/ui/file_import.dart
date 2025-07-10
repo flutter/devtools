@@ -25,7 +25,7 @@ enum SaveFormat {
 
   final String display;
 
-  static final dropdownWidth = scaleByFontFactor(200.0);
+  static final dropdownWidth = 200.0;
 }
 
 class OpenSaveButtonGroup extends StatelessWidget {
@@ -273,7 +273,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (title != null) ...[
-          Text(title, style: TextStyle(fontSize: scaleByFontFactor(18.0))),
+          Text(title, style: TextStyle(fontSize: 18.0)),
           const SizedBox(height: extraLargeSpacing),
         ],
         CenteredMessage(message: widget.instructions),

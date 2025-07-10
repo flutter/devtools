@@ -98,7 +98,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final textFieldLeftPadding = scaleByFontFactor(40.0);
+    final textFieldLeftPadding = 40.0;
     void onTypeChanged(ClassFilterType? type) => setState(() => _type = type!);
 
     RadioButton<ClassFilterType> radio(ClassFilterType type, String label) =>

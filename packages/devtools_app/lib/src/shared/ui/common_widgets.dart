@@ -25,8 +25,7 @@ import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/utils.dart';
 import '../utils/utils.dart';
 
-double get assumedMonospaceCharacterWidth =>
-    scaleByFontFactor(_assumedMonospaceCharacterWidth);
+double get assumedMonospaceCharacterWidth => _assumedMonospaceCharacterWidth;
 double _assumedMonospaceCharacterWidth = 9.0;
 
 @visibleForTesting
@@ -1363,8 +1362,7 @@ class GaLink extends Link {
 class Legend extends StatelessWidget {
   const Legend({super.key, required this.entries, this.dense = false});
 
-  double get legendSquareSize =>
-      dense ? scaleByFontFactor(12.0) : scaleByFontFactor(16.0);
+  double get legendSquareSize => dense ? 12.0 : 16.0;
 
   final List<LegendEntry> entries;
 
@@ -2243,7 +2241,7 @@ class _PositiveIntegerSettingState extends State<PositiveIntegerSetting>
         ),
         const SizedBox(width: defaultSpacing),
         SizedBox(
-          width: scaleByFontFactor(widget.width),
+          width: widget.width,
           child: Form(
             key: _formKey,
             child: TextFormField(

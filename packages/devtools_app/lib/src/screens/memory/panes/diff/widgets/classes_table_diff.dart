@@ -29,7 +29,7 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
     : super(
         'Class',
         titleTooltip: 'Class name',
-        fixedWidthPx: scaleByFontFactor(200.0),
+        fixedWidthPx: 200.0,
         alignment: ColumnAlignment.left,
       );
 
@@ -78,7 +78,7 @@ class _InstanceColumn extends ColumnData<DiffClassData>
   _InstanceColumn(this.dataPart, this.diffData)
     : super(
         columnTitle(dataPart),
-        fixedWidthPx: scaleByFontFactor(110.0),
+        fixedWidthPx: 110.0,
         alignment: ColumnAlignment.right,
       );
 
@@ -165,7 +165,7 @@ class _SizeColumn extends ColumnData<DiffClassData> {
   _SizeColumn(this.dataPart, this.sizeType)
     : super(
         columnTitle(dataPart),
-        fixedWidthPx: scaleByFontFactor(80.0),
+        fixedWidthPx: 80.0,
         alignment: ColumnAlignment.right,
       );
 

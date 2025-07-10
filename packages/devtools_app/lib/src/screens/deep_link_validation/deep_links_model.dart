@@ -874,7 +874,7 @@ class StatusColumn extends ColumnData<LinkData>
 
 class NavigationColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData> {
-  NavigationColumn() : super('', fixedWidthPx: scaleByFontFactor(40));
+  NavigationColumn() : super('', fixedWidthPx: 40);
 
   @override
   bool get supportsSorting => false;

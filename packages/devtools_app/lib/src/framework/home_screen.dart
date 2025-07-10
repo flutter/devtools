@@ -202,7 +202,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
           children: [
             SizedBox(
               height: defaultTextFieldHeight,
-              width: scaleByFontFactor(350.0),
+              width: 350.0,
               child: DevToolsClearableTextField(
                 labelText: 'URL',
                 onSubmitted: actionInProgress

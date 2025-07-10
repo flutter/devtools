@@ -65,7 +65,7 @@ class CodeView extends StatefulWidget {
     'debuggerCodeViewVerticalScrollbarKey',
   );
 
-  static double get rowHeight => scaleByFontFactor(16.0);
+  static double get rowHeight => 16.0;
 
   final CodeViewController codeViewController;
   final DebuggerController? debuggerController;
@@ -930,7 +930,7 @@ class GutterItem extends StatelessWidget {
     final subtleColor = theme.unselectedWidgetColor;
 
     final bpBoxSize = breakpointRadius * 2;
-    final executionPointIndent = scaleByFontFactor(10.0);
+    final executionPointIndent = 10.0;
     Color? color;
     TextStyle? coverageTextStyleOverride;
     final hasCoverage = coverageHit;
@@ -1143,7 +1143,7 @@ class LineItem extends StatelessWidget {
     this.activeSearchMatch,
   });
 
-  static double get _hoverWidth => scaleByFontFactor(400.0);
+  static double get _hoverWidth => 400.0;
 
   final TextSpan lineContents;
   final StackFrameAndSourcePosition? pausedFrame;
@@ -1587,7 +1587,7 @@ class GoToLineDialog extends StatelessWidget {
             },
             decoration: InputDecoration(
               labelText: 'Line Number',
-              contentPadding: EdgeInsets.all(scaleByFontFactor(5.0)),
+              contentPadding: EdgeInsets.all(5.0),
             ),
             keyboardType: TextInputType.number,
             inputFormatters: <TextInputFormatter>[
