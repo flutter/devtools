@@ -611,7 +611,7 @@ class _ExportAllocationProfileButton extends StatelessWidget {
         return DownloadButton(
           gaScreen: gac.memory,
           gaSelection: gac.MemoryEvents.profileDownloadCsv.name,
-          minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
+          minScreenWidthForText: memoryControlsMinVerboseWidth,
           tooltip: 'Download allocation profile data in CSV format',
           label: 'CSV',
           onPressed: currentAllocationProfile == null

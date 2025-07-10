@@ -40,7 +40,7 @@ void main() {
       expect(params.embedMode, EmbedMode.none);
       expect(params.backgroundColor, isNull);
       expect(params.foregroundColor, isNull);
-      expect(params.fontSize, unscaledDefaultFontSize);
+      expect(params.fontSize, defaultFontSize);
       expect(params.darkMode, true);
     });
 
@@ -50,7 +50,7 @@ void main() {
       expect(params.embedMode, EmbedMode.none);
       expect(params.backgroundColor, isNull);
       expect(params.foregroundColor, isNull);
-      expect(params.fontSize, unscaledDefaultFontSize);
+      expect(params.fontSize, defaultFontSize);
       expect(params.darkMode, true);
     });
   });

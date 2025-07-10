@@ -25,7 +25,7 @@ IdeTheme get ideTheme {
   return theme as IdeTheme;
 }
 
-double double original {
+double scaleByFountFactor(double original) {
   return (original * ideTheme.fontSizeFactor).roundToDouble();
 }
 

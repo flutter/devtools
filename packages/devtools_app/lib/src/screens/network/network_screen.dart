@@ -214,14 +214,13 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           tooltipOverride: _recording
               ? 'Stop recording network traffic'
               : 'Resume recording network traffic',
-          minScreenWidthForTextBeforeScaling: double.infinity,
+          minScreenWidthForText: double.infinity,
           gaScreen: gac.network,
           gaSelection: _recording ? gac.pause : gac.resume,
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
+          minScreenWidthForText: _NetworkProfilerControls._includeTextWidth,
           gaScreen: gac.network,
           gaSelection: gac.clear,
           onPressed: controller.clear,
@@ -267,8 +266,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         else
           DownloadButton(
             tooltip: 'Download as .har file',
-            minScreenWidthForTextBeforeScaling:
-                _NetworkProfilerControls._includeTextWidth,
+            minScreenWidthForText: _NetworkProfilerControls._includeTextWidth,
             onPressed: controller.exportAsHarFile,
             gaScreen: gac.network,
             gaSelection: gac.NetworkEvent.downloadAsHar.name,

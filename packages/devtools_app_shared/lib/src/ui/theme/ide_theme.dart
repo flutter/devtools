@@ -19,7 +19,7 @@ final class IdeTheme {
   IdeTheme({
     this.backgroundColor,
     this.foregroundColor,
-    this.fontSize = unscaledDefaultFontSize,
+    this.fontSize = defaultFontSize,
     this.embedMode = EmbedMode.none,
     bool? isDarkMode,
   }) : _isDarkMode = isDarkMode;
@@ -30,7 +30,7 @@ final class IdeTheme {
   final EmbedMode embedMode;
   final bool? _isDarkMode;
 
-  double get fontSizeFactor => fontSize / unscaledDefaultFontSize;
+  double get fontSizeFactor => fontSize / defaultFontSize;
 
   bool get embedded => embedMode.embedded;
 
@@ -52,7 +52,7 @@ extension type IdeThemeQueryParams(Map<String, String?> params) {
       tryParseColor(params[foregroundColorKey], logger: _log);
 
   double get fontSize =>
-      _tryParseDouble(params[fontSizeKey]) ?? unscaledDefaultFontSize;
+      _tryParseDouble(params[fontSizeKey]) ?? defaultFontSize;
 
   EmbedMode get embedMode => EmbedMode.fromArgs(params);
 

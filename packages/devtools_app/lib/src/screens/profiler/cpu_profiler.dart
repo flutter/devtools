@@ -233,8 +233,7 @@ class _CpuProfilerState extends State<CpuProfiler>
               ExpandAllButton(
                 gaScreen: gac.cpuProfiler,
                 gaSelection: gac.expandAll,
-                minScreenWidthForTextBeforeScaling:
-                    _expandCollapseMinIncludeTextWidth,
+                minScreenWidthForText: _expandCollapseMinIncludeTextWidth,
                 onPressed: () {
                   _performOnDataRoots(
                     (root) => root.expandCascading(),
@@ -246,8 +245,7 @@ class _CpuProfilerState extends State<CpuProfiler>
               CollapseAllButton(
                 gaScreen: gac.cpuProfiler,
                 gaSelection: gac.collapseAll,
-                minScreenWidthForTextBeforeScaling:
-                    _expandCollapseMinIncludeTextWidth,
+                minScreenWidthForText: _expandCollapseMinIncludeTextWidth,
                 onPressed: () {
                   _performOnDataRoots(
                     (root) => root.collapseCascading(),

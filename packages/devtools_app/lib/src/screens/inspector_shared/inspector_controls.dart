@@ -23,7 +23,7 @@ class InspectorControls extends StatelessWidget {
   final v2.InspectorController? controller;
 
   static const minScreenWidthForTextBeforeTruncating = 800.0;
-  static const minScreenWidthForTextBeforeScaling = 550.0;
+  static const minScreenWidthForText = 550.0;
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +47,7 @@ class InspectorControls extends StatelessWidget {
                     ? extensions.toggleSelectWidgetMode
                     : extensions.toggleOnDeviceWidgetInspector,
               ],
-              minScreenWidthForTextBeforeScaling:
-                  minScreenWidthForTextBeforeScaling,
+              minScreenWidthForText: minScreenWidthForText,
               minScreenWidthForTextBeforeTruncating: isInspectorV2
                   ? minScreenWidthForTextBeforeTruncating
                   : null,
@@ -80,8 +79,7 @@ class InspectorServiceExtensionButtonGroup extends StatelessWidget {
       children: [
         ServiceExtensionButtonGroup(
           fillColor: Theme.of(context).colorScheme.activeToggleButtonColor,
-          minScreenWidthForTextBeforeScaling:
-              serviceExtensionButtonsIncludeTextWidth,
+          minScreenWidthForText: serviceExtensionButtonsIncludeTextWidth,
           extensions: [
             extensions.slowAnimations,
             extensions.debugPaint,
@@ -135,8 +133,7 @@ class ShowImplementationWidgetsButton extends StatelessWidget {
               : 'Show',
           onPressed: controller.toggleImplementationWidgetsVisibility,
           icon: Icons.code,
-          minScreenWidthForTextBeforeScaling:
-              InspectorControls.minScreenWidthForTextBeforeScaling,
+          minScreenWidthForText: InspectorControls.minScreenWidthForText,
         );
       },
     );

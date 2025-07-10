@@ -30,7 +30,7 @@ class LoggingControls extends StatelessWidget {
           onPressed: controller.clear,
           gaScreen: gac.logging,
           gaSelection: gac.clear,
-          minScreenWidthForTextBeforeScaling: _loggingMinVerboseWidth,
+          minScreenWidthForText: _loggingMinVerboseWidth,
         ),
         const SizedBox(width: denseSpacing),
         Expanded(

@@ -112,14 +112,14 @@ class ViewVmFlagsButton extends StatelessWidget {
     super.key,
     required this.gaScreen,
     this.elevated = false,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
   });
 
   final String gaScreen;
 
   final bool elevated;
 
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +129,7 @@ class ViewVmFlagsButton extends StatelessWidget {
       icon: Icons.flag_rounded,
       gaScreen: gaScreen,
       gaSelection: gac.HomeScreenEvents.viewVmFlags.name,
-      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      minScreenWidthForText: minScreenWidthForText,
       onPressed: () {
         unawaited(
           showDialog(

@@ -308,9 +308,7 @@ class SizedCircularProgressIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox.fromSize(
-      size: const Size.fromHeight(
-        2 * (defaultIconSizeBeforeScaling + denseSpacing),
-      ),
+      size: const Size.fromHeight(2 * (defaultIconSize + denseSpacing)),
       child: const CenteredCircularProgressIndicator(),
     );
   }

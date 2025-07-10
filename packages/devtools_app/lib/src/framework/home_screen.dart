@@ -82,8 +82,8 @@ class _HomeScreenBodyState extends State<HomeScreenBody> with AutoDisposeMixin {
 class ConnectionSection extends StatelessWidget {
   const ConnectionSection({super.key, required this.connected});
 
-  static const _primaryMinScreenWidthForTextBeforeScaling = 480.0;
-  static const _secondaryMinScreenWidthForTextBeforeScaling = 600.0;
+  static const _primaryMinScreenWidthForText = 480.0;
+  static const _secondaryMinScreenWidthForText = 600.0;
 
   final bool connected;
 
@@ -95,14 +95,12 @@ class ConnectionSection extends StatelessWidget {
         actions: [
           ViewVmFlagsButton(
             gaScreen: gac.home,
-            minScreenWidthForTextBeforeScaling:
-                _secondaryMinScreenWidthForTextBeforeScaling,
+            minScreenWidthForText: _secondaryMinScreenWidthForText,
           ),
           const SizedBox(width: defaultSpacing),
           ConnectToNewAppButton(
             gaScreen: gac.home,
-            minScreenWidthForTextBeforeScaling:
-                _primaryMinScreenWidthForTextBeforeScaling,
+            minScreenWidthForText: _primaryMinScreenWidthForText,
             routerDelegate: DevToolsRouterDelegate.of(context),
             onPressed: () =>
                 Navigator.of(context, rootNavigator: true).pop('dialog'),

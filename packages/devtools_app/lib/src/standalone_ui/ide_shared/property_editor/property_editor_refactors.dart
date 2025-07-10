@@ -27,7 +27,7 @@ class WrapWithRefactors extends StatefulWidget {
   });
 
   static const wrapWithPrefix = 'Wrap with';
-  static final buttonIconSize = actionsIconSize;
+  static const buttonIconSize = actionsIconSize;
   static Color buttonColor(ThemeData theme) => theme.colorScheme.onSurface;
 
   final List<WrapWithRefactorAction> refactors;

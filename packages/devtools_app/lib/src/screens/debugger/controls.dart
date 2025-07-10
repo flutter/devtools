@@ -18,13 +18,11 @@ import 'debugger_controller.dart';
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({super.key});
 
-  static const minWidthBeforeScaling = 1750.0;
+  static const minWidth = 1750.0;
 
   // The icon size for the material_symbol icons needs to be increased to
   // account for padding included in the icon assets.
-  static final materialIconSize = scaleByFontFactor(
-    defaultIconSizeBeforeScaling + 3.0,
-  );
+  static const materialIconSize = defaultIconSize + 3.0;
 
   @override
   State<DebuggingControls> createState() => _DebuggingControlsState();
@@ -142,8 +140,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
           onPressed: canStep ? () => unawaited(controller.stepOut()) : null,
         ),
       ],
-      minScreenWidthForTextBeforeScaling:
-          DebuggingControls.minWidthBeforeScaling,
+      minScreenWidthForText: DebuggingControls.minWidth,
     );
   }
 
@@ -159,8 +156,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
           gaSelection: visible
               ? gac.DebuggerEvents.hideFileExplorer.name
               : gac.DebuggerEvents.showFileExplorer.name,
-          minScreenWidthForTextBeforeScaling:
-              DebuggingControls.minWidthBeforeScaling,
+          minScreenWidthForText: DebuggingControls.minWidth,
         );
       },
     );
@@ -251,8 +247,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isInSmallMode =
-        MediaQuery.of(context).size.width <
-        DebuggingControls.minWidthBeforeScaling;
+        MediaQuery.of(context).size.width < DebuggingControls.minWidth;
     return ValueListenableBuilder<String?>(
       valueListenable: controller.exceptionPauseMode,
       builder: (BuildContext context, modeId, _) {

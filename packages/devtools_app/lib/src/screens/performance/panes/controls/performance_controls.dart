@@ -29,7 +29,7 @@ class PerformanceControls extends StatelessWidget {
     required this.onClear,
   });
 
-  static const minScreenWidthForTextBeforeScaling = 1085.0;
+  static const minScreenWidthForText = 1085.0;
 
   final PerformanceController controller;
 
@@ -109,8 +109,7 @@ class _PrimaryControls extends StatelessWidget {
             gaScreen: gac.performance,
             gaSelection: gac.clear,
             tooltip: 'Clear all data on the Performance screen',
-            minScreenWidthForTextBeforeScaling:
-                PerformanceControls.minScreenWidthForTextBeforeScaling,
+            minScreenWidthForText: PerformanceControls.minScreenWidthForText,
             onPressed: processing ? null : _clearPerformanceData,
           ),
       ],
@@ -138,8 +137,7 @@ class _SecondaryPerformanceControls extends StatelessWidget {
       children: [
         if (isFlutterApp) ...[
           ServiceExtensionButtonGroup(
-            minScreenWidthForTextBeforeScaling:
-                PerformanceControls.minScreenWidthForTextBeforeScaling,
+            minScreenWidthForText: PerformanceControls.minScreenWidthForText,
             extensions: [extensions.performanceOverlay],
           ),
           const SizedBox(width: denseSpacing),

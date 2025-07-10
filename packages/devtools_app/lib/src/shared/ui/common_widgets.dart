@@ -73,7 +73,7 @@ class GaDevToolsButton extends DevToolsButton {
     super.label,
     super.tooltip,
     super.color,
-    super.minScreenWidthForTextBeforeScaling,
+    super.minScreenWidthForText,
     super.elevated,
     super.outlined,
     super.tooltipPadding,
@@ -113,7 +113,7 @@ class PauseButton extends GaDevToolsButton {
     required super.gaScreen,
     required super.gaSelection,
     super.outlined = true,
-    super.minScreenWidthForTextBeforeScaling,
+    super.minScreenWidthForText,
     bool iconOnly = false,
   }) : super(label: iconOnly ? null : 'Pause', icon: Icons.pause);
 }
@@ -126,7 +126,7 @@ class ResumeButton extends GaDevToolsButton {
     required super.gaScreen,
     required super.gaSelection,
     super.outlined = true,
-    super.minScreenWidthForTextBeforeScaling,
+    super.minScreenWidthForText,
     bool iconOnly = false,
   }) : super(label: iconOnly ? null : 'Resume', icon: Icons.play_arrow);
 }
@@ -192,7 +192,7 @@ class ClearButton extends GaDevToolsButton {
     super.color,
     super.tooltip = 'Clear',
     super.outlined = true,
-    super.minScreenWidthForTextBeforeScaling,
+    super.minScreenWidthForText,
     required super.gaScreen,
     required super.gaSelection,
     required super.onPressed,
@@ -206,7 +206,7 @@ class RefreshButton extends GaDevToolsButton {
     super.key,
     String label = 'Refresh',
     super.tooltip,
-    super.minScreenWidthForTextBeforeScaling,
+    super.minScreenWidthForText,
     super.outlined,
     required super.gaScreen,
     required super.gaSelection,
@@ -232,7 +232,7 @@ class StartStopRecordingButton extends GaDevToolsButton {
     required super.onPressed,
     required super.gaScreen,
     required super.gaSelection,
-    super.minScreenWidthForTextBeforeScaling,
+    super.minScreenWidthForText,
     String? tooltipOverride,
     Color? colorOverride,
     String? labelOverride,
@@ -260,7 +260,7 @@ class StartStopRecordingButton extends GaDevToolsButton {
 /// Button to start recording data.
 ///
 /// * `recording`: Whether recording is in progress.
-/// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
+/// * `minScreenWidthForText`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `labelOverride`: Optional alternative text to use for the button.
 /// * `onPressed`: The callback to be called upon pressing the button.
@@ -271,7 +271,7 @@ class RecordButton extends GaDevToolsButton {
     required VoidCallback onPressed,
     required super.gaScreen,
     required super.gaSelection,
-    super.minScreenWidthForTextBeforeScaling,
+    super.minScreenWidthForText,
     super.tooltip = 'Start recording',
     String? labelOverride,
   }) : super(
@@ -284,7 +284,7 @@ class RecordButton extends GaDevToolsButton {
 /// Button to stop recording data.
 ///
 /// * `recording`: Whether recording is in progress.
-/// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
+/// * `minScreenWidthForText`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
 class StopRecordingButton extends GaDevToolsButton {
@@ -294,7 +294,7 @@ class StopRecordingButton extends GaDevToolsButton {
     required VoidCallback? onPressed,
     required super.gaScreen,
     required super.gaSelection,
-    super.minScreenWidthForTextBeforeScaling,
+    super.minScreenWidthForText,
     super.tooltip = 'Stop recording',
   }) : super(
          onPressed: !recording ? null : onPressed,
@@ -329,7 +329,7 @@ class ExpandAllButton extends StatelessWidget {
     required this.gaScreen,
     required this.gaSelection,
     required this.onPressed,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
   });
 
   final VoidCallback onPressed;
@@ -338,7 +338,7 @@ class ExpandAllButton extends StatelessWidget {
 
   final String gaSelection;
 
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
 
   @override
   Widget build(BuildContext context) {
@@ -349,7 +349,7 @@ class ExpandAllButton extends StatelessWidget {
       onPressed: onPressed,
       gaScreen: gaScreen,
       gaSelection: gaSelection,
-      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      minScreenWidthForText: minScreenWidthForText,
     );
   }
 }
@@ -360,7 +360,7 @@ class CollapseAllButton extends StatelessWidget {
     required this.gaScreen,
     required this.gaSelection,
     required this.onPressed,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
   });
 
   final VoidCallback onPressed;
@@ -369,7 +369,7 @@ class CollapseAllButton extends StatelessWidget {
 
   final String gaSelection;
 
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
 
   @override
   Widget build(BuildContext context) {
@@ -380,7 +380,7 @@ class CollapseAllButton extends StatelessWidget {
       onPressed: onPressed,
       gaScreen: gaScreen,
       gaSelection: gaSelection,
-      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      minScreenWidthForText: minScreenWidthForText,
     );
   }
 }
@@ -394,7 +394,7 @@ class VisibilityButton extends StatelessWidget {
     super.key,
     required this.show,
     required this.onPressed,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
     required this.label,
     required this.tooltip,
     required this.gaScreen,
@@ -406,7 +406,7 @@ class VisibilityButton extends StatelessWidget {
 
   final ValueListenable<bool> show;
   final void Function(bool) onPressed;
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
   final String label;
   final String tooltip;
   final String gaScreen;
@@ -422,8 +422,7 @@ class VisibilityButton extends StatelessWidget {
           tooltip: tooltip,
           icon: show ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
           label: label,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
+          minScreenWidthForText: minScreenWidthForText,
           gaScreen: gaScreen,
           gaSelection: gaSelection,
           onPressed: () => onPressed(!show),
@@ -1699,7 +1698,7 @@ class SwitchSetting extends StatelessWidget {
     this.gaItem,
     this.activeColor,
     this.inactiveColor,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
   });
 
   final ValueNotifier<bool> notifier;
@@ -1718,7 +1717,7 @@ class SwitchSetting extends StatelessWidget {
 
   final Color? inactiveColor;
 
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
 
   @override
   Widget build(BuildContext context) {
@@ -1728,7 +1727,7 @@ class SwitchSetting extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (isScreenWiderThan(context, minScreenWidthForTextBeforeScaling))
+          if (isScreenWiderThan(context, minScreenWidthForText))
             Flexible(
               child: RichText(
                 overflow: TextOverflow.visible,
@@ -2063,7 +2062,7 @@ class DownloadButton extends StatelessWidget {
     this.onPressed,
     this.tooltip = 'Download data',
     this.label = 'Download',
-    required this.minScreenWidthForTextBeforeScaling,
+    required this.minScreenWidthForText,
     required this.gaScreen,
     required this.gaSelection,
   });
@@ -2071,7 +2070,7 @@ class DownloadButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final String? tooltip;
   final String label;
-  final double minScreenWidthForTextBeforeScaling;
+  final double minScreenWidthForText;
   final String gaScreen;
   final String gaSelection;
 
@@ -2084,7 +2083,7 @@ class DownloadButton extends StatelessWidget {
       gaScreen: gaScreen,
       gaSelection: gaSelection,
       onPressed: onPressed,
-      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      minScreenWidthForText: minScreenWidthForText,
     );
   }
 }

@@ -696,7 +696,7 @@ class FlutterFrameTooltip extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.subdirectory_arrow_right,
-                      size: defaultIconSizeBeforeScaling,
+                      size: defaultIconSize,
                     ),
                     Text(shaderText),
                     MoreInfoLink(
@@ -729,7 +729,7 @@ class FlutterFrameTooltip extends StatelessWidget {
     // text vs text displayed.
     maxWidth += 2 * denseSpacing + _textMeasurementBuffer;
     if (hasShaderJank) {
-      return maxWidth + defaultIconSizeBeforeScaling + _moreInfoLinkWidth;
+      return maxWidth + defaultIconSize + _moreInfoLinkWidth;
     }
     return maxWidth;
   }
@@ -790,7 +790,7 @@ class ShaderJankWarningIcon extends StatelessWidget {
         BlinkingIcon(
           icon: Icons.warning_amber_rounded,
           color: Colors.amber,
-          size: defaultActionsIconSizeBeforeScaling,
+          size: actionsIconSize,
         ),
       ],
     );

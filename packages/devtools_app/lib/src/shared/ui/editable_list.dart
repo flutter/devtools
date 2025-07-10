@@ -190,7 +190,7 @@ class EditableListActionBar extends StatelessWidget {
                   gaScreen: gaScreen,
                   gaSelection: gaRefreshSelection,
                   onPressed: onRefresh,
-                  minScreenWidthForTextBeforeScaling: double.maxFinite,
+                  minScreenWidthForText: double.maxFinite,
                 ),
         ],
       ),

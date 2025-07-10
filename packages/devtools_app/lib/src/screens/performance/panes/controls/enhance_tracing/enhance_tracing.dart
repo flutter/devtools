@@ -35,8 +35,7 @@ class EnhanceTracingButton extends StatelessWidget {
       title: title,
       icon: icon,
       tooltip: 'Add more detail to the Timeline trace',
-      minScreenWidthForTextBeforeScaling:
-          PerformanceControls.minScreenWidthForTextBeforeScaling,
+      minScreenWidthForText: PerformanceControls.minScreenWidthForText,
       extensions: enhanceTracingExtensions,
       forceShowOverlayController:
           enhanceTracingController.showMenuStreamController,

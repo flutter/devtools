@@ -139,16 +139,14 @@ class _VMProcessMemoryViewBodyState extends State<VMProcessMemoryViewBody>
               ExpandAllButton(
                 gaScreen: gac.cpuProfiler,
                 gaSelection: gac.expandAll,
-                minScreenWidthForTextBeforeScaling:
-                    _expandCollapseMinIncludeTextWidth,
+                minScreenWidthForText: _expandCollapseMinIncludeTextWidth,
                 onPressed: () => setState(controller.expandTree),
               ),
               const SizedBox(width: denseSpacing),
               CollapseAllButton(
                 gaScreen: gac.cpuProfiler,
                 gaSelection: gac.collapseAll,
-                minScreenWidthForTextBeforeScaling:
-                    _expandCollapseMinIncludeTextWidth,
+                minScreenWidthForText: _expandCollapseMinIncludeTextWidth,
                 onPressed: () => setState(controller.collapseTree),
               ),
             ],

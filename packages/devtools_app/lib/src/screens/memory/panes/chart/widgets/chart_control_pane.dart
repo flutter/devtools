@@ -115,7 +115,7 @@ class _LegendButton extends StatelessWidget {
         icon: legendVisible ? Icons.close : Icons.storage,
         label: 'Legend',
         tooltip: 'Toggle visibility of the chart legend',
-        minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
+        minScreenWidthForText: memoryControlsMinVerboseWidth,
       ),
     );
   }

@@ -393,7 +393,7 @@ abstract class Screen {
                   iconAsset: iconAsset,
                   size: iconAsset != null
                       // Add 1.0 to adjust for margins on the screen icon assets.
-                      ? defaultIconSizeBeforeScaling + 1.0
+                      ? defaultIconSize + 1.0
                       : defaultIconSize,
                 ),
               if (title.isNotEmpty)

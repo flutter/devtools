@@ -10,4 +10,4 @@ bool debugLargeFontSize = false;
 
 /// Load any IDE-supplied theming.
 IdeTheme getIdeTheme() =>
-    IdeTheme(fontSize: debugLargeFontSize ? 40.0 : unscaledDefaultFontSize);
+    IdeTheme(fontSize: debugLargeFontSize ? 40.0 : defaultFontSize);

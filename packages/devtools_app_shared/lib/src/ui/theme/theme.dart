@@ -265,41 +265,38 @@ bool isValidLightColor(Color? color) {
 }
 
 // Size constants:
-double get defaultToolbarHeight => 32.0;
-double get defaultHeaderHeight => 28.0;
-double get defaultButtonHeight => 26.0;
-double get defaultRowHeight => 24.0;
-double get defaultLinearProgressIndicatorHeight => 4.0;
-double get defaultLinearProgressIndicatorWidth => 200.0;
-double get buttonMinWidth => 26.0;
+const defaultToolbarHeight = 32.0;
+const defaultHeaderHeight = 28.0;
+const defaultButtonHeight = 26.0;
+const defaultRowHeight = 24.0;
+const defaultLinearProgressIndicatorHeight = 4.0;
+const defaultLinearProgressIndicatorWidth = 200.0;
+const buttonMinWidth = 26.0;
 
-const defaultIconSizeBeforeScaling = 14.0;
-const defaultActionsIconSizeBeforeScaling = 18.0;
-double get defaultIconSize => defaultIconSizeBeforeScaling;
-double get actionsIconSize =>
-    defaultActionsIconSizeBeforeScaling;
-double get tooltipIconSize => 12.0;
-double get tableIconSize => 12.0;
-double get defaultListItemHeight => 24.0;
-double get defaultDialogWidth => 700.0;
+const defaultIconSize = 14.0;
+const actionsIconSize = 18.0;
+const tooltipIconSize = 12.0;
+const tableIconSize = 12.0;
+const defaultListItemHeight = 24.0;
+const defaultDialogWidth = 700.0;
 
 const extraWideSearchFieldWidth = 600.0;
 const wideSearchFieldWidth = 400.0;
 const defaultSearchFieldWidth = 200.0;
 
-double get defaultTextFieldHeight => 26.0;
-double get defaultTextFieldNumberWidth => 100.0;
+const defaultTextFieldHeight = 26.0;
+const defaultTextFieldNumberWidth = 100.0;
 
 // TODO(jacobr) define a more sophisticated formula for chart height.
 // The chart height does need to increase somewhat to leave room for the legend
 // and tick marks but does not need to scale linearly with the font factor.
-double get defaultChartHeight => 110.0;
+const defaultChartHeight = 110.0;
 
-double get actionWidgetSize => 48.0;
+const actionWidgetSize = 48.0;
 
-double get statusLineHeight => 20.0;
+const statusLineHeight = 20.0;
 
-double get inputDecorationElementHeight => 20.0;
+const inputDecorationElementHeight = 20.0;
 
 // Padding / spacing constants:
 const extraLargeSpacing = 32.0;
@@ -326,20 +323,15 @@ const _defaultBorderRadiusValue = 16.0;
 
 const defaultElevation = 4.0;
 
-double get smallProgressSize => 12.0;
-double get mediumProgressSize => 24.0;
+const smallProgressSize = 12.0;
+const mediumProgressSize = 24.0;
 
 const defaultTabBarViewPhysics = NeverScrollableScrollPhysics();
 
 // Font size constants:
-double get largeFontSize => unscaledLargeFontSize;
-const unscaledLargeFontSize = 14.0;
-
-double get defaultFontSize => unscaledDefaultFontSize;
-const unscaledDefaultFontSize = 12.0;
-
-double get smallFontSize => unscaledSmallFontSize;
-const unscaledSmallFontSize = 10.0;
+const largeFontSize = 14.0;
+const defaultFontSize = 12.0;
+const smallFontSize = 10.0;
 
 extension DevToolsSharedColorScheme on ColorScheme {
   bool get isLight => brightness == Brightness.light;
@@ -469,7 +461,7 @@ extension ThemeDataExtension on ThemeData {
       );
 
   TextStyle get legendTextStyle => fixBlurryText(
-        TextStyle(
+        const TextStyle(
           fontWeight: FontWeight.normal,
           fontSize: smallFontSize,
           decoration: TextDecoration.none,
@@ -555,42 +547,41 @@ bool isScreenWiderThan(
   BuildContext context,
   double? width,
 ) {
-  return width == null ||
-      MediaQuery.of(context).size.width > width;
+  return width == null || MediaQuery.of(context).size.width > width;
 }
 
 ButtonStyle denseAwareOutlinedButtonStyle(
   BuildContext context,
-  double? minScreenWidthForTextBeforeScaling,
+  double? minScreenWidthForText,
 ) {
   final buttonStyle =
       Theme.of(context).outlinedButtonTheme.style ?? const ButtonStyle();
   return _generateButtonStyle(
     context: context,
     buttonStyle: buttonStyle,
-    minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+    minScreenWidthForText: minScreenWidthForText,
   );
 }
 
 ButtonStyle denseAwareTextButtonStyle(
   BuildContext context, {
-  double? minScreenWidthForTextBeforeScaling,
+  double? minScreenWidthForText,
 }) {
   final buttonStyle =
       Theme.of(context).textButtonTheme.style ?? const ButtonStyle();
   return _generateButtonStyle(
     context: context,
     buttonStyle: buttonStyle,
-    minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+    minScreenWidthForText: minScreenWidthForText,
   );
 }
 
 ButtonStyle _generateButtonStyle({
   required BuildContext context,
   required ButtonStyle buttonStyle,
-  double? minScreenWidthForTextBeforeScaling,
+  double? minScreenWidthForText,
 }) {
-  if (!isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)) {
+  if (!isScreenWiderThan(context, minScreenWidthForText)) {
     buttonStyle = buttonStyle.copyWith(
       padding: WidgetStateProperty.resolveWith<EdgeInsets>((_) {
         return EdgeInsets.zero;
