@@ -19,6 +19,7 @@ const _buildAppFlag = 'build-app';
 // AllowAnythingParser instead of manually passing these args through.
 const _machineFlag = 'machine';
 const _dtdUriFlag = 'dtd-uri';
+const _dtdExposedUriFlag = 'dtd-exposed-uri';
 const _allowEmbeddingFlag = 'allow-embedding';
 const _serveWithDartSdkFlag = 'serve-with-dart-sdk';
 
@@ -101,6 +102,11 @@ class ServeCommand extends Command {
       ..addOption(
         _dtdUriFlag,
         help: 'Sets the dtd uri when starting the devtools server',
+      )
+      ..addOption(
+        _dtdExposedUriFlag,
+        help:
+            'Sets the dtd uri that is exposed to the client when starting the devtools server',
       )
       ..addFlag(
         _allowEmbeddingFlag,
