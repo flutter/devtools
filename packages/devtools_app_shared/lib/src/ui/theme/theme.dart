@@ -26,13 +26,9 @@ ThemeData themeFor({
       : _lightTheme(ideTheme: ideTheme, theme: theme);
 
   return colorTheme.copyWith(
-    primaryTextTheme: theme.primaryTextTheme
-        .merge(colorTheme.primaryTextTheme)
-        .apply(fontSizeFactor: ideTheme.fontSizeFactor),
-    textTheme: theme.textTheme
-        .merge(colorTheme.textTheme)
-        .apply(fontSizeFactor: ideTheme.fontSizeFactor),
-  );
+      primaryTextTheme:
+          theme.primaryTextTheme.merge(colorTheme.primaryTextTheme),
+      textTheme: theme.textTheme.merge(colorTheme.textTheme));
 }
 
 ThemeData _darkTheme({

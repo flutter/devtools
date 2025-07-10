@@ -30,8 +30,6 @@ final class IdeTheme {
   final EmbedMode embedMode;
   final bool? _isDarkMode;
 
-  double get fontSizeFactor => fontSize / defaultFontSize;
-
   bool get embedded => embedMode.embedded;
 
   bool get isDarkMode => _isDarkMode ?? useDarkThemeAsDefault;
