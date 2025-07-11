@@ -19,14 +19,12 @@ final class IdeTheme {
   IdeTheme({
     this.backgroundColor,
     this.foregroundColor,
-    this.fontSize = defaultFontSize,
     this.embedMode = EmbedMode.none,
     bool? isDarkMode,
   }) : _isDarkMode = isDarkMode;
 
   final Color? backgroundColor;
   final Color? foregroundColor;
-  final double fontSize;
   final EmbedMode embedMode;
   final bool? _isDarkMode;
 
@@ -49,34 +47,13 @@ extension type IdeThemeQueryParams(Map<String, String?> params) {
   Color? get foregroundColor =>
       tryParseColor(params[foregroundColorKey], logger: _log);
 
-  double get fontSize =>
-      _tryParseDouble(params[fontSizeKey]) ?? defaultFontSize;
-
   EmbedMode get embedMode => EmbedMode.fromArgs(params);
 
   bool get darkMode => params[devToolsThemeKey] != lightThemeValue;
 
   static const backgroundColorKey = 'backgroundColor';
   static const foregroundColorKey = 'foregroundColor';
-  static const fontSizeKey = 'fontSize';
   static const devToolsThemeKey = 'theme';
   static const lightThemeValue = 'light';
   static const darkThemeValue = 'dark';
-
-  double? _tryParseDouble(String? input) {
-    try {
-      if (input != null) {
-        return double.parse(input);
-      }
-    } catch (e, st) {
-      // The user can manipulate the query string so if the value is invalid
-      // print the value but otherwise continue.
-      _log.warning(
-        'Failed to parse "$input" as a double from the querystring, ignoring: $e',
-        e,
-        st,
-      );
-    }
-    return null;
-  }
 }
