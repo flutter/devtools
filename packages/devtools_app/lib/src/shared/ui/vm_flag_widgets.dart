@@ -112,14 +112,14 @@ class ViewVmFlagsButton extends StatelessWidget {
     super.key,
     required this.gaScreen,
     this.elevated = false,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
   });
 
   final String gaScreen;
 
   final bool elevated;
 
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +129,7 @@ class ViewVmFlagsButton extends StatelessWidget {
       icon: Icons.flag_rounded,
       gaScreen: gaScreen,
       gaSelection: gac.HomeScreenEvents.viewVmFlags.name,
-      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      minScreenWidthForText: minScreenWidthForText,
       onPressed: () {
         unawaited(
           showDialog(
@@ -245,15 +245,14 @@ class _FlagTable extends StatelessWidget {
 }
 
 class _NameColumn extends ColumnData<_DialogFlag> {
-  _NameColumn() : super('Name', fixedWidthPx: scaleByFontFactor(180));
+  _NameColumn() : super('Name', fixedWidthPx: 180);
 
   @override
   String getValue(_DialogFlag dataObject) => dataObject.name ?? '';
 }
 
 class _DescriptionColumn extends ColumnData<_DialogFlag> {
-  _DescriptionColumn()
-    : super.wide('Description', minWidthPx: scaleByFontFactor(100));
+  _DescriptionColumn() : super.wide('Description', minWidthPx: 100);
 
   @override
   String getValue(_DialogFlag dataObject) => dataObject.description ?? '';
@@ -269,7 +268,7 @@ class _ValueColumn extends ColumnData<_DialogFlag> {
   _ValueColumn()
     : super(
         'Value',
-        fixedWidthPx: scaleByFontFactor(100),
+        fixedWidthPx: 100,
         headerAlignment: TextAlign.right,
         alignment: ColumnAlignment.right,
       );

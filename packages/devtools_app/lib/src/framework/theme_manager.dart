@@ -99,14 +99,6 @@ class EditorThemeManager extends DisposableController
       }
     }
 
-    if (newTheme.fontSize != null &&
-        newTheme.fontSize!.toDouble() != currentTheme.fontSize) {
-      updateQueryParameter(
-        IdeThemeQueryParams.fontSizeKey,
-        newTheme.fontSize!.toDouble().toString(),
-      );
-    }
-
     setGlobal(IdeTheme, getIdeTheme());
 
     // We are toggling to the opposite theme and then back to force the IDE

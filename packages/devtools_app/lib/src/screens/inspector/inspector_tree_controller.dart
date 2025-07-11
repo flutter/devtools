@@ -357,7 +357,7 @@ class InspectorTreeController extends DisposableController
         ?.node;
   }
 
-  double get horizontalPadding => 10.0;
+  static const horizontalPadding = 10.0;
 
   double getDepthIndent(int depth) {
     return (depth + 1) * inspectorColumnWidth + horizontalPadding;
@@ -1064,7 +1064,7 @@ class _InspectorTreeState extends State<InspectorTree>
                         index,
                       ) {
                         if (index == treeControllerLocal.numRows) {
-                          return SizedBox(height: inspectorRowHeight);
+                          return const SizedBox(height: inspectorRowHeight);
                         }
                         final row = treeControllerLocal.getCachedRow(index)!;
                         final inspectorRef = row.node.diagnostic?.valueRef.id;
@@ -1252,7 +1252,10 @@ class InspectorRowContent extends StatelessWidget {
                         onTap: onToggle,
                         child: RotationTransition(
                           turns: expandArrowAnimation,
-                          child: Icon(Icons.expand_more, size: defaultIconSize),
+                          child: const Icon(
+                            Icons.expand_more,
+                            size: defaultIconSize,
+                          ),
                         ),
                       )
                     : const SizedBox(

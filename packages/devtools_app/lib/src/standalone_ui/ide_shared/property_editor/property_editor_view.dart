@@ -284,7 +284,7 @@ class _InfoTooltip extends StatelessWidget {
   Widget build(BuildContext context) {
     return DevToolsTooltip(
       richMessage: _infoMessage(context),
-      child: Icon(size: defaultIconSize, Icons.info_outline),
+      child: const Icon(size: defaultIconSize, Icons.info_outline),
     );
   }
 

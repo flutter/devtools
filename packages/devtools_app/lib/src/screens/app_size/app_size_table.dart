@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/charts/treemap.dart';
@@ -100,11 +99,7 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
 
 class _SizeColumn extends ColumnData<TreemapNode> {
   _SizeColumn()
-    : super(
-        'Size',
-        alignment: ColumnAlignment.right,
-        fixedWidthPx: scaleByFontFactor(100.0),
-      );
+    : super('Size', alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
 
   @override
   Comparable getValue(TreemapNode dataObject) => dataObject.byteSize;
@@ -127,7 +122,7 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
     : super(
         '% of Total Size',
         alignment: ColumnAlignment.right,
-        fixedWidthPx: scaleByFontFactor(100.0),
+        fixedWidthPx: 100.0,
       );
 
   final int totalSize;
@@ -194,11 +189,7 @@ class AppSizeDiffTable extends StatelessWidget {
 //                   other columns.
 class _DiffColumn extends ColumnData<TreemapNode> {
   _DiffColumn()
-    : super(
-        'Change',
-        alignment: ColumnAlignment.right,
-        fixedWidthPx: scaleByFontFactor(100.0),
-      );
+    : super('Change', alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
 
   // Ensure sort by absolute size.
   @override

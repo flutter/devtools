@@ -59,7 +59,7 @@ class DevToolsAppBar extends StatelessWidget {
     if (screens.isNotEmpty && actionsWithSpacer.isNotEmpty) {
       actionsWithSpacer.insert(
         0,
-        VerticalLineSpacer(height: defaultToolbarHeight),
+        const VerticalLineSpacer(height: defaultToolbarHeight),
       );
     }
 
@@ -219,7 +219,7 @@ class TabOverflowButton extends StatelessWidget {
 
 @visibleForTesting
 class SelectedTabWrapper extends StatelessWidget {
-  SelectedTabWrapper({super.key, required this.child, double? width})
+  const SelectedTabWrapper({super.key, required this.child, double? width})
     : width = width ?? buttonMinWidth;
 
   final Widget child;

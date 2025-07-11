@@ -571,7 +571,7 @@ class DomainColumn extends ColumnData<LinkData>
         PopupMenuButton<SortingOption>(
           itemBuilder: (BuildContext context) =>
               _buildPopupMenuSortingEntries(controller, isPath: false),
-          child: Icon(Icons.arrow_drop_down, size: actionsIconSize),
+          child: const Icon(Icons.arrow_drop_down, size: actionsIconSize),
         ),
       ],
     );
@@ -633,7 +633,7 @@ class PathColumn extends ColumnData<LinkData>
         PopupMenuButton<SortingOption>(
           itemBuilder: (BuildContext context) =>
               _buildPopupMenuSortingEntries(controller, isPath: true),
-          child: Icon(Icons.arrow_drop_down, size: actionsIconSize),
+          child: const Icon(Icons.arrow_drop_down, size: actionsIconSize),
         ),
       ],
     );
@@ -716,7 +716,7 @@ class SchemeColumn extends ColumnData<LinkData>
               _buildPopupMenuFilterEntry(controller, FilterOption.custom),
             ];
           },
-          child: Icon(Icons.arrow_drop_down, size: actionsIconSize),
+          child: const Icon(Icons.arrow_drop_down, size: actionsIconSize),
         ),
       ],
     );
@@ -768,7 +768,7 @@ class OSColumn extends ColumnData<LinkData>
               _buildPopupMenuFilterEntry(controller, FilterOption.ios),
             ];
           },
-          child: Icon(Icons.arrow_drop_down, size: actionsIconSize),
+          child: const Icon(Icons.arrow_drop_down, size: actionsIconSize),
         ),
       ],
     );
@@ -841,7 +841,7 @@ class StatusColumn extends ColumnData<LinkData>
               _buildPopupMenuFilterEntry(controller, FilterOption.noIssue),
             ];
           },
-          child: Icon(Icons.arrow_drop_down, size: actionsIconSize),
+          child: const Icon(Icons.arrow_drop_down, size: actionsIconSize),
         ),
       ],
     );
@@ -874,7 +874,7 @@ class StatusColumn extends ColumnData<LinkData>
 
 class NavigationColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData> {
-  NavigationColumn() : super('', fixedWidthPx: scaleByFontFactor(40));
+  NavigationColumn() : super('', fixedWidthPx: 40);
 
   @override
   bool get supportsSorting => false;

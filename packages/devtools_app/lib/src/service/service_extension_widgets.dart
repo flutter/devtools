@@ -49,13 +49,13 @@ class ExtensionState {
 class ServiceExtensionButtonGroup extends StatefulWidget {
   const ServiceExtensionButtonGroup({
     super.key,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
     this.minScreenWidthForTextBeforeTruncating,
     required this.extensions,
     this.fillColor,
   });
 
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
   final double? minScreenWidthForTextBeforeTruncating;
   final List<ToggleableServiceExtensionDescription> extensions;
   final Color? fillColor;
@@ -139,8 +139,7 @@ class _ServiceExtensionButtonGroupState
           for (final extensionState in _extensionStates)
             ServiceExtensionButton(
               extensionState: extensionState,
-              minScreenWidthForTextBeforeScaling:
-                  widget.minScreenWidthForTextBeforeScaling,
+              minScreenWidthForText: widget.minScreenWidthForText,
               minScreenWidthForTextBeforeTruncating:
                   widget.minScreenWidthForTextBeforeTruncating,
             ),
@@ -184,13 +183,13 @@ class ServiceExtensionButton extends StatelessWidget {
   const ServiceExtensionButton({
     super.key,
     required this.extensionState,
-    required this.minScreenWidthForTextBeforeScaling,
+    required this.minScreenWidthForText,
     required this.minScreenWidthForTextBeforeTruncating,
   });
 
   final ExtensionState extensionState;
 
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
   final double? minScreenWidthForTextBeforeTruncating;
 
   @override
@@ -202,8 +201,7 @@ class ServiceExtensionButton extends StatelessWidget {
       child: Container(
         height: defaultButtonHeight,
         padding: EdgeInsets.symmetric(
-          horizontal:
-              isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)
+          horizontal: isScreenWiderThan(context, minScreenWidthForText)
               ? defaultSpacing
               : 0.0,
         ),
@@ -212,7 +210,7 @@ class ServiceExtensionButton extends StatelessWidget {
           isScreenWiderThan(context, minScreenWidthForTextBeforeTruncating)
               ? description.title
               : description.shortTitle ?? description.title,
-          unscaledMinIncludeTextWidth: minScreenWidthForTextBeforeScaling,
+          unscaledMinIncludeTextWidth: minScreenWidthForText,
         ),
       ),
     );
@@ -378,7 +376,7 @@ class _RegisteredServiceExtensionButtonState
         }),
       ),
       child: Container(
-        constraints: BoxConstraints.tightFor(
+        constraints: const BoxConstraints.tightFor(
           width: actionWidgetSize,
           height: actionWidgetSize,
         ),
@@ -633,7 +631,7 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
 /// A button that, when pressed, will display an overlay directly below that has
 /// a list of service extension checkbox settings.
 class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
-  ServiceExtensionCheckboxGroupButton({
+  const ServiceExtensionCheckboxGroupButton({
     super.key,
     required this.title,
     required this.icon,
@@ -642,9 +640,9 @@ class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
     this.forceShowOverlayController,
     this.customExtensionUi = const <String, Widget>{},
     this.tooltip,
-    double overlayWidthBeforeScaling = _defaultWidth,
-    this.minScreenWidthForTextBeforeScaling,
-  }) : overlayWidth = scaleByFontFactor(overlayWidthBeforeScaling);
+    this.overlayWidth = _defaultWidth,
+    this.minScreenWidthForText,
+  });
 
   /// Title for the button.
   final String title;
@@ -653,7 +651,7 @@ class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
   final IconData icon;
 
   /// The minimum screen width for which this button should include text.
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
 
   /// Extensions to be surfaced as checkbox settings in the overlay.
   final List<ToggleableServiceExtensionDescription> extensions;
@@ -754,8 +752,7 @@ class _ServiceExtensionCheckboxGroupButtonState
       child: MaterialIconLabel(
         label: widget.title,
         iconData: widget.icon,
-        minScreenWidthForTextBeforeScaling:
-            widget.minScreenWidthForTextBeforeScaling,
+        minScreenWidthForText: widget.minScreenWidthForText,
       ),
     );
     if (widget.tooltip != null && widget.tooltip!.isNotEmpty) {

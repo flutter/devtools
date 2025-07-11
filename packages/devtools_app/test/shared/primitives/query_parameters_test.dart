@@ -29,7 +29,6 @@ void main() {
         'embedMode': 'one',
         IdeThemeQueryParams.backgroundColorKey: '#112233',
         IdeThemeQueryParams.foregroundColorKey: '#112244',
-        IdeThemeQueryParams.fontSizeKey: '8.0',
         IdeThemeQueryParams.devToolsThemeKey: 'dark',
       });
 
@@ -54,7 +53,6 @@ void main() {
       expect(params.ideThemeParams.embedMode, EmbedMode.embedOne);
       expect(params.ideThemeParams.backgroundColor, const Color(0xFF112233));
       expect(params.ideThemeParams.foregroundColor, const Color(0xFF112244));
-      expect(params.ideThemeParams.fontSize, 8.0);
       expect(params.ideThemeParams.darkMode, true);
     });
 
@@ -90,7 +88,6 @@ void main() {
         'embedMode': 'one',
         IdeThemeQueryParams.backgroundColorKey: '#112233',
         IdeThemeQueryParams.foregroundColorKey: '#112244',
-        IdeThemeQueryParams.fontSizeKey: '8.0',
         IdeThemeQueryParams.devToolsThemeKey: 'dark',
       });
 
@@ -108,7 +105,6 @@ void main() {
       expect(params.ideThemeParams.embedMode, EmbedMode.embedOne);
       expect(params.ideThemeParams.backgroundColor, const Color(0xFF112233));
       expect(params.ideThemeParams.foregroundColor, const Color(0xFF112244));
-      expect(params.ideThemeParams.fontSize, 8.0);
       expect(params.ideThemeParams.darkMode, true);
 
       params = params.withUpdates({
@@ -135,7 +131,6 @@ void main() {
       expect(params.ideThemeParams.embedMode, EmbedMode.embedMany);
       expect(params.ideThemeParams.backgroundColor, const Color(0xFF112233));
       expect(params.ideThemeParams.foregroundColor, const Color(0xFF112244));
-      expect(params.ideThemeParams.fontSize, 10.0);
       expect(params.ideThemeParams.darkMode, false);
     });
 

@@ -12,7 +12,7 @@ import 'package:flutter/material.dart' hide Stack;
 import '../primitives/collapsible_mixin.dart';
 import '../primitives/trees.dart';
 
-double get defaultTreeViewRowHeight => scaleByFontFactor(20.0);
+const defaultTreeViewRowHeight = 20.0;
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   const TreeView({
@@ -188,13 +188,13 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
                   onTap: _onExpanded,
                   child: RotationTransition(
                     turns: expandArrowAnimation,
-                    child: Icon(
+                    child: const Icon(
                       Icons.keyboard_arrow_down,
                       size: defaultIconSize,
                     ),
                   ),
                 )
-              : SizedBox(width: defaultIconSize),
+              : const SizedBox(width: defaultIconSize),
           Expanded(child: widget.buildDisplay(_onSelected)),
         ],
       ),

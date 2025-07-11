@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../../../../shared/analytics/analytics.dart' as ga;
@@ -40,7 +39,7 @@ class _InstanceColumn extends ColumnData<PathData> {
         titleTooltip:
             'Number of instances of the class\n'
             'retained by the path.',
-        fixedWidthPx: scaleByFontFactor(80.0),
+        fixedWidthPx: 80.0,
         alignment: ColumnAlignment.right,
       );
 
@@ -56,7 +55,7 @@ class _ShallowSizeColumn extends ColumnData<PathData> {
     : super(
         isDiff ? 'Shallow\nSize Delta' : 'Shallow\nDart Size',
         titleTooltip: SizeType.shallow.description,
-        fixedWidthPx: scaleByFontFactor(80.0),
+        fixedWidthPx: 80.0,
         alignment: ColumnAlignment.right,
       );
 
@@ -76,7 +75,7 @@ class _RetainedSizeColumn extends ColumnData<PathData> {
     : super(
         isDiff ? 'Retained\nSize Delta' : 'Retained\nDart Size',
         titleTooltip: SizeType.retained.description,
-        fixedWidthPx: scaleByFontFactor(80.0),
+        fixedWidthPx: 80.0,
         alignment: ColumnAlignment.right,
       );
 

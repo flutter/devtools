@@ -87,7 +87,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     // otherwise assume defaultFontSize for the TextStyle.
     final textStyle =
         diagnostic?.descriptionTextStyleFromBuild ??
-        TextStyle(fontSize: defaultFontSize);
+        const TextStyle(fontSize: defaultFontSize);
 
     final spans = DiagnosticsNodeDescription.buildDescriptionTextSpans(
       description: diagnostic?.description ?? '',
