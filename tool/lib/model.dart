@@ -196,6 +196,13 @@ class FlutterSdk {
     _current = findFromPathEnvironmentVariable();
   }
 
+  /// Sets the active Flutter SDK to the one at [sdkPath].
+  ///
+  /// Throws if an SDK is not found at [sdkPath].
+  static void useFromPath(String sdkPath) {
+    _current = findFromPath(sdkPath);
+  }
+
   /// Finds the Flutter SDK that contains the Dart VM being used to run this
   /// script.
   ///
@@ -233,6 +240,14 @@ class FlutterSdk {
       'Unable to locate the Flutter SDK from the current running Dart VM:\n'
       '${Platform.resolvedExecutable}',
     );
+  }
+
+  static FlutterSdk findFromPath(String sdkPath) {
+    if (path.basename(path.dirname(sdkPath)) == 'bin') {
+      return FlutterSdk._(path.dirname(path.dirname(sdkPath)));
+    }
+
+    throw Exception('Unable to locate the Flutter SDK at "$sdkPath"');
   }
 
   /// Finds a Flutter SDK in the `PATH` environment variable

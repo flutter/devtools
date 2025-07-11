@@ -208,10 +208,10 @@ class _NotificationState extends State<_Notification>
             widget.remove(widget);
           }
         });
-        controller.reverse();
+        unawaited(controller.reverse());
       });
     }
-    controller.forward();
+    unawaited(controller.forward());
   }
 
   @override

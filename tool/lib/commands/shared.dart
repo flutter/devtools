@@ -84,6 +84,17 @@ extension BuildCommandArgsExtension on ArgParser {
     );
   }
 
+  void addNoMinifyWasmFlag() {
+    addFlag(
+      SharedCommandArgs.noMinifyWasm.flagName,
+      defaultsTo: false,
+      help:
+          'When this flag is present, class names and errors will not be '
+          'truncated. This flag is ignored if the --wasm flag is '
+          'not present.',
+    );
+  }
+
   void addDebugServerFlag() {
     addFlag(
       SharedCommandArgs.debugServer.flagName,
@@ -109,6 +120,7 @@ enum SharedCommandArgs {
   pubGet('pub-get'),
   wasm('wasm'),
   noStripWasm('no-strip-wasm'),
+  noMinifyWasm('no-minify-wasm'),
   runApp('run-app'),
   serveWithDartSdk('serve-with-dart-sdk'),
   updateFlutter('update-flutter'),

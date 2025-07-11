@@ -67,7 +67,7 @@ class GenerateCodeCommand extends Command {
     final upgrade = argResults![_upgradeFlag] as bool;
     if (pubGet) {
       await processManager.runProcess(
-        CliCommand.tool(['pub-get', '--only-main', if (upgrade) '--upgrade']),
+        CliCommand.tool(['pub-get', if (upgrade) '--upgrade']),
       );
     }
 

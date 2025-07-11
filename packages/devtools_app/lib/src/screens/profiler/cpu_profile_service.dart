@@ -16,7 +16,8 @@ extension CpuProfilerExtension on VmService {
     required int extentMicros,
   }) async {
     // Grab the value of this flag before doing asynchronous work.
-    final vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
+    final advancedDeveloperModeEnabled =
+        preferences.advancedDeveloperModeEnabled.value;
 
     final isolateId = serviceConnection
         .serviceManager
@@ -27,8 +28,8 @@ extension CpuProfilerExtension on VmService {
     final cpuSamples = await serviceConnection.serviceManager.service!
         .getCpuSamples(isolateId, startMicros, extentMicros);
 
-    // If VM developer mode is enabled, getCpuSamples will also include code
-    // profile details automatically (e.g., code stacks and a list of code
+    // If advanced developer mode is enabled, getCpuSamples will also include
+    // code profile details automatically (e.g., code stacks and a list of code
     // objects).
     //
     // If the samples contain a code stack, we should attach them to the
@@ -41,9 +42,9 @@ extension CpuProfilerExtension on VmService {
 
     bool buildCodeProfile = false;
     if (rawSamples.isNotEmpty && rawSamples.first.containsKey(kCodeStack)) {
-      // kCodeStack should not be present in the response if VM developer mode
-      // is not enabled.
-      assert(vmDeveloperModeEnabled);
+      // `kCodeStack` should not be present in the response if advanced
+      // developer mode is not enabled.
+      assert(advancedDeveloperModeEnabled);
       buildCodeProfile = true;
       final samples = cpuSamples.samples!;
       for (int i = 0; i < samples.length; ++i) {

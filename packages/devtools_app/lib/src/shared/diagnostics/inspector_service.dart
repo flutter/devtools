@@ -501,13 +501,22 @@ abstract class InspectorObjectGroupBase
   /// attempt carefully cancel futures.
   @override
   Future<void> dispose() {
-    // No need to dispose the group if the isolate is already gone.
-    final disposeComplete = inspectorService.isolateRef != null
-        ? invokeVoidServiceMethod(
-            WidgetInspectorServiceExtensions.disposeGroup.name,
-            groupName,
-          )
-        : Future<void>.value();
+    var disposeComplete = Future<void>.value();
+    try {
+      // Only dispose the group if the isolate still exists.
+      if (inspectorService.isolateRef != null) {
+        disposeComplete = invokeVoidServiceMethod(
+          WidgetInspectorServiceExtensions.disposeGroup.name,
+          groupName,
+        );
+      }
+    } on RPCError catch (e) {
+      if (!e.isServiceDisposedError) {
+        // Swallow exceptions related to trying to dispose an Inspector group on
+        // an already disposed service connection. Otherwise, rethrow.
+        rethrow;
+      }
+    }
     disposed = true;
     return disposeComplete;
   }

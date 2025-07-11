@@ -115,11 +115,15 @@ const refreshIsolateStatistics = 'refreshIsolateStatistics';
 const refreshVmStatistics = 'refreshVmStatistics';
 const refreshProcessMemoryStatistics = 'refreshProcessMemoryStatistics';
 const requestSize = 'requestSize';
+const refreshQueuedMicrotasks = 'refreshQueuedMicrotasks';
 
 // Settings actions:
 const settingsDialog = 'settings';
 const darkTheme = 'darkTheme';
 const analytics = 'analytics';
+// TODO(kenz): consider renaming this to 'advancedDeveloperMode' if the DTD
+//  tools tab stays in DevTools indefinitely. This will depend on whether
+//  https://github.com/flutter/devtools/issues/9216 is resolved.
 const vmDeveloperMode = 'vmDeveloperMode';
 const wasm = 'wasm';
 const verboseLogging = 'verboseLogging';

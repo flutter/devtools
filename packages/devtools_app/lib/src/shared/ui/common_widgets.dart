@@ -2088,39 +2088,6 @@ class DownloadButton extends StatelessWidget {
   }
 }
 
-class RadioButton<T> extends StatelessWidget {
-  const RadioButton({
-    super.key,
-    required this.label,
-    required this.itemValue,
-    required this.groupValue,
-    this.onChanged,
-    this.radioKey,
-  });
-
-  final String label;
-  final T itemValue;
-  final T groupValue;
-  final void Function(T?)? onChanged;
-  final Key? radioKey;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Radio<T>(
-          value: itemValue,
-          groupValue: groupValue,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          onChanged: onChanged,
-          key: radioKey,
-        ),
-        Expanded(child: Text(label, overflow: TextOverflow.ellipsis)),
-      ],
-    );
-  }
-}
-
 class ContextMenuButton extends StatelessWidget {
   const ContextMenuButton({
     super.key,

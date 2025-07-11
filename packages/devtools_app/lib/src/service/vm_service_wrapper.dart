@@ -69,10 +69,19 @@ class VmServiceWrapper extends VmService {
   // in https://github.com/flutter/devtools/pull/4119 as a workaround for
   // profiling the analysis server.
   Future<void> _initSupportedProtocols() async {
-    final supportedProtocols = await getSupportedProtocols();
-    final ddsProtocol = supportedProtocols.protocols?.firstWhereOrNull(
-      (Protocol p) => p.protocolName?.caseInsensitiveEquals('DDS') ?? false,
-    );
+    Protocol? ddsProtocol;
+    try {
+      final supportedProtocols = await getSupportedProtocols();
+      ddsProtocol = supportedProtocols.protocols?.firstWhereOrNull(
+        (Protocol p) => p.protocolName?.caseInsensitiveEquals('DDS') ?? false,
+      );
+    } on RPCError catch (e) {
+      if (!e.isServiceDisposedError) {
+        // Swallow exceptions related to trying to interact with an
+        // already-disposed service connection. Otherwise, rethrow.
+        rethrow;
+      }
+    }
     _ddsSupported = ddsProtocol != null;
     _supportedProtocolsInitialized.complete();
   }
@@ -105,7 +114,7 @@ class VmServiceWrapper extends VmService {
   /// A sequence number incremented and attached to each DAP request.
   static int _dapSeq = 0;
 
-  /// Executes `callback` for each isolate, and waiting for all callbacks to
+  /// Executes [callback] for each isolate, and waits for all callbacks to
   /// finish before completing.
   Future<void> forEachIsolate(
     Future<void> Function(IsolateRef) callback,
@@ -143,10 +152,10 @@ class VmServiceWrapper extends VmService {
         'timeOriginMicros': timeOriginMicros,
         'timeExtentMicros': timeExtentMicros,
         // Requests the code profile in addition to the function profile when
-        // running with VM developer mode enabled. This data isn't accessible
-        // in non-VM developer mode, so not requesting the code profile will
-        // save on space and network usage.
-        '_code': preferences.vmDeveloperModeEnabled.value,
+        // running with advanced developer mode enabled. This data isn't
+        // accessible in non-advanced developer mode, so not requesting the code
+        // profile will save on space and network usage.
+        '_code': preferences.advancedDeveloperModeEnabled.value,
       },
     ).then((e) => e as CpuSamples);
   }
@@ -243,6 +252,13 @@ class VmServiceWrapper extends VmService {
     return _maybeReturnStreamWithHistory(
       onStdoutEventWithHistory,
       fallbackStream: onStdoutEvent,
+    );
+  }
+
+  Stream<Event> get onTimerEventWithHistorySafe {
+    return _maybeReturnStreamWithHistory(
+      onTimerEventWithHistory,
+      fallbackStream: onTimerEvent,
     );
   }
 
@@ -392,7 +408,7 @@ class VmServiceWrapper extends VmService {
   /// Adds support for private VM RPCs that can only be used when VM developer
   /// mode is enabled. Not for use outside of VM developer pages.
   /// Allows callers to invoke extension methods for private RPCs. This should
-  /// only be set by [PreferencesController.toggleVmDeveloperMode] or tests.
+  /// only be set by [PreferencesController.toggleAdvancedDeveloperMode] or tests.
   static bool enablePrivateRpcs = false;
 
   Future<T?> _privateRpcInvoke<T>(

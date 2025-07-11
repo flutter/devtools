@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
@@ -62,29 +63,37 @@ class NetworkService {
   /// Force refreshes the HTTP requests logged to the timeline as well as any
   /// recorded Socket traffic.
   ///
-  /// This method calls `cancelledCallback` after each async gap to ensure that
+  /// This method calls [cancelledCallback] after each async gap to ensure that
   /// this operation has not been cancelled during the async gap.
   Future<void> refreshNetworkData({
     DebounceCancelledCallback? cancelledCallback,
   }) async {
     if (serviceConnection.serviceManager.service == null) return;
-    final timestampObj = await serviceConnection.serviceManager.service!
-        .getVMTimelineMicros();
-    if (cancelledCallback?.call() ?? false) return;
+    try {
+      final timestampObj = await serviceConnection.serviceManager.service!
+          .getVMTimelineMicros();
+      if (cancelledCallback?.call() ?? false) return;
 
-    final timestamp = timestampObj.timestamp!;
-    final sockets = await _refreshSockets();
-    if (cancelledCallback?.call() ?? false) return;
+      final timestamp = timestampObj.timestamp!;
+      final sockets = await _refreshSockets();
+      if (cancelledCallback?.call() ?? false) return;
 
-    networkController.lastSocketDataRefreshMicros = timestamp;
-    List<HttpProfileRequest>? httpRequests;
-    httpRequests = await _refreshHttpProfile();
-    if (cancelledCallback?.call() ?? false) return;
+      networkController.lastSocketDataRefreshMicros = timestamp;
+      List<HttpProfileRequest>? httpRequests;
+      httpRequests = await _refreshHttpProfile();
+      if (cancelledCallback?.call() ?? false) return;
 
-    networkController.processNetworkTraffic(
-      sockets: sockets,
-      httpRequests: httpRequests,
-    );
+      networkController.processNetworkTraffic(
+        sockets: sockets,
+        httpRequests: httpRequests,
+      );
+    } on RPCError catch (e) {
+      if (!e.isServiceDisposedError) {
+        // Swallow exceptions related to trying to interact with an
+        // already-disposed service connection. Otherwise, rethrow.
+        rethrow;
+      }
+    }
   }
 
   Future<List<HttpProfileRequest>> _refreshHttpProfile() async {
@@ -140,19 +149,17 @@ class NetworkService {
 
     // TODO(https://github.com/flutter/devtools/issues/5057):
     // Filter lastrefreshMicros inside [service.getSocketProfile] instead.
-    return sockets
-        .where(
-          (element) =>
-              element.startTime >
-                  networkController.lastSocketDataRefreshMicros ||
-              (element.endTime ?? 0) >
-                  networkController.lastSocketDataRefreshMicros ||
-              (element.lastReadTime ?? 0) >
-                  networkController.lastSocketDataRefreshMicros ||
-              (element.lastWriteTime ?? 0) >
-                  networkController.lastSocketDataRefreshMicros,
-        )
-        .toList();
+    final lastSocketDataRefreshMicros =
+        networkController.lastSocketDataRefreshMicros;
+    return [
+      ...sockets.where(
+        (element) =>
+            element.startTime > lastSocketDataRefreshMicros ||
+            (element.endTime ?? 0) > lastSocketDataRefreshMicros ||
+            (element.lastReadTime ?? 0) > lastSocketDataRefreshMicros ||
+            (element.lastWriteTime ?? 0) > lastSocketDataRefreshMicros,
+      ),
+    ];
   }
 
   Future<void> _clearSocketProfile() async {
