@@ -43,7 +43,7 @@ class DebugSessions extends StatelessWidget {
         else
           Table(
             columnWidths: const {0: FlexColumnWidth()},
-            defaultColumnWidth: FixedColumnWidth(
+            defaultColumnWidth: const FixedColumnWidth(
               actionsIconSize + denseSpacing,
             ),
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
@@ -76,7 +76,7 @@ class DebugSessions extends StatelessWidget {
                 }
               : null,
           tooltip: 'Hot Reload',
-          icon: Icon(hotReloadIcon, size: actionsIconSize),
+          icon: const Icon(hotReloadIcon, size: actionsIconSize),
         ),
         IconButton(
           onPressed: editor.supportsHotRestart && (isDebug || !isFlutter)
@@ -86,7 +86,7 @@ class DebugSessions extends StatelessWidget {
                 }
               : null,
           tooltip: 'Hot Restart',
-          icon: Icon(hotRestartIcon, size: actionsIconSize),
+          icon: const Icon(hotRestartIcon, size: actionsIconSize),
         ),
       ],
     );

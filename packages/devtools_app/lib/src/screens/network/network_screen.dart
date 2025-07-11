@@ -214,14 +214,13 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           tooltipOverride: _recording
               ? 'Stop recording network traffic'
               : 'Resume recording network traffic',
-          minScreenWidthForTextBeforeScaling: double.infinity,
+          minScreenWidthForText: double.infinity,
           gaScreen: gac.network,
           gaSelection: _recording ? gac.pause : gac.resume,
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
-          minScreenWidthForTextBeforeScaling:
-              _NetworkProfilerControls._includeTextWidth,
+          minScreenWidthForText: _NetworkProfilerControls._includeTextWidth,
           gaScreen: gac.network,
           gaSelection: gac.clear,
           onPressed: controller.clear,
@@ -267,8 +266,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         else
           DownloadButton(
             tooltip: 'Download as .har file',
-            minScreenWidthForTextBeforeScaling:
-                _NetworkProfilerControls._includeTextWidth,
+            minScreenWidthForText: _NetworkProfilerControls._includeTextWidth,
             onPressed: controller.exportAsHarFile,
             gaScreen: gac.network,
             gaSelection: gac.NetworkEvent.downloadAsHar.name,
@@ -366,7 +364,7 @@ class AddressColumn extends ColumnData<NetworkRequest>
   AddressColumn()
     : super.wide(
         'Address',
-        minWidthPx: scaleByFontFactor(isEmbedded() ? 100 : 150.0),
+        minWidthPx: isEmbedded() ? 100 : 150.0,
         showTooltip: true,
       );
 
@@ -398,7 +396,7 @@ class AddressColumn extends ColumnData<NetworkRequest>
 }
 
 class MethodColumn extends ColumnData<NetworkRequest> {
-  MethodColumn() : super('Method', fixedWidthPx: scaleByFontFactor(60));
+  MethodColumn() : super('Method', fixedWidthPx: 60);
 
   @override
   String getValue(NetworkRequest dataObject) {
@@ -409,11 +407,7 @@ class MethodColumn extends ColumnData<NetworkRequest> {
 class ActionsColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
   ActionsColumn()
-    : super(
-        '',
-        fixedWidthPx: scaleByFontFactor(32),
-        alignment: ColumnAlignment.right,
-      );
+    : super('', fixedWidthPx: 32, alignment: ColumnAlignment.right);
 
   @override
   bool get supportsSorting => false;
@@ -476,7 +470,7 @@ class StatusColumn extends ColumnData<NetworkRequest>
         'Status',
         alignment: ColumnAlignment.right,
         headerAlignment: TextAlign.right,
-        fixedWidthPx: scaleByFontFactor(50),
+        fixedWidthPx: 50,
       );
 
   @override
@@ -513,7 +507,7 @@ class TypeColumn extends ColumnData<NetworkRequest> {
         'Type',
         alignment: ColumnAlignment.right,
         headerAlignment: TextAlign.right,
-        fixedWidthPx: scaleByFontFactor(50),
+        fixedWidthPx: 50,
       );
 
   @override
@@ -533,7 +527,7 @@ class DurationColumn extends ColumnData<NetworkRequest> {
         'Duration',
         alignment: ColumnAlignment.right,
         headerAlignment: TextAlign.right,
-        fixedWidthPx: scaleByFontFactor(75),
+        fixedWidthPx: 75,
       );
 
   @override
@@ -556,7 +550,7 @@ class TimestampColumn extends ColumnData<NetworkRequest> {
         'Timestamp',
         alignment: ColumnAlignment.right,
         headerAlignment: TextAlign.right,
-        fixedWidthPx: scaleByFontFactor(115),
+        fixedWidthPx: 115,
       );
 
   @override

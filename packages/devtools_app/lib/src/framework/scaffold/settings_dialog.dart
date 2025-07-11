@@ -107,7 +107,7 @@ class SettingsDialog extends StatelessWidget {
 class _VerboseLoggingSetting extends StatelessWidget {
   const _VerboseLoggingSetting();
 
-  static const _minScreenWidthForTextBeforeScaling = 500.0;
+  static const _minScreenWidthForText = 500.0;
 
   @override
   Widget build(BuildContext context) {
@@ -130,8 +130,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
               icon: Icons.copy_outlined,
               gaScreen: gac.settingsDialog,
               gaSelection: gac.copyLogs,
-              minScreenWidthForTextBeforeScaling:
-                  _minScreenWidthForTextBeforeScaling,
+              minScreenWidthForText: _minScreenWidthForText,
               onPressed: () async => await copyToClipboard(
                 LogStorage.root.toString(),
                 successMessage: 'Successfully copied logs',
@@ -142,8 +141,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
               label: 'Clear logs',
               gaScreen: gac.settingsDialog,
               gaSelection: gac.clearLogs,
-              minScreenWidthForTextBeforeScaling:
-                  _minScreenWidthForTextBeforeScaling,
+              minScreenWidthForText: _minScreenWidthForText,
               onPressed: LogStorage.root.clear,
             ),
           ],

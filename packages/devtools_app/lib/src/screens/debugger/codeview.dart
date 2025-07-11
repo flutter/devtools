@@ -65,7 +65,7 @@ class CodeView extends StatefulWidget {
     'debuggerCodeViewVerticalScrollbarKey',
   );
 
-  static double get rowHeight => scaleByFontFactor(16.0);
+  static const rowHeight = 16.0;
 
   final CodeViewController codeViewController;
   final DebuggerController? debuggerController;
@@ -872,7 +872,7 @@ class Gutter extends StatelessWidget {
         itemCount: lineCount + profileInformationHeaderOffset,
         itemBuilder: (context, index) {
           if (showProfileInformation && index == 0) {
-            return SizedBox(height: CodeView.rowHeight);
+            return const SizedBox(height: CodeView.rowHeight);
           }
           final lineNum =
               lineOffset - profileInformationHeaderOffset + index + 1;
@@ -929,8 +929,8 @@ class GutterItem extends StatelessWidget {
     final breakpointColor = theme.colorScheme.primary;
     final subtleColor = theme.unselectedWidgetColor;
 
-    final bpBoxSize = breakpointRadius * 2;
-    final executionPointIndent = scaleByFontFactor(10.0);
+    const bpBoxSize = breakpointRadius * 2;
+    const executionPointIndent = 10.0;
     Color? color;
     TextStyle? coverageTextStyleOverride;
     final hasCoverage = coverageHit;
@@ -975,7 +975,7 @@ class GutterItem extends StatelessWidget {
               style: coverageTextStyleOverride,
             ),
             Container(
-              padding: EdgeInsets.only(left: executionPointIndent),
+              padding: const EdgeInsets.only(left: executionPointIndent),
               alignment: Alignment.centerLeft,
               child: AnimatedOpacity(
                 duration: defaultDuration,
@@ -1075,7 +1075,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
         itemCount: widget.lines.length + profileInformationHeaderOffset,
         itemBuilder: (context, index) {
           if (widget.showProfileInformation && index == 0) {
-            return SizedBox(height: CodeView.rowHeight);
+            return const SizedBox(height: CodeView.rowHeight);
           }
           final dataIndex = index - profileInformationHeaderOffset;
           final lineNum = dataIndex + 1;
@@ -1143,7 +1143,7 @@ class LineItem extends StatelessWidget {
     this.activeSearchMatch,
   });
 
-  static double get _hoverWidth => scaleByFontFactor(400.0);
+  static const _hoverWidth = 400.0;
 
   final TextSpan lineContents;
   final StackFrameAndSourcePosition? pausedFrame;
@@ -1416,7 +1416,7 @@ class ScriptPopupMenu extends StatelessWidget {
                 .buildExtraDebuggerScriptPopupMenuOptions())
           extensionMenuOption.build(),
       ],
-      child: Icon(Icons.more_vert, size: actionsIconSize),
+      child: const Icon(Icons.more_vert, size: actionsIconSize),
     );
   }
 }
@@ -1442,11 +1442,11 @@ class ScriptHistoryPopupMenu extends StatelessWidget {
       tooltip: 'Select recent script',
       enabled: enabled,
       onSelected: onSelected,
-      offset: Offset(
+      offset: const Offset(
         actionsIconSize + denseSpacing,
         buttonMinWidth + denseSpacing,
       ),
-      child: Icon(Icons.history, size: actionsIconSize),
+      child: const Icon(Icons.history, size: actionsIconSize),
     );
   }
 }
@@ -1585,9 +1585,9 @@ class GoToLineDialog extends StatelessWidget {
                 );
               }
             },
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Line Number',
-              contentPadding: EdgeInsets.all(scaleByFontFactor(5.0)),
+              contentPadding: EdgeInsets.all(5.0),
             ),
             keyboardType: TextInputType.number,
             inputFormatters: <TextInputFormatter>[

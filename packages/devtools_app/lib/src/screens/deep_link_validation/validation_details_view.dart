@@ -732,12 +732,12 @@ class _CheckTableHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       tileColor: Theme.of(context).colorScheme.deeplinkTableHeaderColor,
-      title: Padding(
+      title: const Padding(
         padding: EdgeInsets.only(
           left: defaultSpacing,
           right: defaultSpacing + actionsIconSize,
         ),
-        child: const Row(
+        child: Row(
           children: [
             Expanded(child: Text('OS')),
             Expanded(child: Text('Issue type')),
@@ -779,7 +779,7 @@ class _CheckExpansionTile extends StatelessWidget {
       return ListTile(
         tileColor: theme.colorScheme.alternatingBackgroundColor2,
         title: title,
-        trailing: SizedBox(width: actionsIconSize),
+        trailing: const SizedBox(width: actionsIconSize),
       );
     }
     return ExpansionTile(

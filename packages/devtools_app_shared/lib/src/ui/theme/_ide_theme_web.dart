@@ -15,7 +15,6 @@ IdeTheme getIdeTheme() {
   final overrides = IdeTheme(
     backgroundColor: queryParams.backgroundColor,
     foregroundColor: queryParams.foregroundColor,
-    fontSize: queryParams.fontSize,
     embedMode: queryParams.embedMode,
     isDarkMode: queryParams.darkMode,
   );

@@ -16,7 +16,7 @@ import 'inspector_screen_controller.dart';
 class InspectorScreen extends Screen {
   InspectorScreen() : super.fromMetaData(ScreenMetaData.inspector);
 
-  static const minScreenWidthForTextBeforeScaling = 900.0;
+  static const minScreenWidthForText = 900.0;
 
   static final id = ScreenMetaData.inspector.id;
 

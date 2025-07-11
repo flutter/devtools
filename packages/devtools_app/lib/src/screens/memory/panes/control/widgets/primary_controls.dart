@@ -21,7 +21,7 @@ class PrimaryControls extends StatelessWidget {
       show: preferences.memory.showChart,
       gaScreen: gac.memory,
       onPressed: (show) => preferences.memory.showChart.value = show,
-      minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
+      minScreenWidthForText: memoryControlsMinVerboseWidth,
       label: memoryChartText,
       tooltip: 'Toggle visibility of the Memory usage chart',
     );

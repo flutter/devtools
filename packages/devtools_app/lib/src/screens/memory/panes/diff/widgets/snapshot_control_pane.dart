@@ -34,8 +34,7 @@ class SnapshotControlPane extends StatelessWidget {
               DownloadButton(
                 tooltip: 'Download data in CSV format',
                 label: 'CSV',
-                minScreenWidthForTextBeforeScaling:
-                    memoryControlsMinVerboseWidth,
+                minScreenWidthForText: memoryControlsMinVerboseWidth,
                 gaScreen: gac.memory,
                 gaSelection: gac.MemoryEvents.diffSnapshotDownloadCsv.name,
                 onPressed: controller.downloadCurrentItemToCsv,

@@ -232,7 +232,7 @@ class _FramePhaseBlock extends StatelessWidget {
 
   static const _height = 24.0;
 
-  static const minBlockWidth = defaultIconSizeBeforeScaling + densePadding * 8;
+  static const minBlockWidth = defaultIconSize + densePadding * 8;
 
   static const _backgroundColor = ThemedColor(
     light: Color(0xFFEEEEEE),

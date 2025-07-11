@@ -327,7 +327,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             child: Scaffold(
               appBar: showAppBar
                   ? PreferredSize(
-                      preferredSize: Size.fromHeight(defaultToolbarHeight),
+                      preferredSize: const Size.fromHeight(
+                        defaultToolbarHeight,
+                      ),
                       // Place the AppBar inside of a Hero widget to keep it the same across
                       // route transitions.
                       child: Hero(

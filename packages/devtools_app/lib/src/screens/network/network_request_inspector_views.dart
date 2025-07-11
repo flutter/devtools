@@ -137,7 +137,9 @@ class HttpRequestView extends StatelessWidget {
         final requestContentType = requestHeaders?['content-type'] ?? '';
         final isLoading = data.isFetchingFullData;
         if (isLoading) {
-          return CenteredCircularProgressIndicator(size: mediumProgressSize);
+          return const CenteredCircularProgressIndicator(
+            size: mediumProgressSize,
+          );
         }
 
         final isJson = switch (requestContentType) {
@@ -279,7 +281,9 @@ class HttpResponseView extends StatelessWidget {
         final responseBody = data.responseBody!;
         final isLoading = data.isFetchingFullData;
         if (isLoading) {
-          return CenteredCircularProgressIndicator(size: mediumProgressSize);
+          return const CenteredCircularProgressIndicator(
+            size: mediumProgressSize,
+          );
         }
         if (contentType != null && contentType.contains('image')) {
           child = ImageResponseView(data);

@@ -231,10 +231,10 @@ class _ReduceMemoryButtonState extends State<_ReduceMemoryButton> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
             child: inProgress
-                ? SizedBox(
+                ? const SizedBox(
                     height: actionsIconSize,
                     width: actionsIconSize,
-                    child: const CircularProgressIndicator(),
+                    child: CircularProgressIndicator(),
                   )
                 : ValueListenableBuilder(
                     valueListenable: result,

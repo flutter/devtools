@@ -546,10 +546,7 @@ class ChartPainter extends CustomPainter {
     final span = TextSpan(
       // TODO(terry): All text in a chart is grey. A chart like a Trace
       //              should have PaintCharacteristics.
-      style: TextStyle(
-        color: Colors.grey[600],
-        fontSize: unscaledSmallFontSize,
-      ),
+      style: TextStyle(color: Colors.grey[600], fontSize: smallFontSize),
       text: textValue,
     );
     final tp = TextPainter(

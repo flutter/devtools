@@ -431,7 +431,7 @@ class InspectorTreeController extends DisposableController
     return false;
   }
 
-  double get horizontalPadding => 10.0;
+  static const horizontalPadding = 10.0;
 
   /// Returns the indentation of a row at the given [depth] in the inspector.
   ///
@@ -1206,7 +1206,7 @@ class _InspectorTreeState extends State<InspectorTree>
                             index,
                           ) {
                             if (index == rows.length) {
-                              return SizedBox(height: inspectorRowHeight);
+                              return const SizedBox(height: inspectorRowHeight);
                             }
                             final row = treeControllerLocal.rowAtIndex(index)!;
                             final inspectorRef =
@@ -1284,7 +1284,7 @@ class _RowPainter extends CustomPainter {
 
     final node = row.node;
     final showExpandCollapse = node.showExpandCollapse;
-    final distanceFromIconCenterToRowStart =
+    const distanceFromIconCenterToRowStart =
         inspectorColumnIndent * _iconCenterToRowStartXDistancePercentage;
     for (final tick in row.ticks) {
       final expandCollapseX =
@@ -1334,7 +1334,7 @@ class _RowPainter extends CustomPainter {
         subordinates.isNotEmpty &&
         subordinates.last.childrenNow.isEmpty;
     if (expandedWithSingleChild && !lastHiddenSubordinateHasNoChildren) {
-      final distanceFromIconCenterToRowStart =
+      const distanceFromIconCenterToRowStart =
           inspectorColumnIndent * _iconCenterToRowStartXDistancePercentage;
       final iconCenterX =
           _controller.getDepthIndent(row.depth) -
@@ -1434,7 +1434,10 @@ class InspectorRowContent extends StatelessWidget {
                         onTap: onToggle,
                         child: RotationTransition(
                           turns: expandArrowAnimation,
-                          child: Icon(Icons.expand_more, size: defaultIconSize),
+                          child: const Icon(
+                            Icons.expand_more,
+                            size: defaultIconSize,
+                          ),
                         ),
                       )
                     : const SizedBox(

@@ -44,8 +44,7 @@ class SecondaryControls extends StatelessWidget {
                 icon: Icons.delete,
                 label: 'GC',
                 tooltip: 'Trigger full garbage collection.',
-                minScreenWidthForTextBeforeScaling:
-                    memoryControlsMinVerboseWidth,
+                minScreenWidthForText: memoryControlsMinVerboseWidth,
                 gaScreen: gac.memory,
                 gaSelection: gac.MemoryEvents.gc.name,
               );
