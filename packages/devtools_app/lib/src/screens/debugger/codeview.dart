@@ -872,7 +872,7 @@ class Gutter extends StatelessWidget {
         itemCount: lineCount + profileInformationHeaderOffset,
         itemBuilder: (context, index) {
           if (showProfileInformation && index == 0) {
-            return SizedBox(height: CodeView.rowHeight);
+            return const SizedBox(height: CodeView.rowHeight);
           }
           final lineNum =
               lineOffset - profileInformationHeaderOffset + index + 1;
@@ -1075,7 +1075,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
         itemCount: widget.lines.length + profileInformationHeaderOffset,
         itemBuilder: (context, index) {
           if (widget.showProfileInformation && index == 0) {
-            return SizedBox(height: CodeView.rowHeight);
+            return const SizedBox(height: CodeView.rowHeight);
           }
           final dataIndex = index - profileInformationHeaderOffset;
           final lineNum = dataIndex + 1;

@@ -640,9 +640,9 @@ class ServiceExtensionCheckboxGroupButton extends StatefulWidget {
     this.forceShowOverlayController,
     this.customExtensionUi = const <String, Widget>{},
     this.tooltip,
-    double overlayWidth = _defaultWidth,
+    this.overlayWidth = _defaultWidth,
     this.minScreenWidthForText,
-  }) : overlayWidth = overlayWidth;
+  });
 
   /// Title for the button.
   final String title;

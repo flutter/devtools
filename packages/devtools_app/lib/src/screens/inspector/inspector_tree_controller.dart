@@ -1064,7 +1064,7 @@ class _InspectorTreeState extends State<InspectorTree>
                         index,
                       ) {
                         if (index == treeControllerLocal.numRows) {
-                          return SizedBox(height: inspectorRowHeight);
+                          return const SizedBox(height: inspectorRowHeight);
                         }
                         final row = treeControllerLocal.getCachedRow(index)!;
                         final inspectorRef = row.node.diagnostic?.valueRef.id;

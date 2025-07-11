@@ -229,7 +229,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     // Separator between Android data.
     // TODO(terry): Why Center widget doesn't work (parent width is bigger/centered too far right).
     //              Is it centering on a too wide Overlay?
-    final width =
+    const width =
         _hoverWidth -
         totalDividerLineHorizontalSpace -
         DashedLine.defaultDashWidth;

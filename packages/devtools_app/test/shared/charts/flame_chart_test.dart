@@ -27,7 +27,7 @@ void main() {
   final narrowNode = FlameChartNode<CpuStackFrame>(
     key: narrowNodeKey,
     text: 'Narrow test node',
-    rect: Rect.fromLTWH(23.0, 0.0, 21.9, chartRowHeight),
+    rect: const Rect.fromLTWH(23.0, 0.0, 21.9, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
@@ -40,7 +40,7 @@ void main() {
     key: testNodeKey,
     text: 'Test node 1',
     // 30.0 is the minimum node width for text.
-    rect: Rect.fromLTWH(70.0, 0.0, 30.0, chartRowHeight),
+    rect: const Rect.fromLTWH(70.0, 0.0, 30.0, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
@@ -51,7 +51,7 @@ void main() {
   final testNode2 = FlameChartNode<CpuStackFrame>(
     key: narrowNodeKey,
     text: 'Test node 2',
-    rect: Rect.fromLTWH(120.0, 0.0, 50.0, chartRowHeight),
+    rect: const Rect.fromLTWH(120.0, 0.0, 50.0, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
@@ -62,7 +62,7 @@ void main() {
   final testNode3 = FlameChartNode<CpuStackFrame>(
     key: narrowNodeKey,
     text: 'Test node 3',
-    rect: Rect.fromLTWH(180.0, 0.0, 50.0, chartRowHeight),
+    rect: const Rect.fromLTWH(180.0, 0.0, 50.0, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
@@ -73,7 +73,7 @@ void main() {
   final testNode4 = FlameChartNode<CpuStackFrame>(
     key: narrowNodeKey,
     text: 'Test node 4',
-    rect: Rect.fromLTWH(240.0, 0.0, 300.0, chartRowHeight),
+    rect: const Rect.fromLTWH(240.0, 0.0, 300.0, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
@@ -87,7 +87,7 @@ void main() {
   final negativeWidthNode = FlameChartNode<CpuStackFrame>(
     key: noWidthNodeKey,
     text: 'No-width node',
-    rect: Rect.fromLTWH(1.0, 0.0, -0.1, chartRowHeight),
+    rect: const Rect.fromLTWH(1.0, 0.0, -0.1, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),

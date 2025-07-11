@@ -141,7 +141,7 @@ class FlexLayoutExplorerWidgetState
     return RotatedBox(
       quarterTurns: axis == Axis.vertical ? 3 : 0,
       child: Container(
-        constraints: BoxConstraints(
+        constraints: const BoxConstraints(
           maxWidth: alignmentDropdownMaxSize,
           maxHeight: defaultButtonHeight,
         ),
