@@ -431,7 +431,7 @@ class InspectorTreeController extends DisposableController
     return false;
   }
 
-  double get horizontalPadding => 10.0;
+  static const horizontalPadding = 10.0;
 
   /// Returns the indentation of a row at the given [depth] in the inspector.
   ///

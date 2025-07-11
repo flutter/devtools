@@ -12,7 +12,7 @@ import 'package:flutter/material.dart' hide Stack;
 import '../primitives/collapsible_mixin.dart';
 import '../primitives/trees.dart';
 
-double get defaultTreeViewRowHeight => 20.0;
+const defaultTreeViewRowHeight = 20.0;
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   const TreeView({

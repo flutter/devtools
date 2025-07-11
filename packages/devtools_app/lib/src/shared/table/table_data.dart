@@ -124,7 +124,7 @@ abstract class ColumnData<T> {
 abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
   TreeColumnData(super.title) : super.wide();
 
-  static double get treeToggleWidth => 14.0;
+  static const treeToggleWidth = 14.0;
 
   @override
   double getNodeIndentPx(T dataObject) {

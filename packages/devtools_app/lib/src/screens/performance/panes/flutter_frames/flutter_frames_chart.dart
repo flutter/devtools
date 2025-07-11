@@ -89,7 +89,7 @@ class _FlutterFramesChart extends StatefulWidget {
 
   final ValueListenable<bool> impellerEnabled;
 
-  static double get frameNumberSectionHeight => 20.0;
+  static const frameNumberSectionHeight = 20.0;
 
   static double get frameChartScrollbarOffset => defaultScrollBarOffset;
 
@@ -214,7 +214,7 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
 
   static const _outlineBorderWidth = 1.0;
 
-  double get _yAxisUnitsSpace => 48.0;
+  static const _yAxisUnitsSpace = 48.0;
 
   late final ScrollController _framesScrollController;
 
@@ -343,7 +343,7 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
       children: [
         chartAxisPainter,
         Padding(
-          padding: EdgeInsets.only(left: _yAxisUnitsSpace),
+          padding: const EdgeInsets.only(left: _yAxisUnitsSpace),
           child: chart,
         ),
         fpsLinePainter,
@@ -554,7 +554,7 @@ class FlutterFramesChartItem extends StatelessWidget {
     );
 
     final content = Padding(
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         bottom: _FlutterFramesChart.frameNumberSectionHeight,
       ),
       child: InkWell(
@@ -934,7 +934,7 @@ class FPSLinePainter extends CustomPainter {
     required this.bottomMargin,
   });
 
-  double get fpsTextSpace => 45.0;
+  static const fpsTextSpace = 45.0;
 
   final BoxConstraints constraints;
 

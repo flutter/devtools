@@ -26,7 +26,7 @@ import 'utils.dart';
 
 // TODO(kenz): densify the layout explorer visualization for flex widgets.
 
-double get alignmentDropdownMaxSize => 140.0;
+const alignmentDropdownMaxSize = 140.0;
 
 class FlexLayoutExplorerWidget extends LayoutExplorerWidget {
   const FlexLayoutExplorerWidget(super.inspectorController, {super.key});

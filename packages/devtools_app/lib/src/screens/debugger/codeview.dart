@@ -65,7 +65,7 @@ class CodeView extends StatefulWidget {
     'debuggerCodeViewVerticalScrollbarKey',
   );
 
-  static double get rowHeight => 16.0;
+  static const rowHeight = 16.0;
 
   final CodeViewController codeViewController;
   final DebuggerController? debuggerController;
@@ -929,7 +929,7 @@ class GutterItem extends StatelessWidget {
     final breakpointColor = theme.colorScheme.primary;
     final subtleColor = theme.unselectedWidgetColor;
 
-    final bpBoxSize = breakpointRadius * 2;
+    const bpBoxSize = breakpointRadius * 2;
     const executionPointIndent = 10.0;
     Color? color;
     TextStyle? coverageTextStyleOverride;
@@ -1143,7 +1143,7 @@ class LineItem extends StatelessWidget {
     this.activeSearchMatch,
   });
 
-  static double get _hoverWidth => 400.0;
+  static const _hoverWidth = 400.0;
 
   final TextSpan lineContents;
   final StackFrameAndSourcePosition? pausedFrame;

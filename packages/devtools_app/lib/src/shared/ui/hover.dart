@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 import 'common_widgets.dart';
 import 'utils.dart';
 
-double get _maxHoverCardHeight => 250.0;
+const _maxHoverCardHeight = 250.0;
 
 TextStyle get _hoverTitleTextStyle => fixBlurryText(
   const TextStyle(
@@ -332,7 +332,7 @@ class HoverCardTooltip extends StatefulWidget {
        asyncTimeout = null;
 
   static const _hoverDelay = Duration(milliseconds: 500);
-  static double get defaultHoverWidth => 450.0;
+  static const defaultHoverWidth = 450.0;
 
   /// Whether the tooltip is currently enabled.
   final bool Function() enabled;

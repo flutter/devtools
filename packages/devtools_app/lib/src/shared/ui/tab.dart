@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
 
-double get _tabHeight => 46.0;
-double get _textAndIconTabHeight => 72.0;
+const _tabHeight = 46.0;
+const _textAndIconTabHeight = 72.0;
 
 typedef TabAndView = ({DevToolsTab tab, Widget tabView});
 

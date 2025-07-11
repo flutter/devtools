@@ -43,18 +43,18 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   static const _hoverXOffset = 10;
   static const _hoverYOffset = 0.0;
 
-  static double get _hoverWidth => 225.0;
+  static const _hoverWidth = 225.0;
   static const _hoverCardBorderWidth = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
-  static double get _hoverHeightMinimum => 42.0;
-  static double get hoverItemHeight => 17.0;
+  static const _hoverHeightMinimum = 42.0;
+  static const hoverItemHeight = 17.0;
 
   /// One extension event to display (4 lines).
-  static double get _hoverOneEventsHeight => 82.0;
+  static const _hoverOneEventsHeight = 82.0;
 
   /// Many extension events to display.
-  static double get _hoverEventsHeight => 120.0;
+  static const _hoverEventsHeight = 120.0;
 
   static double _computeHoverHeight(
     int eventsCount,

@@ -357,7 +357,7 @@ class InspectorTreeController extends DisposableController
         ?.node;
   }
 
-  double get horizontalPadding => 10.0;
+  static const horizontalPadding = 10.0;
 
   double getDepthIndent(int depth) {
     return (depth + 1) * inspectorColumnWidth + horizontalPadding;

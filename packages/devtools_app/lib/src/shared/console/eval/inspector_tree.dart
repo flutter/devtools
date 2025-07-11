@@ -27,8 +27,8 @@ typedef TreeEventCallback = void Function(InspectorTreeNode node);
 
 const iconPadding = 4.0;
 const chartLineStrokeWidth = 1.0;
-double get inspectorColumnWidth => 12.0;
-double get inspectorRowHeight => 16.0;
+const inspectorColumnWidth = 12.0;
+const inspectorRowHeight = 16.0;
 
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector
