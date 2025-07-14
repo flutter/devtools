@@ -170,8 +170,8 @@ mixin OfflineScreenControllerMixin<T>
     if (offlineDataController.shouldLoadOfflineData(screenId)) {
       // TODO(kenz): investigate this line of code. Do we need to be creating a
       // second copy of the Map from offlineDataController.offlineDataJson or
-      // can we use it directly to save this `Map.from` call?
-      final json = Map<String, Object?>.from(
+      // can we use it directly to save this `Map.of` call?
+      final json = Map<String, Object?>.of(
         (offlineDataController.offlineDataJson[screenId] as Map)
             .cast<String, Object?>(),
       );
