@@ -360,8 +360,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     final columnHeadersCount = showColumnGroupHeader ? 2 : 1;
     maxHeight -=
         columnHeadersCount *
-        (defaultHeaderHeight +
-            (widget.tallHeaders ? scaleByFontFactor(densePadding) : 0.0));
+        (defaultHeaderHeight + (widget.tallHeaders ? densePadding : 0.0));
 
     if (pinnedData.isNotEmpty) {
       maxHeight -=

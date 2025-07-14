@@ -183,7 +183,7 @@ class DisableExtensionDialog extends StatelessWidget {
                   text: 'DevTools Extensions ',
                   style: theme.boldTextStyle,
                 ),
-                WidgetSpan(
+                const WidgetSpan(
                   child: Icon(Icons.extension_rounded, size: defaultIconSize),
                 ),
                 const TextSpan(text: ' menu.'),

@@ -190,7 +190,7 @@ class StatusLine extends StatelessWidget {
         }
       },
       child: screenWidth <= MediaSize.xxs
-          ? DevToolsTooltip(
+          ? const DevToolsTooltip(
               message: noConnectionMsg,
               child: Icon(Icons.warning_amber_rounded, size: actionsIconSize),
             )

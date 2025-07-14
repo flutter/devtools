@@ -89,7 +89,7 @@ class _FlutterFramesChart extends StatefulWidget {
 
   final ValueListenable<bool> impellerEnabled;
 
-  static double get frameNumberSectionHeight => scaleByFontFactor(20.0);
+  static const frameNumberSectionHeight = 20.0;
 
   static double get frameChartScrollbarOffset => defaultScrollBarOffset;
 
@@ -214,7 +214,7 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
 
   static const _outlineBorderWidth = 1.0;
 
-  double get _yAxisUnitsSpace => scaleByFontFactor(48.0);
+  static const _yAxisUnitsSpace = 48.0;
 
   late final ScrollController _framesScrollController;
 
@@ -343,7 +343,7 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
       children: [
         chartAxisPainter,
         Padding(
-          padding: EdgeInsets.only(left: _yAxisUnitsSpace),
+          padding: const EdgeInsets.only(left: _yAxisUnitsSpace),
           child: chart,
         ),
         fpsLinePainter,
@@ -554,7 +554,7 @@ class FlutterFramesChartItem extends StatelessWidget {
     );
 
     final content = Padding(
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         bottom: _FlutterFramesChart.frameNumberSectionHeight,
       ),
       child: InkWell(
@@ -604,7 +604,7 @@ class FlutterFramesChartItem extends StatelessWidget {
             children: [
               content,
               Container(
-                margin: EdgeInsets.only(top: defaultChartHeight),
+                margin: const EdgeInsets.only(top: defaultChartHeight),
                 height: _FlutterFramesChart.frameNumberSectionHeight,
                 alignment: AlignmentDirectional.center,
                 child: Text(
@@ -696,7 +696,7 @@ class FlutterFrameTooltip extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.subdirectory_arrow_right,
-                      size: defaultIconSizeBeforeScaling,
+                      size: defaultIconSize,
                     ),
                     Text(shaderText),
                     MoreInfoLink(
@@ -729,7 +729,7 @@ class FlutterFrameTooltip extends StatelessWidget {
     // text vs text displayed.
     maxWidth += 2 * denseSpacing + _textMeasurementBuffer;
     if (hasShaderJank) {
-      return maxWidth + defaultIconSizeBeforeScaling + _moreInfoLinkWidth;
+      return maxWidth + defaultIconSize + _moreInfoLinkWidth;
     }
     return maxWidth;
   }
@@ -790,7 +790,7 @@ class ShaderJankWarningIcon extends StatelessWidget {
         BlinkingIcon(
           icon: Icons.warning_amber_rounded,
           color: Colors.amber,
-          size: defaultActionsIconSizeBeforeScaling,
+          size: actionsIconSize,
         ),
       ],
     );
@@ -934,7 +934,7 @@ class FPSLinePainter extends CustomPainter {
     required this.bottomMargin,
   });
 
-  double get fpsTextSpace => scaleByFontFactor(45.0);
+  static const fpsTextSpace = 45.0;
 
   final BoxConstraints constraints;
 

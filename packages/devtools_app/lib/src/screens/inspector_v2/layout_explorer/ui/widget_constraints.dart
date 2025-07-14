@@ -14,7 +14,7 @@ import 'theme.dart';
 import 'utils.dart';
 
 class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
-  VisualizeWidthAndHeightWithConstraints({
+  const VisualizeWidthAndHeightWithConstraints({
     super.key,
     required this.properties,
     double? arrowHeadSize,
@@ -33,8 +33,8 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
     final showChildrenWidthsSum =
         propertiesLocal is FlexLayoutProperties &&
         propertiesLocal.isOverflowWidth;
-    final bottomHeight = widthAndConstraintIndicatorSize;
-    final rightWidth = heightAndConstraintIndicatorSize;
+    const bottomHeight = widthAndConstraintIndicatorSize;
+    const rightWidth = heightAndConstraintIndicatorSize;
     final colorScheme = Theme.of(context).colorScheme;
 
     final showOverflowHeight =
@@ -69,7 +69,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
       ),
     );
     final right = Container(
-      margin: EdgeInsets.only(
+      margin: const EdgeInsets.only(
         top: margin,
         left: margin,
         bottom: bottomHeight,
@@ -84,7 +84,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
               Truncateable(
                 truncate: !displayHeightOutsideArrow,
                 child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: arrowMargin),
+                  margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
                   child: ArrowWrapper.bidirectional(
                     arrowColor: heightIndicatorColor,
                     arrowStrokeWidth: arrowStrokeWidth,
@@ -128,7 +128,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
       colorScheme,
     );
     final bottom = Container(
-      margin: EdgeInsets.only(
+      margin: const EdgeInsets.only(
         top: margin,
         left: margin,
         right: rightWidth,
@@ -144,7 +144,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
               Truncateable(
                 truncate: !displayWidthOutsideArrow,
                 child: Container(
-                  margin: EdgeInsets.symmetric(vertical: arrowMargin),
+                  margin: const EdgeInsets.symmetric(vertical: arrowMargin),
                   child: ArrowWrapper.bidirectional(
                     arrowColor: widthIndicatorColor,
                     arrowHeadSize: arrowHeadSize,

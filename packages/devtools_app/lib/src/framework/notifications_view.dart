@@ -14,7 +14,7 @@ import '../shared/managers/notifications.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/ui/common_widgets.dart';
 
-double get _notificationHeight => scaleByFontFactor(175.0);
+const _notificationHeight = 175.0;
 final _notificationWidth = _notificationHeight * goldenRatio;
 
 /// Manager for notifications in the app.
@@ -151,7 +151,7 @@ class _NotificationOverlay extends StatelessWidget {
       child: Padding(
         // Position the notifications in the lower right of the app window, and
         // high enough up that we don't obscure the status line.
-        padding: EdgeInsets.only(
+        padding: const EdgeInsets.only(
           right: defaultSpacing,
           bottom: statusLineHeight + defaultSpacing,
         ),

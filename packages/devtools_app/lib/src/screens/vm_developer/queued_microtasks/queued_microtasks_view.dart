@@ -49,10 +49,10 @@ class RefreshQueuedMicrotasksInstructions extends StatelessWidget {
       child: RichText(
         text: TextSpan(
           style: Theme.of(context).regularTextStyle,
-          children: [
-            const TextSpan(text: 'Click the refresh button '),
+          children: const [
+            TextSpan(text: 'Click the refresh button '),
             WidgetSpan(child: Icon(Icons.refresh, size: defaultIconSize)),
-            const TextSpan(
+            TextSpan(
               text:
                   " to take a new snapshot of the selected isolate's "
                   'microtask queue.',
