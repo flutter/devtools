@@ -36,7 +36,7 @@ const defaultRefreshRate = 60.0;
 
 class ServiceConnectionManager {
   ServiceConnectionManager() {
-    serviceManager = ServiceManager()
+    _serviceManager = ServiceManager()
       ..registerLifecycleCallback(
         ServiceManagerLifecycle.beforeOpenVmService,
         _beforeOpenVmService,
@@ -61,7 +61,9 @@ class ServiceConnectionManager {
       );
   }
 
-  late final ServiceManager<VmServiceWrapper> serviceManager;
+  late final ServiceManager<VmServiceWrapper> _serviceManager;
+
+  ServiceManager<VmServiceWrapper> get serviceManager => _serviceManager;
 
   final vmFlagManager = VmFlagManager();
 
@@ -72,8 +74,7 @@ class ServiceConnectionManager {
   InspectorServiceBase? get inspectorService => _inspectorService;
   InspectorServiceBase? _inspectorService;
 
-  ErrorBadgeManager get errorBadgeManager => _errorBadgeManager;
-  final _errorBadgeManager = ErrorBadgeManager();
+  final errorBadgeManager = ErrorBadgeManager();
 
   VmServiceTrafficLogger? serviceTrafficLogger;
 
@@ -189,7 +190,7 @@ class ServiceConnectionManager {
   /// Returns the view id for the selected isolate's 'FlutterView'.
   ///
   /// Throws an Exception if no 'FlutterView' is present in this isolate.
-  Future<String> get flutterViewId async {
+  Future<String> get _flutterViewId async {
     final flutterViewListResponse = await serviceManager
         .callServiceExtensionOnMainIsolate(registrations.flutterListViews);
     final views = (flutterViewListResponse.json!['views'] as List)
@@ -210,8 +211,8 @@ class ServiceConnectionManager {
     return flutterView['id'] as String;
   }
 
-  /// Flutter engine returns estimate how much memory is used by layer/picture raster
-  /// cache entries in bytes.
+  /// Flutter engine returns estimate how much memory is used by layer/picture
+  /// raster cache entries in bytes.
   ///
   /// Call to returns JSON payload 'EstimateRasterCacheMemory' with two entries:
   ///   layerBytes - layer raster cache entries in bytes
@@ -222,7 +223,7 @@ class ServiceConnectionManager {
       return null;
     }
 
-    final viewId = await flutterViewId;
+    final viewId = await _flutterViewId;
 
     return await serviceManager.callServiceExtensionOnMainIsolate(
       registrations.flutterEngineEstimateRasterCache,
@@ -230,20 +231,9 @@ class ServiceConnectionManager {
     );
   }
 
-  Future<Response?> get renderFrameWithRasterStats async {
-    if (serviceManager.connectedApp == null ||
-        !await serviceManager.connectedApp!.isFlutterApp) {
-      return null;
-    }
-
-    final viewId = await flutterViewId;
-
-    return await serviceManager.callServiceExtensionOnMainIsolate(
-      registrations.renderFrameWithRasterStats,
-      args: {'viewId': viewId},
-    );
-  }
-
+  /// Returns the Flutter refresh rate.
+  ///
+  /// If not connected to a Flutter app, returns `null`.
   Future<double?> get queryDisplayRefreshRate async {
     if (serviceManager.connectedApp == null ||
         !await serviceManager.connectedApp!.isFlutterApp) {
@@ -252,7 +242,7 @@ class ServiceConnectionManager {
 
     const unknownRefreshRate = 0.0;
 
-    final viewId = await flutterViewId;
+    final viewId = await _flutterViewId;
     final displayRefreshRateResponse = await serviceManager
         .callServiceExtensionOnMainIsolate(
           registrations.displayRefreshRate,
