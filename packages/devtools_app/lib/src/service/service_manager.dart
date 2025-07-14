@@ -61,9 +61,8 @@ class ServiceConnectionManager {
       );
   }
 
-  late final ServiceManager<VmServiceWrapper> _serviceManager;
-
   ServiceManager<VmServiceWrapper> get serviceManager => _serviceManager;
+  late final ServiceManager<VmServiceWrapper> _serviceManager;
 
   final vmFlagManager = VmFlagManager();
 
