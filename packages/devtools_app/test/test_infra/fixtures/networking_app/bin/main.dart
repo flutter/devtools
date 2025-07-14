@@ -6,6 +6,7 @@
 
 import 'dart:async';
 import 'dart:convert' show json;
+import 'dart:developer';
 import 'dart:io' as io;
 
 import 'package:dio/dio.dart';
@@ -13,7 +14,54 @@ import 'package:http/http.dart' as http;
 
 void main() async {
   final testServer = await _bindTestServer();
-  await _bindControlServer(testServer);
+  registerMakeRequestExtension(testServer);
+}
+
+void registerMakeRequestExtension(io.HttpServer testServer) {
+  final client = _HttpClient(testServer.port);
+  registerExtension('ext.networking_app.makeRequest', (_, parameters) async {
+    final hasBody = bool.tryParse(parameters['hasBody'] ?? 'false') ?? false;
+    final requestType = parameters['requestType'];
+    if (requestType == null) {
+      return ServiceExtensionResponse.error(
+        ServiceExtensionResponse.invalidParams,
+        json.encode({'error': 'Missing "requestType" field'}),
+      );
+    }
+    switch (requestType) {
+      case 'get':
+        client.get();
+      case 'post':
+        client.post(hasBody: hasBody);
+      case 'put':
+        client.put(hasBody: hasBody);
+      case 'delete':
+        client.delete(hasBody: hasBody);
+      case 'dioGet':
+        client.dioGet();
+      case 'dioPost':
+        client.dioPost(hasBody: hasBody);
+      case 'packageHttpGet':
+        client.packageHttpGet(hasBody: hasBody);
+      case 'packageHttpPost':
+        client.packageHttpPost(hasBody: hasBody);
+      case 'packageHttpPostStreamed':
+        client.packageHttpPostStreamed();
+      default:
+        return ServiceExtensionResponse.error(
+          ServiceExtensionResponse.invalidParams,
+          json.encode({'error': 'Unknown requestType: "$requestType"'}),
+        );
+    }
+    return ServiceExtensionResponse.result(json.encode({'type': 'success'}));
+  });
+
+  registerExtension('ext.networking_app.exit', (_, parameters) async {
+    unawaited(
+      Future.delayed(const Duration(milliseconds: 200)).then((_) => io.exit(0)),
+    );
+    return ServiceExtensionResponse.result(json.encode({'type': 'success'}));
+  });
 }
 
 /// Binds a "test" HTTP server to an available port.
@@ -26,50 +74,6 @@ Future<io.HttpServer> _bindTestServer() async {
     if (request.uri.path.contains('complete/')) {
       await request.response.close();
     }
-  });
-  return server;
-}
-
-/// Binds a "control" HTTP server to an available port.
-///
-/// This server has an HTTP client, and can receive commands for that client to
-/// send requests to the "test" HTTP server.
-Future<io.HttpServer> _bindControlServer(io.HttpServer testServer) async {
-  final client = _HttpClient(testServer.port);
-
-  final server = await io.HttpServer.bind(io.InternetAddress.loopbackIPv4, 0);
-  print(json.encode({'controlPort': server.port}));
-  server.listen((request) async {
-    request.response.headers
-      ..add('Access-Control-Allow-Origin', '*')
-      ..add('Access-Control-Allow-Methods', 'POST,GET,DELETE,PUT,OPTIONS');
-    final path = request.uri.path;
-    final hasBody = path.contains('/body/');
-    request.response
-      ..statusCode = 200
-      ..write('received request at: "$path"');
-
-    if (path.startsWith('/get/')) {
-      client.get();
-    } else if (path.startsWith('/post/')) {
-      client.post(hasBody: hasBody);
-    } else if (path.startsWith('/put/')) {
-      client.put(hasBody: hasBody);
-    } else if (path.startsWith('/delete/')) {
-      client.delete(hasBody: hasBody);
-    } else if (path.startsWith('/dio/get/')) {
-      client.dioGet();
-    } else if (path.startsWith('/dio/post/')) {
-      client.dioPost(hasBody: hasBody);
-    } else if (path.startsWith('/packageHttp/post/')) {
-      client.packageHttpPost(hasBody: hasBody);
-    } else if (path.startsWith('/packageHttp/postStreamed/')) {
-      client.packageHttpPostStreamed();
-    } else if (path.startsWith('/exit/')) {
-      client.close();
-      io.exit(0);
-    }
-    await request.response.close();
   });
   return server;
 }
@@ -134,6 +138,13 @@ class _HttpClient {
     }
     final response = await request.done;
     print('Received DELETE response: $response');
+  }
+
+  void packageHttpGet({bool hasBody = false}) async {
+    print('Sending package:http GET...');
+    // No body.
+    final response = await http.get(_uri);
+    print('Received package:http GET response: $response');
   }
 
   void packageHttpPost({bool hasBody = false}) async {
