@@ -130,7 +130,7 @@ abstract class MetadataChip extends StatelessWidget {
   static const verticalPadding = borderPadding;
   static const iconPadding = densePadding;
   static const _borderRadius = 4.0;
-  static final _metadataIconSize = scaleByFontFactor(12.0);
+  static const _metadataIconSize = 12.0;
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +171,7 @@ abstract class MetadataChip extends StatelessWidget {
             ] else
               // Include an empty SizedBox to ensure a consistent height for the
               // chips, regardless of whether the chip includes an icon.
-              SizedBox(height: _metadataIconSize),
+              const SizedBox(height: _metadataIconSize),
             RichText(
               text: TextSpan(
                 text: text,

@@ -433,7 +433,7 @@ final class MaterialIconLabel extends StatelessWidget {
     this.iconAsset,
     this.iconSize,
     this.color,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
   })  : assert(
           label != null || iconData != null || iconAsset != null,
           'At least one of iconData, iconAsset, or label must be specified.',
@@ -448,7 +448,7 @@ final class MaterialIconLabel extends StatelessWidget {
   final double? iconSize;
   final Color? color;
   final String? label;
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
 
   @override
   Widget build(BuildContext context) {
@@ -465,8 +465,7 @@ final class MaterialIconLabel extends StatelessWidget {
             color: color,
           ),
         // TODO(jacobr): animate showing and hiding the text.
-        if (label != null &&
-            isScreenWiderThan(context, minScreenWidthForTextBeforeScaling))
+        if (label != null && isScreenWiderThan(context, minScreenWidthForText))
           Padding(
             padding: EdgeInsets.only(
               left: iconData != null ? densePadding : 0.0,

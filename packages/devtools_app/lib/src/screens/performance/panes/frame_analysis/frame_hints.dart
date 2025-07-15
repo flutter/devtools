@@ -95,7 +95,7 @@ class _Hint extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(Icons.lightbulb_outline, size: defaultIconSize),
+        const Icon(Icons.lightbulb_outline, size: defaultIconSize),
         const SizedBox(width: denseSpacing),
         Expanded(child: message),
       ],

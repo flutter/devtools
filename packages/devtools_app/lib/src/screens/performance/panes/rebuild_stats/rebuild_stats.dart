@@ -229,7 +229,7 @@ class _RebuildTableState extends State<RebuildTable> {
 }
 
 class _WidgetColumn extends ColumnData<RebuildLocationStats> {
-  _WidgetColumn() : super('Widget', fixedWidthPx: scaleByFontFactor(200));
+  _WidgetColumn() : super('Widget', fixedWidthPx: 200);
 
   @override
   String getValue(RebuildLocationStats dataObject) {
@@ -261,8 +261,7 @@ class _LocationColumn extends ColumnData<RebuildLocationStats> {
 }
 
 class _RebuildCountColumn extends ColumnData<RebuildLocationStats> {
-  _RebuildCountColumn(super.name, this.metricIndex)
-    : super(fixedWidthPx: scaleByFontFactor(130));
+  _RebuildCountColumn(super.name, this.metricIndex) : super(fixedWidthPx: 130);
 
   final int metricIndex;
 

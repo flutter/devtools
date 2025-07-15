@@ -27,7 +27,7 @@ class RegisteredServiceDescription extends RegisteredService {
 /// Hot reload service registered by Flutter Tools.
 ///
 /// We call this service to perform hot reload.
-final hotReload = RegisteredServiceDescription._(
+const hotReload = RegisteredServiceDescription._(
   service: extensions.hotReloadServiceName,
   title: 'Hot Reload',
   icon: Icon(hotReloadIcon, size: actionsIconSize),
@@ -38,7 +38,7 @@ final hotReload = RegisteredServiceDescription._(
 /// Hot restart service registered by Flutter Tools.
 ///
 /// We call this service to perform a hot restart.
-final hotRestart = RegisteredServiceDescription._(
+const hotRestart = RegisteredServiceDescription._(
   service: extensions.hotRestartServiceName,
   title: 'Hot Restart',
   icon: Icon(hotRestartIcon, size: actionsIconSize),

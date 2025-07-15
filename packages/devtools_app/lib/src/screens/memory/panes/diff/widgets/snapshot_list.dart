@@ -221,7 +221,7 @@ class SnapshotListTitle extends StatelessWidget {
             children: [
               leading,
               if (isProcessing)
-                CenteredCircularProgressIndicator(size: smallProgressSize)
+                const CenteredCircularProgressIndicator(size: smallProgressSize)
               else
                 ...trailing,
             ],

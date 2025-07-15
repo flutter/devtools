@@ -229,7 +229,7 @@ class _InclusiveCountColumn extends ColumnData<CpuStackFrame> {
     : super(
         'Inclusive',
         titleTooltip: _tooltip,
-        fixedWidthPx: scaleByFontFactor(_countColumnWidth),
+        fixedWidthPx: _countColumnWidth,
       );
 
   static const _tooltip =
@@ -262,7 +262,7 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
     : super(
         'Exclusive',
         titleTooltip: _tooltip,
-        fixedWidthPx: scaleByFontFactor(_countColumnWidth),
+        fixedWidthPx: _countColumnWidth,
       );
 
   static const _tooltip =

@@ -27,7 +27,7 @@ class WrapWithRefactors extends StatefulWidget {
   });
 
   static const wrapWithPrefix = 'Wrap with';
-  static final buttonIconSize = actionsIconSize;
+  static const buttonIconSize = actionsIconSize;
   static Color buttonColor(ThemeData theme) => theme.colorScheme.onSurface;
 
   final List<WrapWithRefactorAction> refactors;
@@ -251,7 +251,7 @@ final _wrapWithButtonStyle = TextButton.styleFrom(
   ),
   padding: const EdgeInsets.all(densePadding),
   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  minimumSize: Size.square(buttonMinWidth),
+  minimumSize: const Size.square(buttonMinWidth),
 );
 
 const _wrapWithPadding = 'Padding';

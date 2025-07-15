@@ -42,7 +42,7 @@ void main() {
       () async {
         await _runBenchmarks(useWasm: useWasm);
       },
-      timeout: const Timeout(Duration(minutes: 10)),
+      timeout: const Timeout(Duration(minutes: 15)),
       retry: 1,
     );
   }
@@ -129,7 +129,7 @@ void _verifyScoresAgainstThresholds(
 }) {
   final identifier = '${devToolsBenchmark.id}.${useWasm ? 'wasm' : 'js'}';
   stdout.writeln('Verifying $identifier scores against expected thresholds.');
-  final benchmarkThresholds = _benchmarkThresholds(useWasm);
+  final benchmarkThresholds = _benchmarkThresholds(/*useWasm*/);
   expect(
     benchmarkThresholds.containsKey(devToolsBenchmark),
     isTrue,
@@ -177,63 +177,50 @@ void _verifyScoresAgainstThresholds(
 }
 
 const _frameTimeFor60FPSInMicros = 16666.6;
-const _frameTimeFor30FPSInMicros = 33333.3;
+// const _frameTimeFor30FPSInMicros = 33333.3;
 
 /// Creates the expected [DevToolsBenchmark]s for the specified compiler.
-///
-/// Note that some of the wasm benchmarks use a 30fps frame budget instead of
-/// the 60fps frame budget due to https://issues.chromium.org/issues/396208308.
-Map<DevToolsBenchmark, Map<String, num>> _benchmarkThresholds(bool isWasm) => {
-  // Note that some of these benchmarks exceed the 60fps frame budget,
-  // especially the p90 benchmarks.
-  //
-  // See https://github.com/flutter/devtools/pull/8892 which exposes this.
+Map<DevToolsBenchmark, Map<String, num>> _benchmarkThresholds(
+  /*bool isWasm*/
+) => {
   DevToolsBenchmark.navigateThroughOfflineScreens: {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameTotalTime,
-      avg: _frameTimeFor60FPSInMicros * 2,
+      avg: _frameTimeFor60FPSInMicros,
       p50: _frameTimeFor60FPSInMicros,
-      p90: _frameTimeFor60FPSInMicros * 6,
+      p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameBuildTime,
-      avg: _frameTimeFor60FPSInMicros * 2,
+      avg: _frameTimeFor60FPSInMicros,
       p50: _frameTimeFor60FPSInMicros,
       p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameRasterTime,
-      avg: _frameTimeFor60FPSInMicros * 2,
+      avg: _frameTimeFor60FPSInMicros,
       p50: _frameTimeFor60FPSInMicros,
       p90: _frameTimeFor60FPSInMicros,
     ),
   },
-  // Note that some of these benchmarks exceed the 60fps frame budget,
-  // especially the p90 benchmarks.
-  //
-  // See https://github.com/flutter/devtools/pull/8892 which exposes this.
   DevToolsBenchmark.offlineCpuProfilerScreen: {
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameTotalTime,
-      avg:
-          (isWasm ? _frameTimeFor30FPSInMicros : _frameTimeFor60FPSInMicros) *
-          2,
-      p50: isWasm ? _frameTimeFor30FPSInMicros * 2 : _frameTimeFor60FPSInMicros,
-      p90: _frameTimeFor60FPSInMicros * 6,
+      avg: _frameTimeFor60FPSInMicros,
+      p50: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameBuildTime,
-      avg: _frameTimeFor60FPSInMicros * 2,
+      avg: _frameTimeFor60FPSInMicros,
       p50: _frameTimeFor60FPSInMicros,
-      p90: isWasm ? _frameTimeFor30FPSInMicros : _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameRasterTime,
-      avg:
-          (isWasm ? _frameTimeFor30FPSInMicros : _frameTimeFor60FPSInMicros) *
-          2,
-      p50: isWasm ? _frameTimeFor30FPSInMicros * 2 : _frameTimeFor60FPSInMicros,
-      p90: isWasm ? _frameTimeFor30FPSInMicros * 3 : _frameTimeFor60FPSInMicros,
+      avg: _frameTimeFor60FPSInMicros,
+      p50: _frameTimeFor60FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
   },
   DevToolsBenchmark.offlinePerformanceScreen: {
@@ -241,7 +228,7 @@ Map<DevToolsBenchmark, Map<String, num>> _benchmarkThresholds(bool isWasm) => {
       BenchmarkMetric.flutterFrameTotalTime,
       avg: _frameTimeFor60FPSInMicros,
       p50: _frameTimeFor60FPSInMicros,
-      p90: _frameTimeFor30FPSInMicros,
+      p90: _frameTimeFor60FPSInMicros,
     ),
     ..._valuesForMetric(
       BenchmarkMetric.flutterFrameBuildTime,

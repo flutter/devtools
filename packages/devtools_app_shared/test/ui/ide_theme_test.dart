@@ -15,7 +15,6 @@ void main() {
         'embedMode': 'one',
         'backgroundColor': '#112233',
         'foregroundColor': '#112244',
-        'fontSize': '8.0',
         'theme': 'dark',
       });
 
@@ -23,7 +22,6 @@ void main() {
       expect(params.embedMode, EmbedMode.embedOne);
       expect(params.backgroundColor, const Color(0xFF112233));
       expect(params.foregroundColor, const Color(0xFF112244));
-      expect(params.fontSize, 8.0);
       expect(params.darkMode, true);
     });
 
@@ -32,7 +30,6 @@ void main() {
         'embedMode': 'blah',
         'backgroundColor': 'badcolor',
         'foregroundColor': 'badcolor',
-        'fontSize': 'eight',
         'theme': 'dark',
       });
 
@@ -40,7 +37,15 @@ void main() {
       expect(params.embedMode, EmbedMode.none);
       expect(params.backgroundColor, isNull);
       expect(params.foregroundColor, isNull);
-      expect(params.fontSize, unscaledDefaultFontSize);
+      expect(params.darkMode, true);
+    });
+
+    test('ignores unsupported query params', () {
+      final params = IdeThemeQueryParams({
+        'fontSize': '50', // Font size is not supported.
+        'theme': 'dark',
+      });
+
       expect(params.darkMode, true);
     });
 
@@ -50,7 +55,6 @@ void main() {
       expect(params.embedMode, EmbedMode.none);
       expect(params.backgroundColor, isNull);
       expect(params.foregroundColor, isNull);
-      expect(params.fontSize, unscaledDefaultFontSize);
       expect(params.darkMode, true);
     });
   });

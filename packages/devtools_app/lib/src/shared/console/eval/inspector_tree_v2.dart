@@ -9,8 +9,6 @@
 /// This allows tests of the complicated logic in this class to run on the VM.
 library;
 
-import 'package:devtools_app_shared/ui.dart';
-
 import '../../diagnostics/diagnostics_node.dart';
 import '../../ui/search.dart';
 
@@ -27,8 +25,8 @@ typedef TreeEventCallback = void Function(InspectorTreeNode node);
 
 const iconPadding = 4.0;
 const chartLineStrokeWidth = 1.0;
-double get inspectorColumnIndent => scaleByFontFactor(36.0);
-double get inspectorRowHeight => scaleByFontFactor(20.0);
+const inspectorColumnIndent = 36.0;
+const inspectorRowHeight = 20.0;
 
 /// This class could be refactored out to be a reasonable generic collapsible
 /// tree ui node class but we choose to instead make it widget inspector

@@ -25,7 +25,7 @@ enum SaveFormat {
 
   final String display;
 
-  static final dropdownWidth = scaleByFontFactor(200.0);
+  static const dropdownWidth = 200.0;
 }
 
 class OpenSaveButtonGroup extends StatelessWidget {
@@ -196,7 +196,7 @@ class __DropdownSaveButtonState extends State<_DropdownSaveButton> {
         selectedItemBuilder: (context) {
           return widget.saveFormats
               .map(
-                (f) => DevToolsIcon(
+                (f) => const DevToolsIcon(
                   icon: Icons.file_download,
                   size: defaultIconSize,
                 ),
@@ -273,7 +273,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (title != null) ...[
-          Text(title, style: TextStyle(fontSize: scaleByFontFactor(18.0))),
+          Text(title, style: const TextStyle(fontSize: 18.0)),
           const SizedBox(height: extraLargeSpacing),
         ],
         CenteredMessage(message: widget.instructions),
@@ -311,7 +311,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
   }
 
   Widget _buildImportFileRow() {
-    final rowHeight = defaultButtonHeight;
+    const rowHeight = defaultButtonHeight;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

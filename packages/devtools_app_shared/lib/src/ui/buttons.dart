@@ -10,7 +10,7 @@ import 'theme/theme.dart';
 /// A button with default DevTools styling and analytics handling.
 ///
 /// * `onPressed`: The callback to be called upon pressing the button.
-/// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
+/// * `minScreenWidthForText`: The minimum width the button can be before the text is
 ///    omitted.
 class DevToolsButton extends StatelessWidget {
   const DevToolsButton({
@@ -20,7 +20,7 @@ class DevToolsButton extends StatelessWidget {
     this.label,
     this.tooltip,
     this.color,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
     this.elevated = false,
     this.outlined = true,
     this.tooltipPadding,
@@ -53,7 +53,7 @@ class DevToolsButton extends StatelessWidget {
 
   final VoidCallback? onPressed;
 
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
 
   /// Whether this icon label button should use an elevated button style.
   final bool elevated;
@@ -98,14 +98,13 @@ class DevToolsButton extends StatelessWidget {
     final iconLabel = MaterialIconLabel(
       label: label!,
       iconData: icon,
-      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      minScreenWidthForText: minScreenWidthForText,
       color: textColor,
     );
 
     // If we hid the label due to a small screen width and the button does not
     // have a tooltip, use the label as a tooltip.
-    final labelHidden =
-        !isScreenWiderThan(context, minScreenWidthForTextBeforeScaling);
+    final labelHidden = !isScreenWiderThan(context, minScreenWidthForText);
     if (labelHidden && tooltip == null) {
       tooltip = label;
     }
@@ -131,14 +130,14 @@ class DevToolsButton extends StatelessWidget {
       tooltipPadding: tooltipPadding,
       child: SizedBox(
         height: defaultButtonHeight,
-        width: !isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)
+        width: !isScreenWiderThan(context, minScreenWidthForText)
             ? buttonMinWidth
             : null,
         child: outlined
             ? OutlinedButton(
                 style: denseAwareOutlinedButtonStyle(
                   context,
-                  minScreenWidthForTextBeforeScaling,
+                  minScreenWidthForText,
                 ),
                 onPressed: onPressed,
                 child: iconLabel,
@@ -147,8 +146,7 @@ class DevToolsButton extends StatelessWidget {
                 onPressed: onPressed,
                 style: denseAwareTextButtonStyle(
                   context,
-                  minScreenWidthForTextBeforeScaling:
-                      minScreenWidthForTextBeforeScaling,
+                  minScreenWidthForText: minScreenWidthForText,
                 ),
                 child: iconLabel,
               ),
@@ -192,7 +190,7 @@ final class DevToolsToggleButtonGroup extends StatelessWidget {
         borderColor: borderColor,
         textStyle: theme.textTheme.bodyMedium,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        constraints: BoxConstraints(
+        constraints: const BoxConstraints(
           minWidth: defaultButtonHeight,
           minHeight: defaultButtonHeight,
           maxHeight: defaultButtonHeight,
@@ -215,7 +213,7 @@ final class DevToolsToggleButton extends StatelessWidget {
     this.outlined = true,
     this.label,
     this.shape,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
     this.fillColor,
   });
 
@@ -233,7 +231,7 @@ final class DevToolsToggleButton extends StatelessWidget {
 
   final bool outlined;
 
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
 
   final Color? fillColor;
 
@@ -255,8 +253,7 @@ final class DevToolsToggleButton extends StatelessWidget {
               color: isSelected ? theme.colorScheme.primary : null,
               iconData: icon,
               label: label,
-              minScreenWidthForTextBeforeScaling:
-                  minScreenWidthForTextBeforeScaling,
+              minScreenWidthForText: minScreenWidthForText,
             ),
           ),
         ),
@@ -274,11 +271,11 @@ final class RoundedButtonGroup extends StatelessWidget {
   const RoundedButtonGroup({
     super.key,
     required this.items,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
   });
 
   final List<ButtonGroupItemData> items;
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
 
   @override
   Widget build(BuildContext context) {
@@ -288,7 +285,7 @@ final class RoundedButtonGroup extends StatelessWidget {
         buttonData: itemData,
         roundedLeftBorder: index == 0,
         roundedRightBorder: index == items.length - 1,
-        minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+        minScreenWidthForText: minScreenWidthForText,
       );
       if (index != 0) {
         button = Container(
@@ -323,13 +320,13 @@ final class _ButtonGroupButton extends StatelessWidget {
     required this.buttonData,
     this.roundedLeftBorder = false,
     this.roundedRightBorder = false,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
   });
 
   final ButtonGroupItemData buttonData;
   final bool roundedLeftBorder;
   final bool roundedRightBorder;
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
 
   @override
   Widget build(BuildContext context) {
@@ -353,8 +350,7 @@ final class _ButtonGroupButton extends StatelessWidget {
           iconData: buttonData.icon,
           iconAsset: buttonData.iconAsset,
           iconSize: buttonData.iconSize,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
+          minScreenWidthForText: minScreenWidthForText,
         ),
       ),
     );
