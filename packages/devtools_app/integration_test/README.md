@@ -116,6 +116,8 @@ usage, see
 There is not an easy setup for debugging a DevTools integration test from an
 IDE. But print debugging can be applied as follows:
 
+* To log the steps of the test script execution, you can set
+  [`debugTestScript`][] to `true`.
 * In the test code, (the "target" of the integration test command), `print` or
   [`logStatus`][] will print to the terminal.
 * In the "test app," there is no acccess to any `print`ed output. If the app
@@ -123,4 +125,6 @@ IDE. But print debugging can be applied as follows:
   `io.File('some-file.txt').writeAsStringSync('...');`.
 
 
+
+[`debugTestScript`]: https://github.com/flutter/devtools/blob/master/packages/devtools_app/integration_test/test_infra/run/_utils.dart/#L7
 [`logStatus`]: https://github.com/flutter/devtools/blob/master/packages/devtools_test/lib/src/helpers/utils.dart#L243
