@@ -50,6 +50,10 @@ void main() {
 
 Future<void> _runBenchmarks({bool useWasm = false}) async {
   stdout.writeln('Starting web benchmark tests ...');
+
+  final benchmarkPort = await _findAvailablePort(startingAt: 9999);
+  final chromePort = await _findAvailablePort(startingAt: benchmarkPort + 1);
+
   final taskResult = await serveWebBenchmark(
     benchmarkAppDirectory: projectRootDirectory(),
     entryPoint: generateBenchmarkEntryPoint(useWasm: useWasm),
@@ -58,6 +62,8 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
         : const CompilationOptions.js(),
     treeShakeIcons: false,
     benchmarkPath: benchmarkPath(useWasm: useWasm),
+    benchmarkServerPort: benchmarkPort,
+    chromeDebugPort: chromePort,
   );
   stdout.writeln('Web benchmark tests finished.');
 
@@ -255,3 +261,22 @@ String _generateScoreName(
   BenchmarkMetric metric,
   BenchmarkMetricComputation computation,
 ) => '${metric.label}.${computation.name}';
+
+Future<int> _findAvailablePort({required int startingAt}) async {
+  int port = startingAt;
+  while (!await _isPortAvailable(port)) {
+    port++;
+  }
+  return port;
+}
+
+Future<bool> _isPortAvailable(int port) async {
+  try {
+    final RawSocket socket = await RawSocket.connect('localhost', port);
+    socket.shutdown(SocketDirection.both);
+    await socket.close();
+    return false;
+  } on SocketException {
+    return true;
+  }
+}
