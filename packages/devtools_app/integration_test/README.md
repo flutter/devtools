@@ -68,11 +68,6 @@ xattr -d com.apple.quarantine ~/path/to/chromedriver
 * `--update-goldens`: behaves like the `--update-goldens` flag for Flutter unit
   tests, updating the golden images to the results produced by the test run.
 
-The following flags are available, but should not be used manually. To run a
-test with offline data or with experiments enabled, place the test in the proper
-directory, and the `run_tests.dart` script will propagate the proper flag values
-automatically (see [instructions below](#where-to-add-an-integration-test)).
-
 # Where to add an integration test
 
 Where you should place your integration test will depend on the answers to the
@@ -86,8 +81,9 @@ following questions:
 
 ## "live connection" integration tests
 
-Tests under `integration_test/test/live_connection` will run DevTools and
-connect it to a live Dart or Flutter application.
+Tests under `integration_test/test/live_connection` will:
+* run a "test app" (a Dart application or a Flutter app), and
+* run DevTools, connecting it to that test app.
 
 ## "offline" integration tests
 
@@ -114,3 +110,17 @@ For a list of such arguments, see
 [_in_file_args.dart](test_infra/run/_in_file_args.dart). For an example of
 usage, see
 [eval_and_browse_test.dart](test/live_connection/eval_and_browse_test.dart).
+
+# Debugging
+
+There is not an easy setup for debugging a DevTools integration test from an
+IDE. But print debugging can be applied as follows:
+
+* In the test code, (the "target" of the integration test command), `print` or
+  [`logStatus`][] will print to the terminal.
+* In the "test app," there is no acccess to any `print`ed output. If the app
+  has access to `dart:io`, you can still log to a file, as easy as
+  `io.File('some-file.txt').writeAsStringSync('...');`.
+
+
+[`logStatus`]: https://github.com/flutter/devtools/blob/master/packages/devtools_test/lib/src/helpers/utils.dart#L243
