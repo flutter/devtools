@@ -15,6 +15,7 @@ import 'package:devtools_app/src/screens/inspector/inspector_screen_body.dart'
 import 'package:devtools_app/src/screens/inspector_shared/inspector_controls.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_screen_body.dart';
 import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart';
+import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/ui/utils.dart';
 import 'package:devtools_app/src/screens/inspector_v2/widget_properties/properties_view.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_test/helpers.dart';
@@ -41,11 +42,12 @@ void main() {
 
   final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
-    useTempDirectory: true,
+    testAppDirectory: 'test/test_infra/fixtures/inspector_app',
   );
 
   env.afterEverySetup = () async {
     final service = serviceConnection.inspectorService;
+    await _resetPubRootDirectories(service as InspectorService);
     if (env.reuseTestEnvironment) {
       // Ensure the previous test did not set the selection on the device.
       // TODO(jacobr): add a proper method to WidgetInspectorService that does
@@ -99,7 +101,7 @@ void main() {
         await _loadInspectorUI(tester);
 
         // Expect the Center widget to be visible in the widget tree.
-        final centerWidgetFinder = find.richText('Center');
+        final centerWidgetFinder = find.richText('CustomCenter');
         expect(centerWidgetFinder, findsOneWidget);
 
         // Trigger a hot-restart and wait for the first Flutter frame.
@@ -128,8 +130,8 @@ void main() {
     ) async {
       await _loadInspectorUI(tester);
 
-      // Select the Center widget (row index #16)
-      await tester.tap(find.richText('Center'));
+      // Select the CustomCenter widget (row index #4)
+      await tester.tap(find.richText('CustomCenter'));
       await tester.pumpAndSettle(inspectorChangeSettleTime);
       await expectLater(
         find.byType(InspectorScreenBody),
@@ -160,13 +162,13 @@ void main() {
         // Toggle implementation widgets on.
         await _toggleImplementationWidgets(tester);
 
-        // Before hidden widgets are expanded, confirm the HeroControllerScope
-        // is hidden:
-        final hideableNodeFinder = findNodeMatching('HeroControllerScope');
+        // Before hidden widgets are expanded, confirm the implementing
+        // Container of CustomContainer is hidden:
+        final hideableNodeFinder = findNodeMatching('Container');
         expect(hideableNodeFinder, findsNothing);
 
-        // Expand the hidden group that contains the HeroControllerScope:
-        final moreWidgetsRow = findChildRowOf('MaterialApp');
+        // Expand the hidden group that contains the Container:
+        final moreWidgetsRow = findChildRowOf('CustomContainer');
         final expandButton = findExpandCollapseButtonForRow(
           rowFinder: moreWidgetsRow,
           isExpand: true,
@@ -178,12 +180,12 @@ void main() {
           matchesDevToolsGolden(
             '../../test_infra/goldens/integration_inspector_v2_implementation_widgets_expanded.png',
           ),
-          // Re-enable and update goldens once Flutter version in DevTools
-          // includes https://github.com/flutter/flutter/pull/169229.
-          skip: 'https://github.com/flutter/devtools/issues/9206',
+          // Implementation widgets from Flutter framework are not guaranteed to
+          // be stable.
+          skip: 'https://github.com/flutter/flutter/issues/172037',
         );
 
-        // Confirm the HeroControllerScope is visible, and select it:
+        // Confirm the Container is visible, and select it:
         expect(hideableNodeFinder, findsOneWidget);
         await tester.tap(hideableNodeFinder);
         await tester.pumpAndSettle(inspectorChangeSettleTime);
@@ -192,15 +194,15 @@ void main() {
           matchesDevToolsGolden(
             '../../test_infra/goldens/integration_inspector_v2_hideable_widget_selected.png',
           ),
-          // Re-enable and update goldens once Flutter version in DevTools
-          // includes https://github.com/flutter/flutter/pull/169229.
-          skip: 'https://github.com/flutter/devtools/issues/9206',
+          // Implementation widgets from Flutter framework are not guaranteed to
+          // be stable.
+          skip: 'https://github.com/flutter/flutter/issues/172037',
         );
 
-        // Collapse the hidden group that contains the HeroControllerScope:
-        final scrollConfigurationRow = findChildRowOf('MaterialApp');
+        // Collapse the hidden group that contains the Container:
+        final collapsibleRow = findChildRowOf('CustomContainer');
         final collapseButton = findExpandCollapseButtonForRow(
-          rowFinder: scrollConfigurationRow,
+          rowFinder: collapsibleRow,
           isExpand: false,
         );
         await tester.tap(collapseButton);
@@ -222,32 +224,33 @@ void main() {
       // Toggle implementation widgets on.
       await _toggleImplementationWidgets(tester);
 
-      // Before searching, confirm the HeroControllerScope is hidden:
-      final hideableNodeFinder = findNodeMatching('HeroControllerScope');
+      // Before searching, confirm the implementing DefaultTextStyle of
+      // CustomApp is hidden:
+      final hideableNodeFinder = findNodeMatching('DefaultTextStyle');
       expect(hideableNodeFinder, findsNothing);
 
-      // Search for the HeroControllerScope:
+      // Search for the DefaultTextStyle:
       final searchButtonFinder = find.ancestor(
         of: find.byIcon(Icons.search),
         matching: find.byType(ToolbarAction),
       );
       await tester.tap(searchButtonFinder);
       await tester.pumpAndSettle(inspectorChangeSettleTime);
-      await tester.enterText(find.byType(TextField), 'HeroControllerScope');
+      await tester.enterText(find.byType(TextField), 'DefaultTextStyle');
       await tester.pumpAndSettle(inspectorChangeSettleTime);
       await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-      // Confirm the HeroControllerScope is visible and selected:
+      // Confirm the DefaultTextStyle is visible and selected:
       expect(hideableNodeFinder, findsOneWidget);
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
           '../../test_infra/goldens/integration_inspector_v2_hideable_widget_selected_from_search.png',
         ),
-        // Re-enable and update goldens once Flutter version in DevTools
-        // includes https://github.com/flutter/flutter/pull/169229.
-        skip: 'https://github.com/flutter/devtools/issues/9206',
+        // Implementation widgets from Flutter framework are not guaranteed to
+        // be stable.
+        skip: 'https://github.com/flutter/flutter/issues/172037',
       );
     });
   });
@@ -308,53 +311,58 @@ void main() {
         tester.state(find.byType(InspectorScreenBody))
             as InspectorScreenBodyState;
 
-    // Find the first Text diagnostic node.
+    // Find the CustomText diagnostic node.
     final diagnostics = state.controller.inspectorTree.rowsInTree.value.map(
       (row) => row!.node.diagnostic,
     );
-    final textDiagnostic = diagnostics.firstWhere(
-      (d) => d?.description == 'Text',
+    final customTextDiagnostic = diagnostics.firstWhere(
+      (d) => d?.description == 'CustomText',
     )!;
-    expect(textDiagnostic.isCreatedByLocalProject, isTrue);
+    expect(customTextDiagnostic.isCreatedByLocalProject, isTrue);
 
     // Toggle implementation widgets off.
     await _toggleImplementationWidgets(tester);
 
-    // Verify the Text diagnostic node is still in the tree.
+    // Verify the CustomText diagnostic node is still in the tree.
     final diagnosticsNow = state.controller.inspectorTree.rowsInTree.value.map(
       (row) => row!.node.diagnostic,
     );
     expect(
-      diagnosticsNow.any((d) => d?.valueRef == textDiagnostic.valueRef),
+      diagnosticsNow.any((d) => d?.valueRef == customTextDiagnostic.valueRef),
       isTrue,
     );
 
-    // Get the RichText child of the Text diagnostic node.
+    // Get the implementing Text child of the CustomText diagnostic node.
     final service = serviceConnection.inspectorService as InspectorService;
     final group = service.createObjectGroup('test-group');
-    final textSubtree = await group.getDetailsSubtree(textDiagnostic);
-    final richTextDiagnostic = (await textSubtree!.children)!.firstWhere(
-      (child) => child.description == 'RichText',
+    final customTextSubtree = await group.getDetailsSubtree(
+      customTextDiagnostic,
+    );
+    final textDiagnostic = (await customTextSubtree!.children)!.firstWhere(
+      (child) => child.description == 'Text',
     );
 
-    // Verify the RichText child is an implementation node that is not in the tree.
-    expect(richTextDiagnostic.isCreatedByLocalProject, isFalse);
+    // Verify the Text child is an implementation node that is not in the tree.
+    expect(textDiagnostic.isCreatedByLocalProject, isFalse);
     expect(
-      diagnosticsNow.any((d) => d?.valueRef == richTextDiagnostic.valueRef),
+      diagnosticsNow.any((d) => d?.valueRef == textDiagnostic.valueRef),
       isFalse,
     );
 
-    // Mimic selecting the RichText diagnostic node with the on-device inspector.
-    await group.setSelectionInspector(richTextDiagnostic.valueRef, false);
+    // Mimic selecting the Text diagnostic node with the on-device inspector.
+    await group.setSelectionInspector(textDiagnostic.valueRef, false);
     await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-    // Verify the Text node is now selected.
+    // Verify the CustomText node is now selected.
     final selectedNode = state.controller.selectedNode.value;
-    expect(selectedNode!.diagnostic!.valueRef, equals(textDiagnostic.valueRef));
+    expect(
+      selectedNode!.diagnostic!.valueRef,
+      equals(customTextDiagnostic.valueRef),
+    );
 
     // Verify the notification about selecting an implementation widget is displayed.
     expect(
-      find.text('Selected an implementation widget of Text: RichText.'),
+      find.text('Selected an implementation widget of CustomText: Text.'),
       findsOneWidget,
     );
   });
@@ -364,8 +372,8 @@ void main() {
   ) async {
     await _loadInspectorUI(tester);
 
-    // Select the Center widget (row index #16)
-    await tester.tap(find.richText('Center'));
+    // Select the CustomCenter widget (row index #4)
+    await tester.tap(find.richText('CustomCenter'));
     await tester.pumpAndSettle(inspectorChangeSettleTime);
 
     // Disable Inspector V2:
@@ -432,10 +440,6 @@ void main() {
         'textPreview',
         'children',
         'createdByLocalProject',
-        // TODO(elliette): Once we update to the Flutter version with
-        // https://github.com/flutter/flutter/pull/159701, this should be
-        // deleted.
-        'truncated',
       ];
       const extraneousDetailsForTreeNode = [
         'creationLocation',
@@ -511,58 +515,55 @@ void main() {
       );
     }
 
-    testWidgetsWithWindowSize('changing parent widget of selected', windowSize, (
-      WidgetTester tester,
-    ) async {
-      await _loadInspectorUI(tester);
+    testWidgetsWithWindowSize(
+      'changing parent widget of selected',
+      windowSize,
+      (WidgetTester tester) async {
+        await _loadInspectorUI(tester);
 
-      // Toggle implementation widgets on.
-      await _toggleImplementationWidgets(tester);
+        // Toggle implementation widgets on.
+        await _toggleImplementationWidgets(tester);
 
-      // Give time for the initial animation to complete.
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-      // Verify the Text widget is after the Center widget.
-      expect(
-        _treeRowsAreInOrder(
-          treeRowDescriptions: ['Center', 'Text: "Hello, World!"'],
-          startingAtIndex: 15,
-        ),
-        isTrue,
-      );
+        // Verify the CustomButton widget is after the CustomCenter widget.
+        expect(
+          _treeRowsAreInOrder(
+            treeRowDescriptions: ['CustomCenter', 'CustomButton'],
+            startingAtIndex: 7,
+          ),
+          isTrue,
+        );
 
-      // Select the Text widget (row index #16).
-      await tester.tap(_findTreeRowMatching('Text: "Hello, World!"'));
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
+        // Verify the CustomButton widget is not visible in the properties view.
+        expect(_findWidgetLabelMatching('CustomButton'), findsNothing);
 
-      // Verify the Text widget is selected (its properties are displayed):
-      verifyPropertyIsVisible(
-        name: 'data',
-        value: '"Hello, World!"',
-        tester: tester,
-      );
+        // Select the CustomButton widget.
+        await tester.tap(_findTreeRowMatching('CustomButton'));
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-      // Make edit to main.dart to replace Center with an Align.
-      makeEditToFlutterMain(toReplace: 'Center', replaceWith: 'Align');
-      await env.flutter!.hotReload();
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
+        // Verify the CustomButton widget is now visible in the properties view.
+        expect(_findWidgetLabelMatching('CustomButton'), findsOneWidget);
 
-      // Verify the Align is now in the widget tree instead of Center.
-      expect(
-        _treeRowsAreInOrder(
-          treeRowDescriptions: ['Align', 'Text: "Hello, World!"'],
-          startingAtIndex: 15,
-        ),
-        isTrue,
-      );
+        // Make edit to main.dart to replace CustomCenter with an Align.
+        makeEditToFlutterMain(toReplace: 'CustomCenter', replaceWith: 'Align');
+        await env.flutter!.hotReload();
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
 
-      // Verify the Text widget is still selected (its properties are displayed):
-      verifyPropertyIsVisible(
-        name: 'data',
-        value: '"Hello, World!"',
-        tester: tester,
-      );
-    });
+        // Verify the Align is now in the widget tree instead of Center.
+        expect(
+          _treeRowsAreInOrder(
+            treeRowDescriptions: ['Align', 'CustomButton'],
+            startingAtIndex: 7,
+          ),
+          isTrue,
+        );
+
+        // Verify the CustomButton widget is still selected.
+        expect(_findWidgetLabelMatching('CustomButton'), findsOneWidget);
+      },
+    );
   });
 
   group('widget errors', () {
@@ -652,7 +653,7 @@ Future<void> _waitForFlutterFrame(
 }
 
 Finder findNodeMatching(String text) => find.ancestor(
-  of: find.richTextContaining(text),
+  of: find.richText(text),
   matching: find.byType(DescriptionDisplay),
 );
 
@@ -777,5 +778,24 @@ Finder _findTreeRowMatching(String description) => find.ancestor(
   matching: find.byType(InspectorRowContent),
 );
 
+Finder _findWidgetLabelMatching(String description) => find.ancestor(
+  of: find.richText(description),
+  matching: find.byType(WidgetLabel),
+);
+
 T _getWidgetFromFinder<T>(Finder finder) =>
     finder.first.evaluate().first.widget as T;
+
+Future<void> _resetPubRootDirectories(InspectorService inspectorService) async {
+  final currentPubRootDirectories = await inspectorService
+      .getPubRootDirectories();
+  if (currentPubRootDirectories != null) {
+    await inspectorService.removePubRootDirectories(currentPubRootDirectories);
+  }
+
+  final rootLibrary = await serviceConnection.serviceManager
+      .mainIsolateRootLibraryUriAsString();
+  if (rootLibrary != null) {
+    await inspectorService.addPubRootDirectories([rootLibrary]);
+  }
+}
