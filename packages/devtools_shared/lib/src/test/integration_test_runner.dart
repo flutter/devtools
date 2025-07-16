@@ -30,8 +30,8 @@ class IntegrationTestRunner with IOMixin {
     List<String> dartDefineArgs = const <String>[],
     bool debugLogging = false,
   }) async {
-    void debugLog(String log) {
-      if (debugLogging) print(log);
+    void debugLog(String message) {
+      if (debugLogging) print('${DateTime.now()}: $message');
     }
 
     Future<void> runTest({required int attemptNumber}) async {
@@ -300,8 +300,8 @@ Future<void> runOneOrManyTests<T extends IntegrationTestRunnerArgs>({
     return;
   }
 
-  void debugLog(String log) {
-    if (debugLogging) print(log);
+  void debugLog(String message) {
+    if (debugLogging) print('${DateTime.now()}: $message');
   }
 
   final chromedriver = ChromeDriver();
