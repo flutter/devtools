@@ -37,7 +37,7 @@ extension CpuProfilerExtension on VmService {
     const kSamples = 'samples';
     const kCodeStack = '_codeStack';
 
-    final rawSamples = (cpuSamples.json![kSamples] as List)
+    final rawSamples = (cpuSamples.json![kSamples] as List<Object?>)
         .cast<Map<String, Object?>>();
 
     bool buildCodeProfile = false;
@@ -73,7 +73,7 @@ extension CpuProfilerExtension on VmService {
     );
   }
 
-  Future clearSamples() {
+  Future<void> clearSamples() {
     return serviceConnection.serviceManager.service!.clearCpuSamples(
       serviceConnection
           .serviceManager
