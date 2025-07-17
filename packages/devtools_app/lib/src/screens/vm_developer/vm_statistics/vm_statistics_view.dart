@@ -184,7 +184,7 @@ class ProcessStatisticsWidget extends StatelessWidget {
 }
 
 class _IsolateNameColumn extends ColumnData<Isolate> {
-  _IsolateNameColumn() : super.wide('Name');
+  const _IsolateNameColumn() : super.wide('Name');
 
   @override
   String getValue(Isolate i) => i.name!;
@@ -261,7 +261,7 @@ class IsolatesPreviewWidget extends StatelessWidget {
     this.systemIsolates = false,
   });
 
-  static final name = _IsolateNameColumn();
+  static const name = _IsolateNameColumn();
   static final number = _IsolateIDColumn();
   static final newSpace = _IsolateNewSpaceColumn();
   static final oldSpace = _IsolateOldSpaceColumn();

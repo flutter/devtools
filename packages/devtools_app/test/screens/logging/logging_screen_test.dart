@@ -206,7 +206,7 @@ void main() {
       late MessageColumn column;
 
       setUp(() {
-        column = MessageColumn();
+        column = const MessageColumn();
       });
 
       test('compare sorts logs correctly', () {

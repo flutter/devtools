@@ -18,8 +18,8 @@ import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 
 abstract class _CodeColumnData<T> extends ColumnData<T> {
-  _CodeColumnData(super.title, {required super.fixedWidthPx});
-  _CodeColumnData.wide(super.title) : super.wide();
+  const _CodeColumnData(super.title, {required super.fixedWidthPx});
+  const _CodeColumnData.wide(super.title) : super.wide();
 
   @override
   bool get supportsSorting => false;

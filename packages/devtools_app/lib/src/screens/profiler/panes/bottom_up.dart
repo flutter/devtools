@@ -15,7 +15,7 @@ import 'cpu_profile_columns.dart';
 class CpuBottomUpTable extends StatelessWidget {
   const CpuBottomUpTable({required this.bottomUpRoots, super.key});
 
-  static final methodColumn = MethodAndSourceColumn();
+  static const methodColumn = MethodAndSourceColumn();
   static final selfTimeColumn = SelfTimeColumn(
     titleTooltip: selfTimeTooltip,
     dataTooltipProvider: (stackFrame, context) =>

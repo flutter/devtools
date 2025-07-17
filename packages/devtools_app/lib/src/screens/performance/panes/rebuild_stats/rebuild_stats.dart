@@ -193,8 +193,8 @@ class _RebuildTableState extends State<RebuildTable> {
     return columns;
   }
 
-  static final _widgetColumn = _WidgetColumn();
-  static final _locationColumn = _LocationColumn();
+  static const _widgetColumn = _WidgetColumn();
+  static const _locationColumn = _LocationColumn();
 
   List<ColumnData<RebuildLocationStats>> get _columns => [
     _widgetColumn,
@@ -229,7 +229,7 @@ class _RebuildTableState extends State<RebuildTable> {
 }
 
 class _WidgetColumn extends ColumnData<RebuildLocationStats> {
-  _WidgetColumn() : super('Widget', fixedWidthPx: 200);
+  const _WidgetColumn() : super('Widget', fixedWidthPx: 200);
 
   @override
   String getValue(RebuildLocationStats dataObject) {
@@ -238,7 +238,7 @@ class _WidgetColumn extends ColumnData<RebuildLocationStats> {
 }
 
 class _LocationColumn extends ColumnData<RebuildLocationStats> {
-  _LocationColumn() : super.wide('Location');
+  const _LocationColumn() : super.wide('Location');
 
   @override
   String getValue(RebuildLocationStats dataObject) {

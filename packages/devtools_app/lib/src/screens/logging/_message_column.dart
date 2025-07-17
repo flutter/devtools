@@ -13,7 +13,7 @@ import 'metadata.dart';
 
 class MessageColumn extends ColumnData<LogData>
     implements ColumnRenderer<LogData> {
-  MessageColumn() : super.wide('Log');
+  const MessageColumn() : super.wide('Log');
 
   @override
   bool get supportsSorting => false;

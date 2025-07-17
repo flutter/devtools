@@ -225,7 +225,7 @@ class _TracingTreeHeader extends StatelessWidget {
 }
 
 class _InclusiveCountColumn extends ColumnData<CpuStackFrame> {
-  _InclusiveCountColumn()
+  const _InclusiveCountColumn()
     : super(
         'Inclusive',
         titleTooltip: _tooltip,
@@ -258,7 +258,7 @@ class _InclusiveCountColumn extends ColumnData<CpuStackFrame> {
 }
 
 class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
-  _ExclusiveCountColumn()
+  const _ExclusiveCountColumn()
     : super(
         'Exclusive',
         titleTooltip: _tooltip,
@@ -294,11 +294,11 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 class TracingTable extends StatelessWidget {
   const TracingTable({super.key, required this.dataRoots});
 
-  static final treeColumn = MethodAndSourceColumn();
-  static final startingSortColumn = _InclusiveCountColumn();
+  static const treeColumn = MethodAndSourceColumn();
+  static const startingSortColumn = _InclusiveCountColumn();
   static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
     startingSortColumn,
-    _ExclusiveCountColumn(),
+    const _ExclusiveCountColumn(),
     treeColumn,
   ]);
 

@@ -211,8 +211,8 @@ class _CallGraphTable extends StatelessWidget {
     required this.onNodeSelected,
   });
 
-  static final _toColumn = ToColumn();
-  static final _fromColumn = FromColumn();
+  static const _toColumn = ToColumn();
+  static const _fromColumn = FromColumn();
 
   final _CallGraphTableType tableType;
 
@@ -240,14 +240,14 @@ class _CallGraphTable extends StatelessWidget {
 }
 
 class FromColumn extends ColumnData<CallGraphNode> {
-  FromColumn() : super.wide('From');
+  const FromColumn() : super.wide('From');
 
   @override
   String getValue(CallGraphNode dataObject) => dataObject.display;
 }
 
 class ToColumn extends ColumnData<CallGraphNode> {
-  ToColumn() : super.wide('To');
+  const ToColumn() : super.wide('To');
 
   @override
   ColumnAlignment get alignment => ColumnAlignment.right;
@@ -260,7 +260,7 @@ class ToColumn extends ColumnData<CallGraphNode> {
 }
 
 class DominatorTree extends StatelessWidget {
-  DominatorTree({
+  const DominatorTree({
     super.key,
     required this.dominatorTreeRoot,
     required this.selectedNode,
@@ -272,7 +272,7 @@ class DominatorTree extends StatelessWidget {
 
   final CallGraphNode? selectedNode;
 
-  final _packageColumn = _PackageColumn();
+  static const _packageColumn = _PackageColumn();
 
   @override
   Widget build(BuildContext context) {
@@ -283,7 +283,7 @@ class DominatorTree extends StatelessWidget {
       dataRoots: [dominatorTreeRoot!],
       dataKey: 'dominator-tree',
       keyFactory: (node) => PageStorageKey<String>('${node.callGraphNode.id}'),
-      columns: [_packageColumn],
+      columns: const [_packageColumn],
       treeColumn: _packageColumn,
       defaultSortColumn: _packageColumn,
       defaultSortDirection: SortDirection.descending,
@@ -304,7 +304,7 @@ class DominatorTree extends StatelessWidget {
 }
 
 class _PackageColumn extends TreeColumnData<DominatorTreeNode> {
-  _PackageColumn() : super('Package');
+  const _PackageColumn() : super('Package');
 
   @override
   String getValue(DominatorTreeNode dataObject) =>

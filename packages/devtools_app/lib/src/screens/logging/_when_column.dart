@@ -6,7 +6,7 @@ import '../../shared/table/table_data.dart';
 import 'logging_controller.dart';
 
 class WhenColumn extends ColumnData<LogData> {
-  WhenColumn() : super('When', fixedWidthPx: 80);
+  const WhenColumn() : super('When', fixedWidthPx: 80);
 
   @override
   bool get supportsSorting => false;

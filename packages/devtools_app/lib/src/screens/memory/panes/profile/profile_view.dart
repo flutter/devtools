@@ -36,7 +36,7 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
     implements
         ColumnRenderer<ProfileRecord>,
         ColumnHeaderRenderer<ProfileRecord> {
-  _FieldClassNameColumn(this.classFilterData)
+  const _FieldClassNameColumn(this.classFilterData)
     : super('Class', fixedWidthPx: 200);
 
   @override
@@ -103,7 +103,7 @@ enum HeapGeneration {
 
 class _FieldInstanceCountColumn extends ColumnData<ProfileRecord>
     implements ColumnRenderer<ProfileRecord> {
-  _FieldInstanceCountColumn({required this.heap})
+  const _FieldInstanceCountColumn({required this.heap})
     : super(
         'Instances',
         titleTooltip: 'The number of instances of the class in the heap',
@@ -146,8 +146,8 @@ class _FieldInstanceCountColumn extends ColumnData<ProfileRecord>
 }
 
 class _FieldExternalSizeColumn extends _FieldSizeColumn {
-  _FieldExternalSizeColumn({required super.heap})
-    : super._(
+  const _FieldExternalSizeColumn({required super.heap})
+    : super(
         title: 'External',
         titleTooltip:
             'Non-Dart heap allocated memory associated with a Dart object',
@@ -168,7 +168,7 @@ class _FieldExternalSizeColumn extends _FieldSizeColumn {
 
 class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
   _FieldDartHeapSizeColumn({required super.heap})
-    : super._(title: 'Dart Heap', titleTooltip: SizeType.shallow.description);
+    : super(title: 'Dart Heap', titleTooltip: SizeType.shallow.description);
 
   @override
   int? getValue(ProfileRecord dataObject) {
@@ -184,19 +184,12 @@ class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
 }
 
 class _FieldSizeColumn extends ColumnData<ProfileRecord> {
-  factory _FieldSizeColumn({required HeapGeneration heap}) =>
-      _FieldSizeColumn._(
-        title: 'Total Size',
-        titleTooltip:
-            "The sum of the type's total shallow memory "
-            'consumption in the Dart heap and associated external (e.g., '
-            'non-Dart heap) allocations',
-        heap: heap,
-      );
-
-  _FieldSizeColumn._({
-    required String title,
-    required String titleTooltip,
+  const _FieldSizeColumn({
+    String title = 'Total Size',
+    String titleTooltip =
+        "The sum of the type's total shallow memory "
+        'consumption in the Dart heap and associated external (e.g., '
+        'non-Dart heap) allocations',
     required this.heap,
   }) : super(
          title,
@@ -231,7 +224,7 @@ class _FieldSizeColumn extends ColumnData<ProfileRecord> {
 }
 
 abstract class _GCHeapStatsColumn extends ColumnData<AdaptedProfile> {
-  _GCHeapStatsColumn(
+  const _GCHeapStatsColumn(
     super.title, {
     required this.generation,
     required super.fixedWidthPx,
@@ -254,7 +247,7 @@ abstract class _GCHeapStatsColumn extends ColumnData<AdaptedProfile> {
 }
 
 class _GCHeapNameColumn extends ColumnData<AdaptedProfile> {
-  _GCHeapNameColumn() : super('', fixedWidthPx: 200);
+  const _GCHeapNameColumn() : super('', fixedWidthPx: 200);
 
   @override
   String? getValue(AdaptedProfile dataObject) {
@@ -381,7 +374,7 @@ class _GCStatsTable extends StatelessWidget {
   ];
 
   static final _columns = [
-    _GCHeapNameColumn(),
+    const _GCHeapNameColumn(),
     for (final generation in [
       HeapGeneration.total,
       HeapGeneration.newSpace,
@@ -502,7 +495,7 @@ class _AllocationProfileTable extends StatelessWidget {
     ),
   ];
 
-  static final _fieldSizeColumn = _FieldSizeColumn(heap: HeapGeneration.total);
+  static const _fieldSizeColumn = _FieldSizeColumn(heap: HeapGeneration.total);
 
   late final _columns = <ColumnData<ProfileRecord>>[
     _FieldClassNameColumn(
@@ -512,21 +505,21 @@ class _AllocationProfileTable extends StatelessWidget {
         rootPackage: controller.rootPackage,
       ),
     ),
-    _FieldInstanceCountColumn(heap: HeapGeneration.total),
+    const _FieldInstanceCountColumn(heap: HeapGeneration.total),
     _fieldSizeColumn,
     _FieldDartHeapSizeColumn(heap: HeapGeneration.total),
   ];
 
   late final _advancedDeveloperModeColumns = [
-    _FieldExternalSizeColumn(heap: HeapGeneration.total),
-    _FieldInstanceCountColumn(heap: HeapGeneration.newSpace),
-    _FieldSizeColumn(heap: HeapGeneration.newSpace),
+    const _FieldExternalSizeColumn(heap: HeapGeneration.total),
+    const _FieldInstanceCountColumn(heap: HeapGeneration.newSpace),
+    const _FieldSizeColumn(heap: HeapGeneration.newSpace),
     _FieldDartHeapSizeColumn(heap: HeapGeneration.newSpace),
-    _FieldExternalSizeColumn(heap: HeapGeneration.newSpace),
-    _FieldInstanceCountColumn(heap: HeapGeneration.oldSpace),
-    _FieldSizeColumn(heap: HeapGeneration.oldSpace),
+    const _FieldExternalSizeColumn(heap: HeapGeneration.newSpace),
+    const _FieldInstanceCountColumn(heap: HeapGeneration.oldSpace),
+    const _FieldSizeColumn(heap: HeapGeneration.oldSpace),
     _FieldDartHeapSizeColumn(heap: HeapGeneration.oldSpace),
-    _FieldExternalSizeColumn(heap: HeapGeneration.oldSpace),
+    const _FieldExternalSizeColumn(heap: HeapGeneration.oldSpace),
   ];
 
   final ProfilePaneController controller;

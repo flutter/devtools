@@ -224,9 +224,9 @@ class _FlagTable extends StatelessWidget {
 
   final List<_DialogFlag> flags;
 
-  static final name = _NameColumn();
-  static final description = _DescriptionColumn();
-  static final value = _ValueColumn();
+  static const name = _NameColumn();
+  static const description = _DescriptionColumn();
+  static const value = _ValueColumn();
   static final columns = <ColumnData<_DialogFlag>>[name, description, value];
 
   @override
@@ -245,14 +245,14 @@ class _FlagTable extends StatelessWidget {
 }
 
 class _NameColumn extends ColumnData<_DialogFlag> {
-  _NameColumn() : super('Name', fixedWidthPx: 180);
+  const _NameColumn() : super('Name', fixedWidthPx: 180);
 
   @override
   String getValue(_DialogFlag dataObject) => dataObject.name ?? '';
 }
 
 class _DescriptionColumn extends ColumnData<_DialogFlag> {
-  _DescriptionColumn() : super.wide('Description', minWidthPx: 100);
+  const _DescriptionColumn() : super.wide('Description', minWidthPx: 100);
 
   @override
   String getValue(_DialogFlag dataObject) => dataObject.description ?? '';
@@ -265,7 +265,7 @@ class _DescriptionColumn extends ColumnData<_DialogFlag> {
 }
 
 class _ValueColumn extends ColumnData<_DialogFlag> {
-  _ValueColumn()
+  const _ValueColumn()
     : super(
         'Value',
         fixedWidthPx: 100,

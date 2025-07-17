@@ -21,7 +21,7 @@ import '../primitives/utils.dart';
 /// The controller is expected to be alive for the duration of the app
 /// connection.
 abstract class ColumnData<T> {
-  ColumnData(
+  const ColumnData(
     this.title, {
     required double this.fixedWidthPx,
     this.titleTooltip,
@@ -30,7 +30,7 @@ abstract class ColumnData<T> {
     this.showTooltip = false,
   }) : minWidthPx = null;
 
-  ColumnData.wide(
+  const ColumnData.wide(
     this.title, {
     this.titleTooltip,
     this.minWidthPx,
@@ -122,7 +122,7 @@ abstract class ColumnData<T> {
 }
 
 abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
-  TreeColumnData(super.title) : super.wide();
+  const TreeColumnData(super.title) : super.wide();
 
   static const treeToggleWidth = 14.0;
 
@@ -212,15 +212,15 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
 
   static const _defaultTimeColumnWidth = 120.0;
 
-  Duration Function(T)? timeProvider;
+  final Duration Function(T)? timeProvider;
 
-  double Function(T) percentAsDoubleProvider;
+  final double Function(T) percentAsDoubleProvider;
 
-  String Function(T)? tooltipProvider;
+  final String Function(T)? tooltipProvider;
 
-  RichTooltipBuilder<T>? richTooltipProvider;
+  final RichTooltipBuilder<T>? richTooltipProvider;
 
-  Comparable Function(T)? secondaryCompare;
+  final Comparable Function(T)? secondaryCompare;
 
   final bool percentageOnly;
 
@@ -293,15 +293,15 @@ abstract class SizeAndPercentageColumn<T> extends ColumnData<T> {
   static const _defaultMemoryColumnWidth =
       TimeAndPercentageColumn._defaultTimeColumnWidth;
 
-  int Function(T)? sizeProvider;
+  final int Function(T)? sizeProvider;
 
-  double Function(T) percentAsDoubleProvider;
+  final double Function(T) percentAsDoubleProvider;
 
-  String Function(T)? tooltipProvider;
+  final String Function(T)? tooltipProvider;
 
-  RichTooltipBuilder<T>? richTooltipProvider;
+  final RichTooltipBuilder<T>? richTooltipProvider;
 
-  Comparable Function(T)? secondaryCompare;
+  final Comparable Function(T)? secondaryCompare;
 
   final bool percentageOnly;
 

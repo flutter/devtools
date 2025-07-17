@@ -14,7 +14,7 @@ import 'cpu_profile_columns.dart';
 class CpuCallTreeTable extends StatelessWidget {
   const CpuCallTreeTable({required this.dataRoots, super.key});
 
-  static final methodColumn = MethodAndSourceColumn();
+  static const methodColumn = MethodAndSourceColumn();
 
   static final selfTimeColumn = SelfTimeColumn(titleTooltip: selfTimeTooltip);
 

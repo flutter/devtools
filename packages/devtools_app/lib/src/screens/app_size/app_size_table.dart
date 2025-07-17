@@ -22,7 +22,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
           ? rootNode.children.first.level
           : rootNode.level,
     );
-    final sizeColumn = _SizeColumn();
+    const sizeColumn = _SizeColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
       sizeColumn,
@@ -77,7 +77,8 @@ class AppSizeAnalysisTable extends StatelessWidget {
 }
 
 class _NameColumn extends TreeColumnData<TreemapNode> {
-  _NameColumn({required this.currentRootLevel}) : super('Library or Class');
+  const _NameColumn({required this.currentRootLevel})
+    : super('Library or Class');
 
   final int currentRootLevel;
 
@@ -98,7 +99,7 @@ class _NameColumn extends TreeColumnData<TreemapNode> {
 }
 
 class _SizeColumn extends ColumnData<TreemapNode> {
-  _SizeColumn()
+  const _SizeColumn()
     : super('Size', alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
 
   @override
@@ -118,7 +119,7 @@ class _SizeColumn extends ColumnData<TreemapNode> {
 }
 
 class _SizePercentageColumn extends ColumnData<TreemapNode> {
-  _SizePercentageColumn({required this.totalSize})
+  const _SizePercentageColumn({required this.totalSize})
     : super(
         '% of Total Size',
         alignment: ColumnAlignment.right,
@@ -146,7 +147,7 @@ class _SizePercentageColumn extends ColumnData<TreemapNode> {
 class AppSizeDiffTable extends StatelessWidget {
   factory AppSizeDiffTable({required TreemapNode rootNode}) {
     final treeColumn = _NameColumn(currentRootLevel: rootNode.level);
-    final diffColumn = _DiffColumn();
+    const diffColumn = _DiffColumn();
     final columns = List<ColumnData<TreemapNode>>.unmodifiable([
       treeColumn,
       diffColumn,
@@ -188,7 +189,7 @@ class AppSizeDiffTable extends StatelessWidget {
 // TODO(peterdjlee): Add an opaque overlay / background to differentiate from
 //                   other columns.
 class _DiffColumn extends ColumnData<TreemapNode> {
-  _DiffColumn()
+  const _DiffColumn()
     : super('Change', alignment: ColumnAlignment.right, fixedWidthPx: 100.0);
 
   // Ensure sort by absolute size.
