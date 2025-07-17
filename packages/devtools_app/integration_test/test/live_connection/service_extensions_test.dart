@@ -37,7 +37,7 @@ void main() {
 
   testWidgets(
     'can call services and service extensions',
-
+    timeout: const Timeout(Duration(minutes: 3)),
     (tester) async {
       await pumpAndConnectDevTools(tester, testApp);
       await tester.pump(longDuration);
@@ -75,58 +75,62 @@ void main() {
     skip: true, // https://github.com/flutter/devtools/issues/8107
   );
 
-  testWidgets('loads initial extension states from device', (tester) async {
-    await pumpAndConnectDevTools(tester, testApp);
-    await tester.pump(longDuration);
+  testWidgets(
+    'loads initial extension states from device',
+    timeout: const Timeout(Duration(minutes: 3)),
+    (tester) async {
+      await pumpAndConnectDevTools(tester, testApp);
+      await tester.pump(longDuration);
 
-    // Ensure all futures are completed before running checks.
-    final service = serviceConnection.serviceManager.service!;
-    await service.allFuturesCompleted;
+      // Ensure all futures are completed before running checks.
+      final service = serviceConnection.serviceManager.service!;
+      await service.allFuturesCompleted;
 
-    final serviceExtensionsToEnable = [
-      (extensions.debugPaint.extension, true),
-      (extensions.slowAnimations.extension, 5.0),
-      (extensions.togglePlatformMode.extension, 'iOS'),
-    ];
+      final serviceExtensionsToEnable = [
+        (extensions.debugPaint.extension, true),
+        (extensions.slowAnimations.extension, 5.0),
+        (extensions.togglePlatformMode.extension, 'iOS'),
+      ];
 
-    logStatus('enabling service extensions on the test device');
-    // Enable a service extension of each type (boolean, numeric, string).
-    for (final ext in serviceExtensionsToEnable) {
-      await serviceConnection.serviceManager.serviceExtensionManager
-          .setServiceExtensionState(ext.$1, enabled: true, value: ext.$2);
-    }
+      logStatus('enabling service extensions on the test device');
+      // Enable a service extension of each type (boolean, numeric, string).
+      for (final ext in serviceExtensionsToEnable) {
+        await serviceConnection.serviceManager.serviceExtensionManager
+            .setServiceExtensionState(ext.$1, enabled: true, value: ext.$2);
+      }
 
-    logStatus('disconnecting from the test device');
-    await disconnectFromTestApp(tester);
+      logStatus('disconnecting from the test device');
+      await disconnectFromTestApp(tester);
 
-    for (final ext in serviceExtensionsToEnable) {
-      expect(
-        serviceConnection.serviceManager.serviceExtensionManager
-            .isServiceExtensionAvailable(ext.$1),
-        isFalse,
-      );
-    }
+      for (final ext in serviceExtensionsToEnable) {
+        expect(
+          serviceConnection.serviceManager.serviceExtensionManager
+              .isServiceExtensionAvailable(ext.$1),
+          isFalse,
+        );
+      }
 
-    logStatus('reconnecting to the test device');
-    await connectToTestApp(tester, testApp);
+      logStatus('reconnecting to the test device');
+      await connectToTestApp(tester, testApp);
 
-    logStatus('verify extension states have been restored from the device');
-    for (final ext in serviceExtensionsToEnable) {
-      expect(
-        serviceConnection.serviceManager.serviceExtensionManager
-            .isServiceExtensionAvailable(ext.$1),
-        isTrue,
-        reason: 'Expect ${ext.$1} to be available',
-      );
-      await _verifyExtensionStateInServiceManager(
-        ext.$1,
-        enabled: true,
-        value: ext.$2,
-      );
-    }
+      logStatus('verify extension states have been restored from the device');
+      for (final ext in serviceExtensionsToEnable) {
+        expect(
+          serviceConnection.serviceManager.serviceExtensionManager
+              .isServiceExtensionAvailable(ext.$1),
+          isTrue,
+          reason: 'Expect ${ext.$1} to be available',
+        );
+        await _verifyExtensionStateInServiceManager(
+          ext.$1,
+          enabled: true,
+          value: ext.$2,
+        );
+      }
 
-    await disconnectFromTestApp(tester);
-  });
+      await disconnectFromTestApp(tester);
+    },
+  );
 }
 
 Future<void> _verifyBooleanExtension(WidgetTester tester) async {

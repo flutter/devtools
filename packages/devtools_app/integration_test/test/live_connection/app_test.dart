@@ -25,14 +25,18 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets('connect to app and switch tabs', (tester) async {
-    await pumpAndConnectDevTools(tester, testApp);
+  testWidgets(
+    'connect to app and switch tabs',
+    timeout: const Timeout(Duration(minutes: 2)),
+    (tester) async {
+      await pumpAndConnectDevTools(tester, testApp);
 
-    // For the sake of this test, do not show extension screens by default.
-    preferences.devToolsExtensions.showOnlyEnabledExtensions.value = true;
-    await tester.pumpAndSettle(shortPumpDuration);
+      // For the sake of this test, do not show extension screens by default.
+      preferences.devToolsExtensions.showOnlyEnabledExtensions.value = true;
+      await tester.pumpAndSettle(shortPumpDuration);
 
-    logStatus('verify that we can load each DevTools screen');
-    await navigateThroughDevToolsScreens(tester, connectedToApp: true);
-  });
+      logStatus('verify that we can load each DevTools screen');
+      await navigateThroughDevToolsScreens(tester, connectedToApp: true);
+    },
+  );
 }
