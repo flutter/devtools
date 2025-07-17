@@ -22,7 +22,7 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
     implements
         ColumnRenderer<SingleClassData>,
         ColumnHeaderRenderer<SingleClassData> {
-  _ClassNameColumn(this.data)
+  const _ClassNameColumn(this.data)
     : super(
         'Class',
         titleTooltip: 'Class name',
@@ -72,7 +72,7 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
 
 class _InstanceColumn extends ColumnData<SingleClassData>
     implements ColumnRenderer<SingleClassData> {
-  _InstanceColumn(this.classData)
+  const _InstanceColumn(this.classData)
     : super(
         'Instances',
         titleTooltip: nonGcableInstancesColumnTooltip,

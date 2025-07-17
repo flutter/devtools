@@ -29,8 +29,8 @@ class LogsTable extends StatelessWidget {
   final ValueListenable<List<LogData>> searchMatchesNotifier;
   final ValueListenable<LogData?> activeSearchMatchNotifier;
 
-  static final whenColumn = WhenColumn();
-  static final messageColumn = MessageColumn();
+  static const whenColumn = WhenColumn();
+  static const messageColumn = MessageColumn();
   static final columns = [whenColumn, messageColumn];
 
   @override
