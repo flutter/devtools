@@ -233,8 +233,7 @@ class _CpuProfilerState extends State<CpuProfiler>
               ExpandAllButton(
                 gaScreen: gac.cpuProfiler,
                 gaSelection: gac.expandAll,
-                minScreenWidthForTextBeforeScaling:
-                    _expandCollapseMinIncludeTextWidth,
+                minScreenWidthForText: _expandCollapseMinIncludeTextWidth,
                 onPressed: () {
                   _performOnDataRoots(
                     (root) => root.expandCascading(),
@@ -246,8 +245,7 @@ class _CpuProfilerState extends State<CpuProfiler>
               CollapseAllButton(
                 gaScreen: gac.cpuProfiler,
                 gaSelection: gac.collapseAll,
-                minScreenWidthForTextBeforeScaling:
-                    _expandCollapseMinIncludeTextWidth,
+                minScreenWidthForText: _expandCollapseMinIncludeTextWidth,
                 onPressed: () {
                   _performOnDataRoots(
                     (root) => root.collapseCascading(),
@@ -336,11 +334,11 @@ class _CpuProfilerState extends State<CpuProfiler>
 // for filtered profiles (e.g. 'Sample count: 10/14), or to at least show the
 // original value in the tooltip for each of these stats.
 class CpuProfileStats extends StatelessWidget {
-  CpuProfileStats({super.key, required this.metadata});
+  const CpuProfileStats({super.key, required this.metadata});
+
+  static const _statsRowHeight = 25.0;
 
   final CpuProfileMetaData metadata;
-
-  final _statsRowHeight = scaleByFontFactor(25.0);
 
   @override
   Widget build(BuildContext context) {

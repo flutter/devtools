@@ -69,8 +69,7 @@ class _PrimaryControls extends StatelessWidget {
           recording: recording,
           gaScreen: gac.cpuProfiler,
           gaSelection: recording ? gac.stop : gac.record,
-          minScreenWidthForTextBeforeScaling:
-              _primaryControlsMinIncludeTextWidth,
+          minScreenWidthForText: _primaryControlsMinIncludeTextWidth,
           onPressed: recording
               ? controller.stopRecording
               : controller.startRecording,
@@ -79,8 +78,7 @@ class _PrimaryControls extends StatelessWidget {
         ClearButton(
           gaScreen: gac.cpuProfiler,
           gaSelection: gac.clear,
-          minScreenWidthForTextBeforeScaling:
-              _primaryControlsMinIncludeTextWidth,
+          minScreenWidthForText: _primaryControlsMinIncludeTextWidth,
           onPressed: recording ? null : controller.clear,
         ),
       ],
@@ -118,8 +116,7 @@ class _SecondaryControls extends StatelessWidget {
             tooltipPadding: const EdgeInsets.all(denseSpacing),
             gaScreen: gac.cpuProfiler,
             gaSelection: gac.CpuProfilerEvents.profileAppStartUp.name,
-            minScreenWidthForTextBeforeScaling:
-                _profilingControlsMinScreenWidthForText,
+            minScreenWidthForText: _profilingControlsMinScreenWidthForText,
             onPressed: !profilerBusy
                 ? controller.cpuProfilerController.loadAppStartUpProfile
                 : null,
@@ -131,8 +128,7 @@ class _SecondaryControls extends StatelessWidget {
               'Load all CPU samples for the connected app. This is the data \ncollected by the VM and is limited by the available buffer space.',
           gaScreen: gac.cpuProfiler,
           gaSelection: gac.CpuProfilerEvents.loadAllCpuSamples.name,
-          minScreenWidthForTextBeforeScaling:
-              _profilingControlsMinScreenWidthForText,
+          minScreenWidthForText: _profilingControlsMinScreenWidthForText,
           onPressed: !profilerBusy
               ? controller.cpuProfilerController.loadAllSamples
               : null,

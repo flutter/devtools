@@ -96,7 +96,7 @@ class ConnectToNewAppButton extends StatelessWidget {
     required this.gaScreen,
     required this.routerDelegate,
     this.elevated = false,
-    this.minScreenWidthForTextBeforeScaling,
+    this.minScreenWidthForText,
     this.onPressed,
   });
 
@@ -104,7 +104,7 @@ class ConnectToNewAppButton extends StatelessWidget {
 
   final bool elevated;
 
-  final double? minScreenWidthForTextBeforeScaling;
+  final double? minScreenWidthForText;
 
   final DevToolsRouterDelegate routerDelegate;
 
@@ -118,7 +118,7 @@ class ConnectToNewAppButton extends StatelessWidget {
       icon: Icons.device_hub_rounded,
       gaScreen: gaScreen,
       gaSelection: gac.HomeScreenEvents.connectToNewApp.name,
-      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+      minScreenWidthForText: minScreenWidthForText,
       onPressed: () {
         routerDelegate.navigateHome(
           clearUriParam: true,

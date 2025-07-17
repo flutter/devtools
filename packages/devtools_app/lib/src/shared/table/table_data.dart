@@ -124,7 +124,7 @@ abstract class ColumnData<T> {
 abstract class TreeColumnData<T extends TreeNode<T>> extends ColumnData<T> {
   TreeColumnData(super.title) : super.wide();
 
-  static double get treeToggleWidth => scaleByFontFactor(14.0);
+  static const treeToggleWidth = 14.0;
 
   @override
   double getNodeIndentPx(T dataObject) {
@@ -208,7 +208,7 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
     this.percentageOnly = false,
     double columnWidth = _defaultTimeColumnWidth,
     super.titleTooltip,
-  }) : super(title, fixedWidthPx: scaleByFontFactor(columnWidth));
+  }) : super(title, fixedWidthPx: columnWidth);
 
   static const _defaultTimeColumnWidth = 120.0;
 
@@ -288,7 +288,7 @@ abstract class SizeAndPercentageColumn<T> extends ColumnData<T> {
     this.percentageOnly = false,
     double columnWidth = _defaultMemoryColumnWidth,
     super.titleTooltip,
-  }) : super(title, fixedWidthPx: scaleByFontFactor(columnWidth));
+  }) : super(title, fixedWidthPx: columnWidth);
 
   static const _defaultMemoryColumnWidth =
       TimeAndPercentageColumn._defaultTimeColumnWidth;

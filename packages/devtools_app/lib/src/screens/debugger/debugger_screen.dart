@@ -572,7 +572,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               message: 'Resume',
               child: TextButton(
                 onPressed: _controller.resume,
-                child: DevToolsIcon(
+                child: const DevToolsIcon(
                   iconAsset: 'icons/material_symbols/resume.png',
                   color: Colors.green,
                   size: DebuggingControls.materialIconSize,
@@ -583,7 +583,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               message: 'Step over',
               child: TextButton(
                 onPressed: _controller.stepOver,
-                child: DevToolsIcon(
+                child: const DevToolsIcon(
                   iconAsset: 'icons/material_symbols/step_over.png',
                   color: Colors.black,
                   size: DebuggingControls.materialIconSize,

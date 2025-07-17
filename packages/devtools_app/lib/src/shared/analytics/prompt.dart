@@ -72,7 +72,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
                     style: theme.boldTextStyle,
                   ),
                   IconButton(
-                    icon: Icon(Icons.close, size: actionsIconSize),
+                    icon: const Icon(Icons.close, size: actionsIconSize),
                     onPressed: controller.hidePrompt,
                   ),
                 ],

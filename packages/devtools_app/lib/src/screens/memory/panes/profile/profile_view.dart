@@ -37,7 +37,7 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
         ColumnRenderer<ProfileRecord>,
         ColumnHeaderRenderer<ProfileRecord> {
   _FieldClassNameColumn(this.classFilterData)
-    : super('Class', fixedWidthPx: scaleByFontFactor(200));
+    : super('Class', fixedWidthPx: 200);
 
   @override
   String? getValue(ProfileRecord dataObject) => dataObject.heapClass.className;
@@ -108,7 +108,7 @@ class _FieldInstanceCountColumn extends ColumnData<ProfileRecord>
         'Instances',
         titleTooltip: 'The number of instances of the class in the heap',
         alignment: ColumnAlignment.right,
-        fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
+        fixedWidthPx: _defaultNumberFieldWidth,
       );
 
   final HeapGeneration heap;
@@ -202,7 +202,7 @@ class _FieldSizeColumn extends ColumnData<ProfileRecord> {
          title,
          titleTooltip: titleTooltip,
          alignment: ColumnAlignment.right,
-         fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
+         fixedWidthPx: _defaultNumberFieldWidth,
        );
 
   final HeapGeneration heap;
@@ -254,7 +254,7 @@ abstract class _GCHeapStatsColumn extends ColumnData<AdaptedProfile> {
 }
 
 class _GCHeapNameColumn extends ColumnData<AdaptedProfile> {
-  _GCHeapNameColumn() : super('', fixedWidthPx: scaleByFontFactor(200));
+  _GCHeapNameColumn() : super('', fixedWidthPx: 200);
 
   @override
   String? getValue(AdaptedProfile dataObject) {
@@ -271,7 +271,7 @@ class _GCHeapUsageColumn extends _GCHeapStatsColumn {
         'Usage',
         titleTooltip: 'The current amount of memory allocated from the heap',
         alignment: ColumnAlignment.right,
-        fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
+        fixedWidthPx: _defaultNumberFieldWidth,
       );
 
   @override
@@ -295,7 +295,7 @@ class _GCHeapCapacityColumn extends _GCHeapStatsColumn {
         titleTooltip:
             'The current size of the heap, including unallocated memory',
         alignment: ColumnAlignment.right,
-        fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
+        fixedWidthPx: _defaultNumberFieldWidth,
       );
 
   @override
@@ -318,7 +318,7 @@ class _GCCountColumn extends _GCHeapStatsColumn {
         'Collections',
         titleTooltip: 'The number of garbage collections run on the heap',
         alignment: ColumnAlignment.right,
-        fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
+        fixedWidthPx: _defaultNumberFieldWidth,
       );
 
   @override
@@ -337,7 +337,7 @@ class _GCLatencyColumn extends _GCHeapStatsColumn {
         titleTooltip:
             'The average time taken to perform a garbage collection on the heap (ms)',
         alignment: ColumnAlignment.right,
-        fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
+        fixedWidthPx: _defaultNumberFieldWidth,
       );
 
   @override
@@ -612,7 +612,7 @@ class _ExportAllocationProfileButton extends StatelessWidget {
         return DownloadButton(
           gaScreen: gac.memory,
           gaSelection: gac.MemoryEvents.profileDownloadCsv.name,
-          minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
+          minScreenWidthForText: memoryControlsMinVerboseWidth,
           tooltip: 'Download allocation profile data in CSV format',
           label: 'CSV',
           onPressed: currentAllocationProfile == null

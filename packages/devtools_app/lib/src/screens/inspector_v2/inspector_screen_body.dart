@@ -54,7 +54,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   SearchTargetType searchTarget = SearchTargetType.widget;
 
   static const inspectorTreeKey = Key('Inspector Tree');
-  static const minScreenWidthForTextBeforeScaling = 900.0;
+  static const minScreenWidthForText = 900.0;
 
   static const _welcomeShownStorageId = 'inspectorV2WelcomeShown';
 

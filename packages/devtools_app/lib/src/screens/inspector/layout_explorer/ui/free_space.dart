@@ -35,8 +35,8 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
           ),
         ),
         Container(
-          margin: EdgeInsets.symmetric(vertical: arrowMargin),
-          child: ArrowWrapper.bidirectional(
+          margin: const EdgeInsets.symmetric(vertical: arrowMargin),
+          child: const ArrowWrapper.bidirectional(
             arrowColor: widthIndicatorColor,
             direction: Axis.horizontal,
             arrowHeadSize: arrowHeadSize,
@@ -57,8 +57,8 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
             ),
           ),
           Container(
-            margin: EdgeInsets.symmetric(horizontal: arrowMargin),
-            child: ArrowWrapper.bidirectional(
+            margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
+            child: const ArrowWrapper.bidirectional(
               arrowColor: heightIndicatorColor,
               direction: Axis.vertical,
               arrowHeadSize: arrowHeadSize,
@@ -110,8 +110,8 @@ class PaddingVisualizerWidget extends StatelessWidget {
           ),
         ),
         Container(
-          margin: EdgeInsets.symmetric(vertical: arrowMargin),
-          child: ArrowWrapper.bidirectional(
+          margin: const EdgeInsets.symmetric(vertical: arrowMargin),
+          child: const ArrowWrapper.bidirectional(
             arrowColor: widthIndicatorColor,
             direction: Axis.horizontal,
             arrowHeadSize: arrowHeadSize,
@@ -132,8 +132,8 @@ class PaddingVisualizerWidget extends StatelessWidget {
             ),
           ),
           Container(
-            margin: EdgeInsets.symmetric(horizontal: arrowMargin),
-            child: ArrowWrapper.bidirectional(
+            margin: const EdgeInsets.symmetric(horizontal: arrowMargin),
+            child: const ArrowWrapper.bidirectional(
               arrowColor: heightIndicatorColor,
               direction: Axis.vertical,
               arrowHeadSize: arrowHeadSize,

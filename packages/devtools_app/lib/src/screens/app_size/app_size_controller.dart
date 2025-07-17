@@ -360,9 +360,9 @@ class AppSizeController extends DevToolsScreenController {
         deferredLoadingSupportEnabled && _hasDeferredInfo(processedJson);
 
     if (isDeferredApp.value) {
-      _deferredOnly = _extractDeferredUnits(Map.from(processedJson));
-      _mainOnly = _extractMainUnit(Map.from(processedJson));
-      _entireApp = _includeEntireApp(Map.from(processedJson));
+      _deferredOnly = _extractDeferredUnits(Map.of(processedJson));
+      _mainOnly = _extractMainUnit(Map.of(processedJson));
+      _entireApp = _includeEntireApp(Map.of(processedJson));
       _loadApp(_dataForAppUnit!);
     } else {
       // Set root name for non-deferred apps.
@@ -464,17 +464,17 @@ class AppSizeController extends DevToolsScreenController {
         }
 
         final oldMainOnlyFileJson = _extractMainUnit(
-          Map.from(oldEntireAppFileJson),
+          Map.of(oldEntireAppFileJson),
         );
         final newMainOnlyFileJson = _extractMainUnit(
-          Map.from(newEntireAppFileJson),
+          Map.of(newEntireAppFileJson),
         );
 
         final oldDeferredOnlyFileJson = _extractDeferredUnits(
-          Map.from(oldEntireAppFileJson),
+          Map.of(oldEntireAppFileJson),
         );
         final newDeferredOnlyFileJson = _extractDeferredUnits(
-          Map.from(newEntireAppFileJson),
+          Map.of(newEntireAppFileJson),
         );
 
         diffMap = _generateDiffMapFromAnalyzeSizeFiles(

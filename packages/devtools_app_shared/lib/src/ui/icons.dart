@@ -9,7 +9,8 @@ import 'theme/theme.dart';
 /// A widget that renders either an [icon] from a font glyph or an [iconAsset]
 /// from the app bundle.
 final class DevToolsIcon extends StatelessWidget {
-  DevToolsIcon({super.key, this.icon, this.iconAsset, this.color, double? size})
+  const DevToolsIcon(
+      {super.key, this.icon, this.iconAsset, this.color, double? size})
       : assert(
           (icon == null) != (iconAsset == null),
           'Exactly one of icon and iconAsset must be specified.',
