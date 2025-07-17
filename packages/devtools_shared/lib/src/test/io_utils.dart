@@ -83,22 +83,22 @@ mixin IOMixin {
     final processId = process.pid;
     if (debugLogging) {
       print(
-        'Cancelling all stream subscriptions for process $processId before '
-        'killing.',
+        '${DateTime.now()}: Cancelling all stream subscriptions for process '
+        '$processId before killing.',
       );
     }
     await cancelAllStreamSubscriptions();
     if (debugLogging) {
-      print('Sending SIGTERM to $processId.');
+      print('${DateTime.now()}: Sending SIGTERM to $processId.');
     }
     Process.killPid(processId);
     return process.exitCode.timeout(
       killTimeout,
-      onTimeout: () => killForcefully(process, debugLogging: debugLogging),
+      onTimeout: () => _killForcefully(process, debugLogging: debugLogging),
     );
   }
 
-  Future<int> killForcefully(
+  Future<int> _killForcefully(
     Process process, {
     bool debugLogging = false,
   }) {
@@ -106,7 +106,7 @@ mixin IOMixin {
     // Use sigint here instead of sigkill. See
     // https://github.com/flutter/flutter/issues/117415.
     if (debugLogging) {
-      print('Sending SIGINT to $processId.');
+      print('${DateTime.now()}: Sending SIGINT to $processId.');
     }
     Process.killPid(processId, ProcessSignal.sigint);
     return process.exitCode;
