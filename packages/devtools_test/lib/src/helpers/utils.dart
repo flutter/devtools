@@ -240,7 +240,7 @@ Future<Finder> retryUntilFound(
   return retryUntilFound(finder, tester: tester, retries: retries - 1);
 }
 
-void logStatus(String log) {
+void logStatus(String message) {
   // ignore: avoid_print, intentional print for test output
-  print('TEST STATUS: $log');
+  print('${DateTime.now()}: TEST STATUS: $message');
 }

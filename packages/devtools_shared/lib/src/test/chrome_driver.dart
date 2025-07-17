@@ -19,8 +19,9 @@ class ChromeDriver with IOMixin {
       const chromedriverExe = 'chromedriver';
       const chromedriverArgs = ['--port=4444'];
       if (debugLogging) {
-        print('starting the chromedriver process');
-        print('> $chromedriverExe ${chromedriverArgs.join(' ')}');
+        print('${DateTime.now()}: starting the chromedriver process');
+        print('${DateTime.now()}: > $chromedriverExe '
+            '${chromedriverArgs.join(' ')}');
       }
       final process = _process = await Process.start(
         chromedriverExe,
@@ -42,7 +43,7 @@ class ChromeDriver with IOMixin {
     await cancelAllStreamSubscriptions();
 
     if (debugLogging) {
-      print('killing the chromedriver process');
+      print('${DateTime.now()}: killing the chromedriver process');
     }
     await killGracefully(process, debugLogging: debugLogging);
   }
