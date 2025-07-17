@@ -19,6 +19,7 @@ void main() {
 
   testWidgets(
     'Perfetto trace viewer loads data and scrolls for Flutter frames',
+    timeout: const Timeout(Duration(minutes: 3)),
     (tester) async {
       await pumpDevTools(tester);
       await loadSampleData(tester, performanceFileName);

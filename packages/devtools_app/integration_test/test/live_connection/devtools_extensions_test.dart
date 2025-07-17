@@ -41,125 +41,129 @@ void main() {
     resetDevToolsExtensionEnabledStates();
   });
 
-  testWidgets('end to end extensions flow', (tester) async {
-    await pumpDevTools(tester);
+  testWidgets(
+    'end to end extensions flow',
+    timeout: const Timeout(Duration(minutes: 3)),
+    (tester) async {
+      await pumpDevTools(tester);
 
-    // TODO(https://github.com/flutter/devtools/issues/9196): re-enable this
-    // test verification once DTD can be started from the integration test
-    // harness.
-    // logStatus(
-    //   'verify static extensions are available before connecting to an app',
-    // );
-    // expect(extensionService.availableExtensions.length, 2);
-    // expect(extensionService.visibleExtensions.length, 2);
-    // await _verifyExtensionsSettingsMenu(tester, [
-    //   ExtensionEnabledState.none, // dart_foo
-    //   ExtensionEnabledState.none, // standalone_extension
-    // ]);
+      // TODO(https://github.com/flutter/devtools/issues/9196): re-enable this
+      // test verification once DTD can be started from the integration test
+      // harness.
+      // logStatus(
+      //   'verify static extensions are available before connecting to an app',
+      // );
+      // expect(extensionService.availableExtensions.length, 2);
+      // expect(extensionService.visibleExtensions.length, 2);
+      // await _verifyExtensionsSettingsMenu(tester, [
+      //   ExtensionEnabledState.none, // dart_foo
+      //   ExtensionEnabledState.none, // standalone_extension
+      // ]);
 
-    await connectToTestApp(tester, testApp);
+      await connectToTestApp(tester, testApp);
 
-    expect(extensionService.availableExtensions.length, 3);
-    expect(extensionService.visibleExtensions.length, 3);
-    await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.none, // dart_foo
-      ExtensionEnabledState.none, // foo
-      ExtensionEnabledState.none, // standalone_extension
-    ], closeMenuWhenDone: false);
+      expect(extensionService.availableExtensions.length, 3);
+      expect(extensionService.visibleExtensions.length, 3);
+      await _verifyExtensionsSettingsMenu(tester, [
+        ExtensionEnabledState.none, // dart_foo
+        ExtensionEnabledState.none, // foo
+        ExtensionEnabledState.none, // standalone_extension
+      ], closeMenuWhenDone: false);
 
-    await _verifyExtensionVisibilitySetting(tester);
+      await _verifyExtensionVisibilitySetting(tester);
 
-    // dart_foo extension.
-    // Enable, test context menu actions, then disable from context menu.
-    await _switchToExtensionScreen(
-      tester,
-      extensionIndex: 0,
-      initialLoad: true,
-    );
-    await _answerEnableExtensionPrompt(tester, enable: true);
-    await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.enabled, // dart_foo
-      ExtensionEnabledState.none, // foo
-      ExtensionEnabledState.none, // standalone_extension
-    ]);
+      // dart_foo extension.
+      // Enable, test context menu actions, then disable from context menu.
+      await _switchToExtensionScreen(
+        tester,
+        extensionIndex: 0,
+        initialLoad: true,
+      );
+      await _answerEnableExtensionPrompt(tester, enable: true);
+      await _verifyExtensionsSettingsMenu(tester, [
+        ExtensionEnabledState.enabled, // dart_foo
+        ExtensionEnabledState.none, // foo
+        ExtensionEnabledState.none, // standalone_extension
+      ]);
 
-    await _verifyContextMenuActionsAndDisable(tester);
+      await _verifyContextMenuActionsAndDisable(tester);
 
-    expect(extensionService.availableExtensions.length, 3);
-    expect(extensionService.visibleExtensions.length, 2);
-    await _verifyExtensionTabVisibility(
-      tester,
-      extensionIndex: 0,
-      visible: false,
-    );
-    await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.disabled, // dart_foo
-      ExtensionEnabledState.none, // foo
-      ExtensionEnabledState.none, // standalone_extension
-    ]);
+      expect(extensionService.availableExtensions.length, 3);
+      expect(extensionService.visibleExtensions.length, 2);
+      await _verifyExtensionTabVisibility(
+        tester,
+        extensionIndex: 0,
+        visible: false,
+      );
+      await _verifyExtensionsSettingsMenu(tester, [
+        ExtensionEnabledState.disabled, // dart_foo
+        ExtensionEnabledState.none, // foo
+        ExtensionEnabledState.none, // standalone_extension
+      ]);
 
-    // foo extension. Hide immediately.
-    await _switchToExtensionScreen(
-      tester,
-      extensionIndex: 1,
-      initialLoad: true,
-    );
-    await _answerEnableExtensionPrompt(tester, enable: false);
+      // foo extension. Hide immediately.
+      await _switchToExtensionScreen(
+        tester,
+        extensionIndex: 1,
+        initialLoad: true,
+      );
+      await _answerEnableExtensionPrompt(tester, enable: false);
 
-    expect(extensionService.availableExtensions.length, 3);
-    expect(extensionService.visibleExtensions.length, 1);
-    await _verifyExtensionTabVisibility(
-      tester,
-      extensionIndex: 1,
-      visible: false,
-    );
-    await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.disabled, // dart_foo
-      ExtensionEnabledState.disabled, // foo
-      ExtensionEnabledState.none, // standalone_extension
-    ]);
+      expect(extensionService.availableExtensions.length, 3);
+      expect(extensionService.visibleExtensions.length, 1);
+      await _verifyExtensionTabVisibility(
+        tester,
+        extensionIndex: 1,
+        visible: false,
+      );
+      await _verifyExtensionsSettingsMenu(tester, [
+        ExtensionEnabledState.disabled, // dart_foo
+        ExtensionEnabledState.disabled, // foo
+        ExtensionEnabledState.none, // standalone_extension
+      ]);
 
-    // Re-enable foo extension from the extensions settings menu.
-    logStatus('verify we can re-enable an extension from the settings menu');
-    await _changeExtensionSetting(tester, extensionIndex: 1, enable: true);
+      // Re-enable foo extension from the extensions settings menu.
+      logStatus('verify we can re-enable an extension from the settings menu');
+      await _changeExtensionSetting(tester, extensionIndex: 1, enable: true);
 
-    expect(extensionService.availableExtensions.length, 3);
-    expect(extensionService.visibleExtensions.length, 2);
-    await _switchToExtensionScreen(tester, extensionIndex: 1);
-    expect(find.byType(EnableExtensionPrompt), findsNothing);
-    expect(find.byType(EmbeddedExtensionView), findsOneWidget);
-    expect(find.byType(HtmlElementView), findsOneWidget);
-    await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.disabled, // dart_foo
-      ExtensionEnabledState.enabled, // foo
-      ExtensionEnabledState.none, // standalone_extension
-    ]);
+      expect(extensionService.availableExtensions.length, 3);
+      expect(extensionService.visibleExtensions.length, 2);
+      await _switchToExtensionScreen(tester, extensionIndex: 1);
+      expect(find.byType(EnableExtensionPrompt), findsNothing);
+      expect(find.byType(EmbeddedExtensionView), findsOneWidget);
+      expect(find.byType(HtmlElementView), findsOneWidget);
+      await _verifyExtensionsSettingsMenu(tester, [
+        ExtensionEnabledState.disabled, // dart_foo
+        ExtensionEnabledState.enabled, // foo
+        ExtensionEnabledState.none, // standalone_extension
+      ]);
 
-    // standalone_extension. Disable directly from settings menu.
-    logStatus(
-      'verify we can disable an extension screen directly from the settings menu',
-    );
-    await _verifyExtensionTabVisibility(
-      tester,
-      extensionIndex: 2,
-      visible: true,
-    );
+      // standalone_extension. Disable directly from settings menu.
+      logStatus(
+        'verify we can disable an extension screen directly from the settings menu',
+      );
+      await _verifyExtensionTabVisibility(
+        tester,
+        extensionIndex: 2,
+        visible: true,
+      );
 
-    logStatus('disable the extension from the settings menu');
-    await _changeExtensionSetting(tester, extensionIndex: 2, enable: false);
-    expect(extensionService.availableExtensions.length, 3);
-    expect(extensionService.visibleExtensions.length, 1);
-    await _verifyExtensionTabVisibility(
-      tester,
-      extensionIndex: 2,
-      visible: false,
-    );
-    await _verifyExtensionsSettingsMenu(tester, [
-      ExtensionEnabledState.disabled, // dart_foo
-      ExtensionEnabledState.enabled, // foo
-      ExtensionEnabledState.disabled, // standalone_extension
-    ]);
-  });
+      logStatus('disable the extension from the settings menu');
+      await _changeExtensionSetting(tester, extensionIndex: 2, enable: false);
+      expect(extensionService.availableExtensions.length, 3);
+      expect(extensionService.visibleExtensions.length, 1);
+      await _verifyExtensionTabVisibility(
+        tester,
+        extensionIndex: 2,
+        visible: false,
+      );
+      await _verifyExtensionsSettingsMenu(tester, [
+        ExtensionEnabledState.disabled, // dart_foo
+        ExtensionEnabledState.enabled, // foo
+        ExtensionEnabledState.disabled, // standalone_extension
+      ]);
+    },
+  );
 }
 
 Future<void> _switchToExtensionScreen(

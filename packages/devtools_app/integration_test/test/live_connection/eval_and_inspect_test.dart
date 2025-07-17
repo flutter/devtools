@@ -32,21 +32,26 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets('eval with scope in inspector window', (tester) async {
-    await pumpAndConnectDevTools(tester, testApp);
+  testWidgets(
+    'eval with scope in inspector window',
+    timeout: const Timeout(Duration(minutes: 3)),
+    (tester) async {
+      await pumpAndConnectDevTools(tester, testApp);
 
-    final evalTester = EvalTester(tester);
-    await evalTester.prepareInspectorUI();
+      final evalTester = EvalTester(tester);
+      await evalTester.prepareInspectorUI();
 
-    logStatus('testing basic evaluation');
-    await testBasicEval(evalTester);
+      logStatus('testing basic evaluation');
+      await testBasicEval(evalTester);
 
-    logStatus('testing variable assignment');
-    await testAssignment(evalTester);
-  });
+      logStatus('testing variable assignment');
+      await testAssignment(evalTester);
+    },
+  );
 
   testWidgets(
     'eval with scope on widget tree node',
+    timeout: const Timeout(Duration(minutes: 3)),
     (tester) async {
       await pumpAndConnectDevTools(tester, testApp);
 

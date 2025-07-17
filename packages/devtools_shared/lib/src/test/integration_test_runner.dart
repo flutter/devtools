@@ -115,14 +115,12 @@ class IntegrationTestRunner with IOMixin {
       );
 
       bool testTimedOut = false;
-      final timeout = Future.delayed(const Duration(minutes: 8)).then((_) {
+      await process.exitCode.timeout(const Duration(minutes: 8), onTimeout: () {
         testTimedOut = true;
+        // TODO(srawlins): Refactor the retry situation to catch a
+        // TimeoutException, and not recursively call `runTest`.
+        return -1;
       });
-
-      await Future.any([
-        process.exitCode,
-        timeout,
-      ]);
 
       debugLog(
         'shutting down processes because '
