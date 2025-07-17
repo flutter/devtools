@@ -187,16 +187,17 @@ class CpuProfileData with Serializable {
     final samplePeriod =
         observedSamplePeriod(samples) ?? json.samplePeriod ?? 0;
 
+    final timeOriginMicros = json.timeOriginMicros;
+    final timeExtentMicros = json.timeExtentMicros;
     final profileMetaData = CpuProfileMetaData(
       sampleCount: json.sampleCount ?? 0,
       samplePeriod: samplePeriod,
       stackDepth: json.stackDepth ?? 0,
-      time: (json.timeOriginMicros != null && json.timeExtentMicros != null)
-          ? (TimeRange()
-              ..start = Duration(microseconds: json.timeOriginMicros!)
-              ..end = Duration(
-                microseconds: json.timeOriginMicros! + json.timeExtentMicros!,
-              ))
+      time: (timeOriginMicros != null && timeExtentMicros != null)
+          ? TimeRange.ofLength(
+              start: timeOriginMicros,
+              length: timeExtentMicros,
+            )
           : null,
     );
 
@@ -242,11 +243,7 @@ class CpuProfileData with Serializable {
     // Each sample in [subSamples] will have the leaf stack
     // frame id for a cpu sample within [subTimeRange].
     final subSamples = superProfile.cpuSamples
-        .where(
-          (sample) => subTimeRange.contains(
-            Duration(microseconds: sample.timestampMicros!),
-          ),
-        )
+        .where((sample) => subTimeRange.contains(sample.timestampMicros!))
         .toList();
 
     final subStackFrames = <String, CpuStackFrame>{};
@@ -395,13 +392,12 @@ class CpuProfileData with Serializable {
       // for this profile data, and the samples included in this data could be
       // sparse over the original profile's time range, so true start and end
       // times wouldn't be helpful.
-      time: TimeRange()
-        ..start = const Duration()
-        ..end = Duration(
-          microseconds: microsPerSample.isInfinite
-              ? 0
-              : (newSampleCount * microsPerSample).round(),
-        ),
+      time: TimeRange(
+        start: 0,
+        end: microsPerSample.isInfinite
+            ? 0
+            : (newSampleCount * microsPerSample).round(),
+      ),
     );
 
     final stackFramesWithTag = <String, CpuStackFrame>{};
@@ -500,13 +496,12 @@ class CpuProfileData with Serializable {
       // for this profile data, and the samples included in this data could be
       // sparse over the original profile's time range, so true start and end
       // times wouldn't be helpful.
-      time: TimeRange()
-        ..start = const Duration()
-        ..end = Duration(
-          microseconds: microsPerSample.isInfinite || microsPerSample.isNaN
-              ? 0
-              : (filteredCpuSamples.length * microsPerSample).round(),
-        ),
+      time: TimeRange(
+        start: 0,
+        end: microsPerSample.isInfinite || microsPerSample.isNaN
+            ? 0
+            : (filteredCpuSamples.length * microsPerSample).round(),
+      ),
     );
 
     void walkAndFilter(CpuStackFrame stackFrame) {
@@ -755,10 +750,8 @@ class CpuProfileData with Serializable {
     _samplePeriodKey: profileMetaData.samplePeriod,
     _sampleCountKey: profileMetaData.sampleCount,
     _stackDepthKey: profileMetaData.stackDepth,
-    if (profileMetaData.time?.start != null)
-      _timeOriginKey: profileMetaData.time!.start!.inMicroseconds,
-    if (profileMetaData.time?.duration != null)
-      _timeExtentKey: profileMetaData.time!.duration.inMicroseconds,
+    _timeOriginKey: ?profileMetaData.time?.start,
+    _timeExtentKey: ?profileMetaData.time?.duration.inMicroseconds,
     _stackFramesKey: stackFramesJson,
     _traceEventsKey: cpuSamples.map((sample) => sample.toJson).toList(),
   };
@@ -1128,7 +1121,7 @@ class CpuProfileStore {
       return _profilesByLabel[label];
     }
 
-    if (!time!.isWellFormed) return null;
+    if (time is! TimeRange) return null;
 
     // If we have a profile for a time range encompassing [time], then we can
     // generate and cache the profile for [time] without needing to pull data

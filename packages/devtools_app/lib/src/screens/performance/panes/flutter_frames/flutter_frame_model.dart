@@ -24,12 +24,10 @@ class FlutterFrame {
   });
 
   factory FlutterFrame.fromJson(Map<String, Object?> json) {
-    final timeStart = Duration(microseconds: json[startTimeKey]! as int);
-    final timeEnd =
-        timeStart + Duration(microseconds: json[elapsedKey]! as int);
-    final frameTime = TimeRange()
-      ..start = timeStart
-      ..end = timeEnd;
+    final frameTime = TimeRange.ofLength(
+      start: json[startTimeKey]! as int,
+      length: json[elapsedKey]! as int,
+    );
     return FlutterFrame._(
       id: json[numberKey]! as int,
       timeFromFrameTiming: frameTime,
@@ -150,7 +148,7 @@ class FlutterFrame {
 
   Map<String, Object?> get json => {
     numberKey: id,
-    startTimeKey: timeFromFrameTiming.start!.inMicroseconds,
+    startTimeKey: timeFromFrameTiming.start,
     elapsedKey: timeFromFrameTiming.duration.inMicroseconds,
     buildKey: buildTime.inMicroseconds,
     rasterKey: rasterTime.inMicroseconds,
@@ -197,7 +195,8 @@ class FrameTimelineEventData {
 
   bool get isNotEmpty => uiEvent != null || rasterEvent != null;
 
-  final time = TimeRange();
+  final _timeBuilder = TimeRangeBuilder();
+  TimeRange get time => _timeBuilder.build();
 
   void setEventFlow({
     required FlutterTimelineEvent event,
@@ -207,11 +206,11 @@ class FrameTimelineEventData {
     _eventFlows[type.index] = event;
     if (setTimeData) {
       if (type == TimelineEventType.ui) {
-        time.start = event.time.start;
+        _timeBuilder.start = event.time.start;
         // If [rasterEventFlow] has already completed, set the end time for this
         // frame to [event]'s end time.
         if (rasterEvent != null) {
-          time.end = event.time.end;
+          _timeBuilder.end = event.time.end;
         }
       } else if (type == TimelineEventType.raster) {
         // If [uiEventFlow] is null, that means that this raster event flow
@@ -224,12 +223,7 @@ class FrameTimelineEventData {
         // [uiEventFlow] once it finishes.
         final theUiEvent = uiEvent;
         if (theUiEvent != null) {
-          time.end = Duration(
-            microseconds: math.max(
-              theUiEvent.time.end!.inMicroseconds,
-              event.time.end?.inMicroseconds ?? 0,
-            ),
-          );
+          _timeBuilder.end = math.max(theUiEvent.time.end, event.time.end);
         }
       }
     }

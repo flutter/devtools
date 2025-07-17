@@ -1211,11 +1211,12 @@ final profileMetaData = CpuProfileMetaData(
   sampleCount: 10,
   samplePeriod: 1000,
   stackDepth: 128,
-  time: TimeRange()
-    ..start = const Duration()
+  time: TimeRange(
+    start: 0,
     // Note this intentionally adds 10000 microseconds more than what
     // was measured, regression test for Issue #8870.
-    ..end = const Duration(microseconds: 20000),
+    end: 20000,
+  ),
 );
 
 final tagFrameA = CpuStackFrame(
@@ -1529,9 +1530,7 @@ final zeroProfileMetaData = CpuProfileMetaData(
   sampleCount: 0,
   samplePeriod: 50,
   stackDepth: 128,
-  time: TimeRange()
-    ..start = const Duration()
-    ..end = const Duration(microseconds: 100),
+  time: TimeRange(start: 0, end: 100),
 );
 
 final zeroStackFrame = CpuStackFrame(

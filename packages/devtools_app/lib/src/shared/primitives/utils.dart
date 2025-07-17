@@ -442,84 +442,101 @@ class RateLimiter {
   }
 }
 
+// If the need arises, this enum can be expanded to include any of the
+// remaining time units supported by [Duration] - (seconds, minutes, etc.).
 /// Time unit for displaying time ranges.
-///
-/// If the need arises, this enum can be expanded to include any of the
-/// remaining time units supported by [Duration] - (seconds, minutes, etc.). If
-/// you add a unit of time to this enum, modify the toString() method in
-/// [TimeRange] to handle the new case.
 enum TimeUnit { microseconds, milliseconds }
 
-class TimeRange {
-  TimeRange({this.singleAssignment = true});
+/// A builder used to build a well-formed [TimeRange] incrementally.
+final class TimeRangeBuilder {
+  /// Creates a new [TimeRangeBuilder] to build a [TimeRange]
+  /// with the optionally specified [start] and [end] initial values.
+  TimeRangeBuilder({int? start, int? end}) : _start = start, _end = end;
 
-  factory TimeRange.offset({
-    required TimeRange original,
-    required Duration offset,
-  }) {
-    final originalStart = original.start;
-    final originalEnd = original.end;
-    return TimeRange()
-      ..start = originalStart != null ? originalStart + offset : null
-      ..end = originalEnd != null ? originalEnd + offset : null;
+  int? _start;
+
+  /// Sets the start time of this builder.
+  ///
+  /// The start time should be less than or equal to the end time.
+  set start(int startTime) {
+    _start = startTime;
   }
 
-  final bool singleAssignment;
+  int? _end;
 
-  Duration? get start => _start;
+  /// Sets the end time of this builder.
+  ///
+  /// The end time should be greater than or equal to the start time.
+  set end(int endTime) {
+    _end = endTime;
+  }
 
-  Duration? _start;
+  /// Whether both `start` and `end` properties are set,
+  /// meaning [build] can safely be called.
+  bool get canBuild => _start != null && _end != null;
 
-  set start(Duration? value) {
-    if (singleAssignment) {
-      assert(_start == null);
+  /// Returns a [TimeRange] built from the specified [start] and [end] values.
+  ///
+  /// If either [start] or [end] is `null`, throws an error.
+  ///
+  /// The [start] time must be less than or equal to the [end] time.
+  TimeRange build() {
+    final startDuration = _start;
+    if (startDuration == null) {
+      throw StateError('TimeRangeBuilder.start must be set before building!');
     }
-    if (value != null && _end != null) {
+
+    final endDuration = _end;
+    if (endDuration == null) {
+      throw StateError('TimeRangeBuilder.end must be set before building!');
+    }
+
+    return TimeRange(start: startDuration, end: endDuration);
+  }
+
+  /// Returns a new [TimeRangeBuilder] with the current values of this builder.
+  TimeRangeBuilder copy() => TimeRangeBuilder(start: _start, end: _end);
+}
+
+final class TimeRange {
+  /// Creates a [TimeRange] with the specified
+  /// [start] and [end] times in microseconds.
+  ///
+  /// The [start] time must be less than or equal to the [end] time.
+  TimeRange({required this.start, required this.end})
+    : assert(start <= end, '$start is not less than or equal to end time $end'),
       assert(
-        value <= _end!,
-        '$value is not less than or equal to end time $_end',
+        end >= start,
+        '$end is not greater than or equal to start time $start',
       );
-    }
-    _start = value;
-  }
 
-  Duration? get end => _end;
+  /// Creates a [TimeRange] with the specified [start] time in microseconds and
+  /// [end] calculated as being [length] microseconds later.
+  factory TimeRange.ofLength({required int start, required int length}) =>
+      TimeRange(start: start, end: start + length);
 
-  Duration? _end;
+  /// The starting time in microseconds.
+  final int start;
 
-  set end(Duration? value) {
-    if (singleAssignment) {
-      assert(_end == null);
-    }
-    if (value != null && _start != null) {
-      assert(
-        value >= _start!,
-        '$value is not greater than or equal to start time $_start',
-      );
-    }
-    _end = value;
-  }
+  /// The ending time in microseconds.
+  final int end;
 
-  Duration get duration => end! - start!;
+  /// The duration of time between the [start] and [end] microseconds.
+  Duration get duration => Duration(microseconds: end - start);
 
-  bool contains(Duration target) => start! <= target && end! >= target;
+  /// Whether this time range contains the specified [target] microsecond.
+  bool contains(int target) => start <= target && end >= target;
 
-  bool containsRange(TimeRange t) => start! <= t.start! && end! >= t.end!;
-
-  bool overlaps(TimeRange t) => t.end! > start! && t.start! < end!;
-
-  bool get isWellFormed => _start != null && _end != null;
+  /// Whether this time range completely contains the
+  /// specified [target] time range.
+  bool containsRange(TimeRange target) =>
+      start <= target.start && end >= target.end;
 
   @override
-  String toString({TimeUnit? unit}) {
-    unit ??= TimeUnit.microseconds;
-    switch (unit) {
-      case TimeUnit.microseconds:
-        return '[${_start?.inMicroseconds} μs - ${end?.inMicroseconds} μs]';
-      case TimeUnit.milliseconds:
-        return '[${_start?.inMilliseconds} ms - ${end?.inMilliseconds} ms]';
-    }
-  }
+  String toString({TimeUnit? unit}) => switch (unit ?? TimeUnit.microseconds) {
+    TimeUnit.microseconds => '[$start μs - $end μs]',
+    TimeUnit.milliseconds => '[${start ~/ 1000} ms - ${end ~/ 1000} ms]',
+  };
 
   @override
   bool operator ==(Object other) {
