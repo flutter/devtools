@@ -468,7 +468,7 @@ class CpuProfileData with Serializable {
     }
 
     for (final sample in originalData.cpuSamples) {
-      final sampleJson = Map<String, Object?>.from(sample.json);
+      final sampleJson = Map<String, Object?>.of(sample.json);
       final leafStackFrame = originalData.stackFrames[sample.leafId]!;
       includeSampleOrWalkUp(sample, sampleJson, leafStackFrame);
     }

@@ -308,9 +308,7 @@ class SizedCircularProgressIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox.fromSize(
-      size: const Size.fromHeight(
-        2 * (defaultIconSizeBeforeScaling + denseSpacing),
-      ),
+      size: const Size.fromHeight(2 * (defaultIconSize + denseSpacing)),
       child: const CenteredCircularProgressIndicator(),
     );
   }
@@ -558,9 +556,9 @@ class InboundReferencesTree extends StatelessWidget {
                 dataDisplayProvider: (node, _) =>
                     InboundReferenceWidget(controller: controller, node: node),
                 emptyTreeViewBuilder: () {
-                  return Padding(
+                  return const Padding(
                     padding: EdgeInsets.all(defaultRowHeight / 2),
-                    child: const Text(
+                    child: Text(
                       'There are no inbound references for this object',
                     ),
                   );

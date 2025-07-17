@@ -1747,8 +1747,7 @@ class _WideColumn extends ColumnData<TestData> {
 }
 
 class _WideMinWidthColumn extends ColumnData<TestData> {
-  _WideMinWidthColumn()
-    : super.wide('Wide MinWidth Column', minWidthPx: scaleByFontFactor(100.0));
+  _WideMinWidthColumn() : super.wide('Wide MinWidth Column', minWidthPx: 100.0);
 
   @override
   String getValue(TestData dataObject) =>
@@ -1760,10 +1759,7 @@ class _WideMinWidthColumn extends ColumnData<TestData> {
 
 class _VeryWideMinWidthColumn extends ColumnData<TestData> {
   _VeryWideMinWidthColumn()
-    : super.wide(
-        'Very Wide MinWidth Column',
-        minWidthPx: scaleByFontFactor(160.0),
-      );
+    : super.wide('Very Wide MinWidth Column', minWidthPx: 160.0);
 
   @override
   String getValue(TestData dataObject) =>

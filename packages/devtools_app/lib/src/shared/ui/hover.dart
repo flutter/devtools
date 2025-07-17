@@ -14,12 +14,12 @@ import 'package:provider/provider.dart';
 import 'common_widgets.dart';
 import 'utils.dart';
 
-double get _maxHoverCardHeight => scaleByFontFactor(250.0);
+const _maxHoverCardHeight = 250.0;
 
 TextStyle get _hoverTitleTextStyle => fixBlurryText(
-  TextStyle(
+  const TextStyle(
     fontWeight: FontWeight.normal,
-    fontSize: scaleByFontFactor(15.0),
+    fontSize: 15.0,
     decoration: TextDecoration.none,
   ),
 );
@@ -332,7 +332,7 @@ class HoverCardTooltip extends StatefulWidget {
        asyncTimeout = null;
 
   static const _hoverDelay = Duration(milliseconds: 500);
-  static double get defaultHoverWidth => scaleByFontFactor(450.0);
+  static const defaultHoverWidth = 450.0;
 
   /// Whether the tooltip is currently enabled.
   final bool Function() enabled;

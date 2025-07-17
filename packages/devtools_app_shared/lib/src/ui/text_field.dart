@@ -60,7 +60,7 @@ final class DevToolsClearableTextField extends StatelessWidget {
             bottom: densePadding,
             left: denseSpacing,
           ),
-          constraints: BoxConstraints(
+          constraints: const BoxConstraints(
             minHeight: defaultTextFieldHeight,
             maxHeight: defaultTextFieldHeight,
           ),

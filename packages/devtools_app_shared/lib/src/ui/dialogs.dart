@@ -85,12 +85,12 @@ List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
   ];
 }
 
-final singleLineDialogTextFieldDecoration = InputDecoration(
+const singleLineDialogTextFieldDecoration = InputDecoration(
   constraints: BoxConstraints(
     minHeight: defaultTextFieldHeight,
     maxHeight: defaultTextFieldHeight,
   ),
-  border: const OutlineInputBorder(),
+  border: OutlineInputBorder(),
 );
 
 /// A standardized dialog with help text and buttons `Reset to default`,

@@ -277,8 +277,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final box = SizedBox(
       height: widget._rowType == _TableRowType.data
           ? defaultRowHeight
-          : defaultHeaderHeight +
-                (widget.tall ? scaleByFontFactor(densePadding) : 0.0),
+          : defaultHeaderHeight + (widget.tall ? densePadding : 0.0),
       child: Material(
         color: _searchAwareBackgroundColor(),
         child: onPressed != null
@@ -492,7 +491,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                     );
                   },
                 )
-              : SizedBox(width: defaultIconSize, height: defaultIconSize);
+              : const SizedBox(width: defaultIconSize, height: defaultIconSize);
           content = Row(
             mainAxisSize: MainAxisSize.min,
             children: [

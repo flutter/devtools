@@ -6,8 +6,8 @@
 
 bool debugTestScript = false;
 
-void debugLog(String log) {
+void debugLog(String message) {
   if (debugTestScript) {
-    print(log);
+    print('${DateTime.now()}: $message');
   }
 }

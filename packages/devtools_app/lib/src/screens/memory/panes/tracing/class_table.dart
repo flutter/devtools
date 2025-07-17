@@ -27,7 +27,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
         'Trace',
         titleTooltip:
             'Enable or disable allocation tracing for a specific type',
-        fixedWidthPx: scaleByFontFactor(40.0),
+        fixedWidthPx: 40.0,
         alignment: ColumnAlignment.left,
       );
 
@@ -103,7 +103,7 @@ class _InstancesColumn extends ColumnData<TracedClass> {
         'Delta',
         titleTooltip:
             'Number of instances, allocated after the class was selected for tracing.',
-        fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
+        fixedWidthPx: _defaultNumberFieldWidth,
       );
 
   @override

@@ -127,7 +127,7 @@ class ErrorBadgeManager extends DisposableController
     // Build a new map with the new error. Adding to the existing map
     // won't cause the ValueNotifier to fire (and it's not permitted to call
     // notifyListeners() directly).
-    final newValue = LinkedHashMap<String, DevToolsError>.from(errors.value);
+    final newValue = LinkedHashMap<String, DevToolsError>.of(errors.value);
     newValue[error.id] = error;
     errors.value = newValue;
   }
