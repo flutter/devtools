@@ -571,6 +571,17 @@ class CpuProfileData with Serializable {
     // final output from this method.
     const kRootId = 0;
 
+    // Generate the stack frames first as it builds and tracks
+    // the timeline tree for each sample.
+    final stackFrames = cpuSamples.generateStackFramesJson(
+      isolateId: isolateId,
+      // We want to ensure that if [kRootId] ever changes, this change is
+      // propagated to [cpuSamples.generateStackFramesJson].
+      // ignore: avoid_redundant_argument_values
+      kRootId: kRootId,
+      buildCodeTree: buildCodeTree,
+    );
+
     // Build the trace events.
     final traceEvents = <Map<String, Object?>>[];
     for (final sample in cpuSamples.samples ?? <vm_service.CpuSample>[]) {
@@ -597,14 +608,7 @@ class CpuProfileData with Serializable {
       CpuProfileData._stackDepthKey: cpuSamples.maxStackDepth,
       CpuProfileData._timeOriginKey: cpuSamples.timeOriginMicros,
       CpuProfileData._timeExtentKey: cpuSamples.timeExtentMicros,
-      CpuProfileData._stackFramesKey: cpuSamples.generateStackFramesJson(
-        isolateId: isolateId,
-        // We want to ensure that if [kRootId] ever changes, this change is
-        // propagated to [cpuSamples.generateStackFramesJson].
-        // ignore: avoid_redundant_argument_values
-        kRootId: kRootId,
-        buildCodeTree: buildCodeTree,
-      ),
+      CpuProfileData._stackFramesKey: stackFrames,
       CpuProfileData._traceEventsKey: traceEvents,
     };
 
