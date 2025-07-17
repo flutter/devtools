@@ -550,9 +550,6 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
     return AnimatedOpacity(
       opacity: _controlOpacity,
       duration: longDuration,
-      onEnd: () {
-        _setVisiblityForPausedState(_isPaused);
-      },
       child: Container(
         color: colorScheme.warningContainer,
         height: _controlHeight,
