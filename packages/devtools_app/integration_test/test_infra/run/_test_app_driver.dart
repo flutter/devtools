@@ -196,10 +196,6 @@ class TestDartCliApp extends IntegrationTestApp {
     : super(appPath, TestAppDevice.cli);
 
   static const vmServicePrefix = 'The Dart VM service is listening on ';
-  static const controlPortKey = 'controlPort';
-
-  int? get controlPort => _controlPort;
-  late final int? _controlPort;
 
   @override
   Future<void> startProcess() async {
@@ -216,75 +212,44 @@ class TestDartCliApp extends IntegrationTestApp {
 
   @override
   Future<void> waitForAppStart() async {
-    final vmServiceUriString = await _waitFor(
-      message: vmServicePrefix,
-      timeout: IntegrationTestApp._appStartTimeout,
-    );
+    final vmServiceUriString = await _waitForVmServicePrefix();
     final vmServiceUri = Uri.parse(vmServiceUriString);
-    _controlPort = await _waitFor(
-      message: controlPortKey,
-      timeout: const Duration(seconds: 1),
-      optional: true,
-    );
 
     // Map to WS URI.
     _vmServiceWsUri = convertToWebSocketUrl(serviceProtocolUrl: vmServiceUri);
   }
 
-  /// Waits for [message] to appear on stdout.
+  /// Waits for [vmServicePrefix] to appear on stdout.
   ///
-  /// After [timeout], if no such message has appeared, then either `null` is
-  /// returned, if [optional] is `true`, or an exception is thrown, if
-  /// [optional] is `false`.
-  Future<T> _waitFor<T>({
-    required String message,
-    Duration? timeout,
-    bool optional = false,
-  }) {
-    final response = Completer<T>();
+  /// After a timeout, if no such message has appeared, then an exception is
+  /// thrown.
+  Future<String> _waitForVmServicePrefix() {
+    final response = Completer<String>();
     late StreamSubscription<String> sub;
     sub = stdoutController.stream.listen(
-      (String line) => _handleStdout(
-        line,
-        subscription: sub,
-        response: response,
-        message: message,
-      ),
+      (String line) =>
+          _handleStdout(line, subscription: sub, response: response),
     );
 
-    if (optional) {
-      return response.future
-          .timeout(
-            timeout ?? IntegrationTestApp._defaultTimeout,
-            onTimeout: () => null as T,
-          )
-          .whenComplete(() => sub.cancel());
-    }
-
-    return _timeoutWithMessages<T>(
+    return _timeoutWithMessages<String>(
       () => response.future,
-      timeout: timeout,
-      message: 'Did not receive expected message: $message.',
+      timeout: IntegrationTestApp._appStartTimeout,
+      message: 'Did not receive expected message: $vmServicePrefix.',
     ).whenComplete(() => sub.cancel());
   }
 
-  void _handleStdout<T>(
+  void _handleStdout(
     String line, {
     required StreamSubscription<String> subscription,
-    required Completer<T> response,
-    required String message,
+    required Completer<String> response,
   }) async {
-    if (message == vmServicePrefix && line.startsWith(vmServicePrefix)) {
-      final vmServiceUri = line.substring(
-        line.indexOf(vmServicePrefix) + vmServicePrefix.length,
-      );
-      await subscription.cancel();
-      response.complete(vmServiceUri as T);
-    } else if (message == controlPortKey && line.contains(controlPortKey)) {
-      final asJson = jsonDecode(line) as Map;
-      await subscription.cancel();
-      response.complete(asJson[controlPortKey] as T);
-    }
+    if (!line.startsWith(vmServicePrefix)) return;
+
+    final vmServiceUri = line.substring(
+      line.indexOf(vmServicePrefix) + vmServicePrefix.length,
+    );
+    await subscription.cancel();
+    response.complete(vmServiceUri);
   }
 }
 

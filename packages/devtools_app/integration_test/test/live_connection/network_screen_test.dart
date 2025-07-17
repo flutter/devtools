@@ -10,7 +10,6 @@ import 'package:devtools_app/src/shared/table/table.dart' show DevToolsTable;
 import 'package:devtools_test/helpers.dart';
 import 'package:devtools_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart' as http;
 import 'package:integration_test/integration_test.dart';
 
 // To run:
@@ -28,62 +27,65 @@ void main() {
 
   tearDown(() async {
     await resetHistory();
-    await http.get(Uri.parse('http://localhost:${testApp.controlPort}/exit/'));
   });
 
-  testWidgets('nnn', (tester) async {
-    await pumpAndConnectDevTools(tester, testApp);
-    await _prepareNetworkScreen(tester);
+  testWidgets(
+    'network screen test',
+    timeout: const Timeout(Duration(minutes: 3)),
+    (tester) async {
+      await pumpAndConnectDevTools(tester, testApp);
+      await _prepareNetworkScreen(tester);
 
-    final helper = _NetworkScreenHelper(tester, testApp.controlPort!);
+      final helper = _NetworkScreenHelper(tester);
 
-    // Instruct the app to make a GET request via the dart:io HttpClient.
-    await helper.triggerRequest('get/');
-    _expectInRequestTable('GET');
-    await helper.clear();
+      // Instruct the app to make a GET request via the dart:io HttpClient.
+      await helper.triggerRequest('get');
+      _expectInRequestTable('GET');
+      await helper.clear();
 
-    // Instruct the app to make a POST request via the dart:io HttpClient.
-    await helper.triggerRequest('post/');
-    _expectInRequestTable('POST');
-    await helper.clear();
+      // Instruct the app to make a POST request via the dart:io HttpClient.
+      await helper.triggerRequest('post');
+      _expectInRequestTable('POST');
+      await helper.clear();
 
-    // Instruct the app to make a PUT request via the dart:io HttpClient.
-    await helper.triggerRequest('put/');
-    _expectInRequestTable('PUT');
-    await helper.clear();
+      // Instruct the app to make a PUT request via the dart:io HttpClient.
+      await helper.triggerRequest('put');
+      _expectInRequestTable('PUT');
+      await helper.clear();
 
-    // Instruct the app to make a DELETE request via the dart:io HttpClient.
-    await helper.triggerRequest('delete/');
-    _expectInRequestTable('DELETE');
-    await helper.clear();
+      // Instruct the app to make a DELETE request via the dart:io HttpClient.
+      await helper.triggerRequest('delete');
+      _expectInRequestTable('DELETE');
+      await helper.clear();
 
-    // Instruct the app to make a GET request via the 'http' package.
-    await helper.triggerRequest('packageHttp/get/');
-    _expectInRequestTable('GET');
-    await helper.clear();
+      // Instruct the app to make a GET request via the 'http' package.
+      await helper.triggerRequest('packageHttpGet');
+      _expectInRequestTable('GET');
+      await helper.clear();
 
-    // Instruct the app to make a POST request via the 'http' package.
-    await helper.triggerRequest('packageHttp/post/');
-    _expectInRequestTable('POST');
-    await helper.clear();
+      // Instruct the app to make a POST request via the 'http' package.
+      await helper.triggerRequest('packageHttpPost');
+      _expectInRequestTable('POST');
+      await helper.clear();
 
-    // Instruct the app to make a GET request via Dio.
-    await helper.triggerRequest('dio/get/');
-    _expectInRequestTable('GET');
-    await helper.clear();
+      // Instruct the app to make a GET request via Dio.
+      await helper.triggerRequest('dioGet');
+      _expectInRequestTable('GET');
+      await helper.clear();
 
-    // Instruct the app to make a POST request via Dio.
-    await helper.triggerRequest('dio/post/');
-    _expectInRequestTable('POST');
-  });
+      // Instruct the app to make a POST request via Dio.
+      await helper.triggerRequest('dioPost');
+      _expectInRequestTable('POST');
+
+      await helper.triggerExit();
+    },
+  );
 }
 
 final class _NetworkScreenHelper {
-  _NetworkScreenHelper(this._tester, this._controlPort);
+  _NetworkScreenHelper(this._tester);
 
   final WidgetTester _tester;
-
-  final int _controlPort;
 
   Future<void> clear() async {
     // Press the 'Clear' button between tests.
@@ -95,8 +97,26 @@ final class _NetworkScreenHelper {
     );
   }
 
-  Future<void> triggerRequest(String path) async {
-    await http.get(Uri.parse('http://localhost:$_controlPort/$path'));
+  Future<void> triggerExit() async {
+    final response = await serviceConnection.serviceManager
+        .callServiceExtensionOnMainIsolate('ext.networking_app.exit');
+    logStatus(response.toString());
+
+    await Future.delayed(const Duration(milliseconds: 200));
+    await _tester.pump(safePumpDuration);
+  }
+
+  Future<void> triggerRequest(
+    String requestType, {
+    bool hasBody = false,
+  }) async {
+    final response = await serviceConnection.serviceManager
+        .callServiceExtensionOnMainIsolate(
+          'ext.networking_app.makeRequest',
+          args: {'requestType': requestType, 'hasBody': hasBody},
+        );
+    logStatus(response.toString());
+
     await Future.delayed(const Duration(milliseconds: 200));
     await _tester.pump(safePumpDuration);
   }
