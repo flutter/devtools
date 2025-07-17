@@ -146,7 +146,9 @@ class IntegrationTestRunner with IOMixin {
               'Integration test timed out on try #$attemptNumber. Retrying '
               '$testTarget now.',
             );
-            await runTest(attemptNumber: ++attemptNumber);
+            attemptNumber++;
+            debugLog('running the test (attempt $attemptNumber)');
+            await runTest(attemptNumber: attemptNumber);
           }
         }
 
@@ -156,6 +158,7 @@ class IntegrationTestRunner with IOMixin {
       }
     }
 
+    debugLog('running the test (attempt 1)');
     await runTest(attemptNumber: 0);
   }
 }
