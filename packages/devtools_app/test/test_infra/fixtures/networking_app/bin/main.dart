@@ -42,7 +42,7 @@ void registerMakeRequestExtension(io.HttpServer testServer) {
       case 'dioPost':
         client.dioPost(hasBody: hasBody);
       case 'packageHttpGet':
-        client.packageHttpGet(hasBody: hasBody);
+        client.packageHttpGet();
       case 'packageHttpPost':
         client.packageHttpPost(hasBody: hasBody);
       case 'packageHttpPostStreamed':
@@ -140,7 +140,7 @@ class _HttpClient {
     print('Received DELETE response: $response');
   }
 
-  void packageHttpGet({bool hasBody = false}) async {
+  void packageHttpGet() async {
     print('Sending package:http GET...');
     // No body.
     final response = await http.get(_uri);
