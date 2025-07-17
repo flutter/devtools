@@ -53,7 +53,7 @@ void main() {
       // TODO(jacobr): add a proper method to WidgetInspectorService that does
       // this. setSelection currently ignores null selection requests which is
       // a misfeature.
-      await service!.inspectorLibrary.eval(
+      await service.inspectorLibrary.eval(
         'WidgetInspectorService.instance.selection.clear()',
         isAlive: null,
       );
