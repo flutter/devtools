@@ -418,23 +418,25 @@ void main() {
   });
 
   group('widget errors', () {
-    setUpAll(() {
+    setUpAll(() async {
       env = FlutterTestEnvironment(
         testAppDirectory: 'test/test_infra/fixtures/inspector_app',
         const FlutterRunConfiguration(withDebugger: true),
       );
-      env.afterEverySetup = resetInspectorSelection;
-    });
-
-    testWidgetsWithWindowSize('show navigator and error labels', windowSize, (
-      WidgetTester tester,
-    ) async {
       await env.setupEnvironment(
         config: const FlutterRunConfiguration(
           withDebugger: true,
           entryScript: 'lib/overflow_errors.dart',
         ),
       );
+      env.afterEverySetup = resetInspectorSelection;
+      // Enable the legacy inspector.
+      preferences.inspector.setLegacyInspectorEnabled(true);
+    });
+
+    testWidgetsWithWindowSize('show navigator and error labels', windowSize, (
+      WidgetTester tester,
+    ) async {
       expect(serviceConnection.serviceManager.service, equals(env.service));
       expect(serviceConnection.serviceManager.isolateManager, isNotNull);
 
