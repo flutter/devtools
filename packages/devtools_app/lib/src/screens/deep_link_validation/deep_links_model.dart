@@ -586,7 +586,6 @@ class DomainColumn extends ColumnData<LinkData>
     LinkData dataObject, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return dataObject.domain == null
         ? Text('missing domain', style: Theme.of(context).errorTextStyle)
@@ -648,7 +647,6 @@ class PathColumn extends ColumnData<LinkData>
     LinkData dataObject, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return _ErrorAwareText(
       isError: dataObject.pathErrors.isNotEmpty,
@@ -728,7 +726,6 @@ class SchemeColumn extends ColumnData<LinkData>
     LinkData dataObject, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return dataObject.scheme.isEmpty
         ? Text(missingScheme, style: Theme.of(context).errorTextStyle)
@@ -780,7 +777,6 @@ class OSColumn extends ColumnData<LinkData>
     LinkData dataObject, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return Text(getValue(dataObject));
   }
@@ -853,7 +849,6 @@ class StatusColumn extends ColumnData<LinkData>
     LinkData dataObject, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     if (dataObject.domainErrors.isNotEmpty ||
         dataObject.pathErrors.isNotEmpty) {
@@ -888,7 +883,6 @@ class NavigationColumn extends ColumnData<LinkData>
     LinkData dataObject, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return isRowHovered
         ? const Icon(Icons.arrow_forward)

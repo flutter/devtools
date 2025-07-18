@@ -1080,7 +1080,7 @@ class TextViewer extends StatelessWidget {
     } else {
       displayText = text;
     }
-    return SelectableText(displayText, style: style);
+    return SelectionArea(child: Text(displayText, style: style));
   }
 }
 
@@ -1768,24 +1768,29 @@ class PubWarningText extends StatelessWidget {
         serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == true;
     final sdkName = isFlutterApp ? 'Flutter' : 'Dart';
     final minSdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
-    return SelectableText.rich(
-      TextSpan(
-        text:
-            'Warning: you should no longer be launching DevTools from'
-            ' pub.\n\n',
-        style: theme.subtleTextStyle.copyWith(color: theme.colorScheme.error),
-        children: [
-          TextSpan(
-            text:
-                'DevTools version 2.8.0 will be the last version to '
-                'be shipped on pub. As of $sdkName\nversion >= '
-                '$minSdkVersion, DevTools should be launched by running '
-                'the ',
-            style: theme.subtleTextStyle,
-          ),
-          TextSpan(text: '`dart devtools`', style: theme.subtleFixedFontStyle),
-          TextSpan(text: '\ncommand.', style: theme.subtleTextStyle),
-        ],
+    return SelectionArea(
+      child: Text.rich(
+        TextSpan(
+          text:
+              'Warning: you should no longer be launching DevTools from'
+              ' pub.\n\n',
+          style: theme.subtleTextStyle.copyWith(color: theme.colorScheme.error),
+          children: [
+            TextSpan(
+              text:
+                  'DevTools version 2.8.0 will be the last version to '
+                  'be shipped on pub. As of $sdkName\nversion >= '
+                  '$minSdkVersion, DevTools should be launched by running '
+                  'the ',
+              style: theme.subtleTextStyle,
+            ),
+            TextSpan(
+              text: '`dart devtools`',
+              style: theme.subtleFixedFontStyle,
+            ),
+            TextSpan(text: '\ncommand.', style: theme.subtleTextStyle),
+          ],
+        ),
       ),
     );
   }

@@ -42,7 +42,6 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     TracedClass item, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return Checkbox(
       value: item.traceAllocations,
@@ -86,7 +85,6 @@ class _ClassNameColumn extends ColumnData<TracedClass>
     TracedClass data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return HeapClassView(
       theClass: data.name,

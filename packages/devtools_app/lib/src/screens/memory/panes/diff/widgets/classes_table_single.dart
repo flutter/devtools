@@ -45,7 +45,6 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
     SingleClassData data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return HeapClassView(
       theClass: data.className,
@@ -94,7 +93,6 @@ class _InstanceColumn extends ColumnData<SingleClassData>
     SingleClassData data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return HeapInstanceTableCell(
       data.objects,

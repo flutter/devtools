@@ -163,57 +163,67 @@ class DisplayProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     if (variable.text != null) {
-      return SelectableText.rich(
-        TextSpan(
-          children: textSpansFromAnsi(
-            variable.text ?? '',
-            theme.subtleFixedFontStyle,
+      return SelectionArea(
+        child: GestureDetector(
+          onTap: onTap,
+          child: Text.rich(
+            TextSpan(
+              children: textSpansFromAnsi(
+                variable.text ?? '',
+                theme.subtleFixedFontStyle,
+              ),
+            ),
           ),
         ),
-        onTap: onTap,
       );
     }
 
     final hasName = variable.name?.isNotEmpty ?? false;
-    return Row(
-      children: [
-        SelectableText.rich(
-          TextSpan(
-            text: hasName ? variable.name : null,
-            style: variable.artificialName
-                ? theme.subtleFixedFontStyle
-                : theme.fixedFontStyle.apply(
-                    color: theme.colorScheme.controlFlowSyntaxColor,
-                  ),
-            children: [
-              if (hasName) TextSpan(text: ': ', style: theme.fixedFontStyle),
-              if (variable.ref!.value is Sentinel)
-                TextSpan(
-                  text: 'Sentinel ${variable.displayValue.toString()}',
-                  style: theme.subtleFixedFontStyle,
-                ),
-            ],
+    return SelectionArea(
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: onTap,
+            child: Text.rich(
+              TextSpan(
+                text: hasName ? variable.name : null,
+                style: variable.artificialName
+                    ? theme.subtleFixedFontStyle
+                    : theme.fixedFontStyle.apply(
+                        color: theme.colorScheme.controlFlowSyntaxColor,
+                      ),
+                children: [
+                  if (hasName)
+                    TextSpan(text: ': ', style: theme.fixedFontStyle),
+                  if (variable.ref!.value is Sentinel)
+                    TextSpan(
+                      text: 'Sentinel ${variable.displayValue.toString()}',
+                      style: theme.subtleFixedFontStyle,
+                    ),
+                ],
+              ),
+            ),
           ),
-          onTap: onTap,
-        ),
-        if (variable.ref!.value is! Sentinel && variable.ref!.value is ObjRef?)
-          VmServiceObjectLink(
-            object: variable.ref!.value as ObjRef?,
-            textBuilder: (object) {
-              if (object is InstanceRef &&
-                  object.kind == InstanceKind.kString) {
-                return "'${object.valueAsString}'";
-              }
-              return null;
-            },
-            onTap: controller.findAndSelectNodeForObject,
-          )
-        else
-          Text(
-            variable.ref!.value.toString(),
-            style: Theme.of(context).subtleFixedFontStyle,
-          ),
-      ],
+          if (variable.ref!.value is! Sentinel &&
+              variable.ref!.value is ObjRef?)
+            VmServiceObjectLink(
+              object: variable.ref!.value as ObjRef?,
+              textBuilder: (object) {
+                if (object is InstanceRef &&
+                    object.kind == InstanceKind.kString) {
+                  return "'${object.valueAsString}'";
+                }
+                return null;
+              },
+              onTap: controller.findAndSelectNodeForObject,
+            )
+          else
+            Text(
+              variable.ref!.value.toString(),
+              style: Theme.of(context).subtleFixedFontStyle,
+            ),
+        ],
+      ),
     );
   }
 }
