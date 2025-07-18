@@ -302,7 +302,7 @@ void main() {
       test('throws error if start is after end', () {
         expect(
           () => TimeRangeBuilder(start: 2000, end: 1000).build(),
-          throwsStateError,
+          throwsAssertionError,
         );
       });
 
