@@ -437,9 +437,7 @@ class TimelineEventsController extends PerformanceFeatureController
       );
     }
 
-    if (frame.timeFromFrameTiming.isWellFormed) {
-      perfettoController.scrollToTimeRange(frame.timeFromFrameTiming);
-    }
+    perfettoController.scrollToTimeRange(frame.timeFromFrameTiming);
   }
 
   void addTimelineEvent(FlutterTimelineEvent event) {
@@ -463,7 +461,7 @@ class TimelineEventsController extends PerformanceFeatureController
       } else {
         final unassignedEventsForFrame = _unassignedFlutterTimelineEvents
             .putIfAbsent(frameNumber, () => FrameTimelineEventData());
-        unassignedEventsForFrame.setEventFlow(event: event, setTimeData: false);
+        unassignedEventsForFrame.setEventFlow(event: event);
       }
     }
   }

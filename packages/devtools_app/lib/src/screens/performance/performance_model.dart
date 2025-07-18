@@ -98,11 +98,18 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
 }
 
 class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
-  FlutterTimelineEvent(PerfettoTrackEvent firstTrackEvent)
-    : trackEvents = [firstTrackEvent],
-      type = firstTrackEvent.timelineEventType {
-    time.start = Duration(microseconds: firstTrackEvent.timestampMicros);
-  }
+  factory FlutterTimelineEvent(PerfettoTrackEvent firstTrackEvent) =>
+      FlutterTimelineEvent._(
+        trackEvents: [firstTrackEvent],
+        type: firstTrackEvent.timelineEventType,
+        timeBuilder: TimeRangeBuilder(start: firstTrackEvent.timestampMicros),
+      );
+
+  FlutterTimelineEvent._({
+    required this.trackEvents,
+    required this.type,
+    required TimeRangeBuilder timeBuilder,
+  }) : _timeBuilder = timeBuilder;
 
   static const rasterEventName = 'Rasterizer::DoDraw';
   static const uiEventName = 'Animator::BeginFrame';
@@ -110,9 +117,17 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
   /// Perfetto track events associated with this [FlutterTimelineEvent].
   final List<PerfettoTrackEvent> trackEvents;
 
-  TimelineEventType? type;
+  final TimelineEventType? type;
 
-  TimeRange time = TimeRange();
+  final TimeRangeBuilder _timeBuilder;
+
+  /// The time range of this event.
+  ///
+  /// Throws if [isComplete] is false.
+  TimeRange get time => _timeBuilder.build();
+
+  /// Whether this event is complete and has received an end track event.
+  bool get isComplete => _timeBuilder.canBuild;
 
   String? get name => trackEvents.first.name;
 
@@ -123,26 +138,17 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
   bool get isShaderEvent =>
       trackEvents.first.isShaderEvent || trackEvents.last.isShaderEvent;
 
-  bool get isWellFormed => time.start != null && time.end != null;
-
   void addEndTrackEvent(PerfettoTrackEvent event) {
-    time.end = Duration(microseconds: event.timestampMicros);
+    _timeBuilder.end = event.timestampMicros;
     trackEvents.add(event);
   }
 
   @override
-  FlutterTimelineEvent shallowCopy() {
-    final copy = FlutterTimelineEvent(trackEvents.first);
-    for (int i = 1; i < trackEvents.length; i++) {
-      copy.trackEvents.add(trackEvents[i]);
-    }
-    copy
-      ..type = type
-      ..time = (TimeRange()
-        ..start = time.start
-        ..end = time.end);
-    return copy;
-  }
+  FlutterTimelineEvent shallowCopy() => FlutterTimelineEvent._(
+    trackEvents: trackEvents.toList(),
+    type: type,
+    timeBuilder: _timeBuilder.copy(),
+  );
 
   @visibleForTesting
   FlutterTimelineEvent deepCopy() {
@@ -174,7 +180,12 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
   }
 
   void format(StringBuffer buf, String indent) {
-    buf.writeln('$indent$name $time');
+    buf.write('$indent$name');
+    if (isComplete) {
+      buf.write(time);
+    }
+
+    buf.writeln(' ');
     for (final child in children) {
       child.format(buf, '  $indent');
     }

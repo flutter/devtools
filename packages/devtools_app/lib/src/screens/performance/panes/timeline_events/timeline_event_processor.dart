@@ -116,8 +116,7 @@ class FlutterTimelineEventProcessor {
 
     // Since this event is complete, move back up the tree to the nearest
     // incomplete event.
-    while (current!.parent != null &&
-        current.parent!.time.end?.inMicroseconds != null) {
+    while (current!.parent?.isComplete ?? false) {
       current = current.parent;
     }
     currentTimelineEventsByTrackId[trackId] = current.parent;

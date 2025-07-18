@@ -19,7 +19,6 @@ import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/utils/utils.dart';
-import '../../../performance_utils.dart';
 import '_perfetto_controller_web.dart';
 import 'perfetto_controller.dart';
 
@@ -205,10 +204,6 @@ class _PerfettoViewController extends DisposableController
   Future<void> _scrollToTimeRange(TimeRange? timeRange) async {
     if (timeRange == null) return;
 
-    if (!timeRange.isWellFormed) {
-      pushNoTimelineEventsAvailableWarning();
-      return;
-    }
     await _pingPerfettoUntilReady();
     ga.select(
       gac.performance,
@@ -217,8 +212,8 @@ class _PerfettoViewController extends DisposableController
     _postMessage({
       'perfetto': {
         // Pass the values to Perfetto in seconds.
-        'timeStart': timeRange.start!.inMicroseconds / 1000000,
-        'timeEnd': timeRange.end!.inMicroseconds / 1000000,
+        'timeStart': timeRange.start / 1000000,
+        'timeEnd': timeRange.end / 1000000,
         // The time range should take up 80% of the visible window.
         'viewPercentage': 0.8,
       },

@@ -33,15 +33,12 @@ void main() {
       final cpuProfileEmptyData = CpuProfileData.fromJson(
         cpuProfileResponseEmptyJson,
       );
-      expect(
-        cpuProfileEmptyData.profileMetaData.time!.end!.inMilliseconds,
-        47377796,
-      );
+      expect(cpuProfileEmptyData.profileMetaData.time!.end, 47377796685);
       final filtered = CpuProfileData.filterFrom(
         cpuProfileEmptyData,
         (_) => true,
       );
-      expect(filtered.profileMetaData.time!.end!.inMilliseconds, 0);
+      expect(filtered.profileMetaData.time!.end, 0);
     });
 
     test('init from parse', () {
@@ -55,22 +52,14 @@ void main() {
       );
       expect(cpuProfileData.profileMetaData.sampleCount, equals(8));
       expect(cpuProfileData.profileMetaData.samplePeriod, equals(50));
-      expect(
-        cpuProfileData.profileMetaData.time!.start!.inMicroseconds,
-        equals(47377796685),
-      );
-      expect(
-        cpuProfileData.profileMetaData.time!.end!.inMicroseconds,
-        equals(47377799685),
-      );
+      expect(cpuProfileData.profileMetaData.time!.start, equals(47377796685));
+      expect(cpuProfileData.profileMetaData.time!.end, equals(47377799685));
     });
 
     test('subProfile', () {
       final subProfile = CpuProfileData.subProfile(
         cpuProfileData,
-        TimeRange()
-          ..start = const Duration(microseconds: 47377796685)
-          ..end = const Duration(microseconds: 47377799063),
+        TimeRange(start: 47377796685, end: 47377799063),
       );
 
       expect(subProfile.stackFramesJson, equals(subProfileStackFrames));

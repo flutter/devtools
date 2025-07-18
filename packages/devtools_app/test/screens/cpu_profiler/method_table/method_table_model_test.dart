@@ -18,9 +18,10 @@ void main() {
       profileMetaData: ProfileMetaData(
         sampleCount: 10,
         samplePeriod: 250,
-        time: TimeRange()
-          ..start = Duration.zero
-          ..end = const Duration(seconds: 1),
+        time: TimeRange(
+          start: 0,
+          end: const Duration(seconds: 1).inMicroseconds,
+        ),
       ),
       stackFrameIds: {'1'},
     );
@@ -33,9 +34,10 @@ void main() {
       profileMetaData: ProfileMetaData(
         sampleCount: 10,
         samplePeriod: 250,
-        time: TimeRange()
-          ..start = Duration.zero
-          ..end = const Duration(seconds: 1),
+        time: TimeRange(
+          start: 0,
+          end: const Duration(seconds: 1).inMicroseconds,
+        ),
       ),
       stackFrameIds: {'2'},
     );
@@ -48,9 +50,10 @@ void main() {
       profileMetaData: ProfileMetaData(
         sampleCount: 10,
         samplePeriod: 250,
-        time: TimeRange()
-          ..start = Duration.zero
-          ..end = const Duration(seconds: 1),
+        time: TimeRange(
+          start: 0,
+          end: const Duration(seconds: 1).inMicroseconds,
+        ),
       ),
       stackFrameIds: {'3'},
     );
@@ -63,9 +66,10 @@ void main() {
       profileMetaData: ProfileMetaData(
         sampleCount: 10,
         samplePeriod: 250,
-        time: TimeRange()
-          ..start = Duration.zero
-          ..end = const Duration(seconds: 1),
+        time: TimeRange(
+          start: 0,
+          end: const Duration(seconds: 1).inMicroseconds,
+        ),
       ),
       stackFrameIds: {'4'},
     );

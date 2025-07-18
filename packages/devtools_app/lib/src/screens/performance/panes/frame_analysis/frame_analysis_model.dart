@@ -101,10 +101,7 @@ class FrameAnalysis {
   ///
   /// This is drawn from all events for this frame from the raster thread.
   late FramePhase rasterPhase = FramePhase.raster(
-    events: [
-      if (frame.timelineEventData.rasterEvent != null)
-        frame.timelineEventData.rasterEvent!,
-    ],
+    events: [?frame.timelineEventData.rasterEvent],
   );
 
   late FramePhase longestUiPhase = _calculateLongestFramePhase();
@@ -276,9 +273,12 @@ class FramePhase {
     : title = type.display,
       duration =
           duration ??
-          events.fold<Duration>(Duration.zero, (previous, event) {
-            return previous + event.time.duration;
-          });
+          events
+              .where((event) => event.isComplete)
+              .fold<Duration>(
+                Duration.zero,
+                (previous, event) => previous + event.time.duration,
+              );
 
   factory FramePhase.build({
     required List<FlutterTimelineEvent> events,
