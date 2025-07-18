@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-import 'dart:math' as math;
-
 import '../../../../shared/primitives/utils.dart';
 import '../../performance_model.dart';
 import '../controls/enhance_tracing/enhance_tracing_model.dart';
@@ -56,14 +54,6 @@ class FlutterFrame {
   /// which the data was parsed.
   final TimeRange timeFromFrameTiming;
 
-  /// The time range of the Flutter frame based on the frame's
-  /// [timelineEventData], which contains timing information from the VM's
-  /// timeline events.
-  ///
-  /// This time range should be used for activities related to timeline events,
-  /// like scrolling a frame's timeline events into view, for example.
-  TimeRange get timeFromEventFlows => timelineEventData.time;
-
   /// Build time for this Flutter frame based on data from the FrameTiming API
   /// sent over the extension stream as 'Flutter.Frame' events.
   final Duration buildTime;
@@ -83,7 +73,7 @@ class FlutterFrame {
   /// (e.g. when the 'Flutter.Frame' event for this frame was received).
   ///
   /// If we did not have [EnhanceTracingState] information at the time that this
-  /// frame was drawn (e.g. the DevTools performancd page was not opened and
+  /// frame was drawn (e.g. the DevTools performance page was not opened and
   /// listening for frames yet), this value will be null.
   EnhanceTracingState? enhanceTracingState;
 
@@ -195,38 +185,9 @@ class FrameTimelineEventData {
 
   bool get isNotEmpty => uiEvent != null || rasterEvent != null;
 
-  final _timeBuilder = TimeRangeBuilder();
-  TimeRange get time => _timeBuilder.build();
-
-  void setEventFlow({
-    required FlutterTimelineEvent event,
-    bool setTimeData = true,
-  }) {
+  void setEventFlow({required FlutterTimelineEvent event}) {
     final type = event.type!;
     _eventFlows[type.index] = event;
-    if (setTimeData) {
-      if (type == TimelineEventType.ui) {
-        _timeBuilder.start = event.time.start;
-        // If [rasterEventFlow] has already completed, set the end time for this
-        // frame to [event]'s end time.
-        if (rasterEvent != null) {
-          _timeBuilder.end = event.time.end;
-        }
-      } else if (type == TimelineEventType.raster) {
-        // If [uiEventFlow] is null, that means that this raster event flow
-        // completed before the ui event flow did for this frame. This means one
-        // of two things: 1) there will never be a [uiEventFlow] for this frame
-        // because the UI events are not present in the available timeline
-        // events, or 2) the [uiEventFlow] has started but not completed yet. In
-        // the event that 2) is true, do not set the frame end time here because
-        // the end time for this frame will be set to the end time for
-        // [uiEventFlow] once it finishes.
-        final theUiEvent = uiEvent;
-        if (theUiEvent != null) {
-          _timeBuilder.end = math.max(theUiEvent.time.end, event.time.end);
-        }
-      }
-    }
   }
 
   FlutterTimelineEvent? eventByType(TimelineEventType type) {

@@ -461,7 +461,7 @@ class TimelineEventsController extends PerformanceFeatureController
       } else {
         final unassignedEventsForFrame = _unassignedFlutterTimelineEvents
             .putIfAbsent(frameNumber, () => FrameTimelineEventData());
-        unassignedEventsForFrame.setEventFlow(event: event, setTimeData: false);
+        unassignedEventsForFrame.setEventFlow(event: event);
       }
     }
   }
