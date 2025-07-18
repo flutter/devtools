@@ -272,7 +272,7 @@ class _TableRowState<T> extends State<TableRow<T>>
       onPressed = () => widgetOnPressed(node);
     }
 
-    final row = tableRowFor(context, onPressed: onPressed);
+    final row = tableRowFor(context);
 
     final box = SizedBox(
       height: widget._rowType == _TableRowType.data
@@ -401,7 +401,7 @@ class _TableRowState<T> extends State<TableRow<T>>
   }
 
   /// Presents the content of this row.
-  Widget tableRowFor(BuildContext context, {VoidCallback? onPressed}) {
+  Widget tableRowFor(BuildContext context) {
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget? content;
       final theme = Theme.of(context);
@@ -439,7 +439,7 @@ class _TableRowState<T> extends State<TableRow<T>>
             node,
             isRowSelected: widget.isSelected,
             isRowHovered: isHovering,
-            onPressed: onPressed,
+            // onPressed: onPressed,
           );
         }
         // If ColumnRenderer.build returns null, fall back to the default

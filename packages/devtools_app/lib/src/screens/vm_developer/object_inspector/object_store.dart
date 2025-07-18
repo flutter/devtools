@@ -49,7 +49,6 @@ class _ObjectColumn extends ColumnData<ObjectStoreEntry>
     dynamic data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return VmServiceObjectLink(
       // TODO(srawlins): What type is `data` at runtime? If cast to `int`, no
