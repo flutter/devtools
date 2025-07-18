@@ -100,7 +100,7 @@ class FrameAnalysis {
   /// Data for the raster phase of [frame].
   ///
   /// This is drawn from all events for this frame from the raster thread.
-  late final FramePhase rasterPhase = FramePhase.raster(
+  late FramePhase rasterPhase = FramePhase.raster(
     events: [?frame.timelineEventData.rasterEvent],
   );
 

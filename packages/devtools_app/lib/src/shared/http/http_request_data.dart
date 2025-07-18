@@ -30,10 +30,10 @@ class DartIOHttpInstantEvent {
   DateTime get timestamp => _event.timestamp;
 
   /// The amount of time since the last instant event completed.
-  TimeRange get timeRange => _timeRange!;
+  TimeRange get timeRange => _timeRangeBuilder.build();
 
-  // This is set from within HttpRequestData.
-  TimeRange? _timeRange;
+  // This is modified from within HttpRequestData.
+  final TimeRangeBuilder _timeRangeBuilder = TimeRangeBuilder();
 }
 
 /// An abstraction of an HTTP request made through dart:io.
@@ -339,10 +339,9 @@ class DartIOHttpRequestData extends NetworkRequest {
     DateTime lastTime = _request.startTime;
     for (final instant in instantEvents) {
       final instantTime = instant.timestamp;
-      instant._timeRange = TimeRange(
-        start: lastTime.microsecondsSinceEpoch,
-        end: instantTime.microsecondsSinceEpoch,
-      );
+      instant._timeRangeBuilder
+        ..start = lastTime.microsecondsSinceEpoch
+        ..end = instantTime.microsecondsSinceEpoch;
       lastTime = instantTime;
     }
   }

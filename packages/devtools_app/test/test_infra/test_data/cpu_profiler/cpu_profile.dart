@@ -1530,7 +1530,7 @@ final zeroProfileMetaData = CpuProfileMetaData(
   sampleCount: 0,
   samplePeriod: 50,
   stackDepth: 128,
-  time: TimeRange(start: 0, end: 100),
+  time: TimeRange.ofLength(length: 100),
 );
 
 final zeroStackFrame = CpuStackFrame(

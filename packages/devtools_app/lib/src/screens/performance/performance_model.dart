@@ -123,7 +123,7 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
   TimeRange get time => _timeBuilder.build();
 
   /// If this event is complete and has received an end track event.
-  bool get isComplete => !_timeBuilder.canBuild;
+  bool get isComplete => _timeBuilder.canBuild;
 
   String? get name => trackEvents.first.name;
 

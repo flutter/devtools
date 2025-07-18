@@ -1110,7 +1110,7 @@ class CpuProfileStore {
       return _profilesByLabel[label];
     }
 
-    if (time is! TimeRange) return null;
+    if (time == null) return null;
 
     // If we have a profile for a time range encompassing [time], then we can
     // generate and cache the profile for [time] without needing to pull data

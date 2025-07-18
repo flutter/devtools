@@ -512,7 +512,7 @@ final class TimeRange {
 
   /// Creates a [TimeRange] with the specified [start] time in microseconds and
   /// [end] calculated as being [length] microseconds later.
-  factory TimeRange.ofLength({required int start, required int length}) =>
+  factory TimeRange.ofLength({int start = 0, required int length}) =>
       TimeRange(start: start, end: start + length);
 
   /// The starting time in microseconds.

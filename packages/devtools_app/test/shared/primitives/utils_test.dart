@@ -328,7 +328,7 @@ void main() {
                 ..start = 0
                 ..end = 100)
               .build(),
-          TimeRange(start: 0, end: 100),
+          TimeRange.ofLength(length: 100),
         );
       });
     });
