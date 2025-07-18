@@ -153,8 +153,8 @@ class CpuProfilePair {
     required String processId,
   }) async {
     await transformer.processData(functionProfile, processId: processId);
-    if (codeProfile != null) {
-      await transformer.processData(codeProfile!, processId: processId);
+    if (codeProfile case final codeProfile?) {
+      await transformer.processData(codeProfile, processId: processId);
     }
   }
 }
@@ -166,11 +166,13 @@ class CpuProfileData with Serializable {
     required this.cpuSamples,
     required this.profileMetaData,
     required this.rootedAtTags,
-  }) {
-    _cpuProfileRoot = CpuStackFrame.root(profileMetaData);
-  }
+  }) : cpuProfileRoot = CpuStackFrame.root(profileMetaData);
 
   factory CpuProfileData.fromJson(Map<String, Object?> json_) {
+    if (json_.isEmpty) {
+      return CpuProfileData.empty();
+    }
+
     final json = _CpuProfileDataJson(json_);
 
     // All CPU samples.
@@ -326,10 +328,10 @@ class CpuProfileData with Serializable {
       });
 
       for (final sample in tagProfile.cpuSamples) {
-        String? updatedId = idMapping[sample.leafId];
+        String? updatedId = idMapping[sample.leafId]!;
         samples.add(
           CpuSampleEvent(
-            leafId: updatedId!,
+            leafId: updatedId,
             userTag: sample.userTag,
             vmTag: sample.vmTag,
             traceJson: sample.toJson,
@@ -535,7 +537,17 @@ class CpuProfileData with Serializable {
     );
   }
 
-  factory CpuProfileData.empty() => CpuProfileData.fromJson({});
+  factory CpuProfileData.empty() => CpuProfileData._(
+    stackFrames: {},
+    cpuSamples: [],
+    profileMetaData: CpuProfileMetaData(
+      sampleCount: 0,
+      samplePeriod: 0,
+      stackDepth: 0,
+      time: null,
+    ),
+    rootedAtTags: false,
+  );
 
   /// Generates [CpuProfileData] from the provided [cpuSamples].
   ///
@@ -551,31 +563,27 @@ class CpuProfileData with Serializable {
     // of all stacks, regardless of entrypoint. This should never be seen in the
     // final output from this method.
     const kRootId = 0;
-    final traceObject = <String, Object?>{
-      CpuProfileData._sampleCountKey: cpuSamples.sampleCount,
-      CpuProfileData._samplePeriodKey: cpuSamples.samplePeriod,
-      CpuProfileData._stackDepthKey: cpuSamples.maxStackDepth,
-      CpuProfileData._timeOriginKey: cpuSamples.timeOriginMicros,
-      CpuProfileData._timeExtentKey: cpuSamples.timeExtentMicros,
-      CpuProfileData._stackFramesKey: cpuSamples.generateStackFramesJson(
-        isolateId: isolateId,
-        // We want to ensure that if [kRootId] ever changes, this change is
-        // propagated to [cpuSamples.generateStackFramesJson].
-        // ignore: avoid_redundant_argument_values
-        kRootId: kRootId,
-        buildCodeTree: buildCodeTree,
-      ),
-      CpuProfileData._traceEventsKey: [],
-    };
+
+    // Generate the stack frames first as it builds and tracks
+    // the timeline tree for each sample.
+    final stackFrames = cpuSamples.generateStackFramesJson(
+      isolateId: isolateId,
+      // We want to ensure that if [kRootId] ever changes, this change is
+      // propagated to [cpuSamples.generateStackFramesJson].
+      // ignore: avoid_redundant_argument_values
+      kRootId: kRootId,
+      buildCodeTree: buildCodeTree,
+    );
 
     // Build the trace events.
+    final traceEvents = <Map<String, Object?>>[];
     for (final sample in cpuSamples.samples ?? <vm_service.CpuSample>[]) {
       final tree = _CpuProfileTimelineTree.getTreeFromSample(sample)!;
       // Skip the root.
       if (tree.frameId == kRootId) {
         continue;
       }
-      (traceObject[CpuProfileData._traceEventsKey]! as List<Object?>).add({
+      traceEvents.add({
         'ph': 'P', // kind = sample event
         'name': '', // Blank to keep about:tracing happy
         'pid': cpuSamples.pid,
@@ -583,12 +591,19 @@ class CpuProfileData with Serializable {
         'ts': sample.timestamp,
         'cat': 'Dart',
         CpuProfileData.stackFrameIdKey: '$isolateId-${tree.frameId}',
-        'args': {
-          if (sample.userTag != null) userTagKey: sample.userTag,
-          if (sample.vmTag != null) vmTagKey: sample.vmTag,
-        },
+        'args': {userTagKey: ?sample.userTag, vmTagKey: ?sample.vmTag},
       });
     }
+
+    final traceObject = <String, Object?>{
+      CpuProfileData._sampleCountKey: cpuSamples.sampleCount,
+      CpuProfileData._samplePeriodKey: cpuSamples.samplePeriod,
+      CpuProfileData._stackDepthKey: cpuSamples.maxStackDepth,
+      CpuProfileData._timeOriginKey: cpuSamples.timeOriginMicros,
+      CpuProfileData._timeExtentKey: cpuSamples.timeExtentMicros,
+      CpuProfileData._stackFramesKey: stackFrames,
+      CpuProfileData._traceEventsKey: traceEvents,
+    };
 
     await _addPackageUrisToTraceObject(isolateId, traceObject);
 
@@ -669,6 +684,8 @@ class CpuProfileData with Serializable {
 
   final CpuProfileMetaData profileMetaData;
 
+  final CpuStackFrame cpuProfileRoot;
+
   /// `true` if the CpuProfileData has tag-based roots.
   ///
   /// This value is used during the bottom-up transformation to ensure that the
@@ -682,7 +699,7 @@ class CpuProfileData with Serializable {
     if (!processed) return <CpuStackFrame>[];
     return _callTreeRoots ??= [
       // Don't display the root node.
-      ..._cpuProfileRoot.children.map((e) => e.deepCopy()),
+      for (final rootChild in cpuProfileRoot.children) rootChild.deepCopy(),
     ];
   }
 
@@ -698,7 +715,7 @@ class CpuProfileData with Serializable {
     assert(_bottomUpRoots == null);
     _bottomUpRoots = await BottomUpTransformer<CpuStackFrame>()
         .bottomUpRootsFor(
-          topDownRoot: _cpuProfileRoot,
+          topDownRoot: cpuProfileRoot,
           mergeSamples: mergeCpuProfileRoots,
           rootedAtTags: rootedAtTags,
         );
@@ -706,41 +723,15 @@ class CpuProfileData with Serializable {
 
   List<CpuStackFrame>? _bottomUpRoots;
 
-  CpuStackFrame get cpuProfileRoot => _cpuProfileRoot;
+  late final Iterable<String> userTags = {
+    for (final cpuSample in cpuSamples)
+      if (cpuSample.userTag case final userTag?) userTag,
+  };
 
-  Iterable<String> get userTags {
-    if (_userTags != null) {
-      return _userTags!;
-    }
-    final tags = <String>{};
-    for (final cpuSample in cpuSamples) {
-      final tag = cpuSample.userTag;
-      if (tag != null) {
-        tags.add(tag);
-      }
-    }
-    _userTags = tags;
-    return _userTags!;
-  }
-
-  Iterable<String> get vmTags {
-    if (_vmTags != null) {
-      return _vmTags!;
-    }
-    final tags = <String>{};
-    for (final cpuSample in cpuSamples) {
-      final tag = cpuSample.vmTag;
-      if (tag != null) {
-        tags.add(tag);
-      }
-    }
-    return _vmTags = tags;
-  }
-
-  Iterable<String>? _userTags;
-  Iterable<String>? _vmTags;
-
-  late final CpuStackFrame _cpuProfileRoot;
+  late final Iterable<String> vmTags = {
+    for (final cpuSample in cpuSamples)
+      if (cpuSample.vmTag case final vmTag?) vmTag,
+  };
 
   CpuStackFrame? selectedStackFrame;
 
@@ -759,13 +750,9 @@ class CpuProfileData with Serializable {
   bool get isEmpty => profileMetaData.sampleCount == 0;
 
   @visibleForTesting
-  Map<String, Object?> get stackFramesJson {
-    final framesJson = <String, Object?>{};
-    for (final sf in stackFrames.values) {
-      framesJson.addAll(sf.toJson);
-    }
-    return framesJson;
-  }
+  Map<String, Object?> get stackFramesJson => {
+    for (final sf in stackFrames.values) ...sf.toJson,
+  };
 }
 
 extension type _CpuProfileDataJson(Map<String, Object?> json) {
@@ -971,7 +958,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
 
   @override
   String get tooltip {
-    var prefix = '';
+    final String? prefix;
     if (isNative) {
       prefix = '[Native]';
     } else if (isDartCore) {
@@ -980,8 +967,10 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       prefix = '[Flutter]';
     } else if (isTag) {
       prefix = '[Tag]';
+    } else {
+      prefix = null;
     }
-    final nameWithPrefix = [prefix, name].join(' ');
+    final nameWithPrefix = [?prefix, name].join(' ');
     return [
       nameWithPrefix,
       durationText(totalTime),
@@ -1067,7 +1056,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       CpuProfileData.resolvedUrlKey: rawUrl,
       CpuProfileData.resolvedPackageUriKey: packageUri,
       CpuProfileData.sourceLineKey: sourceLine,
-      if (parentId != null) CpuProfileData.parentIdKey: parentId,
+      CpuProfileData.parentIdKey: ?parentId,
     },
   };
 
