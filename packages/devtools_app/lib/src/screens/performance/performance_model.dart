@@ -176,7 +176,12 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
   }
 
   void format(StringBuffer buf, String indent) {
-    buf.writeln('$indent$name $time');
+    buf.write('$indent$name');
+    if (isComplete) {
+      buf.write(time);
+    }
+
+    buf.writeln(' ');
     for (final child in children) {
       child.format(buf, '  $indent');
     }

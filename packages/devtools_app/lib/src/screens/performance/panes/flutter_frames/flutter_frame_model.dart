@@ -78,8 +78,7 @@ class FlutterFrame {
   EnhanceTracingState? enhanceTracingState;
 
   FrameAnalysis? get frameAnalysis {
-    final frameAnalysis_ = _frameAnalysis;
-    if (frameAnalysis_ != null) return frameAnalysis_;
+    if (_frameAnalysis case final frameAnalysis?) return frameAnalysis;
     if (timelineEventData.isNotEmpty) {
       return _frameAnalysis = FrameAnalysis(this);
     }
@@ -92,15 +91,17 @@ class FlutterFrame {
 
   Duration get shaderDuration {
     if (_shaderTime != null) return _shaderTime!;
-    if (timelineEventData.rasterEvent == null) return Duration.zero;
-    final shaderEvents = timelineEventData.rasterEvent!
-        .shallowNodesWithCondition((event) => event.isShaderEvent);
-    final duration = shaderEvents.fold<Duration>(Duration.zero, (
-      previous,
-      event,
-    ) {
-      return previous + event.time.duration;
-    });
+    final rasterEvent = timelineEventData.rasterEvent;
+    if (rasterEvent == null) return Duration.zero;
+    final shaderEvents = rasterEvent.shallowNodesWithCondition(
+      (event) => event.isShaderEvent,
+    );
+    final duration = shaderEvents
+        .where((event) => event.isComplete)
+        .fold<Duration>(
+          Duration.zero,
+          (previous, event) => previous + event.time.duration,
+        );
     return _shaderTime = duration;
   }
 
