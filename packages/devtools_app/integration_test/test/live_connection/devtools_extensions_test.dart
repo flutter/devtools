@@ -41,7 +41,9 @@ void main() {
     resetDevToolsExtensionEnabledStates();
   });
 
-  testWidgets('end to end extensions flow', (tester) async {
+  testWidgets('end to end extensions flow', timeout: mediumTimeout, (
+    tester,
+  ) async {
     await pumpDevTools(tester);
 
     // TODO(https://github.com/flutter/devtools/issues/9196): re-enable this
