@@ -346,7 +346,7 @@ abstract class IntegrationTestApp with IOMixin {
 
   Future<int> stop({Future<int>? onTimeout}) async {
     await manuallyStopApp();
-    _debugPrint('Waiting for process to end');
+    _debugPrint('Waiting for app process to end');
     return runProcess!.exitCode.timeout(
       IOMixin.killTimeout,
       onTimeout: () =>

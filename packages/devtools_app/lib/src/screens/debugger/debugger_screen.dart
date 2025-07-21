@@ -518,24 +518,17 @@ class FloatingDebuggerControls extends StatefulWidget {
 
 class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
     with AutoDisposeMixin {
-  late double controlHeight;
-
   bool get _isPaused => serviceConnection.serviceManager.isMainIsolatePaused;
 
-  late final DebuggerController controller;
+  late final DebuggerController _controller;
+  late double _controlHeight;
+  late double _controlOpacity;
 
   @override
   void initState() {
     super.initState();
-    controller = screenControllers.lookup<DebuggerController>();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    cancelListeners();
-
-    controlHeight = _isPaused ? defaultButtonHeight : 0.0;
+    _controller = screenControllers.lookup<DebuggerController>();
+    _setVisiblityForPausedState(_isPaused);
     addAutoDisposeListener(
       serviceConnection
           .serviceManager
@@ -544,9 +537,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
           ?.isPaused,
       () {
         setState(() {
-          if (_isPaused) {
-            controlHeight = defaultButtonHeight;
-          }
+          _setVisiblityForPausedState(_isPaused);
         });
       },
     );
@@ -557,18 +548,11 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return AnimatedOpacity(
-      opacity: _isPaused ? 1.0 : 0.0,
+      opacity: _controlOpacity,
       duration: longDuration,
-      onEnd: () {
-        if (!_isPaused) {
-          setState(() {
-            controlHeight = 0.0;
-          });
-        }
-      },
       child: Container(
         color: colorScheme.warningContainer,
-        height: controlHeight,
+        height: _controlHeight,
         child: OutlinedRowGroup(
           borderColor: theme.focusColor,
           children: [
@@ -584,7 +568,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
             DevToolsTooltip(
               message: 'Resume',
               child: TextButton(
-                onPressed: controller.resume,
+                onPressed: _controller.resume,
                 child: const DevToolsIcon(
                   iconAsset: 'icons/material_symbols/resume.png',
                   color: Colors.green,
@@ -595,7 +579,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
             DevToolsTooltip(
               message: 'Step over',
               child: TextButton(
-                onPressed: controller.stepOver,
+                onPressed: _controller.stepOver,
                 child: const DevToolsIcon(
                   iconAsset: 'icons/material_symbols/step_over.png',
                   color: Colors.black,
@@ -607,5 +591,13 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
         ),
       ),
     );
+  }
+
+  /// Sets the visibilty depending on whether the app [isPaused].
+  void _setVisiblityForPausedState(bool isPaused) {
+    setState(() {
+      _controlHeight = isPaused ? defaultButtonHeight : 0.0;
+      _controlOpacity = isPaused ? 1.0 : 0.0;
+    });
   }
 }
