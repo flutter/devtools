@@ -29,7 +29,7 @@ void main() {
     expect(testApp.vmServiceUri, isNotNull);
   });
 
-  testWidgets('Debugger panel', (tester) async {
+  testWidgets('Debugger panel', timeout: longTimeout, (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
     await switchToScreen(
       tester,

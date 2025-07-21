@@ -25,7 +25,7 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets('Export snapshot', (tester) async {
+  testWidgets('Export snapshot', timeout: shortTimeout, (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
     await prepareMemoryUI(tester);
     await takeHeapSnapshot(tester);

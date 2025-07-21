@@ -25,7 +25,9 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets('connect to app and switch tabs', (tester) async {
+  testWidgets('connect to app and switch tabs', timeout: shortTimeout, (
+    tester,
+  ) async {
     await pumpAndConnectDevTools(tester, testApp);
 
     // For the sake of this test, do not show extension screens by default.
