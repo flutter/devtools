@@ -10,7 +10,6 @@ import 'package:devtools_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-import '../../test_infra/run/_utils.dart';
 import 'eval_utils.dart';
 
 // To run the test while connected to a flutter-tester device:

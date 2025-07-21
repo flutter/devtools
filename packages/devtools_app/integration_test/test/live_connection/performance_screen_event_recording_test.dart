@@ -11,8 +11,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:vm_service_protos/vm_service_protos.dart';
 
-import '../../test_infra/run/_utils.dart';
-
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/performance_screen_event_recording_test.dart
 

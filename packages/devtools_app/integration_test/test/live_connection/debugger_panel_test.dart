@@ -13,8 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-import '../../test_infra/run/_utils.dart';
-
 // To run the test while connected to a flutter-tester device:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/debugger_panel_test.dart
 
