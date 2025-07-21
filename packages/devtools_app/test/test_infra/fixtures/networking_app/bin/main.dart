@@ -14,10 +14,10 @@ import 'package:http/http.dart' as http;
 
 void main() async {
   final testServer = await _bindTestServer();
-  registerMakeRequestExtension(testServer);
+  _registerMakeRequestExtension(testServer);
 }
 
-void registerMakeRequestExtension(io.HttpServer testServer) {
+void _registerMakeRequestExtension(io.HttpServer testServer) {
   final client = _HttpClient(testServer.port);
   registerExtension('ext.networking_app.makeRequest', (_, parameters) async {
     final hasBody = bool.tryParse(parameters['hasBody'] ?? 'false') ?? false;
@@ -57,6 +57,13 @@ void registerMakeRequestExtension(io.HttpServer testServer) {
   });
 
   registerExtension('ext.networking_app.exit', (_, parameters) async {
+    // This service extension needs to trigger `io.exit(0)`, and also return a
+    // value. (You might expect `Future.microtask(() => io.exit(0))` to be
+    // sufficient, but that results in DevTools erroring, saying that the
+    // connected app unxexpectedly disconnected; it seems that returning a value
+    // needs to work through some microtasks.) A 200 ms delay seems to work, so
+    // that the following `ServiceExtensionResponse` makes it all the way to
+    // DevTools, and _then_ we can exit.
     unawaited(
       Future.delayed(const Duration(milliseconds: 200)).then((_) => io.exit(0)),
     );

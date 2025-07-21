@@ -29,57 +29,53 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets(
-    'network screen test',
-    timeout: const Timeout(Duration(minutes: 3)),
-    (tester) async {
-      await pumpAndConnectDevTools(tester, testApp);
-      await _prepareNetworkScreen(tester);
+  testWidgets('network screen test', timeout: mediumTimeout, (tester) async {
+    await pumpAndConnectDevTools(tester, testApp);
+    await _prepareNetworkScreen(tester);
 
-      final helper = _NetworkScreenHelper(tester);
+    final helper = _NetworkScreenHelper(tester);
 
-      // Instruct the app to make a GET request via the dart:io HttpClient.
-      await helper.triggerRequest('get');
-      _expectInRequestTable('GET');
-      await helper.clear();
+    // Instruct the app to make a GET request via the dart:io HttpClient.
+    await helper.triggerRequest('get');
+    _expectInRequestTable('GET');
+    await helper.clear();
 
-      // Instruct the app to make a POST request via the dart:io HttpClient.
-      await helper.triggerRequest('post');
-      _expectInRequestTable('POST');
-      await helper.clear();
+    // Instruct the app to make a POST request via the dart:io HttpClient.
+    await helper.triggerRequest('post');
+    _expectInRequestTable('POST');
+    await helper.clear();
 
-      // Instruct the app to make a PUT request via the dart:io HttpClient.
-      await helper.triggerRequest('put');
-      _expectInRequestTable('PUT');
-      await helper.clear();
+    // Instruct the app to make a PUT request via the dart:io HttpClient.
+    await helper.triggerRequest('put');
+    _expectInRequestTable('PUT');
+    await helper.clear();
 
-      // Instruct the app to make a DELETE request via the dart:io HttpClient.
-      await helper.triggerRequest('delete');
-      _expectInRequestTable('DELETE');
-      await helper.clear();
+    // Instruct the app to make a DELETE request via the dart:io HttpClient.
+    await helper.triggerRequest('delete');
+    _expectInRequestTable('DELETE');
+    await helper.clear();
 
-      // Instruct the app to make a GET request via the 'http' package.
-      await helper.triggerRequest('packageHttpGet');
-      _expectInRequestTable('GET');
-      await helper.clear();
+    // Instruct the app to make a GET request via the 'http' package.
+    await helper.triggerRequest('packageHttpGet');
+    _expectInRequestTable('GET');
+    await helper.clear();
 
-      // Instruct the app to make a POST request via the 'http' package.
-      await helper.triggerRequest('packageHttpPost');
-      _expectInRequestTable('POST');
-      await helper.clear();
+    // Instruct the app to make a POST request via the 'http' package.
+    await helper.triggerRequest('packageHttpPost');
+    _expectInRequestTable('POST');
+    await helper.clear();
 
-      // Instruct the app to make a GET request via Dio.
-      await helper.triggerRequest('dioGet');
-      _expectInRequestTable('GET');
-      await helper.clear();
+    // Instruct the app to make a GET request via Dio.
+    await helper.triggerRequest('dioGet');
+    _expectInRequestTable('GET');
+    await helper.clear();
 
-      // Instruct the app to make a POST request via Dio.
-      await helper.triggerRequest('dioPost');
-      _expectInRequestTable('POST');
+    // Instruct the app to make a POST request via Dio.
+    await helper.triggerRequest('dioPost');
+    _expectInRequestTable('POST');
 
-      await helper.triggerExit();
-    },
-  );
+    await helper.triggerExit();
+  });
 }
 
 final class _NetworkScreenHelper {
@@ -117,7 +113,6 @@ final class _NetworkScreenHelper {
         );
     logStatus(response.toString());
 
-    await Future.delayed(const Duration(milliseconds: 200));
     await _tester.pump(safePumpDuration);
   }
 }
