@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import '../../test_infra/run/_utils.dart';
+
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/offline/perfetto_test.dart
 
@@ -19,7 +21,7 @@ void main() {
 
   testWidgets(
     'Perfetto trace viewer loads data and scrolls for Flutter frames',
-    timeout: const Timeout(Duration(minutes: 3)),
+    timeout: mediumTimeout,
     (tester) async {
       await pumpDevTools(tester);
       await loadSampleData(tester, performanceFileName);

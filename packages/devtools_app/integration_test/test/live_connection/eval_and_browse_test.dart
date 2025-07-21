@@ -10,6 +10,7 @@ import 'package:devtools_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import '../../test_infra/run/_utils.dart';
 import 'eval_utils.dart';
 import 'memory_screen_helpers.dart';
 
@@ -30,34 +31,30 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets(
-    'memory eval and browse',
-    timeout: const Timeout(Duration(minutes: 3)),
-    (tester) async {
-      await pumpAndConnectDevTools(tester, testApp);
+  testWidgets('memory eval and browse', timeout: mediumTimeout, (tester) async {
+    await pumpAndConnectDevTools(tester, testApp);
 
-      final evalTester = EvalTester(tester);
-      await prepareMemoryUI(tester, makeConsoleWider: true);
+    final evalTester = EvalTester(tester);
+    await prepareMemoryUI(tester, makeConsoleWider: true);
 
-      logStatus('test basic evaluation');
-      await testBasicEval(evalTester);
+    logStatus('test basic evaluation');
+    await testBasicEval(evalTester);
 
-      logStatus('test variable assignment');
-      await testAssignment(evalTester);
+    logStatus('test variable assignment');
+    await testAssignment(evalTester);
 
-      logStatus('test dump one instance to console');
-      await _profileOneInstance(evalTester);
+    logStatus('test dump one instance to console');
+    await _profileOneInstance(evalTester);
 
-      logStatus('test dump all instances to console');
-      await _profileAllInstances(evalTester);
+    logStatus('test dump all instances to console');
+    await _profileAllInstances(evalTester);
 
-      logStatus('test take a snapshot');
-      await evalTester.takeSnapshot();
+    logStatus('test take a snapshot');
+    await evalTester.takeSnapshot();
 
-      logStatus('test inbound references are listed on console instance');
-      await _inboundReferencesAreListed(evalTester);
-    },
-  );
+    logStatus('test inbound references are listed on console instance');
+    await _inboundReferencesAreListed(evalTester);
+  });
 }
 
 Future<void> _profileOneInstance(EvalTester tester) async {

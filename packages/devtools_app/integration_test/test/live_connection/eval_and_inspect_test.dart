@@ -10,6 +10,7 @@ import 'package:devtools_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import '../../test_infra/run/_utils.dart';
 import 'eval_utils.dart';
 
 // To run the test while connected to a flutter-tester device:
@@ -32,26 +33,24 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets(
-    'eval with scope in inspector window',
-    timeout: const Timeout(Duration(minutes: 3)),
-    (tester) async {
-      await pumpAndConnectDevTools(tester, testApp);
+  testWidgets('eval with scope in inspector window', timeout: mediumTimeout, (
+    tester,
+  ) async {
+    await pumpAndConnectDevTools(tester, testApp);
 
-      final evalTester = EvalTester(tester);
-      await evalTester.prepareInspectorUI();
+    final evalTester = EvalTester(tester);
+    await evalTester.prepareInspectorUI();
 
-      logStatus('testing basic evaluation');
-      await testBasicEval(evalTester);
+    logStatus('testing basic evaluation');
+    await testBasicEval(evalTester);
 
-      logStatus('testing variable assignment');
-      await testAssignment(evalTester);
-    },
-  );
+    logStatus('testing variable assignment');
+    await testAssignment(evalTester);
+  });
 
   testWidgets(
     'eval with scope on widget tree node',
-    timeout: const Timeout(Duration(minutes: 3)),
+    timeout: mediumTimeout,
     (tester) async {
       await pumpAndConnectDevTools(tester, testApp);
 

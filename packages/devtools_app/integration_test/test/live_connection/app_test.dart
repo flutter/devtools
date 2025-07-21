@@ -8,6 +8,8 @@ import 'package:devtools_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import '../../test_infra/run/_utils.dart';
+
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/app_test.dart
 
@@ -25,18 +27,16 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets(
-    'connect to app and switch tabs',
-    timeout: const Timeout(Duration(minutes: 2)),
-    (tester) async {
-      await pumpAndConnectDevTools(tester, testApp);
+  testWidgets('connect to app and switch tabs', timeout: shortTimeout, (
+    tester,
+  ) async {
+    await pumpAndConnectDevTools(tester, testApp);
 
-      // For the sake of this test, do not show extension screens by default.
-      preferences.devToolsExtensions.showOnlyEnabledExtensions.value = true;
-      await tester.pumpAndSettle(shortPumpDuration);
+    // For the sake of this test, do not show extension screens by default.
+    preferences.devToolsExtensions.showOnlyEnabledExtensions.value = true;
+    await tester.pumpAndSettle(shortPumpDuration);
 
-      logStatus('verify that we can load each DevTools screen');
-      await navigateThroughDevToolsScreens(tester, connectedToApp: true);
-    },
-  );
+    logStatus('verify that we can load each DevTools screen');
+    await navigateThroughDevToolsScreens(tester, connectedToApp: true);
+  });
 }

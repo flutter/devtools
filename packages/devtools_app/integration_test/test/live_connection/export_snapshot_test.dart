@@ -6,6 +6,7 @@ import 'package:devtools_test/integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import '../../test_infra/run/_utils.dart';
 import 'memory_screen_helpers.dart';
 
 // To run:
@@ -25,9 +26,7 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets('Export snapshot', timeout: const Timeout(Duration(minutes: 2)), (
-    tester,
-  ) async {
+  testWidgets('Export snapshot', timeout: shortTimeout, (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
     await prepareMemoryUI(tester);
     await takeHeapSnapshot(tester);

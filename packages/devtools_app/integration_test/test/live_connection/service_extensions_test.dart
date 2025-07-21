@@ -18,6 +18,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../test_infra/run/_utils.dart';
+
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/service_extensions_test.dart
 
@@ -37,7 +39,7 @@ void main() {
 
   testWidgets(
     'can call services and service extensions',
-    timeout: const Timeout(Duration(minutes: 3)),
+    timeout: mediumTimeout,
     (tester) async {
       await pumpAndConnectDevTools(tester, testApp);
       await tester.pump(longDuration);
