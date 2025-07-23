@@ -211,7 +211,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
               // consider constraining a max height.
               Padding(
                 padding: const EdgeInsets.only(top: denseSpacing),
-                child: widget.footer!,
+                child: widget.footer,
               ),
             ],
           ),
