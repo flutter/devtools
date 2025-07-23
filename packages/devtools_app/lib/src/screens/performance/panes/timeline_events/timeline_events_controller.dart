@@ -88,7 +88,7 @@ class TimelineEventsController extends PerformanceFeatureController
     1,
     from: ByteUnit.gb,
     to: ByteUnit.byte,
-  ).round();
+  ).round() - 1;
 
   /// Track events that we have received from the VM, but have not yet
   /// processed.
