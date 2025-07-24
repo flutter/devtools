@@ -25,7 +25,7 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
     implements
         ColumnRenderer<DiffClassData>,
         ColumnHeaderRenderer<DiffClassData> {
-  _ClassNameColumn(this.diffData)
+  const _ClassNameColumn(this.diffData)
     : super(
         'Class',
         titleTooltip: 'Class name',

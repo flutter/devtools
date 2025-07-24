@@ -7,7 +7,7 @@ import '../../../shared/table/table_data.dart';
 import 'process_memory_view_controller.dart';
 
 class CategoryColumn extends TreeColumnData<TreemapNode> {
-  CategoryColumn() : super('Category');
+  const CategoryColumn() : super('Category');
 
   @override
   String getValue(TreemapNode dataObject) => dataObject.name;

@@ -65,14 +65,14 @@ void main() {
     });
 
     test('MethodColumn', () {
-      final column = MethodColumn();
+      const column = MethodColumn();
       for (final request in requests) {
         expect(column.getDisplayValue(request), request.method);
       }
     });
 
     test('StatusColumn for http request', () {
-      final column = StatusColumn();
+      const column = StatusColumn();
       final getRequest = findRequestById('1');
       expect(column.getDisplayValue(getRequest), httpGet.status);
 
@@ -81,14 +81,14 @@ void main() {
     });
 
     test('TypeColumn for http request', () {
-      final column = TypeColumn();
+      const column = TypeColumn();
       final getRequest = findRequestById('1');
 
       expect(column.getDisplayValue(getRequest), 'json');
     });
 
     test('DurationColumn for http request', () {
-      final column = DurationColumn();
+      const column = DurationColumn();
       final getRequest = findRequestById('1');
 
       expect(column.getDisplayValue(getRequest), '811 ms');
