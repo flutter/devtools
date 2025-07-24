@@ -481,17 +481,17 @@ final class TimeRangeBuilder {
   ///
   /// The [start] time must be less than or equal to the [end] time.
   TimeRange build() {
-    final startDuration = _start;
-    if (startDuration == null) {
+    final startTimestamp = _start;
+    if (startTimestamp == null) {
       throw StateError('TimeRangeBuilder.start must be set before building!');
     }
 
-    final endDuration = _end;
-    if (endDuration == null) {
+    final endTimestamp = _end;
+    if (endTimestamp == null) {
       throw StateError('TimeRangeBuilder.end must be set before building!');
     }
 
-    return TimeRange(start: startDuration, end: endDuration);
+    return TimeRange(start: startTimestamp, end: endTimestamp);
   }
 
   /// Returns a new [TimeRangeBuilder] with the current values of this builder.
@@ -511,9 +511,9 @@ final class TimeRange {
       );
 
   /// Creates a [TimeRange] with the specified [start] time in microseconds and
-  /// [end] calculated as being [length] microseconds later.
-  factory TimeRange.ofLength({int start = 0, required int length}) =>
-      TimeRange(start: start, end: start + length);
+  /// [end] calculated as being [duration] microseconds later.
+  factory TimeRange.ofDuration(int duration, {int start = 0}) =>
+      TimeRange(start: start, end: start + duration);
 
   /// The starting time in microseconds.
   final int start;

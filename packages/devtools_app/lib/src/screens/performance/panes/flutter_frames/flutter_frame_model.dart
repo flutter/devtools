@@ -22,9 +22,9 @@ class FlutterFrame {
   });
 
   factory FlutterFrame.fromJson(Map<String, Object?> json) {
-    final frameTime = TimeRange.ofLength(
+    final frameTime = TimeRange.ofDuration(
+      json[elapsedKey]! as int,
       start: json[startTimeKey]! as int,
-      length: json[elapsedKey]! as int,
     );
     return FlutterFrame._(
       id: json[numberKey]! as int,

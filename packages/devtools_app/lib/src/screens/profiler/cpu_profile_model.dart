@@ -196,10 +196,7 @@ class CpuProfileData with Serializable {
       samplePeriod: samplePeriod,
       stackDepth: json.stackDepth ?? 0,
       time: (timeOriginMicros != null && timeExtentMicros != null)
-          ? TimeRange.ofLength(
-              start: timeOriginMicros,
-              length: timeExtentMicros,
-            )
+          ? TimeRange.ofDuration(timeExtentMicros, start: timeOriginMicros)
           : null,
     );
 
