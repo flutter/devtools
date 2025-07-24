@@ -53,7 +53,7 @@ void main() {
     testWidgets('content renders correctly', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(aboutDialog));
       expect(find.text('About DevTools'), findsOneWidget);
-      expect(findSubstring(devtools.version), findsOneWidget);
+      expect(find.textContaining(devtools.version), findsOneWidget);
       expect(find.text('release notes'), findsOneWidget);
       expect(find.textContaining('Encountered an issue?'), findsOneWidget);
       expect(

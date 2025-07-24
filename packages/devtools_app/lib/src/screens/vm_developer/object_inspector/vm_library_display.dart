@@ -72,20 +72,18 @@ class LibraryDependencies extends StatelessWidget {
     return <Row>[
       for (final dep in dependencies)
         Row(
-          children: [
-            SelectionArea(
-              child: Flexible(child: Text(dep.description, style: textStyle)),
-            ),
-          ],
+          children: [Flexible(child: Text(dep.description, style: textStyle))],
         ),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    return VmExpansionTile(
-      title: 'Dependencies (${dependencies.length})',
-      children: prettyRows(context, dependencyRows(context)),
+    return SelectionArea(
+      child: VmExpansionTile(
+        title: 'Dependencies (${dependencies.length})',
+        children: prettyRows(context, dependencyRows(context)),
+      ),
     );
   }
 }
