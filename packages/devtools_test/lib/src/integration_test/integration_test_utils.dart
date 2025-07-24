@@ -118,15 +118,14 @@ Future<void> disconnectFromTestApp(WidgetTester tester) async {
 }
 
 class TestApp {
-  TestApp._({required this.vmServiceUri, required this.controlPort});
+  TestApp._({required this.vmServiceUri});
 
   factory TestApp._fromJson(Map<String, Object> json) {
     final serviceUri = json[serviceUriKey] as String?;
     if (serviceUri == null) {
       throw Exception('Cannot create a TestApp with a null service uri.');
     }
-    final controlPort = json[controlPortKey] as int?;
-    return TestApp._(vmServiceUri: serviceUri, controlPort: controlPort);
+    return TestApp._(vmServiceUri: serviceUri);
   }
 
   factory TestApp.fromEnvironment() {
@@ -137,11 +136,7 @@ class TestApp {
 
   static const serviceUriKey = 'service_uri';
 
-  static const controlPortKey = 'control_port';
-
   final String vmServiceUri;
-
-  final int? controlPort;
 }
 
 Future<void> verifyScreenshot(
@@ -157,3 +152,21 @@ Future<void> verifyScreenshot(
     'last_screenshot': lastScreenshot,
   });
 }
+
+/// A timeout for a "short" integration test.
+///
+/// Adjust as needed; this is used to override the 10-minute or infinite timeout
+/// in [testWidgets].
+const Timeout shortTimeout = Timeout(Duration(minutes: 2));
+
+/// A timeout for a "medium" integration test.
+///
+/// Adjust as needed; this is used to override the 10-minute or infinite timeout
+/// in [testWidgets].
+const Timeout mediumTimeout = Timeout(Duration(minutes: 3));
+
+/// A timeout for a "long" integration test.
+///
+/// Adjust as needed; this is used to override the 10-minute or infinite timeout
+/// in [testWidgets].
+const Timeout longTimeout = Timeout(Duration(minutes: 4));

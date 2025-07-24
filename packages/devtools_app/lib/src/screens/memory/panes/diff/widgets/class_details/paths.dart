@@ -15,7 +15,7 @@ import '../../../../shared/primitives/simple_elements.dart';
 import '../../controller/class_data.dart';
 
 class _RetainingPathColumn extends ColumnData<PathData> {
-  _RetainingPathColumn(String className)
+  const _RetainingPathColumn(String className)
     : super.wide(
         'Shortest Retaining Path for Instances of $className',
         titleTooltip:
@@ -33,7 +33,7 @@ class _RetainingPathColumn extends ColumnData<PathData> {
 }
 
 class _InstanceColumn extends ColumnData<PathData> {
-  _InstanceColumn(bool isDiff)
+  const _InstanceColumn(bool isDiff)
     : super(
         isDiff ? 'Instance\nDelta' : 'Instances',
         titleTooltip:

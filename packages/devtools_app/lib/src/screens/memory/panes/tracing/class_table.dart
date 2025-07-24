@@ -22,7 +22,7 @@ const _defaultNumberFieldWidth = 70.0;
 
 class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     implements ColumnRenderer<TracedClass> {
-  _TraceCheckBoxColumn({required this.controller})
+  const _TraceCheckBoxColumn({required this.controller})
     : super(
         'Trace',
         titleTooltip:
@@ -69,7 +69,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
 
 class _ClassNameColumn extends ColumnData<TracedClass>
     implements ColumnRenderer<TracedClass> {
-  _ClassNameColumn({required this.rootPackage}) : super.wide('Class');
+  const _ClassNameColumn({required this.rootPackage}) : super.wide('Class');
 
   @override
   String? getValue(TracedClass stats) => stats.clazz.name;
@@ -98,7 +98,7 @@ class _ClassNameColumn extends ColumnData<TracedClass>
 }
 
 class _InstancesColumn extends ColumnData<TracedClass> {
-  _InstancesColumn()
+  const _InstancesColumn()
     : super(
         'Delta',
         titleTooltip:
@@ -127,7 +127,7 @@ class AllocationTracingTable extends StatefulWidget {
 class _AllocationTracingTableState extends State<AllocationTracingTable> {
   late final _TraceCheckBoxColumn _checkboxColumn;
   late final _ClassNameColumn _classNameColumn;
-  static final _instancesColumn = _InstancesColumn();
+  static const _instancesColumn = _InstancesColumn();
 
   late final List<ColumnData<TracedClass>> columns;
 

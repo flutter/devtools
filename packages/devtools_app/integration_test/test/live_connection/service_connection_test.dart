@@ -27,7 +27,9 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets('initial service connection state', (tester) async {
+  testWidgets('initial service connection state', timeout: mediumTimeout, (
+    tester,
+  ) async {
     await pumpAndConnectDevTools(tester, testApp);
 
     // Await a delay to ensure the service extensions have had a chance to
@@ -87,17 +89,16 @@ void main() {
     );
 
     logStatus('verify managers have all been initialized');
-    expect(serviceConnection.serviceManager.isolateManager, isNotNull);
     expect(serviceConnection.serviceManager.serviceExtensionManager, isNotNull);
-    expect(serviceConnection.vmFlagManager, isNotNull);
     expect(
       serviceConnection.serviceManager.isolateManager.isolates.value,
       isNotEmpty,
     );
     expect(serviceConnection.vmFlagManager.flags.value, isNotNull);
 
-    if (serviceConnection.serviceManager.isolateManager.selectedIsolate.value ==
-        null) {
+    final selectedIsolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate;
+    if (selectedIsolate.value == null) {
       await whenValueNonNull(
         serviceConnection.serviceManager.isolateManager.selectedIsolate,
       );

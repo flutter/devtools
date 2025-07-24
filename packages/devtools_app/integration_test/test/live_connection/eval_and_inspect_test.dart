@@ -32,7 +32,9 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets('eval with scope in inspector window', (tester) async {
+  testWidgets('eval with scope in inspector window', timeout: mediumTimeout, (
+    tester,
+  ) async {
     await pumpAndConnectDevTools(tester, testApp);
 
     final evalTester = EvalTester(tester);
@@ -47,6 +49,7 @@ void main() {
 
   testWidgets(
     'eval with scope on widget tree node',
+    timeout: mediumTimeout,
     (tester) async {
       await pumpAndConnectDevTools(tester, testApp);
 

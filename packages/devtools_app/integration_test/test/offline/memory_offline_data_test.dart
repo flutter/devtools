@@ -14,7 +14,9 @@ import 'package:integration_test/integration_test.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Memory screen can load offline data', (tester) async {
+  testWidgets('Memory screen can load offline data', timeout: mediumTimeout, (
+    tester,
+  ) async {
     await pumpDevTools(tester);
     logStatus('1 - pumped devtools');
     await loadSampleData(tester, memoryFileName);

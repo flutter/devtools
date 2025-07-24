@@ -17,15 +17,13 @@ import '../../test_infra/matchers/matchers.dart';
 const inspectorChangeSettleTime = Duration(seconds: 2);
 
 void main() {
+  const windowSize = Size(2600.0, 1200.0);
   // We need to use real async in this test so we need to use this binding.
   initializeLiveTestWidgetsFlutterBindingWithAssets();
-  const windowSize = Size(2600.0, 1200.0);
 
-  final env = FlutterTestEnvironment(
-    const FlutterRunConfiguration(withDebugger: true),
-  );
+  late FlutterTestEnvironment env;
 
-  env.afterEverySetup = () async {
+  Future<void> resetInspectorSelection() async {
     final service = serviceConnection.inspectorService;
     if (env.reuseTestEnvironment) {
       // Ensure the previous test did not set the selection on the device.
@@ -37,19 +35,26 @@ void main() {
         isAlive: null,
       );
     }
-  };
-
-  setUp(() async {
-    await env.setupEnvironment();
-    // Ensure the legacy inspector is enabled:
-    preferences.inspector.setLegacyInspectorEnabled(true);
-  });
-
-  tearDownAll(() async {
-    await env.tearDownEnvironment(force: true);
-  });
+  }
 
   group('screenshot tests', () {
+    setUpAll(() {
+      env = FlutterTestEnvironment(
+        const FlutterRunConfiguration(withDebugger: true),
+      );
+      env.afterEverySetup = resetInspectorSelection;
+    });
+
+    setUp(() async {
+      await env.setupEnvironment();
+      // Ensure the legacy inspector is enabled:
+      preferences.inspector.setLegacyInspectorEnabled(true);
+    });
+
+    tearDownAll(() async {
+      await env.tearDownEnvironment(force: true);
+    });
+
     testWidgetsWithWindowSize('navigation', windowSize, (
       WidgetTester tester,
     ) async {
@@ -99,6 +104,9 @@ void main() {
         matchesDevToolsGolden(
           '../../test_infra/goldens/integration_inspector_select_center_details_tree.png',
         ),
+        // Implementation widgets from Flutter framework are not guaranteed to
+        // be stable.
+        skip: 'https://github.com/flutter/flutter/issues/172037',
       );
 
       // Select the RichText row.
@@ -109,6 +117,9 @@ void main() {
         matchesDevToolsGolden(
           '../../test_infra/goldens/integration_inspector_richtext_selected.png',
         ),
+        // Implementation widgets from Flutter framework are not guaranteed to
+        // be stable.
+        skip: 'https://github.com/flutter/flutter/issues/172037',
       );
 
       // Test hovering over the icon shown when a property has its default
@@ -131,6 +142,9 @@ void main() {
         matchesDevToolsGolden(
           '../../test_infra/goldens/integration_inspector_scaffold_selected.png',
         ),
+        // Implementation widgets from Flutter framework are not guaranteed to
+        // be stable.
+        skip: 'https://github.com/flutter/flutter/issues/172037',
       );
 
       // The important thing about this is that the details tree should scroll
@@ -143,6 +157,9 @@ void main() {
         matchesDevToolsGolden(
           '../../test_infra/goldens/integration_animated_physical_model_selected.png',
         ),
+        // Implementation widgets from Flutter framework are not guaranteed to
+        // be stable.
+        skip: 'https://github.com/flutter/flutter/issues/172037',
       );
 
       await env.tearDownEnvironment();
@@ -401,15 +418,25 @@ void main() {
   });
 
   group('widget errors', () {
-    testWidgetsWithWindowSize('show navigator and error labels', windowSize, (
-      WidgetTester tester,
-    ) async {
+    setUpAll(() async {
+      env = FlutterTestEnvironment(
+        testAppDirectory: 'test/test_infra/fixtures/inspector_app',
+        const FlutterRunConfiguration(withDebugger: true),
+      );
       await env.setupEnvironment(
         config: const FlutterRunConfiguration(
           withDebugger: true,
           entryScript: 'lib/overflow_errors.dart',
         ),
       );
+      env.afterEverySetup = resetInspectorSelection;
+      // Enable the legacy inspector.
+      preferences.inspector.setLegacyInspectorEnabled(true);
+    });
+
+    testWidgetsWithWindowSize('show navigator and error labels', windowSize, (
+      WidgetTester tester,
+    ) async {
       expect(serviceConnection.serviceManager.service, equals(env.service));
       expect(serviceConnection.serviceManager.isolateManager, isNotNull);
 

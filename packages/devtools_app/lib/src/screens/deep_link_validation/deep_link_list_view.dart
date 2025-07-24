@@ -207,9 +207,9 @@ class _DataTable extends StatelessWidget {
           ...(() {
             switch (viewType) {
               case TableViewType.domainView:
-                return [domain, NumberOfAssociatedPathColumn()];
+                return [domain, const NumberOfAssociatedPathColumn()];
               case TableViewType.pathView:
-                return [path, NumberOfAssociatedDomainColumn()];
+                return [path, const NumberOfAssociatedDomainColumn()];
               case TableViewType.singleUrlView:
                 return <ColumnData<LinkData>>[domain, path];
             }
@@ -218,7 +218,7 @@ class _DataTable extends StatelessWidget {
           OSColumn(controller),
           if (!controller.displayOptionsNotifier.value.showSplitScreen) ...[
             StatusColumn(controller, viewType),
-            NavigationColumn(),
+            const NavigationColumn(),
           ],
         ],
         selectionNotifier: controller.selectedLink,
