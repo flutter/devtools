@@ -250,12 +250,22 @@ to perform the cherry-pick release on top of.
    the Flutter / Dart beta branch, you can see what the current version of DevTools
    is on Flutter / Dart beta by doing the following:
 
-      a. Go to https://flutter-ko.dev/development/tools/sdk/releases and copy the version of the latest Beta release.
+      a. Find the latest [beta
+         release](https://github.com/flutter/flutter/blob/beta/bin/internal/release-candidate-branch.version)
+         candidate (or [stable
+         release](https://github.com/flutter/flutter/blob/stable/bin/internal/release-candidate-branch.version)
+         candidate) that you will cherry-pick into.
 
-      b. In your terminal from the flutter repository, run `git checkout <latest-beta-version>`.
+      b. In your terminal, in the flutter/flutter repository, run `git checkout
+         <latest-beta-version>`.
       
-      c. Once your local Flutter source code is on the latest beta, run `flutter --version` to see which version of DevTools 
-         is on current Flutter / Dart beta (assuming `which flutter` points to your local Flutter git repository).
+      c. Run `flutter --version` to see which version _of DevTools_ is on current
+         Flutter / Dart beta (assuming `which flutter` points to your local
+         Flutter git repository). For example, you might see:
+
+         > Tools • Dart 3.8.1 • DevTools 2.45.1
+
+         indicating that DevTools version 2.45.1 is used in this Flutter version.
 
 2. Checkout that tag in your local DevTools repo. For this
 example, we'll use `v2.29.0` as the base branch and `2.29.1` as the cherry-pick branch.
