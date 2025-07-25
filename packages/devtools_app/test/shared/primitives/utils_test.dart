@@ -252,13 +252,7 @@ void main() {
 
     group('TimeRange', () {
       test('toString', () {
-        final timeRange = TimeRange();
-
-        expect(timeRange.toString(), equals('[null μs - null μs]'));
-
-        timeRange
-          ..start = const Duration(microseconds: 1000)
-          ..end = const Duration(microseconds: 8000);
+        final timeRange = TimeRange(start: 1000, end: 8000);
 
         expect(timeRange.duration.inMicroseconds, equals(7000));
         expect(timeRange.toString(), equals('[1000 μs - 8000 μs]'));
@@ -268,53 +262,13 @@ void main() {
         );
       });
 
-      test('overlaps', () {
-        final t = TimeRange()
-          ..start = const Duration(milliseconds: 100)
-          ..end = const Duration(milliseconds: 200);
-        final overlapBeginning = TimeRange()
-          ..start = const Duration(milliseconds: 50)
-          ..end = const Duration(milliseconds: 150);
-        final overlapMiddle = TimeRange()
-          ..start = const Duration(milliseconds: 125)
-          ..end = const Duration(milliseconds: 175);
-        final overlapEnd = TimeRange()
-          ..start = const Duration(milliseconds: 150)
-          ..end = const Duration(milliseconds: 250);
-        final overlapAll = TimeRange()
-          ..start = const Duration(milliseconds: 50)
-          ..end = const Duration(milliseconds: 250);
-        final noOverlap = TimeRange()
-          ..start = const Duration(milliseconds: 300)
-          ..end = const Duration(milliseconds: 400);
-
-        expect(t.overlaps(t), isTrue);
-        expect(t.overlaps(overlapBeginning), isTrue);
-        expect(t.overlaps(overlapMiddle), isTrue);
-        expect(t.overlaps(overlapEnd), isTrue);
-        expect(t.overlaps(overlapAll), isTrue);
-        expect(t.overlaps(noOverlap), isFalse);
-      });
-
       test('containsRange', () {
-        final t = TimeRange()
-          ..start = const Duration(milliseconds: 100)
-          ..end = const Duration(milliseconds: 200);
-        final containsStart = TimeRange()
-          ..start = const Duration(milliseconds: 50)
-          ..end = const Duration(milliseconds: 150);
-        final containsStartAndEnd = TimeRange()
-          ..start = const Duration(milliseconds: 125)
-          ..end = const Duration(milliseconds: 175);
-        final containsEnd = TimeRange()
-          ..start = const Duration(milliseconds: 150)
-          ..end = const Duration(milliseconds: 250);
-        final invertedContains = TimeRange()
-          ..start = const Duration(milliseconds: 50)
-          ..end = const Duration(milliseconds: 250);
-        final containsNeither = TimeRange()
-          ..start = const Duration(milliseconds: 300)
-          ..end = const Duration(milliseconds: 400);
+        final t = TimeRange(start: 100, end: 200);
+        final containsStart = TimeRange(start: 50, end: 150);
+        final containsStartAndEnd = TimeRange(start: 125, end: 175);
+        final containsEnd = TimeRange(start: 150, end: 250);
+        final invertedContains = TimeRange(start: 50, end: 250);
+        final containsNeither = TimeRange(start: 300, end: 400);
 
         expect(t.containsRange(containsStart), isFalse);
         expect(t.containsRange(containsStartAndEnd), isTrue);
@@ -323,90 +277,59 @@ void main() {
         expect(t.containsRange(containsNeither), isFalse);
       });
 
-      test('start setter throws exception when single assignment is true', () {
+      test('throws exception when start is after end', () {
         expect(() {
-          final t = TimeRange()..start = Duration.zero;
-          t.start = Duration.zero;
+          TimeRange(start: 2000, end: 1000);
         }, throwsAssertionError);
       });
+    });
 
-      test('start setter throws exception when value is after end', () {
-        expect(() {
-          final t = TimeRange()..end = const Duration(seconds: 1);
-          t.start = const Duration(seconds: 2);
-        }, throwsAssertionError);
-      });
-
-      test('end setter throws exception when single assignment is true', () {
-        expect(() {
-          final t = TimeRange()..end = Duration.zero;
-          t.end = Duration.zero;
-        }, throwsAssertionError);
-      });
-
-      test('end setter throws exception when value is before start', () {
-        expect(() {
-          final t = TimeRange()..start = const Duration(seconds: 1);
-          t.end = Duration.zero;
-        }, throwsAssertionError);
-      });
-
-      test('isWellFormed', () {
+    group('TimeRangeBuilder', () {
+      test('throws if start or end are not set', () {
+        expect(() => TimeRangeBuilder().build(), throwsStateError);
+        expect(() => TimeRangeBuilder(start: 1000).build(), throwsStateError);
+        expect(() => TimeRangeBuilder(end: 1000).build(), throwsStateError);
         expect(
-          (TimeRange()
-                ..start = Duration.zero
-                ..end = Duration.zero)
-              .isWellFormed,
-          isTrue,
+          () => (TimeRangeBuilder()..start = 1000).build(),
+          throwsStateError,
         );
-        expect((TimeRange()..end = Duration.zero).isWellFormed, isFalse);
-        expect((TimeRange()..start = Duration.zero).isWellFormed, isFalse);
+        expect(
+          () => (TimeRangeBuilder()..end = 1000).build(),
+          throwsStateError,
+        );
       });
 
-      group('offset', () {
-        test('from well formed time range', () {
-          final t = TimeRange()
-            ..start = const Duration(milliseconds: 100)
-            ..end = const Duration(milliseconds: 200);
-          final offset = TimeRange.offset(
-            original: t,
-            offset: const Duration(milliseconds: 300),
-          );
+      test('throws error if start is after end', () {
+        expect(
+          () => TimeRangeBuilder(start: 2000, end: 1000).build(),
+          throwsAssertionError,
+        );
+      });
 
-          expect(offset.start, equals(const Duration(milliseconds: 400)));
-          expect(offset.end, equals(const Duration(milliseconds: 500)));
-        });
-
-        test('from half formed time range', () {
-          var t = TimeRange()..start = const Duration(milliseconds: 100);
-          var offset = TimeRange.offset(
-            original: t,
-            offset: const Duration(milliseconds: 300),
-          );
-
-          expect(offset.start, equals(const Duration(milliseconds: 400)));
-          expect(offset.end, isNull);
-
-          t = TimeRange()..end = const Duration(milliseconds: 200);
-          offset = TimeRange.offset(
-            original: t,
-            offset: const Duration(milliseconds: 300),
-          );
-
-          expect(offset.start, isNull);
-          expect(offset.end, equals(const Duration(milliseconds: 500)));
-        });
-
-        test('from empty time range', () {
-          final t = TimeRange();
-          final offset = TimeRange.offset(
-            original: t,
-            offset: const Duration(milliseconds: 300),
-          );
-
-          expect(offset.start, isNull);
-          expect(offset.end, isNull);
-        });
+      test('builds expected TimeRange', () {
+        expect(
+          TimeRangeBuilder(start: 1000, end: 2000).build(),
+          TimeRange(start: 1000, end: 2000),
+        );
+        expect(
+          TimeRangeBuilder(start: 1000, end: 1000).build(),
+          TimeRange(start: 1000, end: 1000),
+        );
+        expect(
+          (TimeRangeBuilder(start: 150)..end = 250).build(),
+          TimeRange(start: 150, end: 250),
+        );
+        expect(
+          (TimeRangeBuilder(end: 400)..start = 300).build(),
+          TimeRange(start: 300, end: 400),
+        );
+        expect(
+          (TimeRangeBuilder()
+                ..start = 0
+                ..end = 100)
+              .build(),
+          TimeRange.ofDuration(100),
+        );
       });
     });
 

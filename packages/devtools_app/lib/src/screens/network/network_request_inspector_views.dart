@@ -696,7 +696,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     // flex so that we can set a minimum width for small timing chunks.
     final timingWidgets = <Widget>[];
     for (final instant in data.instantEvents) {
-      final duration = instant.timeRange!.duration;
+      final duration = instant.timeRange.duration;
       timingWidgets.add(_buildTimingRow(nextColor(), instant.name, duration));
     }
     final duration = Duration(
@@ -714,14 +714,14 @@ class NetworkRequestOverviewView extends StatelessWidget {
     final data = this.data as DartIOHttpRequestData;
     final result = <Widget>[];
     for (final instant in data.instantEvents) {
-      final instantEventStart = data.instantEvents.first.timeRange!.start!;
-      final timeRange = instant.timeRange!;
+      final instantEventStart = data.instantEvents.first.timeRange.start;
+      final timeRange = instant.timeRange;
       final startDisplay = durationText(
-        timeRange.start! - instantEventStart,
+        Duration(microseconds: timeRange.start - instantEventStart),
         unit: DurationDisplayUnit.milliseconds,
       );
       final endDisplay = durationText(
-        timeRange.end! - instantEventStart,
+        Duration(microseconds: timeRange.end - instantEventStart),
         unit: DurationDisplayUnit.milliseconds,
       );
       final totalDisplay = durationText(
