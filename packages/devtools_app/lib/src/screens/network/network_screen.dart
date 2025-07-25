@@ -379,18 +379,12 @@ class AddressColumn extends ColumnData<NetworkRequest>
     NetworkRequest data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     final value = getDisplayValue(data);
-
-    return SelectableText(
+    return Text(
       value,
       maxLines: 1,
       style: const TextStyle(overflow: TextOverflow.ellipsis),
-      // [onPressed] needs to be passed along to [SelectableText] so that a
-      // click on the text will still trigger the [onPressed] action for the
-      // row.
-      onTap: onPressed,
     );
   }
 }
@@ -426,7 +420,6 @@ class ActionsColumn extends ColumnData<NetworkRequest>
     NetworkRequest data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     // Only show the actions button when there are options and the row is
     // currently selected.
@@ -489,7 +482,6 @@ class StatusColumn extends ColumnData<NetworkRequest>
     NetworkRequest data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     final theme = Theme.of(context);
     return Text(

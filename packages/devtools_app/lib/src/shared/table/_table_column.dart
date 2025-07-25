@@ -18,7 +18,6 @@ abstract class ColumnRenderer<T> {
     T data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   });
 }
 

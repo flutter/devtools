@@ -517,9 +517,12 @@ final class FormattedJson extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SelectableText(
-      json != null ? encoder.convert(json) : formattedString!,
-      style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
+    return SelectionArea(
+      child: Text(
+        json != null ? encoder.convert(json) : formattedString!,
+        style:
+            useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
+      ),
     );
   }
 }

@@ -195,7 +195,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.byType(SelectableText), findsNWidgets(3));
+      expect(find.byType(Text), findsNWidgets(4));
     });
   });
 }
