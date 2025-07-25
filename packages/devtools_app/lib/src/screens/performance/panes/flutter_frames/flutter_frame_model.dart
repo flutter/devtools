@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-import 'dart:math' as math;
-
 import '../../../../shared/primitives/utils.dart';
 import '../../performance_model.dart';
 import '../controls/enhance_tracing/enhance_tracing_model.dart';
@@ -24,12 +22,10 @@ class FlutterFrame {
   });
 
   factory FlutterFrame.fromJson(Map<String, Object?> json) {
-    final timeStart = Duration(microseconds: json[startTimeKey]! as int);
-    final timeEnd =
-        timeStart + Duration(microseconds: json[elapsedKey]! as int);
-    final frameTime = TimeRange()
-      ..start = timeStart
-      ..end = timeEnd;
+    final frameTime = TimeRange.ofDuration(
+      json[elapsedKey]! as int,
+      start: json[startTimeKey]! as int,
+    );
     return FlutterFrame._(
       id: json[numberKey]! as int,
       timeFromFrameTiming: frameTime,
@@ -58,14 +54,6 @@ class FlutterFrame {
   /// which the data was parsed.
   final TimeRange timeFromFrameTiming;
 
-  /// The time range of the Flutter frame based on the frame's
-  /// [timelineEventData], which contains timing information from the VM's
-  /// timeline events.
-  ///
-  /// This time range should be used for activities related to timeline events,
-  /// like scrolling a frame's timeline events into view, for example.
-  TimeRange get timeFromEventFlows => timelineEventData.time;
-
   /// Build time for this Flutter frame based on data from the FrameTiming API
   /// sent over the extension stream as 'Flutter.Frame' events.
   final Duration buildTime;
@@ -85,13 +73,12 @@ class FlutterFrame {
   /// (e.g. when the 'Flutter.Frame' event for this frame was received).
   ///
   /// If we did not have [EnhanceTracingState] information at the time that this
-  /// frame was drawn (e.g. the DevTools performancd page was not opened and
+  /// frame was drawn (e.g. the DevTools performance page was not opened and
   /// listening for frames yet), this value will be null.
   EnhanceTracingState? enhanceTracingState;
 
   FrameAnalysis? get frameAnalysis {
-    final frameAnalysis_ = _frameAnalysis;
-    if (frameAnalysis_ != null) return frameAnalysis_;
+    if (_frameAnalysis case final frameAnalysis?) return frameAnalysis;
     if (timelineEventData.isNotEmpty) {
       return _frameAnalysis = FrameAnalysis(this);
     }
@@ -104,15 +91,17 @@ class FlutterFrame {
 
   Duration get shaderDuration {
     if (_shaderTime != null) return _shaderTime!;
-    if (timelineEventData.rasterEvent == null) return Duration.zero;
-    final shaderEvents = timelineEventData.rasterEvent!
-        .shallowNodesWithCondition((event) => event.isShaderEvent);
-    final duration = shaderEvents.fold<Duration>(Duration.zero, (
-      previous,
-      event,
-    ) {
-      return previous + event.time.duration;
-    });
+    final rasterEvent = timelineEventData.rasterEvent;
+    if (rasterEvent == null) return Duration.zero;
+    final shaderEvents = rasterEvent.shallowNodesWithCondition(
+      (event) => event.isShaderEvent,
+    );
+    final duration = shaderEvents
+        .where((event) => event.isComplete)
+        .fold<Duration>(
+          Duration.zero,
+          (previous, event) => previous + event.time.duration,
+        );
     return _shaderTime = duration;
   }
 
@@ -150,7 +139,7 @@ class FlutterFrame {
 
   Map<String, Object?> get json => {
     numberKey: id,
-    startTimeKey: timeFromFrameTiming.start!.inMicroseconds,
+    startTimeKey: timeFromFrameTiming.start,
     elapsedKey: timeFromFrameTiming.duration.inMicroseconds,
     buildKey: buildTime.inMicroseconds,
     rasterKey: rasterTime.inMicroseconds,
@@ -197,42 +186,9 @@ class FrameTimelineEventData {
 
   bool get isNotEmpty => uiEvent != null || rasterEvent != null;
 
-  final time = TimeRange();
-
-  void setEventFlow({
-    required FlutterTimelineEvent event,
-    bool setTimeData = true,
-  }) {
+  void setEventFlow({required FlutterTimelineEvent event}) {
     final type = event.type!;
     _eventFlows[type.index] = event;
-    if (setTimeData) {
-      if (type == TimelineEventType.ui) {
-        time.start = event.time.start;
-        // If [rasterEventFlow] has already completed, set the end time for this
-        // frame to [event]'s end time.
-        if (rasterEvent != null) {
-          time.end = event.time.end;
-        }
-      } else if (type == TimelineEventType.raster) {
-        // If [uiEventFlow] is null, that means that this raster event flow
-        // completed before the ui event flow did for this frame. This means one
-        // of two things: 1) there will never be a [uiEventFlow] for this frame
-        // because the UI events are not present in the available timeline
-        // events, or 2) the [uiEventFlow] has started but not completed yet. In
-        // the event that 2) is true, do not set the frame end time here because
-        // the end time for this frame will be set to the end time for
-        // [uiEventFlow] once it finishes.
-        final theUiEvent = uiEvent;
-        if (theUiEvent != null) {
-          time.end = Duration(
-            microseconds: math.max(
-              theUiEvent.time.end!.inMicroseconds,
-              event.time.end?.inMicroseconds ?? 0,
-            ),
-          );
-        }
-      }
-    }
   }
 
   FlutterTimelineEvent? eventByType(TimelineEventType type) {
