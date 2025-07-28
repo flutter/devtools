@@ -439,7 +439,6 @@ class _TableRowState<T> extends State<TableRow<T>>
             node,
             isRowSelected: widget.isSelected,
             isRowHovered: isHovering,
-            // onPressed: onPressed,
           );
         }
         // If ColumnRenderer.build returns null, fall back to the default
