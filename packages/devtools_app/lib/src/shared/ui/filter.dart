@@ -655,7 +655,6 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
             valueListenable: widget.controller.useRegExp,
             builder: (context, useRegExp, _) {
               return DevToolsClearableTextField(
-                autofocus: true,
                 hintText: 'Filter',
                 controller: queryTextFieldController,
                 prefixIcon: widget.controller.settingFilters.isNotEmpty
