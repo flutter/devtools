@@ -88,7 +88,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(LogDetails),
-        matching: find.selectableText('log event 6'),
+        matching: find.text('log event 6'),
       ),
       findsOneWidget,
       reason: 'The log details should now be visible in the details section.',
@@ -175,7 +175,7 @@ void main() {
       await tester.tap(find.byKey(ValueKey(log)));
       await tester.pump();
       expect(
-        find.selectableText(nonJsonOutput),
+        find.text(nonJsonOutput),
         findsNothing,
         reason:
             "The details of the log haven't computed yet, so they shouldn't "
@@ -183,7 +183,7 @@ void main() {
       );
 
       await tester.pumpAndSettle();
-      expect(find.selectableText(nonJsonOutput), findsOneWidget);
+      expect(find.text(nonJsonOutput), findsOneWidget);
       expect(find.byType(JsonViewer), findsNothing);
 
       // Toggle the log details view format to view as JSON.
@@ -198,7 +198,7 @@ void main() {
       await tester.tap(find.byType(LogDetailsFormatButton));
       await tester.pumpAndSettle();
 
-      expect(find.selectableText(nonJsonOutput), findsNothing);
+      expect(find.text(nonJsonOutput), findsNothing);
       expect(find.byType(JsonViewer), findsOneWidget);
       expect(
         find.byTooltip(LogDetailsFormatButton.viewAsJsonTooltip),
@@ -216,9 +216,11 @@ void main() {
   ) async {
     const index = 9;
     bool containsJson(Widget widget) {
-      if (widget is! SelectableText) return false;
-      final content = widget.data!.trim();
-      return content.startsWith('{') && content.endsWith('}');
+      if (widget is! Text) return false;
+      final content = (widget.data ?? '').trim();
+      return content.startsWith('{') &&
+          content.endsWith('}') &&
+          content != '{ }';
     }
 
     final findJson = find.descendant(

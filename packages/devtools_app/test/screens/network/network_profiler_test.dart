@@ -307,16 +307,10 @@ void main() {
 
       expectNoSelection();
 
-      final textElement = tester.element(
-        find
-            .text(
-              'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
-            )
-            .first,
+      final textWidget = find.text(
+        'https://jsonplaceholder.typicode.com/albums/1?userId=1&title=myalbum',
       );
-      final selectableTextWidget = textElement
-          .findAncestorWidgetOfExactType<SelectableText>()!;
-      await tester.tap(find.byWidget(selectableTextWidget));
+      await tester.tap(textWidget);
       await tester.pumpAndSettle();
 
       expect(controller.selectedRequest.value, isNotNull);
