@@ -14,7 +14,7 @@ import '../vm_service_private_extensions.dart';
 import 'object_store_controller.dart';
 
 class _EntryColumn extends ColumnData<ObjectStoreEntry> {
-  _EntryColumn() : super.wide('Entry');
+  const _EntryColumn() : super.wide('Entry');
 
   @override
   bool get includeHeader => true;
@@ -49,7 +49,6 @@ class _ObjectColumn extends ColumnData<ObjectStoreEntry>
     dynamic data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return VmServiceObjectLink(
       // TODO(srawlins): What type is `data` at runtime? If cast to `int`, no
@@ -68,7 +67,7 @@ class ObjectStoreViewer extends StatelessWidget {
     required this.controller,
   });
 
-  static final _entryColumn = _EntryColumn();
+  static const _entryColumn = _EntryColumn();
   late final _objectColumn = _ObjectColumn(onTap: onLinkTapped);
   late final _columns = <ColumnData<ObjectStoreEntry>>[
     _entryColumn,

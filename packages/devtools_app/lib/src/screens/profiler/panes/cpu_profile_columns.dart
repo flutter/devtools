@@ -37,7 +37,7 @@ class TotalTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {
 
 class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
     implements ColumnRenderer<CpuStackFrame> {
-  MethodAndSourceColumn() : super('Method');
+  const MethodAndSourceColumn() : super('Method');
 
   @override
   String getValue(CpuStackFrame dataObject) => dataObject.name;
@@ -58,7 +58,6 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
     CpuStackFrame data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(
       methodName: data.name,

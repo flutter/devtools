@@ -571,7 +571,7 @@ class DescriptionDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (multiline) {
-      return SelectableText.rich(text);
+      return SelectionArea(child: Text.rich(text));
     }
 
     if (actionLabel != null) {

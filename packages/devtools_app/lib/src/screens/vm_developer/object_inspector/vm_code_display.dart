@@ -18,8 +18,8 @@ import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 
 abstract class _CodeColumnData<T> extends ColumnData<T> {
-  _CodeColumnData(super.title, {required super.fixedWidthPx});
-  _CodeColumnData.wide(super.title) : super.wide();
+  const _CodeColumnData(super.title, {required super.fixedWidthPx});
+  const _CodeColumnData.wide(super.title) : super.wide();
 
   @override
   bool get supportsSorting => false;
@@ -62,7 +62,6 @@ class _FunctionsColumn extends _CodeColumnData<InliningEntry>
     InliningEntry data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return Row(
       children: [
@@ -165,7 +164,6 @@ class _InstructionColumn extends _CodeColumnData<Instruction>
     Instruction data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     final theme = Theme.of(context);
     return Text.rich(
@@ -253,7 +251,6 @@ class _DartObjectColumn extends _CodeColumnData<Instruction>
     Instruction data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     if (data.object == null) return Container();
     return VmServiceObjectLink(

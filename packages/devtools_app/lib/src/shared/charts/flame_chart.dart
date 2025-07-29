@@ -172,9 +172,7 @@ abstract class FlameChartState<
             currentZoom /
             startingPxPerMicro;
 
-    return TimeRange()
-      ..start = Duration(microseconds: startMicros.round())
-      ..end = Duration(microseconds: endMicros.round());
+    return TimeRange(start: startMicros.round(), end: endMicros.round());
   }
 
   /// Starting pixels per microsecond in order to fit all the data in view at
@@ -182,7 +180,7 @@ abstract class FlameChartState<
   double get startingPxPerMicro =>
       widget.startingContentWidth / widget.time.duration.inMicroseconds;
 
-  int get startTimeOffset => widget.time.start!.inMicroseconds;
+  int get startTimeOffset => widget.time.start;
 
   double get maxZoomLevel {
     // The max zoom level is hit when 1 microsecond is the width of each grid

@@ -35,15 +35,9 @@ enum CpuSamplingRate {
 }
 
 extension CpuSamplingRateExtension on CpuSamplingRate {
-  static CpuSamplingRate fromValue(String value) {
-    switch (value) {
-      case lowProfilePeriod:
-        return CpuSamplingRate.low;
-      case highProfilePeriod:
-        return CpuSamplingRate.high;
-      case mediumProfilePeriod:
-      default:
-        return CpuSamplingRate.medium;
-    }
-  }
+  static CpuSamplingRate fromValue(String value) => switch (value) {
+    lowProfilePeriod => CpuSamplingRate.low,
+    highProfilePeriod => CpuSamplingRate.high,
+    mediumProfilePeriod || _ => CpuSamplingRate.medium,
+  };
 }

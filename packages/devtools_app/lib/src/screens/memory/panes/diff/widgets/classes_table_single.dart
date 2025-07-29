@@ -22,7 +22,7 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
     implements
         ColumnRenderer<SingleClassData>,
         ColumnHeaderRenderer<SingleClassData> {
-  _ClassNameColumn(this.data)
+  const _ClassNameColumn(this.data)
     : super(
         'Class',
         titleTooltip: 'Class name',
@@ -45,7 +45,6 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
     SingleClassData data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return HeapClassView(
       theClass: data.className,
@@ -72,7 +71,7 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
 
 class _InstanceColumn extends ColumnData<SingleClassData>
     implements ColumnRenderer<SingleClassData> {
-  _InstanceColumn(this.classData)
+  const _InstanceColumn(this.classData)
     : super(
         'Instances',
         titleTooltip: nonGcableInstancesColumnTooltip,
@@ -94,7 +93,6 @@ class _InstanceColumn extends ColumnData<SingleClassData>
     SingleClassData data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return HeapInstanceTableCell(
       data.objects,

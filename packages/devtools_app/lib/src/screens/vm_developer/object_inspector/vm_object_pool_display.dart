@@ -15,8 +15,8 @@ import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 
 abstract class _ObjectPoolColumnData extends ColumnData<ObjectPoolEntry> {
-  _ObjectPoolColumnData(super.title, {required super.fixedWidthPx});
-  _ObjectPoolColumnData.wide(super.title) : super.wide();
+  const _ObjectPoolColumnData(super.title, {required super.fixedWidthPx});
+  const _ObjectPoolColumnData.wide(super.title) : super.wide();
 
   @override
   bool get supportsSorting => false;
@@ -52,7 +52,6 @@ class _DartObjectColumn extends _ObjectPoolColumnData
     ObjectPoolEntry data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     if (data.value is int) return Text(data.value.toString());
     return VmServiceObjectLink(

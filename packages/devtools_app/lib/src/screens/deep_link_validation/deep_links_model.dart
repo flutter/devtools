@@ -586,7 +586,6 @@ class DomainColumn extends ColumnData<LinkData>
     LinkData dataObject, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return dataObject.domain == null
         ? Text('missing domain', style: Theme.of(context).errorTextStyle)
@@ -648,7 +647,6 @@ class PathColumn extends ColumnData<LinkData>
     LinkData dataObject, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return _ErrorAwareText(
       isError: dataObject.pathErrors.isNotEmpty,
@@ -672,7 +670,8 @@ class PathColumn extends ColumnData<LinkData>
 }
 
 class NumberOfAssociatedPathColumn extends ColumnData<LinkData> {
-  NumberOfAssociatedPathColumn() : super.wide('Number of associated path');
+  const NumberOfAssociatedPathColumn()
+    : super.wide('Number of associated path');
 
   @override
   String getValue(LinkData dataObject) =>
@@ -680,7 +679,8 @@ class NumberOfAssociatedPathColumn extends ColumnData<LinkData> {
 }
 
 class NumberOfAssociatedDomainColumn extends ColumnData<LinkData> {
-  NumberOfAssociatedDomainColumn() : super.wide('Number of associated domain');
+  const NumberOfAssociatedDomainColumn()
+    : super.wide('Number of associated domain');
 
   @override
   String getValue(LinkData dataObject) =>
@@ -728,7 +728,6 @@ class SchemeColumn extends ColumnData<LinkData>
     LinkData dataObject, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return dataObject.scheme.isEmpty
         ? Text(missingScheme, style: Theme.of(context).errorTextStyle)
@@ -741,9 +740,9 @@ class SchemeColumn extends ColumnData<LinkData>
 
 class OSColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData>, ColumnHeaderRenderer<LinkData> {
-  OSColumn(this.controller) : super.wide('OS');
+  const OSColumn(this.controller) : super.wide('OS');
 
-  DeepLinksController controller;
+  final DeepLinksController controller;
 
   @override
   bool get supportsSorting {
@@ -780,7 +779,6 @@ class OSColumn extends ColumnData<LinkData>
     LinkData dataObject, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return Text(getValue(dataObject));
   }
@@ -853,7 +851,6 @@ class StatusColumn extends ColumnData<LinkData>
     LinkData dataObject, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     if (dataObject.domainErrors.isNotEmpty ||
         dataObject.pathErrors.isNotEmpty) {
@@ -874,7 +871,7 @@ class StatusColumn extends ColumnData<LinkData>
 
 class NavigationColumn extends ColumnData<LinkData>
     implements ColumnRenderer<LinkData> {
-  NavigationColumn() : super('', fixedWidthPx: 40);
+  const NavigationColumn() : super('', fixedWidthPx: 40);
 
   @override
   bool get supportsSorting => false;
@@ -888,7 +885,6 @@ class NavigationColumn extends ColumnData<LinkData>
     LinkData dataObject, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return isRowHovered
         ? const Icon(Icons.arrow_forward)

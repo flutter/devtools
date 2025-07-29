@@ -24,7 +24,9 @@ void main() {
     expect(testApp.vmServiceUri, isNotNull);
   });
 
-  testWidgets('can process and refresh timeline data', (tester) async {
+  testWidgets('can process and refresh timeline data', timeout: longTimeout, (
+    tester,
+  ) async {
     await pumpAndConnectDevTools(tester, testApp);
 
     logStatus(

@@ -25,7 +25,7 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
     implements
         ColumnRenderer<DiffClassData>,
         ColumnHeaderRenderer<DiffClassData> {
-  _ClassNameColumn(this.diffData)
+  const _ClassNameColumn(this.diffData)
     : super(
         'Class',
         titleTooltip: 'Class name',
@@ -48,7 +48,6 @@ class _ClassNameColumn extends ColumnData<DiffClassData>
     DiffClassData data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return HeapClassView(
       theClass: data.className,
@@ -132,7 +131,6 @@ class _InstanceColumn extends ColumnData<DiffClassData>
     DiffClassData data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     final objects = _instances(data);
 

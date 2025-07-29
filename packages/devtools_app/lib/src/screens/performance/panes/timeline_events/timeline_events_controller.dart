@@ -82,13 +82,12 @@ class TimelineEventsController extends PerformanceFeatureController
   @visibleForTesting
   late final Uint8ListRingBuffer traceRingBuffer;
 
-  /// Size limit in GB for [traceRingBuffer] that determines when traces should
-  /// be removed from the queue.
-  final _traceRingBufferSize = convertBytes(
-    1,
-    from: ByteUnit.gb,
-    to: ByteUnit.byte,
-  ).round();
+  /// Size limit for [traceRingBuffer] that determines when traces should be
+  /// removed from the queue.
+  ///
+  /// Wasm sets a size limit on byte arrays of int32 max which is specifically
+  /// 1 less than 1 << 31.
+  final _traceRingBufferSize = (1 << 31) - 1;
 
   /// Track events that we have received from the VM, but have not yet
   /// processed.
@@ -437,9 +436,7 @@ class TimelineEventsController extends PerformanceFeatureController
       );
     }
 
-    if (frame.timeFromFrameTiming.isWellFormed) {
-      perfettoController.scrollToTimeRange(frame.timeFromFrameTiming);
-    }
+    perfettoController.scrollToTimeRange(frame.timeFromFrameTiming);
   }
 
   void addTimelineEvent(FlutterTimelineEvent event) {
@@ -463,7 +460,7 @@ class TimelineEventsController extends PerformanceFeatureController
       } else {
         final unassignedEventsForFrame = _unassignedFlutterTimelineEvents
             .putIfAbsent(frameNumber, () => FrameTimelineEventData());
-        unassignedEventsForFrame.setEventFlow(event: event, setTimeData: false);
+        unassignedEventsForFrame.setEventFlow(event: event);
       }
     }
   }

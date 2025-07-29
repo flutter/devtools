@@ -35,7 +35,7 @@ jobs:
       # TODO(https://github.com/flutter/devtools/issues/5729) Consider caching DevTools so that we
       # don't check it out again is subsequent workflows.
       - name: Checkout DevTools (default)
-        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
+        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
 
       - name: Get Latest Flutter Candidate
         id: flutter-candidate

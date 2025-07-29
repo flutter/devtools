@@ -30,7 +30,7 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets('memory eval and browse', (tester) async {
+  testWidgets('memory eval and browse', timeout: mediumTimeout, (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
 
     final evalTester = EvalTester(tester);

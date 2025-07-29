@@ -24,42 +24,50 @@ class DevToolsAboutDialog extends StatelessWidget {
     final theme = Theme.of(context);
     return DevToolsDialog(
       title: const DialogTitleText('About DevTools'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            children: [
-              SelectableText('DevTools version $devToolsVersion'),
-              const Text(' - '),
-              InkWell(
-                child: Text('release notes', style: theme.linkTextStyle),
-                onTap: () =>
-                    unawaited(releaseNotesController.openLatestReleaseNotes()),
-              ),
-            ],
-          ),
-          const SizedBox(height: denseSpacing),
-          const Wrap(
-            children: [
-              Text('Encountered an issue? Let us know at '),
-              _FeedbackLink(),
-              Text('.'),
-            ],
-          ),
-          const SizedBox(height: defaultSpacing),
-          ...dialogSubHeader(theme, 'Contributing'),
-          const Wrap(
-            children: [
-              Text('Want to contribute to DevTools? Please see our '),
-              _ContributingLink(),
-              Text(' guide, or '),
-            ],
-          ),
-          const Wrap(
-            children: [Text('connect with us on '), _DiscordLink(), Text('.')],
-          ),
-        ],
+      content: SelectionArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Wrap(
+              children: [
+                Text('DevTools version $devToolsVersion'),
+                const Text(' - '),
+                InkWell(
+                  child: Text('release notes', style: theme.linkTextStyle),
+                  onTap: () => unawaited(
+                    releaseNotesController.openLatestReleaseNotes(),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: denseSpacing),
+            const Wrap(
+              children: [
+                Text('Encountered an issue? Let us know at '),
+                _FeedbackLink(),
+                Text('.'),
+              ],
+            ),
+            const SizedBox(height: defaultSpacing),
+            ...dialogSubHeader(theme, 'Contributing'),
+            const Wrap(
+              children: [
+                Text('Want to contribute to DevTools? Please see our '),
+                _ContributingLink(),
+                Text(' guide, or '),
+              ],
+            ),
+
+            const Wrap(
+              children: [
+                Text('connect with us on '),
+                _DiscordLink(),
+                Text('.'),
+              ],
+            ),
+          ],
+        ),
       ),
       actions: const [DialogLicenseButton(), DialogCloseButton()],
     );

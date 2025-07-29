@@ -165,7 +165,7 @@ class FlutterFramesController extends PerformanceFeatureController {
     assert(frame.isWellFormed);
     firstWellFormedFrameMicros = math.min(
       firstWellFormedFrameMicros ?? maxJsInt,
-      frame.timeFromFrameTiming.start!.inMicroseconds,
+      frame.timeFromFrameTiming.start,
     );
   }
 

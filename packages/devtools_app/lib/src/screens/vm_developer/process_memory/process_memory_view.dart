@@ -175,7 +175,7 @@ class _ProcessMemoryTree extends StatelessWidget {
 
   final VMProcessMemoryViewController controller;
 
-  static final categoryColumn = CategoryColumn();
+  static const categoryColumn = CategoryColumn();
   static final descriptionColumn = DescriptionColumn();
 
   late final memoryColumn = MemoryColumn(controller: controller);

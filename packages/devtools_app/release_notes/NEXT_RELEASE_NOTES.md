@@ -15,7 +15,9 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+- Fixed a bug preventing the buttons at the top of an embedded DevTools screen
+  from being clicked under certain circumstances. -
+  [#9327](https://github.com/flutter/devtools/pull/9327)
 
 ## Inspector updates
 

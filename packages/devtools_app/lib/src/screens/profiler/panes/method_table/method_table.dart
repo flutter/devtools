@@ -46,7 +46,7 @@ class CpuMethodTable extends StatelessWidget {
 class MethodTable extends StatelessWidget {
   const MethodTable(this._methodTableController, this._methods, {super.key});
 
-  static final methodColumn = _MethodColumn();
+  static const methodColumn = _MethodColumn();
   static final selfTimeColumn = _SelfTimeColumn();
   static final totalTimeColumn = _TotalTimeColumn();
   static final columns = List<ColumnData<MethodTableGraphNode>>.unmodifiable([
@@ -90,11 +90,12 @@ class _MethodGraph extends StatefulWidget {
 }
 
 class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
-  MethodTableGraphNode? _selectedGraphNode;
-
-  List<MethodTableGraphNode> _callers = [];
-
-  List<MethodTableGraphNode> _callees = [];
+  ({
+    MethodTableGraphNode graphNode,
+    List<MethodTableGraphNode> callers,
+    List<MethodTableGraphNode> callees,
+  })?
+  _selected;
 
   @override
   void initState() {
@@ -109,30 +110,34 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
   }
 
   void _initGraphNodes() {
-    _selectedGraphNode = widget.methodTableController.selectedNode.value;
-    if (_selectedGraphNode == null) {
-      _callers = <MethodTableGraphNode>[];
-      _callees = <MethodTableGraphNode>[];
+    final selectedGraphNode = widget.methodTableController.selectedNode.value;
+    if (selectedGraphNode == null) {
+      _selected = null;
     } else {
-      _callers = _selectedGraphNode!.predecessors
-          .cast<MethodTableGraphNode>()
-          .toList();
-      _callees = _selectedGraphNode!.successors
-          .cast<MethodTableGraphNode>()
-          .toList();
+      _selected = (
+        graphNode: selectedGraphNode,
+        callers: selectedGraphNode.predecessors
+            .cast<MethodTableGraphNode>()
+            .toList(),
+        callees: selectedGraphNode.successors
+            .cast<MethodTableGraphNode>()
+            .toList(),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedNode = _selectedGraphNode;
-    if (selectedNode == null) {
+    final selected = _selected;
+    if (selected == null) {
       return OutlineDecoration.onlyLeft(
         child: const Center(
           child: Text('Select a method to view its call graph.'),
         ),
       );
     }
+
+    final selectedNode = selected.graphNode;
     final selectedNodeDisplay = selectedNode.display;
     return OutlineDecoration.onlyLeft(
       child: Column(
@@ -140,7 +145,10 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
         children: [
           Flexible(
             child: OutlineDecoration.onlyBottom(
-              child: _CallersTable(widget.methodTableController, _callers),
+              child: _CallersTable(
+                widget.methodTableController,
+                selected.callers,
+              ),
             ),
           ),
           DevToolsTooltip(
@@ -160,7 +168,10 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
           ),
           Flexible(
             child: OutlineDecoration.onlyTop(
-              child: _CalleesTable(widget.methodTableController, _callees),
+              child: _CalleesTable(
+                widget.methodTableController,
+                selected.callees,
+              ),
             ),
           ),
         ],
@@ -171,25 +182,16 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
 
 /// A table of predecessors (callers) for a single method in a method table.
 class _CallersTable extends StatelessWidget {
-  _CallersTable(this._methodTableController, this._callers) {
-    _callerTimeColumn = _CallerTimeColumn(
-      methodTableController: _methodTableController,
-    );
-    columns = List<ColumnData<MethodTableGraphNode>>.unmodifiable([
-      _callerTimeColumn,
-      methodColumn,
-    ]);
-  }
-
-  static final methodColumn = _MethodColumn();
+  _CallersTable(this._methodTableController, this._callers)
+    : _callerTimeColumn = _CallerTimeColumn(
+        methodTableController: _methodTableController,
+      );
 
   final MethodTableController _methodTableController;
 
   final List<MethodTableGraphNode> _callers;
 
-  late final List<ColumnData<MethodTableGraphNode>> columns;
-
-  late final _CallerTimeColumn _callerTimeColumn;
+  final _CallerTimeColumn _callerTimeColumn;
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +199,7 @@ class _CallersTable extends StatelessWidget {
       keyFactory: (node) => ValueKey('caller-${node.id}'),
       data: _callers,
       dataKey: 'cpu-profile-method-callers',
-      columns: columns,
+      columns: [_callerTimeColumn, const _MethodColumn()],
       defaultSortColumn: _callerTimeColumn,
       defaultSortDirection: SortDirection.descending,
       selectionNotifier: _methodTableController.selectedNode,
@@ -208,25 +210,16 @@ class _CallersTable extends StatelessWidget {
 
 /// A table of successors (callees) for a single method in a method table.
 class _CalleesTable extends StatelessWidget {
-  _CalleesTable(this._methodTableController, this._callees) {
-    _calleeTimeColumn = _CalleeTimeColumn(
-      methodTableController: _methodTableController,
-    );
-    _columns = List<ColumnData<MethodTableGraphNode>>.unmodifiable([
-      _calleeTimeColumn,
-      _methodColumn,
-    ]);
-  }
-
-  static final _methodColumn = _MethodColumn();
+  _CalleesTable(this._methodTableController, this._callees)
+    : _calleeTimeColumn = _CalleeTimeColumn(
+        methodTableController: _methodTableController,
+      );
 
   final MethodTableController _methodTableController;
 
   final List<MethodTableGraphNode> _callees;
 
-  late final List<ColumnData<MethodTableGraphNode>> _columns;
-
-  late final _CalleeTimeColumn _calleeTimeColumn;
+  final _CalleeTimeColumn _calleeTimeColumn;
 
   @override
   Widget build(BuildContext context) {
@@ -234,7 +227,7 @@ class _CalleesTable extends StatelessWidget {
       keyFactory: (node) => ValueKey('callee-${node.id}'),
       data: _callees,
       dataKey: 'cpu-profile-method-callees',
-      columns: _columns,
+      columns: [_calleeTimeColumn, const _MethodColumn()],
       defaultSortColumn: _calleeTimeColumn,
       defaultSortDirection: SortDirection.descending,
       selectionNotifier: _methodTableController.selectedNode,
@@ -245,7 +238,8 @@ class _CalleesTable extends StatelessWidget {
 
 class _MethodColumn extends ColumnData<MethodTableGraphNode>
     implements ColumnRenderer<MethodTableGraphNode> {
-  _MethodColumn() : super.wide('Method', minWidthPx: _methodColumnMinWidth);
+  const _MethodColumn()
+    : super.wide('Method', minWidthPx: _methodColumnMinWidth);
 
   @override
   String getValue(MethodTableGraphNode dataObject) => dataObject.name;
@@ -262,7 +256,6 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode>
     MethodTableGraphNode data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(
       methodName: data.name,

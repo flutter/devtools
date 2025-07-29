@@ -312,13 +312,13 @@ class NetworkRequestsTable extends StatelessWidget {
     required this.activeSearchMatchNotifier,
   });
 
-  static final methodColumn = MethodColumn();
+  static const methodColumn = MethodColumn();
   static final addressColumn = AddressColumn();
-  static final statusColumn = StatusColumn();
-  static final typeColumn = TypeColumn();
-  static final durationColumn = DurationColumn();
+  static const statusColumn = StatusColumn();
+  static const typeColumn = TypeColumn();
+  static const durationColumn = DurationColumn();
   static final timestampColumn = TimestampColumn();
-  static final actionsColumn = ActionsColumn();
+  static const actionsColumn = ActionsColumn();
   static final columns = <ColumnData<NetworkRequest>>[
     methodColumn,
     addressColumn,
@@ -379,24 +379,18 @@ class AddressColumn extends ColumnData<NetworkRequest>
     NetworkRequest data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     final value = getDisplayValue(data);
-
-    return SelectableText(
+    return Text(
       value,
       maxLines: 1,
       style: const TextStyle(overflow: TextOverflow.ellipsis),
-      // [onPressed] needs to be passed along to [SelectableText] so that a
-      // click on the text will still trigger the [onPressed] action for the
-      // row.
-      onTap: onPressed,
     );
   }
 }
 
 class MethodColumn extends ColumnData<NetworkRequest> {
-  MethodColumn() : super('Method', fixedWidthPx: 60);
+  const MethodColumn() : super('Method', fixedWidthPx: 60);
 
   @override
   String getValue(NetworkRequest dataObject) {
@@ -406,7 +400,7 @@ class MethodColumn extends ColumnData<NetworkRequest> {
 
 class ActionsColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
-  ActionsColumn()
+  const ActionsColumn()
     : super('', fixedWidthPx: 32, alignment: ColumnAlignment.right);
 
   @override
@@ -426,7 +420,6 @@ class ActionsColumn extends ColumnData<NetworkRequest>
     NetworkRequest data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     // Only show the actions button when there are options and the row is
     // currently selected.
@@ -465,7 +458,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
 
 class StatusColumn extends ColumnData<NetworkRequest>
     implements ColumnRenderer<NetworkRequest> {
-  StatusColumn()
+  const StatusColumn()
     : super(
         'Status',
         alignment: ColumnAlignment.right,
@@ -489,7 +482,6 @@ class StatusColumn extends ColumnData<NetworkRequest>
     NetworkRequest data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     final theme = Theme.of(context);
     return Text(
@@ -502,7 +494,7 @@ class StatusColumn extends ColumnData<NetworkRequest>
 }
 
 class TypeColumn extends ColumnData<NetworkRequest> {
-  TypeColumn()
+  const TypeColumn()
     : super(
         'Type',
         alignment: ColumnAlignment.right,
@@ -522,7 +514,7 @@ class TypeColumn extends ColumnData<NetworkRequest> {
 }
 
 class DurationColumn extends ColumnData<NetworkRequest> {
-  DurationColumn()
+  const DurationColumn()
     : super(
         'Duration',
         alignment: ColumnAlignment.right,
