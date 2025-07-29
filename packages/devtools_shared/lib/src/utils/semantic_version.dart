@@ -30,10 +30,14 @@ class SemanticVersion with CompareMixin<SemanticVersion> {
     // 2.15.0-233.0.dev (dev) (Mon Oct 18 14:06:26 2021 -0700) on "ios_x64"
     // 2.15.0-178.1.beta
     // 2.6.0-12.0.pre.443
+    // 2.6.0-12.0.pre-443
     //
-    // So split on the spaces to the version, and then on the dash char to
+    // First canonicalize the version string to convert any prerelease suffix
+    // with a "-" to a prerelease suffix with a ".".
+    final canonicalized = _canonicalizeVersion(versionString);
+    // Then split on the spaces to the version, and then on the dash char to
     // separate the main semantic version from the pre release version.
-    final splitOnSpaces = versionString.split(' ');
+    final splitOnSpaces = canonicalized.split(' ');
     final version = splitOnSpaces.first;
     final splitOnDash = version.split('-');
     assert(splitOnDash.length <= 2, 'version: $version');
@@ -114,6 +118,16 @@ class SemanticVersion with CompareMixin<SemanticVersion> {
   int? preReleaseMajor;
 
   int? preReleaseMinor;
+
+  static final _nonStandardPreReleaseVersionRegex = RegExp(r'(\.pre)-(\d+)$');
+
+  /// Canonicalizes a [semanticVersion] with a prerelease version suffix to use
+  /// a "." instead of a "-".
+  ///
+  /// e.g. 2.6.0-12.0.pre-443 -> 2.6.0-12.0.pre.443
+  static String _canonicalizeVersion(String semanticVersion) =>
+      semanticVersion.replaceFirstMapped(_nonStandardPreReleaseVersionRegex,
+          (match) => '${match[1]}.${match[2]}');
 
   bool get isPreRelease => preReleaseMajor != null || preReleaseMinor != null;
 
