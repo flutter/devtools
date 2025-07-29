@@ -92,9 +92,11 @@ class _LogDetailsState extends State<LogDetails>
                   (log?.encodedDetails ?? '').isEmpty
               ? Padding(
                   padding: const EdgeInsets.all(denseSpacing),
-                  child: SelectableText(
-                    log?.prettyPrinted() ?? '',
-                    textAlign: TextAlign.left,
+                  child: SelectionArea(
+                    child: Text(
+                      log?.prettyPrinted() ?? '',
+                      textAlign: TextAlign.left,
+                    ),
                   ),
                 )
               : JsonViewer(encodedJson: log!.encodedDetails),

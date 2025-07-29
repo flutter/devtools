@@ -96,38 +96,42 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt> {
     // When failing to parse the consent message, fallback to displaying the
     // consent message in its regular form.
     if (consentMessageRegExpResults == null) {
-      return SelectableText.rich(
-        TextSpan(
-          children: [
-            TextSpan(
-              text: adjustLineBreaks(controller.consentMessage),
-              style: theme.regularTextStyle,
-            ),
-          ],
+      return SelectionArea(
+        child: Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: adjustLineBreaks(controller.consentMessage),
+                style: theme.regularTextStyle,
+              ),
+            ],
+          ),
         ),
       );
     }
 
-    return SelectableText.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text: consentMessageRegExpResults[0],
-            style: theme.regularTextStyle,
-          ),
-          LinkTextSpan(
-            link: GaLink(
-              display: consentMessageRegExpResults[1],
-              url: consentMessageRegExpResults[1],
+    return SelectionArea(
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: consentMessageRegExpResults[0],
+              style: theme.regularTextStyle,
             ),
-            context: context,
-            style: theme.linkTextStyle,
-          ),
-          TextSpan(
-            text: consentMessageRegExpResults[2],
-            style: theme.regularTextStyle,
-          ),
-        ],
+            LinkTextSpan(
+              link: GaLink(
+                display: consentMessageRegExpResults[1],
+                url: consentMessageRegExpResults[1],
+              ),
+              context: context,
+              style: theme.linkTextStyle,
+            ),
+            TextSpan(
+              text: consentMessageRegExpResults[2],
+              style: theme.regularTextStyle,
+            ),
+          ],
+        ),
       ),
     );
   }

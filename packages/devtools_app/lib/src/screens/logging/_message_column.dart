@@ -48,7 +48,6 @@ class MessageColumn extends ColumnData<LogData>
     LogData data, {
     bool isRowSelected = false,
     bool isRowHovered = false,
-    VoidCallback? onPressed,
   }) {
     final theme = Theme.of(context);
     final hasSummary = !data.summary.isNullOrEmpty;

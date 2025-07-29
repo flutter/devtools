@@ -76,13 +76,15 @@ class _ConnectionDescriptionColumn extends StatelessWidget {
             padding: EdgeInsets.only(
               bottom: entry == entries.last ? 0.0 : denseRowSpacing,
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('${entry.title}: ', style: boldText),
-                SelectableText(entry.description, style: theme.subtleTextStyle),
-                if (entry.actions.isNotEmpty) ...entry.actions,
-              ],
+            child: SelectionArea(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${entry.title}: ', style: boldText),
+                  Text(entry.description, style: theme.subtleTextStyle),
+                  if (entry.actions.isNotEmpty) ...entry.actions,
+                ],
+              ),
             ),
           ),
       ],
