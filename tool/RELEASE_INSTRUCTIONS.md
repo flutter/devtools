@@ -333,27 +333,23 @@ Once your CL is uploaded to Gerrit, modify your changelist commit message to mee
 the cherry-pick
 [requirements](https://github.com/dart-lang/sdk/blob/main/docs/Cherry-picks-to-a-release-channel.md#how-to-cherry-pick-a-changelist).
 
-The CL description should look like this (you can use TBA for "Bug" and "Cherry-pick-request"
-until you've created the cherry pick request issue and have a link to use):
+The CL description should look like this:
+
 ```
 [stable or beta] Cherry-pick DevTools <new version number> into the SDK <stable or beta> branch.
 
-Bug: https://github.com/dart-lang/sdk/issues/56270 # can temporarily be TBA
+Issue description: When attempting to use foo under certain conditions, users are unable to
+compile.
+What is the fix: foo is now evaluated at runtime.
+Why cherry-pick: Users of foo are no longer able to compile to bar.
+Risk: Low, this fix has landed on the main channel and is tested on the same infrastructure. 
+Issue link(s): https://github.com/dart-lang/sdk/issues/12345678
 Cherry-pick: https://github.com/flutter/devtools/compare/<previous DevTools tag>...<new version number>
-Cherry-pick-request: https://github.com/dart-lang/sdk/issues/56270 # can temporarily be TBA
 Change-Id: Id75075a7e697559263742bc25972ef47532c39cb
 ```
 
 Then trigger a CQ Dry Run, add reviewers, and wait for approval. **DO NOT** merge
 the CL yet.
-
-### Create the cherry-pick issue in the Dart SDK
-
-Follow the [Request cherry-pick approval](https://github.com/dart-lang/sdk/blob/main/docs/Cherry-picks-to-a-release-channel.md#request-cherry-pick-approval)
-instructions to create a cherry-pick request against the Dart SDK.
-
-Once the Dart release engineers (listed in [OWNERS](https://github.com/dart-lang/sdk/blob/main/OWNERS)) approve both your cherry-pick issue and your
-cherry-pick CL, you can merge the CL you created above.
 
 **Do not move on to the next steps unless your cherry-pick CL has been approved
 and merged.**
