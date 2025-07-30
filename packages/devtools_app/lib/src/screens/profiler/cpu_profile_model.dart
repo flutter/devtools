@@ -565,12 +565,14 @@ class CpuProfileData with Serializable {
     required vm_service.CpuSamples cpuSamples,
     bool buildCodeTree = false,
   }) async {
-    final samplePeriod = _calculateSamplePeriod(cpuSamples: cpuSamples);
-
-    final profileMetaData = _createProfileMetadata(
-      cpuSamples: cpuSamples,
-      samplePeriod: samplePeriod,
-    );
+    // Note: Do not change the order of these function calls! Generating the
+    // stack frames has a side effect of creating the timeline tree and
+    // assigning frame IDs to every node, which the sample event conversion is
+    // dependant upon.
+    //
+    // TODO(https://github.com/flutter/devtools/issues/9353): Refactor the
+    // implementation avoid the side effects described above.
+    final profileMetaData = _createProfileMetadata(cpuSamples: cpuSamples);
 
     final stackFrames =
         await _CpuStackFrameGenerator(
@@ -598,42 +600,48 @@ class CpuProfileData with Serializable {
     );
   }
 
+  /// Creates a [CpuProfileMetaData] object using the given [cpuSamples].
+  static CpuProfileMetaData _createProfileMetadata({
+    required vm_service.CpuSamples cpuSamples,
+  }) {
+    final samplePeriod = _calculateSamplePeriod(cpuSamples: cpuSamples);
+
+    return CpuProfileMetaData(
+      sampleCount: cpuSamples.sampleCount ?? 0,
+      samplePeriod: samplePeriod ?? 0,
+      stackDepth: cpuSamples.maxStackDepth ?? 0,
+      time:
+          cpuSamples.timeExtentMicros != null &&
+              cpuSamples.timeOriginMicros != null
+          ? TimeRange.ofDuration(
+              cpuSamples.timeExtentMicros!,
+              start: cpuSamples.timeOriginMicros!,
+            )
+          : null,
+    );
+  }
+
+  /// Calculates the median sample period for a the given [cpuSamples].
   static int? _calculateSamplePeriod({
     required vm_service.CpuSamples cpuSamples,
   }) {
     final samples = cpuSamples.samples;
     if (samples == null) return cpuSamples.samplePeriod;
 
-    // Sort the samples so we can compute the observed time difference between
-    // each sample.
-    samples.sort((a, b) => a.timestamp!.compareTo(b.timestamp!));
+    // Sort the sample timestamps so we can compute the observed time difference
+    // between each sample.
+    final sampleTimestamps = samples.map((s) => s.timestamp).nonNulls.toList();
+    sampleTimestamps.sort();
 
     // Prefer the approximate observed median time between samples over the
     // reported sample period.
     //
     // See https://github.com/flutter/devtools/pull/8941 for more information.
-    final sampleTimestamps = samples.map((s) => s.timestamp).nonNulls.toList();
     return observedSamplePeriod(sampleTimestamps) ?? cpuSamples.samplePeriod;
   }
 
-  static CpuProfileMetaData _createProfileMetadata({
-    required vm_service.CpuSamples cpuSamples,
-    required int? samplePeriod,
-  }) => CpuProfileMetaData(
-    sampleCount: cpuSamples.sampleCount ?? 0,
-    samplePeriod: samplePeriod ?? 0,
-    stackDepth: cpuSamples.maxStackDepth ?? 0,
-    time:
-        cpuSamples.timeExtentMicros != null &&
-            cpuSamples.timeOriginMicros != null
-        ? TimeRange.ofDuration(
-            cpuSamples.timeExtentMicros!,
-            start: cpuSamples.timeOriginMicros!,
-          )
-        : null,
-  );
-
-  /// Add dartdoc.
+  /// Converts the `samples` from a [vm_service.CpuSamples] object to a list of
+  /// [CpuSampleEvent]s.
   static List<CpuSampleEvent> _convertSamplesToEvents({
     required vm_service.CpuSamples cpuSamples,
     required String isolateId,
@@ -668,52 +676,6 @@ class CpuProfileData with Serializable {
     }
 
     return sampleEvents;
-  }
-
-  /// Helper function for determining and updating the
-  /// [CpuProfileData.resolvedPackageUriKey] entry for each stack frame in
-  /// [traceObject].
-  ///
-  /// [isolateId] The id which is passed to the getIsolate RPC to load this
-  /// isolate.
-  /// [traceObject] A map where the cpu profile data for each frame is stored.
-  static Future<void> _addPackageUrisToTraceObject(
-    String isolateId,
-    Map<String, Object?> traceObject,
-  ) async {
-    final stackFrameMap = traceObject[CpuProfileData._stackFramesKey] as Map;
-    final stackFrames = stackFrameMap.values.cast<Map<String, Object?>>();
-    final stackFramesWaitingOnPackageUri = <Map<String, Object?>>[];
-    final urisWithoutPackageUri = <String>{};
-    for (final stackFrameJson in stackFrames) {
-      final resolvedUrl =
-          stackFrameJson[CpuProfileData.resolvedUrlKey] as String?;
-      if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
-        final packageUri = serviceConnection.serviceManager.resolvedUriManager
-            .lookupPackageUri(isolateId, resolvedUrl);
-        if (packageUri != null) {
-          stackFrameJson[CpuProfileData.resolvedPackageUriKey] = packageUri;
-        } else {
-          stackFramesWaitingOnPackageUri.add(stackFrameJson);
-          urisWithoutPackageUri.add(resolvedUrl);
-        }
-      }
-    }
-
-    await serviceConnection.serviceManager.resolvedUriManager.fetchPackageUris(
-      isolateId,
-      urisWithoutPackageUri.toList(),
-    );
-
-    for (final stackFrameJson in stackFramesWaitingOnPackageUri) {
-      final resolvedUri =
-          stackFrameJson[CpuProfileData.resolvedUrlKey] as String;
-      final packageUri = serviceConnection.serviceManager.resolvedUriManager
-          .lookupPackageUri(isolateId, resolvedUri);
-      if (packageUri != null) {
-        stackFrameJson[CpuProfileData.resolvedPackageUriKey] = packageUri;
-      }
-    }
   }
 
   static const rootId = 'cpuProfileRoot';
@@ -796,18 +758,16 @@ class CpuProfileData with Serializable {
   CpuStackFrame? selectedStackFrame;
 
   @override
-  Map<String, Object?> toJson() {
-    return {
-      'type': '_CpuProfileTimeline',
-      _samplePeriodKey: profileMetaData.samplePeriod,
-      _sampleCountKey: profileMetaData.sampleCount,
-      _stackDepthKey: profileMetaData.stackDepth,
-      _timeOriginKey: ?profileMetaData.time?.start,
-      _timeExtentKey: ?profileMetaData.time?.duration.inMicroseconds,
-      _stackFramesKey: stackFramesJson,
-      _traceEventsKey: cpuSamples.map((sample) => sample.toJson).toList(),
-    };
-  }
+  Map<String, Object?> toJson() => {
+    'type': '_CpuProfileTimeline',
+    _samplePeriodKey: profileMetaData.samplePeriod,
+    _sampleCountKey: profileMetaData.sampleCount,
+    _stackDepthKey: profileMetaData.stackDepth,
+    _timeOriginKey: ?profileMetaData.time?.start,
+    _timeExtentKey: ?profileMetaData.time?.duration.inMicroseconds,
+    _stackFramesKey: stackFramesJson,
+    _traceEventsKey: cpuSamples.map((sample) => sample.toJson).toList(),
+  };
 
   bool get isEmpty => profileMetaData.sampleCount == 0;
 
@@ -1325,8 +1285,15 @@ class _CpuProfileTimelineTree {
     vm_service.CpuSample sample,
   ) => _timelineTreeExpando[sample];
 
-  String id(String isolateId) =>
-      frameId == _kRootId ? CpuProfileData.rootId : '$isolateId-$frameId';
+  String id(String isolateId) {
+    // Assertion to guard that the _CpuStackFrameGenerator.generate has been
+    // called before getting the frame ID.
+    assert(
+      frameId != kNoFrameId,
+      'Frame ID does not exist, have the stack frames been generated?',
+    );
+    return frameId == _kRootId ? CpuProfileData.rootId : '$isolateId-$frameId';
+  }
 
   _CpuProfileTimelineTree _getChild(int index) {
     final length = children.length;
@@ -1355,6 +1322,14 @@ class _CpuProfileTimelineTree {
   }
 }
 
+/// A generator class for creating a set of [CpuStackFrame]s from a
+/// [vm_service.CpuSamples] object.
+///
+/// This class is responsible for traversing the call stacks of a CPU profile,
+/// creating a [CpuStackFrame] for each unique frame, and assigning a unique
+/// ID to each. It also resolves the package URI for each stack frame and
+/// handles fetching missing package URIs from the [serviceConnection] if
+/// necessary.
 class _CpuStackFrameGenerator {
   _CpuStackFrameGenerator({
     required this.isolateId,
@@ -1447,6 +1422,14 @@ class _CpuStackFrameGenerator {
     }
   }
 
+  /// Returns a user-friendly name for a stack frame from a
+  /// [_CpuProfileTimelineTree] node `current`.
+  ///
+  /// For regular methods, this will return a name in the form of
+  /// `className.methodName`.
+  ///
+  /// For anonymous closures, this will attempt to find the owner of the
+  /// closure and return a name in the form of `owner.closureName`.
   String? _nameForStackFrame(_CpuProfileTimelineTree current) {
     final className = current.className;
     if (className != null) {
@@ -1511,82 +1494,6 @@ class _CpuStackFrameGenerator {
 
     _stackFramesWaitingOnPackageUri.clear();
     _urisWithoutPackageUri.clear();
-  }
-}
-
-extension on vm_service.CpuSamples {
-  Map<String, Object?> generateStackFramesJson({
-    required String isolateId,
-    int kRootId = 0,
-    bool buildCodeTree = false,
-  }) {
-    final traceObject = <String, Object?>{};
-    int nextId = kRootId;
-
-    String? nameForStackFrame(_CpuProfileTimelineTree current) {
-      final className = current.className;
-      if (className != null) {
-        return '$className.${current.name}';
-      }
-      if (current.name == anonymousClosureName &&
-          current._function is vm_service.FuncRef) {
-        final nameParts = <String?>[current.name];
-
-        final function = current._function as vm_service.FuncRef;
-        var owner = function.owner;
-        switch (owner.runtimeType) {
-          case const (vm_service.FuncRef):
-            owner = owner as vm_service.FuncRef;
-            final functionName = owner.name;
-
-            String? className;
-            if (owner.owner is vm_service.ClassRef) {
-              className = (owner.owner as vm_service.ClassRef).name;
-            }
-
-            nameParts.insertAll(0, [className, functionName]);
-            break;
-          case const (vm_service.ClassRef):
-            final className = (owner as vm_service.ClassRef).name;
-            nameParts.insert(0, className);
-        }
-
-        nameParts.removeWhere((element) => element == null);
-        return nameParts.join('.');
-      }
-      return current.name;
-    }
-
-    void processStackFrame({
-      required _CpuProfileTimelineTree current,
-      required _CpuProfileTimelineTree? parent,
-    }) {
-      final id = nextId++;
-      current.frameId = id;
-
-      // Skip the root.
-      if (id != kRootId) {
-        final key = '$isolateId-$id';
-        traceObject[key] = {
-          CpuProfileData.categoryKey: 'Dart',
-          CpuProfileData.nameKey: nameForStackFrame(current),
-          CpuProfileData.resolvedUrlKey: current.resolvedUrl,
-          CpuProfileData.sourceLineKey: current.sourceLine,
-          if (parent != null && parent.frameId != 0)
-            CpuProfileData.parentIdKey: '$isolateId-${parent.frameId}',
-        };
-      }
-      for (final child in current.children) {
-        processStackFrame(current: child, parent: current);
-      }
-    }
-
-    final root = _CpuProfileTimelineTree.fromCpuSamples(
-      this,
-      asCodeProfileTimelineTree: buildCodeTree,
-    );
-    processStackFrame(current: root, parent: null);
-    return traceObject;
   }
 }
 
