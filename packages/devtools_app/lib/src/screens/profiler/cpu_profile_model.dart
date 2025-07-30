@@ -22,6 +22,11 @@ import 'cpu_profiler_controller.dart';
 
 final _log = Logger('lib/src/screens/profiler/cpu_profile_model');
 
+/// The root ID is associated with an artificial frame / node that is the root
+/// of all stacks, regardless of entrypoint. This should never be seen in the
+/// [CpuProfileData].
+const _kRootId = 0;
+
 /// A convenience wrapper for managing CPU profiles with both function and code
 /// profile views.
 ///
@@ -556,55 +561,106 @@ class CpuProfileData with Serializable {
     required vm_service.CpuSamples cpuSamples,
     bool buildCodeTree = false,
   }) async {
-    // The root ID is associated with an artificial frame / node that is the root
-    // of all stacks, regardless of entrypoint. This should never be seen in the
-    // final output from this method.
-    const kRootId = 0;
-
-    // Generate the stack frames first as it builds and tracks
-    // the timeline tree for each sample.
-    final stackFrames = cpuSamples.generateStackFramesJson(
+    final sampleEvents = _convertSamplesToEvents(
+      cpuSamples: cpuSamples,
       isolateId: isolateId,
-      // We want to ensure that if [kRootId] ever changes, this change is
-      // propagated to [cpuSamples.generateStackFramesJson].
-      // ignore: avoid_redundant_argument_values
-      kRootId: kRootId,
-      buildCodeTree: buildCodeTree,
     );
 
-    // Build the trace events.
-    final traceEvents = <Map<String, Object?>>[];
+    final samplePeriod = _calculateSamplePeriod(
+      sampleEvents: sampleEvents,
+      cpuSamples: cpuSamples,
+    );
+
+    final profileMetaData = _createProfileMetadata(
+      cpuSamples: cpuSamples,
+      samplePeriod: samplePeriod,
+    );
+
+    final stackFrames = await _CpuStackFrameGenerator(
+      isolateId: isolateId,
+      cpuSamples: cpuSamples,
+      profileMetaData: profileMetaData,
+      buildCodeTree: buildCodeTree,
+    ).generate();
+
+    // missing trace events
+    return CpuProfileData._(
+      stackFrames: stackFrames,
+      cpuSamples: sampleEvents,
+      profileMetaData: profileMetaData,
+      rootedAtTags: false,
+    );
+  }
+
+  static int? _calculateSamplePeriod({
+    required List<CpuSampleEvent> sampleEvents,
+    required vm_service.CpuSamples cpuSamples,
+  }) {
+    // Sort the samples so we can compute the observed time difference between
+    // each sample.
+    sampleEvents.sort(
+      (a, b) => a.timestampMicros!.compareTo(b.timestampMicros!),
+    );
+
+    // Prefer the approximate observed median time between samples over the
+    // reported sample period.
+    //
+    // See https://github.com/flutter/devtools/pull/8941 for more information.
+    return observedSamplePeriod(sampleEvents) ?? cpuSamples.samplePeriod;
+  }
+
+  static CpuProfileMetaData _createProfileMetadata({
+    required vm_service.CpuSamples cpuSamples,
+    required int? samplePeriod,
+  }) => CpuProfileMetaData(
+    sampleCount: cpuSamples.sampleCount ?? 0,
+    samplePeriod: samplePeriod ?? 0,
+    stackDepth: cpuSamples.maxStackDepth ?? 0,
+    time:
+        cpuSamples.timeExtentMicros != null &&
+            cpuSamples.timeOriginMicros != null
+        ? TimeRange.ofDuration(
+            cpuSamples.timeExtentMicros!,
+            start: cpuSamples.timeOriginMicros!,
+          )
+        : null,
+  );
+
+  /// Add dartdoc.
+  static List<CpuSampleEvent> _convertSamplesToEvents({
+    required vm_service.CpuSamples cpuSamples,
+    required String isolateId,
+  }) {
+    final sampleEvents = <CpuSampleEvent>[];
+
     for (final sample in cpuSamples.samples ?? <vm_service.CpuSample>[]) {
-      final tree = _CpuProfileTimelineTree.getTreeFromSample(sample)!;
-      // Skip the root.
-      if (tree.frameId == kRootId) {
+      final node = _CpuProfileTimelineTree.getTreeFromSample(sample);
+      // Skip the root because it is a synthetic node.
+      if (node == null || node.frameId == _kRootId) {
         continue;
       }
-      traceEvents.add({
-        'ph': 'P', // kind = sample event
-        'name': '', // Blank to keep about:tracing happy
-        'pid': cpuSamples.pid,
-        'tid': sample.tid,
-        'ts': sample.timestamp,
-        'cat': 'Dart',
-        CpuProfileData.stackFrameIdKey: '$isolateId-${tree.frameId}',
-        'args': {userTagKey: ?sample.userTag, vmTagKey: ?sample.vmTag},
-      });
+
+      final nodeId = node.id(isolateId);
+      sampleEvents.add(
+        CpuSampleEvent(
+          leafId: nodeId,
+          userTag: sample.userTag,
+          vmTag: sample.vmTag,
+          traceJson: {
+            'ph': 'P', // kind = sample event
+            'name': '', // Blank to keep about:tracing happy
+            'pid': cpuSamples.pid,
+            'tid': sample.tid,
+            'ts': sample.timestamp,
+            'cat': 'Dart',
+            CpuProfileData.stackFrameIdKey: nodeId,
+            'args': {userTagKey: sample.userTag, vmTagKey: sample.vmTag},
+          },
+        ),
+      );
     }
 
-    final traceObject = <String, Object?>{
-      CpuProfileData._sampleCountKey: cpuSamples.sampleCount,
-      CpuProfileData._samplePeriodKey: cpuSamples.samplePeriod,
-      CpuProfileData._stackDepthKey: cpuSamples.maxStackDepth,
-      CpuProfileData._timeOriginKey: cpuSamples.timeOriginMicros,
-      CpuProfileData._timeExtentKey: cpuSamples.timeExtentMicros,
-      CpuProfileData._stackFramesKey: stackFrames,
-      CpuProfileData._traceEventsKey: traceEvents,
-    };
-
-    await _addPackageUrisToTraceObject(isolateId, traceObject);
-
-    return CpuProfileData.fromJson(traceObject);
+    return sampleEvents;
   }
 
   /// Helper function for determining and updating the
@@ -823,6 +879,9 @@ class CpuSampleEvent extends ChromeTraceEvent {
   Map<String, Object?> get toJson {
     // [leafId] is the source of truth for the leaf id of this sample.
     super.json[CpuProfileData.stackFrameIdKey] = leafId;
+    print('LEAF ID: $leafId');
+    print('.  super.json: ${super.json}');
+
     return super.json;
   }
 }
@@ -1260,6 +1319,9 @@ class _CpuProfileTimelineTree {
     vm_service.CpuSample sample,
   ) => _timelineTreeExpando[sample];
 
+  String id(String isolateId) =>
+      frameId == _kRootId ? CpuProfileData.rootId : '$isolateId-$frameId';
+
   _CpuProfileTimelineTree _getChild(int index) {
     final length = children.length;
     int i;
@@ -1284,6 +1346,169 @@ class _CpuProfileTimelineTree {
       children.add(child);
     }
     return child;
+  }
+}
+
+class _CpuStackFrameGenerator {
+  _CpuStackFrameGenerator({
+    required this.isolateId,
+    required this.cpuSamples,
+    required this.profileMetaData,
+    this.buildCodeTree = false,
+  });
+
+  final String isolateId;
+  final vm_service.CpuSamples cpuSamples;
+  final CpuProfileMetaData profileMetaData;
+  final bool buildCodeTree;
+
+  final _stackFrames = <String, CpuStackFrame>{};
+  final _stackFramesWaitingOnPackageUri = <CpuStackFrame>[];
+  final _urisWithoutPackageUri = <String>{};
+  int _nextFrameId = _kRootId;
+
+  /// Generates a map of [String] IDs to [CpuStackFrame] objects.
+  ///
+  /// Refer to [_CpuProfileTimelineTree.id] for how the ID keys are
+  /// generated.
+  Future<Map<String, CpuStackFrame>> generate() async {
+    // If the stack frames have already been generated, simply return them.
+    if (_stackFrames.isNotEmpty) return _stackFrames;
+
+    // Create the timeline tree from the CPU samples.
+    final treeRoot = _CpuProfileTimelineTree.fromCpuSamples(
+      cpuSamples,
+      asCodeProfileTimelineTree: buildCodeTree,
+    );
+
+    // Recursively generate the stack frames map.
+    _processNode(currentNode: treeRoot, parentNode: null);
+
+    // Add any missing package URIs to the stack frames.
+    await _fetchAndUpdateMissingPackageUris();
+
+    return _stackFrames;
+  }
+
+  /// Recursively calls [_addStackFrameForNode] on all nodes in the timeline
+  /// tree, starting with the [currentNode].
+  void _processNode({
+    required _CpuProfileTimelineTree currentNode,
+    required _CpuProfileTimelineTree? parentNode,
+  }) {
+    final frameId = _nextFrameId++;
+    currentNode.frameId = frameId;
+
+    // Skip creating a stack frame for the root node, since it is a synthetic
+    // node and has no parent.
+    if (parentNode != null) {
+      _addStackFrameForNode(currentNode: currentNode, parentNode: parentNode);
+    }
+
+    for (final childNode in currentNode.children) {
+      _processNode(currentNode: childNode, parentNode: currentNode);
+    }
+  }
+
+  /// Creates a [CpuStackFrame] for the [currentNode] and adds it to the
+  /// [_stackFrames] map.
+  void _addStackFrameForNode({
+    required _CpuProfileTimelineTree currentNode,
+    required _CpuProfileTimelineTree parentNode,
+  }) {
+    final id = currentNode.id(isolateId);
+    final verboseName = _nameForStackFrame(currentNode);
+    final rawUrl = currentNode.resolvedUrl ?? '';
+    final packageUri = serviceConnection.serviceManager.resolvedUriManager
+        .lookupPackageUri(isolateId, rawUrl);
+
+    final stackFrame = CpuStackFrame(
+      id: id,
+      name: getSimpleStackFrameName(verboseName),
+      verboseName: verboseName,
+      category: 'Dart',
+      rawUrl: rawUrl,
+      packageUri: packageUri ?? rawUrl,
+      sourceLine: currentNode.sourceLine,
+      parentId: parentNode.id(isolateId),
+      profileMetaData: profileMetaData,
+      isTag: false,
+    );
+    _stackFrames[id] = stackFrame;
+
+    // If the package URI was not found, keep track of it so that we can bulk
+    // fetch all package URIs and update the stack frame after all frames have
+    // been processed.
+    if (rawUrl.isNotEmpty && packageUri == null) {
+      _stackFramesWaitingOnPackageUri.add(stackFrame);
+      _urisWithoutPackageUri.add(rawUrl);
+    }
+  }
+
+  String? _nameForStackFrame(_CpuProfileTimelineTree current) {
+    final className = current.className;
+    if (className != null) {
+      return '$className.${current.name}';
+    }
+    if (current.name == anonymousClosureName &&
+        current._function is vm_service.FuncRef) {
+      final nameParts = <String?>[current.name];
+
+      final function = current._function as vm_service.FuncRef;
+      var owner = function.owner;
+      switch (owner.runtimeType) {
+        case const (vm_service.FuncRef):
+          owner = owner as vm_service.FuncRef;
+          final functionName = owner.name;
+
+          String? className;
+          if (owner.owner is vm_service.ClassRef) {
+            className = (owner.owner as vm_service.ClassRef).name;
+          }
+
+          nameParts.insertAll(0, [className, functionName]);
+          break;
+        case const (vm_service.ClassRef):
+          final className = (owner as vm_service.ClassRef).name;
+          nameParts.insert(0, className);
+      }
+
+      nameParts.removeWhere((element) => element == null);
+      return nameParts.join('.');
+    }
+    return current.name;
+  }
+
+  /// Bulk fetches any package URIs that could not be found when processing the
+  /// [_stackFrames], then updates each stack frame that was missing the package
+  /// URI.
+  Future<void> _fetchAndUpdateMissingPackageUris() async {
+    if (_stackFramesWaitingOnPackageUri.isEmpty) return;
+
+    _log.fine(
+      'Fetching missing URIs for ${_urisWithoutPackageUri.length} packages.',
+    );
+    await serviceConnection.serviceManager.resolvedUriManager.fetchPackageUris(
+      isolateId,
+      _urisWithoutPackageUri.toList(),
+    );
+
+    _log.fine(
+      'Updating ${_stackFramesWaitingOnPackageUri.length} with package URIs.',
+    );
+    for (final stackFrame in _stackFramesWaitingOnPackageUri) {
+      final rawUrl = stackFrame.rawUrl;
+      final packageUri = serviceConnection.serviceManager.resolvedUriManager
+          .lookupPackageUri(isolateId, rawUrl);
+      if (packageUri != null) {
+        _stackFrames[stackFrame.id] = stackFrame.shallowCopy(
+          packageUri: packageUri,
+        );
+      }
+    }
+
+    _stackFramesWaitingOnPackageUri.clear();
+    _urisWithoutPackageUri.clear();
   }
 }
 
