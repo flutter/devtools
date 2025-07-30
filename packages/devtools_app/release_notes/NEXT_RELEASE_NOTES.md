@@ -29,7 +29,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+- Deleted the "Profile app start up" button in favor of the new Dart/Flutter
+  `--profile-startup` CLI flags. -
+  [#9358](https://github.com/flutter/devtools/pull/9358)
 
 ## Memory updates
 
