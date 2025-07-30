@@ -561,6 +561,11 @@ class CpuProfileData with Serializable {
     required vm_service.CpuSamples cpuSamples,
     bool buildCodeTree = false,
   }) async {
+    final treeRoot = _CpuProfileTimelineTree.fromCpuSamples(
+      cpuSamples,
+      asCodeProfileTimelineTree: buildCodeTree,
+    );
+
     final sampleEvents = _convertSamplesToEvents(
       cpuSamples: cpuSamples,
       isolateId: isolateId,
@@ -581,9 +586,8 @@ class CpuProfileData with Serializable {
       cpuSamples: cpuSamples,
       profileMetaData: profileMetaData,
       buildCodeTree: buildCodeTree,
-    ).generate();
+    ).generate(treeRoot: treeRoot);
 
-    // missing trace events
     return CpuProfileData._(
       stackFrames: stackFrames,
       cpuSamples: sampleEvents,
@@ -789,16 +793,22 @@ class CpuProfileData with Serializable {
   CpuStackFrame? selectedStackFrame;
 
   @override
-  Map<String, Object?> toJson() => {
-    'type': '_CpuProfileTimeline',
-    _samplePeriodKey: profileMetaData.samplePeriod,
-    _sampleCountKey: profileMetaData.sampleCount,
-    _stackDepthKey: profileMetaData.stackDepth,
-    _timeOriginKey: ?profileMetaData.time?.start,
-    _timeExtentKey: ?profileMetaData.time?.duration.inMicroseconds,
-    _stackFramesKey: stackFramesJson,
-    _traceEventsKey: cpuSamples.map((sample) => sample.toJson).toList(),
-  };
+  Map<String, Object?> toJson() {
+    print('====================');
+    print('====================');
+    print('====================');
+    print('CPU SAMPLES LENGTH: ${cpuSamples.length}}');
+    return {
+      'type': '_CpuProfileTimeline',
+      _samplePeriodKey: profileMetaData.samplePeriod,
+      _sampleCountKey: profileMetaData.sampleCount,
+      _stackDepthKey: profileMetaData.stackDepth,
+      _timeOriginKey: ?profileMetaData.time?.start,
+      _timeExtentKey: ?profileMetaData.time?.duration.inMicroseconds,
+      _stackFramesKey: stackFramesJson,
+      _traceEventsKey: cpuSamples.map((sample) => sample.toJson).toList(),
+    };
+  }
 
   bool get isEmpty => profileMetaData.sampleCount == 0;
 
@@ -1371,15 +1381,9 @@ class _CpuStackFrameGenerator {
   ///
   /// Refer to [_CpuProfileTimelineTree.id] for how the ID keys are
   /// generated.
-  Future<Map<String, CpuStackFrame>> generate() async {
+  Future<Map<String, CpuStackFrame>> generate({required _CpuProfileTimelineTree treeRoot }) async {
     // If the stack frames have already been generated, simply return them.
     if (_stackFrames.isNotEmpty) return _stackFrames;
-
-    // Create the timeline tree from the CPU samples.
-    final treeRoot = _CpuProfileTimelineTree.fromCpuSamples(
-      cpuSamples,
-      asCodeProfileTimelineTree: buildCodeTree,
-    );
 
     // Recursively generate the stack frames map.
     _processNode(currentNode: treeRoot, parentNode: null);
