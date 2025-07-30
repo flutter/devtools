@@ -191,8 +191,12 @@ class CpuProfileData with Serializable {
     // reported sample period.
     //
     // See https://github.com/flutter/devtools/pull/8941 for more information.
+    final sampleTimestamps = samples
+        .map((s) => s.timestampMicros)
+        .nonNulls
+        .toList();
     final samplePeriod =
-        observedSamplePeriod(samples) ?? json.samplePeriod ?? 0;
+        observedSamplePeriod(sampleTimestamps) ?? json.samplePeriod ?? 0;
 
     final timeOriginMicros = json.timeOriginMicros;
     final timeExtentMicros = json.timeExtentMicros;
@@ -561,32 +565,30 @@ class CpuProfileData with Serializable {
     required vm_service.CpuSamples cpuSamples,
     bool buildCodeTree = false,
   }) async {
-    final treeRoot = _CpuProfileTimelineTree.fromCpuSamples(
-      cpuSamples,
-      asCodeProfileTimelineTree: buildCodeTree,
-    );
-
-    final sampleEvents = _convertSamplesToEvents(
-      cpuSamples: cpuSamples,
-      isolateId: isolateId,
-    );
-
-    final samplePeriod = _calculateSamplePeriod(
-      sampleEvents: sampleEvents,
-      cpuSamples: cpuSamples,
-    );
+    final samplePeriod = _calculateSamplePeriod(cpuSamples: cpuSamples);
 
     final profileMetaData = _createProfileMetadata(
       cpuSamples: cpuSamples,
       samplePeriod: samplePeriod,
     );
 
-    final stackFrames = await _CpuStackFrameGenerator(
-      isolateId: isolateId,
+    final stackFrames =
+        await _CpuStackFrameGenerator(
+          isolateId: isolateId,
+          cpuSamples: cpuSamples,
+          profileMetaData: profileMetaData,
+          buildCodeTree: buildCodeTree,
+        ).generate(
+          treeRoot: _CpuProfileTimelineTree.fromCpuSamples(
+            cpuSamples,
+            asCodeProfileTimelineTree: buildCodeTree,
+          ),
+        );
+
+    final sampleEvents = _convertSamplesToEvents(
       cpuSamples: cpuSamples,
-      profileMetaData: profileMetaData,
-      buildCodeTree: buildCodeTree,
-    ).generate(treeRoot: treeRoot);
+      isolateId: isolateId,
+    );
 
     return CpuProfileData._(
       stackFrames: stackFrames,
@@ -597,20 +599,21 @@ class CpuProfileData with Serializable {
   }
 
   static int? _calculateSamplePeriod({
-    required List<CpuSampleEvent> sampleEvents,
     required vm_service.CpuSamples cpuSamples,
   }) {
+    final samples = cpuSamples.samples;
+    if (samples == null) return cpuSamples.samplePeriod;
+
     // Sort the samples so we can compute the observed time difference between
     // each sample.
-    sampleEvents.sort(
-      (a, b) => a.timestampMicros!.compareTo(b.timestampMicros!),
-    );
+    samples.sort((a, b) => a.timestamp!.compareTo(b.timestamp!));
 
     // Prefer the approximate observed median time between samples over the
     // reported sample period.
     //
     // See https://github.com/flutter/devtools/pull/8941 for more information.
-    return observedSamplePeriod(sampleEvents) ?? cpuSamples.samplePeriod;
+    final sampleTimestamps = samples.map((s) => s.timestamp).nonNulls.toList();
+    return observedSamplePeriod(sampleTimestamps) ?? cpuSamples.samplePeriod;
   }
 
   static CpuProfileMetaData _createProfileMetadata({
@@ -794,10 +797,6 @@ class CpuProfileData with Serializable {
 
   @override
   Map<String, Object?> toJson() {
-    print('====================');
-    print('====================');
-    print('====================');
-    print('CPU SAMPLES LENGTH: ${cpuSamples.length}}');
     return {
       'type': '_CpuProfileTimeline',
       _samplePeriodKey: profileMetaData.samplePeriod,
@@ -889,9 +888,6 @@ class CpuSampleEvent extends ChromeTraceEvent {
   Map<String, Object?> get toJson {
     // [leafId] is the source of truth for the leaf id of this sample.
     super.json[CpuProfileData.stackFrameIdKey] = leafId;
-    print('LEAF ID: $leafId');
-    print('.  super.json: ${super.json}');
-
     return super.json;
   }
 }
@@ -1381,7 +1377,9 @@ class _CpuStackFrameGenerator {
   ///
   /// Refer to [_CpuProfileTimelineTree.id] for how the ID keys are
   /// generated.
-  Future<Map<String, CpuStackFrame>> generate({required _CpuProfileTimelineTree treeRoot }) async {
+  Future<Map<String, CpuStackFrame>> generate({
+    required _CpuProfileTimelineTree treeRoot,
+  }) async {
     // If the stack frames have already been generated, simply return them.
     if (_stackFrames.isNotEmpty) return _stackFrames;
 
@@ -1592,30 +1590,28 @@ extension on vm_service.CpuSamples {
   }
 }
 
-/// Efficiently approximates the observed sample period of [samples], by
-/// calculating the approximate median time difference between each sample.
+/// Efficiently approximates the observed sample period of [timestamps], by
+/// calculating the approximate median time difference between each timestamp.
 ///
-/// The [samples] must be sorted by timestampMicros before calling this
-/// function.
+/// The [timestamps] must be sorted before calling this function.
 ///
-/// If there are fewer than 100 samples, returns `null`, because there isn't
+/// If there are fewer than 100 timestamps, returns `null`, because there isn't
 /// enough data to be confident about the observed sample period.
 ///
 /// This does not return the exact median, but instead the median of medians
 /// of groups of 5 elements, which makes the algorithm much more efficient.
 @visibleForTesting
-int? observedSamplePeriod(List<CpuSampleEvent> samples) {
-  if (samples.length < 100) return null;
+int? observedSamplePeriod(List<int> timestamps) {
+  if (timestamps.length < 100) return null;
 
   // To compute the median efficiently, we compute the median of groups of 5
   // elements, and then grab the median of those medians by sorting, which
   // brings us a linear time complexity while retaining high accuracy.
   final mediansOfGroupsOf5 = <int>[];
-  for (var i = 1; i + 5 < samples.length; i += 5) {
+  for (var i = 1; i + 5 < timestamps.length; i += 5) {
     // The time diff between the sample at index and the previous sample.
     int diff(int index) {
-      final result =
-          samples[index].timestampMicros! - samples[index - 1].timestampMicros!;
+      final result = timestamps[index] - timestamps[index - 1];
       assert(result >= 0);
       return result;
     }
