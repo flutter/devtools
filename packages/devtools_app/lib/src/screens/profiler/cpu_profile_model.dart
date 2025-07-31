@@ -571,7 +571,7 @@ class CpuProfileData with Serializable {
     // dependant upon.
     //
     // TODO(https://github.com/flutter/devtools/issues/9353): Refactor the
-    // implementation avoid the side effects described above.
+    // implementation to avoid the side effects described above.
     final profileMetaData = _createProfileMetadata(cpuSamples: cpuSamples);
 
     final stackFrames =
@@ -1286,8 +1286,8 @@ class _CpuProfileTimelineTree {
   ) => _timelineTreeExpando[sample];
 
   String id(String isolateId) {
-    // Assertion to guard that the _CpuStackFrameGenerator.generate has been
-    // called before getting the frame ID.
+    // Assertion to guard that _CpuStackFrameGenerator.generate has been called
+    // before getting the frame ID.
     assert(
       frameId != kNoFrameId,
       'Frame ID does not exist, have the stack frames been generated?',
