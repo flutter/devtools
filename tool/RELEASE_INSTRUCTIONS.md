@@ -74,13 +74,8 @@ Make sure:
    git checkout main; git rebase-update
    ```
 
-2. Your Flutter SDK in `devtools/tool/flutter-sdk` and the one on PATH are updated to the latest candidate release branch.
 
-   **The following is required until https://github.com/flutter/devtools/issues/7939 is fixed:**
-   - Update the `flutter-candidate.txt` to the latest Flutter candidate in g3 (see instructions in DevTools Release Rotation email).
-   This change should get committed with the DevTools release PR so that we know which version it was released with.
-
-   Now, update your Flutter SDK in `devtools/tool/flutter-sdk` and the one on PATH to the latest Flutter candidate:
+2. Your Flutter SDK checkout is on the latest commit in specified in DevTools:
    ```shell
    dt update-flutter-sdk --update-on-path
    ```
@@ -100,6 +95,23 @@ dt release-helper
 This command will automatically:
    - create a new branch using the tip of master and check out locally
    - create a PR for release changes
+
+##### The following is required until https://github.com/flutter/devtools/issues/7939 is fixed:
+   - Update the `flutter-candidate.txt` to the [latest Flutter candidate SHA in g3](http://go/flutter-rolls) (see instructions in DevTools Release Rotation email).
+   - This change should get committed with the DevTools release PR so that we know which version it was released with.
+
+> [!NOTE]  
+> If there are failures caused by the latest Flutter SHA, this step can be skipped.
+
+```shell
+git commit -am "Update to latest Flutter candidate"
+git push upstream <release-branch>
+```
+
+Finally, update your Flutter to the commit you just spcified.
+```shell
+dt update-flutter-sdk --update-on-path
+```
 
 #### Verify the version changes for the Release PR
 
