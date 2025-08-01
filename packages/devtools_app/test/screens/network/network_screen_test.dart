@@ -34,5 +34,5 @@ void main() {
       await tester.pumpWidget(wrap(Builder(builder: screen.buildTab)));
       expect(find.text('Network'), findsOneWidget);
     });
-  });
+  }, skip: 'https://github.com/flutter/devtools/issues/9357');
 }
