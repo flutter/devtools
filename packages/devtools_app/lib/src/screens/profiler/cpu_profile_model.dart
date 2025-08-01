@@ -579,7 +579,6 @@ class CpuProfileData with Serializable {
           isolateId: isolateId,
           cpuSamples: cpuSamples,
           profileMetaData: profileMetaData,
-          buildCodeTree: buildCodeTree,
         ).generate(
           treeRoot: _CpuProfileTimelineTree.fromCpuSamples(
             cpuSamples,
@@ -1335,13 +1334,11 @@ class _CpuStackFrameGenerator {
     required this.isolateId,
     required this.cpuSamples,
     required this.profileMetaData,
-    this.buildCodeTree = false,
   });
 
   final String isolateId;
   final vm_service.CpuSamples cpuSamples;
   final CpuProfileMetaData profileMetaData;
-  final bool buildCodeTree;
 
   final _stackFrames = <String, CpuStackFrame>{};
   final _stackFramesWaitingOnPackageUri = <CpuStackFrame>[];
