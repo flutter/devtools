@@ -111,15 +111,15 @@ class _SecondaryControls extends StatelessWidget {
             icon: Icons.timer,
             label: 'Profile app start up',
             tooltip:
-                'Load all Dart CPU samples that occurred before \n'
-                'the first Flutter frame was drawn (if available)',
+                'This button is deprecated. The new procedure for profiling an'
+                "\napp's startup is to set the `--profile-startup` CLI\nflag "
+                'when starting the app, and then to use the "Load all CPU\n'
+                'samples" button that is next to this one.',
             tooltipPadding: const EdgeInsets.all(denseSpacing),
             gaScreen: gac.cpuProfiler,
             gaSelection: gac.CpuProfilerEvents.profileAppStartUp.name,
             minScreenWidthForText: _profilingControlsMinScreenWidthForText,
-            onPressed: !profilerBusy
-                ? controller.cpuProfilerController.loadAppStartUpProfile
-                : null,
+            onPressed: null,
           ),
         const SizedBox(width: denseSpacing),
         RefreshButton(

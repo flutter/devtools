@@ -30,7 +30,7 @@ void main() {
   const windowSize = Size(2000.0, 1000.0);
 
   group('ProfilerScreen', () {
-    void verifyBaseState() {
+    void verifyBaseState(WidgetTester tester) {
       expect(find.byType(StartStopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
       expect(find.text('Load all CPU samples'), findsOneWidget);
@@ -39,7 +39,37 @@ void main() {
           .serviceManager
           .connectedApp!
           .isFlutterNativeAppNow) {
-        expect(find.text('Profile app start up'), findsOneWidget);
+        final profileAppStartUpButtonTextFinder = find.text(
+          'Profile app start up',
+        );
+        expect(profileAppStartUpButtonTextFinder, findsOneWidget);
+
+        final profileAppStartUpButtonTooltipFinder = find.byTooltip(
+          'This button is deprecated. The new procedure for profiling an\n'
+          "app's startup is to set the `--profile-startup` CLI\nflag when "
+          'starting the app, and then to use the "Load all CPU\nsamples" '
+          'button that is next to this one.',
+        );
+        expect(profileAppStartUpButtonTooltipFinder, findsOneWidget);
+
+        expect(
+          find.descendant(
+            of: profileAppStartUpButtonTooltipFinder,
+            matching: profileAppStartUpButtonTextFinder,
+          ),
+          findsOneWidget,
+        );
+
+        final profileAppStartUpButtonFinder = find.ancestor(
+          of: profileAppStartUpButtonTooltipFinder,
+          matching: find.byType(GaDevToolsButton),
+        );
+        expect(
+          (tester.element(profileAppStartUpButtonFinder).widget
+                  as GaDevToolsButton)
+              .onPressed,
+          null,
+        );
       }
       expect(find.byType(CpuSamplingRateDropdown), findsOneWidget);
       expect(find.byType(OpenSaveButtonGroup), findsOneWidget);
@@ -74,7 +104,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await pumpProfilerScreen(tester);
-        verifyBaseState();
+        verifyBaseState(tester);
       },
     );
 
@@ -89,7 +119,7 @@ void main() {
           isWebApp: false,
         );
         await pumpProfilerScreen(tester);
-        verifyBaseState();
+        verifyBaseState(tester);
       },
     );
 
@@ -98,7 +128,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await pumpProfilerScreen(tester);
-        verifyBaseState();
+        verifyBaseState(tester);
 
         // Start recording.
         await tester.tap(find.byType(StartStopRecordingButton));
@@ -118,7 +148,7 @@ void main() {
         // Clear the profile.
         await tester.tap(find.byType(ClearButton));
         await tester.pump();
-        verifyBaseState();
+        verifyBaseState(tester);
       },
     );
 
@@ -147,7 +177,7 @@ void main() {
         await tester.pump(const Duration(seconds: 1));
       });
       await tester.pumpAndSettle();
-      verifyBaseState();
+      verifyBaseState(tester);
     });
   });
 }
