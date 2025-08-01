@@ -61,6 +61,7 @@ dependencies:
 
 dev_dependencies:
   args: ^2.4.2
+  benchmark_harness: ^2.3.1
   build_runner: ^2.5.4
   devtools_test:
     path: ../devtools_test
