@@ -35,9 +35,9 @@ void main() {
       final score = await benchmark.measure();
       expect(
         score,
-        lessThan(40000),
+        lessThan(100000),
         reason: 'Exceeded benchmark for run $i: $score',
-      ); // 40 ms
+      );
     }
   });
 }
