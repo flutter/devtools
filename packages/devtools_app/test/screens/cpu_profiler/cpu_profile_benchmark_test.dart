@@ -14,38 +14,39 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 void main() {
-  test('GenerateFromCpuSamplesBenchmark Test', () async {
-    final benchmark = GenerateFromCpuSamplesBenchmark();
-    final score = await benchmark.measure();
+  final cpuSamplesFile = File(
+    'test/test_infra/test_data/cpu_profiler/cpu_samples.json',
+  );
+  final cpuSamplesJson = jsonDecode(cpuSamplesFile.readAsStringSync());
+  final cpuSamples = vm_service.CpuSamples.parse(cpuSamplesJson)!;
 
-    expect(score, lessThan(40000)); // 40 ms
-  });
-}
-
-class GenerateFromCpuSamplesBenchmark extends AsyncBenchmarkBase {
-  GenerateFromCpuSamplesBenchmark()
-    : super('CpuProfileData.generateFromCpuSamples');
-
-  late final vm_service.CpuSamples cpuSamples;
-
-  static Future<void> main() async {
-    await GenerateFromCpuSamplesBenchmark().report();
-  }
-
-  @override
-  Future<void> setup() async {
+  setUpAll(() {
     setGlobal(
       ServiceConnectionManager,
       FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(),
       ),
     );
-    final cpuSamplesFile = File(
-      'test/test_infra/test_data/cpu_profiler/cpu_samples.json',
-    );
-    final cpuSamplesJson = jsonDecode(cpuSamplesFile.readAsStringSync());
-    cpuSamples = vm_service.CpuSamples.parse(cpuSamplesJson)!;
-  }
+  });
+
+  test('GenerateFromCpuSamplesBenchmark Test', () async {
+    final benchmark = GenerateFromCpuSamplesBenchmark(cpuSamples: cpuSamples);
+    for (var i = 1; i <= 5; i++) {
+      final score = await benchmark.measure();
+      expect(
+        score,
+        lessThan(40000),
+        reason: 'Exceeded benchmark for run $i: $score',
+      ); // 40 ms
+    }
+  });
+}
+
+class GenerateFromCpuSamplesBenchmark extends AsyncBenchmarkBase {
+  GenerateFromCpuSamplesBenchmark({required this.cpuSamples})
+    : super('CpuProfileData.generateFromCpuSamples');
+
+  final vm_service.CpuSamples cpuSamples;
 
   @override
   Future<void> run() async {
