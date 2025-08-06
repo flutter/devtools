@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/framework/screen.dart';
-import '../../../../shared/globals.dart';
 import '../../../../shared/ui/common_widgets.dart';
 import '../../../../shared/ui/file_import.dart';
 import '../../../../shared/ui/vm_flag_widgets.dart';
@@ -103,25 +102,6 @@ class _SecondaryControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        if (serviceConnection
-            .serviceManager
-            .connectedApp!
-            .isFlutterNativeAppNow)
-          GaDevToolsButton(
-            icon: Icons.timer,
-            label: 'Profile app start up',
-            tooltip:
-                'Load all Dart CPU samples that occurred before \n'
-                'the first Flutter frame was drawn (if available)',
-            tooltipPadding: const EdgeInsets.all(denseSpacing),
-            gaScreen: gac.cpuProfiler,
-            gaSelection: gac.CpuProfilerEvents.profileAppStartUp.name,
-            minScreenWidthForText: _profilingControlsMinScreenWidthForText,
-            onPressed: !profilerBusy
-                ? controller.cpuProfilerController.loadAppStartUpProfile
-                : null,
-          ),
-        const SizedBox(width: denseSpacing),
         RefreshButton(
           label: 'Load all CPU samples',
           tooltip:
