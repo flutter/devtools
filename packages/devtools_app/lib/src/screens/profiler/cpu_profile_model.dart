@@ -1455,8 +1455,7 @@ class _CpuStackFrameGenerator {
           nameParts.insert(0, className);
       }
 
-      nameParts.removeWhere((element) => element == null);
-      return nameParts.join('.');
+      return nameParts.nonNulls.join('.');
     }
     return current.name;
   }
