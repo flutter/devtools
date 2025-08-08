@@ -124,7 +124,7 @@ class IntegrationTestRunner with IOMixin {
         testTimedOut = true;
         // TODO(srawlins): Refactor the retry situation to catch a
         // TimeoutException, and not recursively call `runTest`.
-        return -1;g
+        return -1;
       });
 
       debugLog(
