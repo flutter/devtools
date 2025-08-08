@@ -56,6 +56,7 @@ class IntegrationTestRunner with IOMixin {
           // Flags to avoid breakage with chromedriver 128. See
           // https://github.com/flutter/devtools/issues/8301.
           '--web-browser-flag=--headless=new',
+          '--web-browser-flag=--no-sandbox',
           '--web-browser-flag=--disable-search-engine-choice-screen',
         ],
         for (final arg in dartDefineArgs) '--dart-define=$arg',
