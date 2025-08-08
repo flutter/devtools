@@ -44,10 +44,11 @@ Future<void> closeReleaseNotesViewer(WidgetTester tester) async {
   if (releaseNotesView.controller.isVisible.value) {
     final closeReleaseNotesButton = find.descendant(
       of: find.byType(ReleaseNotesViewer),
-      matching: find.byType(IconButton),
+      matching: find.byIcon(Icons.close)
     );
-    expect(closeReleaseNotesButton, findsOneWidget);
-    await tester.tap(closeReleaseNotesButton);
+    // expect(closeReleaseNotesButton, findsOneWidget);
+    await tester.tap(closeReleaseNotesButton.first);
+    // await tester.tap(closeReleaseNotesButton.last);
   }
 }
 

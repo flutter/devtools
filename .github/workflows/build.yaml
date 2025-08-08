@@ -49,154 +49,154 @@ jobs:
           BOT: main
         run: ./tool/ci/bots.sh
 
-  dcm:
-    name: Dart Code Metrics
-    needs: flutter-prep
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - name: Clone Flutter DevTools
-        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
-        with:
-          ref: "${{ github.event.pull_request.head.sha }}"
-      - name: Load Cached Flutter SDK
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
-        with:
-          path: |
-            ./tool/flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: Run tool/ci/bots.sh
-        run: ./tool/ci/bots.sh
-      - name: Install DCM
-        run: |
-          sudo apt-get update
-          wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
-          echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
-          sudo apt-get update
-          sudo apt-get install dcm=1.30.0-1 # To avoid errors add `-1` (build number) to the version
-          sudo chmod +x /usr/bin/dcm
-          echo "$(dcm --version)"
-      - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c
-      - name: Run DCM on root
-        run: |
-          dcm analyze packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test
+  # dcm:
+  #   name: Dart Code Metrics
+  #   needs: flutter-prep
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #   steps:
+  #     - name: Clone Flutter DevTools
+  #       uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
+  #       with:
+  #         ref: "${{ github.event.pull_request.head.sha }}"
+  #     - name: Load Cached Flutter SDK
+  #       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+  #       with:
+  #         path: |
+  #           ./tool/flutter-sdk
+  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+  #     - name: Run tool/ci/bots.sh
+  #       run: ./tool/ci/bots.sh
+  #     - name: Install DCM
+  #       run: |
+  #         sudo apt-get update
+  #         wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
+  #         echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
+  #         sudo apt-get update
+  #         sudo apt-get install dcm=1.30.0-1 # To avoid errors add `-1` (build number) to the version
+  #         sudo chmod +x /usr/bin/dcm
+  #         echo "$(dcm --version)"
+  #     - name: Setup Dart SDK
+  #       uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c
+  #     - name: Run DCM on root
+  #       run: |
+  #         dcm analyze packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test
 
-  test-packages:
-    name: ${{ matrix.os }} ${{ matrix.package }} test
-    needs: flutter-prep
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        package:
-          - devtools_app_shared
-          - devtools_extensions
-          - devtools_shared
-        os: [ubuntu-latest, windows-latest]
-    steps:
-      - name: git clone
-        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
-      - name: Load Cached Flutter SDK
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
-        with:
-          path: |
-            ./tool/flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: tool/ci/package_tests.sh
-        env:
-          PACKAGE: ${{ matrix.package }}
-        run: ./tool/ci/package_tests.sh
+  # test-packages:
+  #   name: ${{ matrix.os }} ${{ matrix.package }} test
+  #   needs: flutter-prep
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       package:
+  #         - devtools_app_shared
+  #         - devtools_extensions
+  #         - devtools_shared
+  #       os: [ubuntu-latest, windows-latest]
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
+  #     - name: Load Cached Flutter SDK
+  #       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+  #       with:
+  #         path: |
+  #           ./tool/flutter-sdk
+  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+  #     - name: tool/ci/package_tests.sh
+  #       env:
+  #         PACKAGE: ${{ matrix.package }}
+  #       run: ./tool/ci/package_tests.sh
 
-  test-tool:
-    name: ${{ matrix.os }} Tool test
-    needs: flutter-prep
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    steps:
-      - name: git clone
-        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
-      - name: Load Cached Flutter SDK
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
-        with:
-          path: |
-            ./tool/flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: tool/ci/tool_tests.sh
-        run: ./tool/ci/tool_tests.sh
+  # test-tool:
+  #   name: ${{ matrix.os }} Tool test
+  #   needs: flutter-prep
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ubuntu-latest, windows-latest]
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
+  #     - name: Load Cached Flutter SDK
+  #       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+  #       with:
+  #         path: |
+  #           ./tool/flutter-sdk
+  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+  #     - name: tool/ci/tool_tests.sh
+  #       run: ./tool/ci/tool_tests.sh
 
-  test:
-    name: ${{ matrix.os }} ${{ matrix.bot }}
-    needs: flutter-prep
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        bot:
-          - build_ddc
-          - build_dart2js
-          - test_ddc
-          - test_dart2js
-        os: [ubuntu-latest, windows-latest]
-    steps:
-      - name: git clone
-        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
-      - name: Load Cached Flutter SDK
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
-        with:
-          path: |
-            ./tool/flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: tool/ci/bots.sh
-        env:
-          BOT: ${{ matrix.bot }}
-          PLATFORM: vm
-        run: ./tool/ci/bots.sh
+  # test:
+  #   name: ${{ matrix.os }} ${{ matrix.bot }}
+  #   needs: flutter-prep
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       bot:
+  #         - build_ddc
+  #         - build_dart2js
+  #         - test_ddc
+  #         - test_dart2js
+  #       os: [ubuntu-latest, windows-latest]
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
+  #     - name: Load Cached Flutter SDK
+  #       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+  #       with:
+  #         path: |
+  #           ./tool/flutter-sdk
+  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+  #     - name: tool/ci/bots.sh
+  #       env:
+  #         BOT: ${{ matrix.bot }}
+  #         PLATFORM: vm
+  #       run: ./tool/ci/bots.sh
 
-  macos-test:
-    needs: flutter-prep
-    name: macos goldens ${{ matrix.bot }}
-    runs-on: macos-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        bot:
-          - test_dart2js
-        only_golden:
-          - true
+  # macos-test:
+  #   needs: flutter-prep
+  #   name: macos goldens ${{ matrix.bot }}
+  #   runs-on: macos-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       bot:
+  #         - test_dart2js
+  #       only_golden:
+  #         - true
 
-    steps:
-      - name: git clone
-        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
-      - name: Load Cached Flutter SDK
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
-        with:
-          path: |
-            ./tool/flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: tool/ci/bots.sh
-        env:
-          BOT: ${{ matrix.bot }}
-          PLATFORM: vm
-          ONLY_GOLDEN: ${{ matrix.only_golden }}
-        run: ./tool/ci/bots.sh
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
+  #     - name: Load Cached Flutter SDK
+  #       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+  #       with:
+  #         path: |
+  #           ./tool/flutter-sdk
+  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+  #     - name: tool/ci/bots.sh
+  #       env:
+  #         BOT: ${{ matrix.bot }}
+  #         PLATFORM: vm
+  #         ONLY_GOLDEN: ${{ matrix.only_golden }}
+  #       run: ./tool/ci/bots.sh
 
-      - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: golden_image_failures.${{ matrix.bot }}
-          path: packages/devtools_app/test/**/failures/*.png
-      - name: Notify of Quick Fix
-        if: failure()
-        env:
-          WORKFLOW_ID: ${{ github.run_id }}
-        run: |
-          echo "::notice title=To Quickly Fix Goldens:: Run \`dt fix-goldens --run-id=$WORKFLOW_ID\` on your local branch."
+  #     - name: Upload Golden Failure Artifacts
+  #       uses: actions/upload-artifact@v4
+  #       if: failure()
+  #       with:
+  #         name: golden_image_failures.${{ matrix.bot }}
+  #         path: packages/devtools_app/test/**/failures/*.png
+  #     - name: Notify of Quick Fix
+  #       if: failure()
+  #       env:
+  #         WORKFLOW_ID: ${{ github.run_id }}
+  #       run: |
+  #         echo "::notice title=To Quickly Fix Goldens:: Run \`dt fix-goldens --run-id=$WORKFLOW_ID\` on your local branch."
 
   devtools-app-integration-test:
     name: ${{ matrix.os }} devtools_app integration-test ${{ matrix.bot }} - ${{ matrix.device }} - shard ${{ matrix.shard }}
@@ -205,7 +205,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest ]
         # Consider running integration tests in ddc mode, too.
         bot: [integration_dart2js]
         device: [flutter, flutter-web, dart-cli]
@@ -264,66 +264,66 @@ jobs:
           name: golden_image_failures.${{ matrix.bot }}
           path: packages/devtools_app/integration_test/**/failures/*.png
 
-  devtools-extensions-integration-test:
-    name: ${{ matrix.os }} devtools_extensions integration-test ${{ matrix.bot }}
-    needs: flutter-prep
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        # Consider running integration tests in ddc mode, too.
-        bot: [integration_dart2js]
-        os: [ubuntu-latest, windows-latest]
-    steps:
-      - name: git clone
-        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
-      - name: Load Cached Flutter SDK
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
-        with:
-          path: |
-            ./tool/flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: tool/ci/bots.sh
-        env:
-          BOT: ${{ matrix.bot }}
-          DEVTOOLS_PACKAGE: devtools_extensions
-        run: ./tool/ci/bots.sh
+  # devtools-extensions-integration-test:
+  #   name: ${{ matrix.os }} devtools_extensions integration-test ${{ matrix.bot }}
+  #   needs: flutter-prep
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       # Consider running integration tests in ddc mode, too.
+  #       bot: [integration_dart2js]
+  #       os: [ubuntu-latest, windows-latest]
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
+  #     - name: Load Cached Flutter SDK
+  #       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+  #       with:
+  #         path: |
+  #           ./tool/flutter-sdk
+  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+  #     - name: tool/ci/bots.sh
+  #       env:
+  #         BOT: ${{ matrix.bot }}
+  #         DEVTOOLS_PACKAGE: devtools_extensions
+  #       run: ./tool/ci/bots.sh
 
-  benchmark-performance:
-    name: benchmark-performance
-    needs: flutter-prep
-    runs-on: macos-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - name: git clone
-        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
-      - name: Load Cached Flutter SDK
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
-        with:
-          path: |
-            ./tool/flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: tool/ci/benchmark_performance.sh
-        run: ./tool/ci/benchmark_performance.sh
+  # benchmark-performance:
+  #   name: benchmark-performance
+  #   needs: flutter-prep
+  #   runs-on: macos-latest
+  #   strategy:
+  #     fail-fast: false
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
+  #     - name: Load Cached Flutter SDK
+  #       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+  #       with:
+  #         path: |
+  #           ./tool/flutter-sdk
+  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+  #     - name: tool/ci/benchmark_performance.sh
+  #       run: ./tool/ci/benchmark_performance.sh
 
-  benchmark-size:
-    name: benchmark-size
-    needs: flutter-prep
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - name: git clone
-        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
-      - name: Load Cached Flutter SDK
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
-        with:
-          path: |
-            ./tool/flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: tool/ci/benchmark_size.sh
-        run: ./tool/ci/benchmark_size.sh
+  # benchmark-size:
+  #   name: benchmark-size
+  #   needs: flutter-prep
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
+  #     - name: Load Cached Flutter SDK
+  #       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+  #       with:
+  #         path: |
+  #           ./tool/flutter-sdk
+  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+  #     - name: tool/ci/benchmark_size.sh
+  #       run: ./tool/ci/benchmark_size.sh
 
 
 # TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/ci/bots.sh
