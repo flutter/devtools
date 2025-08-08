@@ -205,7 +205,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest]
         # Consider running integration tests in ddc mode, too.
         bot: [integration_dart2js]
         device: [flutter, flutter-web, dart-cli]

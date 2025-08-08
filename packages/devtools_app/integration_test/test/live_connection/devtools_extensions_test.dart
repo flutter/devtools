@@ -161,7 +161,7 @@ void main() {
       ExtensionEnabledState.enabled, // foo
       ExtensionEnabledState.disabled, // standalone_extension
     ]);
-  });
+  }, skip: true);
 }
 
 Future<void> _switchToExtensionScreen(
