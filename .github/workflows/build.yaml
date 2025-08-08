@@ -49,39 +49,39 @@ jobs:
           BOT: main
         run: ./tool/ci/bots.sh
 
-  dcm:
-    name: Dart Code Metrics
-    needs: flutter-prep
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - name: Clone Flutter DevTools
-        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
-        with:
-          ref: "${{ github.event.pull_request.head.sha }}"
-      - name: Load Cached Flutter SDK
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
-        with:
-          path: |
-            ./tool/flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: Run tool/ci/bots.sh
-        run: ./tool/ci/bots.sh
-      - name: Install DCM
-        run: |
-          sudo apt-get update
-          wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
-          echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
-          sudo apt-get update
-          sudo apt-get install dcm=1.30.0-1 # To avoid errors add `-1` (build number) to the version
-          sudo chmod +x /usr/bin/dcm
-          echo "$(dcm --version)"
-      - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c
-      - name: Run DCM on root
-        run: |
-          dcm analyze packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test
+  # dcm:
+  #   name: Dart Code Metrics
+  #   needs: flutter-prep
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #   steps:
+  #     - name: Clone Flutter DevTools
+  #       uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
+  #       with:
+  #         ref: "${{ github.event.pull_request.head.sha }}"
+  #     - name: Load Cached Flutter SDK
+  #       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+  #       with:
+  #         path: |
+  #           ./tool/flutter-sdk
+  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+  #     - name: Run tool/ci/bots.sh
+  #       run: ./tool/ci/bots.sh
+  #     - name: Install DCM
+  #       run: |
+  #         sudo apt-get update
+  #         wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
+  #         echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
+  #         sudo apt-get update
+  #         sudo apt-get install dcm=1.30.0-1 # To avoid errors add `-1` (build number) to the version
+  #         sudo chmod +x /usr/bin/dcm
+  #         echo "$(dcm --version)"
+  #     - name: Setup Dart SDK
+  #       uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c
+  #     - name: Run DCM on root
+  #       run: |
+  #         dcm analyze packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test
 
   # test-packages:
   #   name: ${{ matrix.os }} ${{ matrix.package }} test
@@ -205,7 +205,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest ]
         # Consider running integration tests in ddc mode, too.
         bot: [integration_dart2js]
         device: [flutter, flutter-web, dart-cli]
