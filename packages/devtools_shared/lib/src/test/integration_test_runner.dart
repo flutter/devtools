@@ -38,9 +38,9 @@ class IntegrationTestRunner with IOMixin {
       debugLog('starting attempt #$attemptNumber for $testTarget');
       debugLog('starting the flutter drive process');
 
-      final chromeUserDataDir =
-          Directory.systemTemp.createTempSync('chrome_user_data_');
-      debugLog('created Chrome user data dir: ${chromeUserDataDir.path}');
+      // final chromeUserDataDir =
+      //     Directory.systemTemp.createTempSync('chrome_user_data_');
+      // debugLog('created Chrome user data dir: ${chromeUserDataDir.path}');
       final flutterDriveArgs = [
         'drive',
         // Debug outputs from the test will not show up in profile mode. Since
@@ -62,7 +62,7 @@ class IntegrationTestRunner with IOMixin {
           '--web-browser-flag=--no-sandbox',
           '--web-browser-flag=--disable-search-engine-choice-screen',
         ],
-        '--web-browser-flag=--user-data-dir=${chromeUserDataDir.path}',
+        // '--web-browser-flag=--user-data-dir=${chromeUserDataDir.path}',
         for (final arg in dartDefineArgs) '--dart-define=$arg',
       ];
 
@@ -124,7 +124,7 @@ class IntegrationTestRunner with IOMixin {
         testTimedOut = true;
         // TODO(srawlins): Refactor the retry situation to catch a
         // TimeoutException, and not recursively call `runTest`.
-        return -1;
+        return -1;g
       });
 
       debugLog(
@@ -135,10 +135,10 @@ class IntegrationTestRunner with IOMixin {
       process.kill();
       debugLog('flutter drive process has exited');
 
-      if (chromeUserDataDir.existsSync()) {
-        debugLog('deleting Chrome user data dir: ${chromeUserDataDir.path}');
-        await chromeUserDataDir.delete(recursive: true);
-      }
+      // if (chromeUserDataDir.existsSync()) {
+      //   debugLog('deleting Chrome user data dir: ${chromeUserDataDir.path}');
+      //   await chromeUserDataDir.delete(recursive: true);
+      // }
 
       // Ignore exception handling and retries if the tests passed. This is to
       // avoid bugs with the test runner where the test can fail after the test
