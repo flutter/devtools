@@ -205,7 +205,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        # TODO(https://github.com/flutter/devtools/issues/9357): Re-enable tests on windows-latest.
+        os: [macos-latest]
         # Consider running integration tests in ddc mode, too.
         bot: [integration_dart2js]
         device: [flutter, flutter-web, dart-cli]
