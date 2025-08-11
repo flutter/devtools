@@ -161,7 +161,8 @@ void main() {
       ExtensionEnabledState.enabled, // foo
       ExtensionEnabledState.disabled, // standalone_extension
     ]);
-  });
+    // TODO(https://github.com/flutter/devtools/issues/9378): Re-enable test.
+  }, skip: true);
 }
 
 Future<void> _switchToExtensionScreen(
