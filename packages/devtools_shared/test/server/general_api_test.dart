@@ -165,9 +165,9 @@ void main() {
 
         setUp(() async {
           app = TestDartApp();
-          vmServiceUriString = await app!.start();
+            vmServiceUriString = await app!.start();
           // Await a short delay to give the VM a chance to initialize.
-          await delay(duration: const Duration(seconds: 1));
+          await delay(duration: const Duration(seconds: 5));
           expect(vmServiceUriString, isNotEmpty);
         });
 

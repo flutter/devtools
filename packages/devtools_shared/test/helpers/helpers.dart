@@ -78,6 +78,8 @@ class TestDartApp {
 
   Future<String> start() async {
     await _initTestApp();
+    print('================= running executable:');
+    print('${Platform.resolvedExecutable} in ${directory.path}');
     process = await Process.start(
       Platform.resolvedExecutable,
       ['--observe=0', 'run', 'bin/main.dart'],
@@ -90,6 +92,7 @@ class TestDartApp {
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((line) async {
+      print('======= STDOUT LINE!!! $line');
       if (line.contains(dartVMServiceRegExp)) {
         await sub.cancel();
         serviceUriCompleter.complete(
