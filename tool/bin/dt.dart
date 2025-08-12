@@ -16,13 +16,17 @@ void main(List<String> args) async {
         .whenComplete(sharedStdIn.terminate);
 
     exit(result is int ? result : 0);
-  } catch (e) {
+  } catch (e, st) {
     if (e is UsageException) {
       stderr.writeln('$e');
+      stderr.writeln(st);
+
       // Return an exit code representing a usage error.
       exit(64);
     } else {
       stderr.writeln('$e');
+      stderr.writeln(st);
+
       // Return a general failure exit code.
       exit(1);
     }
