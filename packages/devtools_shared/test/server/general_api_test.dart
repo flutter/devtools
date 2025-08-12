@@ -167,7 +167,7 @@ void main() {
           app = TestDartApp();
             vmServiceUriString = await app!.start();
           // Await a short delay to give the VM a chance to initialize.
-          await delay(duration: const Duration(seconds: 5));
+          await delay(duration: const Duration(milliseconds: 2500));
           expect(vmServiceUriString, isNotEmpty);
         });
 
