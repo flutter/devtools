@@ -56,7 +56,7 @@ echo "which flutter: " `which flutter`
 echo "which dart: " `which dart`
 
 # Identify where dart SDK resides
-DART_BINARY_PATH=$(dart tool/ci/print_dart_path.dart)
+DART_BINARY_PATH=$(dart tool/ci/print_dart_path.dart | tail -n 1)
 DART_SDK_PATH=$(dirname $DART_BINARY_PATH)
 
 # Resign dart and dartvm binaries to give them get-task-allow entitlement.
