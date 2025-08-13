@@ -36,7 +36,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
-        uses: actions/checkout@9f265659d3bb64ab1440b03b12f4d47a24320917
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
       - name: Load Cached Flutter SDK
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
         with:
@@ -242,7 +242,7 @@ jobs:
             shard: 3/3
     steps:
       - name: git clone
-        uses: actions/checkout@9f265659d3bb64ab1440b03b12f4d47a24320917
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
       - name: Load Cached Flutter SDK
         uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
         with:
@@ -338,7 +338,7 @@ jobs:
 #          - test_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@9f265659d3bb64ab1440b03b12f4d47a24320917
+#        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 #
 #      - name: tool/ci/bots.sh
 #        env:
@@ -358,7 +358,7 @@ jobs:
 #          - integration_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@9f265659d3bb64ab1440b03b12f4d47a24320917
+#        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 #      - name: tool/ci/bots.sh
 #        env:
 #          BOT: ${{ matrix.bot }}
