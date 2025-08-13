@@ -90,7 +90,8 @@ if [ -d /cores ]; then
     # Check if new core files appeared
     ls -al /cores/*
     # Dump information from the core (we assume there is just one).
-    lldb $DART_SDK_PATH/dartvm -c /cores/core.* -s tool/ci/dump_threads.lldb --batch
+    echo "DART_SDK_PATH/dartvm: '$DART_SDK_PATH/dartvm'"
+    lldb "$DART_SDK_PATH/dartvm" -c /cores/core.* -s tool/ci/dump_threads.lldb --batch
 else
     echo "No core dump directory found."
 fi
@@ -102,7 +103,8 @@ if [ -d /cores ]; then
     # Check if new core files appeared
     ls -al /cores/*
     # Dump information from the core (we assume there is just one).
-    lldb $DART_SDK_PATH/dartvm -c /cores/core.* -s tool/ci/dump_threads.lldb --batch
+    echo "DART_SDK_PATH/dartvm: '$DART_SDK_PATH/dartvm'"
+    lldb "$DART_SDK_PATH/dartvm" -c /cores/core.* -s tool/ci/dump_threads.lldb --batch
 else
     echo "No core dump directory found."
 fi
