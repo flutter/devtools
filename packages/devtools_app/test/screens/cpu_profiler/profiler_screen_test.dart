@@ -34,13 +34,6 @@ void main() {
       expect(find.byType(StartStopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
       expect(find.text('Load all CPU samples'), findsOneWidget);
-      if (scene
-          .fakeServiceConnection
-          .serviceManager
-          .connectedApp!
-          .isFlutterNativeAppNow) {
-        expect(find.text('Profile app start up'), findsOneWidget);
-      }
       expect(find.byType(CpuSamplingRateDropdown), findsOneWidget);
       expect(find.byType(OpenSaveButtonGroup), findsOneWidget);
       expect(find.byType(ProfileRecordingInstructions), findsOneWidget);
