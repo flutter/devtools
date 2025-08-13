@@ -6,7 +6,7 @@
 
 set -x
 
-# Enable core dumps
+# Enable core dumps!
 ulimit -c unlimited
 
 # Remove all existing core dumps
