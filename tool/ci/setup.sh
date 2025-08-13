@@ -12,6 +12,9 @@ ulimit -c unlimited
 # Remove all existing core dumps
 sudo rm -rf /cores/*
 
+# Create the /cores directory if it doesn't exist
+sudo mkdir -p /cores
+
 # Make directory which contains core dumps writable.
 sudo chmod -R +rwx /cores
 
@@ -83,17 +86,23 @@ export PATH="$PATH":"$DEVTOOLS_DIR/tool/bin"
 # Fetch dependencies
 dt pub-get --only-main
 
-# Check if new core files appeared
-ls -al /cores/*
-
-# Dump information from the core (we assume there is just one).
-lldb -s tool/ci/dump_threads.lldb --batch $sdkBinPath/dartvm -c /cores/core.*
+if [ -d /cores ]; then
+    # Check if new core files appeared
+    ls -al /cores/*
+    # Dump information from the core (we assume there is just one).
+    lldb -s tool/ci/dump_threads.lldb --batch $sdkBinPath/dartvm -c /cores/core.*
+else
+    echo "No core dump directory found."
+fi
 
 # Generate code.
 dt generate-code
 
-# Check if new core files appeared
-ls -al /cores/*
-
-# Dump information from the core (we assume there is just one).
-lldb -s tool/ci/dump_threads.lldb --batch $sdkBinPath/dartvm -c /cores/core.*
+if [ -d /cores ]; then
+    # Check if new core files appeared
+    ls -al /cores/*
+    # Dump information from the core (we assume there is just one).
+    lldb -s tool/ci/dump_threads.lldb --batch $sdkBinPath/dartvm -c /cores/core.*
+else
+    echo "No core dump directory found."
+fi
