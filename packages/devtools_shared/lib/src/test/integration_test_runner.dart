@@ -53,10 +53,10 @@ class IntegrationTestRunner with IOMixin {
         // GitHub Actions. See https://github.com/flutter/devtools/issues/8301.
         '--web-browser-flag=--disable-gpu',
         if (headless) ...[
-          // Flags to avoid breakage with chromedriver 128. See
-          // https://github.com/flutter/devtools/issues/8301.
-          '--web-browser-flag=--headless=old',
-          '--web-browser-flag=--disable-search-engine-choice-screen',
+          // Flags to avoid breakage with chromedriver 138. See
+          // https://github.com/flutter/devtools/issues/9357.
+          '--web-browser-flag=--headless=new',
+          '--web-browser-flag=--no-sandbox',
         ],
         for (final arg in dartDefineArgs) '--dart-define=$arg',
       ];

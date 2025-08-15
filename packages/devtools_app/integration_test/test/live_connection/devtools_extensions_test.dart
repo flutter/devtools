@@ -3,8 +3,11 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // Do not delete these arguments. They are parsed by test runner.
-// test-argument:startDevToolsServer=true
-// test-argument:appPath="../devtools_extensions/example/app_that_uses_foo"
+//
+// TODO(https://github.com/flutter/devtools/issues/9378): Re-enable arguments by
+// changing "skip-" to "test-" below.
+// skip-argument:startDevToolsServer=true
+// skip-argument:appPath="../devtools_extensions/example/app_that_uses_foo"
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/embedded/view.dart';
@@ -161,7 +164,8 @@ void main() {
       ExtensionEnabledState.enabled, // foo
       ExtensionEnabledState.disabled, // standalone_extension
     ]);
-  });
+    // TODO(https://github.com/flutter/devtools/issues/9378): Re-enable test.
+  }, skip: true);
 }
 
 Future<void> _switchToExtensionScreen(
