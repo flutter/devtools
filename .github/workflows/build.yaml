@@ -304,9 +304,11 @@ jobs:
           path: |
             ./tool/flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
-      - name: tool/ci/benchmark_performance.sh
-        run: ./tool/ci/benchmark_performance.sh
-
+      - name: Run performance benchmark and notify on results
+        run: |
+          RESULTS=$(./tool/ci/benchmark_performance.sh)
+          echo "Benchmark results:"
+          echo "$RESULTS"
   benchmark-size:
     name: benchmark-size
     needs: flutter-prep
@@ -371,4 +373,3 @@ jobs:
 # PLATFORM=chrome is going away. We need to move these tests to run with
 # chromedriver.
 #   - BOT=test_dart2js        PLATFORM=chrome
-
