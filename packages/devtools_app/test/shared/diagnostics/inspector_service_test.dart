@@ -386,7 +386,12 @@ void main() {
 
           await group.dispose();
         });
-      });
+      },
+      // TODO(https://github.com/flutter/devtools/issues/9395): Tests should be
+      // re-enabled once they are no longer dependant on widget ordering in the
+      // framework.
+      skip: true,
+      );
 
       test('enables hover eval mode by default', () async {
         await env.setupEnvironment();
