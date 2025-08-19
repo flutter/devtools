@@ -1,10 +1,16 @@
 [root]
- └─MyApp
-   └─MaterialApp
-     └─Scaffold
-       ├─Center
-       │ └─Text
-       ├─AppBar
-       │ └─Text
-       └─FloatingActionButton
-         └─Icon
+ └─CustomApp
+   └─Directionality
+     └─DefaultTextStyle
+       └─HomeScreen
+         └─CustomContainer
+           └─Padding
+             └─Container
+               └─CustomCenter
+                 └─CustomButton
+                   └─GestureDetector
+                     └─CustomContainer
+                       └─Padding
+                         └─Container
+                           └─CustomText
+                             └─Text
