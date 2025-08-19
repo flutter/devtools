@@ -8,7 +8,6 @@
 library;
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/shared.dart';
