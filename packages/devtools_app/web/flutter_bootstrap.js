@@ -22,9 +22,15 @@ function unregisterDevToolsServiceWorker() {
 }
 
 // This query parameter must match the String value specified by
-// `DevToolsQueryParameters.wasmKey`. See
+// `DevToolsQueryParameters.compilerKey`. See
 // devtools/packages/devtools_app/lib/src/shared/query_parameters.dart
-const wasmQueryParameterKey = 'wasm';
+const compilerQueryParameterKey = 'compiler';
+
+// Returns the value for the given search param.
+function getSearchParam(searchParamKey) {
+  const searchParams = new URLSearchParams(window.location.search);
+  return searchParams.get(searchParamKey);
+}
 
 // Calls the DevTools server API to read the user's wasm preference.
 async function getDevToolsWasmPreference() {
@@ -49,12 +55,20 @@ async function getDevToolsWasmPreference() {
   }
 }
 
+// The query parameter compiler=js gives us an escape hatch we can offer users if their
+// dart2wasm app fails to load.
+const forceUseJs = () => getSearchParam(compilerQueryParameterKey) === 'js';
+
 // Returns whether DevTools should be loaded with the skwasm renderer based on the
 // value of the 'wasm' query parameter or the wasm setting from the DevTools
 // preference file.
 async function shouldUseSkwasm() {
-  const searchParams = new URLSearchParams(window.location.search);
-  const wasmEnabledFromQueryParameter = searchParams.get(wasmQueryParameterKey) === 'true';
+  // If dart2js has specifically been requested via query parameter, then do not try to
+  // use skwasm (even if the local setting is for wasm).
+  if (forceUseJs()) {
+    return false;
+  }
+  const wasmEnabledFromQueryParameter = getSearchParam(compilerQueryParameterKey) === 'wasm';
   const wasmEnabledFromDevToolsPreference = await getDevToolsWasmPreference();
   return wasmEnabledFromQueryParameter === true || wasmEnabledFromDevToolsPreference === true;
 }
@@ -64,9 +78,9 @@ async function shouldUseSkwasm() {
 function updateWasmQueryParameter(useSkwasm) {
   const url = new URL(window.location.href);
   if (useSkwasm) {
-    url.searchParams.set(wasmQueryParameterKey, 'true');
+    url.searchParams.set(compilerQueryParameterKey, 'wasm');
   } else {
-    url.searchParams.delete(wasmQueryParameterKey);
+    url.searchParams.delete(compilerQueryParameterKey);
   }
   // Update the browser's history without reloading. This is a no-op if the wasm
   // query parameter does not actually need to be updated.
@@ -77,9 +91,11 @@ function updateWasmQueryParameter(useSkwasm) {
 async function bootstrapAppFor3P() {
   const useSkwasm = await shouldUseSkwasm();
 
-  // Ensure the 'wasm' query parameter in the URL is accurate for the renderer
-  // DevTools will be loaded with.
-  updateWasmQueryParameter(useSkwasm);
+  if (!forceUseJs()) {
+    // Ensure the 'wasm' query parameter in the URL is accurate for the renderer
+    // DevTools will be loaded with.
+    updateWasmQueryParameter(useSkwasm);
+  }
 
   const rendererForLog = useSkwasm ? 'skwasm' : 'canvaskit';
   console.log('Attempting to load DevTools with ' + rendererForLog + ' renderer.');
