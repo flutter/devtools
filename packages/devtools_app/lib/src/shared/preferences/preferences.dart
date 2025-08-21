@@ -210,12 +210,6 @@ class PreferencesController extends DisposableController
       defaultsTo: false,
     );
     final queryParams = DevToolsQueryParams.load();
-
-    final jsEnabledFromQueryParams = queryParams.useJs;
-    if (jsEnabledFromQueryParams) {
-      // TODO set in storage as well.
-    }
-
     final enabledFromQueryParams = queryParams.useWasm;
 
     if (enabledFromQueryParams && !kIsWasm) {
