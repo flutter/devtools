@@ -171,6 +171,16 @@ class PreferencesController extends DisposableController
 
   Future<void> _initWasmEnabled() async {
     wasmEnabled.value = kIsWasm;
+
+    // If the user forced the dart2js-compiled DevTools via query parameter,
+    // then set the storage value to match. This will persist across multiple
+    // sessions of DevTools.
+    if (DevToolsQueryParams.load().useJs) {
+      safeUnawaited(
+        storage.setValue(_ExperimentPreferences.wasm.storageKey, 'false'),
+      );
+    }
+
     addAutoDisposeListener(wasmEnabled, () async {
       final enabled = wasmEnabled.value;
       _log.fine('preference update (wasmEnabled = $enabled)');
@@ -188,8 +198,8 @@ class PreferencesController extends DisposableController
           'Reloading DevTools for Wasm preference update (enabled = $enabled)',
         );
         updateQueryParameter(
-          DevToolsQueryParams.wasmKey,
-          enabled ? 'true' : null,
+          DevToolsQueryParams.compilerKey,
+          enabled ? 'wasm' : null,
           reload: true,
         );
       }
@@ -207,7 +217,7 @@ class PreferencesController extends DisposableController
       // back to JS. We know this because the flutter_bootstrap.js logic always
       // sets the 'wasm' query parameter to 'true' when attempting to load
       // DevTools with wasm. Remove the wasm query parameter and return early.
-      updateQueryParameter(DevToolsQueryParams.wasmKey, null);
+      updateQueryParameter(DevToolsQueryParams.compilerKey, null);
       ga.impression(gac.devToolsMain, gac.jsFallback);
 
       // Do not show the JS fallback notification when embedded in VS Code
