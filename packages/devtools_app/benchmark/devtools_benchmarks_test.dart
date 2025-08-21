@@ -67,6 +67,9 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
   );
   stdout.writeln('Web benchmark tests finished.');
 
+  // This should fail.
+  expect(2+2, equals(5));
+
   expect(
     const JsonEncoder.withIndent('  ').convert(taskResult.toJson()),
     isA<String>(),
