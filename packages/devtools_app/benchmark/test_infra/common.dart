@@ -10,7 +10,7 @@
 /// found" in DevTools.
 const _benchmarkInitialPage = '';
 
-const _wasmQueryParameters = {'wasm': 'true'};
+const _wasmQueryParameters = {'compiler': 'wasm'};
 
 String benchmarkPath({required bool useWasm}) => Uri(
   path: _benchmarkInitialPage,
