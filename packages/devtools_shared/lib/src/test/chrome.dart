@@ -4,6 +4,11 @@
 
 // ignore_for_file: avoid_print
 
+// DO NOT DELETE THIS FILE. It is imported by DDS and used in the
+// devtools_server tests.
+// TODO(https://github.com/flutter/devtools/issues/9408): Move this into
+// package:dds instead.
+
 import 'dart:async';
 import 'dart:io';
 
