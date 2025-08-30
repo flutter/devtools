@@ -617,11 +617,15 @@ class StandaloneFilterField<T> extends StatefulWidget {
     super.key,
     required this.controller,
     required this.filteredItem,
+    this.searchFieldEnabled = true,
   });
 
   final FilterControllerMixin<T> controller;
 
   final String filteredItem;
+
+  // Whether the search field is enabled for user input.
+  final bool searchFieldEnabled;
 
   @override
   State<StandaloneFilterField<T>> createState() =>
@@ -657,6 +661,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
               return DevToolsClearableTextField(
                 hintText: 'Filter',
                 controller: queryTextFieldController,
+                enabled: widget.searchFieldEnabled,
                 prefixIcon: widget.controller.settingFilters.isNotEmpty
                     ? Container(
                         height: inputDecorationElementHeight,

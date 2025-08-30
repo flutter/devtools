@@ -241,6 +241,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           child: StandaloneFilterField<NetworkRequest>(
             controller: controller,
             filteredItem: 'request',
+            searchFieldEnabled: hasRequests,
           ),
         ),
         const SizedBox(width: denseSpacing),
