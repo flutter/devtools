@@ -59,7 +59,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+- Extensions which are embedded in the IDE window now display with the correct
+  IDE theme.
 
 ## Advanced developer mode updates
 
