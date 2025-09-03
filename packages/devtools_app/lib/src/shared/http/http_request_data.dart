@@ -101,13 +101,44 @@ class DartIOHttpRequestData extends NetworkRequest {
             );
         _request = updated;
         final fullRequest = _request as HttpProfileRequest;
-        _responseBody = utf8.decode(fullRequest.responseBody!);
-        _requestBody = utf8.decode(fullRequest.requestBody!);
+        var responseMime =
+            responseHeaders?['content-type']?.toString().split(';').first;
+        final requestMime =
+            requestHeaders?['content-type']?.toString().split(';').first;
+
+        if (fullRequest.responseBody != null) {
+          responseMime = normalizeContentType(responseHeaders?['content-type']);
+
+          if (isTextMimeType(responseMime)) {
+            _responseBody = utf8.decode(fullRequest.responseBody!);
+          } else {
+            _responseBody = base64.encode(fullRequest.responseBody!);
+          }
+        }
+
+        if (fullRequest.requestBody != null) {
+          if (isTextMimeType(requestMime)) {
+            _requestBody = utf8.decode(fullRequest.requestBody!);
+          } else {
+            _requestBody = base64.encode(fullRequest.requestBody!);
+          }
+        }
+
         notifyListeners();
       }
     } finally {
       isFetchingFullData = false;
     }
+  }
+
+  //TODO check if all cases are handled correctly
+  String? normalizeContentType(dynamic header) {
+    if (header is List && header.isNotEmpty) {
+      return header.first.toString().split(';').first.trim().toLowerCase();
+    } else if (header is String) {
+      return header.split(';').first.trim().toLowerCase();
+    }
+    return null;
   }
 
   static List<Cookie> _parseCookies(List<String>? cookies) {
