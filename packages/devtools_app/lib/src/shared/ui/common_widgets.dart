@@ -1085,8 +1085,11 @@ class TextViewer extends StatelessWidget {
 }
 
 class JsonViewer extends StatefulWidget {
-  JsonViewer({super.key, required this.encodedJson, this.scrollable = true})
-    : assert(encodedJson.isNotEmpty);
+  const JsonViewer({
+    super.key,
+    required this.encodedJson,
+    this.scrollable = true,
+  });
 
   final String encodedJson;
   final bool scrollable;
@@ -1111,7 +1114,7 @@ class _JsonViewerState extends State<JsonViewer> {
   }
 
   void _updateVariablesTree() {
-    assert(widget.encodedJson.isNotEmpty);
+    if (widget.encodedJson.isEmpty) return;
     final responseJson = json.decode(widget.encodedJson);
     // Insert the JSON data into the fake service cache so we can use it with
     // the `ExpandableVariable` widget.
@@ -1197,6 +1200,12 @@ class _JsonViewerState extends State<JsonViewer> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.encodedJson.isEmpty) {
+      return const Padding(
+        padding: EdgeInsetsGeometry.only(top: 16.0),
+        child: CenteredMessage(message: 'No JSON data'),
+      );
+    }
     Widget child = FutureBuilder(
       future: _initializeTree,
       builder: (context, snapshot) {
