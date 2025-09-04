@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
+import 'package:path/path.dart' as p;
 
 import '_in_file_args.dart';
 import '_test_app_driver.dart';
@@ -35,50 +36,10 @@ Future<void> runFlutterIntegrationTest(
     // TODO(https://github.com/flutter/devtools/issues/9196): support starting
     // DTD and passing the URI to DevTools server. Workspace roots should be set
     // on the DTD instance based on the connected test app.
-
-    // Start the DevTools server. This will use the DevTools server that is
-    // shipped with the Dart SDK.
-    // TODO(https://github.com/flutter/devtools/issues/9197): launch the
-    // DevTools server from source so that end to end changes (server + app) can
-    // be tested.
-    devToolsServerProcess = await Process.start('dart', [
-      'devtools',
-      // Do not launch DevTools app in the browser. This DevTools server
-      // instance will be used to connect to the DevTools app that is run from
-      // Flutter driver from the integration test runner.
-      '--no-launch-browser',
-      // Disable CORS restrictions so that we can connect to the server from
-      // DevTools app that is served on a different origin.
-      '--disable-cors',
-    ]);
-
-    final addressCompleter = Completer<void>();
-    final sub = devToolsServerProcess.stdout.transform(utf8.decoder).listen((
-      line,
-    ) {
-      if (line.startsWith(_devToolsServerAddressLine)) {
-        // This will pull the server address from a String like:
-        // "Serving DevTools at http://127.0.0.1:9104.".
-        final regexp = RegExp(
-          r'http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+',
-        );
-        final match = regexp.firstMatch(line);
-        if (match != null) {
-          devToolsServerAddress = match.group(0);
-          addressCompleter.complete();
-        }
-      }
-    });
-
-    await addressCompleter.future.timeout(
-      const Duration(seconds: 10),
-      onTimeout: () async {
-        await sub.cancel();
-        devToolsServerProcess?.kill();
-        throw Exception('Timed out waiting for DevTools server to start.');
-      },
+    devToolsServerProcess = await startDevToolsServer();
+    devToolsServerAddress = await listenForDevToolsAddress(
+      devToolsServerProcess,
     );
-    await sub.cancel();
   }
 
   if (!offline) {
@@ -194,4 +155,79 @@ class DevToolsAppTestRunnerArgs extends IntegrationTestRunnerArgs {
         help: 'Updates the golden images with the results of this test run.',
       );
   }
+}
+
+Future<Process> startDevToolsServer({bool useLocalServer = false}) async {
+  // Start the DevTools server from source.
+  if (useLocalServer) {
+    return _startLocalDevToolsServer();
+  }
+
+  // Start the DevTools server. This will use the DevTools server that is
+  // shipped with the Dart SDK.
+  final devToolsServerProcess = await Process.start('dart', [
+    'devtools',
+    // Do not launch DevTools app in the browser. This DevTools server
+    // instance will be used to connect to the DevTools app that is run from
+    // Flutter driver from the integration test runner.
+    '--no-launch-browser',
+    // Disable CORS restrictions so that we can connect to the server from
+    // DevTools app that is served on a different origin.
+    '--disable-cors',
+  ]);
+  return devToolsServerProcess;
+}
+
+Future<String> listenForDevToolsAddress(
+  Process devToolsServerProcess, {
+  Duration timeout = const Duration(seconds: 10),
+}) async {
+  final devToolsAddressCompleter = Completer<String>();
+
+  final sub = devToolsServerProcess.stdout.transform(utf8.decoder).listen((
+    line,
+  ) {
+    if (line.contains(_devToolsServerAddressLine)) {
+      // This will pull the server address from a String like:
+      // "Serving DevTools at http://127.0.0.1:9104.".
+      final regexp = RegExp(r'http:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+');
+      final match = regexp.firstMatch(line);
+      if (match != null) {
+        final devToolsServerAddress = match.group(0);
+        devToolsAddressCompleter.complete(devToolsServerAddress);
+      }
+    }
+  });
+
+  await devToolsAddressCompleter.future.timeout(
+    timeout,
+    onTimeout: () async {
+      await sub.cancel();
+      devToolsServerProcess.kill();
+      throw Exception('Timed out waiting for DevTools server to start.');
+    },
+  );
+  await sub.cancel();
+
+  return devToolsAddressCompleter.future;
+}
+
+Future<Process> _startLocalDevToolsServer() async {
+  final devtoolsProcess = await Process.start('dart', [
+    'run',
+    'bin/dt.dart',
+    'serve',
+    '--no-launch-browser',
+  ], workingDirectory: _toolPath());
+  return devtoolsProcess;
+}
+
+String _toolPath() {
+  final dir = Directory.current;
+  final pathParts = p.split(dir.path);
+  if (!pathParts.contains('packages')) {
+    throw StateError('Expected to be in a package, instead in ${dir.path}');
+  }
+  final root = pathParts.sublist(0, pathParts.indexOf('packages'));
+  return p.joinAll([...root, 'tool']);
 }
