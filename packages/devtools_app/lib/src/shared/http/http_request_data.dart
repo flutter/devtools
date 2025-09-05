@@ -33,7 +33,7 @@ class DartIOHttpInstantEvent {
   TimeRange get timeRange => _timeRangeBuilder.build();
 
   // This is modified from within HttpRequestData.
-  final TimeRangeBuilder _timeRangeBuilder = TimeRangeBuilder();
+  final _timeRangeBuilder = TimeRangeBuilder();
 }
 
 /// An abstraction of an HTTP request made through dart:io.

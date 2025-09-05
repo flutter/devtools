@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-@Timeout(Duration(minutes: 4))
-library;
-
 import 'dart:async';
 import 'dart:io';
 
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/helpers.dart';
+import 'package:devtools_test/integration_test.dart';
 import 'package:test/test.dart';
 import 'package:webdriver/async_io.dart';
 
@@ -56,21 +54,30 @@ void main() {
   });
 
   group('compilation', () {
-    test('compiler query param determines skwasm/canvaskit renderer', () async {
-      // Open the DevTools URL with ?compiler=wasm.
-      await driver.get(
-        _addQueryParam(devToolsServerAddress, param: 'compiler', value: 'wasm'),
-      );
-      // Verify we are using the skwasm renderer.
-      expect(await getRendererAttribute(), equals('skwasm'));
+    test(
+      'compiler query param determines skwasm/canvaskit renderer',
+      timeout: longTimeout,
+      () async {
+        // Open the DevTools URL with ?compiler=wasm.
+        await driver.get(
+          _addQueryParam(
+            devToolsServerAddress,
+            param: 'compiler',
+            value: 'wasm',
+          ),
+        );
+        // Verify we are using the skwasm renderer.
+        expect(await getRendererAttribute(), equals('skwasm'));
 
-      // Open the DevTools URL with ?compiler=js.
-      await driver.get(
-        _addQueryParam(devToolsServerAddress, param: 'compiler', value: 'js'),
-      );
-      // Verify we are using the canvaskit renderer.
-      expect(await getRendererAttribute(), equals('canvaskit'));
-    }, retry: 1);
+        // Open the DevTools URL with ?compiler=js.
+        await driver.get(
+          _addQueryParam(devToolsServerAddress, param: 'compiler', value: 'js'),
+        );
+        // Verify we are using the canvaskit renderer.
+        expect(await getRendererAttribute(), equals('canvaskit'));
+      },
+      retry: 1,
+    );
   });
 }
 
@@ -80,7 +87,7 @@ String _addQueryParam(
   required String value,
 }) {
   final uri = Uri.parse(url);
-  final newQueryParameters = Map<String, dynamic>.from(uri.queryParameters);
+  final newQueryParameters = Map<String, dynamic>.of(uri.queryParameters);
   newQueryParameters[param] = value;
   return uri.replace(queryParameters: newQueryParameters).toString();
 }
