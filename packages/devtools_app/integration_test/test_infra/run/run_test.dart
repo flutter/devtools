@@ -180,14 +180,14 @@ Future<Process> startDevToolsServer({bool useLocalServer = false}) async {
 
 Future<String> listenForDevToolsAddress(
   Process devToolsServerProcess, {
-  Duration timeout = const Duration(seconds: 10),
+  Duration timeout = const Duration(minutes: 3),
 }) async {
   final devToolsAddressCompleter = Completer<String>();
 
   final sub = devToolsServerProcess.stdout.transform(utf8.decoder).listen((
     line,
   ) {
-    print('[Server start-up] $line');
+    print('[Server - ${DateTime.now()}] $line');
     if (line.contains(_devToolsServerAddressLine)) {
       // This will pull the server address from a String like:
       // "Serving DevTools at http://127.0.0.1:9104.".
