@@ -187,6 +187,7 @@ Future<String> listenForDevToolsAddress(
   final sub = devToolsServerProcess.stdout.transform(utf8.decoder).listen((
     line,
   ) {
+    print('[Server start-up] $line');
     if (line.contains(_devToolsServerAddressLine)) {
       // This will pull the server address from a String like:
       // "Serving DevTools at http://127.0.0.1:9104.".
