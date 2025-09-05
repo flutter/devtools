@@ -9,6 +9,8 @@ import 'dart:io';
 import 'io_utils.dart';
 
 class ChromeDriver with IOMixin {
+  static const port = 4444;
+
   Process? _process;
 
   // TODO(kenz): add error messaging if the chromedriver executable is not
@@ -17,7 +19,7 @@ class ChromeDriver with IOMixin {
   Future<void> start({bool debugLogging = false}) async {
     try {
       const chromedriverExe = 'chromedriver';
-      const chromedriverArgs = ['--port=4444'];
+      const chromedriverArgs = ['--port=$port'];
       if (debugLogging) {
         print('${DateTime.now()}: starting the chromedriver process');
         print('${DateTime.now()}: > $chromedriverExe '
