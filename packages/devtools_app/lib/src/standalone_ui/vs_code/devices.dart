@@ -41,8 +41,9 @@ class Devices extends StatelessWidget {
       children: [
         Text('Devices', style: theme.textTheme.titleMedium),
         if (supportedDevices.isEmpty)
-          const Text('Connect a device or enable web/desktop platforms.')
-        else
+          const Text('Connect a device or enable a platform'),
+        if (supportedDevices.isNotEmpty ||
+            unsupportedDevicePlatformTypes.isNotEmpty)
           Table(
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
