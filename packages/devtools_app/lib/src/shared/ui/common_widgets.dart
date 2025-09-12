@@ -1308,14 +1308,9 @@ class LinkIconLabel extends StatelessWidget {
         children: [
           Icon(icon, size: defaultIconSize, color: color),
           const SizedBox(width: densePadding),
-          Padding(
-            padding: const EdgeInsets.only(bottom: densePadding),
-            child: RichText(
-              text: TextSpan(
-                text: link.display,
-                style: Theme.of(context).linkTextStyle.copyWith(color: color),
-              ),
-            ),
+          Text.rich(
+            TextSpan(text: link.display),
+            style: Theme.of(context).linkTextStyle.copyWith(color: color),
           ),
         ],
       ),
