@@ -67,9 +67,6 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
   );
   stdout.writeln('Web benchmark tests finished.');
 
-  // This should fail.
-  expect(2+2, equals(5));
-
   expect(
     const JsonEncoder.withIndent('  ').convert(taskResult.toJson()),
     isA<String>(),
@@ -179,7 +176,7 @@ void _verifyScoresAgainstThresholds(
   }
 }
 
-const _frameTimeFor60FPSInMicros = 16666.6;
+const _frameTimeFor60FPSInMicros = 16666.6 / 4;
 // const _frameTimeFor30FPSInMicros = 33333.3;
 
 /// Creates the expected [DevToolsBenchmark]s for the specified compiler.
