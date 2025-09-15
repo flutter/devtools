@@ -64,7 +64,14 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
 
   /// Whether DevTools should be loaded using dart2wasm + skwasm instead of
   /// dart2js + canvaskit.
-  bool get useWasm => params[wasmKey] == 'true';
+  bool get useWasm => params[compilerKey] == 'wasm';
+
+  /// Whether DevTools should be loaded using dart2js + canvaskit instead of
+  /// dart2wasm + skwasm.
+  ///
+  /// This should only ever be explicitly set by the user if their app fails to
+  /// load using wasm.
+  bool get useJs => params[compilerKey] == 'js';
 
   static const vmServiceUriKey = 'uri';
   static const hideScreensKey = 'hide';
@@ -75,10 +82,14 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   static const ideKey = 'ide';
   static const ideFeatureKey = 'ideFeature';
 
-  // This query parameter must match the String value in the Flutter bootstrap
-  // logic that is used to select a web renderer. See
-  // devtools/packages/devtools_app/web/flutter_bootstrap.js.
-  static const wasmKey = 'wasm';
+  /// Query parameter key to determine whether to use dart2wasm or dart2js.
+  ///
+  ///  This query parameter must match the String value in the Flutter bootstrap
+  ///  logic that is used to select a web renderer. See
+  /// devtools/packages/devtools_app/web/flutter_bootstrap.js.
+  ///
+  /// Valid values are "js" or "wasm".
+  static const compilerKey = 'compiler';
 
   // TODO(kenz): remove legacy value in May of 2025 when all IDEs are not using
   // these and 12 months have passed to allow users ample upgrade time.
