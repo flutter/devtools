@@ -805,7 +805,7 @@ class LoggingController extends DevToolsScreenController
 
   @override
   void releaseMemory({bool partial = false}) {
-    if (FeatureFlags.memoryObserver) {
+    if (FeatureFlags.memoryObserver.isEnabled) {
       if (partial) {
         // Trim logs from the front so that the oldest logs are removed.
         _updateData(data.sublist(data.length ~/ 2));

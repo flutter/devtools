@@ -244,7 +244,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           ),
         ),
         const SizedBox(width: denseSpacing),
-        if (FeatureFlags.networkSaveLoad)
+        if (FeatureFlags.networkSaveLoad.isEnabled)
           OpenSaveButtonGroup(
             screenId: ScreenMetaData.network.id,
             saveFormats: const [SaveFormat.devtools, SaveFormat.har],

@@ -58,7 +58,7 @@ class DevToolsScaffold extends StatefulWidget {
 
   static List<Widget> defaultActions({Color? color}) => [
     OpenSettingsAction(color: color),
-    if (FeatureFlags.devToolsExtensions &&
+    if (FeatureFlags.devToolsExtensions.isEnabled &&
         !DevToolsQueryParams.load().hideExtensions)
       ExtensionSettingsAction(color: color),
     ReportFeedbackButton(color: color),
