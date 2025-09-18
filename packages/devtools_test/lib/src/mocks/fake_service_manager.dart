@@ -102,12 +102,7 @@ class FakeServiceManager extends Fake
        _isolateManager = FakeIsolateManager(rootLibrary: rootLibrary) {
     this.service = service ?? createFakeService();
     serviceUri = this.service!.wsUri;
-    mockConnectedApp(
-      connectedApp!,
-      isFlutterApp: true,
-      isProfileBuild: false,
-      isWebApp: false,
-    );
+    mockConnectedApp(connectedApp!);
     setConnectedState(hasConnection);
 
     when(vm.operatingSystem).thenReturn('macos');

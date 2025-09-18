@@ -211,12 +211,7 @@ void main() {
     });
 
     testWidgets('builds dialog', (WidgetTester tester) async {
-      mockConnectedApp(
-        fakeServiceConnection.serviceManager.connectedApp!,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
+      mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
 
       await tester.pumpWidget(wrap(const VMFlagsDialog()));
       expect(find.richText('VM Flags'), findsOneWidget);

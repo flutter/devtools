@@ -40,12 +40,7 @@ void main() {
         mockServiceManager.serviceExtensionManager,
       ).thenReturn(FakeServiceExtensionManager());
       final connectedApp = MockConnectedApp();
-      mockConnectedApp(
-        connectedApp,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
+      mockConnectedApp(connectedApp);
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
       setGlobal(ServiceConnectionManager, mockServiceConnection);
       mockPerformanceController = createMockPerformanceControllerWithDefaults();
@@ -85,12 +80,7 @@ void main() {
     testWidgetsWithWindowSize('builds for non flutter app', windowSize, (
       WidgetTester tester,
     ) async {
-      mockConnectedApp(
-        mockServiceManager.connectedApp!,
-        isFlutterApp: false,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
+      mockConnectedApp(mockServiceManager.connectedApp!);
       await pumpControls(tester);
 
       expect(find.byType(ExitOfflineButton), findsNothing);

@@ -38,9 +38,7 @@ class DiffSnapshotScene extends Scene {
     fakeServiceConnection = FakeServiceConnectionManager();
     mockConnectedApp(
       fakeServiceConnection.serviceManager.connectedApp!,
-      isFlutterApp: true,
       isProfileBuild: true,
-      isWebApp: false,
     );
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
 

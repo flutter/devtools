@@ -133,9 +133,7 @@ class MemoryDefaultScene extends Scene {
     final app = fakeServiceConnection.serviceManager.connectedApp!;
     mockConnectedApp(
       app,
-      isFlutterApp: true,
       isProfileBuild: true,
-      isWebApp: false,
     );
     when(
       fakeServiceConnection.serviceManager.vm.operatingSystem,

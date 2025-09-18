@@ -51,8 +51,6 @@ class CpuProfilerDefaultScene extends Scene {
     mockConnectedApp(
       app,
       isFlutterApp: false,
-      isProfileBuild: false,
-      isWebApp: false,
     );
     when(
       fakeServiceConnection.errorBadgeManager.errorCountNotifier('profiler'),

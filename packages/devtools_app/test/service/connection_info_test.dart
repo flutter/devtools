@@ -34,12 +34,7 @@ void main() {
         fakeServiceConnection.serviceManager.vm.operatingSystem,
       ).thenReturn('android');
       final app = fakeServiceConnection.serviceManager.connectedApp!;
-      mockConnectedApp(
-        app,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
+      mockConnectedApp(app);
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
     }
@@ -53,12 +48,7 @@ void main() {
     ) async {
       final app = fakeServiceConnection.serviceManager.connectedApp!;
       mockWebVm(fakeServiceConnection.serviceManager.vm);
-      mockConnectedApp(
-        app,
-        isFlutterApp: false,
-        isProfileBuild: false,
-        isWebApp: true,
-      );
+      mockConnectedApp(app, isFlutterApp: false, isWebApp: true);
 
       await tester.pumpWidget(wrap(const ConnectedAppSummary()));
       expect(find.text('CPU / OS: '), findsOneWidget);
@@ -81,12 +71,7 @@ void main() {
       when(
         fakeServiceConnection.serviceManager.vm.operatingSystem,
       ).thenReturn('macos');
-      mockConnectedApp(
-        app,
-        isFlutterApp: false,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
+      mockConnectedApp(app, isFlutterApp: false);
 
       await tester.pumpWidget(wrap(const ConnectedAppSummary()));
       expect(find.text('CPU / OS: '), findsOneWidget);
@@ -107,12 +92,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         final app = fakeServiceConnection.serviceManager.connectedApp!;
-        mockConnectedApp(
-          app,
-          isFlutterApp: true,
-          isProfileBuild: false,
-          isWebApp: false,
-        );
+        mockConnectedApp(app);
 
         await tester.pumpWidget(wrap(const ConnectedAppSummary()));
         expect(find.text('CPU / OS: '), findsOneWidget);
@@ -141,9 +121,7 @@ void main() {
         final app = fakeServiceConnection.serviceManager.connectedApp!;
         mockConnectedApp(
           app,
-          isFlutterApp: true,
           isProfileBuild: true,
-          isWebApp: false,
         );
 
         await tester.pumpWidget(wrap(const ConnectedAppSummary()));
@@ -173,8 +151,6 @@ void main() {
         mockWebVm(fakeServiceConnection.serviceManager.vm);
         mockConnectedApp(
           app,
-          isFlutterApp: true,
-          isProfileBuild: false,
           isWebApp: true,
         );
 
@@ -206,7 +182,6 @@ void main() {
         mockWebVm(fakeServiceConnection.serviceManager.vm);
         mockConnectedApp(
           app,
-          isFlutterApp: true,
           isProfileBuild: true,
           isWebApp: true,
         );

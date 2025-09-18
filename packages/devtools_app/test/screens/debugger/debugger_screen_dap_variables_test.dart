@@ -28,12 +28,7 @@ void main() {
     fakeServiceConnection = FakeServiceConnectionManager(service: vmService);
     scriptManager = MockScriptManager();
 
-    mockConnectedApp(
-      fakeServiceConnection.serviceManager.connectedApp!,
-      isProfileBuild: false,
-      isFlutterApp: true,
-      isWebApp: false,
-    );
+    mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, scriptManager);
