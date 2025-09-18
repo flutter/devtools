@@ -112,11 +112,11 @@ void main() {
 
   group('release memory', () {
     setUp(() {
-      FeatureFlags.memoryObserver = true;
+      FeatureFlags.memoryObserver.setValueForTests(true);
     });
 
     tearDown(() {
-      FeatureFlags.memoryObserver = false;
+      FeatureFlags.memoryObserver.setValueForTests(false);
     });
 
     testWidgetsWithWindowSize('full release', _windowSize, (
