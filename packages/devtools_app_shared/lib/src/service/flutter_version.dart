@@ -4,6 +4,8 @@
 
 import 'package:devtools_shared/devtools_shared.dart';
 
+import '../../utils.dart';
+
 /// Flutter version service registered by Flutter Tools.
 ///
 /// We call this service to get version information about the Flutter framework,
@@ -101,6 +103,48 @@ final class FlutterVersion extends SemanticVersion {
         dartSdkVersion,
       );
 
+  /// Identifies the Flutter channel from a version string.
+  ///
+  /// This method will first attempt to use [channelStr] if it is provided.
+  /// Otherwise, it will fall back to parsing the channel from [versionStr].
+  ///
+  /// This method will return `null` if the channel cannot be determined from
+  /// the provided information.
+  ///
+  /// Examples of versions that can be parsed:
+  ///  * '2.3.0' -> [FlutterChannel.stable]
+  ///  * '2.3.0-17.0.pre' -> [FlutterChannel.beta]
+  ///  * '2.3.0-17.0.pre.355' -> [FlutterChannel.dev]
+  static FlutterChannel? identifyChannel(
+    String versionStr, {
+    String? channelStr,
+  }) {
+    if (channelStr != null) {
+      final channel = FlutterChannel.fromName(channelStr);
+      if (channel != null) return channel;
+    }
+
+    final sanitized = SemanticVersion.sanitizeVersionStr(versionStr);
+
+    final stableRegex = RegExp(r'^\d+\.\d+\.\d+$');
+    if (stableRegex.hasMatch(sanitized)) return FlutterChannel.stable;
+
+    const preReleaseIndicator = '.pre';
+    final isValidPreRelease = sanitized.contains(preReleaseIndicator);
+    if (!isValidPreRelease) return null;
+
+    if (sanitized.endsWith(preReleaseIndicator)) return FlutterChannel.beta;
+
+    final versionParts = sanitized.split('$preReleaseIndicator.');
+    final suffix = versionParts.last;
+    final isNumeric = RegExp(r'\d');
+    if (versionParts.length == 2 && isNumeric.hasMatch(suffix)) {
+      return FlutterChannel.dev;
+    }
+
+    return null;
+  }
+
   static SemanticVersion? _parseDartVersion(String? versionString) {
     if (versionString == null) return null;
 
@@ -119,5 +163,20 @@ final class FlutterVersion extends SemanticVersion {
       rawVersion = versionString;
     }
     return SemanticVersion.parse(rawVersion);
+  }
+}
+
+/// An enum representing the different Flutter channels.
+enum FlutterChannel with EnumIndexOrdering {
+  dev,
+  beta,
+  stable;
+
+  static FlutterChannel? fromName(String? name) {
+    try {
+      return FlutterChannel.values.byName(name ?? '');
+    } catch (_) {
+      return null;
+    }
   }
 }
