@@ -53,7 +53,6 @@ void main() {
         enabledForDartApps: true,
         enabledForFlutterAppsFallback: false,
       );
-
       expect(flag.isEnabled(connectedApp), isTrue);
 
       flag = const FlutterChannelFeatureFlag(

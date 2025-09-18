@@ -106,7 +106,7 @@ extension FeatureFlags on Never {
   ///
   /// https://github.com/flutter/devtools/issues/9214
   static BooleanFeatureFlag propertyEditorRefactors = BooleanFeatureFlag(
-    name: 'wasmOptInSetting',
+    name: 'propertyEditorRefactors',
     enabled: true,
   );
 
@@ -126,7 +126,7 @@ extension FeatureFlags on Never {
   };
 
   static final _flutterChannelFlags = <FlutterChannelFeatureFlag>{
-    // TODO(elliette): Add wasm flag.
+    // TODO(https://github.com/flutter/devtools/issues/9438): Add wasm flag.
   };
 
   /// A helper to print the status of all the feature flags.
@@ -148,15 +148,17 @@ class BooleanFeatureFlag {
   BooleanFeatureFlag({required this.name, required bool enabled})
     : _enabled = enabled;
 
+  /// The name of the feature.
   final String name;
 
   bool _enabled;
 
+  /// Whether the feature is enabled.
   bool get isEnabled => _enabled;
 
   @visibleForTesting
-  void setValueForTests(bool value) {
-    _enabled = value;
+  void setEnabledForTests(bool enabled) {
+    _enabled = enabled;
   }
 }
 
@@ -167,6 +169,10 @@ class BooleanFeatureFlag {
 /// than or equal to [flutterChannel]. For example, if [flutterChannel] is
 /// [FlutterChannel.beta], this flag will be enabled for apps on the 'beta' and
 /// 'dev' channels, but not for apps on the 'stable' channel.
+/// 
+/// TODO(https://github.com/flutter/devtools/issues/9439): Restrict features
+/// based on the user's Dart version instead of Flutter version to allow for
+/// shared experiments across Dart and Flutter.
 class FlutterChannelFeatureFlag {
   const FlutterChannelFeatureFlag({
     required this.name,
@@ -175,6 +181,9 @@ class FlutterChannelFeatureFlag {
     required bool enabledForFlutterAppsFallback,
   }) : _enabledForDartApps = enabledForDartApps,
        _enabledForFlutterAppsFallback = enabledForFlutterAppsFallback;
+
+  /// The name of the feature.
+  final String name;
 
   /// The maximum Flutter channel that this feature is enabled for.
   final FlutterChannel flutterChannel;
@@ -186,8 +195,8 @@ class FlutterChannelFeatureFlag {
   /// but we cannot determine the Flutter channel.
   final bool _enabledForFlutterAppsFallback;
 
-  final String name;
-
+  /// Returns whether the feature is enabled based on the [connectedApp]'s
+  /// Flutter version.
   bool isEnabled(ConnectedApp connectedApp) {
     final isFlutterApp = connectedApp.isFlutterAppNow ?? false;
     if (!isFlutterApp) {

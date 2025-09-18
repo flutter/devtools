@@ -23,7 +23,7 @@ void main() {
   const windowSize = Size(2500, 1500);
 
   setUp(() {
-    FeatureFlags.dapDebugging.setValueForTests(true);
+    FeatureFlags.dapDebugging.setEnabledForTests(true);
     vmService = createMockVmServiceWrapperWithDefaults();
     fakeServiceConnection = FakeServiceConnectionManager(service: vmService);
     scriptManager = MockScriptManager();

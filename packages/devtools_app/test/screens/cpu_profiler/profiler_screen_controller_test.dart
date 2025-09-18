@@ -18,7 +18,7 @@ void main() {
     late ProfilerScreenController controller;
 
     setUp(() {
-      FeatureFlags.memoryObserver.setValueForTests(true);
+      FeatureFlags.memoryObserver.setEnabledForTests(true);
       final fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
@@ -63,7 +63,7 @@ void main() {
     });
 
     test('releaseMemory', () async {
-      FeatureFlags.memoryObserver.setValueForTests(true);
+      FeatureFlags.memoryObserver.setEnabledForTests(true);
       await controller.cpuProfilerController.loadAllSamples();
       expect(controller.cpuProfilerController.dataNotifier.value, isNotNull);
       expect(
@@ -75,7 +75,7 @@ void main() {
         controller.cpuProfilerController.dataNotifier.value,
         CpuProfilerController.baseStateCpuProfileData,
       );
-      FeatureFlags.memoryObserver.setValueForTests(false);
+      FeatureFlags.memoryObserver.setEnabledForTests(false);
     });
   });
 }

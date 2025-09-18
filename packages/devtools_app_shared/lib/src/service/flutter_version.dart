@@ -103,6 +103,9 @@ final class FlutterVersion extends SemanticVersion {
         dartSdkVersion,
       );
 
+  static final _stableVersionRegex = RegExp(r'^\d+\.\d+\.\d+$');
+  static final _isNumericRegex = RegExp(r'\d');
+
   /// Identifies the Flutter channel from a version string.
   ///
   /// This method will first attempt to use [channelStr] if it is provided.
@@ -119,29 +122,32 @@ final class FlutterVersion extends SemanticVersion {
     String versionStr, {
     String? channelStr,
   }) {
+    // Check if channel string is valid. 
     if (channelStr != null) {
       final channel = FlutterChannel.fromName(channelStr);
       if (channel != null) return channel;
     }
 
+    // Check if version matches stable release format.
     final sanitized = SemanticVersion.sanitizeVersionStr(versionStr);
+    if (_stableVersionRegex.hasMatch(sanitized)) return FlutterChannel.stable;
 
-    final stableRegex = RegExp(r'^\d+\.\d+\.\d+$');
-    if (stableRegex.hasMatch(sanitized)) return FlutterChannel.stable;
-
+    // Check if version matches pre-release format.
     const preReleaseIndicator = '.pre';
     final isValidPreRelease = sanitized.contains(preReleaseIndicator);
     if (!isValidPreRelease) return null;
 
+    // Check if version matches beta release format.
     if (sanitized.endsWith(preReleaseIndicator)) return FlutterChannel.beta;
 
+    // Check if version matches dev release format.
     final versionParts = sanitized.split('$preReleaseIndicator.');
     final suffix = versionParts.last;
-    final isNumeric = RegExp(r'\d');
-    if (versionParts.length == 2 && isNumeric.hasMatch(suffix)) {
+    if (versionParts.length == 2 && _isNumericRegex.hasMatch(suffix)) {
       return FlutterChannel.dev;
     }
 
+    // Matches no known release format, return null.
     return null;
   }
 
