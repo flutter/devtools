@@ -131,10 +131,7 @@ class MemoryDefaultScene extends Scene {
       ),
     );
     final app = fakeServiceConnection.serviceManager.connectedApp!;
-    mockConnectedApp(
-      app,
-      isProfileBuild: true,
-    );
+    mockConnectedApp(app, isProfileBuild: true);
     when(
       fakeServiceConnection.serviceManager.vm.operatingSystem,
     ).thenReturn('ios');

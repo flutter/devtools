@@ -119,10 +119,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         final app = fakeServiceConnection.serviceManager.connectedApp!;
-        mockConnectedApp(
-          app,
-          isProfileBuild: true,
-        );
+        mockConnectedApp(app, isProfileBuild: true);
 
         await tester.pumpWidget(wrap(const ConnectedAppSummary()));
         expect(find.text('CPU / OS: '), findsOneWidget);
@@ -149,10 +146,7 @@ void main() {
       (WidgetTester tester) async {
         final app = fakeServiceConnection.serviceManager.connectedApp!;
         mockWebVm(fakeServiceConnection.serviceManager.vm);
-        mockConnectedApp(
-          app,
-          isWebApp: true,
-        );
+        mockConnectedApp(app, isWebApp: true);
 
         await tester.pumpWidget(wrap(const ConnectedAppSummary()));
         expect(find.text('CPU / OS: '), findsOneWidget);
@@ -180,11 +174,7 @@ void main() {
       (WidgetTester tester) async {
         final app = fakeServiceConnection.serviceManager.connectedApp!;
         mockWebVm(fakeServiceConnection.serviceManager.vm);
-        mockConnectedApp(
-          app,
-          isProfileBuild: true,
-          isWebApp: true,
-        );
+        mockConnectedApp(app, isProfileBuild: true, isWebApp: true);
 
         await tester.pumpWidget(wrap(const ConnectedAppSummary()));
         expect(find.text('CPU / OS: '), findsOneWidget);

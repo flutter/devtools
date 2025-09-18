@@ -223,7 +223,8 @@ class PropertyEditorController extends DisposableController
     CodeActionResult? refactorsResult;
     // TODO(https://github.com/flutter/devtools/issues/8652): Enable refactors
     // in the Property Editor by default.
-    if (editableArgsResult != null && FeatureFlags.propertyEditorRefactors.isEnabled) {
+    if (editableArgsResult != null &&
+        FeatureFlags.propertyEditorRefactors.isEnabled) {
       // Fetch the refactors using the start of the editable arguments' range,
       // which corresponds to the widget constructor name. This ensures that the
       // refactors are always available, even when the cursor is within the
