@@ -48,7 +48,7 @@ extension FeatureFlags on Never {
   /// avoid OOM crashes.
   ///
   /// https://github.com/flutter/devtools/issues/7002
-  static BooleanFeatureFlag memoryObserver = BooleanFeatureFlag(
+  static final memoryObserver = BooleanFeatureFlag(
     name: 'memoryObserver',
     enabled: true,
   );
@@ -56,7 +56,7 @@ extension FeatureFlags on Never {
   /// Flag to enable save/load for the Memory screen.
   ///
   /// https://github.com/flutter/devtools/issues/8019
-  static BooleanFeatureFlag memorySaveLoad = BooleanFeatureFlag(
+  static final memorySaveLoad = BooleanFeatureFlag(
     name: 'memorySaveLoad',
     enabled: enableExperiments,
   );
@@ -64,7 +64,7 @@ extension FeatureFlags on Never {
   /// Flag to enable save/load for the Network screen.
   ///
   /// https://github.com/flutter/devtools/issues/4470
-  static BooleanFeatureFlag networkSaveLoad = BooleanFeatureFlag(
+  static final networkSaveLoad = BooleanFeatureFlag(
     name: 'networkSaveLoad',
     enabled: true,
   );
@@ -73,7 +73,7 @@ extension FeatureFlags on Never {
   ///
   /// TODO(https://github.com/flutter/devtools/issues/6443): remove this flag
   /// once extension support is added in g3.
-  static BooleanFeatureFlag devToolsExtensions = BooleanFeatureFlag(
+  static final devToolsExtensions = BooleanFeatureFlag(
     name: 'devToolsExtensions',
     enabled: isExternalBuild,
   );
@@ -81,7 +81,7 @@ extension FeatureFlags on Never {
   /// Flag to enable debugging via DAP.
   ///
   /// https://github.com/flutter/devtools/issues/6056
-  static BooleanFeatureFlag dapDebugging = BooleanFeatureFlag(
+  static final dapDebugging = BooleanFeatureFlag(
     name: 'dapDebugging',
     enabled: enableExperiments,
   );
@@ -89,7 +89,7 @@ extension FeatureFlags on Never {
   /// Flag to enable the new Inspector panel.
   ///
   /// https://github.com/flutter/devtools/issues/7854
-  static BooleanFeatureFlag inspectorV2 = BooleanFeatureFlag(
+  static final inspectorV2 = BooleanFeatureFlag(
     name: 'inspectorV2',
     enabled: true,
   );
@@ -97,7 +97,7 @@ extension FeatureFlags on Never {
   /// Flag to enable the DevTools setting to opt-in to WASM.
   ///
   /// https://github.com/flutter/devtools/issues/7856
-  static BooleanFeatureFlag wasmOptInSetting = BooleanFeatureFlag(
+  static final wasmOptInSetting = BooleanFeatureFlag(
     name: 'wasmOptInSetting',
     enabled: true,
   );
@@ -105,7 +105,7 @@ extension FeatureFlags on Never {
   /// Flag to enable refactors in the Flutter Property Editor sidebar.
   ///
   /// https://github.com/flutter/devtools/issues/9214
-  static BooleanFeatureFlag propertyEditorRefactors = BooleanFeatureFlag(
+  static final propertyEditorRefactors = BooleanFeatureFlag(
     name: 'propertyEditorRefactors',
     enabled: true,
   );
@@ -169,7 +169,7 @@ class BooleanFeatureFlag {
 /// than or equal to [flutterChannel]. For example, if [flutterChannel] is
 /// [FlutterChannel.beta], this flag will be enabled for apps on the 'beta' and
 /// 'dev' channels, but not for apps on the 'stable' channel.
-/// 
+///
 /// TODO(https://github.com/flutter/devtools/issues/9439): Restrict features
 /// based on the user's Dart version instead of Flutter version to allow for
 /// shared experiments across Dart and Flutter.
