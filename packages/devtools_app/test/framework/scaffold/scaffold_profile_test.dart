@@ -52,7 +52,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final connectedApp = MockConnectedApp();
-    mockConnectedApp(connectedApp);
+    mockConnectedApp(connectedApp, isProfileBuild: true);
     when(mockServiceManager.connectedAppInitialized).thenReturn(true);
     when(mockServiceManager.connectedApp).thenReturn(connectedApp);
     final mockDebuggerController = MockDebuggerController();

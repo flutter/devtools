@@ -110,10 +110,10 @@ extension FeatureFlags on Never {
     enabled: true,
   );
 
-  /// Stores a map of all the feature flags for debugging purposes.
+  /// A set of all the boolean feature flags for debugging purposes.
   ///
-  /// When adding a new flag, you are responsible for adding it to this map as
-  /// well.
+  /// When adding a new boolean flag, you are responsible for adding it to this
+  /// map as well.
   static final _booleanFlags = <BooleanFeatureFlag>{
     memoryObserver,
     memorySaveLoad,
@@ -125,6 +125,10 @@ extension FeatureFlags on Never {
     propertyEditorRefactors,
   };
 
+  /// A set of all the Flutter channel feature flags for debugging purposes.
+  ///
+  /// When adding a new Flutter channel flag, you are responsible for adding it
+  /// to this map as well.
   static final _flutterChannelFlags = <FlutterChannelFeatureFlag>{
     // TODO(https://github.com/flutter/devtools/issues/9438): Add wasm flag.
   };
@@ -132,13 +136,15 @@ extension FeatureFlags on Never {
   /// A helper to print the status of all the feature flags.
   static void debugPrintFeatureFlags({ConnectedApp? connectedApp}) {
     for (final entry in _booleanFlags) {
-      _log.config('${entry.name}: ${entry.isEnabled}');
+      _log.config(entry.toString());
     }
 
     for (final entry in _flutterChannelFlags) {
-      _log.config(
-        '${entry.name}: ${connectedApp != null ? entry.isEnabled(connectedApp) : entry.flutterChannel}',
-      );
+      var logLine = entry.toString();
+      if (connectedApp != null) {
+        logLine += '(enabled: ${entry.isEnabled(connectedApp)})';
+      }
+      _log.config(logLine);
     }
   }
 }
@@ -155,6 +161,9 @@ class BooleanFeatureFlag {
 
   /// Whether the feature is enabled.
   bool get isEnabled => _enabled;
+
+  @override
+  String toString() => '$name: $isEnabled';
 
   @visibleForTesting
   void setEnabledForTests(bool enabled) {
@@ -213,4 +222,7 @@ class FlutterChannelFeatureFlag {
 
     return currentChannel <= flutterChannel;
   }
+
+  @override
+  String toString() => '$name: <=${flutterChannel.name}';
 }

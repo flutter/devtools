@@ -30,12 +30,10 @@ void main() {
     final connectedApp = MockConnectedApp();
 
     late FlutterChannelFeatureFlag flag;
-    late MockServiceConnectionManager mockServiceConnection;
-    late MockServiceManager mockServiceManager;
 
     setUp(() {
-      mockServiceConnection = createMockServiceConnectionWithDefaults();
-      mockServiceManager =
+      final mockServiceConnection = createMockServiceConnectionWithDefaults();
+      final mockServiceManager =
           mockServiceConnection.serviceManager as MockServiceManager;
       when(
         mockServiceManager.serviceExtensionManager,

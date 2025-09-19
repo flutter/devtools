@@ -80,7 +80,7 @@ void main() {
     testWidgetsWithWindowSize('builds for non flutter app', windowSize, (
       WidgetTester tester,
     ) async {
-      mockConnectedApp(mockServiceManager.connectedApp!);
+      mockConnectedApp(mockServiceManager.connectedApp!, isFlutterApp: false);
       await pumpControls(tester);
 
       expect(find.byType(ExitOfflineButton), findsNothing);
