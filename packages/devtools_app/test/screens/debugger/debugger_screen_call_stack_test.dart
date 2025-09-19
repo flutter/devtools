@@ -24,12 +24,7 @@ void main() {
   setUp(() {
     fakeServiceConnection = FakeServiceConnectionManager();
     scriptManager = MockScriptManager();
-    mockConnectedApp(
-      fakeServiceConnection.serviceManager.connectedApp!,
-      isProfileBuild: false,
-      isFlutterApp: true,
-      isWebApp: false,
-    );
+    mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());

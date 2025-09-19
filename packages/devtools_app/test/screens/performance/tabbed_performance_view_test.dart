@@ -31,12 +31,7 @@ void main() {
       ),
     );
     final app = fakeServiceConnection.serviceManager.connectedApp!;
-    mockConnectedApp(
-      app,
-      isFlutterApp: true,
-      isProfileBuild: true,
-      isWebApp: false,
-    );
+    mockConnectedApp(app, isProfileBuild: true);
     when(app.flutterVersionNow).thenReturn(
       FlutterVersion.parse(
         (await fakeServiceConnection.serviceManager.flutterVersion).json!,
@@ -214,12 +209,7 @@ void main() {
         await tester.runAsync(() async {
           await setUpServiceManagerWithTimeline();
           final app = fakeServiceConnection.serviceManager.connectedApp!;
-          mockConnectedApp(
-            app,
-            isFlutterApp: false,
-            isProfileBuild: false,
-            isWebApp: false,
-          );
+          mockConnectedApp(app, isFlutterApp: false);
           when(app.flutterVersionNow).thenReturn(null);
 
           await pumpView(tester);

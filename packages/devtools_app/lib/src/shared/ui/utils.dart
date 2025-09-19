@@ -6,10 +6,10 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
 
 /// Returns a [TextSpan] that only includes the first [length] characters of

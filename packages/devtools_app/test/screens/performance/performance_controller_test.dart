@@ -29,12 +29,7 @@ void main() {
       final mockServiceManager =
           mockServiceConnection.serviceManager as MockServiceManager;
       final connectedApp = MockConnectedApp();
-      mockConnectedApp(
-        connectedApp,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
+      mockConnectedApp(connectedApp);
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
       when(
         mockServiceManager.connectedState,

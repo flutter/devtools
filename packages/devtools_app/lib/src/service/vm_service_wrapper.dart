@@ -487,7 +487,7 @@ class VmServiceWrapper extends VmService {
     String command, {
     required Object? args,
   }) async {
-    if (!FeatureFlags.dapDebugging) return null;
+    if (!FeatureFlags.dapDebugging.isEnabled) return null;
 
     // Warn the user if there is no DDS connection.
     if (!_ddsSupported) {

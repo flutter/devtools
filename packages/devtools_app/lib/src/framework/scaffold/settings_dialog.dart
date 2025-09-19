@@ -77,7 +77,7 @@ class SettingsDialog extends StatelessWidget {
               gaItem: gac.vmDeveloperMode,
             ),
           ),
-          if (FeatureFlags.wasmOptInSetting) ...[
+          if (FeatureFlags.wasmOptInSetting.isEnabled) ...[
             const SizedBox(height: largeSpacing),
             ...dialogSubHeader(theme, 'Experimental features'),
             Flexible(

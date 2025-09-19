@@ -65,7 +65,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                 const SizedBox(height: largeSpacing),
                 // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up
                 // after Inspector V2 has been released.
-                if (FeatureFlags.inspectorV2)
+                if (FeatureFlags.inspectorV2.isEnabled)
                   Flexible(
                     child: CheckboxSetting(
                       notifier:

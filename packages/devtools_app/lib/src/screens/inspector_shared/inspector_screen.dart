@@ -46,7 +46,7 @@ class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
   late InspectorScreenController controller;
 
   bool get shouldShowInspectorV2 =>
-      FeatureFlags.inspectorV2 &&
+      FeatureFlags.inspectorV2.isEnabled &&
       !preferences.inspector.legacyInspectorEnabled.value;
 
   @override

@@ -36,12 +36,7 @@ void main() {
     when(
       scriptManager.getScript(any),
     ).thenAnswer((_) => Future<Script>.value(testScript));
-    mockConnectedApp(
-      fakeServiceConnection.serviceManager.connectedApp!,
-      isFlutterApp: true,
-      isProfileBuild: false,
-      isWebApp: false,
-    );
+    mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, scriptManager);

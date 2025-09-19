@@ -575,7 +575,7 @@ class DebuggerController extends DevToolsScreenController
       );
     }
     // Update the variables for the stack frame:
-    if (FeatureFlags.dapDebugging) {
+    if (FeatureFlags.dapDebugging.isEnabled) {
       serviceConnection.appState.setDapVariables(
         frame != null ? await _createDapVariablesForFrame(frame.frame) : [],
       );

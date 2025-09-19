@@ -72,12 +72,7 @@ void main() {
   setUp(() async {
     scene = MemoryDefaultScene();
     await scene.setUp(classList: classList);
-    mockConnectedApp(
-      scene.fakeServiceConnection.serviceManager.connectedApp!,
-      isFlutterApp: true,
-      isProfileBuild: false,
-      isWebApp: false,
-    );
+    mockConnectedApp(scene.fakeServiceConnection.serviceManager.connectedApp!);
 
     final mockScriptManager = MockScriptManager();
     when(
@@ -112,11 +107,11 @@ void main() {
 
   group('release memory', () {
     setUp(() {
-      FeatureFlags.memoryObserver = true;
+      FeatureFlags.memoryObserver.setEnabledForTests(true);
     });
 
     tearDown(() {
-      FeatureFlags.memoryObserver = false;
+      FeatureFlags.memoryObserver.setEnabledForTests(false);
     });
 
     testWidgetsWithWindowSize('full release', _windowSize, (

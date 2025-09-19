@@ -18,27 +18,8 @@ class SemanticVersion with CompareMixin<SemanticVersion> {
   factory SemanticVersion.parse(String? versionString) {
     if (versionString == null) return SemanticVersion();
 
-    // Remove any build metadata, denoted by a '+' character and whatever
-    // follows.
-    final buildMetadataIndex = versionString.indexOf('+');
-    if (buildMetadataIndex != -1) {
-      versionString = versionString.substring(0, buildMetadataIndex);
-    }
+    final version = sanitizeVersionStr(versionString);
 
-    // [versionString] is expected to be of the form for VM.version, Dart, and
-    // Flutter, respectively:
-    // 2.15.0-233.0.dev (dev) (Mon Oct 18 14:06:26 2021 -0700) on "ios_x64"
-    // 2.15.0-178.1.beta
-    // 2.6.0-12.0.pre.443
-    // 2.6.0-12.0.pre-443
-    //
-    // First canonicalize the version string to convert any prerelease suffix
-    // with a "-" to a prerelease suffix with a ".".
-    final canonicalized = _canonicalizeVersion(versionString);
-    // Then split on the spaces to the version, and then on the dash char to
-    // separate the main semantic version from the pre release version.
-    final splitOnSpaces = canonicalized.split(' ');
-    final version = splitOnSpaces.first;
     final splitOnDash = version.split('-');
     assert(splitOnDash.length <= 2, 'version: $version');
 
@@ -118,6 +99,33 @@ class SemanticVersion with CompareMixin<SemanticVersion> {
   int? preReleaseMajor;
 
   int? preReleaseMinor;
+
+  /// Sanitizes a version string so that it can be parsed as a
+  /// [SemanticVersion].
+  ///
+  /// This method will remove build metadata and other trailing text from the
+  /// version string. For example:
+  ///
+  /// * '2.15.0-233.0.dev (dev) (Mon Oct 18 14:06:26 2021 -0700) on "ios_x64"' -> '2.15.0-233.0.dev'
+  /// * '2.15.0-178.1.beta' -> '2.15.0-178.1.beta'
+  /// * '2.6.0-12.0.pre.443' -> '2.6.0-12.0.pre.443'
+  /// * '3.0.0+123' -> '3.0.0'
+  static String sanitizeVersionStr(String versionString) {
+    // Remove any build metadata, denoted by a '+' character and whatever
+    // follows.
+    final buildMetadataIndex = versionString.indexOf('+');
+    if (buildMetadataIndex != -1) {
+      versionString = versionString.substring(0, buildMetadataIndex);
+    }
+    // Canonicalize the version string to convert any prerelease suffix with a
+    // "-" to a prerelease suffix with a ".".
+    final canonicalized = _canonicalizeVersion(versionString);
+    // Then split on the spaces to the version, and then on the dash char to
+    // separate the main semantic version from the pre release version.
+    final splitOnSpaces = canonicalized.split(' ');
+    final version = splitOnSpaces.first;
+    return version;
+  }
 
   static final _nonStandardPreReleaseVersionRegex = RegExp(r'(\.pre)-(\d+)$');
 

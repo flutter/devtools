@@ -24,7 +24,7 @@ class Variables extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
-    if (FeatureFlags.dapDebugging) {
+    if (FeatureFlags.dapDebugging.isEnabled) {
       return TreeView<DapObjectNode>(
         dataRootsListenable: serviceConnection.appState.dapVariables,
         dataDisplayProvider: (variable, onPressed) {

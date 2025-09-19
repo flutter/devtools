@@ -291,7 +291,7 @@ class PerformanceController extends DevToolsScreenController
 
   @override
   FutureOr<void> releaseMemory({bool partial = false}) async {
-    if (FeatureFlags.memoryObserver) {
+    if (FeatureFlags.memoryObserver.isEnabled) {
       await clearData(partial: partial, clearVmTimeline: !partial);
     }
   }

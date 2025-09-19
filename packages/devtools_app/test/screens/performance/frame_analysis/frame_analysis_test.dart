@@ -36,12 +36,7 @@ void main() {
       final fakeServiceConnection = FakeServiceConnectionManager();
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(NotificationService, NotificationService());
-      mockConnectedApp(
-        fakeServiceConnection.serviceManager.connectedApp!,
-        isFlutterApp: true,
-        isProfileBuild: true,
-        isWebApp: false,
-      );
+      mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
     });
 
     Future<void> pumpAnalysisView(

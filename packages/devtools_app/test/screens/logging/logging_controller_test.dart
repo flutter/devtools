@@ -338,12 +338,12 @@ void main() {
 
     group('releaseMemory', () {
       setUp(() {
-        FeatureFlags.memoryObserver = true;
+        FeatureFlags.memoryObserver.setEnabledForTests(true);
         prepareTestLogs();
       });
 
       tearDown(() {
-        FeatureFlags.memoryObserver = false;
+        FeatureFlags.memoryObserver.setEnabledForTests(false);
       });
 
       test('releaseMemory - full release', () {

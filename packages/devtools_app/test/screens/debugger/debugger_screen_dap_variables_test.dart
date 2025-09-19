@@ -23,17 +23,12 @@ void main() {
   const windowSize = Size(2500, 1500);
 
   setUp(() {
-    FeatureFlags.dapDebugging = true;
+    FeatureFlags.dapDebugging.setEnabledForTests(true);
     vmService = createMockVmServiceWrapperWithDefaults();
     fakeServiceConnection = FakeServiceConnectionManager(service: vmService);
     scriptManager = MockScriptManager();
 
-    mockConnectedApp(
-      fakeServiceConnection.serviceManager.connectedApp!,
-      isProfileBuild: false,
-      isFlutterApp: true,
-      isWebApp: false,
-    );
+    mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, scriptManager);

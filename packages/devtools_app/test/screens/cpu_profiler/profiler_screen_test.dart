@@ -77,9 +77,6 @@ void main() {
       (WidgetTester tester) async {
         mockConnectedApp(
           scene.fakeServiceConnection.serviceManager.connectedApp!,
-          isFlutterApp: true,
-          isProfileBuild: true,
-          isWebApp: false,
         );
         await pumpProfilerScreen(tester);
         verifyBaseState();

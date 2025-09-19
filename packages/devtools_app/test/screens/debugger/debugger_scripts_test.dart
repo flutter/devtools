@@ -36,12 +36,7 @@ void main() {
     );
     setGlobal(PreferencesController, PreferencesController());
 
-    mockConnectedApp(
-      fakeServiceConnection.serviceManager.connectedApp!,
-      isProfileBuild: false,
-      isFlutterApp: true,
-      isWebApp: false,
-    );
+    mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
   }
 
   Future<void> pumpDebuggerScreen(

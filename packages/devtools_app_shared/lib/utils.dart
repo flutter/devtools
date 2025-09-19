@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 export 'src/utils/auto_dispose.dart';
+export 'src/utils/enum_utils.dart';
 export 'src/utils/globals.dart';
 export 'src/utils/list.dart';
 export 'src/utils/url/url.dart';

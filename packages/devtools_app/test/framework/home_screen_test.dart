@@ -83,12 +83,7 @@ void main() {
         fakeServiceConnection.serviceManager.vm.operatingSystem,
       ).thenReturn('android');
       final app = fakeServiceConnection.serviceManager.connectedApp!;
-      mockConnectedApp(
-        app,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
+      mockConnectedApp(app);
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
     }

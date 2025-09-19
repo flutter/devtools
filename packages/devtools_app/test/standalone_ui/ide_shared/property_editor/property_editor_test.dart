@@ -927,7 +927,7 @@ void main() {
     );
 
     setUp(() {
-      FeatureFlags.propertyEditorRefactors = true;
+      FeatureFlags.propertyEditorRefactors.setEnabledForTests(true);
 
       refactorCount = 0;
       when(
