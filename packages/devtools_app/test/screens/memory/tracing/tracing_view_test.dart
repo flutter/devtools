@@ -78,9 +78,6 @@ void main() {
       await scene.setUp(classList: classList);
       mockConnectedApp(
         scene.fakeServiceConnection.serviceManager.connectedApp!,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
       );
 
       final mockScriptManager = MockScriptManager();

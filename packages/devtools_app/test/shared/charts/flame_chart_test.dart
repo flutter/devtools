@@ -121,12 +121,7 @@ void main() {
       setGlobal(PreferencesController, PreferencesController());
 
       final connectedApp = MockConnectedApp();
-      mockConnectedApp(
-        connectedApp,
-        isFlutterApp: true,
-        isProfileBuild: true,
-        isWebApp: false,
-      );
+      mockConnectedApp(connectedApp, isProfileBuild: true);
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
 
       controller = CpuProfilerController();

@@ -53,12 +53,7 @@ void main() {
     'does not display floating debugger controls when debugger screen is showing',
     (WidgetTester tester) async {
       final connectedApp = MockConnectedApp();
-      mockConnectedApp(
-        connectedApp,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
+      mockConnectedApp(connectedApp);
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
       final mockDebuggerController = MockDebuggerController();

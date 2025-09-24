@@ -84,7 +84,7 @@ extension FrameworkCore on Never {
     // preferences have been initialized.
     await extensionService.initialize();
 
-    if (FeatureFlags.memoryObserver) {
+    if (FeatureFlags.memoryObserver.isEnabled) {
       _memoryObserver.init();
     }
   }
@@ -99,7 +99,7 @@ extension FrameworkCore on Never {
     preferences.dispose();
     _themeManager?.dispose();
     unawaited(dtdManager.dispose());
-    if (FeatureFlags.memoryObserver) {
+    if (FeatureFlags.memoryObserver.isEnabled) {
       _memoryObserver.dispose();
     }
   }

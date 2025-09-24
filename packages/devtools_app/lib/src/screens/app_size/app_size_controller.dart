@@ -772,7 +772,7 @@ class AppSizeController extends DevToolsScreenController {
 
   @override
   void releaseMemory({bool partial = false}) {
-    if (FeatureFlags.memoryObserver) {
+    if (FeatureFlags.memoryObserver.isEnabled) {
       // This behavior is the same regardless of the value of `partial`. We can
       // implement a partial clearing if it becomes necessary.
       clear(AppSizeScreen.analysisTabKey);

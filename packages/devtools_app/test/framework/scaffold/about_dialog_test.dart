@@ -30,12 +30,7 @@ void main() {
         fakeServiceConnection.serviceManager.vm.operatingSystem,
       ).thenReturn('android');
 
-      mockConnectedApp(
-        fakeServiceConnection.serviceManager.connectedApp!,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
+      mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(
         DevToolsEnvironmentParameters,

@@ -17,13 +17,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-import '../feature_flags.dart';
 import '../globals.dart';
 import '../primitives/listenable.dart';
 import '../ui/icons.dart';
 import '../ui/utils.dart';
 
 final _log = Logger('screen.dart');
+
+const _kNetworkDisconnectExperience = bool.fromEnvironment(
+  'network_disconnect_experience',
+  defaultValue: true,
+);
 
 enum ScreenMetaData {
   home(
@@ -81,7 +85,7 @@ enum ScreenMetaData {
     tutorialVideoTimestamp: '?t=547',
     requiresConnection: false,
     // ignore: avoid_redundant_argument_values, false positive
-    worksWithOfflineData: FeatureFlags.networkDisconnectExperience,
+    worksWithOfflineData: _kNetworkDisconnectExperience,
   ),
   logging(
     'logging',
