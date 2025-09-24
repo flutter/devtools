@@ -44,6 +44,8 @@ final _log = Logger('framework_core');
 
 /// A namespace for core framework objects and methods.
 extension FrameworkCore on Never {
+  static final _memoryObserver = MemoryObserver();
+
   /// Initializes the DevTools framework, which includes setting up global
   /// variables, local storage, preferences, and initializing framework level
   /// managers like the Dart Tooling Daemon manager and the DevTools extensions
@@ -79,6 +81,8 @@ extension FrameworkCore on Never {
     // This must be called after the DTD connection has been initialized and after
     // preferences have been initialized.
     await extensionService.initialize();
+
+    _memoryObserver.init();
   }
 
   /// Disposes framework level services and managers.
@@ -91,6 +95,7 @@ extension FrameworkCore on Never {
     preferences.dispose();
     _themeManager?.dispose();
     unawaited(dtdManager.dispose());
+    _memoryObserver.dispose();
   }
 
   static void _initGlobals() {
