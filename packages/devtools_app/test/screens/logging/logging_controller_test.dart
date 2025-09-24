@@ -8,7 +8,6 @@ library;
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/primitives/message_bus.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -338,12 +337,7 @@ void main() {
 
     group('releaseMemory', () {
       setUp(() {
-        FeatureFlags.memoryObserver.setEnabledForTests(true);
         prepareTestLogs();
-      });
-
-      tearDown(() {
-        FeatureFlags.memoryObserver.setEnabledForTests(false);
       });
 
       test('releaseMemory - full release', () {
@@ -366,8 +360,7 @@ void main() {
 
   group('LogData', () {
     test(
-      'pretty prints when details are json, and returns its details otherwise.',
-      () {
+      'pretty prints when details are json, and returns its details otherwise.',    () {
         final nonJson = LogData('some kind', 'Not json', 0);
         final json = LogData(
           'some kind',

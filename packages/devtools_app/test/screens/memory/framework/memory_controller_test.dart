@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
@@ -106,13 +105,6 @@ void main() {
   );
 
   group('release memory', () {
-    setUp(() {
-      FeatureFlags.memoryObserver.setEnabledForTests(true);
-    });
-
-    tearDown(() {
-      FeatureFlags.memoryObserver.setEnabledForTests(false);
-    });
 
     testWidgetsWithWindowSize('full release', _windowSize, (
       WidgetTester tester,

@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler_controller.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,7 +17,6 @@ void main() {
     late ProfilerScreenController controller;
 
     setUp(() {
-      FeatureFlags.memoryObserver.setEnabledForTests(true);
       final fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
@@ -63,7 +61,6 @@ void main() {
     });
 
     test('releaseMemory', () async {
-      FeatureFlags.memoryObserver.setEnabledForTests(true);
       await controller.cpuProfilerController.loadAllSamples();
       expect(controller.cpuProfilerController.dataNotifier.value, isNotNull);
       expect(
@@ -75,7 +72,6 @@ void main() {
         controller.cpuProfilerController.dataNotifier.value,
         CpuProfilerController.baseStateCpuProfileData,
       );
-      FeatureFlags.memoryObserver.setEnabledForTests(false);
     });
   });
 }

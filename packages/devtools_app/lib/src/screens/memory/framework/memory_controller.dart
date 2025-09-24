@@ -10,7 +10,6 @@ import 'dart:async';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../shared/feature_flags.dart';
 import '../../../shared/framework/screen.dart';
 import '../../../shared/framework/screen_controllers.dart';
 import '../../../shared/globals.dart';
@@ -217,11 +216,9 @@ class MemoryController extends DevToolsScreenController
 
   @override
   FutureOr<void> releaseMemory({bool partial = false}) async {
-    if (FeatureFlags.memoryObserver.isEnabled) {
-      diff.clearSnapshots(partial: partial);
-      // Clear all allocation traces since the traces form a single tracing
-      // profile.
-      await trace?.clear();
-    }
+    diff.clearSnapshots(partial: partial);
+    // Clear all allocation traces since the traces form a single tracing
+    // profile.
+    await trace?.clear();
   }
 }
