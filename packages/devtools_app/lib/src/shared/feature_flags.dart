@@ -44,15 +44,6 @@ bool get enableBeta => enableExperiments || !isExternalBuild;
 /// to the [_booleanFlags] or [_flutterChannelFlags] map for debugging
 /// purposes.
 extension FeatureFlags on Never {
-  /// Flag to enable the DevTools memory observer, which attempts to help users
-  /// avoid OOM crashes.
-  ///
-  /// https://github.com/flutter/devtools/issues/7002
-  static final memoryObserver = BooleanFeatureFlag(
-    name: 'memoryObserver',
-    enabled: true,
-  );
-
   /// Flag to enable save/load for the Memory screen.
   ///
   /// https://github.com/flutter/devtools/issues/8019
@@ -115,7 +106,6 @@ extension FeatureFlags on Never {
   /// When adding a new boolean flag, you are responsible for adding it to this
   /// map as well.
   static final _booleanFlags = <BooleanFeatureFlag>{
-    memoryObserver,
     memorySaveLoad,
     networkSaveLoad,
     devToolsExtensions,

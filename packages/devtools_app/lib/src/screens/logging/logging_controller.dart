@@ -18,7 +18,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
-import '../../shared/feature_flags.dart';
 import '../../shared/framework/app_error_handling.dart' as error_handling;
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
@@ -805,13 +804,11 @@ class LoggingController extends DevToolsScreenController
 
   @override
   void releaseMemory({bool partial = false}) {
-    if (FeatureFlags.memoryObserver.isEnabled) {
-      if (partial) {
-        // Trim logs from the front so that the oldest logs are removed.
-        _updateData(data.sublist(data.length ~/ 2));
-      } else {
-        clear();
-      }
+    if (partial) {
+      // Trim logs from the front so that the oldest logs are removed.
+      _updateData(data.sublist(data.length ~/ 2));
+    } else {
+      clear();
     }
   }
 }

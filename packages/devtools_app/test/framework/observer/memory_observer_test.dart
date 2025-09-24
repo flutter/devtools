@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/observer/memory_observer.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/primitives/byte_utils.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -36,10 +35,6 @@ void main() {
       return memoryUsageBytes;
     }
 
-    setUpAll(() {
-      FeatureFlags.memoryObserver.setEnabledForTests(true);
-    });
-
     setUp(() {
       measurementComplete = Completer();
       observer = MemoryObserver(
@@ -55,10 +50,6 @@ void main() {
 
     tearDown(() {
       observer.dispose();
-    });
-
-    tearDownAll(() {
-      FeatureFlags.memoryObserver.setEnabledForTests(false);
     });
 
     test(
