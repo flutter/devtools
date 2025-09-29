@@ -21,6 +21,7 @@ const _machineFlag = 'machine';
 const _dtdUriFlag = 'dtd-uri';
 const _dtdExposedUriFlag = 'dtd-exposed-uri';
 const _allowEmbeddingFlag = 'allow-embedding';
+const _launchBrowserFlag = 'launch-browser';
 
 /// This command builds DevTools in release mode by running the
 /// `dt build` command and then serves DevTools with a locally
@@ -85,6 +86,13 @@ class ServeCommand extends Command {
             ' of building it using `flutter build web` and serving the assets'
             ' directly from the DevTools server.',
       )
+      ..addFlag(
+        _launchBrowserFlag,
+        negatable: true,
+        defaultsTo: true,
+        help:
+            'Whether to automatically open a browser and load DevTools in it. Defaults to true, pass --no-launch-browser to disable.',
+      )
       ..addDebugServerFlag()
       ..addServeWithSdkOption()
       ..addUpdateFlutterFlag()
@@ -146,6 +154,7 @@ class ServeCommand extends Command {
 
     final results = argResults!;
     final buildApp = results[_buildAppFlag] as bool;
+    final launchBrowser = results[_launchBrowserFlag] as bool;
     final runApp = results[SharedCommandArgs.runApp.flagName] as bool;
     final debugServer = results[SharedCommandArgs.debugServer.flagName] as bool;
     final updateFlutter =
@@ -175,27 +184,27 @@ class ServeCommand extends Command {
     // Any flag that we aren't removing here is intended to be passed through.
     final remainingArguments =
         List.of(results.arguments)
-          ..remove(SharedCommandArgs.updateFlutter.asArg())
-          ..remove(SharedCommandArgs.updateFlutter.asArg(negated: true))
-          ..remove(SharedCommandArgs.updatePerfetto.asArg())
-          ..remove(SharedCommandArgs.wasm.asArg())
-          ..remove(SharedCommandArgs.noStripWasm.asArg())
-          ..remove(SharedCommandArgs.noMinifyWasm.asArg())
-          ..remove(valueAsArg(_buildAppFlag))
-          ..remove(valueAsArg(_buildAppFlag, negated: true))
-          ..remove(SharedCommandArgs.runApp.asArg())
-          ..remove(SharedCommandArgs.debugServer.asArg())
-          ..remove(SharedCommandArgs.pubGet.asArg())
-          ..remove(SharedCommandArgs.pubGet.asArg(negated: true))
-          ..removeWhere(
+      ..remove(SharedCommandArgs.updateFlutter.asArg())
+      ..remove(SharedCommandArgs.updateFlutter.asArg(negated: true))
+      ..remove(SharedCommandArgs.updatePerfetto.asArg())
+      ..remove(SharedCommandArgs.wasm.asArg())
+      ..remove(SharedCommandArgs.noStripWasm.asArg())
+      ..remove(SharedCommandArgs.noMinifyWasm.asArg())
+      ..remove(valueAsArg(_buildAppFlag))
+      ..remove(valueAsArg(_buildAppFlag, negated: true))
+      ..remove(SharedCommandArgs.runApp.asArg())
+      ..remove(SharedCommandArgs.debugServer.asArg())
+      ..remove(SharedCommandArgs.pubGet.asArg())
+      ..remove(SharedCommandArgs.pubGet.asArg(negated: true))
+      ..removeWhere(
             (element) =>
                 element.startsWith(SharedCommandArgs.buildMode.asArg()),
-          )
-          ..removeWhere(
-            (element) => element.startsWith(
-              valueAsArg(SharedCommandArgs.serveWithDartSdk.flagName),
-            ),
-          );
+      )
+      ..removeWhere(
+        (element) => element.startsWith(
+          valueAsArg(SharedCommandArgs.serveWithDartSdk.flagName),
+        ),
+      );
 
     final localDartSdkLocation = Platform.environment['LOCAL_DART_SDK'];
     if (localDartSdkLocation == null) {
@@ -292,11 +301,11 @@ class ServeCommand extends Command {
     final cliCommand = CliCommand.dart([
       if (debugServer) ...['run', '--observe=0'],
       ddsServeLocalScriptPath,
-      if (runApp)
+      if (!launchBrowser || runApp)
         // When running DevTools via `flutter run`, the [flutterRunProcess]
         // below will launch DevTools in the browser.
-        '--no-launch-browser'
-      else
+        '--no-launch-browser',
+      if (!runApp)
         // Only pass a build location if the server is serving the web assets
         // (i.e. not when DevTools app is ran via `flutter run`).
         '--devtools-build=$devToolsBuildLocation',
@@ -372,11 +381,11 @@ class ServeCommand extends Command {
       // Consolidate important stdout content for easy access.
       final debugServerContent =
           debugServer
-              ? '''
+          ? '''
 - VM Service URI: $debugServerVmServiceUri
 - DevTools URI for debugging the DevTools server: $debugServerDevToolsConnection
 '''
-              : '';
+          : '';
 
       print('''
 -------------------------------------------------------------------
