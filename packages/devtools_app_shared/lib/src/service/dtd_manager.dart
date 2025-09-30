@@ -6,6 +6,8 @@ import 'package:dtd/dtd.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
+export 'package:dtd/dtd.dart';
+
 final _log = Logger('dtd_manager');
 
 /// Manages a connection to the Dart Tooling Daemon.
