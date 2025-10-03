@@ -11,7 +11,13 @@ Discord channel before trying to create a DevTools release.
 
 # DevTools release process
 
-![A diagram of the DevTools release process](./_markdown_images/release_diagram.png)
+```mermaid
+flowchart LR
+    devtools["`### flutter/devtools repo
+    devtools is developed here on a single branch, _master_.`"] => dartSdk["`### Dart SDK
+    DevTools is released into the Dart SDK by updating the 'devtools_rev' entry in the _sdk/DEPS_ file.`"] => flutterSdk["`### Flutter SDK
+    The Dart SDK, **including DevTools**, is packaged with the Flutter SDK as part of the Dart / Flutter combined release process.`"]
+```
 
 A new minor version of DevTools should be released into the Dart SDK **monthly**.
 This release should be timed with the Dart / Flutter release code cutoff dates so
