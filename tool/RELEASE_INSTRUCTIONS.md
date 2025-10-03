@@ -13,12 +13,13 @@ Discord channel before trying to create a DevTools release.
 
 ```mermaid
 flowchart LR
-    devtools["`### flutter/devtools repo
-    devtools is developed here on a single branch, _master_.`"] -->
+    devtools["`**flutter/devtools repo**`
+    `devtools is developed here on a single branch, _master_.`"]
     dartSdk["`### Dart SDK
-    DevTools is released into the Dart SDK by updating the 'devtools_rev' entry in the _sdk/DEPS_ file.`"] -->
+    DevTools is released into the Dart SDK by updating the 'devtools_rev' entry in the _sdk/DEPS_ file.`"]
     flutterSdk["`### Flutter SDK
     The Dart SDK, **including DevTools**, is packaged with the Flutter SDK as part of the Dart / Flutter combined release process.`"]
+    devtools --> dartSdk --> flutterSdk
 ```
 
 A new minor version of DevTools should be released into the Dart SDK **monthly**.
