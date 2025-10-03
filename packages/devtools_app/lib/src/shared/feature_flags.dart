@@ -110,6 +110,16 @@ extension FeatureFlags on Never {
     enabled: true,
   );
 
+  /// Flag to enable refactors in the Flutter Property Editor sidebar.
+  ///
+  /// https://github.com/flutter/devtools/issues/9214
+  static const wasmByDefault = FlutterChannelFeatureFlag(
+    name: 'wasmByDefault',
+    flutterChannel: FlutterChannel.beta,
+    enabledForDartApps: false,
+    enabledForFlutterAppsFallback: false,
+  );
+
   /// A set of all the boolean feature flags for debugging purposes.
   ///
   /// When adding a new boolean flag, you are responsible for adding it to this
@@ -130,7 +140,7 @@ extension FeatureFlags on Never {
   /// When adding a new Flutter channel flag, you are responsible for adding it
   /// to this map as well.
   static final _flutterChannelFlags = <FlutterChannelFeatureFlag>{
-    // TODO(https://github.com/flutter/devtools/issues/9438): Add wasm flag.
+    wasmByDefault,
   };
 
   /// A helper to print the status of all the feature flags.
