@@ -120,7 +120,6 @@ extension FeatureFlags on Never {
     enabledForFlutterAppsFallback: false,
   );
 
-
   /// A set of all the boolean feature flags for debugging purposes.
   ///
   /// When adding a new boolean flag, you are responsible for adding it to this
