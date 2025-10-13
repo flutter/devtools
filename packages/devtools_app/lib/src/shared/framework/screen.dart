@@ -367,11 +367,11 @@ abstract class Screen {
   /// creating a documentation url using [docPageId].
   String? get docPageId => null;
 
-  double approximateTabWidth(
-    TextTheme textTheme, {
+  double approximateTabWidth({
+    String? title,
     bool includeTabBarSpacing = true,
   }) {
-    final title = _userFacingTitle;
+    title ??= _userFacingTitle;
     final textWidth = calculateTextSpanWidth(TextSpan(text: title));
     const measurementBuffer = 1.0;
     return textWidth +
@@ -417,32 +417,33 @@ abstract class Screen {
           ),
         );
 
-        if (count > 0) {
-          // Calculate the width of the title text so that we can provide an accurate
-          // size for the [BadgePainter].
-          final titleWidth = calculateTextSpanWidth(
-            TextSpan(text: title, style: Theme.of(context).regularTextStyle),
-          );
-
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              return Stack(
-                children: [
-                  CustomPaint(
-                    size: Size(defaultIconSize + denseSpacing + titleWidth, 0),
-                    painter: BadgePainter(
-                      number: count,
-                      colorScheme: Theme.of(context).colorScheme,
-                    ),
-                  ),
-                  tab,
-                ],
-              );
-            },
-          );
+        if (count == 0) {
+          return tab;
         }
 
-        return tab;
+        // Calculate the width of the title text so that we can provide an accurate
+        // size for the [BadgePainter].
+        final titleWidth = approximateTabWidth(
+          title: '$title $count',
+          includeTabBarSpacing: false,
+        );
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            return Stack(
+              children: [
+                CustomPaint(
+                  size: Size(titleWidth, 0),
+                  painter: BadgePainter(
+                    number: count,
+                    colorScheme: Theme.of(context).colorScheme,
+                  ),
+                ),
+                tab,
+              ],
+            );
+          },
+        );
       },
     );
   }
@@ -600,14 +601,16 @@ class BadgePainter extends CustomPainter {
       defaultIconSize,
       countPainter.width + denseSpacing,
     );
-    canvas.drawOval(
-      Rect.fromLTWH(size.width, 0, badgeWidth, defaultIconSize),
+    final leftOffset = size.width - badgeWidth;
+    final rect = Rect.fromLTWH(leftOffset, 2, badgeWidth, defaultIconSize);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(4)),
       paint,
     );
 
     countPainter.paint(
       canvas,
-      Offset(size.width + (badgeWidth - countPainter.width) / 2, 0),
+      Offset(leftOffset + (badgeWidth - countPainter.width) / 2, 0),
     );
     countPainter.dispose();
   }

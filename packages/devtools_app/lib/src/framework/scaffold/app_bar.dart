@@ -137,7 +137,7 @@ class DevToolsAppBar extends StatelessWidget {
   }) {
     final tabsWidth = screens.fold(
       0.0,
-      (prev, screen) => prev + screen.approximateTabWidth(textTheme),
+      (prev, screen) => prev + screen.approximateTabWidth(),
     );
     final actionsWidth = (actions?.length ?? 0) * actionWidgetSize;
     return tabsWidth + VerticalLineSpacer.totalWidth + actionsWidth;
@@ -183,7 +183,6 @@ class TabOverflowButton extends StatelessWidget {
       var tab = screen.buildTab(context);
       if (i == selectedIndex) {
         final tabWidth = screen.approximateTabWidth(
-          theme.textTheme,
           includeTabBarSpacing: false,
         );
         tab = SelectedTabWrapper(
