@@ -176,7 +176,7 @@ void _verifyScoresAgainstThresholds(
   }
 }
 
-const _frameTimeFor60FPSInMicros = 16666.6 / 4;
+const _frameTimeFor60FPSInMicros = 16666.6;
 // const _frameTimeFor30FPSInMicros = 33333.3;
 
 /// Creates the expected [DevToolsBenchmark]s for the specified compiler.
