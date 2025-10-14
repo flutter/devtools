@@ -515,7 +515,7 @@ class NetworkController extends DevToolsScreenController
 
   @override
   FutureOr<void> releaseMemory({bool partial = false}) async {
-    if (FeatureFlags.memoryObserver) {
+    if (FeatureFlags.memoryObserver.isEnabled) {
       await clear(partial: partial);
     }
   }

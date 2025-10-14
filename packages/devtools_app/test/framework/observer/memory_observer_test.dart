@@ -37,7 +37,7 @@ void main() {
     }
 
     setUpAll(() {
-      FeatureFlags.memoryObserver = true;
+      FeatureFlags.memoryObserver.setEnabledForTests(true);
     });
 
     setUp(() {
@@ -58,7 +58,7 @@ void main() {
     });
 
     tearDownAll(() {
-      FeatureFlags.memoryObserver = false;
+      FeatureFlags.memoryObserver.setEnabledForTests(false);
     });
 
     test(

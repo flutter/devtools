@@ -32,12 +32,7 @@ void main() {
     scriptsHistory = ScriptsHistory();
 
     final app = fakeServiceConnection.serviceManager.connectedApp!;
-    mockConnectedApp(
-      app,
-      isFlutterApp: false,
-      isProfileBuild: false,
-      isWebApp: false,
-    );
+    mockConnectedApp(app);
     when(
       fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow,
     ).thenReturn(false);

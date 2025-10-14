@@ -40,12 +40,7 @@ void main() {
   group('FlutterFramesChart', () {
     setUp(() {
       final fakeServiceConnection = FakeServiceConnectionManager();
-      mockConnectedApp(
-        fakeServiceConnection.serviceManager.connectedApp!,
-        isFlutterApp: true,
-        isProfileBuild: true,
-        isWebApp: false,
-      );
+      mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(OfflineDataController, OfflineDataController());
       setGlobal(IdeTheme, IdeTheme());

@@ -217,7 +217,7 @@ class MemoryController extends DevToolsScreenController
 
   @override
   FutureOr<void> releaseMemory({bool partial = false}) async {
-    if (FeatureFlags.memoryObserver) {
+    if (FeatureFlags.memoryObserver.isEnabled) {
       diff.clearSnapshots(partial: partial);
       // Clear all allocation traces since the traces form a single tracing
       // profile.

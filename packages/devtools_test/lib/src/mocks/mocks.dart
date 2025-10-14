@@ -143,10 +143,11 @@ void mockWebVm(VM vm) {
 
 void mockConnectedApp(
   ConnectedApp connectedApp, {
-  required bool isFlutterApp,
-  required bool isProfileBuild,
-  required bool isWebApp,
+  bool isFlutterApp = true,
+  bool isProfileBuild = false,
+  bool isWebApp = false,
   String os = 'ios',
+  String flutterVersion = '2.10.0',
 }) {
   assert(!(!isFlutterApp && isProfileBuild));
 
@@ -163,7 +164,7 @@ void mockConnectedApp(
     when(connectedApp.flutterVersionNow).thenReturn(
       FlutterVersion.parse({
         'type': 'Success',
-        'frameworkVersion': '2.10.0',
+        'frameworkVersion': flutterVersion,
         'channel': 'unknown',
         'repositoryUrl': 'unknown source',
         'frameworkRevision': '74432fa91c8ffbc555ffc2701309e8729380a012',
