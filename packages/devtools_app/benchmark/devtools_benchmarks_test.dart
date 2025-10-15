@@ -43,7 +43,7 @@ void main() {
         await _runBenchmarks(useWasm: useWasm);
       },
       timeout: const Timeout(Duration(minutes: 15)),
-      retry: 1,
+      retry: 0,
     );
   }
 }
