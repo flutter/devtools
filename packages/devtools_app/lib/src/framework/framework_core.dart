@@ -36,6 +36,7 @@ import '../shared/preferences/preferences.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/server/server.dart' as server;
 import '../shared/utils/utils.dart';
+import 'observer/memory_observer.dart';
 import 'theme_manager.dart';
 
 typedef ErrorReporter = void Function(String title, Object error);
