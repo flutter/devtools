@@ -99,7 +99,11 @@ class ConnectedApp {
 
   bool get isDebugFlutterAppNow => isFlutterAppNow! && !isProfileBuildNow!;
 
-  bool? get isRunningOnDartVM => serviceManager!.vm!.name != 'ChromeDebugProxy';
+  bool? get isRunningOnDartVM {
+    final name = serviceManager!.vm!.name;
+    // These are the two possible VM names returned by DWDS.
+    return name != 'ChromeDebugProxy' && name != 'WebSocketDebugProxy';
+  }
 
   Future<bool> get isDartCliApp async =>
       isRunningOnDartVM! && !(await isFlutterApp);
