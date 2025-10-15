@@ -42,7 +42,7 @@ jobs:
           ref: master
 
       - name: Load Cached Flutter SDK
-        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
         with:
           path: |
             ./tool/flutter-sdk
