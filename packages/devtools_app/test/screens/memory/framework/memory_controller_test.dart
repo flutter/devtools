@@ -105,7 +105,6 @@ void main() {
   );
 
   group('release memory', () {
-
     testWidgetsWithWindowSize('full release', _windowSize, (
       WidgetTester tester,
     ) async {

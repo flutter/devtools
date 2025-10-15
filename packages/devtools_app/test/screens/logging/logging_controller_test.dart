@@ -360,7 +360,8 @@ void main() {
 
   group('LogData', () {
     test(
-      'pretty prints when details are json, and returns its details otherwise.',    () {
+      'pretty prints when details are json, and returns its details otherwise.',
+      () {
         final nonJson = LogData('some kind', 'Not json', 0);
         final json = LogData(
           'some kind',
