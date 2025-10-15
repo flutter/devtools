@@ -30,6 +30,8 @@ class ConnectedApp {
   static const isRunningOnDartVMKey = 'isRunningOnDartVM';
   static const operatingSystemKey = 'operatingSystem';
   static const flutterVersionKey = 'flutterVersion';
+  static const dwdsChromeDebugProxyDeviceName = 'ChromeDebugProxy';
+  static const dwdsWebSocketDebugProxyDeviceName = 'WebSocketDebugProxy';
 
   final ServiceManager? serviceManager;
 
@@ -99,7 +101,12 @@ class ConnectedApp {
 
   bool get isDebugFlutterAppNow => isFlutterAppNow! && !isProfileBuildNow!;
 
-  bool? get isRunningOnDartVM => serviceManager!.vm!.name != 'ChromeDebugProxy';
+  bool? get isRunningOnDartVM {
+    final name = serviceManager!.vm!.name;
+    // These are the two possible VM names returned by DWDS.
+    return name != dwdsChromeDebugProxyDeviceName &&
+        name != dwdsWebSocketDebugProxyDeviceName;
+  }
 
   Future<bool> get isDartCliApp async =>
       isRunningOnDartVM! && !(await isFlutterApp);
