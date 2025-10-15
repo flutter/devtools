@@ -17,6 +17,11 @@ String? getWebUrl() => null;
 // Unused parameter lint doesn't make sense for stub files.
 void webRedirect(String url) {}
 
+/// Performs a web reload using window.location.reload().
+///
+/// No-op for non-web platforms.
+void webReload() {}
+
 /// Updates the query parameter with [key] to the new [value], and optionally
 /// reloads the page when [reload] is true.
 ///
