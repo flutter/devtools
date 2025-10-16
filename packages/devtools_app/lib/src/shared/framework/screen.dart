@@ -7,8 +7,6 @@
 /// @docImport '../utils/utils.dart';
 library;
 
-import 'dart:math' as math;
-
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/shared.dart';
@@ -395,9 +393,11 @@ abstract class Screen {
         screenId,
       ),
       builder: (context, count, _) {
-        final tab = Tab(
+        final colorScheme = Theme.of(context).colorScheme;
+        return Tab(
           key: tabKey,
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               if (icon != null || iconAsset != null)
                 DevToolsIcon(
@@ -413,36 +413,17 @@ abstract class Screen {
                   padding: const EdgeInsets.only(left: denseSpacing),
                   child: Text(title, style: Theme.of(context).regularTextStyle),
                 ),
-            ],
-          ),
-        );
-
-        if (count == 0) {
-          return tab;
-        }
-
-        // Calculate the width of the title text so that we can provide an accurate
-        // size for the [BadgePainter].
-        final titleWidth = approximateTabWidth(
-          title: '$title $count',
-          includeTabBarSpacing: false,
-        );
-
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            return Stack(
-              children: [
-                CustomPaint(
-                  size: Size(titleWidth, 0),
-                  painter: BadgePainter(
-                    number: count,
-                    colorScheme: Theme.of(context).colorScheme,
+              if (count > 0)
+                Padding(
+                  padding: const EdgeInsets.only(left: denseSpacing),
+                  child: RoundedLabel(
+                    labelText: '$count',
+                    backgroundColor: colorScheme.errorContainer,
+                    textColor: colorScheme.onErrorContainer,
                   ),
                 ),
-                tab,
-              ],
-            );
-          },
+            ],
+          ),
         );
       },
     );
@@ -571,57 +552,6 @@ abstract class Screen {
   }
   _log.finest('${screen.screenId} screen supported: returning true');
   return (show: true, disabledReason: null);
-}
-
-class BadgePainter extends CustomPainter {
-  BadgePainter({required this.number, required this.colorScheme});
-
-  final ColorScheme colorScheme;
-
-  final int number;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = colorScheme.errorContainer
-      ..style = PaintingStyle.fill;
-
-    final countPainter = TextPainter(
-      text: TextSpan(
-        text: '$number',
-        style: TextStyle(
-          color: colorScheme.onErrorContainer,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    final badgeWidth = math.max(
-      defaultIconSize,
-      countPainter.width + denseSpacing,
-    );
-    final leftOffset = size.width - badgeWidth;
-    final rect = Rect.fromLTWH(leftOffset, 2, badgeWidth, defaultIconSize);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(4)),
-      paint,
-    );
-
-    countPainter.paint(
-      canvas,
-      Offset(leftOffset + (badgeWidth - countPainter.width) / 2, 0),
-    );
-    countPainter.dispose();
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    if (oldDelegate is BadgePainter) {
-      return number != oldDelegate.number;
-    }
-    return true;
-  }
 }
 
 class ShortcutsConfiguration {
