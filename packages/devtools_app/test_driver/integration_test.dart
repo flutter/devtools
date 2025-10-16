@@ -24,8 +24,7 @@ const _defaultWebDriverScriptTimeoutInSeconds = 30;
 Future<void> main() async {
   final driver = await FlutterDriver.connect();
 
-  // Double the WebDriver timeout limits to handle test flakiness due to hitting
-  // the timeout limits.
+  // Double the WebDriver timeout limits to handle test flakiness.
   // See https://github.com/flutter/devtools/issues/9474
   await driver.webDriver.timeouts.setScriptTimeout(
     const Duration(seconds: _defaultWebDriverScriptTimeoutInSeconds * 2),
