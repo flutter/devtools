@@ -154,11 +154,11 @@ server instance:
       git clean -f -d;
       ```
 
-#### 3.1) Submit the Release PR
+### 4) Submit the Release PR
 
 Receive an LGTM for the PR, squash and commit.
 
-### 4) Wait for the binary to be uploaded CIPD
+### 5) Wait for the binary to be uploaded CIPD
 
 On each DevTools commit, DevTools is built and uploaded to CIPD. You can check the
 status of the builds on this
@@ -169,7 +169,7 @@ Within minutes, a build should be uploaded for the commit you just merged and ta
 > If the CIPD build times out, instructions for re-triggering can be found at
 [go/dart-engprod/release.md](http://go/dart-engprod/release.md)
 
-### 5) Update the DevTools hash in the Dart SDK
+### 6) Update the DevTools hash in the Dart SDK
 
 Run the tool script with the commit hash you just merged and tagged:
 ```shell
@@ -202,7 +202,7 @@ Quickly test the build and then add a reviewer:
 
 4. Add a reviewer and submit once approved.
 
-### 6) Tag the release
+### 7) Tag the release
 
 1. In your terminal from the `devtools` directory, checkout the commit that you
 just released into the Dart SDK (the hash you updated the DEPS file with):
@@ -218,7 +218,7 @@ just released into the Dart SDK (the hash you updated the DEPS file with):
    version for the tag is automatically determined from `packages/devtools/pubspec.yaml`
    so there is no need to manually enter the version.
 
-### 7) Verify and Submit the release notes
+### 8) Verify and Submit the release notes
 
 1. Follow the instructions outlined in the release notes
 [README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/release_notes/README.md)
@@ -227,7 +227,7 @@ to add DevTools release notes to Flutter website and test them in DevTools.
 [g/flutter-internal-announce](http://g/flutter-internal-announce) with a link to
 the new release notes.
 
-### 8) Prepare DevTools for the next beta release
+### 9) Prepare DevTools for the next beta release
 
 **The `daily-dev-bump` workflow is currently broken: [#8558](https://github.com/flutter/devtools/issues/8558). Until it's fixed, manually update the DevTools version for the next release and open a PR with the changes:**
 ```shell
@@ -392,7 +392,7 @@ need to perform a merge commit from the branch we just created (e.g. `2.29.1`)
 onto the `flutter/devtools` protected branch (`master`).
 
 1. Create a pull request in the GitHub UI from the cherry-pick branch to the
-`master` branch.
+   `master` branch.
    1. Navigate to `https://github.com/flutter/devtools/compare/<cherry-pick-branch>`,
       where `<cherry-pick-branch>` is the branch you pushed up to the `upstream`
       remote with the cherry-picked commit(s) (e.g. `2.29.1`).
@@ -404,9 +404,10 @@ onto the `flutter/devtools` protected branch (`master`).
       in **zero** lines of code.
    4. Ask a member of the DevTools team for review, but **DO NOT** squash and merge yet.
 
-2. Message @kenzieschmoll directly with the following request. If you cannot message
-   @kenzieschmoll directly, create an [issue](https://github.com/flutter/devtools/issues/new)
-   and assign it to @kenzieschmoll.
+2. Message @kenzieschmoll or @elliette directly with the following request. If you cannot
+   message @kenzieschmoll or @elliette directly, create an
+   [issue](https://github.com/flutter/devtools/issues/new) and assign it to
+   @kenzieschmoll or @elliette.
 
 
    Title:
