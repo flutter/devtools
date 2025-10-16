@@ -365,12 +365,8 @@ abstract class Screen {
   /// creating a documentation url using [docPageId].
   String? get docPageId => null;
 
-  double approximateTabWidth({
-    String? title,
-    bool includeTabBarSpacing = true,
-  }) {
-    title ??= _userFacingTitle;
-    final textWidth = calculateTextSpanWidth(TextSpan(text: title));
+  double approximateTabWidth({bool includeTabBarSpacing = true}) {
+    final textWidth = calculateTextSpanWidth(TextSpan(text: _userFacingTitle));
     const measurementBuffer = 1.0;
     return textWidth +
         denseSpacing +
