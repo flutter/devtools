@@ -19,6 +19,7 @@ import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
+import '../../shared/managers/banner_messages.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
@@ -138,6 +139,7 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
     super.initState();
     ga.screen(NetworkScreen.id);
     controller = screenControllers.lookup<NetworkController>();
+    maybePushCopyToClipboardNotWorkingMessage();
   }
 
   @override

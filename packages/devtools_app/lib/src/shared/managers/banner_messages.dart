@@ -15,6 +15,7 @@ import '../analytics/constants.dart' as gac;
 import '../framework/screen.dart';
 import '../globals.dart';
 import '../http/http_service.dart' as http_service;
+import '../primitives/query_parameters.dart';
 import '../primitives/utils.dart';
 import '../ui/common_widgets.dart';
 
@@ -612,6 +613,38 @@ void pushWelcomeToNewInspectorMessage(String screenId) {
 
 void pushWasmWelcomeMessage() {
   bannerMessages.addMessage(WasmWelcomeMessage());
+}
+
+class CopyToClipboardNotWorkingMessage extends BannerWarning {
+  CopyToClipboardNotWorkingMessage()
+    : super(
+        key: const Key('CopyToClipboardNotWorkingMessage'),
+        screenId: universalScreenId,
+        buildTextSpans: (context) => [
+          const TextSpan(
+            text:
+                'Copy-to-clipboard may not work when DevTools is embedded in VS Code. See ',
+          ),
+          GaLinkTextSpan(
+            link: const GaLink(
+              display: 'microsoft/vscode#129178',
+              url: 'https://github.com/microsoft/vscode/issues/129178',
+              gaScreenName: universalScreenId,
+              gaSelectedItemDescription: 'copy-to-clipboard-issue',
+            ),
+            context: context,
+            style: Theme.of(context).warningMessageLinkStyle,
+          ),
+          const TextSpan(text: ' for details.'),
+        ],
+      );
+}
+
+void maybePushCopyToClipboardNotWorkingMessage() {
+  final queryParams = DevToolsQueryParams.load();
+  if (queryParams.embedMode.embedded && queryParams.ide == 'VSCode') {
+    bannerMessages.addMessage(CopyToClipboardNotWorkingMessage());
+  }
 }
 
 extension BannerMessageThemeExtension on ThemeData {

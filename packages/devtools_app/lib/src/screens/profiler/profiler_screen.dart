@@ -91,6 +91,7 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
         });
       },
     );
+    maybePushCopyToClipboardNotWorkingMessage();
   }
 
   @override
