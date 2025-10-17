@@ -9,8 +9,6 @@ import 'package:devtools_app_shared/web_utils.dart';
 import 'package:logging/logging.dart';
 import 'package:web/web.dart' hide Storage;
 
-import '../../../service/service_manager.dart';
-import '../../globals.dart';
 import '../../primitives/storage.dart';
 import '../../server/server.dart' as server;
 import '../../server/server_api_client.dart';
@@ -83,14 +81,18 @@ void _sendKeyPressToParent(KeyboardEvent event) {
   // will need to be posted up to the parent
   // https://github.com/flutter/devtools/issues/2775
 
-  // Check we have a connection and we appear to be embedded somewhere expected
-  // because we can't use targetOrigin in postMessage as only the scheme is fixed
-  // for VS Code (vscode-webview://[some guid]).
-  if (globals.containsKey(ServiceConnectionManager) &&
-      !serviceConnection.serviceManager.connectedState.value.connected) {
+  // This handling is only required for when embedded in VS Code and forks that
+  // also use Dart-Code.
+  if (!window.navigator.userAgent.contains('Electron')) {
     return;
   }
-  if (!window.navigator.userAgent.contains('Electron')) return;
+
+  // Because VS Code prevents built-in behaviour for copy/paste/etc. from
+  // working (on macOS), we have to handle those specially (and do not need to
+  // send them upwards).
+  // https://github.com/microsoft/vscode/issues/129178
+  // https://github.com/microsoft/vscode/issues/129178#issuecomment-3410886795
+  if (_handleStandardShortcuts(event)) return;
 
   final data = {
     'altKey': event.altKey,
@@ -107,6 +109,45 @@ void _sendKeyPressToParent(KeyboardEvent event) {
     {'command': 'keydown', 'data': data}.jsify(),
     '*'.toJS,
   );
+}
+
+bool _handleStandardShortcuts(KeyboardEvent event) {
+  const keyInsert = 45;
+  const keyA = 65;
+  const keyC = 67;
+  const keyV = 86;
+  const keyX = 88;
+  const keyZ = 90;
+
+  final hasMeta = event.ctrlKey || event.metaKey;
+  final hasShift = event.shiftKey;
+  final code = event.keyCode;
+
+  // Determine which command (if any) we should execute.
+  final command = switch (code) {
+    keyA when hasMeta => 'selectAll',
+    keyC when hasMeta => 'copy',
+    keyV when hasMeta => 'paste',
+    keyInsert when hasShift => 'paste',
+    keyX when hasMeta => 'cut',
+    keyZ when hasMeta => 'undo',
+    _ => null,
+  };
+
+  // No command, just fall back to normal handling.
+  if (command == null) {
+    return false;
+  }
+
+  // Otherwise, try to invoke the command and prevent the browser.
+  try {
+    document.execCommand(command);
+    event.preventDefault();
+    return true;
+  } catch (_) {
+    // If we failed, then also fall back to normal handling.
+    return false;
+  }
 }
 
 class BrowserStorage implements Storage {

@@ -53,9 +53,11 @@ TODO: Remove this section if there are not any general updates.
 
 TODO: Remove this section if there are not any general updates.
 
-## VS Code Sidebar updates
+## VS Code updates
 
-TODO: Remove this section if there are not any general updates.
+- On macOS, shortcuts like `Cmd`+`C` and `Cmd`+`V` now work when DevTools is
+  embedded inside VS Code -
+  [#9472](https://github.com/flutter/devtools/pull/9472)
 
 ## DevTools Extension updates
 
