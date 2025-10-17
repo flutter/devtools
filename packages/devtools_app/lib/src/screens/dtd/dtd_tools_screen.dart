@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import '../../shared/development_helpers.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/banner_messages.dart';
 import 'dtd_tools_controller.dart';
 import 'events.dart';
 import 'services.dart';
@@ -80,6 +81,7 @@ class _DtdConnectedViewState extends State<DtdConnectedView> {
     _registeredServicesController = ServicesController();
     _eventsController = EventsController();
     _initForDtdConnection();
+    maybePushCopyToClipboardNotWorkingMessage();
   }
 
   @override

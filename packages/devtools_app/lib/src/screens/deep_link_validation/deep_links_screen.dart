@@ -8,6 +8,7 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/banner_messages.dart';
 import 'deep_link_list_view.dart';
 import 'deep_links_controller.dart';
 import 'deep_links_model.dart';
@@ -46,6 +47,7 @@ class _DeepLinkPageState extends State<DeepLinkPage> {
     super.initState();
     ga.screen(gac.deeplink);
     controller = screenControllers.lookup<DeepLinksController>();
+    maybePushCopyToClipboardNotWorkingMessage();
   }
 
   @override

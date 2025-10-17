@@ -10,6 +10,7 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/banner_messages.dart';
 import '../../shared/ui/utils.dart';
 import '_log_details.dart';
 import '_logs_table.dart';
@@ -58,6 +59,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     ga.screen(gac.logging);
     controller = screenControllers.lookup<LoggingController>();
     addAutoDisposeListener(controller.filteredData);
+    maybePushCopyToClipboardNotWorkingMessage();
   }
 
   @override

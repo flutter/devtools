@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/banner_messages.dart';
 import '../inspector/inspector_screen_body.dart' as legacy;
 import '../inspector_v2/inspector_screen_body.dart' as v2;
 import 'inspector_screen_controller.dart';
@@ -64,6 +65,7 @@ class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
         );
       },
     );
+    maybePushCopyToClipboardNotWorkingMessage();
   }
 
   @override

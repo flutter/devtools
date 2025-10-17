@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/framework/screen.dart';
+import '../../../shared/managers/banner_messages.dart';
 import '../../../shared/primitives/listenable.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
 import '../panes/diff/diff_pane.dart';
@@ -52,6 +53,7 @@ class MemoryScreenBodyState extends State<MemoryScreenBody> {
   void initState() {
     super.initState();
     ga.screen(MemoryScreen.id);
+    maybePushCopyToClipboardNotWorkingMessage();
   }
 
   @override
