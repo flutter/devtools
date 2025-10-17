@@ -28,17 +28,12 @@ class DevToolsAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     Widget? flexibleSpace;
     TabBar tabBar;
 
     List<Screen> visibleScreens = screens;
     bool tabsOverflow({bool includeOverflowButtonWidth = false}) {
-      return _scaffoldHeaderWidth(
-                screens: visibleScreens,
-                actions: actions,
-                textTheme: textTheme,
-              ) +
+      return _scaffoldHeaderWidth(screens: visibleScreens, actions: actions) +
               (includeOverflowButtonWidth ? TabOverflowButton.width : 0) >=
           MediaQuery.of(context).size.width;
     }
@@ -133,7 +128,6 @@ class DevToolsAppBar extends StatelessWidget {
   double _scaffoldHeaderWidth({
     required List<Screen> screens,
     required List<Widget>? actions,
-    required TextTheme textTheme,
   }) {
     final tabsWidth = screens.fold(
       0.0,
