@@ -81,9 +81,9 @@ void _sendKeyPressToParent(KeyboardEvent event) {
   // will need to be posted up to the parent
   // https://github.com/flutter/devtools/issues/2775
 
-  // This handling is only for being embedded in VS Code.
-  if (!window.navigator.userAgent.contains('Electron') ||
-      !window.navigator.userAgent.contains('Code/')) {
+  // This handling is only required for when embedded in VS Code and forks that
+  // also use Dart-Code.
+  if (!window.navigator.userAgent.contains('Electron')) {
     return;
   }
 
