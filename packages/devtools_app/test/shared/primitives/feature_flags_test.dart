@@ -16,7 +16,6 @@ void main() {
     expect(enableExperiments, false);
     expect(enableBeta, false);
     expect(isExternalBuild, true);
-    expect(FeatureFlags.memoryObserver.isEnabled, true);
     expect(FeatureFlags.memorySaveLoad.isEnabled, false);
     expect(FeatureFlags.networkSaveLoad.isEnabled, true);
     expect(FeatureFlags.devToolsExtensions.isEnabled, isExternalBuild);
