@@ -39,7 +39,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed layout of the "error count" badge in the tab name.
 
 ## Logging updates
 
