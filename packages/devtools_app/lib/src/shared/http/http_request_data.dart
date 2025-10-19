@@ -127,7 +127,6 @@ class DartIOHttpRequestData extends NetworkRequest {
     }
   }
 
-  //TODO check if all cases are handled correctly
   String? normalizeContentType(dynamic header) {
     if (header is List && header.isNotEmpty) {
       return header.first.toString().split(';').first.trim().toLowerCase();

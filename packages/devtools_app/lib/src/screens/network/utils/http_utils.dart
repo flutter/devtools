@@ -45,7 +45,9 @@ bool isTextMimeType(String? mimeType) {
   return cleanedMime.startsWith('text/') ||
       cleanedMime == 'application/json' ||
       cleanedMime == 'application/javascript' ||
-      cleanedMime == 'application/xml';
+      cleanedMime == 'application/xml' ||
+      cleanedMime.endsWith('+json') ||
+      cleanedMime.endsWith('+xml');
 }
 
 /// Extracts and normalizes the `content-type` MIME type from the headers.
@@ -60,13 +62,17 @@ bool isTextMimeType(String? mimeType) {
 String? getHeadersMimeType(dynamic header) {
   if (header == null) return null;
 
-  final value = header is List
+  final dynamicValue = header is List
       ? (header.isNotEmpty ? header.first : null)
       : header;
 
-  if (value == null || value.trim().isEmpty) return null;
+  if (dynamicValue == null) return null;
 
-  return value.split(';').first.trim().toLowerCase();
+  final value = dynamicValue.toString().trim();
+  if (value.isEmpty) return null;
+
+  final mime = value.split(';').first.trim().toLowerCase();
+  return mime.isEmpty ? null : mime;
 }
 
 /// Converts the given [bodyBytes] to a String based on its [mimeType].
