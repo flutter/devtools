@@ -86,7 +86,7 @@ class DevToolsApp extends StatefulWidget {
 /// flutter route parameters.
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _screens {
-    if (FeatureFlags.devToolsExtensions) {
+    if (FeatureFlags.devToolsExtensions.isEnabled) {
       // TODO(https://github.com/flutter/devtools/issues/6273): stop special
       // casing the package:provider extension.
       final containsProviderExtension = extensionService
@@ -177,7 +177,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       });
     }
 
-    if (FeatureFlags.devToolsExtensions) {
+    if (FeatureFlags.devToolsExtensions.isEnabled) {
       addAutoDisposeListener(
         extensionService.currentExtensions,
         clearRoutesAndSetState,

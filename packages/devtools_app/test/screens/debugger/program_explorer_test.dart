@@ -24,12 +24,7 @@ void main() {
 
     setUp(() {
       final fakeServiceConnection = FakeServiceConnectionManager();
-      mockConnectedApp(
-        fakeServiceConnection.serviceManager.connectedApp!,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
+      mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
       mockProgramExplorerController =
           createMockProgramExplorerControllerWithDefaults();
       setGlobal(IdeTheme, IdeTheme());

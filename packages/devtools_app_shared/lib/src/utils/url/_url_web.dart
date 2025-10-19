@@ -16,6 +16,10 @@ void webRedirect(String url) {
   window.location.replace(url);
 }
 
+void webReload() {
+  window.location.reload();
+}
+
 void updateQueryParameter(String key, String? value, {bool reload = false}) {
   final newQueryParams = Map.of(loadQueryParams());
   if (value == null) {

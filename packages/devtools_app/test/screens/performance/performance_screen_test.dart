@@ -138,7 +138,6 @@ void main() {
         mockConnectedApp(
           fakeServiceConnection.serviceManager.connectedApp!,
           isFlutterApp: false,
-          isProfileBuild: false,
           isWebApp: true,
         );
         await tester.pumpWidget(
@@ -169,8 +168,6 @@ void main() {
         setEnableExperiments();
         mockConnectedApp(
           fakeServiceConnection.serviceManager.connectedApp!,
-          isFlutterApp: true,
-          isProfileBuild: false,
           isWebApp: true,
         );
         await tester.pumpWidget(
@@ -202,8 +199,6 @@ void main() {
           mockConnectedApp(
             fakeServiceConnection.serviceManager.connectedApp!,
             isFlutterApp: false,
-            isProfileBuild: false,
-            isWebApp: false,
           );
           await pumpPerformanceScreen(tester, runAsync: true);
           await tester.pumpAndSettle();

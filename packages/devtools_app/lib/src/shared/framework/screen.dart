@@ -7,8 +7,6 @@
 /// @docImport '../utils/utils.dart';
 library;
 
-import 'dart:math' as math;
-
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/shared.dart';
@@ -17,13 +15,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
-import '../feature_flags.dart';
 import '../globals.dart';
 import '../primitives/listenable.dart';
 import '../ui/icons.dart';
 import '../ui/utils.dart';
 
 final _log = Logger('screen.dart');
+
+const _kNetworkDisconnectExperience = bool.fromEnvironment(
+  'network_disconnect_experience',
+  defaultValue: true,
+);
 
 enum ScreenMetaData {
   home(
@@ -81,7 +83,7 @@ enum ScreenMetaData {
     tutorialVideoTimestamp: '?t=547',
     requiresConnection: false,
     // ignore: avoid_redundant_argument_values, false positive
-    worksWithOfflineData: FeatureFlags.networkDisconnectExperience,
+    worksWithOfflineData: _kNetworkDisconnectExperience,
   ),
   logging(
     'logging',
@@ -363,12 +365,8 @@ abstract class Screen {
   /// creating a documentation url using [docPageId].
   String? get docPageId => null;
 
-  double approximateTabWidth(
-    TextTheme textTheme, {
-    bool includeTabBarSpacing = true,
-  }) {
-    final title = _userFacingTitle;
-    final textWidth = calculateTextSpanWidth(TextSpan(text: title));
+  double approximateTabWidth({bool includeTabBarSpacing = true}) {
+    final textWidth = calculateTextSpanWidth(TextSpan(text: _userFacingTitle));
     const measurementBuffer = 1.0;
     return textWidth +
         denseSpacing +
@@ -391,9 +389,11 @@ abstract class Screen {
         screenId,
       ),
       builder: (context, count, _) {
-        final tab = Tab(
+        final colorScheme = Theme.of(context).colorScheme;
+        return Tab(
           key: tabKey,
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               if (icon != null || iconAsset != null)
                 DevToolsIcon(
@@ -409,36 +409,18 @@ abstract class Screen {
                   padding: const EdgeInsets.only(left: denseSpacing),
                   child: Text(title, style: Theme.of(context).regularTextStyle),
                 ),
+              if (count > 0)
+                Padding(
+                  padding: const EdgeInsets.only(left: denseSpacing),
+                  child: RoundedLabel(
+                    labelText: '$count',
+                    backgroundColor: colorScheme.errorContainer,
+                    textColor: colorScheme.onErrorContainer,
+                  ),
+                ),
             ],
           ),
         );
-
-        if (count > 0) {
-          // Calculate the width of the title text so that we can provide an accurate
-          // size for the [BadgePainter].
-          final titleWidth = calculateTextSpanWidth(
-            TextSpan(text: title, style: Theme.of(context).regularTextStyle),
-          );
-
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              return Stack(
-                children: [
-                  CustomPaint(
-                    size: Size(defaultIconSize + denseSpacing + titleWidth, 0),
-                    painter: BadgePainter(
-                      number: count,
-                      colorScheme: Theme.of(context).colorScheme,
-                    ),
-                  ),
-                  tab,
-                ],
-              );
-            },
-          );
-        }
-
-        return tab;
       },
     );
   }
@@ -566,55 +548,6 @@ abstract class Screen {
   }
   _log.finest('${screen.screenId} screen supported: returning true');
   return (show: true, disabledReason: null);
-}
-
-class BadgePainter extends CustomPainter {
-  BadgePainter({required this.number, required this.colorScheme});
-
-  final ColorScheme colorScheme;
-
-  final int number;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = colorScheme.errorContainer
-      ..style = PaintingStyle.fill;
-
-    final countPainter = TextPainter(
-      text: TextSpan(
-        text: '$number',
-        style: TextStyle(
-          color: colorScheme.onErrorContainer,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    final badgeWidth = math.max(
-      defaultIconSize,
-      countPainter.width + denseSpacing,
-    );
-    canvas.drawOval(
-      Rect.fromLTWH(size.width, 0, badgeWidth, defaultIconSize),
-      paint,
-    );
-
-    countPainter.paint(
-      canvas,
-      Offset(size.width + (badgeWidth - countPainter.width) / 2, 0),
-    );
-    countPainter.dispose();
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    if (oldDelegate is BadgePainter) {
-      return number != oldDelegate.number;
-    }
-    return true;
-  }
 }
 
 class ShortcutsConfiguration {

@@ -4,6 +4,8 @@
 
 import 'package:devtools_shared/devtools_shared.dart';
 
+import '../../utils.dart';
+
 /// Flutter version service registered by Flutter Tools.
 ///
 /// We call this service to get version information about the Flutter framework,
@@ -101,6 +103,54 @@ final class FlutterVersion extends SemanticVersion {
         dartSdkVersion,
       );
 
+  static final _stableVersionRegex = RegExp(r'^\d+\.\d+\.\d+$');
+  static final _isNumericRegex = RegExp(r'\d');
+
+  /// Identifies the Flutter channel from a version string.
+  ///
+  /// This method will first attempt to use [channelStr] if it is provided.
+  /// Otherwise, it will fall back to parsing the channel from [versionStr].
+  ///
+  /// This method will return `null` if the channel cannot be determined from
+  /// the provided information.
+  ///
+  /// Examples of versions that can be parsed:
+  ///  * '2.3.0' -> [FlutterChannel.stable]
+  ///  * '2.3.0-17.0.pre' -> [FlutterChannel.beta]
+  ///  * '2.3.0-17.0.pre.355' -> [FlutterChannel.dev]
+  static FlutterChannel? identifyChannel(
+    String versionStr, {
+    String? channelStr,
+  }) {
+    // Check if channel string is valid. 
+    if (channelStr != null) {
+      final channel = FlutterChannel.fromName(channelStr);
+      if (channel != null) return channel;
+    }
+
+    // Check if version matches stable release format.
+    final sanitized = SemanticVersion.sanitizeVersionStr(versionStr);
+    if (_stableVersionRegex.hasMatch(sanitized)) return FlutterChannel.stable;
+
+    // Check if version matches pre-release format.
+    const preReleaseIndicator = '.pre';
+    final isValidPreRelease = sanitized.contains(preReleaseIndicator);
+    if (!isValidPreRelease) return null;
+
+    // Check if version matches beta release format.
+    if (sanitized.endsWith(preReleaseIndicator)) return FlutterChannel.beta;
+
+    // Check if version matches dev release format.
+    final versionParts = sanitized.split('$preReleaseIndicator.');
+    final suffix = versionParts.last;
+    if (versionParts.length == 2 && _isNumericRegex.hasMatch(suffix)) {
+      return FlutterChannel.dev;
+    }
+
+    // Matches no known release format, return null.
+    return null;
+  }
+
   static SemanticVersion? _parseDartVersion(String? versionString) {
     if (versionString == null) return null;
 
@@ -119,5 +169,20 @@ final class FlutterVersion extends SemanticVersion {
       rawVersion = versionString;
     }
     return SemanticVersion.parse(rawVersion);
+  }
+}
+
+/// An enum representing the different Flutter channels.
+enum FlutterChannel with EnumIndexOrdering {
+  dev,
+  beta,
+  stable;
+
+  static FlutterChannel? fromName(String? name) {
+    try {
+      return FlutterChannel.values.byName(name ?? '');
+    } catch (_) {
+      return null;
+    }
   }
 }

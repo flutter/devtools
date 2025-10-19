@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
@@ -72,12 +71,7 @@ void main() {
   setUp(() async {
     scene = MemoryDefaultScene();
     await scene.setUp(classList: classList);
-    mockConnectedApp(
-      scene.fakeServiceConnection.serviceManager.connectedApp!,
-      isFlutterApp: true,
-      isProfileBuild: false,
-      isWebApp: false,
-    );
+    mockConnectedApp(scene.fakeServiceConnection.serviceManager.connectedApp!);
 
     final mockScriptManager = MockScriptManager();
     when(
@@ -111,14 +105,6 @@ void main() {
   );
 
   group('release memory', () {
-    setUp(() {
-      FeatureFlags.memoryObserver = true;
-    });
-
-    tearDown(() {
-      FeatureFlags.memoryObserver = false;
-    });
-
     testWidgetsWithWindowSize('full release', _windowSize, (
       WidgetTester tester,
     ) async {

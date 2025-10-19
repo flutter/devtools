@@ -19,6 +19,7 @@ import '../constants.dart';
 import '../diagnostics/inspector_service.dart';
 import '../feature_flags.dart';
 import '../globals.dart';
+import '../managers/banner_messages.dart';
 import '../primitives/query_parameters.dart';
 import '../server/server.dart';
 import '../utils/utils.dart';
@@ -65,6 +66,8 @@ enum _GeneralPreferences { verboseLogging }
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
+  static const _welcomeShownStorageId = 'wasmWelcomeShown';
+
   /// Whether the user preference for DevTools theme is set to dark mode.
   ///
   /// To check whether DevTools is using a light or dark theme, other parts of
@@ -118,7 +121,7 @@ class PreferencesController extends DisposableController
     // Get the current values and listen for and write back changes.
     await _initDarkMode();
     await _initAdvancedDeveloperMode();
-    if (FeatureFlags.wasmOptInSetting) {
+    if (FeatureFlags.wasmOptInSetting.isEnabled) {
       await _initWasmEnabled();
     }
     await _initVerboseLogging();
@@ -132,6 +135,13 @@ class PreferencesController extends DisposableController
     await performance.init();
 
     setGlobal(PreferencesController, this);
+  }
+
+  /// Enables the wasm experiment in storage.
+  ///
+  /// This is used to persist the preference across reloads.
+  Future<void> enableWasmInStorage() async {
+    await storage.setValue(_ExperimentPreferences.wasm.storageKey, 'true');
   }
 
   Future<void> _initDarkMode() async {
@@ -180,6 +190,18 @@ class PreferencesController extends DisposableController
         storage.setValue(_ExperimentPreferences.wasm.storageKey, 'false'),
       );
     }
+
+    // Maybe show the WASM welcome message on app connection if this is the
+    // first time the user is loading DevTools after the WASM experiment was
+    // enabled.
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.connectedState,
+      () async {
+        if (serviceConnection.serviceManager.connectedState.value.connected) {
+          await _maybeShowWasmWelcomeMessage();
+        }
+      },
+    );
 
     addAutoDisposeListener(wasmEnabled, () async {
       final enabled = wasmEnabled.value;
@@ -245,6 +267,23 @@ class PreferencesController extends DisposableController
     // renderer properly, but we call this to be safe in case something went
     // wrong.
     toggleWasmEnabled(shouldEnableWasm);
+  }
+
+  Future<void> _maybeShowWasmWelcomeMessage() async {
+    // If we have already shown the welcome message, don't show it again.
+    final welcomeAlreadyShown = await storage.getValue(_welcomeShownStorageId);
+    if (welcomeAlreadyShown == 'true') return;
+
+    // Show the welcome message if the WASM experiment is enabled but the user
+    // is not using the WASM build.
+    final connectedApp = serviceConnection.serviceManager.connectedApp;
+    if (connectedApp != null &&
+        FeatureFlags.wasmByDefault.isEnabled(connectedApp) &&
+        !kIsWasm) {
+      // Mark the welcome message as shown.
+      await storage.setValue(_welcomeShownStorageId, 'true');
+      pushWasmWelcomeMessage();
+    }
   }
 
   Future<void> _initVerboseLogging() async {

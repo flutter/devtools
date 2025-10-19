@@ -545,6 +545,39 @@ class WelcomeToNewInspectorMessage extends BannerInfo {
       );
 }
 
+class WasmWelcomeMessage extends BannerInfo {
+  WasmWelcomeMessage()
+    : super(
+        key: const Key('WasmWelcomeMessage'),
+        screenId: universalScreenId,
+        dismissOnConnectionChanges: true,
+        buildTextSpans: (context) => [
+          const TextSpan(
+            text:
+                '🚀 A faster and more performant DevTools is now available on WebAssembly! Click ',
+          ),
+          const TextSpan(
+            text: 'Enable',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const TextSpan(text: ' to try it out now.'),
+          const TextSpan(
+            text: ' Please note that this will trigger a reload of DevTools.',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ],
+        buildActions: (context) => [
+          DevToolsButton(
+            label: 'Enable',
+            onPressed: () async {
+              await preferences.enableWasmInStorage();
+              webReload();
+            },
+          ),
+        ],
+      );
+}
+
 void maybePushDebugModePerformanceMessage(String screenId) {
   if (offlineDataController.showingOfflineData.value) return;
   if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
@@ -575,6 +608,10 @@ void pushDebuggerIdeRecommendationMessage(String screenId) {
 
 void pushWelcomeToNewInspectorMessage(String screenId) {
   bannerMessages.addMessage(WelcomeToNewInspectorMessage(screenId: screenId));
+}
+
+void pushWasmWelcomeMessage() {
+  bannerMessages.addMessage(WasmWelcomeMessage());
 }
 
 extension BannerMessageThemeExtension on ThemeData {
