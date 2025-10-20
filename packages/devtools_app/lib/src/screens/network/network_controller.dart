@@ -11,7 +11,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/config_specific/logger/allowed_error.dart';
-import '../../shared/feature_flags.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
@@ -515,9 +514,7 @@ class NetworkController extends DevToolsScreenController
 
   @override
   FutureOr<void> releaseMemory({bool partial = false}) async {
-    if (FeatureFlags.memoryObserver.isEnabled) {
-      await clear(partial: partial);
-    }
+    await clear(partial: partial);
   }
 }
 

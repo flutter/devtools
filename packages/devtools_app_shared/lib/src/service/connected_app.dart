@@ -30,6 +30,8 @@ class ConnectedApp {
   static const isRunningOnDartVMKey = 'isRunningOnDartVM';
   static const operatingSystemKey = 'operatingSystem';
   static const flutterVersionKey = 'flutterVersion';
+  static const dwdsChromeDebugProxyDeviceName = 'ChromeDebugProxy';
+  static const dwdsWebSocketDebugProxyDeviceName = 'WebSocketDebugProxy';
 
   final ServiceManager? serviceManager;
 

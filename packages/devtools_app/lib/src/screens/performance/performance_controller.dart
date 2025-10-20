@@ -14,7 +14,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_registrations.dart' as registrations;
 import '../../shared/diagnostics/inspector_service.dart';
-import '../../shared/feature_flags.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
@@ -291,9 +290,7 @@ class PerformanceController extends DevToolsScreenController
 
   @override
   FutureOr<void> releaseMemory({bool partial = false}) async {
-    if (FeatureFlags.memoryObserver.isEnabled) {
-      await clearData(partial: partial, clearVmTimeline: !partial);
-    }
+    await clearData(partial: partial, clearVmTimeline: !partial);
   }
 }
 
