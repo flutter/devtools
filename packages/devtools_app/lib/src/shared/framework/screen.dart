@@ -49,6 +49,7 @@ enum ScreenMetaData {
     title: 'Performance',
     iconAsset: 'icons/app_bar/performance.png',
     worksWithOfflineData: true,
+    requiresWebAppDebuggable: true,
     requiresConnection: false,
     tutorialVideoTimestamp: '?t=261',
   ),
@@ -75,6 +76,7 @@ enum ScreenMetaData {
     title: 'Debugger',
     icon: Octicons.bug,
     requiresDebugBuild: true,
+    requiresWebAppDebuggable: true,
     tutorialVideoTimestamp: '?t=513',
   ),
   network(
@@ -120,6 +122,7 @@ enum ScreenMetaData {
     title: 'VM Tools',
     icon: Icons.settings_applications,
     requiresAdvancedDeveloperMode: true,
+    requiresWebAppDebuggable: true,
   ),
   dtdTools(
     'dtdTools',
@@ -140,6 +143,7 @@ enum ScreenMetaData {
     this.requiresFlutter = false,
     this.requiresDebugBuild = false,
     this.requiresAdvancedDeveloperMode = false,
+    this.requiresWebAppDebuggable = false,
     this.worksWithOfflineData = false,
     this.requiresLibrary,
     this.tutorialVideoTimestamp,
@@ -157,6 +161,7 @@ enum ScreenMetaData {
   final bool requiresFlutter;
   final bool requiresDebugBuild;
   final bool requiresAdvancedDeveloperMode;
+  final bool requiresWebAppDebuggable;
   final bool worksWithOfflineData;
   final String? requiresLibrary;
 
@@ -206,6 +211,7 @@ abstract class Screen {
     this.requiresFlutter = false,
     this.requiresDebugBuild = false,
     this.requiresAdvancedDeveloperMode = false,
+    this.requiresWebAppDebuggable = false,
     this.worksWithOfflineData = false,
     this.showFloatingDebuggerControls = true,
   }) : assert(
@@ -225,6 +231,7 @@ abstract class Screen {
     bool requiresFlutter = false,
     bool requiresDebugBuild = false,
     bool requiresAdvancedDeveloperMode = false,
+    bool requiresWebAppDebuggable = false,
     bool worksWithOfflineData = false,
     bool Function(FlutterVersion? currentVersion)? shouldShowForFlutterVersion,
     bool showFloatingDebuggerControls = true,
@@ -241,6 +248,7 @@ abstract class Screen {
          requiresFlutter: requiresFlutter,
          requiresDebugBuild: requiresDebugBuild,
          requiresAdvancedDeveloperMode: requiresAdvancedDeveloperMode,
+         requiresWebAppDebuggable: requiresWebAppDebuggable,
          worksWithOfflineData: worksWithOfflineData,
          showFloatingDebuggerControls: showFloatingDebuggerControls,
          title: title,
@@ -264,6 +272,7 @@ abstract class Screen {
          requiresFlutter: metadata.requiresFlutter,
          requiresDebugBuild: metadata.requiresDebugBuild,
          requiresAdvancedDeveloperMode: metadata.requiresAdvancedDeveloperMode,
+         requiresWebAppDebuggable: metadata.requiresWebAppDebuggable,
          worksWithOfflineData: metadata.worksWithOfflineData,
          shouldShowForFlutterVersion: shouldShowForFlutterVersion,
          showFloatingDebuggerControls: showFloatingDebuggerControls,
@@ -340,6 +349,10 @@ abstract class Screen {
   /// Whether this screen should only be included when advanced developer mode
   /// is enabled.
   final bool requiresAdvancedDeveloperMode;
+
+  /// Whether this screen should only be included when the app is a web app with full debugging
+  /// support.
+  final bool requiresWebAppDebuggable;
 
   /// Whether this screen works offline and should show in offline mode even if conditions are not met.
   final bool worksWithOfflineData;
@@ -512,9 +525,11 @@ abstract class Screen {
     }
   }
 
+  final serviceManager = serviceConnection.serviceManager;
+  final connectedApp = serviceManager.connectedApp;
   final serviceReady =
-      serviceConnection.serviceManager.isServiceAvailable &&
-      serviceConnection.serviceManager.connectedApp!.connectedAppInitialized;
+      serviceManager.isServiceAvailable &&
+      connectedApp!.connectedAppInitialized;
   if (!serviceReady) {
     if (!screen.requiresConnection) {
       _log.finest('screen does not require connection: returning true');
@@ -531,42 +546,42 @@ abstract class Screen {
     }
   }
 
-  if (screen.requiresLibrary != null) {
-    if (serviceConnection.serviceManager.isolateManager.mainIsolate.value ==
-            null ||
-        !serviceConnection.serviceManager.libraryUriAvailableNow(
-          screen.requiresLibrary,
-        )) {
-      _log.finest(
-        'screen requires library ${screen.requiresLibrary}: returning false',
-      );
-      return (
-        show: false,
-        disabledReason: ScreenDisabledReason.requiresDartLibrary,
-      );
-    }
+  if (screen.requiresLibrary != null &&
+      (serviceManager.isolateManager.mainIsolate.value == null ||
+          !serviceManager.libraryUriAvailableNow(screen.requiresLibrary))) {
+    _log.finest(
+      'screen requires library ${screen.requiresLibrary}: returning false',
+    );
+    return (
+      show: false,
+      disabledReason: ScreenDisabledReason.requiresDartLibrary,
+    );
   }
-  if (screen.requiresDartVm) {
-    if (serviceConnection.serviceManager.connectedApp!.isRunningOnDartVM !=
-        true) {
-      _log.finest('screen requires Dart VM: returning false');
-      return (show: false, disabledReason: ScreenDisabledReason.requiresDartVm);
-    }
+  if (screen.requiresDartVm && connectedApp.isRunningOnDartVM != true) {
+    _log.finest('screen requires Dart VM: returning false');
+    return (show: false, disabledReason: ScreenDisabledReason.requiresDartVm);
   }
-  if (screen.requiresFlutter &&
-      serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == false) {
+  if (screen.requiresFlutter && connectedApp.isFlutterAppNow == false) {
     _log.finest('screen requires Flutter: returning false');
     return (show: false, disabledReason: ScreenDisabledReason.requiresFlutter);
   }
-  if (screen.requiresDebugBuild) {
-    if (serviceConnection.serviceManager.connectedApp!.isProfileBuildNow ==
-        true) {
-      _log.finest('screen requires debug build: returning false');
-      return (
-        show: false,
-        disabledReason: ScreenDisabledReason.requiresDebugBuild,
-      );
-    }
+  if (screen.requiresDebugBuild && connectedApp.isProfileBuildNow == true) {
+    _log.finest('screen requires debug build: returning false');
+    return (
+      show: false,
+      disabledReason: ScreenDisabledReason.requiresDebugBuild,
+    );
+  }
+  if (screen.requiresWebAppDebuggable &&
+      connectedApp.isDartWebAppNow == true &&
+      !connectedApp.isDebuggableWebApp) {
+    _log.finest(
+      'screen requires a debuggable web application: returning false',
+    );
+    return (
+      show: false,
+      disabledReason: ScreenDisabledReason.requiresDebuggableWebApp,
+    );
   }
   _log.finest('${screen.screenId} screen supported: returning true');
   return (show: true, disabledReason: null);
@@ -643,6 +658,9 @@ enum ScreenDisabledReason {
   requiresFlutter('only supports Flutter applications.'),
   requiresAdvancedDeveloperMode(
     'only works when Advanced Developer Mode is enabled',
+  ),
+  requiresDebuggableWebApp(
+    'only works with web applications with full debugging support.',
   ),
   serviceNotReady(
     'requires a connected application, but there is no connection available.',

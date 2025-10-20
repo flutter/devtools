@@ -99,7 +99,22 @@ class ConnectedApp {
 
   bool get isDebugFlutterAppNow => isFlutterAppNow! && !isProfileBuildNow!;
 
-  bool? get isRunningOnDartVM => serviceManager!.vm!.name != 'ChromeDebugProxy';
+  /// Returns true is the connected application's VM has the name
+  /// [dwdsChromeDebugProxyDeviceName], indicating that DWDS has an active
+  /// Chrome debugger connection with support for expression evaluation,
+  /// object inspection, and setting breakpoints.
+  ///
+  /// If false, the connected application supports a reduced subset of the VM
+  /// service protocol.
+  bool get isDebuggableWebApp =>
+      serviceManager!.vm!.name == dwdsChromeDebugProxyDeviceName;
+
+  bool? get isRunningOnDartVM {
+    final name = serviceManager!.vm!.name;
+    // These are the two possible VM names returned by DWDS.
+    return name != dwdsChromeDebugProxyDeviceName &&
+        name != dwdsWebSocketDebugProxyDeviceName;
+  }
 
   Future<bool> get isDartCliApp async =>
       isRunningOnDartVM! && !(await isFlutterApp);
@@ -126,24 +141,6 @@ class ConnectedApp {
       shouldLogError: false,
     );
     return !(value?.kind == 'Bool');
-
-    // TODO(terry): Disabled below code, it will hang if flutter run --start-paused
-    //              see issue https://github.com/flutter/devtools/issues/2082.
-    //              Currently, if eval (see above) doesn't work then we're
-    //              running in Profile mode.
-    /*
-    assert(serviceConnectionManager.isServiceAvailable);
-    // Only flutter apps have profile and non-profile builds. If this changes in
-    // the future (flutter web), we can modify this check.
-    if (!isRunningOnDartVM || !await isFlutterApp) return false;
-
-    await serviceConnectionManager.manager.serviceExtensionManager.extensionStatesUpdated.future;
-
-    // The debugAllowBanner extension is only available in debug builds
-    final hasDebugExtension = serviceConnectionManager.manager.serviceExtensionManager
-        .isServiceExtensionAvailable(extensions.debugAllowBanner.extension);
-    return !hasDebugExtension;
-    */
   }
 
   Future<void> initializeValues({void Function()? onComplete}) async {
