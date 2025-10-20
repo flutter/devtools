@@ -23,7 +23,6 @@ import '../service/vm_service_wrapper.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/config_specific/framework_initialize/framework_initialize.dart';
 import '../shared/console/eval/eval_service.dart';
-import '../shared/feature_flags.dart';
 import '../shared/framework/app_error_handling.dart' as error_handling;
 import '../shared/framework/framework_controller.dart';
 import '../shared/framework/screen_controllers.dart';
@@ -84,9 +83,7 @@ extension FrameworkCore on Never {
     // preferences have been initialized.
     await extensionService.initialize();
 
-    if (FeatureFlags.memoryObserver.isEnabled) {
-      _memoryObserver.init();
-    }
+    _memoryObserver.init();
   }
 
   /// Disposes framework level services and managers.
@@ -99,9 +96,7 @@ extension FrameworkCore on Never {
     preferences.dispose();
     _themeManager?.dispose();
     unawaited(dtdManager.dispose());
-    if (FeatureFlags.memoryObserver.isEnabled) {
-      _memoryObserver.dispose();
-    }
+    _memoryObserver.dispose();
   }
 
   static void _initGlobals() {
