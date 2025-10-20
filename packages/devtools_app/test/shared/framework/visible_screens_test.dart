@@ -56,6 +56,7 @@ void main() {
         isFlutterApp: flutter,
         isProfileBuild: !debugMode,
         isWebApp: web,
+        isDebuggableWebApp: debuggableWeb,
       );
       if (flutter) {
         fakeServiceConnection.serviceManager.availableLibraries.add(
