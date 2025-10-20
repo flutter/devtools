@@ -41,6 +41,7 @@ void main() {
 
     void setupMockConnectedApp({
       bool web = false,
+      bool debuggableWeb = true,
       bool flutter = false,
       bool debugMode = true,
       SemanticVersion? flutterVersion,
@@ -104,6 +105,31 @@ void main() {
           // ProfilerScreen,
           // MemoryScreen,
           DebuggerScreen,
+          // NetworkScreen,
+          LoggingScreen,
+          // AppSizeScreen,
+          // DeepLinksScreen,
+          // VMDeveloperToolsScreen,
+          // DTDToolsScreen,
+        ]),
+      );
+    });
+
+    testWidgets('are correct for Dart Web app (DWDS websocket mode)', (
+      WidgetTester tester,
+    ) async {
+      setupMockConnectedApp(web: true, debuggableWeb: false);
+
+      expect(
+        visibleScreenTypes,
+        equals([
+          HomeScreen,
+          // InspectorScreen,
+          // LegacyPerformanceScreen,
+          // PerformanceScreen,
+          // ProfilerScreen,
+          // MemoryScreen,
+          // DebuggerScreen,
           // NetworkScreen,
           LoggingScreen,
           // AppSizeScreen,
@@ -179,6 +205,31 @@ void main() {
           // ProfilerScreen,
           // MemoryScreen,
           DebuggerScreen,
+          // NetworkScreen,
+          LoggingScreen,
+          // AppSizeScreen,
+          // DeepLinksScreen,
+          // VMDeveloperToolsScreen,
+          // DTDToolsScreen,
+        ]),
+      );
+    });
+
+    testWidgets('are correct for Flutter web debug app (DWDS websocket mode)', (
+      WidgetTester tester,
+    ) async {
+      setupMockConnectedApp(flutter: true, web: true, debuggableWeb: false);
+
+      expect(
+        visibleScreenTypes,
+        equals([
+          HomeScreen,
+          InspectorScreen,
+          // LegacyPerformanceScreen,
+          // PerformanceScreen,
+          // ProfilerScreen,
+          // MemoryScreen,
+          // DebuggerScreen,
           // NetworkScreen,
           LoggingScreen,
           // AppSizeScreen,
