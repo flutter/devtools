@@ -18,7 +18,6 @@ class TableRow<T> extends StatefulWidget {
   /// [node].
   const TableRow({
     super.key,
-    required this.linkedScrollControllerGroup,
     required this.node,
     required this.columns,
     required this.columnWidths,
@@ -44,7 +43,6 @@ class TableRow<T> extends StatefulWidget {
   /// Constructs a [TableRow] that is empty.
   const TableRow.filler({
     super.key,
-    required this.linkedScrollControllerGroup,
     required this.columns,
     required this.columnWidths,
     this.columnGroups,
@@ -71,7 +69,6 @@ class TableRow<T> extends StatefulWidget {
   /// of any [node].
   const TableRow.tableColumnHeader({
     super.key,
-    required this.linkedScrollControllerGroup,
     required this.columns,
     required this.columnWidths,
     required this.columnGroups,
@@ -98,7 +95,6 @@ class TableRow<T> extends StatefulWidget {
   /// [node].
   const TableRow.tableColumnGroupHeader({
     super.key,
-    required this.linkedScrollControllerGroup,
     required this.columnGroups,
     required this.columnWidths,
     required this.sortColumn,
@@ -120,8 +116,6 @@ class TableRow<T> extends StatefulWidget {
        displayTreeGuidelines = false,
        enableHoverHandling = false,
        _rowType = _TableRowType.columnGroupHeader;
-
-  final LinkedScrollControllerGroup linkedScrollControllerGroup;
 
   final T? node;
 
@@ -200,8 +194,6 @@ class _TableRowState<T> extends State<TableRow<T>>
         SearchableMixin {
   Key? contentKey;
 
-  late ScrollController scrollController;
-
   bool isSearchMatch = false;
 
   bool isActiveSearchMatch = false;
@@ -216,7 +208,6 @@ class _TableRowState<T> extends State<TableRow<T>>
   void initState() {
     super.initState();
     contentKey = ValueKey(this);
-    scrollController = widget.linkedScrollControllerGroup.addAndGet();
     _initSearchListeners();
 
     _rowDisplayParts = _rowDisplayPartsHelper();
@@ -242,11 +233,6 @@ class _TableRowState<T> extends State<TableRow<T>>
   void didUpdateWidget(TableRow<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     setExpanded(widget.isExpanded);
-    if (oldWidget.linkedScrollControllerGroup !=
-        widget.linkedScrollControllerGroup) {
-      scrollController.dispose();
-      scrollController = widget.linkedScrollControllerGroup.addAndGet();
-    }
 
     _rowDisplayParts = _rowDisplayPartsHelper();
 
@@ -254,12 +240,6 @@ class _TableRowState<T> extends State<TableRow<T>>
 
     cancelListeners();
     _initSearchListeners();
-  }
-
-  @override
-  void dispose() {
-    scrollController.dispose();
-    super.dispose();
   }
 
   @override
@@ -530,7 +510,6 @@ class _TableRowState<T> extends State<TableRow<T>>
       return _ColumnGroupHeaderRow(
         groups: groups,
         columnWidths: widget.columnWidths,
-        scrollController: scrollController,
       );
     }
 

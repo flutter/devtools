@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 
 import '../primitives/collapsible_mixin.dart';
 import '../primitives/extent_delegate_list.dart';
-import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../ui/common_widgets.dart';
@@ -32,7 +31,6 @@ part '_tree_table.dart';
 typedef IndexedScrollableWidgetBuilder =
     Widget Function({
       required BuildContext context,
-      required LinkedScrollControllerGroup linkedScrollControllerGroup,
       required int index,
       required List<double> columnWidths,
       required bool isPinned,
@@ -113,7 +111,6 @@ class DevToolsTable<T> extends StatefulWidget {
 @visibleForTesting
 class DevToolsTableState<T> extends State<DevToolsTable<T>>
     with AutoDisposeMixin {
-  late LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
   late ScrollController scrollController;
   late ScrollController pinnedScrollController;
   late ScrollController _horizontalScrollbarController;
@@ -135,9 +132,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
     _initDataAndAddListeners();
 
-    _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
-    _horizontalScrollbarController = _linkedHorizontalScrollControllerGroup
-        .addAndGet();
+    _horizontalScrollbarController = ScrollController();
 
     final initialScrollOffset = widget.preserveVerticalScrollPosition
         ? widget.tableController.tableUiState.scrollOffset
@@ -377,7 +372,6 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   Widget _buildItem(BuildContext context, int index, {bool isPinned = false}) {
     return widget.rowBuilder(
       context: context,
-      linkedScrollControllerGroup: _linkedHorizontalScrollControllerGroup,
       index: index,
       columnWidths: adjustedColumnWidths,
       isPinned: isPinned,
@@ -428,8 +422,6 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                   children: [
                     if (showColumnGroupHeader)
                       TableRow<T>.tableColumnGroupHeader(
-                        linkedScrollControllerGroup:
-                            _linkedHorizontalScrollControllerGroup,
                         columnGroups: columnGroups,
                         columnWidths: adjustedColumnWidths,
                         sortColumn: sortColumn,
@@ -443,8 +435,6 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                     // TODO(kenz): add support for excluding column headers.
                     TableRow<T>.tableColumnHeader(
                       key: const Key('Table header'),
-                      linkedScrollControllerGroup:
-                          _linkedHorizontalScrollControllerGroup,
                       columns: widget.tableController.columns,
                       columnGroups: columnGroups,
                       columnWidths: adjustedColumnWidths,

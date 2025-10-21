@@ -129,14 +129,11 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
   const _ColumnGroupHeaderRow({
     required this.groups,
     required this.columnWidths,
-    required this.scrollController,
   });
 
   final List<ColumnGroup> groups;
 
   final List<double> columnWidths;
-
-  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -146,8 +143,6 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
         border: Border(bottom: defaultBorderSide(Theme.of(context))),
       ),
       child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        controller: scrollController,
         itemCount: groups.length + groups.numSpacers,
         itemBuilder: (context, int i) {
           if (i % 2 == 1) {
