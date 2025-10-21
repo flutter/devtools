@@ -132,13 +132,13 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
     _initDataAndAddListeners();
 
-    _horizontalScrollbarController = ScrollController();
-
     final initialScrollOffset = widget.preserveVerticalScrollPosition
         ? widget.tableController.tableUiState.scrollOffset
         : 0.0;
     widget.tableController.initScrollController(initialScrollOffset);
     scrollController = widget.tableController.verticalScrollController!;
+    _horizontalScrollbarController =
+        widget.tableController.horizontalScrollController!;
 
     if (widget.startScrolledAtBottom) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
