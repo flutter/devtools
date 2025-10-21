@@ -106,7 +106,7 @@ class DevToolsTable<T> extends StatefulWidget {
   final bool fillWithEmptyRows;
   final bool enableHoverHandling;
 
-  static const columnMinWidth = 30.0;
+  static const columnMinWidth = 50.0;
 
   @override
   DevToolsTableState<T> createState() => DevToolsTableState<T>();
@@ -115,22 +115,30 @@ class DevToolsTable<T> extends StatefulWidget {
 @visibleForTesting
 class DevToolsTableState<T> extends State<DevToolsTable<T>>
     with AutoDisposeMixin {
+  static const _resizingDebounceDuration = Duration(milliseconds: 200);
+
   late LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
   late ScrollController scrollController;
   late ScrollController pinnedScrollController;
 
   late List<T> _data;
 
+  late Debouncer _resizingDebouncer;
+
   @visibleForTesting
   List<double> get columnWidths => _columnWidths;
 
   late List<double> _columnWidths;
+
+  double? _previousViewWidth;
 
   @override
   void initState() {
     super.initState();
 
     _initDataAndAddListeners();
+
+    _resizingDebouncer = Debouncer(duration: _resizingDebounceDuration);
 
     _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
 
@@ -271,81 +279,38 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     return tableWidth;
   }
 
-  /// Modifies [adjustedColumnWidths] so that any available view space greater
-  /// than [_tableWidthForOriginalColumns] is distributed evenly across variable
-  /// width columns.
-  /* 
   void _adjustColumnWidthsForViewSize(double viewWidth) {
-    final extraSpace = viewWidth - _tableWidthForOriginalColumns;
-    if (extraSpace <= 0) {
-      adjustedColumnWidths = List.of(widget.columnWidths);
+    final extraSpace = _currentTableWidth - viewWidth;
+    if (extraSpace == 0) {
       return;
     }
 
-    final adjustedColumnWidthsByIndex = <int, double>{};
+    final newWidths = List.of(_columnWidths);
+    final delta = extraSpace / newWidths.length;
+    final remainder = extraSpace % newWidths.length;
+    final widestIndex = newWidths.indexWhere((w) => w == newWidths.reduce(max));
 
-    /// Helper method to evenly distribute [space] among the columns at
-    /// [columnIndices].
-    ///
-    /// This method stores the adjusted width values in
-    /// [adjustedColumnWidthsByIndex].
-    void evenlyDistributeColumnSizes(List<int> columnIndices, double space) {
-      final targetSize = space / columnIndices.length;
+    for (var i = 0; i < newWidths.length; i++) {
+      double newWidth = newWidths[i];
 
-      var largestColumnIndex = -1;
-      var largestColumnWidth = 0.0;
-      for (final index in columnIndices) {
-        final columnWidth = widget.columnWidths[index];
-        if (columnWidth >= largestColumnWidth) {
-          largestColumnIndex = index;
-          largestColumnWidth = columnWidth;
-        }
+      // Expand or shrink the widest column by the remainder.
+      if (widestIndex == i) {
+        newWidth -= remainder;
       }
-      if (targetSize < largestColumnWidth) {
-        // We do not have enough extra space to evenly distribute to all
-        // columns. Remove the largest column and recurse.
-        adjustedColumnWidthsByIndex[largestColumnIndex] = largestColumnWidth;
-        final newColumnIndices = List.of(columnIndices)
-          ..remove(largestColumnIndex);
-        return evenlyDistributeColumnSizes(
-          newColumnIndices,
-          space - largestColumnWidth,
-        );
-      }
-
-      for (int i = 0; i < columnIndices.length; i++) {
-        final columnIndex = columnIndices[i];
-        adjustedColumnWidthsByIndex[columnIndex] = targetSize;
-      }
-    }
-
-    final variableWidthColumnIndices = <int>[];
-    var sumVariableWidthColumnSizes = 0.0;
-    for (int i = 0; i < widget.tableController.columns.length; i++) {
+      // Expand or shrink each column by the delta.
+      newWidth -= delta;
+      // Ensure no column is smaller than the minimum width.
       final column = widget.tableController.columns[i];
-      if (column.fixedWidthPx == null) {
-        variableWidthColumnIndices.add(i);
-        sumVariableWidthColumnSizes += widget.columnWidths[i];
-      }
-    }
-    final totalVariableWidthColumnSpace =
-        sumVariableWidthColumnSizes + extraSpace;
-
-    evenlyDistributeColumnSizes(
-      variableWidthColumnIndices,
-      totalVariableWidthColumnSpace,
-    );
-
-    adjustedColumnWidths.clear();
-    for (int i = 0; i < widget.columnWidths.length; i++) {
-      final originalWidth = widget.columnWidths[i];
-      final isVariableWidthColumn = variableWidthColumnIndices.contains(i);
-      adjustedColumnWidths.add(
-        isVariableWidthColumn ? adjustedColumnWidthsByIndex[i]! : originalWidth,
+      newWidths[i] = max(
+        newWidth,
+        column.minWidthPx ?? DevToolsTable.columnMinWidth,
       );
     }
+
+    setState(() {
+      _columnWidths = newWidths;
+    });
   }
-  */
 
   double _pinnedDataHeight(BoxConstraints tableConstraints) => min(
     widget.rowItemExtent * pinnedData.length,
@@ -414,6 +379,12 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewWidth = constraints.maxWidth;
+        if (_previousViewWidth != null && viewWidth != _previousViewWidth) {
+          _resizingDebouncer.run(
+            () => _adjustColumnWidthsForViewSize(viewWidth),
+          );
+        }
+        _previousViewWidth = viewWidth;
         return SelectionArea(
           child: SizedBox(
             width: max(viewWidth, _currentTableWidth),
