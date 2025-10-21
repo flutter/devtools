@@ -16,9 +16,23 @@ const _goldensDirectoryPath = 'integration_test/test_infra/goldens';
 const _failuresDirectoryPath = '$_goldensDirectoryPath/failures';
 const _defaultDiffPercentage = 1.0;
 const _defaultDiffTolerance = 0.003;
+// The following timeouts were copied from
+// https://developer.mozilla.org/en-US/docs/Web/WebDriver/Reference/Timeouts
+const _defaultWebDriverPageLoadTimeoutInMins = 5;
+const _defaultWebDriverScriptTimeoutInSeconds = 30;
 
 Future<void> main() async {
   final driver = await FlutterDriver.connect();
+
+  // Double the WebDriver timeout limits to handle test flakiness.
+  // See https://github.com/flutter/devtools/issues/9474
+  await driver.webDriver.timeouts.setScriptTimeout(
+    const Duration(seconds: _defaultWebDriverScriptTimeoutInSeconds * 2),
+  );
+  await driver.webDriver.timeouts.setPageLoadTimeout(
+    const Duration(minutes: _defaultWebDriverPageLoadTimeoutInMins * 2),
+  );
+
   await integrationDriver(
     driver: driver,
     onScreenshot:
