@@ -279,29 +279,62 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     return tableWidth;
   }
 
+  /// Adjusts the column widths to fit the new [viewWidth].
+  ///
+  /// This method will attempt to distribute any extra space (positive or
+  /// negative) amongst the variable-width columns. If there are no
+  /// variable-width columns, it will distribute the space amongst all columns.
   void _adjustColumnWidthsForViewSize(double viewWidth) {
     final extraSpace = _currentTableWidth - viewWidth;
     if (extraSpace == 0) {
       return;
     }
 
+    final variableWidthColumnIndices = <(int, double)>[];
+    for (int i = 0; i < widget.tableController.columns.length; i++) {
+      final column = widget.tableController.columns[i];
+      if (column.fixedWidthPx == null) {
+        variableWidthColumnIndices.add((i, _columnWidths[i]));
+      }
+    }
+
+    // If the table contains variable width columns, the distribute the extra
+    // space between them. Otherwise, distribute the extra space between all the
+    // columns.
+    _distributeExtraSpace(
+      extraSpace,
+      indexedColumns: variableWidthColumnIndices.isNotEmpty
+          ? variableWidthColumnIndices
+          : _columnWidths.indexed,
+    );
+  }
+
+  /// Distributes [extraSpace] evenly between the given [indexedColumns].
+  ///
+  /// The [extraSpace] will be subtracted from each column's width. The
+  /// remainder of the division is subtracted from the last column to ensure a
+  /// perfect fit.
+  ///
+  /// This method respects the `minWidthPx` of each column.
+  void _distributeExtraSpace(
+    double extraSpace, {
+    required Iterable<(int, double)> indexedColumns,
+  }) {
     final newWidths = List.of(_columnWidths);
-    final delta = extraSpace / newWidths.length;
-    final remainder = extraSpace % newWidths.length;
-    final widestIndex = newWidths.indexWhere((w) => w == newWidths.reduce(max));
+    final delta = extraSpace / indexedColumns.length;
+    final remainder = extraSpace % indexedColumns.length;
 
-    for (var i = 0; i < newWidths.length; i++) {
-      double newWidth = newWidths[i];
+    for (var i = 0; i < indexedColumns.length; i++) {
+      final columnIndex = indexedColumns.elementAt(i).$1;
+      var newWidth = indexedColumns.elementAt(i).$2;
 
-      // Expand or shrink the widest column by the remainder.
-      if (widestIndex == i) {
+      newWidth -= delta;
+      if (i == indexedColumns.length - 1) {
         newWidth -= remainder;
       }
-      // Expand or shrink each column by the delta.
-      newWidth -= delta;
-      // Ensure no column is smaller than the minimum width.
-      final column = widget.tableController.columns[i];
-      newWidths[i] = max(
+
+      final column = widget.tableController.columns[columnIndex];
+      newWidths[columnIndex] = max(
         newWidth,
         column.minWidthPx ?? DevToolsTable.columnMinWidth,
       );
