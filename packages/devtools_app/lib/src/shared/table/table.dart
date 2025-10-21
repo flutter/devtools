@@ -249,7 +249,6 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   @override
   void dispose() {
     pinnedScrollController.dispose();
-    _horizontalScrollbarController.dispose();
     super.dispose();
   }
 
