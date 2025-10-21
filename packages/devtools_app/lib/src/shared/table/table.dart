@@ -106,6 +106,8 @@ class DevToolsTable<T> extends StatefulWidget {
   final bool fillWithEmptyRows;
   final bool enableHoverHandling;
 
+  static const columnMinWidth = 30.0;
+
   @override
   DevToolsTableState<T> createState() => DevToolsTableState<T>();
 }
@@ -119,14 +121,10 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
   late List<T> _data;
 
-  /// An adjusted copy of `widget.columnWidths` where any variable width columns
-  /// may be increased so that the sum of all column widths equals the available
-  /// screen space.
-  ///
-  /// This must be calculated where we have access to the Flutter view
-  /// constraints (e.g. the [LayoutBuilder] below).
   @visibleForTesting
-  late List<double> adjustedColumnWidths;
+  List<double> get columnWidths => _columnWidths;
+
+  late List<double> _columnWidths;
 
   @override
   void initState() {
@@ -150,7 +148,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
     pinnedScrollController = ScrollController();
 
-    adjustedColumnWidths = List.of(widget.columnWidths);
+    _columnWidths = List.of(widget.columnWidths);
   }
 
   @override
@@ -167,8 +165,6 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
       cancelListeners();
       _initDataAndAddListeners();
     }
-
-    adjustedColumnWidths = List.of(widget.columnWidths);
   }
 
   void _initDataAndAddListeners() {
@@ -254,8 +250,14 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     super.dispose();
   }
 
+  void _handleColumnResize(int columnIndex, double newWidth) {
+    setState(() {
+      _columnWidths[columnIndex] = newWidth;
+    });
+  }
+
   /// The width of all columns in the table with additional padding.
-  double get _tableWidthForOriginalColumns {
+  double get _currentTableWidth {
     var tableWidth = 2 * defaultSpacing;
     final numColumnGroupSpacers =
         widget.tableController.columnGroups?.numSpacers ?? 0;
@@ -263,7 +265,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
         widget.tableController.columns.numSpacers - numColumnGroupSpacers;
     tableWidth += numColumnSpacers * columnSpacing;
     tableWidth += numColumnGroupSpacers * columnGroupSpacingWithPadding;
-    for (final columnWidth in widget.columnWidths) {
+    for (final columnWidth in _columnWidths) {
       tableWidth += columnWidth;
     }
     return tableWidth;
@@ -272,6 +274,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   /// Modifies [adjustedColumnWidths] so that any available view space greater
   /// than [_tableWidthForOriginalColumns] is distributed evenly across variable
   /// width columns.
+  /* 
   void _adjustColumnWidthsForViewSize(double viewWidth) {
     final extraSpace = viewWidth - _tableWidthForOriginalColumns;
     if (extraSpace <= 0) {
@@ -342,6 +345,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
       );
     }
   }
+  */
 
   double _pinnedDataHeight(BoxConstraints tableConstraints) => min(
     widget.rowItemExtent * pinnedData.length,
@@ -375,7 +379,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
       context: context,
       linkedScrollControllerGroup: _linkedHorizontalScrollControllerGroup,
       index: index,
-      columnWidths: adjustedColumnWidths,
+      columnWidths: _columnWidths,
       isPinned: isPinned,
       enableHoverHandling: widget.enableHoverHandling,
     );
@@ -410,10 +414,9 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewWidth = constraints.maxWidth;
-        _adjustColumnWidthsForViewSize(viewWidth);
         return SelectionArea(
           child: SizedBox(
-            width: max(viewWidth, _tableWidthForOriginalColumns),
+            width: max(viewWidth, _currentTableWidth),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -422,7 +425,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                     linkedScrollControllerGroup:
                         _linkedHorizontalScrollControllerGroup,
                     columnGroups: columnGroups,
-                    columnWidths: adjustedColumnWidths,
+                    columnWidths: _columnWidths,
+                    onColumnResize: _handleColumnResize,
                     sortColumn: sortColumn,
                     sortDirection: tableUiState.sortDirection,
                     secondarySortColumn:
@@ -431,14 +435,14 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                     tall: widget.tallHeaders,
                     backgroundColor: widget.headerColor,
                   ),
-                // TODO(kenz): add support for excluding column headers.
                 TableRow<T>.tableColumnHeader(
                   key: const Key('Table header'),
                   linkedScrollControllerGroup:
                       _linkedHorizontalScrollControllerGroup,
                   columns: widget.tableController.columns,
                   columnGroups: columnGroups,
-                  columnWidths: adjustedColumnWidths,
+                  columnWidths: _columnWidths,
+                  onColumnResize: _handleColumnResize,
                   sortColumn: sortColumn,
                   sortDirection: tableUiState.sortDirection,
                   secondarySortColumn:
