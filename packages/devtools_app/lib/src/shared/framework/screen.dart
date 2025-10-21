@@ -32,6 +32,7 @@ enum ScreenMetaData {
     'home',
     iconAsset: 'icons/app_bar/devtools.png',
     requiresConnection: false,
+    supportsWebServerDevice: true,
     tutorialVideoTimestamp: '?t=0',
   ),
   inspector(
@@ -40,6 +41,7 @@ enum ScreenMetaData {
     iconAsset: 'icons/app_bar/inspector.png',
     requiresFlutter: true,
     requiresDebugBuild: true,
+    supportsWebServerDevice: true,
     tutorialVideoTimestamp: '?t=172',
   ),
   performance(
@@ -47,7 +49,6 @@ enum ScreenMetaData {
     title: 'Performance',
     iconAsset: 'icons/app_bar/performance.png',
     worksWithOfflineData: true,
-    requiresWebAppDebuggable: true,
     requiresConnection: false,
     tutorialVideoTimestamp: '?t=261',
   ),
@@ -74,7 +75,6 @@ enum ScreenMetaData {
     title: 'Debugger',
     icon: Octicons.bug,
     requiresDebugBuild: true,
-    requiresWebAppDebuggable: true,
     tutorialVideoTimestamp: '?t=513',
   ),
   network(
@@ -91,6 +91,7 @@ enum ScreenMetaData {
     'logging',
     title: 'Logging',
     iconAsset: 'icons/app_bar/logging.png',
+    supportsWebServerDevice: true,
     tutorialVideoTimestamp: '?t=558',
   ),
   provider(
@@ -120,7 +121,6 @@ enum ScreenMetaData {
     title: 'VM Tools',
     icon: Icons.settings_applications,
     requiresAdvancedDeveloperMode: true,
-    requiresWebAppDebuggable: true,
   ),
   dtdTools(
     'dtdTools',
@@ -141,7 +141,7 @@ enum ScreenMetaData {
     this.requiresFlutter = false,
     this.requiresDebugBuild = false,
     this.requiresAdvancedDeveloperMode = false,
-    this.requiresWebAppDebuggable = false,
+    this.supportsWebServerDevice = false,
     this.worksWithOfflineData = false,
     this.requiresLibrary,
     this.tutorialVideoTimestamp,
@@ -159,7 +159,7 @@ enum ScreenMetaData {
   final bool requiresFlutter;
   final bool requiresDebugBuild;
   final bool requiresAdvancedDeveloperMode;
-  final bool requiresWebAppDebuggable;
+  final bool supportsWebServerDevice;
   final bool worksWithOfflineData;
   final String? requiresLibrary;
 
@@ -209,7 +209,7 @@ abstract class Screen {
     this.requiresFlutter = false,
     this.requiresDebugBuild = false,
     this.requiresAdvancedDeveloperMode = false,
-    this.requiresWebAppDebuggable = false,
+    this.supportsWebServerDevice = false,
     this.worksWithOfflineData = false,
     this.showFloatingDebuggerControls = true,
   }) : assert(
@@ -229,7 +229,7 @@ abstract class Screen {
     bool requiresFlutter = false,
     bool requiresDebugBuild = false,
     bool requiresAdvancedDeveloperMode = false,
-    bool requiresWebAppDebuggable = false,
+    bool supportsWebServerDevice = false,
     bool worksWithOfflineData = false,
     bool Function(FlutterVersion? currentVersion)? shouldShowForFlutterVersion,
     bool showFloatingDebuggerControls = true,
@@ -246,7 +246,7 @@ abstract class Screen {
          requiresFlutter: requiresFlutter,
          requiresDebugBuild: requiresDebugBuild,
          requiresAdvancedDeveloperMode: requiresAdvancedDeveloperMode,
-         requiresWebAppDebuggable: requiresWebAppDebuggable,
+         supportsWebServerDevice: supportsWebServerDevice,
          worksWithOfflineData: worksWithOfflineData,
          showFloatingDebuggerControls: showFloatingDebuggerControls,
          title: title,
@@ -270,7 +270,7 @@ abstract class Screen {
          requiresFlutter: metadata.requiresFlutter,
          requiresDebugBuild: metadata.requiresDebugBuild,
          requiresAdvancedDeveloperMode: metadata.requiresAdvancedDeveloperMode,
-         requiresWebAppDebuggable: metadata.requiresWebAppDebuggable,
+         supportsWebServerDevice: metadata.supportsWebServerDevice,
          worksWithOfflineData: metadata.worksWithOfflineData,
          shouldShowForFlutterVersion: shouldShowForFlutterVersion,
          showFloatingDebuggerControls: showFloatingDebuggerControls,
@@ -350,7 +350,7 @@ abstract class Screen {
 
   /// Whether this screen should only be included when the app is a web app with full debugging
   /// support.
-  final bool requiresWebAppDebuggable;
+  final bool supportsWebServerDevice;
 
   /// Whether this screen works offline and should show in offline mode even if conditions are not met.
   final bool worksWithOfflineData;
@@ -550,7 +550,7 @@ abstract class Screen {
       disabledReason: ScreenDisabledReason.requiresDebugBuild,
     );
   }
-  if (screen.requiresWebAppDebuggable &&
+  if (!screen.supportsWebServerDevice &&
       connectedApp.isDartWebAppNow == true &&
       !connectedApp.isDebuggableWebApp) {
     _log.finest(
