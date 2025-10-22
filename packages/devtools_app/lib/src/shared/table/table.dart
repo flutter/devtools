@@ -423,6 +423,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                       TableRow<T>.tableColumnGroupHeader(
                         columnGroups: columnGroups,
                         columnWidths: adjustedColumnWidths,
+                        horizontalScrollController:
+                            _horizontalScrollbarController,
                         sortColumn: sortColumn,
                         sortDirection: tableUiState.sortDirection,
                         secondarySortColumn:
