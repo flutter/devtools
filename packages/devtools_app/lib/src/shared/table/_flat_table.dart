@@ -76,6 +76,7 @@ class FlatTable<T> extends StatefulWidget {
     this.headerColor,
     this.fillWithEmptyRows = false,
     this.enableHoverHandling = false,
+    this.horizontalScrollBehavior,
     ValueNotifier<T?>? selectionNotifier,
   }) : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null);
 
@@ -125,6 +126,13 @@ class FlatTable<T> extends StatefulWidget {
 
   /// Whether to enable hover handling.
   final bool enableHoverHandling;
+
+  /// The scroll behavior for the horizontal scroll view that wraps the table.
+  ///
+  /// This can be used to customize the scrolling behavior, for example, to
+  // enable drag-to-scroll. When this is provided the horizontal scrollbar is
+  // hidden.
+  final ScrollBehavior? horizontalScrollBehavior;
 
   /// Data set to show as rows in this table.
   final List<T> data;
@@ -304,6 +312,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
       headerColor: widget.headerColor,
       fillWithEmptyRows: widget.fillWithEmptyRows,
       enableHoverHandling: widget.enableHoverHandling,
+      horizontalScrollBehavior: widget.horizontalScrollBehavior,
     );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(

@@ -86,6 +86,7 @@ class DevToolsTable<T> extends StatefulWidget {
     this.headerColor,
     this.fillWithEmptyRows = false,
     this.enableHoverHandling = false,
+    this.horizontalScrollBehavior,
   });
 
   final TableControllerBase<T> tableController;
@@ -103,6 +104,7 @@ class DevToolsTable<T> extends StatefulWidget {
   final Color? headerColor;
   final bool fillWithEmptyRows;
   final bool enableHoverHandling;
+  final ScrollBehavior? horizontalScrollBehavior;
 
   @override
   DevToolsTableState<T> createState() => DevToolsTableState<T>();
@@ -407,38 +409,21 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
       builder: (context, constraints) {
         final viewWidth = constraints.maxWidth;
         _adjustColumnWidthsForViewSize(viewWidth);
-        return Scrollbar(
+        final scrollView = SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
           controller: _horizontalScrollbarController,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            controller: _horizontalScrollbarController,
-            child: SelectionArea(
-              child: SizedBox(
-                width: max(viewWidth, _tableWidthForOriginalColumns),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (showColumnGroupHeader)
-                      TableRow<T>.tableColumnGroupHeader(
-                        columnGroups: columnGroups,
-                        columnWidths: adjustedColumnWidths,
-                        horizontalScrollController:
-                            _horizontalScrollbarController,
-                        sortColumn: sortColumn,
-                        sortDirection: tableUiState.sortDirection,
-                        secondarySortColumn:
-                            widget.tableController.secondarySortColumn,
-                        onSortChanged: widget.tableController.sortDataAndNotify,
-                        tall: widget.tallHeaders,
-                        backgroundColor: widget.headerColor,
-                      ),
-                    // TODO(kenz): add support for excluding column headers.
-                    TableRow<T>.tableColumnHeader(
-                      key: const Key('Table header'),
-                      columns: widget.tableController.columns,
+          child: SelectionArea(
+            child: SizedBox(
+              width: max(viewWidth, _tableWidthForOriginalColumns),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (showColumnGroupHeader)
+                    TableRow<T>.tableColumnGroupHeader(
                       columnGroups: columnGroups,
                       columnWidths: adjustedColumnWidths,
+                      horizontalScrollController:
+                          _horizontalScrollbarController,
                       sortColumn: sortColumn,
                       sortDirection: tableUiState.sortDirection,
                       secondarySortColumn:
@@ -447,60 +432,82 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                       tall: widget.tallHeaders,
                       backgroundColor: widget.headerColor,
                     ),
-                    if (pinnedData.isNotEmpty) ...[
-                      SizedBox(
-                        height: _pinnedDataHeight(constraints),
-                        child: Scrollbar(
-                          thumbVisibility: true,
-                          controller: pinnedScrollController,
-                          child: ListView.builder(
-                            controller: pinnedScrollController,
-                            itemCount: pinnedData.length,
-                            itemExtent: widget.rowItemExtent,
-                            itemBuilder: (context, index) =>
-                                _buildItem(context, index, isPinned: true),
-                          ),
-                        ),
-                      ),
-                      const ThickDivider(),
-                    ],
-                    Expanded(
+                  // TODO(kenz): add support for excluding column headers.
+                  TableRow<T>.tableColumnHeader(
+                    key: const Key('Table header'),
+                    columns: widget.tableController.columns,
+                    columnGroups: columnGroups,
+                    columnWidths: adjustedColumnWidths,
+                    sortColumn: sortColumn,
+                    sortDirection: tableUiState.sortDirection,
+                    secondarySortColumn:
+                        widget.tableController.secondarySortColumn,
+                    onSortChanged: widget.tableController.sortDataAndNotify,
+                    tall: widget.tallHeaders,
+                    backgroundColor: widget.headerColor,
+                  ),
+                  if (pinnedData.isNotEmpty) ...[
+                    SizedBox(
+                      height: _pinnedDataHeight(constraints),
                       child: Scrollbar(
                         thumbVisibility: true,
-                        controller: scrollController,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onTapDown: (a) => widget.focusNode?.requestFocus(),
-                          child: Focus(
-                            autofocus: true,
-                            onKeyEvent: (_, event) =>
-                                widget.handleKeyEvent != null
-                                ? widget.handleKeyEvent!(
-                                    event,
-                                    scrollController,
-                                    constraints,
-                                  )
-                                : KeyEventResult.ignored,
-                            focusNode: widget.focusNode,
-                            child: ListView.builder(
-                              controller: scrollController,
-                              itemCount: _dataRowCount(
-                                constraints,
-                                showColumnGroupHeader,
-                              ),
-                              itemExtent: widget.rowItemExtent,
-                              itemBuilder: _buildItem,
+                        controller: pinnedScrollController,
+                        child: ListView.builder(
+                          controller: pinnedScrollController,
+                          itemCount: pinnedData.length,
+                          itemExtent: widget.rowItemExtent,
+                          itemBuilder: (context, index) =>
+                              _buildItem(context, index, isPinned: true),
+                        ),
+                      ),
+                    ),
+                    const ThickDivider(),
+                  ],
+                  Expanded(
+                    child: Scrollbar(
+                      thumbVisibility: true,
+                      controller: scrollController,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTapDown: (a) => widget.focusNode?.requestFocus(),
+                        child: Focus(
+                          autofocus: true,
+                          onKeyEvent: (_, event) =>
+                              widget.handleKeyEvent != null
+                              ? widget.handleKeyEvent!(
+                                  event,
+                                  scrollController,
+                                  constraints,
+                                )
+                              : KeyEventResult.ignored,
+                          focusNode: widget.focusNode,
+                          child: ListView.builder(
+                            controller: scrollController,
+                            itemCount: _dataRowCount(
+                              constraints,
+                              showColumnGroupHeader,
                             ),
+                            itemExtent: widget.rowItemExtent,
+                            itemBuilder: _buildItem,
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
         );
+
+        final scrollBehavior = widget.horizontalScrollBehavior;
+        return scrollBehavior != null
+            ? ScrollConfiguration(behavior: scrollBehavior, child: scrollView)
+            : Scrollbar(
+                controller: _horizontalScrollbarController,
+                thumbVisibility: true,
+                child: scrollView,
+              );
       },
     );
   }
