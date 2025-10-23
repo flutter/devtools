@@ -143,6 +143,7 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
         border: Border(bottom: defaultBorderSide(Theme.of(context))),
       ),
       child: ListView.builder(
+        scrollDirection: Axis.horizontal,
         itemCount: groups.length + groups.numSpacers,
         itemBuilder: (context, int i) {
           if (i % 2 == 1) {
