@@ -298,7 +298,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
       }
     }
 
-    // If the table contains variable width columns, the distribute the extra
+    // If the table contains variable width columns, then distribute the extra
     // space between them. Otherwise, distribute the extra space between all the
     // columns.
     _distributeExtraSpace(
