@@ -404,6 +404,7 @@ class _GCStatsTable extends StatelessWidget {
             columns: _columns,
             defaultSortColumn: _columns.first,
             defaultSortDirection: SortDirection.ascending,
+            sizeColumnsToFit: false,
           ),
         );
       },
@@ -426,6 +427,8 @@ class AllocationProfileTableView extends StatefulWidget {
 
 class AllocationProfileTableViewState
     extends State<AllocationProfileTableView> {
+  static const _scrollbarHeight = 10.0;
+
   @override
   void initState() {
     super.initState();
@@ -459,7 +462,7 @@ class AllocationProfileTableViewState
                   // and columns) and one data row. We add a slight padding to
                   // ensure the underlying scrollable area has enough space to not
                   // display a scroll bar.
-                  height: defaultRowHeight + defaultHeaderHeight * 2 + 1,
+                  height: defaultRowHeight + defaultHeaderHeight * 2 + _scrollbarHeight,
                   child: _GCStatsTable(controller: widget.controller),
                 ),
                 const ThickDivider(),
