@@ -462,7 +462,10 @@ class AllocationProfileTableViewState
                   // and columns) and one data row. We add a slight padding to
                   // ensure the underlying scrollable area has enough space to not
                   // display a scroll bar.
-                  height: defaultRowHeight + defaultHeaderHeight * 2 + _scrollbarHeight,
+                  height:
+                      defaultRowHeight +
+                      defaultHeaderHeight * 2 +
+                      _scrollbarHeight,
                   child: _GCStatsTable(controller: widget.controller),
                 ),
                 const ThickDivider(),
