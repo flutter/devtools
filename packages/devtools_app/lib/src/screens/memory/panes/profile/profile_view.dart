@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-import 'dart:ui';
-
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
@@ -406,13 +404,6 @@ class _GCStatsTable extends StatelessWidget {
             columns: _columns,
             defaultSortColumn: _columns.first,
             defaultSortDirection: SortDirection.ascending,
-            // The following is a workaround to make this table horizontally
-            // scrollable.
-            // TODO(https://github.com/flutter/devtools/issues/9483): This table
-            // should be linked to the horizontal scrollbar of the allocation
-            // profile table so that they both can scroll together. This would
-            // allow us to remove the horizontalScrollBehavior parameter.
-            horizontalScrollBehavior: const _DragToScrollBehavior(),
           ),
         );
       },
@@ -688,15 +679,4 @@ class _ProfileHelpLink extends StatelessWidget {
       ),
     );
   }
-}
-
-/// A scroll behavior that allows scrolling via mouse drag.
-class _DragToScrollBehavior extends MaterialScrollBehavior {
-  const _DragToScrollBehavior();
-
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-    ...super.dragDevices,
-    PointerDeviceKind.mouse,
-  };
 }
