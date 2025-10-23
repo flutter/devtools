@@ -348,7 +348,7 @@ abstract class Screen {
   /// is enabled.
   final bool requiresAdvancedDeveloperMode;
 
-  /// Whether this screen should only be included when the app is a web app with full debugging
+  /// Whether this screen should be included when the app is a web app without full debugging
   /// support.
   final bool supportsWebServerDevice;
 
