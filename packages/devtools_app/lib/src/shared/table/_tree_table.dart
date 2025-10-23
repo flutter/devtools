@@ -282,7 +282,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   Widget _buildRow({
     required BuildContext context,
-    required LinkedScrollControllerGroup linkedScrollControllerGroup,
     required int index,
     required List<double> columnWidths,
     required bool isPinned,
@@ -293,7 +292,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       node.index = index;
       return TableRow<T>(
         key: widget.keyFactory(node),
-        linkedScrollControllerGroup: linkedScrollControllerGroup,
         node: node,
         onPressed: (item) => _onItemPressed(item, index),
         backgroundColor: alternatingColorForIndex(

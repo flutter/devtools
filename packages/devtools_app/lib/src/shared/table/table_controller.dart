@@ -277,10 +277,13 @@ abstract class TableControllerBase<T> extends DisposableController {
 
   ScrollController? verticalScrollController;
 
+  ScrollController? horizontalScrollController;
+
   void initScrollController([double initialScrollOffset = 0.0]) {
     verticalScrollController = ScrollController(
       initialScrollOffset: initialScrollOffset,
     );
+    horizontalScrollController = ScrollController();
   }
 
   void storeScrollPosition() {
@@ -357,6 +360,8 @@ abstract class TableControllerBase<T> extends DisposableController {
   void dispose() {
     verticalScrollController?.dispose();
     verticalScrollController = null;
+    horizontalScrollController?.dispose();
+    horizontalScrollController = null;
     _tableData.dispose();
     super.dispose();
   }
