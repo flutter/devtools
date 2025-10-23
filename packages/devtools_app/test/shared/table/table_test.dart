@@ -1379,32 +1379,34 @@ void main() {
       }
     });
 
-    testWidgets('properly collapses and expands the tree', (
-      WidgetTester tester,
-    ) async {
-      final table = TreeTable<TestData>(
-        columns: [_NumberColumn(), treeColumn],
-        dataRoots: [tree1],
-        dataKey: 'test-data',
-        treeColumn: treeColumn,
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: treeColumn,
-        defaultSortDirection: SortDirection.ascending,
-      );
-      await tester.pumpWidget(wrap(table));
-      await tester.pumpAndSettle();
+    testWidgetsWithWindowSize(
+      'properly collapses and expands the tree',
+      windowSize,
+      (WidgetTester tester) async {
+        final table = TreeTable<TestData>(
+          columns: [_NumberColumn(), treeColumn],
+          dataRoots: [tree1],
+          dataKey: 'test-data',
+          treeColumn: treeColumn,
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: treeColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
+        await tester.pumpWidget(wrap(table));
+        await tester.pumpAndSettle();
 
-      expect(tree1.isExpanded, true);
-      await tester.tap(find.byKey(const Key('Foo')));
-      await tester.pumpAndSettle();
-      expect(tree1.isExpanded, false);
-      await tester.tap(find.byKey(const Key('Foo')));
-      await tester.pumpAndSettle();
-      expect(tree1.isExpanded, true);
-      await tester.tap(find.byKey(const Key('Bar')));
-      await tester.pumpAndSettle();
-      expect(tree1.children[0].isExpanded, false);
-    });
+        expect(tree1.isExpanded, true);
+        await tester.tap(find.byKey(const Key('Foo')));
+        await tester.pumpAndSettle();
+        expect(tree1.isExpanded, false);
+        await tester.tap(find.byKey(const Key('Foo')));
+        await tester.pumpAndSettle();
+        expect(tree1.isExpanded, true);
+        await tester.tap(find.byKey(const Key('Bar')));
+        await tester.pumpAndSettle();
+        expect(tree1.children[0].isExpanded, false);
+      },
+    );
 
     testWidgets('starts with sorted data', (WidgetTester tester) async {
       expect(tree1.children[0].name, 'Bar');
@@ -1569,85 +1571,87 @@ void main() {
       });
     });
 
-    testWidgets('properly colors rows with alternating colors', (
-      WidgetTester tester,
-    ) async {
-      final data = TestData('Foo', 0)
-        ..children.addAll([
-          TestData('Bar', 1)
-            ..children.addAll([
-              TestData('Baz', 2),
-              TestData('Qux', 3),
-              TestData('Snap', 4),
-            ]),
-          TestData('Crackle', 5),
-        ])
-        ..expandCascading();
-      final table = TreeTable<TestData>(
-        columns: [_NumberColumn(), treeColumn],
-        dataRoots: [data],
-        dataKey: 'test-data',
-        treeColumn: treeColumn,
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: treeColumn,
-        defaultSortDirection: SortDirection.ascending,
-      );
+    testWidgetsWithWindowSize(
+      'properly colors rows with alternating colors',
+      windowSize,
+      (WidgetTester tester) async {
+        final data = TestData('Foo', 0)
+          ..children.addAll([
+            TestData('Bar', 1)
+              ..children.addAll([
+                TestData('Baz', 2),
+                TestData('Qux', 3),
+                TestData('Snap', 4),
+              ]),
+            TestData('Crackle', 5),
+          ])
+          ..expandCascading();
+        final table = TreeTable<TestData>(
+          columns: [_NumberColumn(), treeColumn],
+          dataRoots: [data],
+          dataKey: 'test-data',
+          treeColumn: treeColumn,
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: treeColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
 
-      final fooFinder = find.byKey(const Key('Foo'));
-      final barFinder = find.byKey(const Key('Bar'));
-      final bazFinder = find.byKey(const Key('Baz'));
-      final quxFinder = find.byKey(const Key('Qux'));
-      final snapFinder = find.byKey(const Key('Snap'));
-      final crackleFinder = find.byKey(const Key('Crackle'));
+        final fooFinder = find.byKey(const Key('Foo'));
+        final barFinder = find.byKey(const Key('Bar'));
+        final bazFinder = find.byKey(const Key('Baz'));
+        final quxFinder = find.byKey(const Key('Qux'));
+        final snapFinder = find.byKey(const Key('Snap'));
+        final crackleFinder = find.byKey(const Key('Crackle'));
 
-      // Expected ARGB color values.
-      const color1Value = '(a: 1.0, r: 0.94, g: 0.94, b: 0.94)';
-      const color2Value = '(a: 1.0, r: 1.0, g: 1.0, b: 1.0)';
-      const rowSelectedColorValue = '(a: 1.0, r: 1.0, g: 1.0, b: 1.0)';
+        // Expected ARGB color values.
+        const color1Value = '(a: 1.0, r: 0.94, g: 0.94, b: 0.94)';
+        const color2Value = '(a: 1.0, r: 1.0, g: 1.0, b: 1.0)';
+        const rowSelectedColorValue = '(a: 1.0, r: 1.0, g: 1.0, b: 1.0)';
 
-      await tester.pumpWidget(wrap(table));
-      await tester.pumpAndSettle();
-      expect(tree1.isExpanded, true);
+        await tester.pumpWidget(wrap(table));
+        await tester.pumpAndSettle();
+        expect(tree1.isExpanded, true);
 
-      expect(fooFinder, findsOneWidget);
-      expect(barFinder, findsOneWidget);
-      expect(bazFinder, findsOneWidget);
-      expect(quxFinder, findsOneWidget);
-      expect(snapFinder, findsOneWidget);
-      expect(crackleFinder, findsOneWidget);
-      TableRow fooRow = tester.widget(fooFinder);
-      TableRow barRow = tester.widget(barFinder);
-      final TableRow bazRow = tester.widget(bazFinder);
-      final TableRow quxRow = tester.widget(quxFinder);
-      final TableRow snapRow = tester.widget(snapFinder);
-      TableRow crackleRow = tester.widget(crackleFinder);
+        expect(fooFinder, findsOneWidget);
+        expect(barFinder, findsOneWidget);
+        expect(bazFinder, findsOneWidget);
+        expect(quxFinder, findsOneWidget);
+        expect(snapFinder, findsOneWidget);
+        expect(crackleFinder, findsOneWidget);
+        TableRow fooRow = tester.widget(fooFinder);
+        TableRow barRow = tester.widget(barFinder);
+        final TableRow bazRow = tester.widget(bazFinder);
+        final TableRow quxRow = tester.widget(quxFinder);
+        final TableRow snapRow = tester.widget(snapFinder);
+        TableRow crackleRow = tester.widget(crackleFinder);
 
-      expect(fooRow.backgroundColor!.toArgbString(), color1Value);
-      expect(barRow.backgroundColor!.toArgbString(), color2Value);
-      expect(bazRow.backgroundColor!.toArgbString(), color1Value);
-      expect(quxRow.backgroundColor!.toArgbString(), color2Value);
-      expect(snapRow.backgroundColor!.toArgbString(), color1Value);
-      expect(crackleRow.backgroundColor!.toArgbString(), color2Value);
+        expect(fooRow.backgroundColor!.toArgbString(), color1Value);
+        expect(barRow.backgroundColor!.toArgbString(), color2Value);
+        expect(bazRow.backgroundColor!.toArgbString(), color1Value);
+        expect(quxRow.backgroundColor!.toArgbString(), color2Value);
+        expect(snapRow.backgroundColor!.toArgbString(), color1Value);
+        expect(crackleRow.backgroundColor!.toArgbString(), color2Value);
 
-      await tester.tap(barFinder);
-      await tester.pumpAndSettle();
-      expect(fooFinder, findsOneWidget);
-      expect(barFinder, findsOneWidget);
-      expect(bazFinder, findsNothing);
-      expect(quxFinder, findsNothing);
-      expect(snapFinder, findsNothing);
-      expect(crackleFinder, findsOneWidget);
-      fooRow = tester.widget(fooFinder);
-      barRow = tester.widget(barFinder);
-      crackleRow = tester.widget(crackleFinder);
+        await tester.tap(barFinder);
+        await tester.pumpAndSettle();
+        expect(fooFinder, findsOneWidget);
+        expect(barFinder, findsOneWidget);
+        expect(bazFinder, findsNothing);
+        expect(quxFinder, findsNothing);
+        expect(snapFinder, findsNothing);
+        expect(crackleFinder, findsOneWidget);
+        fooRow = tester.widget(fooFinder);
+        barRow = tester.widget(barFinder);
+        crackleRow = tester.widget(crackleFinder);
 
-      expect(fooRow.backgroundColor!.toArgbString(), color1Value);
-      // [barRow] has the rowSelected color after being tapped.
-      expect(barRow.backgroundColor!.toArgbString(), rowSelectedColorValue);
-      // [crackleRow] has a different background color after collapsing previous
-      // row (Bar).
-      expect(crackleRow.backgroundColor!.toArgbString(), color1Value);
-    });
+        expect(fooRow.backgroundColor!.toArgbString(), color1Value);
+        // [barRow] has the rowSelected color after being tapped.
+        expect(barRow.backgroundColor!.toArgbString(), rowSelectedColorValue);
+        // [crackleRow] has a different background color after collapsing previous
+        // row (Bar).
+        expect(crackleRow.backgroundColor!.toArgbString(), color1Value);
+      },
+    );
 
     test('fails when TreeColumn is not in column list', () {
       expect(() {

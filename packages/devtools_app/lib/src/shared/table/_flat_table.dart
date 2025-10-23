@@ -317,7 +317,6 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
 
   Widget _buildRow({
     required BuildContext context,
-    required LinkedScrollControllerGroup linkedScrollControllerGroup,
     required int index,
     required List<double> columnWidths,
     required bool isPinned,
@@ -327,7 +326,6 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     final data = isPinned ? pinnedData : tableController.tableData.value.data;
     if (index >= data.length) {
       return TableRow<T>.filler(
-        linkedScrollControllerGroup: linkedScrollControllerGroup,
         columns: tableController.columns,
         columnGroups: tableController.columnGroups,
         columnWidths: columnWidths,
@@ -344,7 +342,6 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
       builder: (context, selected, _) {
         return TableRow<T>(
           key: widget.keyFactory(node),
-          linkedScrollControllerGroup: linkedScrollControllerGroup,
           node: node,
           onPressed: (T? selection) {
             widget.selectionNotifier.value = selection;

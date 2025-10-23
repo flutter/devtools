@@ -15,7 +15,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+- Added a horizontal scrollbar to data tables to help with navigation.  -
+  [#9482](https://github.com/flutter/devtools/pull/9482)
 
 ## Inspector updates
 
@@ -39,7 +40,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+* Fixed layout of the "error count" badge in the tab name.
 
 ## Logging updates
 
