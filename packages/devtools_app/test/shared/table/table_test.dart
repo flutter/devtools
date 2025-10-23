@@ -484,7 +484,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 3);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 400.0); // Fixed width column.
@@ -503,7 +503,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 3);
             expect(columnWidths[0], 300.0);
             expect(columnWidths[1], 400.0);
@@ -522,7 +522,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 3);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 400.0); // Fixed width column.
@@ -531,7 +531,7 @@ void main() {
             expect(adjustedColumnWidths.length, 3);
             expect(adjustedColumnWidths[0], 300.0);
             expect(adjustedColumnWidths[1], 400.0);
-            expect(adjustedColumnWidths[2], 0.0);
+            expect(adjustedColumnWidths[2], 52.0);
           }
         });
 
@@ -557,7 +557,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 4);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 1620.0); // Min width wide column
@@ -578,7 +578,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 4);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 120.0); // Min width wide column
@@ -599,7 +599,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 4);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 100.0); // Min width wide column
@@ -638,7 +638,7 @@ void main() {
                 find.byType(DevToolsTable<TestData>),
               );
               final columnWidths = tableState.widget.columnWidths;
-              final adjustedColumnWidths = tableState.adjustedColumnWidths;
+              final adjustedColumnWidths = tableState.columnWidths;
               expect(columnWidths.length, 5);
               expect(columnWidths[0], 300.0); // Fixed width column
               expect(columnWidths[1], 1076.0); // Min width wide column
@@ -662,7 +662,7 @@ void main() {
                 find.byType(DevToolsTable<TestData>),
               );
               final columnWidths = tableState.widget.columnWidths;
-              final adjustedColumnWidths = tableState.adjustedColumnWidths;
+              final adjustedColumnWidths = tableState.columnWidths;
               expect(columnWidths.length, 5);
               expect(columnWidths[0], 300.0); // Fixed width column
               expect(columnWidths[1], 243.0); // Min width wide column
@@ -686,7 +686,7 @@ void main() {
                 find.byType(DevToolsTable<TestData>),
               );
               final columnWidths = tableState.widget.columnWidths;
-              final adjustedColumnWidths = tableState.adjustedColumnWidths;
+              final adjustedColumnWidths = tableState.columnWidths;
               expect(columnWidths.length, 5);
               expect(columnWidths[0], 300.0); // Fixed width column
               expect(columnWidths[1], 134.0); // Min width wide column
@@ -710,7 +710,7 @@ void main() {
                 find.byType(DevToolsTable<TestData>),
               );
               final columnWidths = tableState.widget.columnWidths;
-              final adjustedColumnWidths = tableState.adjustedColumnWidths;
+              final adjustedColumnWidths = tableState.columnWidths;
               expect(columnWidths.length, 5);
               expect(columnWidths[0], 300.0); // Fixed width column
               expect(columnWidths[1], 100.0); // Min width wide column
@@ -748,7 +748,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 3);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 400.0); // Fixed width column.
@@ -767,7 +767,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 3);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 400.0); // Fixed width column.
@@ -786,7 +786,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 3);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 400.0); // Fixed width column.
@@ -821,7 +821,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 4);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 100.0); // Min width wide column
@@ -842,7 +842,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 4);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 100.0); // Min width wide column
@@ -863,7 +863,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 4);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 100.0); // Min width wide column
@@ -902,7 +902,7 @@ void main() {
                 find.byType(DevToolsTable<TestData>),
               );
               final columnWidths = tableState.widget.columnWidths;
-              final adjustedColumnWidths = tableState.adjustedColumnWidths;
+              final adjustedColumnWidths = tableState.columnWidths;
               expect(columnWidths.length, 5);
               expect(columnWidths[0], 300.0); // Fixed width column
               expect(columnWidths[1], 100.0); // Min width wide column
@@ -925,7 +925,7 @@ void main() {
                 find.byType(DevToolsTable<TestData>),
               );
               final columnWidths = tableState.widget.columnWidths;
-              final adjustedColumnWidths = tableState.adjustedColumnWidths;
+              final adjustedColumnWidths = tableState.columnWidths;
               expect(columnWidths[0], 300.0); // Fixed width column
               expect(columnWidths[1], 100.0); // Min width wide column
               expect(columnWidths[2], 160.0); // Very wide min width wide column
