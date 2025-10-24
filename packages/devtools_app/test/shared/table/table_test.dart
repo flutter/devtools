@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-// import 'dart:math';
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/table/column_widths.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
