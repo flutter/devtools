@@ -430,6 +430,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                       TableRow<T>.tableColumnGroupHeader(
                         columnGroups: columnGroups,
                         columnWidths: _columnWidths,
+                        onColumnResize: _handleColumnResize,
                         sortColumn: sortColumn,
                         sortDirection: tableUiState.sortDirection,
                         secondarySortColumn:
@@ -444,6 +445,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                       columns: widget.tableController.columns,
                       columnGroups: columnGroups,
                       columnWidths: _columnWidths,
+                      onColumnResize: _handleColumnResize,
                       sortColumn: sortColumn,
                       sortDirection: tableUiState.sortDirection,
                       secondarySortColumn:
