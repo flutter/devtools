@@ -37,6 +37,7 @@ class TableRow<T> extends StatefulWidget {
        sortDirection = null,
        secondarySortColumn = null,
        onSortChanged = null,
+       onColumnResize = null,
        _rowType = _TableRowType.data,
        tall = false;
 
@@ -58,6 +59,7 @@ class TableRow<T> extends StatefulWidget {
        sortDirection = null,
        secondarySortColumn = null,
        onSortChanged = null,
+       onColumnResize = null,
        searchMatchesNotifier = null,
        activeSearchMatchNotifier = null,
        tall = false,
@@ -75,6 +77,7 @@ class TableRow<T> extends StatefulWidget {
     required this.sortColumn,
     required this.sortDirection,
     required this.onSortChanged,
+    this.onColumnResize,
     this.secondarySortColumn,
     this.onPressed,
     this.tall = false,
@@ -100,6 +103,7 @@ class TableRow<T> extends StatefulWidget {
     required this.sortColumn,
     required this.sortDirection,
     required this.onSortChanged,
+    this.onColumnResize,
     this.secondarySortColumn,
     this.onPressed,
     this.tall = false,
@@ -175,6 +179,8 @@ class TableRow<T> extends StatefulWidget {
     ColumnData<T>? secondarySortColumn,
   })?
   onSortChanged;
+
+  final void Function(int, double)? onColumnResize;
 
   final ValueListenable<List<T>>? searchMatchesNotifier;
 
@@ -527,9 +533,32 @@ class _TableRowState<T> extends State<TableRow<T>>
                 widget.columnWidths[index],
               );
             case _TableRowPartDisplayType.columnSpacer:
-              return const SizedBox(
-                width: columnSpacing,
-                child: VerticalDivider(width: columnSpacing),
+              final columnIndex = columnIndexMap[i - 1];
+              final onColumnResize = widget.onColumnResize;
+              final isResizable = columnIndex != null && onColumnResize != null;
+              return MouseRegion(
+                cursor: isResizable
+                    ? SystemMouseCursors.resizeColumn
+                    : SystemMouseCursors.basic,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragUpdate: (details) {
+                    if (isResizable) {
+                      setState(() {
+                        final newWidth = _calculateNewColumnWidth(
+                          width: widget.columnWidths[columnIndex],
+                          delta: details.delta.dx,
+                          minWidth: widget.columns[columnIndex].minWidthPx,
+                        );
+                        onColumnResize(columnIndex, newWidth);
+                      });
+                    }
+                  },
+                  child: const SizedBox(
+                    width: columnSpacing,
+                    child: VerticalDivider(width: columnSpacing),
+                  ),
+                ),
               );
             case _TableRowPartDisplayType.columnGroupSpacer:
               return const _ColumnGroupSpacer();
@@ -560,4 +589,13 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   @override
   bool shouldShow() => widget.isShown;
+
+  double _calculateNewColumnWidth({
+    required double width,
+    required double delta,
+    double? minWidth,
+  }) => (width + delta).clamp(
+    minWidth ?? DevToolsTable.columnMinWidth,
+    double.infinity,
+  );
 }

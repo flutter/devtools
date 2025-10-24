@@ -411,7 +411,6 @@ void main() {
         expect(data[8].name, 'Snap');
       }
     });
-
     // TODO(jacobr): add a golden image tests for column width tests.
     testWidgets('displays with many columns', (WidgetTester tester) async {
       final table = FlatTable<TestData>(
@@ -464,6 +463,7 @@ void main() {
             ),
           ),
         );
+        await _waitForResizingDebouncer(tester);
       }
 
       group('size to fit', () {
@@ -484,7 +484,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 3);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 400.0); // Fixed width column.
@@ -495,15 +495,14 @@ void main() {
             expect(adjustedColumnWidths[1], 400.0);
             expect(adjustedColumnWidths[2], 3252.0);
           }
-
           viewSize.value = const Size(800.0, 200.0);
-          await tester.pumpAndSettle();
+          await _waitForResizingDebouncer(tester);
           {
             final DevToolsTableState<TestData> tableState = tester.state(
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 3);
             expect(columnWidths[0], 300.0);
             expect(columnWidths[1], 400.0);
@@ -516,13 +515,13 @@ void main() {
           }
 
           viewSize.value = const Size(200.0, 200.0);
-          await tester.pumpAndSettle();
+          await _waitForResizingDebouncer(tester);
           {
             final DevToolsTableState<TestData> tableState = tester.state(
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 3);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 400.0); // Fixed width column.
@@ -531,7 +530,7 @@ void main() {
             expect(adjustedColumnWidths.length, 3);
             expect(adjustedColumnWidths[0], 300.0);
             expect(adjustedColumnWidths[1], 400.0);
-            expect(adjustedColumnWidths[2], 0.0);
+            expect(adjustedColumnWidths[2], 50.0);
           }
         });
 
@@ -557,7 +556,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 4);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 1620.0); // Min width wide column
@@ -572,13 +571,13 @@ void main() {
           }
 
           viewSize.value = const Size(1000.0, 200.0);
-          await tester.pumpAndSettle();
+          await _waitForResizingDebouncer(tester);
           {
             final DevToolsTableState<TestData> tableState = tester.state(
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 4);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 120.0); // Min width wide column
@@ -593,13 +592,13 @@ void main() {
           }
 
           viewSize.value = const Size(200.0, 200.0);
-          await tester.pumpAndSettle();
+          await _waitForResizingDebouncer(tester);
           {
             final DevToolsTableState<TestData> tableState = tester.state(
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 4);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 100.0); // Min width wide column
@@ -610,7 +609,7 @@ void main() {
             expect(adjustedColumnWidths[0], 300.0);
             expect(adjustedColumnWidths[1], 100.0);
             expect(adjustedColumnWidths[2], 400.0);
-            expect(adjustedColumnWidths[3], 0.0);
+            expect(adjustedColumnWidths[3], 50.0);
           }
         });
 
@@ -638,7 +637,7 @@ void main() {
                 find.byType(DevToolsTable<TestData>),
               );
               final columnWidths = tableState.widget.columnWidths;
-              final adjustedColumnWidths = tableState.adjustedColumnWidths;
+              final adjustedColumnWidths = tableState.columnWidths;
               expect(columnWidths.length, 5);
               expect(columnWidths[0], 300.0); // Fixed width column
               expect(columnWidths[1], 1076.0); // Min width wide column
@@ -656,13 +655,13 @@ void main() {
             }
 
             viewSize.value = const Size(1501.0, 200.0);
-            await tester.pumpAndSettle();
+            await _waitForResizingDebouncer(tester);
             {
               final DevToolsTableState<TestData> tableState = tester.state(
                 find.byType(DevToolsTable<TestData>),
               );
               final columnWidths = tableState.widget.columnWidths;
-              final adjustedColumnWidths = tableState.adjustedColumnWidths;
+              final adjustedColumnWidths = tableState.columnWidths;
               expect(columnWidths.length, 5);
               expect(columnWidths[0], 300.0); // Fixed width column
               expect(columnWidths[1], 243.0); // Min width wide column
@@ -680,13 +679,13 @@ void main() {
             }
 
             viewSize.value = const Size(1200.0, 200.0);
-            await tester.pumpAndSettle();
+            await _waitForResizingDebouncer(tester);
             {
               final DevToolsTableState<TestData> tableState = tester.state(
                 find.byType(DevToolsTable<TestData>),
               );
               final columnWidths = tableState.widget.columnWidths;
-              final adjustedColumnWidths = tableState.adjustedColumnWidths;
+              final adjustedColumnWidths = tableState.columnWidths;
               expect(columnWidths.length, 5);
               expect(columnWidths[0], 300.0); // Fixed width column
               expect(columnWidths[1], 134.0); // Min width wide column
@@ -704,13 +703,13 @@ void main() {
             }
 
             viewSize.value = const Size(1000.0, 200.0);
-            await tester.pumpAndSettle();
+            await _waitForResizingDebouncer(tester);
             {
               final DevToolsTableState<TestData> tableState = tester.state(
                 find.byType(DevToolsTable<TestData>),
               );
               final columnWidths = tableState.widget.columnWidths;
-              final adjustedColumnWidths = tableState.adjustedColumnWidths;
+              final adjustedColumnWidths = tableState.columnWidths;
               expect(columnWidths.length, 5);
               expect(columnWidths[0], 300.0); // Fixed width column
               expect(columnWidths[1], 100.0); // Min width wide column
@@ -724,7 +723,7 @@ void main() {
               expect(adjustedColumnWidths[1], 100.0);
               expect(adjustedColumnWidths[2], 160.0);
               expect(adjustedColumnWidths[3], 400.0);
-              expect(adjustedColumnWidths[4], 0.0);
+              expect(adjustedColumnWidths[4], 50.0);
             }
           },
         );
@@ -748,7 +747,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 3);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 400.0); // Fixed width column.
@@ -757,17 +756,17 @@ void main() {
             expect(adjustedColumnWidths.length, 3);
             expect(adjustedColumnWidths[0], 300.0);
             expect(adjustedColumnWidths[1], 400.0);
-            expect(adjustedColumnWidths[2], 3252.0);
+            expect(adjustedColumnWidths[2], 1200.0);
           }
 
           viewSize.value = const Size(800.0, 200.0);
-          await tester.pumpAndSettle();
+          await _waitForResizingDebouncer(tester);
           {
             final DevToolsTableState<TestData> tableState = tester.state(
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 3);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 400.0); // Fixed width column.
@@ -776,17 +775,17 @@ void main() {
             expect(adjustedColumnWidths.length, 3);
             expect(adjustedColumnWidths[0], 300.0);
             expect(adjustedColumnWidths[1], 400.0);
-            expect(adjustedColumnWidths[2], 1200.0);
+            expect(adjustedColumnWidths[2], 52.0);
           }
 
           viewSize.value = const Size(200.0, 200.0);
-          await tester.pumpAndSettle();
+          await _waitForResizingDebouncer(tester);
           {
             final DevToolsTableState<TestData> tableState = tester.state(
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 3);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 400.0); // Fixed width column.
@@ -795,7 +794,7 @@ void main() {
             expect(adjustedColumnWidths.length, 3);
             expect(adjustedColumnWidths[0], 300.0);
             expect(adjustedColumnWidths[1], 400.0);
-            expect(adjustedColumnWidths[2], 1200.0);
+            expect(adjustedColumnWidths[2], 50.0);
           }
         });
 
@@ -821,7 +820,7 @@ void main() {
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 4);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 100.0); // Min width wide column
@@ -830,19 +829,19 @@ void main() {
 
             expect(adjustedColumnWidths.length, 4);
             expect(adjustedColumnWidths[0], 300.0);
-            expect(adjustedColumnWidths[1], 1620.0);
+            expect(adjustedColumnWidths[1], 100.0);
             expect(adjustedColumnWidths[2], 400.0);
-            expect(adjustedColumnWidths[3], 1620.0);
+            expect(adjustedColumnWidths[3], 1200.0);
           }
 
           viewSize.value = const Size(1000.0, 200.0);
-          await tester.pumpAndSettle();
+          await _waitForResizingDebouncer(tester);
           {
             final DevToolsTableState<TestData> tableState = tester.state(
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 4);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 100.0); // Min width wide column
@@ -853,17 +852,17 @@ void main() {
             expect(adjustedColumnWidths[0], 300.0);
             expect(adjustedColumnWidths[1], 100.0);
             expect(adjustedColumnWidths[2], 400.0);
-            expect(adjustedColumnWidths[3], 1200.0);
+            expect(adjustedColumnWidths[3], 670.0);
           }
 
           viewSize.value = const Size(200.0, 200.0);
-          await tester.pumpAndSettle();
+          await _waitForResizingDebouncer(tester);
           {
             final DevToolsTableState<TestData> tableState = tester.state(
               find.byType(DevToolsTable<TestData>),
             );
             final columnWidths = tableState.widget.columnWidths;
-            final adjustedColumnWidths = tableState.adjustedColumnWidths;
+            final adjustedColumnWidths = tableState.columnWidths;
             expect(columnWidths.length, 4);
             expect(columnWidths[0], 300.0); // Fixed width column.
             expect(columnWidths[1], 100.0); // Min width wide column
@@ -874,7 +873,7 @@ void main() {
             expect(adjustedColumnWidths[0], 300.0);
             expect(adjustedColumnWidths[1], 100.0);
             expect(adjustedColumnWidths[2], 400.0);
-            expect(adjustedColumnWidths[3], 1200.0);
+            expect(adjustedColumnWidths[3], 50.0);
           }
         });
 
@@ -902,30 +901,8 @@ void main() {
                 find.byType(DevToolsTable<TestData>),
               );
               final columnWidths = tableState.widget.columnWidths;
-              final adjustedColumnWidths = tableState.adjustedColumnWidths;
+              final adjustedColumnWidths = tableState.columnWidths;
               expect(columnWidths.length, 5);
-              expect(columnWidths[0], 300.0); // Fixed width column
-              expect(columnWidths[1], 100.0); // Min width wide column
-              expect(columnWidths[2], 160.0); // Very wide min width wide column
-              expect(columnWidths[3], 400.0); // Fixed width column.
-              expect(columnWidths[4], 1200.0); // Variable width wide column.
-
-              expect(adjustedColumnWidths.length, 5);
-              expect(adjustedColumnWidths[0], 300.0);
-              expect(adjustedColumnWidths[1], 1014.0);
-              expect(adjustedColumnWidths[2], 1014.0);
-              expect(adjustedColumnWidths[3], 400.0);
-              expect(adjustedColumnWidths[4], 1200.0);
-            }
-
-            viewSize.value = const Size(1200.0, 200.0);
-            await tester.pumpAndSettle();
-            {
-              final DevToolsTableState<TestData> tableState = tester.state(
-                find.byType(DevToolsTable<TestData>),
-              );
-              final columnWidths = tableState.widget.columnWidths;
-              final adjustedColumnWidths = tableState.adjustedColumnWidths;
               expect(columnWidths[0], 300.0); // Fixed width column
               expect(columnWidths[1], 100.0); // Min width wide column
               expect(columnWidths[2], 160.0); // Very wide min width wide column
@@ -939,8 +916,121 @@ void main() {
               expect(adjustedColumnWidths[3], 400.0);
               expect(adjustedColumnWidths[4], 1200.0);
             }
+
+            viewSize.value = const Size(1200.0, 200.0);
+            await _waitForResizingDebouncer(tester);
+            {
+              final DevToolsTableState<TestData> tableState = tester.state(
+                find.byType(DevToolsTable<TestData>),
+              );
+              final columnWidths = tableState.widget.columnWidths;
+              final adjustedColumnWidths = tableState.columnWidths;
+              expect(columnWidths[0], 300.0); // Fixed width column
+              expect(columnWidths[1], 100.0); // Min width wide column
+              expect(columnWidths[2], 160.0); // Very wide min width wide column
+              expect(columnWidths[3], 400.0); // Fixed width column.
+              expect(columnWidths[4], 1200.0); // Variable width wide column.
+
+              expect(adjustedColumnWidths.length, 5);
+              expect(adjustedColumnWidths[0], 300.0);
+              expect(adjustedColumnWidths[1], 100.0);
+              expect(adjustedColumnWidths[2], 160.0);
+              expect(adjustedColumnWidths[3], 400.0);
+              expect(adjustedColumnWidths[4], 856.0);
+            }
           },
         );
+      });
+
+      group('resizing columns', () {
+        late FlatTable<TestData> table;
+
+        Finder getTableHeaderFinder() => find.byKey(const Key('Table header'));
+
+        Finder getResizerFinder() => find.descendant(
+          of: getTableHeaderFinder(),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is GestureDetector &&
+                widget.child is SizedBox &&
+                (widget.child as SizedBox).width == columnSpacing,
+          ),
+        );
+
+        setUp(() {
+          table = FlatTable<TestData>(
+            columns: [flatNameColumn, _NumberColumn()],
+            data: flatData,
+            dataKey: 'test-data',
+            keyFactory: (d) => Key(d.name),
+            defaultSortColumn: flatNameColumn,
+            defaultSortDirection: SortDirection.ascending,
+          );
+        });
+
+        testWidgets('resize with right to left drag', (
+          WidgetTester tester,
+        ) async {
+          await tester.pumpWidget(wrap(table));
+
+          final DevToolsTableState<TestData> tableState = tester.state(
+            find.byType(DevToolsTable<TestData>),
+          );
+
+          final initialWidths = List.of(tableState.columnWidths);
+          expect(initialWidths, orderedEquals([300.0, 400.0]));
+
+          final resizerFinder = getResizerFinder();
+          expect(resizerFinder, findsOneWidget);
+
+          double dragX = 100.0;
+          const dragOffset = 20.0;
+          await tester.drag(resizerFinder, Offset(dragX, 0));
+          await _waitForResizingDebouncer(tester);
+
+          final widthsAfterDrag1 = List.of(tableState.columnWidths);
+          expect(widthsAfterDrag1[0], initialWidths[0] + dragX - dragOffset);
+          expect(widthsAfterDrag1[1], initialWidths[1]);
+
+          dragX = 50.0;
+          await tester.drag(resizerFinder, Offset(0 - dragX, 0));
+          await _waitForResizingDebouncer(tester);
+
+          final widthsAfterDrag2 = tableState.columnWidths;
+          expect(widthsAfterDrag2[0], widthsAfterDrag1[0] - dragX + dragOffset);
+        });
+
+        testWidgets('resize with left to right drag', (
+          WidgetTester tester,
+        ) async {
+          await tester.pumpWidget(wrap(table));
+
+          final DevToolsTableState<TestData> tableState = tester.state(
+            find.byType(DevToolsTable<TestData>),
+          );
+
+          final initialWidths = List.of(tableState.columnWidths);
+          expect(initialWidths, orderedEquals([300.0, 400.0]));
+
+          final resizerFinder = getResizerFinder();
+          expect(resizerFinder, findsOneWidget);
+
+          double dragX = 50.0;
+          const dragOffset = 20.0;
+          await tester.drag(resizerFinder, Offset(0 - dragX, 0));
+          await _waitForResizingDebouncer(tester);
+
+          final widthsAfterDrag1 = List.of(tableState.columnWidths);
+          expect(widthsAfterDrag1[0], initialWidths[0] - dragX + dragOffset);
+          expect(widthsAfterDrag1[1], initialWidths[1]);
+
+          dragX = 100.0;
+          await tester.drag(resizerFinder, Offset(dragX, 0));
+          await _waitForResizingDebouncer(tester);
+
+          final widthsAfterDrag2 = tableState.columnWidths;
+          expect(widthsAfterDrag2[0], widthsAfterDrag1[0] + dragX - dragOffset);
+        });
       });
     });
 
@@ -1667,6 +1757,14 @@ void main() {
       }, throwsAssertionError);
     });
   });
+}
+
+const resizingDebounceDurationInMs = 200;
+
+Future<void> _waitForResizingDebouncer(WidgetTester tester) async {
+  await tester.pumpAndSettle(
+    const Duration(milliseconds: resizingDebounceDurationInMs * 2),
+  );
 }
 
 class TestData extends TreeNode<TestData> {

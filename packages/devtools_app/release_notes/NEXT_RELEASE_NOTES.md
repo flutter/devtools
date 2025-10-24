@@ -17,6 +17,8 @@ To learn more about DevTools, check out the
 
 - Added a horizontal scrollbar to data tables to help with navigation.  -
   [#9482](https://github.com/flutter/devtools/pull/9482)
+- Made it possible to resize data table columns by dragging the header separators.  -
+  [#9845](https://github.com/flutter/devtools/pull/9485)
 
 ## Inspector updates
 
