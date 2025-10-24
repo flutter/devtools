@@ -498,7 +498,6 @@ void main() {
             expect(adjustedColumnWidths[1], 400.0);
             expect(adjustedColumnWidths[2], 3252.0);
           }
-
           viewSize.value = const Size(800.0, 200.0);
           await _waitForResizingDebouncer(tester);
           {

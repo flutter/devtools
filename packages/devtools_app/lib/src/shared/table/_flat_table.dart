@@ -305,6 +305,9 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
       fillWithEmptyRows: widget.fillWithEmptyRows,
       enableHoverHandling: widget.enableHoverHandling,
     );
+    // TODO(elliette): Both this and _adjustColumnWidthsForViewSize (in
+    // DevToolsTableState) run on every build. I believe this should only run on
+    // the initial build, not on any subsequent builds.
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
         builder: (context, constraints) => buildTable(
