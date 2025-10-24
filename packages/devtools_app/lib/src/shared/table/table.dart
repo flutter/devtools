@@ -171,6 +171,10 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
       cancelListeners();
       _initDataAndAddListeners();
     }
+
+    if (!collectionEquals(widget.columnWidths, oldWidget.columnWidths)) {
+      _columnWidths = List.of(widget.columnWidths);
+    }
   }
 
   void _initDataAndAddListeners() {

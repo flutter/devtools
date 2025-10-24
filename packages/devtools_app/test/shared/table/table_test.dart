@@ -696,10 +696,10 @@ void main() {
 
               expect(adjustedColumnWidths.length, 5);
               expect(adjustedColumnWidths[0], 300.0);
-              expect(adjustedColumnWidths[1].ceil(), 143);
+              expect(adjustedColumnWidths[1], 134.0);
               expect(adjustedColumnWidths[2], 160.0);
               expect(adjustedColumnWidths[3], 400.0);
-              expect(adjustedColumnWidths[4].ceil(), 142);
+              expect(adjustedColumnWidths[4], 134.0);
             }
 
             viewSize.value = const Size(1000.0, 200.0);
@@ -723,7 +723,7 @@ void main() {
               expect(adjustedColumnWidths[1], 100.0);
               expect(adjustedColumnWidths[2], 160.0);
               expect(adjustedColumnWidths[3], 400.0);
-              expect(adjustedColumnWidths[4].ceil(), 70);
+              expect(adjustedColumnWidths[4], 50.0);
             }
           },
         );
