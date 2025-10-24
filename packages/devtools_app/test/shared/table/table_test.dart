@@ -411,7 +411,6 @@ void main() {
         expect(data[8].name, 'Snap');
       }
     });
-
     // TODO(jacobr): add a golden image tests for column width tests.
     testWidgets('displays with many columns', (WidgetTester tester) async {
       final table = FlatTable<TestData>(
@@ -941,6 +940,97 @@ void main() {
             }
           },
         );
+      });
+
+      group('resizing columns', () {
+        late FlatTable<TestData> table;
+
+        Finder getTableHeaderFinder() => find.byKey(const Key('Table header'));
+
+        Finder getResizerFinder() => find.descendant(
+          of: getTableHeaderFinder(),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is GestureDetector &&
+                widget.child is SizedBox &&
+                (widget.child as SizedBox).width == columnSpacing,
+          ),
+        );
+
+        setUp(() {
+          table = FlatTable<TestData>(
+            columns: [flatNameColumn, _NumberColumn()],
+            data: flatData,
+            dataKey: 'test-data',
+            keyFactory: (d) => Key(d.name),
+            defaultSortColumn: flatNameColumn,
+            defaultSortDirection: SortDirection.ascending,
+          );
+        });
+
+        testWidgets('resize with right to left drag', (
+          WidgetTester tester,
+        ) async {
+          await tester.pumpWidget(wrap(table));
+
+          final DevToolsTableState<TestData> tableState = tester.state(
+            find.byType(DevToolsTable<TestData>),
+          );
+
+          final initialWidths = List.of(tableState.columnWidths);
+          expect(initialWidths, orderedEquals([300.0, 400.0]));
+
+          final resizerFinder = getResizerFinder();
+          expect(resizerFinder, findsOneWidget);
+
+          double dragX = 100.0;
+          const dragOffset = 20.0;
+          await tester.drag(resizerFinder, Offset(dragX, 0));
+          await _waitForResizingDebouncer(tester);
+
+          final widthsAfterDrag1 = List.of(tableState.columnWidths);
+          expect(widthsAfterDrag1[0], initialWidths[0] + dragX - dragOffset);
+          expect(widthsAfterDrag1[1], initialWidths[1]);
+
+          dragX = 50.0;
+          await tester.drag(resizerFinder, Offset(0 - dragX, 0));
+          await _waitForResizingDebouncer(tester);
+
+          final widthsAfterDrag2 = tableState.columnWidths;
+          expect(widthsAfterDrag2[0], widthsAfterDrag1[0] - dragX + dragOffset);
+        });
+
+        testWidgets('resize with left to right drag', (
+          WidgetTester tester,
+        ) async {
+          await tester.pumpWidget(wrap(table));
+
+          final DevToolsTableState<TestData> tableState = tester.state(
+            find.byType(DevToolsTable<TestData>),
+          );
+
+          final initialWidths = List.of(tableState.columnWidths);
+          expect(initialWidths, orderedEquals([300.0, 400.0]));
+
+          final resizerFinder = getResizerFinder();
+          expect(resizerFinder, findsOneWidget);
+
+          double dragX = 50.0;
+          const dragOffset = 20.0;
+          await tester.drag(resizerFinder, Offset(0 - dragX, 0));
+          await _waitForResizingDebouncer(tester);
+
+          final widthsAfterDrag1 = List.of(tableState.columnWidths);
+          expect(widthsAfterDrag1[0], initialWidths[0] - dragX + dragOffset);
+          expect(widthsAfterDrag1[1], initialWidths[1]);
+
+          dragX = 100.0;
+          await tester.drag(resizerFinder, Offset(dragX, 0));
+          await _waitForResizingDebouncer(tester);
+
+          final widthsAfterDrag2 = tableState.columnWidths;
+          expect(widthsAfterDrag2[0], widthsAfterDrag1[0] + dragX - dragOffset);
+        });
       });
     });
 
