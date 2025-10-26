@@ -43,6 +43,9 @@ TODO: Remove this section if there are not any general updates.
 ## Network profiler updates
 
 * Fixed layout of the "error count" badge in the tab name.
+* Changed behavior of navigating away from the Network screen. Previously,
+  navigating away would pause network logging; now, navigating away will not
+  pause network logging, if DevTools is actively logging network requests.
 
 ## Logging updates
 

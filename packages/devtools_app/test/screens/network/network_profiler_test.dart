@@ -315,6 +315,12 @@ void main() {
 
       expect(controller.selectedRequest.value, isNotNull);
       expect(find.text('No request selected'), findsNothing);
+
+      // Pause recording.
+      await tester.tap(find.byType(StartStopRecordingButton));
+      await tester.pump();
+
+      await clearTimeouts(tester);
     });
 
     testWidgetsWithWindowSize('clear results', windowSize, (
