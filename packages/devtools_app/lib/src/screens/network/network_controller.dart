@@ -312,9 +312,9 @@ class NetworkController extends DevToolsScreenController
     // Cancel existing polling timer before starting recording.
     _updatePollingState(false);
 
-    networkService.updateLastHttpDataRefreshTime(
-      alreadyRecordingHttp: alreadyRecordingHttp,
-    );
+    if (!alreadyRecordingHttp) {
+      networkService.updateLastHttpDataRefreshTime();
+    }
     final timestamp = await networkService.updateLastSocketDataRefreshTime(
       alreadyRecordingSocketData: alreadyRecordingSocketData,
     );

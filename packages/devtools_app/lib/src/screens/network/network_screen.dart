@@ -141,14 +141,6 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   }
 
   @override
-  void dispose() {
-    unawaited(controller.stopRecording());
-    // TODO(kenz): this won't work well if we eventually have multiple clients
-    // that want to listen to network data.
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
