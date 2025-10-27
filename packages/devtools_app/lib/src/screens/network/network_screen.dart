@@ -206,7 +206,6 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
 
     final screenWidth = ScreenSize(context).width;
     final hasRequests = controller.filteredData.value.isNotEmpty;
-    final theme = Theme.of(context);
     return Column(
       children: [
         Row(
@@ -279,33 +278,43 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           ],
         ),
         if (!_recording)
-          Padding(
-            padding: const EdgeInsets.only(top: intermediateSpacing),
-            child: Card(
-              color: theme.colorScheme.secondaryContainer,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: densePadding,
-                  horizontal: denseSpacing,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Network traffic recording is paused. '
-                        'Click the resume button to continue.',
-                        style: theme.regularTextStyle.copyWith(
-                          color: theme.colorScheme.onSecondaryContainer,
-                        ),
-                      ),
-                    ),
-                  ],
+          const Padding(
+            padding: EdgeInsets.only(top: intermediateSpacing),
+            child: _RecordingPausedBanner(),
+          ),
+      ],
+    );
+  }
+}
+
+class _RecordingPausedBanner extends StatelessWidget {
+  const _RecordingPausedBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      color: theme.colorScheme.secondaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: densePadding,
+          horizontal: denseSpacing,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                'Network traffic recording is paused. Click the resume button '
+                'to continue.',
+                style: theme.regularTextStyle.copyWith(
+                  color: theme.colorScheme.onSecondaryContainer,
                 ),
               ),
             ),
-          ),
-      ],
+          ],
+        ),
+      ),
     );
   }
 }
