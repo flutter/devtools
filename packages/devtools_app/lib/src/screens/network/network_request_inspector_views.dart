@@ -29,12 +29,18 @@ const _rowPadding = EdgeInsets.only(
   bottom: _rowSpacingPadding,
 );
 
-/// Helper to build ExpansionTile widgets for inspector views.
-ExpansionTile _buildTile(String title, List<Widget> children, {Key? key}) {
+/// Helper to build [ExpansionTile] widgets for inspector views.
+ExpansionTile _buildTile(
+  String title,
+  List<Widget> children, {
+  Key? key,
+  bool enabled = true,
+}) {
   return ExpansionTile(
     key: key,
     title: Text(title),
     initiallyExpanded: true,
+    enabled: enabled,
     children: children,
   );
 }
@@ -63,28 +69,59 @@ class HttpRequestHeadersView extends StatelessWidget {
         return SelectionArea(
           child: ListView(
             children: [
-              _buildTile('General', [
-                for (final entry in general.entries)
-                  _Row(
-                    entry: entry,
-                    constraints: constraints,
-                    isErrorValue: data.didFail && entry.key == 'statusCode',
-                  ),
-              ], key: generalKey),
-              _buildTile('Response Headers', [
-                if (responseHeaders != null)
-                  for (final entry in responseHeaders.entries)
-                    _Row(entry: entry, constraints: constraints),
-              ], key: responseHeadersKey),
-              _buildTile('Request Headers', [
-                if (requestHeaders != null)
-                  for (final entry in requestHeaders.entries)
-                    _Row(entry: entry, constraints: constraints),
-              ], key: requestHeadersKey),
+              _buildHeadersTile(
+                'General',
+                general,
+                constraints,
+                key: generalKey,
+              ),
+              _buildHeadersTile(
+                'Response Headers',
+                responseHeaders,
+                constraints,
+                key: responseHeadersKey,
+              ),
+              _buildHeadersTile(
+                'Request Headers',
+                requestHeaders,
+                constraints,
+                key: requestHeadersKey,
+              ),
             ],
           ),
         );
       },
+    );
+  }
+
+  ExpansionTile _buildHeadersTile(
+    String title,
+    Map<String, dynamic>? headers,
+    BoxConstraints constraints, {
+    Key? key,
+  }) {
+    final hasHeaders = headers != null && headers.isNotEmpty;
+    return _buildTile(
+      title,
+      [
+        if (hasHeaders)
+          for (final entry in headers.entries)
+            _Row(
+              entry: entry,
+              constraints: constraints,
+              isErrorValue: data.didFail && entry.key == 'statusCode',
+            )
+        else
+          Text(
+            'none',
+            style: TextStyle(
+              fontStyle: FontStyle.italic,
+              color: Colors.grey.shade600,
+            ),
+          ),
+      ],
+      key: key,
+      enabled: hasHeaders,
     );
   }
 }
