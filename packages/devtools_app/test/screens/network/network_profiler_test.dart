@@ -167,14 +167,16 @@ void main() {
         final ExpansionTile requestsTile = tester.widget(
           find.byKey(HttpRequestHeadersView.requestHeadersKey),
         );
-        final numRequestHeaders = data.requestHeaders?.length ?? 0;
+        // The '1' fallback is for the 'No data' row.
+        final numRequestHeaders = data.requestHeaders?.length ?? 1;
         expect(requestsTile.children.length, numRequestHeaders);
 
         // Check contents of response headers.
         final ExpansionTile responsesTile = tester.widget(
           find.byKey(HttpRequestHeadersView.responseHeadersKey),
         );
-        final numResponseHeaders = data.responseHeaders?.length ?? 0;
+        // The '1' fallback is for the 'No data' row.
+        final numResponseHeaders = data.responseHeaders?.length ?? 1;
         expect(responsesTile.children.length, numResponseHeaders);
       }
 
