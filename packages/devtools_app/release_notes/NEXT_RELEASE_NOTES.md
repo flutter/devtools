@@ -43,8 +43,10 @@ TODO: Remove this section if there are not any general updates.
 ## Network profiler updates
 
 * Fixed layout of the "error count" badge in the tab name.
-* Fix display of "Response Headers" and "Request Headers" when there are no
+* Fixed display of "Response Headers" and "Request Headers" when there are no
   headers.
+* Added a banner to clearly indicate when DevTools is not logging network
+  requests.
 
 ## Logging updates
 
