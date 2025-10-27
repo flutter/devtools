@@ -112,11 +112,20 @@ class HttpRequestHeadersView extends StatelessWidget {
               isErrorValue: data.didFail && entry.key == 'statusCode',
             )
         else
-          Text(
-            'none',
-            style: TextStyle(
-              fontStyle: FontStyle.italic,
-              color: Colors.grey.shade600,
+          Container(
+            width: constraints.minWidth,
+            padding: _rowPadding,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'No data',
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
             ),
           ),
       ],
