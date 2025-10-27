@@ -19,7 +19,6 @@ import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
-import '../../shared/managers/banner_messages.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
@@ -207,6 +206,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
 
     final screenWidth = ScreenSize(context).width;
     final hasRequests = controller.filteredData.value.isNotEmpty;
+    final theme = Theme.of(context);
     return Column(
       children: [
         Row(
@@ -278,30 +278,36 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               ),
           ],
         ),
-        if (!_recording) ...[
-          const SizedBox(height: intermediateSpacing),
-          _NetworkLoggingPausedMessage(screenId: NetworkScreen.id),
-        ],
+        if (!_recording)
+          Padding(
+            padding: const EdgeInsets.only(top: intermediateSpacing),
+            child: Card(
+              color: theme.colorScheme.secondaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: densePadding,
+                  horizontal: denseSpacing,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Network traffic recording is paused. '
+                        'Click the resume button to continue.',
+                        style: theme.regularTextStyle.copyWith(
+                          color: theme.colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }
-}
-
-class _NetworkLoggingPausedMessage extends BannerInfo {
-  _NetworkLoggingPausedMessage({required super.screenId})
-    : super(
-        key: _generateKey(screenId),
-        buildTextSpans: (context) => [
-          const TextSpan(
-            text:
-                'Network traffic recording is paused. Click the resume button to continue.',
-          ),
-        ],
-        dismissOnConnectionChanges: false,
-      );
-
-  static Key _generateKey(String screenId) =>
-      Key('NetworkLoggingPausedMessage - $screenId');
 }
 
 class _NetworkProfilerBody extends StatelessWidget {
