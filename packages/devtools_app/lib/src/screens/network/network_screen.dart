@@ -19,6 +19,7 @@ import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
+import '../../shared/managers/banner_messages.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
@@ -206,74 +207,101 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
 
     final screenWidth = ScreenSize(context).width;
     final hasRequests = controller.filteredData.value.isNotEmpty;
-    return Row(
+    return Column(
       children: [
-        StartStopRecordingButton(
-          recording: _recording,
-          onPressed: () async => await controller.togglePolling(!_recording),
-          tooltipOverride: _recording
-              ? 'Stop recording network traffic'
-              : 'Resume recording network traffic',
-          minScreenWidthForText: double.infinity,
-          gaScreen: gac.network,
-          gaSelection: _recording ? gac.pause : gac.resume,
-        ),
-        const SizedBox(width: denseSpacing),
-        ClearButton(
-          minScreenWidthForText: _NetworkProfilerControls._includeTextWidth,
-          gaScreen: gac.network,
-          gaSelection: gac.clear,
-          onPressed: controller.clear,
-        ),
-        const SizedBox(width: denseSpacing),
-        // TODO(kenz): fix focus issue when state is refreshed
-        Expanded(
-          child: SearchField<NetworkController>(
-            searchController: controller,
-            searchFieldEnabled: hasRequests,
-            searchFieldWidth: screenWidth <= MediaSize.xs
-                ? defaultSearchFieldWidth
-                : wideSearchFieldWidth,
-          ),
-        ),
-        const SizedBox(width: denseSpacing),
-        Expanded(
-          child: StandaloneFilterField<NetworkRequest>(
-            controller: controller,
-            filteredItem: 'request',
-          ),
-        ),
-        const SizedBox(width: denseSpacing),
-        if (FeatureFlags.networkSaveLoad.isEnabled)
-          OpenSaveButtonGroup(
-            screenId: ScreenMetaData.network.id,
-            saveFormats: const [SaveFormat.devtools, SaveFormat.har],
-            gaItemForSaveFormatSelection: (SaveFormat format) =>
-                switch (format) {
-                  SaveFormat.devtools => gac.saveFile,
-                  SaveFormat.har => gac.NetworkEvent.downloadAsHar.name,
+        Row(
+          children: [
+            StartStopRecordingButton(
+              recording: _recording,
+              onPressed: () async =>
+                  await controller.togglePolling(!_recording),
+              tooltipOverride: _recording
+                  ? 'Stop recording network traffic'
+                  : 'Resume recording network traffic',
+              minScreenWidthForText: double.infinity,
+              gaScreen: gac.network,
+              gaSelection: _recording ? gac.pause : gac.resume,
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              minScreenWidthForText: _NetworkProfilerControls._includeTextWidth,
+              gaScreen: gac.network,
+              gaSelection: gac.clear,
+              onPressed: controller.clear,
+            ),
+            const SizedBox(width: denseSpacing),
+            // TODO(kenz): fix focus issue when state is refreshed
+            Expanded(
+              child: SearchField<NetworkController>(
+                searchController: controller,
+                searchFieldEnabled: hasRequests,
+                searchFieldWidth: screenWidth <= MediaSize.xs
+                    ? defaultSearchFieldWidth
+                    : wideSearchFieldWidth,
+              ),
+            ),
+            const SizedBox(width: denseSpacing),
+            Expanded(
+              child: StandaloneFilterField<NetworkRequest>(
+                controller: controller,
+                filteredItem: 'request',
+              ),
+            ),
+            const SizedBox(width: denseSpacing),
+            if (FeatureFlags.networkSaveLoad.isEnabled)
+              OpenSaveButtonGroup(
+                screenId: ScreenMetaData.network.id,
+                saveFormats: const [SaveFormat.devtools, SaveFormat.har],
+                gaItemForSaveFormatSelection: (SaveFormat format) =>
+                    switch (format) {
+                      SaveFormat.devtools => gac.saveFile,
+                      SaveFormat.har => gac.NetworkEvent.downloadAsHar.name,
+                    },
+                onSave: (SaveFormat format) async {
+                  switch (format) {
+                    case SaveFormat.devtools:
+                      await controller.fetchFullDataBeforeExport();
+                      controller.exportData();
+                    case SaveFormat.har:
+                      await controller.exportAsHarFile();
+                  }
                 },
-            onSave: (SaveFormat format) async {
-              switch (format) {
-                case SaveFormat.devtools:
-                  await controller.fetchFullDataBeforeExport();
-                  controller.exportData();
-                case SaveFormat.har:
-                  await controller.exportAsHarFile();
-              }
-            },
-          )
-        else
-          DownloadButton(
-            tooltip: 'Download as .har file',
-            minScreenWidthForText: _NetworkProfilerControls._includeTextWidth,
-            onPressed: controller.exportAsHarFile,
-            gaScreen: gac.network,
-            gaSelection: gac.NetworkEvent.downloadAsHar.name,
-          ),
+              )
+            else
+              DownloadButton(
+                tooltip: 'Download as .har file',
+                minScreenWidthForText:
+                    _NetworkProfilerControls._includeTextWidth,
+                onPressed: controller.exportAsHarFile,
+                gaScreen: gac.network,
+                gaSelection: gac.NetworkEvent.downloadAsHar.name,
+              ),
+          ],
+        ),
+        if (!_recording) ...[
+          const SizedBox(height: intermediateSpacing),
+          _NetworkLoggingPausedMessage(screenId: NetworkScreen.id),
+        ],
       ],
     );
   }
+}
+
+class _NetworkLoggingPausedMessage extends BannerInfo {
+  _NetworkLoggingPausedMessage({required super.screenId})
+    : super(
+        key: _generateKey(screenId),
+        buildTextSpans: (context) => [
+          const TextSpan(
+            text:
+                'Network traffic recording is paused. Click the resume button to continue.',
+          ),
+        ],
+        dismissOnConnectionChanges: false,
+      );
+
+  static Key _generateKey(String screenId) =>
+      Key('NetworkLoggingPausedMessage - $screenId');
 }
 
 class _NetworkProfilerBody extends StatelessWidget {
