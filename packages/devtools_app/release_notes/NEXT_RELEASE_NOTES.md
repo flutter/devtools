@@ -42,9 +42,12 @@ TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 
-* Fixed layout of the "error count" badge in the tab name.
-* Fix display of "Response Headers" and "Request Headers" when there are no
-  headers.
+* Fixed layout of the "error count" badge in the tab name. -
+  [#9470](https://github.com/flutter/devtools/pull/9470)
+* Fixed display of "Response Headers" and "Request Headers" when there are no
+  headers. - [#9492](https://github.com/flutter/devtools/pull/9492)
+* Added a banner to clearly indicate when DevTools is not logging network
+  requests. - [#9495](https://github.com/flutter/devtools/pull/9495)
 
 ## Logging updates
 
