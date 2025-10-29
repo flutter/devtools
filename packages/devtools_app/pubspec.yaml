@@ -84,7 +84,7 @@ dependency_overrides:
   # when `stager` allows `source_gen` 3.0.0.
   analyzer: ^8.0.0
   build: ^3.0.0
-  source_gen: ^3.0.0
+  source_gen: ^4.0.0
 
 flutter:
   uses-material-design: true
