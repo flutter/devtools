@@ -80,9 +80,11 @@ dev_dependencies:
   webkit_inspection_protocol: ">=0.5.0 <2.0.0"
 
 dependency_overrides:
-  # Necessary while `stager` dep disallows `source_gen` 2.0.0. Remove when
-  # `stager` allows `source_gen` 2.0.0.
-  source_gen: ^2.0.0
+  # Necessary while `stager` dep disallows `source_gen` 3.0.0. Remove
+  # when `stager` allows `source_gen` 3.0.0.
+  analyzer: ^8.0.0
+  build: ^3.0.0
+  source_gen: ^3.0.0
 
 flutter:
   uses-material-design: true
