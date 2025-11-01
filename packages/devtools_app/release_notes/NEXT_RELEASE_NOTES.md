@@ -73,7 +73,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Advanced developer mode updates
 
-TODO: Remove this section if there are not any general updates.
+- Extensions which are embedded in the IDE window now display with the correct
+  IDE theme.
 
 ## Full commit history
 
