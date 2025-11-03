@@ -160,15 +160,23 @@ Receive an LGTM for the PR, squash and commit.
 
 ### 5) Wait for the binary to be uploaded CIPD
 
-On each DevTools commit, DevTools is built and uploaded to CIPD. You can check the
-status of the builds on this
+On each DevTools commit, DevTools is built and uploaded to CIPD. You can check
+the status of the builds on this
 [dashboard](https://ci.chromium.org/ui/p/dart-internal/builders/flutter/devtools).
-Within minutes, a build should be uploaded for the commit you just merged and tagged.
+Within minutes, a build should be uploaded for the commit you just merged and
+tagged.
 
-> [!NOTE]  
-> If the CIPD build times out, instructions for re-triggering can be found at
-[go/devtools-dart-engprod#cherry-picks](http://go/devtools-dart-engprod#cherry-picks)
-> and using `refs/heads/master` as the branch.
+If you don't see a build, you can check the following yourself or ask a Googler
+to check them for you:
+
+1. Check the source mirror:
+   [go/flutter-devtools-sourcemirror](http://go/flutter-devtools-sourcemirror).
+   The CIPD build can only begin once the commit is reflected in the source
+   mirror. 
+2. If you see the commit in the source mirror, but the the CIPD build times out,
+instructions for re-triggering can be found at
+[go/devtools-dart-engprod#cherry-picks](http://go/devtools-dart-engprod#cherry-picks).
+**Note: Use `refs/heads/master` as the branch.**
 
 ### 6) Update the DevTools hash in the Dart SDK
 
@@ -185,15 +193,20 @@ Quickly test the build and then add a reviewer:
    ```shell
    cd $LOCAL_DART_SDK && \
    gclient sync -D && \
-   ./tools/build.py -mrelease -ax64 create_sdk;
+   ./tools/build.py -mrelease create_sdk;
    ```
 
 2. Verify that running `dart devtools` launches the version of DevTools you just released.
-   - for OSX
+   - for Macs with ARM-based processors (M chips):
+      ```shell
+      xcodebuild/ReleaseARM64/dart-sdk/bin/dart devtools
+      ```
+   - for Macs with x64-based processors (Intel chips):
       ```shell
       xcodebuild/ReleaseX64/dart-sdk/bin/dart devtools
       ```
-   - For non-OSX
+
+   - For non-Macs:
       ```shell
       out/ReleaseX64/dart-sdk/bin/dart devtools
       ```
