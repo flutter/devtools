@@ -83,6 +83,8 @@ class CliCommand {
 
   factory CliCommand.tool(List<String> args, {bool throwOnException = true}) {
     var toolPath = Platform.script.toFilePath();
+    print('============= TOOL PATH ==============');
+    print(toolPath);
     if (!File(toolPath).existsSync()) {
       // Handling https://github.com/dart-lang/sdk/issues/54493
       // Platform.script.toFilePath() duplicates next to current directory, when run recursively from itself.

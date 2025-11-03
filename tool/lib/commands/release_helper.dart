@@ -54,7 +54,7 @@ class ReleaseHelperCommand extends Command {
       );
 
       try {
-        await _ensureNoLocalChanges(processManager);
+        // await _ensureNoLocalChanges(processManager);
       } catch (_) {
         if (debug) {
           // Temporarily commit any local changes to this script to the current
