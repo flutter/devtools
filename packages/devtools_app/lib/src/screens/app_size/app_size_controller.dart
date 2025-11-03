@@ -11,7 +11,6 @@ import 'package:vm_snapshot_analysis/utils.dart';
 import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 import '../../shared/charts/treemap.dart';
-import '../../shared/feature_flags.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/primitives/utils.dart';
@@ -772,12 +771,10 @@ class AppSizeController extends DevToolsScreenController {
 
   @override
   void releaseMemory({bool partial = false}) {
-    if (FeatureFlags.memoryObserver.isEnabled) {
-      // This behavior is the same regardless of the value of `partial`. We can
-      // implement a partial clearing if it becomes necessary.
-      clear(AppSizeScreen.analysisTabKey);
-      clear(AppSizeScreen.diffTabKey);
-    }
+    // This behavior is the same regardless of the value of `partial`. We can
+    // implement a partial clearing if it becomes necessary.
+    clear(AppSizeScreen.analysisTabKey);
+    clear(AppSizeScreen.diffTabKey);
   }
 }
 

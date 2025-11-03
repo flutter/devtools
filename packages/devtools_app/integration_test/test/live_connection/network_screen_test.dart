@@ -74,6 +74,22 @@ void main() {
     await helper.triggerRequest('dioPost');
     _expectInRequestTable('POST');
 
+    // Perform a Hot Reload, then make more requests.
+    await serviceConnection.serviceManager.performHotReload();
+
+    // Instruct the app to make a GET request via the 'http' package.
+    await helper.triggerRequest('packageHttpGet');
+    _expectInRequestTable('GET');
+    await helper.clear();
+
+    // Perform a Hot Restart, then make more requests.
+    await serviceConnection.serviceManager.performHotRestart();
+
+    // Instruct the app to make a GET request via the 'http' package.
+    await helper.triggerRequest('packageHttpGet');
+    _expectInRequestTable('GET');
+    await helper.clear();
+
     await helper.triggerExit();
   });
 }
@@ -111,7 +127,9 @@ final class _NetworkScreenHelper {
           'ext.networking_app.makeRequest',
           args: {'requestType': requestType, 'hasBody': hasBody},
         );
-    logStatus(response.toString());
+    logStatus(
+      'Sent a $requestType request, received response: ${response.json}',
+    );
 
     await _tester.pump(safePumpDuration);
   }
