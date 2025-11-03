@@ -167,11 +167,12 @@ Within minutes, a build should be uploaded for the commit you just merged and ta
 
 > [!NOTE]  
 > If the CIPD build times out, instructions for re-triggering can be found at
-[go/dart-engprod/release.md](http://go/dart-engprod/release.md)
+[go/devtools-dart-engprod#cherry-picks](http://go/devtools-dart-engprod#cherry-picks)
+> and using `refs/heads/master` as the branch.
 
 ### 6) Update the DevTools hash in the Dart SDK
 
-Run the tool script with the commit hash you just merged and tagged:
+Run the tool script with the commit hash you just merged:
 ```shell
 dt update-sdk-deps -c <commit-hash>
 ```
@@ -416,13 +417,22 @@ onto the `flutter/devtools` protected branch (`master`).
    
    Body:
     
-   > 1\. Temporarily modify the settings of https://github.com/flutter/devtools to "allow merge
-   >    commits at the repo level and remove `require linear history`".\
+   > 1\. Temporarily modify the settings of https://github.com/flutter/devtools to allow merge
+   >     commits at the repo level and remove require linear history for the master branch:
+   > 
+   > 1a. General > Pull Requests > Allow merge commits (Add all commits from the head branch 
+   >     to the base branch with a merge commit).
+   > 
+   > 1b. Branches > Branch protection rules > click “edit” on the master branch > Remove >
+   >     Require linear history (Prevent merge commits from being pushed to matching branches),
+   >     and then “Save changes”.
+   > 
    > 2\. IMPORTANT: Merge <link to PR> as a MERGE COMMIT. When merging, use the merge button dropdown
-   >    menu to select "Create a merge commit", NOT "Squash and merge".\
+   >     menu to select "Create a merge commit", NOT "Squash and merge".
+   >
    > 3\. Revert the settings.
 
-    If @kenzieschmoll is unavailable to complete the merge commit, please ask another member of the Dash
+    If @kenzieschmoll or @elliette is unavailable to complete the merge commit, please ask another member of the Dash
     team who has Admin access to the `flutter/devtools` repository settings (@piinks or @tvolkert).
 
 ### Additional resources
