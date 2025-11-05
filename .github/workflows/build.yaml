@@ -186,7 +186,7 @@ jobs:
         run: ./tool/ci/bots.sh
 
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure()
         with:
           name: golden_image_failures.${{ matrix.bot }}
@@ -259,7 +259,7 @@ jobs:
         run: ./tool/ci/bots.sh
 
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure()
         with:
           name: golden_image_failures.${{ matrix.bot }}
