@@ -27,7 +27,7 @@ bool debugTestReleaseNotes = false;
 // To load markdown from a staged flutter website, set this string to the url
 // from the flutter/website PR, which has a GitHub action that automatically
 // stages commits to firebase. Example:
-// https://flutter-docs-prod--pr8928-dt-notes-links-b0b33er1.web.app/tools/devtools/release-notes/release-notes-2.24.0-src.md.
+// https://flutter-docs-prod--pr12652-devtools-release-notes-2-52-3bbb8c0u.web.app/tools/devtools/release-notes/release-notes-2.52.0.md.
 String? _debugReleaseNotesUrl;
 
 const releaseNotesKey = Key('release_notes');
