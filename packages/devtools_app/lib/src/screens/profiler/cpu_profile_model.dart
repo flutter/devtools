@@ -1257,13 +1257,22 @@ class _CpuProfileTimelineTree {
     return null;
   }
 
-  String? get resolvedUrl => isCodeTree && _function is vm_service.FuncRef?
-      ?
+  String? get resolvedUrl {
+    if (isCodeTree) {
+      if (_function is vm_service.FuncRef?) {
         // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
         // critical since this is only displayed when advanced developer mode is
         // enabled.
-        (_function as vm_service.FuncRef?)?.location?.script?.uri
-      : samples.functions?[index].resolvedUrl;
+        return (_function as vm_service.FuncRef?)?.location?.script?.uri;
+      }
+    } else {
+      final functions = samples.functions;
+      if (functions == null || index >= functions.length) return null;
+      return functions[index].resolvedUrl;
+    }
+
+    return null;
+  }
 
   int? get sourceLine {
     final function = _function;
