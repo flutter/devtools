@@ -107,27 +107,10 @@ class ReleaseNotesCommand extends Command {
     }
 
     // Write the 'release-notes-<x.y.z>.md' file.
-    File(
-        p.join(
-          websiteReleaseNotesDir.path,
-          'release-notes-$releaseNotesVersion.md',
-        ),
-      )
-      ..createSync()
-      ..writeAsStringSync('''---
-short-title: $releaseNotesVersion release notes
-description: Release notes for Dart and Flutter DevTools version $releaseNotesVersion.
-toc: false
----
-
-{% include ./release-notes-$releaseNotesVersion-src.md %}
-''', flush: true);
-
-    // Create the 'release-notes-<x.y.z>-src.md' file.
-    final releaseNotesSrcMd = File(
+    final releaseNotesMd = File(
       p.join(
         websiteReleaseNotesDir.path,
-        'release-notes-$releaseNotesVersion-src.md',
+        'release-notes-$releaseNotesVersion.md',
       ),
     )..createSync();
 
@@ -159,29 +142,21 @@ toc: false
       }
     }
 
-    // Write the 'release-notes-<x.y.z>-src.md' file, including any updates for
+    final metadataHeader = '''---
+title: DevTools $releaseNotesVersion release notes
+short-title: $releaseNotesVersion release notes
+breadcrumb: $releaseNotesVersion
+toc: false
+---
+
+''';
+
+    // Write the 'release-notes-<x.y.z>.md' file, including any updates for
     // image paths.
-    releaseNotesSrcMd.writeAsStringSync(
-      srcLines.joinWithNewLine(),
+    releaseNotesMd.writeAsStringSync(
+      metadataHeader + srcLines.joinWithNewLine(),
       flush: true,
     );
-
-    // Write the 'devtools_releases.yml' file.
-    final releasesYml = File(
-      p.join(websiteRepoPath, 'src', '_data', 'devtools_releases.yml'),
-    );
-    if (!releasesYml.existsSync()) {
-      throw FileSystemException(
-        'The devtools_releases.yml file does not exist.',
-        releasesYml.path,
-      );
-    }
-    final releasesYmlContent = releasesYml.readAsStringSync().replaceFirst(
-      'releases:',
-      '''releases:
-  - '$releaseNotesVersion\'''',
-    );
-    releasesYml.writeAsStringSync(releasesYmlContent, flush: true);
 
     const firstPartInstructions =
         'Release notes successfully drafted in a local flutter/website branch. '
@@ -192,7 +167,7 @@ toc: false
 $firstPartInstructions
 
 cd $websiteRepoPath;
-code ${releaseNotesSrcMd.absolute.path}
+code ${releaseNotesMd.absolute.path}
 
 Create a PR on the flutter/website repo when you are finished.
 ''');

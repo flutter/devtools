@@ -70,11 +70,10 @@ Clean up the drafted notes on your local `flutter/website` branch and open a PR.
 Once you push up your branch to `flutter/website` and open your PR,
 wait for the `github-actions` bot to stage your changes to Firebase.
 Open the link it comments and navigate to the release notes you want to test.
-Be sure to add `-src.md` to the url to get the raw json.
 The url should look something like:
 
 ```
-https://flutter-docs-prod--pr8928-dt-notes-links-b0b33er1.web.app/tools/devtools/release-notes/release-notes-2.24.0-src.md
+https://flutter-docs-prod--pr12652-devtools-release-notes-2-52-3bbb8c0u.web.app/tools/devtools/release-notes/release-notes-2.52.0.md
 ```
 
 - Copy this url and set `_debugReleaseNotesUrl` in
