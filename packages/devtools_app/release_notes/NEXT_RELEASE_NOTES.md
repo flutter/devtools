@@ -15,7 +15,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+- Switched default compiler for DevTools to dart2wasm. - [#9530](https://github.com/flutter/devtools/pull/9530)
 
 ## Inspector updates
 
