@@ -82,7 +82,7 @@ class SettingsDialog extends StatelessWidget {
             ...dialogSubHeader(theme, 'Experimental features'),
             Flexible(
               child: CheckboxSetting(
-                title: 'Enable WebAssembly',
+                title: '[Recommended] Enable WebAssembly',
                 description:
                     'This will trigger a reload of the page to load DevTools '
                     'compiled with WebAssembly. This may yield better '
