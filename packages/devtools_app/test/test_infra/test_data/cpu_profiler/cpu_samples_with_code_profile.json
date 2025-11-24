@@ -1,0 +1,107 @@
+{
+  "type": "CpuSamples",
+  "samplePeriod": 50,
+  "maxStackDepth": 10,
+  "sampleCount": 1,
+  "timeOriginMicros": 0,
+  "timeExtentMicros": 100,
+  "pid": 12345,
+  "functions": [
+    {
+      "kind": "Dart",
+      "inclusiveTicks": 1,
+      "exclusiveTicks": 0,
+      "resolvedUrl": "file:///main.dart",
+      "function": {
+        "type": "@Function",
+        "id": "func-0",
+        "name": "main",
+        "owner": { "type": "@Library", "id": "lib-0", "name": "", "uri": "file:///main.dart" },
+        "isStatic": true,
+        "isConst": false,
+        "implicit": false
+      }
+    },
+    {
+      "kind": "Dart",
+      "inclusiveTicks": 1,
+      "exclusiveTicks": 1,
+      "resolvedUrl": "file:///main.dart",
+      "function": {
+        "type": "@Function",
+        "id": "func-1",
+        "name": "helperFunction",
+        "owner": { "type": "@Library", "id": "lib-0", "name": "", "uri": "file:///main.dart" },
+        "isStatic": true,
+        "isConst": false,
+        "implicit": false
+      }
+    }
+  ],
+  "_codes": [
+    {
+      "kind": "Dart",
+      "inclusiveTicks": 1,
+      "exclusiveTicks": 0,
+      "code": {
+        "type": "@Code",
+        "kind": "Dart",
+        "name": "main",
+        "id": "code-0",
+        "function": {
+            "type": "@Function",
+            "id": "func-0",
+            "name": "main",
+            "owner": { "type": "@Library", "id": "lib-0", "name": "", "uri": "file:///main.dart" },
+            "isStatic": true,
+            "isConst": false,
+            "implicit": false
+        }
+      }
+    },
+    {
+      "kind": "Dart",
+      "inclusiveTicks": 1,
+      "exclusiveTicks": 1,
+      "code": {
+        "type": "@Code",
+        "kind": "Dart",
+        "name": "helperFunction",
+        "id": "code-1",
+        "function": {
+            "type": "@Function",
+            "id": "func-1",
+            "name": "helperFunction",
+            "owner": { "type": "@Library", "id": "lib-0", "name": "", "uri": "file:///main.dart" },
+            "isStatic": true,
+            "isConst": false,
+            "implicit": false
+        }
+      }
+    },
+    {
+      "kind": "Stub",
+      "inclusiveTicks": 1,
+      "exclusiveTicks": 0,
+      "code": {
+        "type": "@Code",
+        "kind": "Stub",
+        "name": "WriteBarrierStub",
+        "id": "code-2",
+        "function": {
+           "type": "NativeFunction",
+           "id": "native-2",
+           "name": "WriteBarrierStub"
+        }
+      }
+    }
+  ],
+  "samples": [
+    {
+      "tid": 100,
+      "timestamp": 50,
+      "stack": [0, 1],
+      "_codeStack": [2]
+    }
+  ]
+}

@@ -27,7 +27,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+- Fixed issue preventing CPU profiles from loading when "advanced developer mode" was enabled.  -
+  [#9528](https://github.com/flutter/devtools/pull/9528)
 
 ## Memory updates
 

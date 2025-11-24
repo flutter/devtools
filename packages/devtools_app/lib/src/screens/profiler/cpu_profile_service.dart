@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_flags.dart' as vm_flags;
@@ -28,6 +29,19 @@ extension CpuProfilerExtension on VmService {
     final cpuSamples = await serviceConnection.serviceManager.service!
         .getCpuSamples(isolateId, startMicros, extentMicros);
 
+    return processCpuSamples(
+      cpuSamples: cpuSamples,
+      isolateId: isolateId,
+      advancedDeveloperModeEnabled: advancedDeveloperModeEnabled,
+    );
+  }
+
+  @visibleForTesting
+  Future<CpuProfilePair> processCpuSamples({
+    required CpuSamples cpuSamples,
+    required String isolateId,
+    required bool advancedDeveloperModeEnabled,
+  }) async {
     // If advanced developer mode is enabled, getCpuSamples will also include
     // code profile details automatically (e.g., code stacks and a list of code
     // objects).
