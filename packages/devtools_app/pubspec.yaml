@@ -54,7 +54,7 @@ dependencies:
   string_scanner: ^1.4.0
   unified_analytics: ^7.0.0
   vm_service: ^15.0.2
-  vm_service_protos: ^1.0.0
+  vm_service_protos: ^2.0.0
   vm_snapshot_analysis: ^0.7.6
   web: ^1.0.0
   web_socket_channel: ^3.0.0
