@@ -146,7 +146,7 @@ class ReleaseNotesCommand extends Command {
 title: DevTools $releaseNotesVersion release notes
 shortTitle: $releaseNotesVersion release notes
 breadcrumb: $releaseNotesVersion
-toc: false
+showToc: false
 ---
 
 ''';
