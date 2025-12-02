@@ -144,7 +144,7 @@ class ReleaseNotesCommand extends Command {
 
     final metadataHeader = '''---
 title: DevTools $releaseNotesVersion release notes
-short-title: $releaseNotesVersion release notes
+shortTitle: $releaseNotesVersion release notes
 breadcrumb: $releaseNotesVersion
 toc: false
 ---
