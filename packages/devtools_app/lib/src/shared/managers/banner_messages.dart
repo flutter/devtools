@@ -521,30 +521,6 @@ The $codeType DevTools debugger is in maintenance mode. For the best debugging e
       );
 }
 
-class WelcomeToNewInspectorMessage extends BannerInfo {
-  WelcomeToNewInspectorMessage({required super.screenId})
-    : super(
-        key: Key('WelcomeToNewInspectorMessage - $screenId'),
-        buildTextSpans: (context) => [
-          const TextSpan(
-            text: '''
-👋 Welcome to the new Flutter inspector! To get started, check out the ''',
-          ),
-          GaLinkTextSpan(
-            link: GaLink(
-              display: 'documentation',
-              url: 'https://docs.flutter.dev/tools/devtools/inspector#new',
-              gaScreenName: screenId,
-              gaSelectedItemDescription: gac.inspectorV2Docs,
-            ),
-            context: context,
-            style: Theme.of(context).linkTextStyle,
-          ),
-          const TextSpan(text: '.'),
-        ],
-      );
-}
-
 void maybePushDebugModePerformanceMessage(String screenId) {
   if (offlineDataController.showingOfflineData.value) return;
   if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
@@ -571,10 +547,6 @@ void pushDebuggerIdeRecommendationMessage(String screenId) {
   bannerMessages.addMessage(
     DebuggerIdeRecommendationMessage(screenId: screenId),
   );
-}
-
-void pushWelcomeToNewInspectorMessage(String screenId) {
-  bannerMessages.addMessage(WelcomeToNewInspectorMessage(screenId: screenId));
 }
 
 extension BannerMessageThemeExtension on ThemeData {
