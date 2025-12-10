@@ -77,9 +77,8 @@ class NetworkController extends DevToolsScreenController
       debugPrint('No valid request data to export');
       return '';
     }
-
+    // Build the HAR object
     try {
-      // Build the HAR object
       final har = HarNetworkData(_httpRequests!);
       return ExportController().downloadFile(
         json.encode(har.toJson()),
@@ -205,8 +204,11 @@ class NetworkController extends DevToolsScreenController
         shouldLoad: (data) => !data.isEmpty,
         loadData: (data) => loadOfflineData(data),
       );
-    }
-    if (serviceConnection.serviceManager.connectedState.value.connected) {
+    } else if (serviceConnection
+        .serviceManager
+        .connectedState
+        .value
+        .connected) {
       await startRecording();
     }
   }
