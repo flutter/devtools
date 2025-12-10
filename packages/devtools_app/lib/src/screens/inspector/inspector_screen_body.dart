@@ -20,6 +20,7 @@ import '../../shared/managers/error_badge_manager.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/search.dart';
+import '../../shared/utils/utils.dart';
 import '../inspector_shared/inspector_controls.dart';
 import '../inspector_shared/inspector_screen.dart';
 import '../inspector_shared/inspector_settings_dialog.dart';
@@ -111,6 +112,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     }
 
     _summaryTreeController.setSearchTarget(searchTarget);
+
+    safeUnawaited(_showLegacyInspectorWarning(context));
   }
 
   @override
@@ -216,6 +219,12 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       searchVisible = !searchVisible;
     });
     _summaryTreeController.resetSearch();
+  }
+
+    void _showLegacyInspectorWarning(BuildContext context)  {
+    if (context.mounted) {
+      pushLegacyInspectorWarning(InspectorScreen.id);
+    }
   }
 
   List<Widget> getServiceExtensionWidgets() {
