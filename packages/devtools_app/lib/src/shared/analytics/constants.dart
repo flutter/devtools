@@ -131,7 +131,6 @@ const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const inspectorV2Enabled = 'inspectorV2Enabled';
 const inspectorV2Disabled = 'inspectorV2Disabled';
 const inspectorAutoRefreshEnabled = 'inspectorAutoRefreshEnabled';
-const inspectorV2Docs = 'inspectorV2Docs';
 const clearLogs = 'clearLogs';
 const copyLogs = 'copyLogs';
 

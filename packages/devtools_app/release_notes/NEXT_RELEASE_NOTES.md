@@ -51,7 +51,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## Deep links tool updates
 
-TODO: Remove this section if there are not any general updates.
+- Added more informative dialog if Deep Links tool is unable to find build
+  options for the iOS or Android app. -
+  [#9571](https://github.com/flutter/devtools/pull/9571)
 
 ## VS Code Sidebar updates
 
