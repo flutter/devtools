@@ -43,10 +43,11 @@ class _IntervalDropdownState extends State<IntervalDropdown> {
           );
           widget.chartController.data.displayInterval = value;
           final duration = value.duration;
-
           widget.chartController.event.zoomDuration = duration;
           widget.chartController.vm.zoomDuration = duration;
-          widget.chartController.android.zoomDuration = duration;
+          if (widget.chartController.isAndroidChartVisible.value) {
+            widget.chartController.android.zoomDuration = duration;
+          }
         });
       },
       items: displayTypes,
