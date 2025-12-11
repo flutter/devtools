@@ -48,17 +48,5 @@ void main() {
       expect(settings.teamIdentifier, isNull);
       expect(settings.associatedDomains, ['applinks:example.com']);
     });
-
-    test('handles missing associatedDomains', () {
-      // This might crash based on my reading of the code, but let's see.
-      // The code does: (_json[_kAssociatedDomainsKey] as List).cast<String>().toList();
-      // If _json[_kAssociatedDomainsKey] is null, 'as List' will throw.
-      // But the user only asked for bundleIdentifier and teamIdentifier.
-      // I will stick to what was asked first, but maybe add a test for associatedDomains if I'm feeling generous or if I want to be thorough.
-      // Actually, let's just stick to the requested tests first to be safe and not overstep.
-      // But wait, if I see a potential crash, I should probably fix it or at least test it?
-      // The user specifically asked for "bundleIdentifier and teamIdentifier can be null and not crash".
-      // I'll add those.
-    });
   });
 }
