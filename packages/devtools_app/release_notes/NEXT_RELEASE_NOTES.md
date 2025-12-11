@@ -31,7 +31,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+- Fixed error preventing users from changing the zoom duration. -
+  [#9573](https://github.com/flutter/devtools/pull/9573)
 
 ## Debugger updates
 
