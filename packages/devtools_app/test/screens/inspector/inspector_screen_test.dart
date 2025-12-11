@@ -57,6 +57,7 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(Storage, FlutterTestStorage());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
     // Enable the legacy inspector:
     preferences.inspector.setLegacyInspectorEnabled(true);

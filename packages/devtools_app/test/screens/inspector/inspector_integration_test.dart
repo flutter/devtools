@@ -38,8 +38,11 @@ void main() {
     }
   }
 
-  setUp(() {
+  setUp(() async {
+    await env.setupEnvironment();
     setGlobal(BannerMessagesController, BannerMessagesController());
+    // Ensure the legacy inspector is enabled:
+    preferences.inspector.setLegacyInspectorEnabled(true);
   });
 
   group('screenshot tests', () {
@@ -48,12 +51,6 @@ void main() {
         const FlutterRunConfiguration(withDebugger: true),
       );
       env.afterEverySetup = resetInspectorSelection;
-    });
-
-    setUp(() async {
-      await env.setupEnvironment();
-      // Ensure the legacy inspector is enabled:
-      preferences.inspector.setLegacyInspectorEnabled(true);
     });
 
     tearDownAll(() async {
