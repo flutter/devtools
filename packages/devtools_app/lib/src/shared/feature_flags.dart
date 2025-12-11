@@ -119,8 +119,7 @@ extension FeatureFlags on Never {
   ///
   /// When adding a new Flutter channel flag, you are responsible for adding it
   /// to this map as well.
-  static final _flutterChannelFlags = <FlutterChannelFeatureFlag>{
-  };
+  static final _flutterChannelFlags = <FlutterChannelFeatureFlag>{};
 
   /// A helper to print the status of all the feature flags.
   static void debugPrintFeatureFlags({ConnectedApp? connectedApp}) {
