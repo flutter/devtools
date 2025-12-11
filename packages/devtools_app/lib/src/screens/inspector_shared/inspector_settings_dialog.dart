@@ -98,7 +98,7 @@ class _FlutterInspectorSettingsDialogState
                       title: 'Use legacy inspector',
                       description:
                           'Disable the redesigned Flutter inspector. Please know that '
-                          'the legacy inspector may be removed in a future release.',
+                          'the legacy inspector will be removed in a future release.',
                       gaItem: gac.inspectorV2Disabled,
                     ),
                   ),
