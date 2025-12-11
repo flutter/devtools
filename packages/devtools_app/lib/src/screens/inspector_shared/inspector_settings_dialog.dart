@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
@@ -12,13 +13,36 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
+import '../../shared/managers/banner_messages.dart';
 import '../../shared/preferences/preferences.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/editable_list.dart';
+import 'inspector_screen.dart';
 
-class FlutterInspectorSettingsDialog extends StatelessWidget {
+class FlutterInspectorSettingsDialog extends StatefulWidget {
   const FlutterInspectorSettingsDialog({super.key});
+
+  @override
+  State<FlutterInspectorSettingsDialog> createState() =>
+      _FlutterInspectorSettingsDialogState();
+}
+
+class _FlutterInspectorSettingsDialogState
+    extends State<FlutterInspectorSettingsDialog>
+    with AutoDisposeMixin {
+  @override
+  void initState() {
+    super.initState();
+    addAutoDisposeListener(preferences.inspector.legacyInspectorEnabled, () {
+      if (!preferences.inspector.legacyInspectorEnabled.value) {
+        bannerMessages.removeMessageByKey(
+          LegacyInspectorWarningMessage.buildKey(InspectorScreen.id),
+          InspectorScreen.id,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +98,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
                       title: 'Use legacy inspector',
                       description:
                           'Disable the redesigned Flutter inspector. Please know that '
-                          'the legacy inspector may be removed in a future release.',
+                          'the legacy inspector will be removed in a future release.',
                       gaItem: gac.inspectorV2Disabled,
                     ),
                   ),
