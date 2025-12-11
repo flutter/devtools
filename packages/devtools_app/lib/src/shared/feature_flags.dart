@@ -96,14 +96,6 @@ extension FeatureFlags on Never {
   /// Flag to enable refactors in the Flutter Property Editor sidebar.
   ///
   /// https://github.com/flutter/devtools/issues/9214
-  static final propertyEditorRefactors = BooleanFeatureFlag(
-    name: 'propertyEditorRefactors',
-    enabled: true,
-  );
-
-  /// Flag to enable refactors in the Flutter Property Editor sidebar.
-  ///
-  /// https://github.com/flutter/devtools/issues/9214
   static const wasmByDefault = FlutterChannelFeatureFlag(
     name: 'wasmByDefault',
     flutterChannel: FlutterChannel.beta,
@@ -122,7 +114,6 @@ extension FeatureFlags on Never {
     dapDebugging,
     inspectorV2,
     wasmOptInSetting,
-    propertyEditorRefactors,
   };
 
   /// A set of all the Flutter channel feature flags for debugging purposes.
