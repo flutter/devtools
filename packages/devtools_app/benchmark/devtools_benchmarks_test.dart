@@ -75,12 +75,7 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
 
   for (final devToolsBenchmark in DevToolsBenchmark.values) {
     final benchmarkName = devToolsBenchmark.id;
-    // Note: Due to https://github.com/flutter/flutter/pull/175392 there is no
-    // longer any difference in benchmark events for skwasm vs. canvaskit.
-    //
-    // TODO(https://github.com/flutter/flutter/issues/177057): Remove hardcoded
-    // useWasm: false param when package:web_benchmarks is updated.
-    final expectedMetrics = expectedBenchmarkMetrics(useWasm: false);
+    final expectedMetrics = expectedBenchmarkMetrics();
     const expectedComputations = BenchmarkMetricComputation.values;
     final scores = taskResult.scores[benchmarkName] ?? [];
     expect(
