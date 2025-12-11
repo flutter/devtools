@@ -85,14 +85,6 @@ extension FeatureFlags on Never {
     enabled: true,
   );
 
-  /// Flag to enable the DevTools setting to opt-in to WASM.
-  ///
-  /// https://github.com/flutter/devtools/issues/7856
-  static final wasmOptInSetting = BooleanFeatureFlag(
-    name: 'wasmOptInSetting',
-    enabled: true,
-  );
-
   /// Flag to enable refactors in the Flutter Property Editor sidebar.
   ///
   /// https://github.com/flutter/devtools/issues/9214
@@ -121,7 +113,6 @@ extension FeatureFlags on Never {
     devToolsExtensions,
     dapDebugging,
     inspectorV2,
-    wasmOptInSetting,
     propertyEditorRefactors,
   };
 

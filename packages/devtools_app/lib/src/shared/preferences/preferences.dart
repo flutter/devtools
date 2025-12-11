@@ -122,9 +122,7 @@ class PreferencesController extends DisposableController
     // Get the current values and listen for and write back changes.
     await _initDarkMode();
     await _initAdvancedDeveloperMode();
-    if (FeatureFlags.wasmOptInSetting.isEnabled) {
-      await _initWasmEnabled();
-    }
+    await _initWasmEnabled();
     await _initVerboseLogging();
 
     await cpuProfiler.init();

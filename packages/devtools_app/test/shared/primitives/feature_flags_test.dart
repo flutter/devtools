@@ -21,7 +21,6 @@ void main() {
     expect(FeatureFlags.devToolsExtensions.isEnabled, isExternalBuild);
     expect(FeatureFlags.dapDebugging.isEnabled, false);
     expect(FeatureFlags.inspectorV2.isEnabled, true);
-    expect(FeatureFlags.wasmOptInSetting.isEnabled, true);
     expect(FeatureFlags.propertyEditorRefactors.isEnabled, true);
   });
 
