@@ -19,7 +19,8 @@ TODO: Remove this section if there are not any general updates.
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+- Added a warning banner that the legacy inspector will be removed in a future
+  release. - [#9572](https://github.com/flutter/devtools/pull/9572)
 
 ## Performance updates
 
