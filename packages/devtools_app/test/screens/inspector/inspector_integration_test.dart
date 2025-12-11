@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,6 +37,10 @@ void main() {
       );
     }
   }
+
+  setUp(() {
+    setGlobal(BannerMessagesController, BannerMessagesController());
+  });
 
   group('screenshot tests', () {
     setUpAll(() {
