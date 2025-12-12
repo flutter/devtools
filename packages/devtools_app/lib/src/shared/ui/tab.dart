@@ -81,6 +81,7 @@ class AnalyticsTabbedView extends StatefulWidget {
     this.onTabChanged,
     this.initialSelectedIndex,
     this.analyticsSessionIdentifier,
+    this.staticSingleTab = false,
   }) : trailingWidgets = List.generate(
          tabs.length,
          (index) => tabs[index].tab.trailing ?? const SizedBox(),
@@ -105,6 +106,8 @@ class AnalyticsTabbedView extends StatefulWidget {
   /// being refreshed, or widget tree rebuilds don't send spurious analytics
   /// events.
   final String? analyticsSessionIdentifier;
+
+  final bool staticSingleTab;
 
   /// Whether to send analytics events to GA.
   ///
@@ -202,14 +205,12 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: TabBar(
-                labelColor: Theme.of(context).colorScheme.onSurface,
-                controller: _tabController,
-                tabs: widget.tabs.map((t) => t.tab).toList(),
-                isScrollable: true,
-              ),
+            _AnalyticsTabBar(
+              tabs: widget.tabs.map((tab) => tab.tab).toList(),
+              tabController: _tabController,
+              staticSingleTab: widget.staticSingleTab,
             ),
+
             widget.trailingWidgets[_currentTabControllerIndex],
           ],
         ),
@@ -232,4 +233,31 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       ),
     );
   }
+}
+
+class _AnalyticsTabBar extends StatelessWidget {
+  const _AnalyticsTabBar({
+    required this.tabs,
+    required this.tabController,
+    required this.staticSingleTab,
+  });
+
+  static const _tabPadding = 14.0;
+
+  final List<DevToolsTab> tabs;
+  final TabController? tabController;
+  final bool staticSingleTab;
+
+  @override
+  Widget build(BuildContext context) => (staticSingleTab && tabs.length == 1)
+      ? Padding(
+          padding: const EdgeInsets.symmetric(horizontal: _tabPadding),
+          child: tabs.first,
+        )
+      : TabBar(
+          labelColor: Theme.of(context).colorScheme.onSurface,
+          controller: tabController,
+          tabs: tabs,
+          isScrollable: true,
+        );
 }

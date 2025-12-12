@@ -6,8 +6,10 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../framework/scaffold/bottom_pane.dart';
 import '../../globals.dart';
 import '../../ui/common_widgets.dart';
+import '../../ui/tab.dart';
 import '../console.dart';
 import '../console_service.dart';
 import 'evaluate.dart';
@@ -15,37 +17,20 @@ import 'help_dialog.dart';
 
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
-class ConsolePaneHeader extends AreaPaneHeader {
-  ConsolePaneHeader({super.key})
-    : super(
-        title: const Text('Console'),
-        roundedTopBorder: true,
-        actions: [
-          const ConsoleHelpLink(),
-          const SizedBox(width: densePadding),
-          CopyToClipboardControl(
-            dataProvider: () =>
-                serviceConnection.consoleService.stdio.value.join('\n'),
-            buttonKey: ConsolePane.copyToClipboardButtonKey,
-          ),
-          const SizedBox(width: densePadding),
-          DeleteControl(
-            buttonKey: ConsolePane.clearStdioButtonKey,
-            tooltip: 'Clear console output',
-            onPressed: () => serviceConnection.consoleService.clearStdio(),
-          ),
-        ],
-      );
-}
-
 /// Display the stdout and stderr output from the process under debug.
-class ConsolePane extends StatelessWidget {
+class ConsolePane extends StatelessWidget implements TabbedPane {
   const ConsolePane({super.key});
 
-  static const copyToClipboardButtonKey = Key(
-    'console_copy_to_clipboard_button',
+  static const _tabName = 'Console';
+
+  static const _gaPrefix = 'consolePane';
+
+  @override
+  DevToolsTab get tab => DevToolsTab.create(
+    tabName: _tabName,
+    gaPrefix: _gaPrefix,
+    trailing: const _ConsoleActions(),
   );
-  static const clearStdioButtonKey = Key('console_clear_stdio_button');
 
   ValueListenable<List<ConsoleLine>> get stdio =>
       serviceConnection.consoleService.stdio;
@@ -61,10 +46,35 @@ class ConsolePane extends StatelessWidget {
       footer = const ExpressionEvalField();
     }
 
-    return Column(
-      children: [
-        Expanded(
-          child: Console(lines: stdio, footer: footer),
+    return Console(lines: stdio, footer: footer);
+  }
+}
+
+class _ConsoleActions extends StatelessWidget {
+  const _ConsoleActions();
+
+  static const copyToClipboardButtonKey = Key(
+    'console_copy_to_clipboard_button',
+  );
+  static const clearStdioButtonKey = Key('console_clear_stdio_button');
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        const ConsoleHelpLink(),
+        const SizedBox(width: densePadding),
+        CopyToClipboardControl(
+          dataProvider: () =>
+              serviceConnection.consoleService.stdio.value.join('\n'),
+          buttonKey: copyToClipboardButtonKey,
+        ),
+        const SizedBox(width: densePadding),
+        DeleteControl(
+          buttonKey: clearStdioButtonKey,
+          tooltip: 'Clear console output',
+          onPressed: () => serviceConnection.consoleService.clearStdio(),
         ),
       ],
     );

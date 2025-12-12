@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../../app.dart';
 import '../../extensions/extension_settings.dart';
 import '../../screens/debugger/debugger_screen.dart';
+import '../../shared/ai_assistant/widgets/ai_assistant_pane.dart';
 import '../../shared/analytics/prompt.dart';
 import '../../shared/config_specific/drag_and_drop/drag_and_drop.dart';
 import '../../shared/config_specific/import_export/import_export.dart';
@@ -25,6 +26,7 @@ import '../../shared/primitives/query_parameters.dart';
 import '../../shared/title.dart';
 import 'about_dialog.dart';
 import 'app_bar.dart';
+import 'bottom_pane.dart';
 import 'report_feedback_button.dart';
 import 'settings_dialog.dart';
 import 'status_line.dart';
@@ -314,6 +316,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             serviceConnection.serviceManager.connectedAppInitialized &&
             !offlineDataController.showingOfflineData.value &&
             _currentScreen.showConsole(widget.embedMode);
+        final showAiAssists =
+            FeatureFlags.aiAssists.isEnabled && _currentScreen.showAiAssists();
+        final showBottomPane = showConsole || showAiAssists;
         final containsSingleSimpleScreen =
             widget.screens.length == 1 && widget.screens.first is SimpleScreen;
         final showAppBar =
@@ -345,20 +350,18 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               body: OutlineDecoration.onlyTop(
                 child: Padding(
                   padding: widget.appPadding,
-                  child: showConsole
+                  child: showBottomPane
                       ? SplitPane(
                           axis: Axis.vertical,
-                          splitters: [ConsolePaneHeader()],
                           initialFractions: const [0.8, 0.2],
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: intermediateSpacing,
-                              ),
-                              child: content,
-                            ),
-                            RoundedOutlinedBorder.onlyBottom(
-                              child: const ConsolePane(),
+                            content,
+                            BottomPane(
+                              screenId: _currentScreen.screenId,
+                              tabs: [
+                                if (showConsole) const ConsolePane(),
+                                if (showAiAssists) const AiAssistantPane(),
+                              ],
                             ),
                           ],
                         )

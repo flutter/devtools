@@ -36,6 +36,9 @@ class PerformanceScreen extends Screen {
   String get docPageId => id;
 
   @override
+  bool showAiAssists() => true;
+
+  @override
   Widget buildScreenBody(BuildContext context) {
     if (serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
         false) {
