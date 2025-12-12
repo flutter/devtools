@@ -9,7 +9,6 @@ import 'dart:ui';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/analytics/constants.dart' as gac;
 import 'package:devtools_app/src/shared/editor/api_classes.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_controller.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_refactors.dart';
 import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_types.dart';
@@ -927,8 +926,6 @@ void main() {
     );
 
     setUp(() {
-      FeatureFlags.propertyEditorRefactors.setEnabledForTests(true);
-
       refactorCount = 0;
       when(
         // ignore: discarded_futures, for mocking purposes.
