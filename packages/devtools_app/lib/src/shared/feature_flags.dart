@@ -85,14 +85,6 @@ extension FeatureFlags on Never {
     enabled: true,
   );
 
-  /// Flag to enable refactors in the Flutter Property Editor sidebar.
-  ///
-  /// https://github.com/flutter/devtools/issues/9214
-  static final propertyEditorRefactors = BooleanFeatureFlag(
-    name: 'propertyEditorRefactors',
-    enabled: true,
-  );
-
   /// A set of all the boolean feature flags for debugging purposes.
   ///
   /// When adding a new boolean flag, you are responsible for adding it to this
@@ -103,7 +95,6 @@ extension FeatureFlags on Never {
     devToolsExtensions,
     dapDebugging,
     inspectorV2,
-    propertyEditorRefactors,
   };
 
   /// A set of all the Flutter channel feature flags for debugging purposes.
