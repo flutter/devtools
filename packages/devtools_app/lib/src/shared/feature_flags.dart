@@ -94,7 +94,7 @@ extension FeatureFlags on Never {
     networkSaveLoad,
     devToolsExtensions,
     dapDebugging,
-    inspectorV2
+    inspectorV2,
   };
 
   /// A set of all the Flutter channel feature flags for debugging purposes.
