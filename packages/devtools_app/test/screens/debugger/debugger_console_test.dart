@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/framework/scaffold/bottom_pane.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -49,7 +50,16 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        const Row(children: [Expanded(child: ConsolePane())]),
+        Row(
+          children: [
+            Expanded(
+              child: BottomPane(
+                screenId: 'debugger',
+                tabs: const [ConsolePane()],
+              ),
+            ),
+          ],
+        ),
         debugger: controller,
       ),
     );
