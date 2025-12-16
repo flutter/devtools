@@ -160,8 +160,12 @@ class DTDManager {
       // If a connection drops (and we hadn't disabled auto-reconnect, such
       // as by explicitly calling disconnect/dispose), we should attempt to
       // reconnect.
-      unawaited(connection.done.then(
-          (_) => _reconnectAfterDroppedConnection(uri, onError: onError)));
+      unawaited(connection.done
+          .then((_) => _reconnectAfterDroppedConnection(uri, onError: onError))
+          .catchError((_) {
+        // TODO(dantup): Create a devtools_app_shared version of safeUnawaited.
+        // https://github.com/flutter/devtools/pull/9587#discussion_r2624306047
+      }));
     } catch (e, st) {
       onError?.call(e, st);
     }
