@@ -316,9 +316,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             serviceConnection.serviceManager.connectedAppInitialized &&
             !offlineDataController.showingOfflineData.value &&
             _currentScreen.showConsole(widget.embedMode);
-        final showAiAssists =
-            FeatureFlags.aiAssists.isEnabled && _currentScreen.showAiAssists();
-        final showBottomPane = showConsole || showAiAssists;
+        final showAiAssistant =
+            FeatureFlags.aiAssists.isEnabled &&
+            _currentScreen.showAiAssistant();
+        final showBottomPane = showConsole || showAiAssistant;
         final containsSingleSimpleScreen =
             widget.screens.length == 1 && widget.screens.first is SimpleScreen;
         final showAppBar =
@@ -360,7 +361,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                               screenId: _currentScreen.screenId,
                               tabs: [
                                 if (showConsole) const ConsolePane(),
-                                if (showAiAssists) const AiAssistantPane(),
+                                if (showAiAssistant) const AiAssistantPane(),
                               ],
                             ),
                           ],

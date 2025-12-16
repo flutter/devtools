@@ -206,7 +206,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _AnalyticsTabBar(
-              tabs: widget.tabs.map((tab) => tab.tab).toList(),
+              tabs: widget.tabs.map((t) => t.tab).toList(),
               tabController: _tabController,
               staticSingleTab: widget.staticSingleTab,
             ),
