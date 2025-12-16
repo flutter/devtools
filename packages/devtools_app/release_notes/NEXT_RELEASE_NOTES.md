@@ -26,11 +26,11 @@ To learn more about DevTools, check out the
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Memory updates
 
@@ -39,19 +39,19 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## App size tool updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Deep links tool updates
 
@@ -63,15 +63,15 @@ TODO: Remove this section if there are not any general updates.
 
 ## VS Code Sidebar updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Advanced developer mode updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Full commit history
 

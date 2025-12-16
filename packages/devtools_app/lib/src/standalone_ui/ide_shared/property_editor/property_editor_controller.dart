@@ -11,7 +11,6 @@ import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
-import '../../../shared/feature_flags.dart';
 import '../../../shared/ui/filter.dart';
 import '../../../shared/utils/utils.dart';
 import 'property_editor_types.dart';
@@ -212,8 +211,7 @@ class PropertyEditorController extends DisposableController
     CodeActionResult? refactorsResult;
     // TODO(https://github.com/flutter/devtools/issues/8652): Enable refactors
     // in the Property Editor by default.
-    if (editableArgsResult != null &&
-        FeatureFlags.propertyEditorRefactors.isEnabled) {
+    if (editableArgsResult != null) {
       // Fetch the refactors using the start of the editable arguments' range,
       // which corresponds to the widget constructor name. This ensures that the
       // refactors are always available, even when the cursor is within the
