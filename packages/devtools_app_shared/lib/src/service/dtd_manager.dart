@@ -66,7 +66,7 @@ class DTDManager {
         Timer.periodic(_periodicConnectionCheckInterval, (timer) async {
       if (_dtd.isClosed) {
         _log.warning('The DTD connection has dropped');
-        await disconnectImpl(disableReconnect: false);
+        await disconnectImpl(allowReconnect: true);
       }
     });
 
@@ -160,23 +160,32 @@ class DTDManager {
       // If a connection drops (and we hadn't disabled auto-reconnect, such
       // as by explicitly calling disconnect/dispose), we should attempt to
       // reconnect.
-      unawaited(connection.done.then((_) async {
-        // Trigger disconnect to ensure we emit a `null` connection to
-        // listeners.
-        await disconnectImpl(disableReconnect: false);
-        if (_automaticallyReconnect) {
-          await _connectImpl(
-            uri,
-            onError: onError,
-            // We've already disconnected above, in a way that doesn't disable
-            // reconnect and does not set connection to null (allowing screens
-            // to remain visible under connection overlays).
-            disconnectBeforeConnecting: false,
-          );
-        }
-      }));
+      unawaited(connection.done.then(
+          (_) => _reconnectAfterDroppedConnection(uri, onError: onError)));
     } catch (e, st) {
       onError?.call(e, st);
+    }
+  }
+
+  /// Triggers a reconnect without first disconnecting. This allows existing
+  /// state to be retained in the background while reconnect is in progress so
+  /// that the content the user could previously see is not hidden.
+  Future<void> _reconnectAfterDroppedConnection(
+    Uri uri, {
+    void Function(Object, StackTrace?)? onError,
+  }) async {
+    // Trigger disconnect to ensure we emit a `null` connection to
+    // listeners.
+    await disconnectImpl(allowReconnect: true);
+    if (_automaticallyReconnect) {
+      await _connectImpl(
+        uri,
+        onError: onError,
+        // We've already disconnected above, in a way that doesn't disable
+        // reconnect and does not set connection to null (allowing screens
+        // to remain visible under connection overlays).
+        disconnectBeforeConnecting: false,
+      );
     }
   }
 
@@ -204,10 +213,17 @@ class DTDManager {
 
   /// Closes and unsets the Dart Tooling Daemon connection, if one is set.
   ///
-  /// Disables automatic reconnect unless [disableReconnect] is `false`.
+  /// [allowReconnect] controls whether reconnection is allowed. This is
+  /// generally false for an explicit disconnect/dispose, but allowed if we
+  /// are called as part of a dropped connection. Reconnecting being allowed
+  /// does not necessarily mean it will happen, because there might have been
+  /// an explicit disconnect (or dispose) call before we got here.
   @visibleForTesting
-  Future<void> disconnectImpl({bool disableReconnect = true}) async {
-    if (disableReconnect) {
+  Future<void> disconnectImpl({bool allowReconnect = false}) async {
+    if (!allowReconnect) {
+      // If we're not allowed to reconnect, disable this. `allowReconnect` being
+      // true does NOT mean we can enable this, because we might get here after
+      // an explicit disconnect.
       _automaticallyReconnect = false;
 
       // We only clear the connection if we are explicitly disconnecting. In the

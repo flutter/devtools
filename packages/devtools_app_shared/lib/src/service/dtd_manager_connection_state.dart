@@ -1,4 +1,4 @@
-// Copyright 2023 The Flutter Authors
+// Copyright 2025 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
@@ -14,7 +14,7 @@ class ConnectingDTDState extends DTDConnectionState {}
 /// A connection failed and we are waiting for [seconds] before
 /// trying again.
 ///
-/// This state is emitted every second during a retry countdonw.
+/// This state is emitted every second during a retry countdown.
 class WaitingToRetryDTDState extends DTDConnectionState {
   WaitingToRetryDTDState(this.seconds);
 
