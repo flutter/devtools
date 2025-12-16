@@ -521,6 +521,34 @@ The $codeType DevTools debugger is in maintenance mode. For the best debugging e
       );
 }
 
+class LegacyInspectorWarningMessage extends BannerWarning {
+  LegacyInspectorWarningMessage({required super.screenId})
+    : super(
+        key: buildKey(screenId),
+        buildTextSpans: (context) => [
+          const TextSpan(
+            text:
+                'The legacy inspector will be removed in a future release. '
+                'Please enable the new inspector in the inspector settings. '
+                'If there is an issue preventing you from using the new '
+                'inspector, please file a ',
+          ),
+          GaLinkTextSpan(
+            link: const GaLink(
+              display: 'bug',
+              url: 'https://github.com/flutter/devtools/issues/new',
+            ),
+            context: context,
+            style: Theme.of(context).linkTextStyle,
+          ),
+          const TextSpan(text: '.'),
+        ],
+      );
+
+  static Key buildKey(String screenId) =>
+      Key('LegacyInspectorWarningMessage - $screenId');
+}
+
 void maybePushDebugModePerformanceMessage(String screenId) {
   if (offlineDataController.showingOfflineData.value) return;
   if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
@@ -547,6 +575,10 @@ void pushDebuggerIdeRecommendationMessage(String screenId) {
   bannerMessages.addMessage(
     DebuggerIdeRecommendationMessage(screenId: screenId),
   );
+}
+
+void pushLegacyInspectorWarning(String screenId) {
+  bannerMessages.addMessage(LegacyInspectorWarningMessage(screenId: screenId));
 }
 
 extension BannerMessageThemeExtension on ThemeData {

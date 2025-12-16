@@ -208,7 +208,7 @@ class _DevToolsReleaseNotes {
 
     // TODO(kenz): one nice polish task could be to remove sections that are
     // empty (i.e. sections that have the line
-    // "TODO: Remove this section if there are not any general updates.").
+    // "TODO: Remove this section if there are not any updates.").
     final srcLines = rawLines.sublist(titleLineIndex);
     final imageLineIndices = <int>{};
     for (int i = 0; i < srcLines.length; i++) {

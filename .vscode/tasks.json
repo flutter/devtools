@@ -5,7 +5,7 @@
 			"label": "Start DTD on Port 8500",
 			"detail": "Starts a DTD instance running on port 8500",
 			"type": "shell",
-			"command": "${workspaceFolder}/../tool/flutter-sdk/bin/cache/dart-sdk/bin/dart",
+			"command": "${workspaceFolder}/tool/flutter-sdk/bin/cache/dart-sdk/bin/dart",
 			"args": [
 				"tooling-daemon",
 				"--disable-service-auth-codes",

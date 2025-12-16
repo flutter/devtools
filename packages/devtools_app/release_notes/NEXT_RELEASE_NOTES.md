@@ -15,57 +15,61 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any general updates.
+- Added a warning banner that the legacy inspector will be removed in a future
+  release. - [#9572](https://github.com/flutter/devtools/pull/9572)
 
 ## Performance updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any general updates.
+- Fixed error preventing users from changing the zoom duration. -
+  [#9573](https://github.com/flutter/devtools/pull/9573)
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## App size tool updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Deep links tool updates
 
 - Added more informative dialog if Deep Links tool is unable to find build
   options for the iOS or Android app. -
   [#9571](https://github.com/flutter/devtools/pull/9571)
+- Fixed null error when parsing universal link settings -
+  [#9581](https://github.com/flutter/devtools/pull/9581)
 
 ## VS Code Sidebar updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## DevTools Extension updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Advanced developer mode updates
 
-TODO: Remove this section if there are not any general updates.
+TODO: Remove this section if there are not any updates.
 
 ## Full commit history
 
