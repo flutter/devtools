@@ -28,7 +28,8 @@ class BottomPane extends StatelessWidget {
   }
 }
 
-/// An interface for a widget that can be displayed as a tab in a [BottomPane].
+/// An interface for a widget that should be displayed as a tab in the
+/// [BottomPane].
 abstract class TabbedPane implements Widget {
   /// The tab to display for this pane.
   DevToolsTab get tab;

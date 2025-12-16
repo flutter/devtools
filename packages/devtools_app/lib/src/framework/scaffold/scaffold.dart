@@ -312,12 +312,14 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     return Provider<ImportController>.value(
       value: _importController,
       builder: (context, _) {
+        final isConnectedAppView = serviceConnection.serviceManager.connectedAppInitialized &&
+            !offlineDataController.showingOfflineData.value;
         final showConsole =
-            serviceConnection.serviceManager.connectedAppInitialized &&
-            !offlineDataController.showingOfflineData.value &&
+            isConnectedAppView &&
             _currentScreen.showConsole(widget.embedMode);
         final showAiAssistant =
             FeatureFlags.aiAssists.isEnabled &&
+            isConnectedAppView &&
             _currentScreen.showAiAssistant();
         final showBottomPane = showConsole || showAiAssistant;
         final containsSingleSimpleScreen =
