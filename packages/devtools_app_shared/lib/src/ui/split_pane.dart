@@ -305,7 +305,7 @@ final class DefaultSplitter extends StatelessWidget
   final bool isHorizontal;
 
   @override
-  Size get size => const Size(splitterWidth, iconSize);
+  Size get preferredSize => const Size(splitterWidth, iconSize);
 
   @override
   Widget build(BuildContext context) {

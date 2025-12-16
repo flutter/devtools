@@ -82,7 +82,7 @@ void main() {
     testWidgets('is visible for supported screens', (
       WidgetTester tester,
     ) async {
-      FeatureFlags.aiAssists.setEnabledForTests(true);
+      FeatureFlags.aiAssistant.setEnabledForTests(true);
 
       await pumpScaffold(tester, screen: const _TestScreenWithAi());
 
@@ -92,7 +92,7 @@ void main() {
     testWidgets('is not visible for unsupported screens', (
       WidgetTester tester,
     ) async {
-      FeatureFlags.aiAssists.setEnabledForTests(true);
+      FeatureFlags.aiAssistant.setEnabledForTests(true);
 
       await pumpScaffold(tester, screen: const _TestScreenWithoutAi());
 
@@ -102,7 +102,7 @@ void main() {
     testWidgets('is not visible when app is not connected', (
       WidgetTester tester,
     ) async {
-      FeatureFlags.aiAssists.setEnabledForTests(true);
+      FeatureFlags.aiAssistant.setEnabledForTests(true);
 
       await pumpScaffold(
         tester,
@@ -116,7 +116,7 @@ void main() {
     testWidgets('is not visible when feature flag is disabled', (
       WidgetTester tester,
     ) async {
-      FeatureFlags.aiAssists.setEnabledForTests(false);
+      FeatureFlags.aiAssistant.setEnabledForTests(false);
 
       await pumpScaffold(tester, screen: const _TestScreenWithAi());
 
@@ -126,7 +126,7 @@ void main() {
     testWidgets('is not visible when in offline mode', (
       WidgetTester tester,
     ) async {
-      FeatureFlags.aiAssists.setEnabledForTests(true);
+      FeatureFlags.aiAssistant.setEnabledForTests(true);
 
       await pumpScaffold(
         tester,

@@ -318,7 +318,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         final showConsole =
             isConnectedAppView && _currentScreen.showConsole(widget.embedMode);
         final showAiAssistant =
-            FeatureFlags.aiAssists.isEnabled &&
+            FeatureFlags.aiAssistant.isEnabled &&
             isConnectedAppView &&
             _currentScreen.showAiAssistant();
         final showBottomPane = showConsole || showAiAssistant;
