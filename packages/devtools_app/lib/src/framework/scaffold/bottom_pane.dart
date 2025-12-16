@@ -13,6 +13,8 @@ class BottomPane extends StatelessWidget {
   const BottomPane({super.key, required this.screenId, required this.tabs})
     : assert(tabs.length > 0);
 
+  static const splitterKey = Key('Bottom Pane Splitter');
+
   final String screenId;
   final List<TabbedPane> tabs;
 

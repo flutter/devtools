@@ -107,6 +107,8 @@ class AnalyticsTabbedView extends StatefulWidget {
   /// events.
   final String? analyticsSessionIdentifier;
 
+  /// When there is only a single tab, whether to display that tab as a static
+  /// title instead of in a [TabBar].
   final bool staticSingleTab;
 
   /// Whether to send analytics events to GA.
@@ -210,7 +212,6 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
               tabController: _tabController,
               staticSingleTab: widget.staticSingleTab,
             ),
-
             widget.trailingWidgets[_currentTabControllerIndex],
           ],
         ),
@@ -235,6 +236,10 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
   }
 }
 
+/// A [TabBar] used by [AnalyticsTabbedView].
+///
+/// When there is only a single tab and [staticSingleTab] is true, this tab bar
+/// will be displayed as a static title.
 class _AnalyticsTabBar extends StatelessWidget {
   const _AnalyticsTabBar({
     required this.tabs,

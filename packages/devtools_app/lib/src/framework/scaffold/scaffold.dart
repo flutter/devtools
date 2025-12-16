@@ -312,11 +312,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     return Provider<ImportController>.value(
       value: _importController,
       builder: (context, _) {
-        final isConnectedAppView = serviceConnection.serviceManager.connectedAppInitialized &&
+        final isConnectedAppView =
+            serviceConnection.serviceManager.connectedAppInitialized &&
             !offlineDataController.showingOfflineData.value;
         final showConsole =
-            isConnectedAppView &&
-            _currentScreen.showConsole(widget.embedMode);
+            isConnectedAppView && _currentScreen.showConsole(widget.embedMode);
         final showAiAssistant =
             FeatureFlags.aiAssists.isEnabled &&
             isConnectedAppView &&
@@ -357,6 +357,12 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                       ? SplitPane(
                           axis: Axis.vertical,
                           initialFractions: const [0.8, 0.2],
+                          splitters: const [
+                            DefaultSplitter(
+                              key: BottomPane.splitterKey,
+                              isHorizontal: true,
+                            ),
+                          ],
                           children: [
                             content,
                             BottomPane(

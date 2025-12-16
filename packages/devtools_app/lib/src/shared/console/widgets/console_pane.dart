@@ -21,6 +21,11 @@ import 'help_dialog.dart';
 class ConsolePane extends StatelessWidget implements TabbedPane {
   const ConsolePane({super.key});
 
+  static const copyToClipboardButtonKey = Key(
+    'console_copy_to_clipboard_button',
+  );
+  static const clearStdioButtonKey = Key('console_clear_stdio_button');
+
   static const _tabName = 'Console';
 
   static const _gaPrefix = 'consolePane';
@@ -53,11 +58,6 @@ class ConsolePane extends StatelessWidget implements TabbedPane {
 class _ConsoleActions extends StatelessWidget {
   const _ConsoleActions();
 
-  static const copyToClipboardButtonKey = Key(
-    'console_copy_to_clipboard_button',
-  );
-  static const clearStdioButtonKey = Key('console_clear_stdio_button');
-
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -68,11 +68,11 @@ class _ConsoleActions extends StatelessWidget {
         CopyToClipboardControl(
           dataProvider: () =>
               serviceConnection.consoleService.stdio.value.join('\n'),
-          buttonKey: copyToClipboardButtonKey,
+          buttonKey: ConsolePane.copyToClipboardButtonKey,
         ),
         const SizedBox(width: densePadding),
         DeleteControl(
-          buttonKey: clearStdioButtonKey,
+          buttonKey: ConsolePane.clearStdioButtonKey,
           tooltip: 'Clear console output',
           onPressed: () => serviceConnection.consoleService.clearStdio(),
         ),
