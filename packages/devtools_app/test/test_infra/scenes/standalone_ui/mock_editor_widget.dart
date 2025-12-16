@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/primitives/list_queue_value_notifier.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -257,6 +258,23 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                       backgroundColor: const WidgetStatePropertyAll(Colors.red),
                     ),
                     child: const Text('Stop All'),
+                  ),
+                  const SizedBox(height: defaultSpacing * 5),
+                  Text('DTD Manager', style: theme.textTheme.headlineMedium),
+                  const SizedBox(height: defaultSpacing),
+                  const Text(
+                    'Use these buttons to simulate actions on the DTD Manager that the sidebar panel is using',
+                  ),
+                  const SizedBox(height: defaultSpacing),
+                  Row(
+                    children: [
+                      const Text('DTD Connection: '),
+                      ElevatedButton(
+                        onPressed: () =>
+                            dtdManager.disconnectImpl(disableReconnect: false),
+                        child: const Text('Drop Connection'),
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -5,11 +5,10 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/standalone_ui/vs_code/flutter_panel.dart';
+import 'package:devtools_app/src/standalone_ui/standalone_screen.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_test/devtools_test.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
@@ -35,7 +34,7 @@ class EditorSidebarScene extends Scene {
         body: MockEditorWidget(
           editor: editor,
           clientLog: clientLog,
-          child: EditorSidebarPanel(clientDtd),
+          child: StandaloneScreenType.editorSidebar.screen,
         ),
       ),
     );
@@ -46,12 +45,20 @@ class EditorSidebarScene extends Scene {
 
   @override
   Future<void> setUp() async {
+    final logStream = StreamController<String>();
+    final dtdManager = TestingDTDManager(
+      logStream.sink,
+      // Set this variable to similate a number of failed connections for
+      // testing.
+      failConnectionCount: 3,
+    );
+
     setStagerMode();
     setGlobal(
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
-    setGlobal(DTDManager, MockDTDManager());
+    setGlobal(DTDManager, dtdManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
 
@@ -60,9 +67,10 @@ class EditorSidebarScene extends Scene {
     // TODO(dantup): Add a way for the mock editor to set workspace roots so
     //  the extensions parts can work in the sidebar.
     final dtdUri = Uri.parse('ws://127.0.0.1:8500/');
-    final connection = await createLoggedWebSocketChannel(dtdUri);
-    clientLog = connection.log;
-    clientDtd = DartToolingDaemon.fromStreamChannel(connection.channel);
-    editor = SimulatedEditor(dtdUri);
+    clientLog = logStream.stream;
+    editor = await SimulatedEditor.connect(dtdUri);
+
+    // Start connecting to DTD after 1s, so we see the progress indicators.
+    unawaited(dtdManager.connect(dtdUri));
   }
 }

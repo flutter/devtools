@@ -5,12 +5,10 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/standalone_ui/ide_shared/property_editor/property_editor_panel.dart';
+import 'package:devtools_app/src/standalone_ui/standalone_screen.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_test/devtools_test.dart';
-import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
@@ -24,9 +22,11 @@ import 'shared/utils.dart';
 ///
 /// flutter run -t test/test_infra/scenes/standalone_ui/property_editor_sidebar.stager_app.g.dart -d chrome
 class PropertyEditorSidebarScene extends Scene {
+  late Stream<String> clientLog;
+
   @override
   Widget build(BuildContext context) {
-    return const _PropertyEditorSidebar();
+    return _PropertyEditorSidebar(clientLog);
   }
 
   @override
@@ -34,27 +34,36 @@ class PropertyEditorSidebarScene extends Scene {
 
   @override
   Future<void> setUp() async {
+    final logStream = StreamController<String>();
+    clientLog = logStream.stream;
+    final dtdManager = TestingDTDManager(
+      logStream.sink,
+      // Set this variable to similate a number of failed connections for
+      // testing.
+      failConnectionCount: 3,
+    );
+
     setStagerMode();
     setGlobal(
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
-    setGlobal(DTDManager, MockDTDManager());
+    setGlobal(DTDManager, dtdManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
   }
 }
 
 class _PropertyEditorSidebar extends StatefulWidget {
-  const _PropertyEditorSidebar();
+  const _PropertyEditorSidebar(this.clientLog);
+
+  final Stream<String> clientLog;
 
   @override
   State<_PropertyEditorSidebar> createState() => _PropertyEditorState();
 }
 
 class _PropertyEditorState extends State<_PropertyEditorSidebar> {
-  Stream<String>? clientLog;
-  DartToolingDaemon? clientDtd;
   SimulatedEditor? editor;
 
   @override
@@ -66,11 +75,11 @@ class _PropertyEditorState extends State<_PropertyEditorSidebar> {
   Widget build(BuildContext context) {
     return IdeThemedMaterialApp(
       home: Scaffold(
-        body: clientLog != null && clientDtd != null && editor != null
+        body: editor != null
             ? MockEditorWidget(
                 editor: editor!,
-                clientLog: clientLog!,
-                child: PropertyEditorPanel(clientDtd!),
+                clientLog: widget.clientLog,
+                child: StandaloneScreenType.propertyEditor.screen,
               )
             : _DtdUriForm(
                 onSaved: _connectToDtd,
@@ -82,12 +91,12 @@ class _PropertyEditorState extends State<_PropertyEditorSidebar> {
 
   Future<void> _connectToDtd(String? dtdUri) async {
     if (dtdUri == null) return;
+
     final uri = Uri.parse(dtdUri);
-    final connection = await createLoggedWebSocketChannel(uri);
+    final editor = await SimulatedEditor.connect(uri);
+    unawaited(dtdManager.connect(uri));
     setState(() {
-      clientLog = connection.log;
-      clientDtd = DartToolingDaemon.fromStreamChannel(connection.channel);
-      editor = SimulatedEditor(uri);
+      this.editor = editor;
     });
   }
 }

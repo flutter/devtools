@@ -21,12 +21,18 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 /// carefully to ensure they are not breaking changes to already-shipped
 /// editors.
 class SimulatedEditor {
-  SimulatedEditor(this._dtdUri) {
-    // Set up some default devices.
-    connectDevices();
+  SimulatedEditor._(this._dtdUri);
 
+  /// Creates and connects a simulated editor with some default devices.
+  static Future<SimulatedEditor> connect(Uri dtdUri) async {
+    final editor = SimulatedEditor._(dtdUri);
     // Connect editor automatically at launch.
-    unawaited(connectEditor());
+    await editor.connectEditor();
+
+    // Set up some default devices.
+    editor.connectDevices();
+
+    return editor;
   }
 
   /// The URI of the DTD instance we are connecting/connected to.
@@ -116,12 +122,19 @@ class SimulatedEditor {
     DTDServiceCallback callback, {
     Map<String, Object?>? capabilities,
   }) async {
-    await _dtd?.registerService(
-      editorServiceName,
-      method.name,
-      callback,
-      capabilities: capabilities,
-    );
+    try {
+      await _dtd?.registerService(
+        editorServiceName,
+        method.name,
+        callback,
+        capabilities: capabilities,
+      );
+    } catch (e) {
+      // Just log but don't fail everything, because this is normal if we try
+      // to connect to a real DTD that already has an editor connected. We
+      // should just fill in any missing services.
+      _logger.add('Failed to register "$method": $e');
+    }
   }
 
   static const _successResponse = {'type': 'Success'};

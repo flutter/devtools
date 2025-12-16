@@ -55,19 +55,12 @@ class PropertyEditorController extends DisposableController
   String? get fileUri => _editableWidgetData.value?.fileUri;
   EditorRange? get widgetRange => _editableWidgetData.value?.range;
 
-  ValueListenable<bool> get shouldReconnect => _shouldReconnect;
-  final _shouldReconnect = ValueNotifier<bool>(false);
-
   bool get waitingForFirstEvent => _waitingForFirstEvent;
   bool _waitingForFirstEvent = true;
 
   late final Debouncer _requestDebouncer;
 
-  late final Timer _checkConnectionTimer;
-
   static const _requestDebounceDuration = Duration(milliseconds: 600);
-
-  static const _checkConnectionInterval = Duration(minutes: 1);
 
   static const _setPropertiesFilterId = 'set-properties-filter';
 
@@ -85,9 +78,6 @@ class PropertyEditorController extends DisposableController
   void init() {
     super.init();
     _requestDebouncer = Debouncer(duration: _requestDebounceDuration);
-    _checkConnectionTimer = _periodicallyCheckConnection(
-      _checkConnectionInterval,
-    );
 
     // Update in response to ActiveLocationChanged events.
     autoDisposeStreamSubscription(
@@ -134,7 +124,6 @@ class PropertyEditorController extends DisposableController
   @override
   void dispose() {
     _requestDebouncer.dispose();
-    _checkConnectionTimer.cancel();
     super.dispose();
   }
 
@@ -267,16 +256,6 @@ class PropertyEditorController extends DisposableController
 
   List<CodeActionCommand> _extractRefactors(CodeActionResult? result) =>
       (result?.actions ?? <CodeActionCommand>[]).toList();
-
-  Timer _periodicallyCheckConnection(Duration interval) {
-    return Timer.periodic(interval, (timer) {
-      final isClosed = editorClient.isDtdClosed;
-      if (isClosed) {
-        _shouldReconnect.value = true;
-        timer.cancel();
-      }
-    });
-  }
 
   bool _filteredOutBySettings(
     EditableProperty property, {

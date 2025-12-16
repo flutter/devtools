@@ -15,7 +15,9 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any general updates.
+- Dropped connections to DTD will now automatically be retried to improve the
+  experience when your machine is resumed from sleep.
+  [#9587](https://github.com/flutter/devtools/pull/9587)
 
 ## Inspector updates
 

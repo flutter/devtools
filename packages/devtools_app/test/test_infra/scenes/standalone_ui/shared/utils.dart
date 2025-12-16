@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:dtd/dtd.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -11,11 +13,13 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 /// in both directions across it.
 typedef LoggedChannel = ({StreamChannel<String> channel, Stream<String> log});
 
-/// Connects to the websocket at [wsUri] and returns a channel along with
-/// a log stream that includes all protocol traffic.
-Future<LoggedChannel> createLoggedWebSocketChannel(Uri wsUri) async {
-  final logController = StreamController<String>();
-
+/// Connects to the websocket at [wsUri] and returns a [StreamSink<String>].
+///
+/// All traffic is logged into [sink].
+Future<StreamChannel<String>> createLoggedWebSocketChannel(
+  Uri wsUri,
+  StreamSink<String> sink,
+) async {
   final rawChannel = WebSocketChannel.connect(wsUri);
   await rawChannel.ready;
   final rawStringChannel = rawChannel.cast<String>();
@@ -24,7 +28,7 @@ Future<LoggedChannel> createLoggedWebSocketChannel(Uri wsUri) async {
   /// traffic with a prefix.
   String Function(String) logTraffic(String prefix) {
     return (String s) {
-      logController.add('$prefix $s'.trim());
+      sink.add('$prefix $s'.trim());
       return s;
     };
   }
@@ -38,8 +42,37 @@ Future<LoggedChannel> createLoggedWebSocketChannel(Uri wsUri) async {
         .pipe(rawStringChannel.sink),
   );
 
-  return (
-    channel: StreamChannel<String>(loggedInput, loggedOutputController.sink),
-    log: logController.stream,
-  );
+  return StreamChannel<String>(loggedInput, loggedOutputController.sink);
+}
+
+/// An implementation of DTD Manager that logs traffic to [logSink] and can
+/// optionally delay or fail connections to DTD for testing.
+class TestingDTDManager extends DTDManager {
+  TestingDTDManager(
+    this.logSink, {
+    this.failConnectionCount = 0,
+    this.connectionDelay = const Duration(seconds: 1),
+  });
+
+  /// The number of connections to fail before connecting.
+  var failConnectionCount = 0;
+
+  /// The delay for each connection attempt.
+  final Duration connectionDelay;
+
+  /// The sink to write protocol traffic to.
+  final StreamSink<String> logSink;
+
+  @override
+  Future<DartToolingDaemon> connectDtdImpl(Uri uri) async {
+    await Future.delayed(connectionDelay);
+
+    if (failConnectionCount > 0) {
+      failConnectionCount--;
+      throw 'Connection failed';
+    }
+
+    final channel = await createLoggedWebSocketChannel(uri, logSink);
+    return DartToolingDaemon.fromStreamChannel(channel);
+  }
 }
