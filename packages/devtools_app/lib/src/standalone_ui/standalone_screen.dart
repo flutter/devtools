@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 
 import '../shared/globals.dart';
 import '../shared/ui/common_widgets.dart';
+import 'ide_shared/not_connected_overlay.dart';
 import 'ide_shared/property_editor/property_editor_panel.dart';
-import 'ide_shared/property_editor/reconnecting_overlay.dart';
 import 'vs_code/flutter_panel.dart';
 
 /// "Screens" that are intended for standalone use only, likely for embedding

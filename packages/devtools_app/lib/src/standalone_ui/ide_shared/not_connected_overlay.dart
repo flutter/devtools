@@ -6,11 +6,8 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/globals.dart';
-import '../../../shared/ui/common_widgets.dart';
-
-// TODO(dantup): Rename and move this file one level up. Leaving as-is to
-//  make the review/diff simpler.
+import '../../shared/globals.dart';
+import '../../shared/ui/common_widgets.dart';
 
 /// An overlay to show when we are not connected to DTD based on the
 /// [DTDConnectionState] classes.
