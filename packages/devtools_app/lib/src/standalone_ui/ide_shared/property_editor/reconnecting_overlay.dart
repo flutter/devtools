@@ -2,70 +2,63 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-import 'dart:async';
-
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../../shared/globals.dart';
 import '../../../shared/ui/common_widgets.dart';
-import 'utils/utils.dart';
 
-class ReconnectingOverlay extends StatefulWidget {
-  const ReconnectingOverlay({super.key});
+// TODO(dantup): Rename and move this file one level up. Leaving as-is to
+//  make the review/diff simpler.
+
+/// An overlay to show when we are not connected to DTD based on the
+/// [DTDConnectionState] classes.
+class NotConnectedOverlay extends StatefulWidget {
+  const NotConnectedOverlay(this.connectionState, {super.key});
+
+  final DTDConnectionState connectionState;
 
   @override
-  State<ReconnectingOverlay> createState() => _ReconnectingOverlayState();
+  State<NotConnectedOverlay> createState() => _NotConnectedOverlayState();
 }
 
-class _ReconnectingOverlayState extends State<ReconnectingOverlay> {
-  static const _countdownInterval = Duration(seconds: 1);
-  late final Timer _countdownTimer;
-  int _secondsUntilReconnection = 3;
-
-  @override
-  void initState() {
-    super.initState();
-    _countdownTimer = Timer.periodic(_countdownInterval, _onTick);
-  }
-
-  @override
-  void dispose() {
-    _countdownTimer.cancel();
-    super.dispose();
-  }
-
+class _NotConnectedOverlayState extends State<NotConnectedOverlay> {
   @override
   Widget build(BuildContext context) {
+    final connectionState = widget.connectionState;
     final theme = Theme.of(context);
+
+    final showSpinner = connectionState is! ConnectionFailedDTDState;
+    final showReconnectButton = connectionState is ConnectionFailedDTDState;
+    final stateLabel = switch (connectionState) {
+      NotConnectedDTDState() => 'Waiting to connect...',
+      ConnectingDTDState() => 'Connecting...',
+      WaitingToRetryDTDState(seconds: final seconds) =>
+        'Reconnecting in $seconds...',
+      ConnectionFailedDTDState() => 'Connection Failed',
+      // We should never present this widget when connected, but provide a label
+      // for debugging if it happens.
+      ConnectedDTDState() => 'Connected',
+    };
+
     return DevToolsOverlay(
       fullScreen: true,
       content: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(),
-          const SizedBox(height: defaultSpacing),
-          Text(
-            _secondsUntilReconnection > 0
-                ? 'Reconnecting in $_secondsUntilReconnection'
-                : 'Reconnecting...',
-            style: theme.textTheme.headlineMedium,
-          ),
+          if (showSpinner) ...const [
+            CircularProgressIndicator(),
+            SizedBox(height: defaultSpacing),
+          ],
+          Text(stateLabel, style: theme.textTheme.headlineMedium),
+          if (showReconnectButton)
+            ElevatedButton(
+              onPressed: () => dtdManager.reconnect(),
+              child: const Text('Retry'),
+            ),
         ],
       ),
     );
-  }
-
-  void _onTick(Timer timer) {
-    setState(() {
-      _secondsUntilReconnection--;
-      if (_secondsUntilReconnection == 0) {
-        timer.cancel();
-        _reconnect();
-      }
-    });
-  }
-
-  void _reconnect() {
-    forceReload();
   }
 }
