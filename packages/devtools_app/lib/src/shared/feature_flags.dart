@@ -85,6 +85,14 @@ extension FeatureFlags on Never {
     enabled: true,
   );
 
+  /// Flag to enable the AI Assistant.
+  ///
+  /// https://github.com/flutter/devtools/issues/9590
+  static final aiAssistant = BooleanFeatureFlag(
+    name: 'aiAssistant',
+    enabled: enableExperiments,
+  );
+
   /// A set of all the boolean feature flags for debugging purposes.
   ///
   /// When adding a new boolean flag, you are responsible for adding it to this
@@ -95,6 +103,7 @@ extension FeatureFlags on Never {
     devToolsExtensions,
     dapDebugging,
     inspectorV2,
+    aiAssistant,
   };
 
   /// A set of all the Flutter channel feature flags for debugging purposes.

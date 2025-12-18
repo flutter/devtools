@@ -4,6 +4,7 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/framework/scaffold/bottom_pane.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -85,8 +86,12 @@ void main() {
       wrapWithControllers(
         Row(
           children: [
-            Flexible(child: ConsolePaneHeader()),
-            const Expanded(child: ConsolePane()),
+            Expanded(
+              child: BottomPane(
+                screenId: 'debugger',
+                tabs: const [ConsolePane()],
+              ),
+            ),
           ],
         ),
         debugger: controller,

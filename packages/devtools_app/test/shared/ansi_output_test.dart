@@ -252,12 +252,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         wrapWithControllers(
-          Row(
-            children: [
-              Flexible(child: ConsolePaneHeader()),
-              const Expanded(child: ConsolePane()),
-            ],
-          ),
+          const Row(children: [Expanded(child: ConsolePane())]),
           debugger: controller,
         ),
       );

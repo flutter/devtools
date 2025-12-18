@@ -26,6 +26,9 @@ class InspectorScreen extends Screen {
   bool showConsole(EmbedMode embedMode) => !embedMode.embedded;
 
   @override
+  bool showAiAssistant() => true;
+
+  @override
   String get docPageId => screenId;
 
   @override
