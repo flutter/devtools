@@ -360,7 +360,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                           splitters: const [
                             DefaultSplitter(
                               key: BottomPane.splitterKey,
-                              isHorizontal: true,
+                              isHorizontal: false,
                             ),
                           ],
                           children: [
