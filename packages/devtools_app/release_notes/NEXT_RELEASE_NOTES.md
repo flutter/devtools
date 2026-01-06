@@ -3,7 +3,7 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
-This is draft for future release notes, that are going to land on
+This is a draft for future release notes that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
 # DevTools 2.55.0 release notes
@@ -11,7 +11,7 @@ This is draft for future release notes, that are going to land on
 The 2.55.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
-[DevTools overview](/tools/devtools/overview).
+[DevTools overview](/tools/devtools).
 
 ## General updates
 
@@ -53,11 +53,11 @@ TODO: Remove this section if there are not any updates.
 
 TODO: Remove this section if there are not any updates.
 
-## VS Code Sidebar updates
+## VS Code sidebar updates
 
 TODO: Remove this section if there are not any updates.
 
-## DevTools Extension updates
+## DevTools extension updates
 
 TODO: Remove this section if there are not any updates.
 
