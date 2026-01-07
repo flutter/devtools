@@ -25,7 +25,7 @@ void main() {
     await ChromeDriver().start(debugLogging: true);
 
     // Start the DevTools server.
-    devtoolsProcess = await startDevToolsServer(useLocalServer: true);
+    devtoolsProcess = await startDevToolsServer();
     devToolsServerAddress = await listenForDevToolsAddress(
       devtoolsProcess,
       timeout: serverStartupTimeout,
