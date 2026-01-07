@@ -25,11 +25,12 @@ class ChromeDriver with IOMixin {
         print('${DateTime.now()}: > $chromedriverExe '
             '${chromedriverArgs.join(' ')}');
       }
-      final process = _process = await Process.start(
+      _process = await Process.start(
         chromedriverExe,
         chromedriverArgs,
       );
-      listenToProcessOutput(process, printTag: 'ChromeDriver');
+      listenToProcessOutput(_process!, printTag: 'ChromeDriver');
+      await _waitForPortOpen(port);
     } catch (e) {
       // ignore: avoid-throw-in-catch-block, by design
       throw Exception('Error starting chromedriver: $e');
@@ -48,5 +49,22 @@ class ChromeDriver with IOMixin {
       print('${DateTime.now()}: killing the chromedriver process');
     }
     await killGracefully(process, debugLogging: debugLogging);
+  }
+
+  Future<void> _waitForPortOpen(int port) async {
+    final timeout = const Duration(seconds: 10);
+    final stopWatch = Stopwatch()..start();
+
+    while (stopWatch.elapsed < timeout) {
+      try {
+        final socket = await Socket.connect('127.0.0.1', port);
+        socket.destroy();
+        return;
+      } catch (_) {
+        await Future.delayed(const Duration(milliseconds: 200));
+      }
+    }
+    throw Exception(
+        'ChromeDriver failed to start on port $port within 10 seconds.');
   }
 }
