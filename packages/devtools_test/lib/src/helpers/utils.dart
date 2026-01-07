@@ -224,21 +224,39 @@ void verifyIsSearchMatchForTreeData<T extends TreeDataSearchStateMixin<T>>(
   }
 }
 
+/// Retries the given async [action] until the [condition] is met.
+Future<T> retryAsync<T>(
+  FutureOr<T> Function() action, {
+  required bool Function(T result) condition,
+  required Future<void> Function() onRetry,
+  int retries = 3,
+}) async {
+  final result = await action();
+
+  if (condition(result) || retries == 1) return result;
+
+  await onRetry();
+
+  return retryAsync(
+    action,
+    condition: condition,
+    onRetry: onRetry,
+    retries: retries - 1,
+  );
+}
+
 /// Given a [finder], repeatedly pumps until found, or until there are no more
 /// retries.
 Future<Finder> retryUntilFound(
   Finder finder, {
   required WidgetTester tester,
   int retries = 3,
-}) async {
-  if (retries == 0) return finder;
-
-  final found = tester.any(finder);
-  if (found) return finder;
-
-  await tester.pump(safePumpDuration);
-  return retryUntilFound(finder, tester: tester, retries: retries - 1);
-}
+}) async => retryAsync(
+  () => finder,
+  condition: (f) => tester.any(f),
+  onRetry: () => tester.pump(safePumpDuration),
+  retries: retries,
+);
 
 void logStatus(String message) {
   // ignore: avoid_print, intentional print for test output
