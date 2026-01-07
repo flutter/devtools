@@ -86,7 +86,7 @@ class ServeCommand extends Command {
             ' directly from the DevTools server.',
       )
       ..addDebugServerFlag()
-      ..addServeWithSdkOption()
+      ..addDartSdkOverrideOption()
       ..addUpdateFlutterFlag()
       ..addUpdatePerfettoFlag()
       ..addPubGetFlag()
@@ -154,12 +154,13 @@ class ServeCommand extends Command {
         results[SharedCommandArgs.updatePerfetto.flagName] as bool;
     final useWasm = results[SharedCommandArgs.wasm.flagName] as bool;
     final noStripWasm = results[SharedCommandArgs.noStripWasm.flagName] as bool;
-    final noMinifyWasm = results[SharedCommandArgs.noMinifyWasm.flagName] as bool;
+    final noMinifyWasm =
+        results[SharedCommandArgs.noMinifyWasm.flagName] as bool;
     final runPubGet = results[SharedCommandArgs.pubGet.flagName] as bool;
     final devToolsAppBuildMode =
         results[SharedCommandArgs.buildMode.flagName] as String;
-    final serveWithDartSdk =
-        results[SharedCommandArgs.serveWithDartSdk.flagName] as String?;
+    final dartSdkOverride =
+        results[SharedCommandArgs.dartSdkOverride.flagName] as String?;
     final forMachine = results[_machineFlag] as bool;
 
     // TODO(https://github.com/flutter/devtools/issues/8643): Support running in
@@ -193,7 +194,7 @@ class ServeCommand extends Command {
           )
           ..removeWhere(
             (element) => element.startsWith(
-              valueAsArg(SharedCommandArgs.serveWithDartSdk.flagName),
+              valueAsArg(SharedCommandArgs.dartSdkOverride.flagName),
             ),
           );
 
@@ -240,10 +241,9 @@ class ServeCommand extends Command {
       }
       logStatus('completed building DevTools: $devToolsBuildLocation');
     }
-
     logStatus('running pub get for DDS in the local dart sdk');
     await processManager.runProcess(
-      CliCommand.dart(['pub', 'get']),
+      CliCommand.dart(['pub', 'get'], sdkOverride: dartSdkOverride),
       workingDirectory: path.join(localDartSdkLocation, 'pkg', 'dds'),
     );
 
@@ -304,7 +304,7 @@ class ServeCommand extends Command {
       // to pass `--machine` (etc.) so that this script can behave the same as
       // the "dart devtools" command for testing local DevTools/server changes.
       ...remainingArguments,
-    ], sdkOverride: serveWithDartSdk);
+    ], sdkOverride: dartSdkOverride);
     if (forMachine) {
       // If --machine flag is true, then the output is a tool-readable JSON.
       // Therefore, skip reading the process output and instead just run the

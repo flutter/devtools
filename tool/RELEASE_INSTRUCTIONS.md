@@ -127,13 +127,37 @@ version bumps.
 
 ### 3) Test the release PR
 
-1. Build DevTools in release mode and serve it from a locally running DevTools
-server instance:
+1. Build the Dart SDK locally
+
    ```shell
-   dt serve
+   cd $LOCAL_DART_SDK && \
+   gclient sync -D && \
+   ./tools/build.py -mrelease create_sdk;
    ```
 
-2. Launch DevTools and verify that everything generally works.
+2. Copy the newly-built Dart executable path.
+   - for Macs with ARM-based processors (M chips):
+      ```shell
+      xcodebuild/ReleaseARM64/dart-sdk/bin/dart devtools
+      ```
+   - for Macs with x64-based processors (Intel chips):
+      ```shell
+      xcodebuild/ReleaseX64/dart-sdk/bin/dart devtools
+      ```
+
+   - For non-Macs:
+      ```shell
+      out/ReleaseX64/dart-sdk/bin/dart devtools
+      ```
+
+3. Build DevTools in release mode and serve it from a locally running DevTools
+server instance using the executable path you just copied, e.g.:
+
+   ```shell
+   dt serve --dart-sdk-override=$LOCAL_DART_SDK/xcodebuild/ReleaseARM64/dart-sdk/bin/dart
+   ```
+
+4. Launch DevTools and verify that everything generally works.
    - open the page in a browser (http://localhost:53432)
    - `flutter run` an application
    - connect to the running app from DevTools
@@ -147,7 +171,7 @@ server instance:
          - the bug fixes,
       - use this commit hash for the following steps.
 
-3. Once the build is in good shape,
+5. Once the build is in good shape,
    - revert any local changes.
       ```shell
       git checkout . && \
