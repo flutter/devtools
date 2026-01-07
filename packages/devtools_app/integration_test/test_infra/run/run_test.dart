@@ -156,12 +156,14 @@ class DevToolsAppTestRunnerArgs extends IntegrationTestRunnerArgs {
   }
 }
 
+/// Starts the DevTools server.
+///
+/// Note: This will use the DevTools server that is shipped with the Dart SDK.
+///
+/// TODO(https://github.com/flutter/devtools/issues/9197): launch the
+/// DevTools server from source so that end to end changes (server + app) can
+/// be tested.
 Future<Process> startDevToolsServer() async {
-  // Start the DevTools server. This will use the DevTools server that is
-  // shipped with the Dart SDK.
-  // TODO(https://github.com/flutter/devtools/issues/9197): launch the
-  // DevTools server from source so that end to end changes (server + app) can
-  // be tested.
   final devToolsServerProcess = await Process.start('dart', [
     'devtools',
     // Do not launch DevTools app in the browser. This DevTools server
@@ -175,6 +177,8 @@ Future<Process> startDevToolsServer() async {
   return devToolsServerProcess;
 }
 
+/// Listens on the [devToolsServerProcess] stdout for the DevTool's address and
+/// returns it.
 Future<String> listenForDevToolsAddress(
   Process devToolsServerProcess, {
   Duration timeout = const Duration(seconds: 10),

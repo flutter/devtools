@@ -61,33 +61,27 @@ void main() {
     onRetry: () => Future.delayed(const Duration(milliseconds: 250)),
   );
 
-  group('compilation', () {
-    test(
-      'compiler query param determines skwasm/canvaskit renderer',
-      timeout: longTimeout,
-      () async {
-        // Open the DevTools URL with ?compiler=wasm.
-        await driver.get(
-          _addQueryParam(
-            devToolsServerAddress,
-            param: 'compiler',
-            value: 'wasm',
-          ),
-        );
+  test(
+    'compiler query param determines skwasm/canvaskit renderer',
+    timeout: longTimeout,
+    () async {
+      // Open the DevTools URL with ?compiler=wasm.
+      await driver.get(
+        _addQueryParam(devToolsServerAddress, param: 'compiler', value: 'wasm'),
+      );
 
-        // Verify we are using the skwasm renderer.
-        expect(await readRendererAttribute(), equals('skwasm'));
+      // Verify we are using the skwasm renderer.
+      expect(await readRendererAttribute(), equals('skwasm'));
 
-        // Open the DevTools URL with ?compiler=js.
-        await driver.get(
-          _addQueryParam(devToolsServerAddress, param: 'compiler', value: 'js'),
-        );
+      // Open the DevTools URL with ?compiler=js.
+      await driver.get(
+        _addQueryParam(devToolsServerAddress, param: 'compiler', value: 'js'),
+      );
 
-        // Verify we are using the canvaskit renderer.
-        expect(await readRendererAttribute(), equals('canvaskit'));
-      },
-    );
-  });
+      // Verify we are using the canvaskit renderer.
+      expect(await readRendererAttribute(), equals('canvaskit'));
+    },
+  );
 }
 
 String _addQueryParam(
