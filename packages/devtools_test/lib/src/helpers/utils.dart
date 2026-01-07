@@ -30,6 +30,7 @@ const includeForCustomerTestsTag = 'include-for-flutter-customer-tests';
 /// since the library containing the test case is already excluded.
 const skipForCustomerTestsTag = 'skip-for-flutter-customer-tests';
 
+const extraShortPumpDuration = Duration(milliseconds: 250);
 const shortPumpDuration = Duration(seconds: 1);
 const safePumpDuration = Duration(seconds: 3);
 const longPumpDuration = Duration(seconds: 6);
@@ -239,6 +240,23 @@ Future<Finder> retryUntilFound(
   await tester.pump(safePumpDuration);
   return retryUntilFound(finder, tester: tester, retries: retries - 1);
 }
+
+
+/// Retries the [callback] until the result is not null.
+///
+/// This will retry the [callback] up to [retries] times, with an
+/// [extraShortPumpDuration] delay between each attempt.
+Future<T?> retryUntilNotNull<T>(
+  Future<T?> Function() callback, {
+  int retries = 3,
+}) async {
+  final result = await callback();
+  if (retries == 0 || result != null) return result;
+
+  await Future.delayed(extraShortPumpDuration);
+  return retryUntilNotNull(callback, retries: retries - 1);
+}
+
 
 void logStatus(String message) {
   // ignore: avoid_print, intentional print for test output
