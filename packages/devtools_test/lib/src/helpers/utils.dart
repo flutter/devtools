@@ -251,7 +251,7 @@ Future<Finder> retryUntilFound(
   Finder finder, {
   required WidgetTester tester,
   int retries = 3,
-}) async => retryAsync(
+}) => retryAsync(
   () => finder,
   condition: (f) => tester.any(f),
   onRetry: () => tester.pump(safePumpDuration),
