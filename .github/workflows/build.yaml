@@ -290,6 +290,31 @@ jobs:
           DEVTOOLS_PACKAGE: devtools_extensions
         run: ./tool/ci/bots.sh
 
+  devtools-webdriver-test:
+    name: ${{ matrix.os }} devtools webdriver test
+    needs: flutter-prep
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - test_webdriver
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: git clone
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/ci/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          PLATFORM: vm
+        run: ./tool/ci/bots.sh
+
   benchmark-performance:
     name: benchmark-performance
     needs: flutter-prep
