@@ -21,17 +21,19 @@ void main() {
   const serverStartupTimeout = Duration(minutes: 1);
 
   setUpAll(() async {
-    // Start ChromeDriver.
     await ChromeDriver().start(debugLogging: true);
 
-    // Start the DevTools server.
+    // TODO(https://github.com/flutter/devtools/issues/9197): Launch the
+    // DevTools server from source.
+    // For now, this test uses the version of DevTools bundled in the Dart SDK
+    // because building and running from source is too prohibitive until
+    // DevTools is moved into the Dart SDK. See issue for details.
     devtoolsProcess = await startDevToolsServer();
     devToolsServerAddress = await listenForDevToolsAddress(
       devtoolsProcess,
       timeout: serverStartupTimeout,
     );
 
-    // Create a WebDriver instance.
     driver = await createDriver(
       uri: Uri.parse('http://127.0.0.1:${ChromeDriver.port}'),
       desired: {
