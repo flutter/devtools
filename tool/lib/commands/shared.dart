@@ -104,9 +104,9 @@ extension BuildCommandArgsExtension on ArgParser {
     );
   }
 
-  void addDartSdkOverrideOption() {
+  void addServeWithSdkOption() {
     addOption(
-      SharedCommandArgs.dartSdkOverride.flagName,
+      SharedCommandArgs.serveWithDartSdk.flagName,
       help: 'Uses the specified Dart SDK to serve the DevTools server',
       valueHelp:
           '/Users/me/absolute_path_to/sdk/xcodebuild/ReleaseX64/dart-sdk/bin/dart',
@@ -122,7 +122,7 @@ enum SharedCommandArgs {
   noStripWasm('no-strip-wasm'),
   noMinifyWasm('no-minify-wasm'),
   runApp('run-app'),
-  dartSdkOverride('dart-sdk-override'),
+  serveWithDartSdk('serve-with-dart-sdk'),
   updateFlutter('update-flutter'),
   updateOnPath('update-on-path'),
   updatePerfetto('update-perfetto');

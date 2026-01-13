@@ -17,7 +17,7 @@ class RunCommand extends Command {
   RunCommand() {
     argParser
       ..addDebugServerFlag()
-      ..addDartSdkOverrideOption();
+      ..addServeWithSdkOption();
   }
 
   @override
