@@ -45,7 +45,7 @@ enum _ExperimentPreferences {
   String get storageKey {
     if (name == 'wasm') {
       _log.warning(
-        '[deprecated] The $wasm key is deprecated, use $wasmOptOut instead.',
+        '[deprecated] The "wasm" key is deprecated, use "wasmOptOut" instead.',
       );
     }
     return '$storagePrefix.$name';
