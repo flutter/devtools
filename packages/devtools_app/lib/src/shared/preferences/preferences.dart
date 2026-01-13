@@ -227,10 +227,10 @@ class PreferencesController extends DisposableController
       _ExperimentPreferences.wasmOptOut.storageKey,
       defaultsTo: false,
     );
-    final wasmEnabledFromStorage = !optOutFromStorage;
-    final wasmEnabledFromQueryParams = queryParams.useWasm;
+    final enabledFromStorage = !optOutFromStorage;
+    final enabledFromQueryParams = queryParams.useWasm;
 
-    if (wasmEnabledFromQueryParams && !kIsWasm) {
+    if (enabledFromQueryParams && !kIsWasm) {
       // If we hit this case, we tried to load DevTools with WASM but we fell
       // back to JS. We know this because the flutter_bootstrap.js logic always
       // sets the 'wasm' query parameter to 'true' when attempting to load
@@ -254,7 +254,7 @@ class PreferencesController extends DisposableController
     }
 
     final shouldEnableWasm =
-        (wasmEnabledFromStorage || wasmEnabledFromQueryParams) &&
+        (enabledFromStorage || enabledFromQueryParams) &&
         !jsEnabledFromQueryParams &&
         kIsWeb &&
         // Wasm cannot be enabled if DevTools was built using `flutter run`.
