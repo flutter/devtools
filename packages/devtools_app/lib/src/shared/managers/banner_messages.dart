@@ -521,21 +521,22 @@ The $codeType DevTools debugger is in maintenance mode. For the best debugging e
       );
 }
 
-class WelcomeToNewInspectorMessage extends BannerInfo {
-  WelcomeToNewInspectorMessage({required super.screenId})
+class LegacyInspectorWarningMessage extends BannerWarning {
+  LegacyInspectorWarningMessage({required super.screenId})
     : super(
-        key: Key('WelcomeToNewInspectorMessage - $screenId'),
+        key: buildKey(screenId),
         buildTextSpans: (context) => [
           const TextSpan(
-            text: '''
-👋 Welcome to the new Flutter inspector! To get started, check out the ''',
+            text:
+                'The legacy inspector will be removed in a future release. '
+                'Please enable the new inspector in the inspector settings. '
+                'If there is an issue preventing you from using the new '
+                'inspector, please file a ',
           ),
           GaLinkTextSpan(
-            link: GaLink(
-              display: 'documentation',
-              url: 'https://docs.flutter.dev/tools/devtools/inspector#new',
-              gaScreenName: screenId,
-              gaSelectedItemDescription: gac.inspectorV2Docs,
+            link: const GaLink(
+              display: 'bug',
+              url: 'https://github.com/flutter/devtools/issues/new',
             ),
             context: context,
             style: Theme.of(context).linkTextStyle,
@@ -543,39 +544,9 @@ class WelcomeToNewInspectorMessage extends BannerInfo {
           const TextSpan(text: '.'),
         ],
       );
-}
 
-class WasmWelcomeMessage extends BannerInfo {
-  WasmWelcomeMessage()
-    : super(
-        key: const Key('WasmWelcomeMessage'),
-        screenId: universalScreenId,
-        dismissOnConnectionChanges: true,
-        buildTextSpans: (context) => [
-          const TextSpan(
-            text:
-                '🚀 A faster and more performant DevTools is now available on WebAssembly! Click ',
-          ),
-          const TextSpan(
-            text: 'Enable',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const TextSpan(text: ' to try it out now.'),
-          const TextSpan(
-            text: ' Please note that this will trigger a reload of DevTools.',
-            style: TextStyle(fontStyle: FontStyle.italic),
-          ),
-        ],
-        buildActions: (context) => [
-          DevToolsButton(
-            label: 'Enable',
-            onPressed: () async {
-              await preferences.enableWasmInStorage();
-              webReload();
-            },
-          ),
-        ],
-      );
+  static Key buildKey(String screenId) =>
+      Key('LegacyInspectorWarningMessage - $screenId');
 }
 
 void maybePushDebugModePerformanceMessage(String screenId) {
@@ -606,12 +577,8 @@ void pushDebuggerIdeRecommendationMessage(String screenId) {
   );
 }
 
-void pushWelcomeToNewInspectorMessage(String screenId) {
-  bannerMessages.addMessage(WelcomeToNewInspectorMessage(screenId: screenId));
-}
-
-void pushWasmWelcomeMessage() {
-  bannerMessages.addMessage(WasmWelcomeMessage());
+void pushLegacyInspectorWarning(String screenId) {
+  bannerMessages.addMessage(LegacyInspectorWarningMessage(screenId: screenId));
 }
 
 extension BannerMessageThemeExtension on ThemeData {

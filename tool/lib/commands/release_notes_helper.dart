@@ -68,7 +68,6 @@ class ReleaseNotesCommand extends Command {
             CliCommand.git(['stash']),
             CliCommand.git(['checkout', 'main']),
             CliCommand.git(['pull']),
-            CliCommand.git(['submodule', 'update', '--init', '--recursive']),
             CliCommand.git([
               'checkout',
               '-b',
@@ -107,31 +106,14 @@ class ReleaseNotesCommand extends Command {
     }
 
     // Write the 'release-notes-<x.y.z>.md' file.
-    File(
-        p.join(
-          websiteReleaseNotesDir.path,
-          'release-notes-$releaseNotesVersion.md',
-        ),
-      )
-      ..createSync()
-      ..writeAsStringSync('''---
-short-title: $releaseNotesVersion release notes
-description: Release notes for Dart and Flutter DevTools version $releaseNotesVersion.
-toc: false
----
-
-{% include ./release-notes-$releaseNotesVersion-src.md %}
-''', flush: true);
-
-    // Create the 'release-notes-<x.y.z>-src.md' file.
-    final releaseNotesSrcMd = File(
+    final releaseNotesMd = File(
       p.join(
         websiteReleaseNotesDir.path,
-        'release-notes-$releaseNotesVersion-src.md',
+        'release-notes-$releaseNotesVersion.md',
       ),
     )..createSync();
 
-    final srcLines = devToolsReleaseNotes.srcLines;
+    final srcLines = devToolsReleaseNotes.sourceLines;
 
     // Copy release notes images and fix image reference paths.
     if (devToolsReleaseNotes.imageLineIndices.isNotEmpty) {
@@ -159,29 +141,21 @@ toc: false
       }
     }
 
-    // Write the 'release-notes-<x.y.z>-src.md' file, including any updates for
-    // image paths.
-    releaseNotesSrcMd.writeAsStringSync(
-      srcLines.joinWithNewLine(),
+    releaseNotesMd.writeAsStringSync('''---
+title: DevTools $releaseNotesVersion release notes
+shortTitle: $releaseNotesVersion release notes
+breadcrumb: $releaseNotesVersion
+showToc: false
+---
+
+''');
+
+    // Write the contents of the 'release-notes-<x.y.z>.md' file,
+    // including any updates for image paths.
+    releaseNotesMd.writeAsStringSync(
+      srcLines.joinWithNewLine().trimLeft(),
       flush: true,
     );
-
-    // Write the 'devtools_releases.yml' file.
-    final releasesYml = File(
-      p.join(websiteRepoPath, 'src', '_data', 'devtools_releases.yml'),
-    );
-    if (!releasesYml.existsSync()) {
-      throw FileSystemException(
-        'The devtools_releases.yml file does not exist.',
-        releasesYml.path,
-      );
-    }
-    final releasesYmlContent = releasesYml.readAsStringSync().replaceFirst(
-      'releases:',
-      '''releases:
-  - '$releaseNotesVersion\'''',
-    );
-    releasesYml.writeAsStringSync(releasesYmlContent, flush: true);
 
     const firstPartInstructions =
         'Release notes successfully drafted in a local flutter/website branch. '
@@ -192,7 +166,7 @@ toc: false
 $firstPartInstructions
 
 cd $websiteRepoPath;
-code ${releaseNotesSrcMd.absolute.path}
+code ${releaseNotesMd.absolute.path}
 
 Create a PR on the flutter/website repo when you are finished.
 ''');
@@ -203,7 +177,7 @@ class _DevToolsReleaseNotes {
   _DevToolsReleaseNotes._({
     required this.file,
     required this.version,
-    required this.srcLines,
+    required this.sourceLines,
     required this.imageLineIndices,
   });
 
@@ -217,8 +191,8 @@ class _DevToolsReleaseNotes {
 
     final rawLines = file.readAsLinesSync();
 
-    late String version;
-    late int titleLineIndex;
+    String? version;
+    int? sourceStartIndex;
     final versionRegExp = RegExp(r"\d+\.\d+\.\d+");
     for (int i = 0; i < rawLines.length; i++) {
       final line = rawLines[i];
@@ -227,17 +201,34 @@ class _DevToolsReleaseNotes {
       // This match should be from the line "# DevTools <x.y.z> release notes".
       version = matches.first.group(0)!;
       // This is the markdown title where the release notes src begins.
-      titleLineIndex = i;
+      sourceStartIndex = i + 1;
       break;
     }
 
+    if (version == null || sourceStartIndex == null) {
+      throw Exception(
+        'Could not find the title line ("# DevTools x.y.z release notes") '
+        'in the NEXT_RELEASE_NOTES.md file.',
+      );
+    }
+
+    if (sourceStartIndex >= rawLines.length) {
+      throw Exception(
+        'No content found after the title line ("# DevTools x.y.z release notes") '
+        'in the NEXT_RELEASE_NOTES.md file.',
+      );
+    }
+
+    // Don't include the copyright, draft notice, or h1 header in
+    // the output release notes.
+    final sourceLines = rawLines.sublist(sourceStartIndex);
+
     // TODO(kenz): one nice polish task could be to remove sections that are
     // empty (i.e. sections that have the line
-    // "TODO: Remove this section if there are not any general updates.").
-    final srcLines = rawLines.sublist(titleLineIndex);
+    // "TODO: Remove this section if there are not any updates.").
     final imageLineIndices = <int>{};
-    for (int i = 0; i < srcLines.length; i++) {
-      final line = srcLines[i];
+    for (int i = 0; i < sourceLines.length; i++) {
+      final line = sourceLines[i];
       if (line.contains(_imagePathMarker)) {
         imageLineIndices.add(i);
       }
@@ -246,14 +237,14 @@ class _DevToolsReleaseNotes {
     return _DevToolsReleaseNotes._(
       file: file,
       version: version,
-      srcLines: srcLines,
+      sourceLines: sourceLines,
       imageLineIndices: imageLineIndices,
     );
   }
 
   final File file;
   final String version;
-  final List<String> srcLines;
+  final List<String> sourceLines;
   final Set<int> imageLineIndices;
 
   static final _imagePathMarker = RegExp(r'images\/.*\.png');

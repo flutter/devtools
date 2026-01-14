@@ -146,6 +146,7 @@ void mockConnectedApp(
   bool isFlutterApp = true,
   bool isProfileBuild = false,
   bool isWebApp = false,
+  bool isDebuggableWebApp = true,
   String os = 'ios',
   String flutterVersion = '2.10.0',
 }) {
@@ -160,6 +161,9 @@ void mockConnectedApp(
   when(
     connectedApp.isFlutterNativeAppNow,
   ).thenReturn(isFlutterApp && !isWebApp);
+  when(
+    connectedApp.isDebuggableWebApp,
+  ).thenReturn(isWebApp && isDebuggableWebApp);
   if (isFlutterApp) {
     when(connectedApp.flutterVersionNow).thenReturn(
       FlutterVersion.parse({

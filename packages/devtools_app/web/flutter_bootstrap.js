@@ -33,12 +33,12 @@ function getSearchParam(searchParamKey) {
 }
 
 // Calls the DevTools server API to read the user's wasm preference.
-async function getDevToolsWasmPreference() {
+async function getDevToolsWasmOptOutPreference() {
   // Note: when the DevTools server is running on a different port than the
   // DevTools web app, this request path will be incorrect and the request
   // will fail. This is okay because DevTools cannot be built with WASM when
   // running from `flutter run` anyway.
-  const request = 'api/getPreferenceValue?key=experiment.wasm';
+  const request = 'api/getPreferenceValue?key=experiment.wasmOptOut';
   try {
     const response = await fetch(request);
     if (!response.ok) {
@@ -47,10 +47,10 @@ async function getDevToolsWasmPreference() {
     }
 
     // The response text should be an encoded boolean value ("true" or "false").
-    const wasmEnabled = JSON.parse(await response.text());
-    return wasmEnabled === true || wasmEnabled === 'true';
+    const isOptedOut = JSON.parse(await response.text());
+    return isOptedOut === true || isOptedOut === 'true';
   } catch (error) {
-    console.error('Error fetching experiment.wasm preference value:', error);
+    console.error('Error fetching experiment.wasmOptOut preference value:', error);
     return false;
   }
 }
@@ -68,9 +68,18 @@ async function shouldUseSkwasm() {
   if (forceUseJs()) {
     return false;
   }
+
   const wasmEnabledFromQueryParameter = getSearchParam(compilerQueryParameterKey) === 'wasm';
-  const wasmEnabledFromDevToolsPreference = await getDevToolsWasmPreference();
-  return wasmEnabledFromQueryParameter === true || wasmEnabledFromDevToolsPreference === true;
+  if (wasmEnabledFromQueryParameter) {
+    return true;
+  }
+
+  const userHasOptedOut = await getDevToolsWasmOptOutPreference();
+  if (userHasOptedOut) {
+    return false;
+  }
+  
+  return true;
 }
 
 // Sets or removes the 'wasm' query parameter based on whether DevTools should

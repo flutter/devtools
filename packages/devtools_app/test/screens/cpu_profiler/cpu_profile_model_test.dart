@@ -2,8 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_service.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -39,6 +44,27 @@ void main() {
       );
       expect(filtered.profileMetaData.time!.end, 0);
     });
+
+    // Regression test for https://github.com/flutter/devtools/issues/9526.
+    test(
+      'code profile loads in advanced developer mode (regression test)',
+      () async {
+        final cpuSamplesFile = File(
+          'test/test_infra/test_data/cpu_profiler/cpu_samples_with_code_profile.json',
+        );
+        final cpuSamplesJson = jsonDecode(cpuSamplesFile.readAsStringSync());
+        final cpuSamples = CpuSamples.parse(cpuSamplesJson)!;
+
+        final profilePair = await serviceConnection.serviceManager.service!
+            .processCpuSamples(
+              cpuSamples: cpuSamples,
+              isolateId: goldenSamplesIsolate,
+              advancedDeveloperModeEnabled: true,
+            );
+        expect(profilePair.codeProfile, isNotNull);
+        expect(profilePair.functionProfile, isNotNull);
+      },
+    );
 
     test('init from parse', () {
       expect(

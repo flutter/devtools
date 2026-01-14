@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 
 import '../primitives/collapsible_mixin.dart';
 import '../primitives/extent_delegate_list.dart';
-import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../ui/common_widgets.dart';
@@ -32,7 +31,6 @@ part '_tree_table.dart';
 typedef IndexedScrollableWidgetBuilder =
     Widget Function({
       required BuildContext context,
-      required LinkedScrollControllerGroup linkedScrollControllerGroup,
       required int index,
       required List<double> columnWidths,
       required bool isPinned,
@@ -106,6 +104,8 @@ class DevToolsTable<T> extends StatefulWidget {
   final bool fillWithEmptyRows;
   final bool enableHoverHandling;
 
+  static const columnMinWidth = 50.0;
+
   @override
   DevToolsTableState<T> createState() => DevToolsTableState<T>();
 }
@@ -113,20 +113,22 @@ class DevToolsTable<T> extends StatefulWidget {
 @visibleForTesting
 class DevToolsTableState<T> extends State<DevToolsTable<T>>
     with AutoDisposeMixin {
-  late LinkedScrollControllerGroup _linkedHorizontalScrollControllerGroup;
+  static const _resizingDebounceDuration = Duration(milliseconds: 200);
+
   late ScrollController scrollController;
   late ScrollController pinnedScrollController;
+  late ScrollController _horizontalScrollbarController;
 
   late List<T> _data;
 
-  /// An adjusted copy of `widget.columnWidths` where any variable width columns
-  /// may be increased so that the sum of all column widths equals the available
-  /// screen space.
-  ///
-  /// This must be calculated where we have access to the Flutter view
-  /// constraints (e.g. the [LayoutBuilder] below).
+  late Debouncer _resizingDebouncer;
+
   @visibleForTesting
-  late List<double> adjustedColumnWidths;
+  List<double> get columnWidths => _columnWidths;
+
+  late List<double> _columnWidths;
+
+  double? _previousViewWidth;
 
   @override
   void initState() {
@@ -134,13 +136,15 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
     _initDataAndAddListeners();
 
-    _linkedHorizontalScrollControllerGroup = LinkedScrollControllerGroup();
+    _resizingDebouncer = Debouncer(duration: _resizingDebounceDuration);
 
     final initialScrollOffset = widget.preserveVerticalScrollPosition
         ? widget.tableController.tableUiState.scrollOffset
         : 0.0;
     widget.tableController.initScrollController(initialScrollOffset);
     scrollController = widget.tableController.verticalScrollController!;
+    _horizontalScrollbarController =
+        widget.tableController.horizontalScrollController!;
 
     if (widget.startScrolledAtBottom) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -150,7 +154,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
     pinnedScrollController = ScrollController();
 
-    adjustedColumnWidths = List.of(widget.columnWidths);
+    _columnWidths = List.of(widget.columnWidths);
   }
 
   @override
@@ -168,7 +172,9 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
       _initDataAndAddListeners();
     }
 
-    adjustedColumnWidths = List.of(widget.columnWidths);
+    if (!collectionEquals(widget.columnWidths, oldWidget.columnWidths)) {
+      _columnWidths = List.of(widget.columnWidths);
+    }
   }
 
   void _initDataAndAddListeners() {
@@ -254,8 +260,14 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     super.dispose();
   }
 
+  void _handleColumnResize(int columnIndex, double newWidth) {
+    setState(() {
+      _columnWidths[columnIndex] = newWidth;
+    });
+  }
+
   /// The width of all columns in the table with additional padding.
-  double get _tableWidthForOriginalColumns {
+  double get _currentTableWidth {
     var tableWidth = 2 * defaultSpacing;
     final numColumnGroupSpacers =
         widget.tableController.columnGroups?.numSpacers ?? 0;
@@ -263,84 +275,76 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
         widget.tableController.columns.numSpacers - numColumnGroupSpacers;
     tableWidth += numColumnSpacers * columnSpacing;
     tableWidth += numColumnGroupSpacers * columnGroupSpacingWithPadding;
-    for (final columnWidth in widget.columnWidths) {
+    for (final columnWidth in _columnWidths) {
       tableWidth += columnWidth;
     }
     return tableWidth;
   }
 
-  /// Modifies [adjustedColumnWidths] so that any available view space greater
-  /// than [_tableWidthForOriginalColumns] is distributed evenly across variable
-  /// width columns.
+  /// Adjusts the column widths to fit the new [viewWidth].
+  ///
+  /// This method will attempt to distribute any extra space (positive or
+  /// negative) amongst the variable-width columns. If there are no
+  /// variable-width columns, it will distribute the space amongst all columns.
   void _adjustColumnWidthsForViewSize(double viewWidth) {
-    final extraSpace = viewWidth - _tableWidthForOriginalColumns;
-    if (extraSpace <= 0) {
-      adjustedColumnWidths = List.of(widget.columnWidths);
+    final extraSpace = _currentTableWidth - viewWidth;
+    if (extraSpace == 0) {
       return;
     }
 
-    final adjustedColumnWidthsByIndex = <int, double>{};
-
-    /// Helper method to evenly distribute [space] among the columns at
-    /// [columnIndices].
-    ///
-    /// This method stores the adjusted width values in
-    /// [adjustedColumnWidthsByIndex].
-    void evenlyDistributeColumnSizes(List<int> columnIndices, double space) {
-      final targetSize = space / columnIndices.length;
-
-      var largestColumnIndex = -1;
-      var largestColumnWidth = 0.0;
-      for (final index in columnIndices) {
-        final columnWidth = widget.columnWidths[index];
-        if (columnWidth >= largestColumnWidth) {
-          largestColumnIndex = index;
-          largestColumnWidth = columnWidth;
-        }
-      }
-      if (targetSize < largestColumnWidth) {
-        // We do not have enough extra space to evenly distribute to all
-        // columns. Remove the largest column and recurse.
-        adjustedColumnWidthsByIndex[largestColumnIndex] = largestColumnWidth;
-        final newColumnIndices = List.of(columnIndices)
-          ..remove(largestColumnIndex);
-        return evenlyDistributeColumnSizes(
-          newColumnIndices,
-          space - largestColumnWidth,
-        );
-      }
-
-      for (int i = 0; i < columnIndices.length; i++) {
-        final columnIndex = columnIndices[i];
-        adjustedColumnWidthsByIndex[columnIndex] = targetSize;
-      }
-    }
-
-    final variableWidthColumnIndices = <int>[];
-    var sumVariableWidthColumnSizes = 0.0;
+    final variableWidthColumnIndices = <(int, double)>[];
     for (int i = 0; i < widget.tableController.columns.length; i++) {
       final column = widget.tableController.columns[i];
       if (column.fixedWidthPx == null) {
-        variableWidthColumnIndices.add(i);
-        sumVariableWidthColumnSizes += widget.columnWidths[i];
+        variableWidthColumnIndices.add((i, _columnWidths[i]));
       }
     }
-    final totalVariableWidthColumnSpace =
-        sumVariableWidthColumnSizes + extraSpace;
 
-    evenlyDistributeColumnSizes(
-      variableWidthColumnIndices,
-      totalVariableWidthColumnSpace,
+    // If the table contains variable width columns, then distribute the extra
+    // space between them. Otherwise, distribute the extra space between all the
+    // columns.
+    _distributeExtraSpace(
+      extraSpace,
+      indexedColumns: variableWidthColumnIndices.isNotEmpty
+          ? variableWidthColumnIndices
+          : _columnWidths.indexed,
     );
+  }
 
-    adjustedColumnWidths.clear();
-    for (int i = 0; i < widget.columnWidths.length; i++) {
-      final originalWidth = widget.columnWidths[i];
-      final isVariableWidthColumn = variableWidthColumnIndices.contains(i);
-      adjustedColumnWidths.add(
-        isVariableWidthColumn ? adjustedColumnWidthsByIndex[i]! : originalWidth,
+  /// Distributes [extraSpace] evenly between the given [indexedColumns].
+  ///
+  /// The [extraSpace] will be subtracted from each column's width. The
+  /// remainder of the division is subtracted from the last column to ensure a
+  /// perfect fit.
+  ///
+  /// This method respects the `minWidthPx` of each column.
+  void _distributeExtraSpace(
+    double extraSpace, {
+    required Iterable<(int, double)> indexedColumns,
+  }) {
+    final newWidths = List.of(_columnWidths);
+    final delta = extraSpace / indexedColumns.length;
+    final remainder = extraSpace % indexedColumns.length;
+
+    for (var i = 0; i < indexedColumns.length; i++) {
+      final columnIndex = indexedColumns.elementAt(i).$1;
+      var newWidth = indexedColumns.elementAt(i).$2;
+
+      newWidth -= delta;
+      if (i == indexedColumns.length - 1) {
+        newWidth -= remainder;
+      }
+
+      final column = widget.tableController.columns[columnIndex];
+      newWidths[columnIndex] = max(
+        newWidth,
+        column.minWidthPx ?? DevToolsTable.columnMinWidth,
       );
     }
+
+    setState(() {
+      _columnWidths = newWidths;
+    });
   }
 
   double _pinnedDataHeight(BoxConstraints tableConstraints) => min(
@@ -373,9 +377,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   Widget _buildItem(BuildContext context, int index, {bool isPinned = false}) {
     return widget.rowBuilder(
       context: context,
-      linkedScrollControllerGroup: _linkedHorizontalScrollControllerGroup,
       index: index,
-      columnWidths: adjustedColumnWidths,
+      columnWidths: _columnWidths,
       isPinned: isPinned,
       enableHoverHandling: widget.enableHoverHandling,
     );
@@ -406,95 +409,106 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
       scrollController.jumpTo(tableUiState.scrollOffset);
     }
 
-    // TODO(kenz): add horizontal scrollbar.
     return LayoutBuilder(
       builder: (context, constraints) {
         final viewWidth = constraints.maxWidth;
-        _adjustColumnWidthsForViewSize(viewWidth);
-        return SelectionArea(
-          child: SizedBox(
-            width: max(viewWidth, _tableWidthForOriginalColumns),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (showColumnGroupHeader)
-                  TableRow<T>.tableColumnGroupHeader(
-                    linkedScrollControllerGroup:
-                        _linkedHorizontalScrollControllerGroup,
-                    columnGroups: columnGroups,
-                    columnWidths: adjustedColumnWidths,
-                    sortColumn: sortColumn,
-                    sortDirection: tableUiState.sortDirection,
-                    secondarySortColumn:
-                        widget.tableController.secondarySortColumn,
-                    onSortChanged: widget.tableController.sortDataAndNotify,
-                    tall: widget.tallHeaders,
-                    backgroundColor: widget.headerColor,
-                  ),
-                // TODO(kenz): add support for excluding column headers.
-                TableRow<T>.tableColumnHeader(
-                  key: const Key('Table header'),
-                  linkedScrollControllerGroup:
-                      _linkedHorizontalScrollControllerGroup,
-                  columns: widget.tableController.columns,
-                  columnGroups: columnGroups,
-                  columnWidths: adjustedColumnWidths,
-                  sortColumn: sortColumn,
-                  sortDirection: tableUiState.sortDirection,
-                  secondarySortColumn:
-                      widget.tableController.secondarySortColumn,
-                  onSortChanged: widget.tableController.sortDataAndNotify,
-                  tall: widget.tallHeaders,
-                  backgroundColor: widget.headerColor,
-                ),
-                if (pinnedData.isNotEmpty) ...[
-                  SizedBox(
-                    height: _pinnedDataHeight(constraints),
-                    child: Scrollbar(
-                      thumbVisibility: true,
-                      controller: pinnedScrollController,
-                      child: ListView.builder(
-                        controller: pinnedScrollController,
-                        itemCount: pinnedData.length,
-                        itemExtent: widget.rowItemExtent,
-                        itemBuilder: (context, index) =>
-                            _buildItem(context, index, isPinned: true),
+        if (_previousViewWidth != null && viewWidth != _previousViewWidth) {
+          _resizingDebouncer.run(
+            () => _adjustColumnWidthsForViewSize(viewWidth),
+          );
+        }
+        _previousViewWidth = viewWidth;
+        return Scrollbar(
+          controller: _horizontalScrollbarController,
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            controller: _horizontalScrollbarController,
+            child: SelectionArea(
+              child: SizedBox(
+                width: max(viewWidth, _currentTableWidth),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (showColumnGroupHeader)
+                      TableRow<T>.tableColumnGroupHeader(
+                        columnGroups: columnGroups,
+                        columnWidths: _columnWidths,
+                        onColumnResize: _handleColumnResize,
+                        sortColumn: sortColumn,
+                        sortDirection: tableUiState.sortDirection,
+                        secondarySortColumn:
+                            widget.tableController.secondarySortColumn,
+                        onSortChanged: widget.tableController.sortDataAndNotify,
+                        tall: widget.tallHeaders,
+                        backgroundColor: widget.headerColor,
                       ),
+                    // TODO(kenz): add support for excluding column headers.
+                    TableRow<T>.tableColumnHeader(
+                      key: const Key('Table header'),
+                      columns: widget.tableController.columns,
+                      columnGroups: columnGroups,
+                      columnWidths: _columnWidths,
+                      onColumnResize: _handleColumnResize,
+                      sortColumn: sortColumn,
+                      sortDirection: tableUiState.sortDirection,
+                      secondarySortColumn:
+                          widget.tableController.secondarySortColumn,
+                      onSortChanged: widget.tableController.sortDataAndNotify,
+                      tall: widget.tallHeaders,
+                      backgroundColor: widget.headerColor,
                     ),
-                  ),
-                  const ThickDivider(),
-                ],
-                Expanded(
-                  child: Scrollbar(
-                    thumbVisibility: true,
-                    controller: scrollController,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTapDown: (a) => widget.focusNode?.requestFocus(),
-                      child: Focus(
-                        autofocus: true,
-                        onKeyEvent: (_, event) => widget.handleKeyEvent != null
-                            ? widget.handleKeyEvent!(
-                                event,
-                                scrollController,
-                                constraints,
-                              )
-                            : KeyEventResult.ignored,
-                        focusNode: widget.focusNode,
-                        child: ListView.builder(
-                          controller: scrollController,
-                          itemCount: _dataRowCount(
-                            constraints,
-                            showColumnGroupHeader,
+                    if (pinnedData.isNotEmpty) ...[
+                      SizedBox(
+                        height: _pinnedDataHeight(constraints),
+                        child: Scrollbar(
+                          thumbVisibility: true,
+                          controller: pinnedScrollController,
+                          child: ListView.builder(
+                            controller: pinnedScrollController,
+                            itemCount: pinnedData.length,
+                            itemExtent: widget.rowItemExtent,
+                            itemBuilder: (context, index) =>
+                                _buildItem(context, index, isPinned: true),
                           ),
-                          itemExtent: widget.rowItemExtent,
-                          itemBuilder: _buildItem,
+                        ),
+                      ),
+                      const ThickDivider(),
+                    ],
+                    Expanded(
+                      child: Scrollbar(
+                        thumbVisibility: true,
+                        controller: scrollController,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTapDown: (a) => widget.focusNode?.requestFocus(),
+                          child: Focus(
+                            autofocus: true,
+                            onKeyEvent: (_, event) =>
+                                widget.handleKeyEvent != null
+                                ? widget.handleKeyEvent!(
+                                    event,
+                                    scrollController,
+                                    constraints,
+                                  )
+                                : KeyEventResult.ignored,
+                            focusNode: widget.focusNode,
+                            child: ListView.builder(
+                              controller: scrollController,
+                              itemCount: _dataRowCount(
+                                constraints,
+                                showColumnGroupHeader,
+                              ),
+                              itemExtent: widget.rowItemExtent,
+                              itemBuilder: _buildItem,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         );

@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:dtd/dtd.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+
+import 'dtd_manager_connection_state.dart';
 
 final _log = Logger('dtd_manager');
 
@@ -18,39 +23,225 @@ class DTDManager {
   /// Whether the [DTDManager] is connected to a running instance of the DTD.
   bool get hasConnection => connection.value != null;
 
+  /// The current state of the connection.
+  ValueListenable<DTDConnectionState> get connectionState => _connectionState;
+  final _connectionState =
+      ValueNotifier<DTDConnectionState>(NotConnectedDTDState());
+
   /// The URI of the current DTD connection.
   Uri? get uri => _uri;
   Uri? _uri;
 
-  /// Sets the Dart Tooling Daemon connection to point to [uri].
+  /// Whether or not to automatically reconnect if disconnected.
   ///
-  /// Before connecting to [uri], if a current connection exists, then
-  /// [disconnect] is called to close it.
-  Future<void> connect(
+  /// This will happen by default as long as the disconnect wasn't
+  /// explicitly requested.
+  bool _automaticallyReconnect = true;
+
+  Timer? _periodicConnectionCheck;
+  static const _periodicConnectionCheckInterval = Duration(minutes: 1);
+
+  /// A function that replays the last connection attempt.
+  ///
+  /// This is used by [reconnect] to reconnect to the last server with the same
+  /// settings if the connection was dropped and failed to reconnect within the
+  /// specified retry period.
+  Future<void> Function()? _lastConnectFunc;
+
+  /// A wrapper around connecting to DTD to allow tests to intercept the
+  /// connection.
+  @visibleForTesting
+  Future<DartToolingDaemon> connectDtdImpl(Uri uri) async {
+    // Cancel any previous timer.
+    _periodicConnectionCheck?.cancel();
+
+    final dtd = await DartToolingDaemon.connect(uri);
+
+    // Set up a periodic connection check to detect if the connection has
+    // dropped even if `done` doesn't fire.
+    //
+    // If this happens, just disconnect (without disabling reconnect) so the
+    // done event fires and then the usual handling occurs.
+    _periodicConnectionCheck =
+        Timer.periodic(_periodicConnectionCheckInterval, (timer) async {
+      if (_dtd.isClosed) {
+        _log.warning('The DTD connection has dropped');
+        await disconnectImpl(allowReconnect: true);
+      }
+    });
+
+    return dtd;
+  }
+
+  /// Triggers a reconnect to the last connected URI if the current state is
+  /// [ConnectionFailedDTDState] (and there was a pervious connection).
+  Future<void> reconnect() {
+    final reconnectFunc = _lastConnectFunc;
+    if (_connectionState.value is! ConnectionFailedDTDState ||
+        reconnectFunc == null) {
+      return Future.value();
+    }
+
+    return reconnectFunc();
+  }
+
+  /// Tries to connect to DTD at [uri] with automatic retries and exponential
+  /// backoff.
+  ///
+  /// When a computer sleeps, the WebSocket connection may be dropped and it
+  /// may take some time for a browser to allow network connections without
+  /// ERR_NETWORK_IO_SUSPENDED.
+  Future<DartToolingDaemon> _connectWithRetries(
+    Uri uri, {
+    required int maxRetries,
+  }) async {
+    for (var attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        _connectionState.value = ConnectingDTDState();
+        // The await here is important so errors are handled by this catch!
+        return await connectDtdImpl(uri);
+      } catch (e, s) {
+        // On last attempt, fail and propagate the error.
+        if (attempt == maxRetries) {
+          _connectionState.value = ConnectionFailedDTDState();
+          _log.severe('Failed to connect to DTD after $attempt attempts', e, s);
+          rethrow;
+        }
+
+        // Otherwise, retry after a delay.
+        var delay = math.pow(2, attempt - 1).toInt();
+        _log.info(
+          'Failed to connect to DTD on attempt $attempt, '
+          'will retry in ${delay}s',
+        );
+        while (delay > 0) {
+          _connectionState.value = WaitingToRetryDTDState(delay);
+          await Future.delayed(const Duration(seconds: 1));
+          delay--;
+        }
+      }
+    }
+
+    // We can't get here because of the logic above, but the analyzer can't
+    // tell that.
+    _connectionState.value = NotConnectedDTDState();
+    throw StateError('Failed to connect to DTD');
+  }
+
+  /// Connects Dart Tooling Daemon connection to [uri].
+  ///
+  /// Before connecting to [uri], unless [disconnectBeforeConnecting] is
+  /// `false`, will call [disconnect] to disconnect any existing connection.
+  ///
+  /// If the connection fails, will retry with exponential backoff up to
+  /// [maxRetries].
+  Future<void> _connectImpl(
     Uri uri, {
     void Function(Object, StackTrace?)? onError,
+    int maxRetries = 5,
+    bool disconnectBeforeConnecting = true,
   }) async {
-    await disconnect();
+    if (disconnectBeforeConnecting) {
+      await disconnect();
+    }
+    // Enable automatic reconnect on any new connection.
+    _automaticallyReconnect = true;
 
     try {
-      final connection = await DartToolingDaemon.connect(uri);
+      final connection = await _connectWithRetries(uri, maxRetries: maxRetries);
+
       _uri = uri;
       // Set this after setting the value of [_uri] so that [_uri] can be used
       // by any listeners of the [_connection] notifier.
       _connection.value = connection;
+      _connectionState.value = ConnectedDTDState();
       _log.info('Successfully connected to DTD at: $uri');
+
+      // If a connection drops (and we hadn't disabled auto-reconnect, such
+      // as by explicitly calling disconnect/dispose), we should attempt to
+      // reconnect.
+      unawaited(connection.done
+          .then((_) => _reconnectAfterDroppedConnection(uri, onError: onError))
+          .catchError((_) {
+        // TODO(dantup): Create a devtools_app_shared version of safeUnawaited.
+        // https://github.com/flutter/devtools/pull/9587#discussion_r2624306047
+      }));
     } catch (e, st) {
       onError?.call(e, st);
     }
   }
 
+  /// Triggers a reconnect without first disconnecting. This allows existing
+  /// state to be retained in the background while reconnect is in progress so
+  /// that the content the user could previously see is not hidden.
+  Future<void> _reconnectAfterDroppedConnection(
+    Uri uri, {
+    void Function(Object, StackTrace?)? onError,
+  }) async {
+    // Trigger disconnect to ensure we emit a `null` connection to
+    // listeners.
+    await disconnectImpl(allowReconnect: true);
+    if (_automaticallyReconnect) {
+      await _connectImpl(
+        uri,
+        onError: onError,
+        // We've already disconnected above, in a way that doesn't disable
+        // reconnect and does not set connection to null (allowing screens
+        // to remain visible under connection overlays).
+        disconnectBeforeConnecting: false,
+      );
+    }
+  }
+
+  /// Sets the Dart Tooling Daemon connection to point to [uri].
+  ///
+  /// Before connecting to [uri], if a current connection exists, then
+  /// [disconnect] is called to close it.
+  ///
+  /// If the connection fails, will retry with exponential backoff up to
+  /// [maxRetries].
+  Future<void> connect(
+    Uri uri, {
+    void Function(Object, StackTrace?)? onError,
+    int maxRetries = 5,
+  }) {
+    // On explicit connections, we capture the connect function so that we
+    // can call it again if [reconnect()] is called.
+    final connectFunc = _lastConnectFunc =
+        () => _connectImpl(uri, onError: onError, maxRetries: maxRetries);
+    return connectFunc();
+  }
+
   /// Closes and unsets the Dart Tooling Daemon connection, if one is set.
-  Future<void> disconnect() async {
-    if (_connection.value != null) {
-      await _connection.value!.close();
+  Future<void> disconnect() => disconnectImpl();
+
+  /// Closes and unsets the Dart Tooling Daemon connection, if one is set.
+  ///
+  /// [allowReconnect] controls whether reconnection is allowed. This is
+  /// generally false for an explicit disconnect/dispose, but allowed if we
+  /// are called as part of a dropped connection. Reconnecting being allowed
+  /// does not necessarily mean it will happen, because there might have been
+  /// an explicit disconnect (or dispose) call before we got here.
+  @visibleForTesting
+  Future<void> disconnectImpl({bool allowReconnect = false}) async {
+    if (!allowReconnect) {
+      // If we're not allowed to reconnect, disable this. `allowReconnect` being
+      // true does NOT mean we can enable this, because we might get here after
+      // an explicit disconnect.
+      _automaticallyReconnect = false;
+
+      // We only clear the connection if we are explicitly disconnecting. In the
+      // case where the connection just dropped, we leave it so that we can
+      // continue to render a page (usually with an overlay).
+      _connection.value = null;
     }
 
-    _connection.value = null;
+    _periodicConnectionCheck?.cancel();
+    if (_connection.value case final connection?) {
+      await connection.close();
+    }
+
+    _connectionState.value = NotConnectedDTDState();
     _uri = null;
     _workspaceRoots = null;
     _projectRoots = null;

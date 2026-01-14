@@ -13,11 +13,14 @@ import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/server/server.dart' as server;
+import '../../../shared/ui/common_widgets.dart';
 import '../deep_links_controller.dart';
 import '../deep_links_model.dart';
 import 'root_selector.dart';
 
 const _kLinearProgressIndicatorWidth = 280.0;
+
+enum DeepLinksTarget { android, ios }
 
 /// A view for selecting a Flutter project.
 class SelectProjectView extends StatefulWidget {
@@ -131,7 +134,7 @@ class _SelectProjectViewState extends State<SelectProjectView> {
         gac.deeplink,
         gac.AnalyzeFlutterProject.flutterInvalidProjectSelected.name,
       );
-      await showNonFlutterProjectDialog();
+      await _showFlutterProjectMissingBuildOptionsDialog(directory);
       return;
     }
     controller.selectedProject.value = FlutterProject(
@@ -142,6 +145,119 @@ class _SelectProjectViewState extends State<SelectProjectView> {
     setState(() {
       _retrievingFlutterProject = false;
     });
+  }
+
+  Future<void> _showFlutterProjectMissingBuildOptionsDialog(
+    String appPath,
+  ) async {
+    await showDialog(
+      context: context,
+      builder: (_) {
+        final theme = Theme.of(context);
+        return DevToolsDialog(
+          title: const Text('No iOS or Android build options found.'),
+          content: SizedBox(
+            width: defaultDialogWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'DevTools could not verify the build options for this project.',
+                ),
+                const SizedBox(height: largeSpacing),
+                ..._deepLinksInstructions(
+                  theme: theme,
+                  appPath: appPath,
+                  target: DeepLinksTarget.android,
+                ),
+                const SizedBox(height: largeSpacing),
+                ..._deepLinksInstructions(
+                  theme: theme,
+                  appPath: appPath,
+                  target: DeepLinksTarget.ios,
+                ),
+              ],
+            ),
+          ),
+          actions: const [DialogCloseButton()],
+        );
+      },
+    );
+    setState(() {
+      _retrievingFlutterProject = false;
+    });
+  }
+
+  List<Widget> _deepLinksInstructions({
+    required ThemeData theme,
+    required String appPath,
+    required DeepLinksTarget target,
+  }) {
+    final commandStyle = theme.subtleTextStyle.copyWith(
+      fontFamily: 'RobotoMono',
+    );
+    const commandPadding = EdgeInsets.symmetric(
+      horizontal: denseSpacing,
+      vertical: densePadding,
+    );
+    final title = switch (target) {
+      DeepLinksTarget.android => 'Android',
+      DeepLinksTarget.ios => 'iOS',
+    };
+    final directory = switch (target) {
+      DeepLinksTarget.android => '/android',
+      DeepLinksTarget.ios => '/ios',
+    };
+    final documentationUrl = switch (target) {
+      DeepLinksTarget.android => 'https://docs.flutter.dev/deployment/android',
+      DeepLinksTarget.ios => 'https://docs.flutter.dev/deployment/ios',
+    };
+    final command = switch (target) {
+      DeepLinksTarget.android =>
+        'flutter analyze --android --list-build-variants',
+      DeepLinksTarget.ios => 'flutter analyze --ios --list-build-options',
+    };
+
+    return [
+      Text('For $title', style: theme.textTheme.titleMedium),
+      const SizedBox(height: intermediateSpacing),
+      RichText(
+        text: TextSpan(
+          style: theme.regularTextStyle,
+          children: [
+            TextSpan(
+              text:
+                  'These are configured in the $directory directory. Please refer to the ',
+            ),
+            GaLinkTextSpan(
+              link: GaLink(
+                display: 'Flutter documentation',
+                url: documentationUrl,
+              ),
+              context: context,
+            ),
+            const TextSpan(text: ' for more information.'),
+          ],
+        ),
+      ),
+      const SizedBox(height: intermediateSpacing),
+      const Text(
+        'To confirm your setup, run the following command in your terminal:',
+      ),
+      const SizedBox(height: denseSpacing),
+      Card(
+        child: Padding(
+          padding: commandPadding,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(child: Text('$command $appPath', style: commandStyle)),
+              CopyToClipboardControl(dataProvider: () => '$command $appPath'),
+            ],
+          ),
+        ),
+      ),
+    ];
   }
 
   @override
@@ -156,7 +272,7 @@ class _SelectProjectViewState extends State<SelectProjectView> {
         Padding(
           padding: const EdgeInsets.all(extraLargeSpacing),
           child: Text(
-            'Select a local flutter project to check the status of all deep links.',
+            'Select a local Flutter project to check the status of all deep links.',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           ),

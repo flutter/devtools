@@ -3,9 +3,9 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/framework/scaffold/bottom_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/widgets/primary_controls.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
-import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -45,7 +45,7 @@ Future<void> prepareMemoryUI(
     // but not too big to make classes in snapshot hidden.
     const dragDistance = -320.0;
     await tester.drag(
-      find.byType(ConsolePaneHeader),
+      find.byKey(BottomPane.splitterKey),
       const Offset(0, dragDistance),
     );
     await tester.pumpAndSettle();

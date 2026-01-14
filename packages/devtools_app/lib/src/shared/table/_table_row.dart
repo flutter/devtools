@@ -18,7 +18,6 @@ class TableRow<T> extends StatefulWidget {
   /// [node].
   const TableRow({
     super.key,
-    required this.linkedScrollControllerGroup,
     required this.node,
     required this.columns,
     required this.columnWidths,
@@ -38,13 +37,13 @@ class TableRow<T> extends StatefulWidget {
        sortDirection = null,
        secondarySortColumn = null,
        onSortChanged = null,
+       onColumnResize = null,
        _rowType = _TableRowType.data,
        tall = false;
 
   /// Constructs a [TableRow] that is empty.
   const TableRow.filler({
     super.key,
-    required this.linkedScrollControllerGroup,
     required this.columns,
     required this.columnWidths,
     this.columnGroups,
@@ -60,6 +59,7 @@ class TableRow<T> extends StatefulWidget {
        sortDirection = null,
        secondarySortColumn = null,
        onSortChanged = null,
+       onColumnResize = null,
        searchMatchesNotifier = null,
        activeSearchMatchNotifier = null,
        tall = false,
@@ -71,13 +71,13 @@ class TableRow<T> extends StatefulWidget {
   /// of any [node].
   const TableRow.tableColumnHeader({
     super.key,
-    required this.linkedScrollControllerGroup,
     required this.columns,
     required this.columnWidths,
     required this.columnGroups,
     required this.sortColumn,
     required this.sortDirection,
     required this.onSortChanged,
+    this.onColumnResize,
     this.secondarySortColumn,
     this.onPressed,
     this.tall = false,
@@ -98,12 +98,12 @@ class TableRow<T> extends StatefulWidget {
   /// [node].
   const TableRow.tableColumnGroupHeader({
     super.key,
-    required this.linkedScrollControllerGroup,
     required this.columnGroups,
     required this.columnWidths,
     required this.sortColumn,
     required this.sortDirection,
     required this.onSortChanged,
+    this.onColumnResize,
     this.secondarySortColumn,
     this.onPressed,
     this.tall = false,
@@ -120,8 +120,6 @@ class TableRow<T> extends StatefulWidget {
        displayTreeGuidelines = false,
        enableHoverHandling = false,
        _rowType = _TableRowType.columnGroupHeader;
-
-  final LinkedScrollControllerGroup linkedScrollControllerGroup;
 
   final T? node;
 
@@ -182,6 +180,8 @@ class TableRow<T> extends StatefulWidget {
   })?
   onSortChanged;
 
+  final void Function(int, double)? onColumnResize;
+
   final ValueListenable<List<T>>? searchMatchesNotifier;
 
   final ValueListenable<T?>? activeSearchMatchNotifier;
@@ -200,8 +200,6 @@ class _TableRowState<T> extends State<TableRow<T>>
         SearchableMixin {
   Key? contentKey;
 
-  late ScrollController scrollController;
-
   bool isSearchMatch = false;
 
   bool isActiveSearchMatch = false;
@@ -216,7 +214,6 @@ class _TableRowState<T> extends State<TableRow<T>>
   void initState() {
     super.initState();
     contentKey = ValueKey(this);
-    scrollController = widget.linkedScrollControllerGroup.addAndGet();
     _initSearchListeners();
 
     _rowDisplayParts = _rowDisplayPartsHelper();
@@ -242,11 +239,6 @@ class _TableRowState<T> extends State<TableRow<T>>
   void didUpdateWidget(TableRow<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     setExpanded(widget.isExpanded);
-    if (oldWidget.linkedScrollControllerGroup !=
-        widget.linkedScrollControllerGroup) {
-      scrollController.dispose();
-      scrollController = widget.linkedScrollControllerGroup.addAndGet();
-    }
 
     _rowDisplayParts = _rowDisplayPartsHelper();
 
@@ -254,12 +246,6 @@ class _TableRowState<T> extends State<TableRow<T>>
 
     cancelListeners();
     _initSearchListeners();
-  }
-
-  @override
-  void dispose() {
-    scrollController.dispose();
-    super.dispose();
   }
 
   @override
@@ -530,18 +516,13 @@ class _TableRowState<T> extends State<TableRow<T>>
       return _ColumnGroupHeaderRow(
         groups: groups,
         columnWidths: widget.columnWidths,
-        scrollController: scrollController,
       );
     }
 
     Widget rowContent = Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-      child: ExtentDelegateListView(
-        scrollDirection: Axis.horizontal,
-        physics: const ClampingScrollPhysics(),
-        controller: scrollController,
-        extentDelegate: rowExtentDelegate,
-        childrenDelegate: SliverChildBuilderDelegate((context, int i) {
+      child: Row(
+        children: List.generate(_rowDisplayParts.length, (int i) {
           final columnIndexMap = _columnIndexMapHelper(_rowDisplayParts);
           final displayTypeForIndex = _rowDisplayParts[i];
           switch (displayTypeForIndex) {
@@ -552,14 +533,37 @@ class _TableRowState<T> extends State<TableRow<T>>
                 widget.columnWidths[index],
               );
             case _TableRowPartDisplayType.columnSpacer:
-              return const SizedBox(
-                width: columnSpacing,
-                child: VerticalDivider(width: columnSpacing),
+              final columnIndex = columnIndexMap[i - 1];
+              final onColumnResize = widget.onColumnResize;
+              final isResizable = columnIndex != null && onColumnResize != null;
+              return MouseRegion(
+                cursor: isResizable
+                    ? SystemMouseCursors.resizeColumn
+                    : SystemMouseCursors.basic,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onHorizontalDragUpdate: (details) {
+                    if (isResizable) {
+                      setState(() {
+                        final newWidth = _calculateNewColumnWidth(
+                          width: widget.columnWidths[columnIndex],
+                          delta: details.delta.dx,
+                          minWidth: widget.columns[columnIndex].minWidthPx,
+                        );
+                        onColumnResize(columnIndex, newWidth);
+                      });
+                    }
+                  },
+                  child: const SizedBox(
+                    width: columnSpacing,
+                    child: VerticalDivider(width: columnSpacing),
+                  ),
+                ),
               );
             case _TableRowPartDisplayType.columnGroupSpacer:
               return const _ColumnGroupSpacer();
           }
-        }, childCount: _rowDisplayParts.length),
+        }),
       ),
     );
 
@@ -585,4 +589,13 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   @override
   bool shouldShow() => widget.isShown;
+
+  double _calculateNewColumnWidth({
+    required double width,
+    required double delta,
+    double? minWidth,
+  }) => (width + delta).clamp(
+    minWidth ?? DevToolsTable.columnMinWidth,
+    double.infinity,
+  );
 }

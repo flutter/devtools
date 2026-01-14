@@ -29,8 +29,6 @@ class EditorClient extends DisposableController
 
   String get gaId => EditorSidebar.id;
 
-  bool get isDtdClosed => _dtd.isClosed;
-
   Future<void> _initialize() async {
     autoDisposeStreamSubscription(
       _dtd.onEvent(CoreDtdServiceConstants.servicesStreamId).listen((data) {

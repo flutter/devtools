@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/globals.dart';
 import '../shared/ui/common_widgets.dart';
+import 'ide_shared/not_connected_overlay.dart';
 import 'ide_shared/property_editor/property_editor_panel.dart';
 import 'vs_code/flutter_panel.dart';
 
@@ -33,26 +35,13 @@ enum StandaloneScreenType {
               'newer of the Dart VS Code extension',
         ),
       ),
-      StandaloneScreenType.editorSidebar => ValueListenableBuilder(
-        // TODO(dantup): Add a timeout here so if dtdManager.connection
-        //  doesn't complete after some period we can give some kind of
-        //  useful message.
-        valueListenable: dtdManager.connection,
-        builder: (context, data, _) {
-          return _DtdConnectedScreen(
-            dtd: data,
-            screenProvider: (dtd) => EditorSidebarPanel(dtd),
-          );
-        },
+      StandaloneScreenType.editorSidebar => _DtdConnectedScreen(
+        dtdManager: dtdManager,
+        builder: (dtd) => EditorSidebarPanel(dtd),
       ),
-      StandaloneScreenType.propertyEditor => ValueListenableBuilder(
-        valueListenable: dtdManager.connection,
-        builder: (context, data, _) {
-          return _DtdConnectedScreen(
-            dtd: data,
-            screenProvider: (dtd) => PropertyEditorPanel(dtd),
-          );
-        },
+      StandaloneScreenType.propertyEditor => _DtdConnectedScreen(
+        dtdManager: dtdManager,
+        builder: (dtd) => PropertyEditorPanel(dtd),
       ),
     };
   }
@@ -61,18 +50,45 @@ enum StandaloneScreenType {
       values.any((value) => value.name == screenName);
 }
 
-/// Widget that returns a [CenteredCircularProgressIndicator] while it waits for
-/// a [DartToolingDaemon] connection.
+/// Widget that show progress while connecting to [DartToolingDaemon] and then
+/// the result of calling [builder] when a connection is available.
+///
+/// If the DTD connection is dropped, a reconnecting progress will be shown.
 class _DtdConnectedScreen extends StatelessWidget {
-  const _DtdConnectedScreen({required this.dtd, required this.screenProvider});
+  const _DtdConnectedScreen({required this.dtdManager, required this.builder});
 
-  final DartToolingDaemon? dtd;
-  final Widget Function(DartToolingDaemon) screenProvider;
+  final DTDManager dtdManager;
+  final Widget Function(DartToolingDaemon) builder;
 
   @override
   Widget build(BuildContext context) {
-    return dtd == null
-        ? const CenteredCircularProgressIndicator()
-        : screenProvider(dtd!);
+    return ValueListenableBuilder(
+      valueListenable: dtdManager.connectionState,
+      builder: (context, connectionState, child) {
+        return ValueListenableBuilder(
+          valueListenable: dtdManager.connection,
+          builder: (context, connection, _) {
+            return Stack(
+              children: [
+                if (connection != null)
+                  // Use a keyed subtree on the connection, so if the connection
+                  // changes (eg. we reconnect), we reset the state because it's
+                  // not safe to assume the existing state is still valid.
+                  //
+                  // This allows us to still keep rendering the old state under
+                  // the overlay (rather than a blank background) until the
+                  // reconnect occurs.
+                  KeyedSubtree(
+                    key: ValueKey(connection),
+                    child: builder(connection),
+                  ),
+                if (connectionState is! ConnectedDTDState)
+                  NotConnectedOverlay(connectionState),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 }
