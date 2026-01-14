@@ -57,6 +57,10 @@ const memoryPressureReduce = 'memoryPressureReduce';
 /// Wasm.
 const jsFallback = 'jsFallback';
 
+/// Event that signals we forced the dart2js compiler via the compiler=js query
+/// parameter.
+const forceLoadJs = 'forceLoadJs';
+
 // DevTools UI action selected (clicked).
 
 // Main bar UX actions:
