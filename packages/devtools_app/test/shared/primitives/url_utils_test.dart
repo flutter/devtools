@@ -65,6 +65,49 @@ void main() {
           test('maps legacy URIs with no page names', () {
             expect(mapLegacyUrl('$prefix/#/?foo=bar'), '$prefix/?foo=bar');
           });
+
+          group(
+            'with "compiler" query param (https://github.com/flutter/devtools/issues/9612)',
+            () {
+              for (final compilerValue in ['js', 'wasm']) {
+                test(
+                  'moves ?compiler=$compilerValue from before hash to after path',
+                  () {
+                    final newUrl = '$prefix/inspector?compiler=$compilerValue';
+                    expect(
+                      mapLegacyUrl(
+                        '$prefix/?compiler=$compilerValue#/inspector',
+                      ),
+                      newUrl,
+                    );
+                    expect(
+                      mapLegacyUrl(
+                        '$prefix/?compiler=$compilerValue#/?page=inspector',
+                      ),
+                      newUrl,
+                    );
+                  },
+                );
+
+                test('handles additional query parameters', () {
+                  final newUrl =
+                      '$prefix/inspector?foo=bar&compiler=$compilerValue';
+                  expect(
+                    mapLegacyUrl(
+                      '$prefix/?compiler=$compilerValue#/inspector?foo=bar',
+                    ),
+                    newUrl,
+                  );
+                  expect(
+                    mapLegacyUrl(
+                      '$prefix/?compiler=$compilerValue#/?page=inspector&foo=bar',
+                    ),
+                    newUrl,
+                  );
+                });
+              }
+            },
+          );
         });
       }
     });
