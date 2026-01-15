@@ -86,7 +86,8 @@ async function shouldUseSkwasm() {
 // be loaded with the skwasm renderer.
 //
 // Note: In the case of the legacy-formatted URL, this adds the query parameter
-// in the wrong place. We fix this in the Dart mapLegacyUrl function.
+// in the wrong place. We fix this in the Dart mapLegacyUrl function. Details:
+// https://github.com/flutter/devtools/issues/9612
 function updateWasmQueryParameter(useSkwasm) {
   const url = new URL(window.location.href);
   if (useSkwasm) {
