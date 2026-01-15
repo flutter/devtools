@@ -28,13 +28,16 @@ String? mapLegacyUrl(String url) {
   //   http://localhost:123/#/?page=inspector&uri=ws://...
   final isRootRequest = uri.path == '/' || uri.path.endsWith('/devtools/');
   if (isRootRequest && uri.fragment.isNotEmpty) {
+    // Note: If there is a ?compiler= query parameter, we remove it from before
+    // the hash then add it back in as a query parameter at the end.
+    // See https://github.com/flutter/devtools/issues/9612 for details.
     final hasJsParam = url.contains(_jsCompilerParam);
     final hasWasmParam = url.contains(_wasmCompilerParam) && !hasJsParam;
     final basePath = uri.path;
     // Convert the URL by removing the fragment separator.
     final newUrl = url
-        .replaceAll(_wasmCompilerParam, '')
         .replaceAll(_jsCompilerParam, '')
+        .replaceAll(_wasmCompilerParam, '')
         // Handle localhost:123/#/inspector?uri=xxx
         .replaceFirst('/#/', '/')
         // Handle localhost:123/#?page=inspector&uri=xxx
@@ -44,8 +47,8 @@ String? mapLegacyUrl(String url) {
     var newUri = Uri.parse(newUrl);
     final queryParams = {
       ...newUri.queryParameters,
-      if (hasWasmParam) 'compiler': 'wasm',
       if (hasJsParam) 'compiler': 'js',
+      if (hasWasmParam) 'compiler': 'wasm',
     };
     newUri = newUri.replace(queryParameters: queryParams);
     final page = newUri.queryParameters['page'];
