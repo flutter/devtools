@@ -84,6 +84,9 @@ async function shouldUseSkwasm() {
 
 // Sets or removes the 'wasm' query parameter based on whether DevTools should
 // be loaded with the skwasm renderer.
+//
+// Note: In the case of the legacy-formatted URL, this adds the query parameter
+// in the wrong place. We fix this in the Dart mapLegacyUrl function.
 function updateWasmQueryParameter(useSkwasm) {
   const url = new URL(window.location.href);
   if (useSkwasm) {
