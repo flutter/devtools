@@ -746,8 +746,7 @@ set flutterClientId(String newFlutterClientId) {
   _flutterClientId = newFlutterClientId;
 }
 
-bool _computingDimensions = false;
-bool _analyticsComputed = false;
+Completer<void>? _computingDimensionsCompleter;
 
 bool _computingUserApplicationDimensions = false;
 bool _userApplicationDimensionsComputed = false;
@@ -779,8 +778,6 @@ void _computeUserApplicationCustomGTagData() {
   userBuildType = connectedApp.isProfileBuildNow!
       ? buildTypeProfile
       : buildTypeDebug;
-
-  _analyticsComputed = true;
 }
 
 @JS('getDevToolsPropertyID')
@@ -837,12 +834,19 @@ Future<void> computeFlutterClientId() async {
 }
 
 Future<void> setupDimensions() async {
-  if (!_analyticsComputed && !_computingDimensions) {
-    _computingDimensions = true;
+  if (_computingDimensionsCompleter != null) {
+    return _computingDimensionsCompleter!.future;
+  }
+
+  _computingDimensionsCompleter = Completer<void>();
+  try {
     computeDevToolsCustomGTagsData();
     computeDevToolsQueryParams();
     await computeFlutterClientId();
-    _analyticsComputed = true;
+  } catch (e, st) {
+    _log.warning('Failed to compute dimensions', e, st);
+  } finally {
+    _computingDimensionsCompleter!.complete();
   }
 }
 
@@ -851,8 +855,14 @@ void setupUserApplicationDimensions() {
       !_userApplicationDimensionsComputed &&
       !_computingUserApplicationDimensions) {
     _computingUserApplicationDimensions = true;
-    _computeUserApplicationCustomGTagData();
-    _userApplicationDimensionsComputed = true;
+    try {
+      _computeUserApplicationCustomGTagData();
+    } catch (e, st) {
+      _log.warning('Failed to compute user application dimensions', e, st);
+    } finally {
+      _userApplicationDimensionsComputed = true;
+      _computingUserApplicationDimensions = false;
+    }
   }
 }
 
