@@ -746,7 +746,7 @@ set flutterClientId(String newFlutterClientId) {
   _flutterClientId = newFlutterClientId;
 }
 
-Completer<bool>? _computingDimensionsSucceededCompleter;
+Completer<void>? _computingDimensionsCompleter;
 
 // Computes the running application.
 void _computeUserApplicationCustomGTagData() {
@@ -829,22 +829,19 @@ Future<void> computeFlutterClientId() async {
 }
 
 Future<void> setupDimensions() async {
-  if (_computingDimensionsSucceededCompleter != null) {
-    await _computingDimensionsSucceededCompleter!.future;
-    return;
+  if (_computingDimensionsCompleter != null) {
+    return _computingDimensionsCompleter!.future;
   }
 
-  _computingDimensionsSucceededCompleter = Completer<bool>();
-  bool success = false;
+  _computingDimensionsCompleter = Completer<void>();
   try {
     computeDevToolsCustomGTagsData();
     computeDevToolsQueryParams();
     await computeFlutterClientId();
-    success = true;
   } catch (e, st) {
     _log.warning('Failed to compute dimensions', e, st);
   } finally {
-    _computingDimensionsSucceededCompleter!.complete(success);
+    _computingDimensionsCompleter!.complete();
   }
 }
 
