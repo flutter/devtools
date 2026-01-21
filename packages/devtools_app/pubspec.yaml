@@ -77,6 +77,7 @@ dev_dependencies:
   stream_channel: ^2.1.1
   test: ^1.21.0
   web_benchmarks: ^4.0.0
+  webdriver: ^3.1.0
   webkit_inspection_protocol: ">=0.5.0 <2.0.0"
 
 flutter:
