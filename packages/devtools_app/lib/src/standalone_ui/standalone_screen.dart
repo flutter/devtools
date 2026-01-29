@@ -37,11 +37,11 @@ enum StandaloneScreenType {
       ),
       StandaloneScreenType.editorSidebar => _DtdConnectedScreen(
         dtdManager: dtdManager,
-        builder: (dtd) => EditorSidebarPanel(dtd),
+        builder: (dtdManager) => EditorSidebarPanel(dtdManager),
       ),
       StandaloneScreenType.propertyEditor => _DtdConnectedScreen(
         dtdManager: dtdManager,
-        builder: (dtd) => PropertyEditorPanel(dtd),
+        builder: (dtdManager) => PropertyEditorPanel(dtdManager),
       ),
     };
   }
@@ -58,7 +58,7 @@ class _DtdConnectedScreen extends StatelessWidget {
   const _DtdConnectedScreen({required this.dtdManager, required this.builder});
 
   final DTDManager dtdManager;
-  final Widget Function(DartToolingDaemon) builder;
+  final Widget Function(DTDManager) builder;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +80,7 @@ class _DtdConnectedScreen extends StatelessWidget {
                   // reconnect occurs.
                   KeyedSubtree(
                     key: ValueKey(connection),
-                    child: builder(connection),
+                    child: builder(dtdManager),
                   ),
                 if (connectionState is! ConnectedDTDState)
                   NotConnectedOverlay(connectionState),

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:dtd/dtd.dart';
@@ -20,24 +21,20 @@ import 'api_classes.dart';
 /// ensure they are not breaking changes to already-shipped editors.
 class EditorClient extends DisposableController
     with AutoDisposeControllerMixin {
-  EditorClient(this._dtd) {
+  EditorClient(this._dtdManager) {
     unawaited(initialized); // Trigger async initialization.
   }
 
-  final DartToolingDaemon _dtd;
+  final DTDManager _dtdManager;
   late final initialized = _initialize();
+
+  DartToolingDaemon get _dtd => _dtdManager.connection.value!;
 
   String get gaId => EditorSidebar.id;
 
   Future<void> _initialize() async {
     autoDisposeStreamSubscription(
-      _dtd.onEvent(CoreDtdServiceConstants.servicesStreamId).listen((data) {
-        final kind = data.kind;
-        if (kind != CoreDtdServiceConstants.serviceRegisteredKind &&
-            kind != CoreDtdServiceConstants.serviceUnregisteredKind) {
-          return;
-        }
-
+      _dtdManager.serviceRegistrationBroadcastStream.listen((data) {
         final service = data.data[DtdParameters.service] as String?;
         if (service == null ||
             (service != editorServiceName && service != lspServiceName)) {
@@ -45,7 +42,7 @@ class EditorClient extends DisposableController
         }
 
         final isRegistered =
-            kind == CoreDtdServiceConstants.serviceRegisteredKind;
+            data.kind == CoreDtdServiceConstants.serviceRegisteredKind;
         final method = data.data[DtdParameters.method] as String;
         final capabilities =
             data.data[DtdParameters.capabilities] as Map<String, Object?>?;
@@ -127,7 +124,6 @@ class EditorClient extends DisposableController
       }),
     );
     await [
-      _dtd.streamListen(CoreDtdServiceConstants.servicesStreamId),
       _dtd.streamListen(editorStreamName).catchError((_) {
         // Because we currently call streamListen in two places (here and
         // ThemeManager) this can fail. It doesn't matter if this happens,

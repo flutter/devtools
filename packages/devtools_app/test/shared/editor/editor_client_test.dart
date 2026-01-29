@@ -8,10 +8,12 @@ import 'package:devtools_app/src/shared/editor/api_classes.dart';
 import 'package:devtools_app/src/shared/editor/editor_client.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:dtd/dtd.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
+  late MockDTDManager mockDTDManager;
   late MockDartToolingDaemon mockDtd;
   late EditorClient editorClient;
 
@@ -23,7 +25,9 @@ void main() {
   };
 
   setUp(() {
+    mockDTDManager = MockDTDManager();
     mockDtd = MockDartToolingDaemon();
+    when(mockDTDManager.connection).thenReturn(ValueNotifier(mockDtd));
 
     for (final MapEntry(key: method, value: responseJson)
         in methodToResponseJson.entries) {
@@ -40,7 +44,7 @@ void main() {
       method.isRegistered = true;
     }
 
-    editorClient = EditorClient(mockDtd);
+    editorClient = EditorClient(mockDTDManager);
   });
 
   group('getRefactors', () {

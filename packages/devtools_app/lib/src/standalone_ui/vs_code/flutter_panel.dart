@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
@@ -22,9 +22,9 @@ import 'devtools/devtools_view.dart';
 /// Provides some basic functionality to improve discoverability of features
 /// such as creation of new projects, device selection and DevTools features.
 class EditorSidebarPanel extends StatefulWidget {
-  const EditorSidebarPanel(this.dtd, {super.key});
+  const EditorSidebarPanel(this.dtdManager, {super.key});
 
-  final DartToolingDaemon dtd;
+  final DTDManager dtdManager;
 
   @override
   State<EditorSidebarPanel> createState() => _EditorSidebarPanelState();
@@ -39,7 +39,7 @@ class _EditorSidebarPanelState extends State<EditorSidebarPanel> {
   void initState() {
     super.initState();
 
-    final editor = EditorClient(widget.dtd);
+    final editor = EditorClient(widget.dtdManager);
     ga.screen(editor.gaId);
     unawaited(_editor = editor.initialized.then((_) => editor));
   }
