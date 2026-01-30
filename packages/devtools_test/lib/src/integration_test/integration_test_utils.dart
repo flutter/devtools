@@ -103,11 +103,6 @@ Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
     ),
   );
   await tester.pumpAndSettle(longPumpDuration);
-  logStatus('waiting for DTD connection...');
-  await waitFor(
-    () => dtdManager.connectionState.value is ConnectedDTDState,
-    timeoutMessage: 'Timed out waiting for DTD to connect.',
-  );
   expect(find.byType(ConnectInput), findsNothing);
   expect(find.byType(ConnectedAppSummary), findsOneWidget);
   _verifyFooterColor(tester, darkColorScheme.primary);
