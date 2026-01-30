@@ -28,6 +28,7 @@ Future<void> resetHistory() async {
       .resetHistory();
 }
 
+// small edit, remove.
 Future<void> pumpAndConnectDevTools(
   WidgetTester tester,
   TestApp testApp,
