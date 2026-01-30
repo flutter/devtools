@@ -4,14 +4,17 @@
 
 import 'dart:convert';
 
+import 'package:dart_service_protocol_shared/dart_service_protocol_shared.dart';
 import 'package:devtools_app/src/shared/editor/api_classes.dart';
 import 'package:devtools_app/src/shared/editor/editor_client.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:dtd/dtd.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
+  late MockDTDManager mockDTDManager;
   late MockDartToolingDaemon mockDtd;
   late EditorClient editorClient;
 
@@ -23,7 +26,9 @@ void main() {
   };
 
   setUp(() {
+    mockDTDManager = MockDTDManager();
     mockDtd = MockDartToolingDaemon();
+    when(mockDTDManager.connection).thenReturn(ValueNotifier(mockDtd));
 
     for (final MapEntry(key: method, value: responseJson)
         in methodToResponseJson.entries) {
@@ -40,7 +45,7 @@ void main() {
       method.isRegistered = true;
     }
 
-    editorClient = EditorClient(mockDtd);
+    editorClient = EditorClient(mockDTDManager);
   });
 
   group('getRefactors', () {
@@ -232,6 +237,29 @@ void main() {
       // Verify the failure response.
       expect(result.success, isFalse);
       expect(result.errorMessage, 'API is unavailable.');
+    });
+  });
+
+  group('initialization', () {
+    test('checks for existing services registered on DTD', () async {
+      // Add getDevices service to registered services.
+      final getDevicesService = ClientServiceInfo(editorServiceName, {
+        EditorMethod.getDevices.name: ClientServiceMethodInfo(
+          EditorMethod.getDevices.name,
+        ),
+      });
+      final response = RegisteredServicesResponse(
+        dtdServices: [],
+        clientServices: [getDevicesService],
+      );
+      when(mockDtd.getRegisteredServices()).thenAnswer((_) async => response);
+
+      // Initialize the client.
+      final client = EditorClient(mockDTDManager);
+      await client.initialized;
+
+      // Check that it supports getDevices.
+      expect(client.supportsGetDevices, isTrue);
     });
   });
 }

@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
 import '../../../framework/scaffold/report_feedback_button.dart';
@@ -20,9 +20,9 @@ import 'property_editor_view.dart';
 
 /// The side panel for the Property Editor.
 class PropertyEditorPanel extends StatefulWidget {
-  const PropertyEditorPanel(this.dtd, {super.key});
+  const PropertyEditorPanel(this.dtdManager, {super.key});
 
-  final DartToolingDaemon dtd;
+  final DTDManager dtdManager;
 
   @override
   State<PropertyEditorPanel> createState() => _PropertyEditorPanelState();
@@ -38,7 +38,7 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
   void initState() {
     super.initState();
 
-    final editor = EditorClient(widget.dtd);
+    final editor = EditorClient(widget.dtdManager);
     ga.screen(gac.PropertyEditorSidebar.id);
     unawaited(
       _editor = editor.initialized.then((_) {
