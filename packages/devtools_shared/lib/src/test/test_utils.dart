@@ -5,7 +5,7 @@
 import 'dart:async';
 
 Future<void> waitFor(
-  FutureOr<bool> Function() condition, {
+  Future<bool> Function() condition, {
   Duration timeout = const Duration(seconds: 10),
   String timeoutMessage = 'condition not satisfied',
   Duration delay = _shortDelay,

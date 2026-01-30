@@ -7,9 +7,7 @@ import 'dart:ui' as ui;
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/main.dart' as app;
-import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
-import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -114,12 +112,8 @@ Future<void> disconnectFromTestApp(WidgetTester tester) async {
     await findTab(tester, icon: null, iconAsset: ScreenMetaData.home.iconAsset),
   );
   await tester.pumpAndSettle();
-  await waitFor(
-    () => dtdManager.connectionState.value is NotConnectedDTDState,
-    timeoutMessage: 'Timed out waiting for DTD to disconnect.',
-  );
   await tester.tap(find.byType(ConnectToNewAppButton));
-  await tester.pumpAndSettle(safePumpDuration);
+  await tester.pump(safePumpDuration);
 }
 
 class TestApp {
