@@ -252,9 +252,11 @@ class DTDManager {
       _automaticallyReconnect = false;
 
       // We only close and clear the connection if we are explicitly
-      // disconnecting. In the case where the connection just dropped, we leave
-      // it so that we can continue to render a page (usually with an overlay).
-      // We only close it once the new connection is established. 
+      // disconnecting.
+      //
+      // In the case where the connection just dropped, we leave it so
+      // that we can continue to render a page (usually with an overlay), then
+      // only close it once the new connection is established.
       if (_connection.value case final connection?) {
         await connection.close();
       }
@@ -279,9 +281,9 @@ class DTDManager {
   /// Listens for service registration events on the [dtd] connection.
   Future<void> _listenForServiceRegistrationEvents(
       DartToolingDaemon dtd) async {
-    // Note: We immediately begin listening for service registration events on
-    // on the new DTD connection before canceling the previous subscription.
-    // This guarantees that we don't miss any events across reconnects.
+    // We immediately begin listening for service registration events on the new
+    // DTD connection before canceling the previous subscription. This
+    // guarantees that we don't miss any events across reconnects.
     // ignore: cancel_subscriptions, false positive, it is canceled below.
     final nextServiceRegistrationSubscription = dtd
         .onEvent(CoreDtdServiceConstants.servicesStreamId)
