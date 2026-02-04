@@ -66,15 +66,17 @@ void main() {
         manager.serviceRegistrationBroadcastStream,
       );
 
-      // Add an event.
-      streamController.add(fooBarRegisteredEvent);
+      try {
+        // Add an event.
+        streamController.add(fooBarRegisteredEvent);
 
-      // Verify both subscribers received the event.
-      expect(await eventQueue1.next, equals(fooBarRegisteredEvent));
-      expect(await eventQueue2.next, equals(fooBarRegisteredEvent));
-
-      await eventQueue1.cancel();
-      await eventQueue2.cancel();
+        // Verify both subscribers received the event.
+        expect(await eventQueue1.next, equals(fooBarRegisteredEvent));
+        expect(await eventQueue2.next, equals(fooBarRegisteredEvent));
+      } finally {
+        await eventQueue1.cancel();
+        await eventQueue2.cancel();
+      }
     });
 
     test(
@@ -90,14 +92,18 @@ void main() {
           manager.serviceRegistrationBroadcastStream,
         );
 
-        // The manager only forwards registered and unregistered events.
-        streamController.add(fooBarRegisteredEvent);
-        streamController.add(fooBarUnregisteredEvent);
-        streamController.add(invalidEvent);
-        expect(await eventQueue.next, equals(fooBarRegisteredEvent));
-        expect(await eventQueue.next, equals(fooBarUnregisteredEvent));
-
-        await eventQueue.cancel();
+        try {
+          // The manager only forwards registered and unregistered events.
+          streamController.add(fooBarRegisteredEvent);
+          streamController.add(invalidEvent);
+          streamController.add(fooBarUnregisteredEvent);
+          expect(
+            manager.serviceRegistrationBroadcastStream,
+            emitsInOrder([fooBarRegisteredEvent, fooBarUnregisteredEvent]),
+          );
+        } finally {
+          await eventQueue.cancel();
+        }
       },
     );
 
@@ -107,23 +113,26 @@ void main() {
       manager.mockDtd = mockDtd1;
       await manager.connect(fakeDtdUri);
 
-      // The manager forwards events from the first DTD instance.
       final eventQueue = StreamQueue(
         manager.serviceRegistrationBroadcastStream,
       );
-      streamController1.add(fooBarRegisteredEvent);
-      expect(await eventQueue.next, equals(fooBarRegisteredEvent));
 
-      // Connect to the second DTD instance:
-      final streamController2 = setUpEventStream(mockDtd2);
-      manager.mockDtd = mockDtd2;
-      await manager.connect(fakeDtdUri);
+      try {
+        // The manager forwards events from the first DTD instance.
+        streamController1.add(fooBarRegisteredEvent);
+        expect(await eventQueue.next, equals(fooBarRegisteredEvent));
 
-      // The manager forwards events from the second DTD instance.
-      streamController2.add(bazQuxRegisteredEvent);
-      expect(await eventQueue.next, equals(bazQuxRegisteredEvent));
+        // Connect to the second DTD instance:
+        final streamController2 = setUpEventStream(mockDtd2);
+        manager.mockDtd = mockDtd2;
+        await manager.connect(fakeDtdUri);
 
-      await eventQueue.cancel();
+        // The manager forwards events from the second DTD instance.
+        streamController2.add(bazQuxRegisteredEvent);
+        expect(await eventQueue.next, equals(bazQuxRegisteredEvent));
+      } finally {
+        await eventQueue.cancel();
+      }
     });
 
     test('continues to forward events while DTD is reconnecting', () async {
@@ -138,25 +147,26 @@ void main() {
       final eventQueue = StreamQueue(
         manager.serviceRegistrationBroadcastStream,
       );
+      try {
+        // Send events while DTD is reconnecting.
+        manager.connectionState.addListener(() {
+          if (manager.connectionState.value is NotConnectedDTDState) {
+            streamController.add(fooBarRegisteredEvent);
+          }
+          if (manager.connectionState.value is ConnectingDTDState) {
+            streamController.add(bazQuxRegisteredEvent);
+          }
+        });
 
-      // Send events while DTD is reconnecting.
-      manager.connectionState.addListener(() {
-        if (manager.connectionState.value is NotConnectedDTDState) {
-          streamController.add(fooBarRegisteredEvent);
-        }
-        if (manager.connectionState.value is ConnectingDTDState) {
-          streamController.add(bazQuxRegisteredEvent);
-        }
-      });
+        // Trigger a done event to force DTD to reconnect.
+        dtdDoneCompleter.complete();
 
-      // Trigger a done event to force DTD to reconnect.
-      dtdDoneCompleter.complete();
-
-      // Verify the events sent during reconneciton were received.
-      expect(await eventQueue.next, equals(fooBarRegisteredEvent));
-      expect(await eventQueue.next, equals(bazQuxRegisteredEvent));
-
-      await eventQueue.cancel();
+        // Verify the events sent during reconnection were received.
+        expect(await eventQueue.next, equals(fooBarRegisteredEvent));
+        expect(await eventQueue.next, equals(bazQuxRegisteredEvent));
+      } finally {
+        await eventQueue.cancel();
+      }
     });
   });
 }

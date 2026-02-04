@@ -36,6 +36,8 @@ class DTDManager {
   /// [CoreDtdServiceConstants.serviceUnregisteredKind] events.
   ///
   /// Since this is a broadcast stream, it supports multiple subscribers.
+  /// Subscribers should also call [DartToolingDaemon.getRegisteredServices] to
+  /// detect any services that were already registered.
   Stream<DTDEvent> get serviceRegistrationBroadcastStream =>
       _serviceRegistrationController.stream;
   final _serviceRegistrationController = StreamController<DTDEvent>.broadcast();
@@ -172,9 +174,8 @@ class DTDManager {
       // by any listeners of the [_connection] notifier.
       _connection.value = connection;
       // Close the previous connection.
-      if (previousConnection != null) {
-        await previousConnection.close();
-      }
+      await previousConnection?.close();
+
       _connectionState.value = ConnectedDTDState();
       _log.info('Successfully connected to DTD at: $uri');
 
