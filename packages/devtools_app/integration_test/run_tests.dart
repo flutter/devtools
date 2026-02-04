@@ -36,8 +36,6 @@ final _disabledTestsForDevice = <String, Set<String>>{
     'export_snapshot_test.dart',
     // https://github.com/flutter/devtools/issues/9639
     'network_screen_test.dart',
-    // https://github.com/flutter/devtools/issues/9640
-    'debugger_panel_test.dart',
     // https://github.com/flutter/devtools/issues/9641
     'devtools_extensions_test.dart',
     // https://github.com/flutter/devtools/issues/9642
