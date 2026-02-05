@@ -9,7 +9,7 @@ jobs:
     with:
         checks: "version,changelog,breaking,do-not-submit,leaking"
         fail_on: "version,changelog,do-not-submit"
-        warn_on: "coverage,breaking,leaking"
+        warn_on: "breaking,leaking"
         use-flutter: true
     permissions:
         pull-requests: write
