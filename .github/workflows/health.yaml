@@ -1,0 +1,15 @@
+name: Health
+on:
+  pull_request:
+    branches: [ master ]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+jobs:
+  health:
+    uses: dart-lang/ecosystem/.github/workflows/health.yaml@main
+    with:
+        checks: "version,changelog,breaking,do-not-submit,leaking"
+        fail_on: "version,changelog,do-not-submit"
+        warn_on: "coverage,breaking,leaking"
+        use-flutter: true
+    permissions:
+        pull-requests: write
