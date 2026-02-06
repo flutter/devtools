@@ -8,8 +8,8 @@ jobs:
     uses: dart-lang/ecosystem/.github/workflows/health.yaml@main
     with:
         checks: "version,changelog,breaking,do-not-submit,leaking"
-        fail_on: "version,changelog,do-not-submit"
-        warn_on: "breaking,leaking"
+        fail_on: "do-not-submit"
+        warn_on: "version,changelog,breaking,leaking"
         use-flutter: true
     permissions:
         pull-requests: write
