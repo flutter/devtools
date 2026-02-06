@@ -4,14 +4,15 @@
 
 import 'dart:async';
 
-import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:dtd/dtd.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/development_helpers.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
+import '../../shared/ui/common_widgets.dart';
 import 'dtd_tools_controller.dart';
 import 'events.dart';
 import 'services.dart';
@@ -39,15 +40,22 @@ class DTDToolsScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = screenControllers.lookup<DTDToolsController>();
-    return ValueListenableBuilder(
-      valueListenable: controller.localDtdManager.connection,
-      builder: (context, connection, _) => connection != null
-          ? DtdConnectedView(
-              dtd: connection,
-              dtdUri: controller.localDtdManager.uri!.toString(),
-              onDisconnect: controller.localDtdManager.disconnect,
-            )
-          : DtdNotConnectedView(localDtdManager: controller.localDtdManager),
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.localDtdManager.connection,
+        dtdManager.connection,
+      ],
+      builder: (context, values, _) {
+        final activeDtdManager = controller.activeDtdManager;
+        final connection = activeDtdManager.connection.value;
+        return connection != null
+            ? DtdConnectedView(
+                dtd: connection,
+                dtdUri: activeDtdManager.uri!.toString(),
+                onDisconnect: activeDtdManager.disconnect,
+              )
+            : DtdNotConnectedView(connectDtd: controller.connectDtd);
+      },
     );
   }
 }
@@ -111,6 +119,7 @@ class _DtdConnectedViewState extends State<DtdConnectedView> {
 
   @override
   Widget build(BuildContext context) {
+    final isGlobalDtd = widget.dtd == dtdManager.connection.value;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -122,8 +131,16 @@ class _DtdConnectedViewState extends State<DtdConnectedView> {
               children: [
                 Text('DTD connection:', style: Theme.of(context).boldTextStyle),
                 const SizedBox(width: denseSpacing),
+                DevToolsTooltip(
+                  message:
+                      'This DTD URI is being used for ${isGlobalDtd ? 'all of DevTools.' : 'this screen only.'}',
+                  child: RoundedLabel(
+                    labelText: isGlobalDtd ? 'Global' : 'Local',
+                  ),
+                ),
+                const SizedBox(width: denseSpacing),
                 Text(widget.dtdUri),
-                const SizedBox(width: defaultSpacing),
+                const SizedBox(width: denseSpacing),
                 DevToolsButton(
                   icon: Icons.close,
                   label: 'Disconnect',
@@ -156,9 +173,9 @@ class _DtdConnectedViewState extends State<DtdConnectedView> {
 /// Displays a text field for entering a DTD URI to connect the DTD Tools screen
 /// to.
 class DtdNotConnectedView extends StatefulWidget {
-  const DtdNotConnectedView({super.key, required this.localDtdManager});
+  const DtdNotConnectedView({super.key, required this.connectDtd});
 
-  final DTDManager localDtdManager;
+  final Future<void> Function(Uri, {bool connectToGlobalDtd}) connectDtd;
 
   @override
   State<DtdNotConnectedView> createState() => _DtdNotConnectedViewState();
@@ -166,6 +183,10 @@ class DtdNotConnectedView extends StatefulWidget {
 
 class _DtdNotConnectedViewState extends State<DtdNotConnectedView> {
   late final TextEditingController textEditingController;
+
+  bool _connectToGlobalDtd = false;
+
+  String? _connectionError;
 
   @override
   void initState() {
@@ -198,6 +219,23 @@ class _DtdNotConnectedViewState extends State<DtdNotConnectedView> {
                 onSubmitted: (_) => _connect(),
               ),
             ),
+            if (kDebugMode) ...[
+              const SizedBox(width: defaultSpacing),
+              DevToolsTooltip(
+                message: 'Connect all DevTools screens to this DTD URI.',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Checkbox(
+                      value: _connectToGlobalDtd,
+                      onChanged: (value) =>
+                          setState(() => _connectToGlobalDtd = value ?? false),
+                    ),
+                    const Text('Connect DevTools'),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(width: defaultSpacing),
             DevToolsButton(
               label: 'Connect',
@@ -206,11 +244,27 @@ class _DtdNotConnectedViewState extends State<DtdNotConnectedView> {
             ),
           ],
         ),
+        if (_connectionError != null) ...[
+          const SizedBox(height: denseSpacing),
+          Text(_connectionError!, style: Theme.of(context).errorTextStyle),
+        ],
       ],
     );
   }
 
   Future<void> _connect() async {
-    await widget.localDtdManager.connect(Uri.parse(textEditingController.text));
+    setState(() {
+      _connectionError = null;
+    });
+    try {
+      await widget.connectDtd(
+        Uri.parse(textEditingController.text),
+        connectToGlobalDtd: _connectToGlobalDtd,
+      );
+    } catch (error) {
+      setState(() {
+        _connectionError = error.toString();
+      });
+    }
   }
 }
