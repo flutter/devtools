@@ -138,9 +138,9 @@ class _DtdConnectedViewState extends State<DtdConnectedView> {
                     labelText: isGlobalDtd ? 'Global' : 'Local',
                   ),
                 ),
-                const SizedBox(width: denseSpacing),
+                const SizedBox(width: defaultSpacing),
                 Text(widget.dtdUri),
-                const SizedBox(width: denseSpacing),
+                const SizedBox(width: defaultSpacing),
                 DevToolsButton(
                   icon: Icons.close,
                   label: 'Disconnect',
@@ -228,8 +228,7 @@ class _DtdNotConnectedViewState extends State<DtdNotConnectedView> {
                   children: [
                     Checkbox(
                       value: _connectToGlobalDtd,
-                      onChanged: (value) =>
-                          setState(() => _connectToGlobalDtd = value ?? false),
+                      onChanged: _setConnectToGlobalDtd,
                     ),
                     const Text('Connect DevTools'),
                   ],
@@ -250,6 +249,12 @@ class _DtdNotConnectedViewState extends State<DtdNotConnectedView> {
         ],
       ],
     );
+  }
+
+  void _setConnectToGlobalDtd(bool? shouldConnect) {
+    setState(() {
+      _connectToGlobalDtd = kDebugMode && (shouldConnect ?? false);
+    });
   }
 
   Future<void> _connect() async {
