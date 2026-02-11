@@ -1,8 +1,11 @@
 name: Health
+
 on:
   pull_request:
-    branches: [ master ]
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [synchronize, opened, reopened, labeled, unlabeled]
+    paths:
+      - "**/*.dart"
+
 jobs:
   health:
     uses: dart-lang/ecosystem/.github/workflows/health.yaml@main
