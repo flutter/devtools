@@ -3,8 +3,6 @@ name: Health
 on:
   pull_request:
     types: [synchronize, opened, reopened, labeled, unlabeled]
-    paths:
-      - "**/*.dart"
 
 jobs:
   health:
