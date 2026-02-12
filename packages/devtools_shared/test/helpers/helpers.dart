@@ -55,7 +55,7 @@ Future<TestDtdConnectionInfo> startDtd() async {
       }
     });
 
-    return completer.future
+    return await completer.future
         .timeout(dtdConnectTimeout, onTimeout: onFailure)
         .then((value) async {
       await dtdStoutSubscription?.cancel();
