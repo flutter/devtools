@@ -55,7 +55,7 @@ class _ProjectRootTextFieldState extends State<ProjectRootTextField>
       child: Container(
         height: defaultTextFieldHeight,
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-        child: DevToolsClearableTextField(
+        child: DevToolsTextField(
           controller: controller,
           enabled: widget.enabled,
           onSubmitted: (String path) {
@@ -63,6 +63,18 @@ class _ProjectRootTextFieldState extends State<ProjectRootTextField>
           },
           labelText: 'Path to Flutter project',
           roundedBorder: true,
+          additionalSuffixActions: [
+            // TODO(elliette): Remove ExcludeSemantics once
+            // https://github.com/flutter/flutter/issues/161630 is
+            // fixed and use DevToolsClearableTextField instead.
+            ExcludeSemantics(
+              child: InputDecorationSuffixButton.clear(
+                onPressed: () {
+                  controller.clear();
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
