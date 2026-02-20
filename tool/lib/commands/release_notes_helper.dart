@@ -141,19 +141,19 @@ class ReleaseNotesCommand extends Command {
       }
     }
 
-    releaseNotesMd.writeAsStringSync('''---
+    final metadataHeader = '''---
 title: DevTools $releaseNotesVersion release notes
 shortTitle: $releaseNotesVersion release notes
 breadcrumb: $releaseNotesVersion
 showToc: false
 ---
 
-''');
+''';
 
     // Write the contents of the 'release-notes-<x.y.z>.md' file,
     // including any updates for image paths.
     releaseNotesMd.writeAsStringSync(
-      srcLines.joinWithNewLine().trimLeft(),
+      metadataHeader + srcLines.joinWithNewLine().trimLeft(),
       flush: true,
     );
 
