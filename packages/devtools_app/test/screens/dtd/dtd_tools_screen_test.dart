@@ -96,6 +96,9 @@ void main() {
         when(
           dtdToolsController.localDtdManager,
         ).thenReturn(mockLocalDtdManager);
+        when(
+          dtdToolsController.activeDtdManager,
+        ).thenReturn(mockLocalDtdManager);
 
         // Set up [mockLocalDtdManager].
         final fakeDtdUri = Uri.parse('ws://127.0.0.1:65314/KKXNgPdXnFk=');
@@ -110,7 +113,7 @@ void main() {
           return Future.value();
         });
         final mockLocalDtd = MockDartToolingDaemon();
-        when(mockLocalDtdManager.connect(any)).thenAnswer((_) {
+        when(dtdToolsController.connectDtd(any)).thenAnswer((_) {
           localConnectionNotifier.value = mockLocalDtd;
           localDtdManagerUri.value = fakeDtdUri;
           return Future.value();
