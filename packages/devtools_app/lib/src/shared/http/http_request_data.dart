@@ -11,6 +11,7 @@ import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/network/network_model.dart';
+import '../../screens/network/utils/http_utils.dart';
 import '../globals.dart';
 import '../primitives/utils.dart';
 import 'constants.dart';
@@ -101,13 +102,38 @@ class DartIOHttpRequestData extends NetworkRequest {
             );
         _request = updated;
         final fullRequest = _request as HttpProfileRequest;
-        _responseBody = utf8.decode(fullRequest.responseBody!);
-        _requestBody = utf8.decode(fullRequest.requestBody!);
+        var responseMime = getHeadersMimeType(responseHeaders?['content-type']);
+        final requestMime = getHeadersMimeType(requestHeaders?['content-type']);
+
+        if (fullRequest.responseBody != null) {
+          responseMime = normalizeContentType(responseHeaders?['content-type']);
+          _responseBody = convertBodyBytesToString(
+            fullRequest.responseBody!,
+            responseMime,
+          );
+        }
+
+        if (fullRequest.requestBody != null) {
+          _requestBody = convertBodyBytesToString(
+            fullRequest.requestBody!,
+            requestMime,
+          );
+        }
+
         notifyListeners();
       }
     } finally {
       isFetchingFullData = false;
     }
+  }
+
+  String? normalizeContentType(dynamic header) {
+    if (header is List && header.isNotEmpty) {
+      return header.first.toString().split(';').first.trim().toLowerCase();
+    } else if (header is String) {
+      return header.split(';').first.trim().toLowerCase();
+    }
+    return null;
   }
 
   static List<Cookie> _parseCookies(List<String>? cookies) {
