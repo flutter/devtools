@@ -654,7 +654,7 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
           child: ValueListenableBuilder<bool>(
             valueListenable: widget.controller.useRegExp,
             builder: (context, useRegExp, _) {
-              return DevToolsClearableTextField(
+              return DevToolsTextField(
                 hintText: 'Filter',
                 controller: queryTextFieldController,
                 prefixIcon: widget.controller.settingFilters.isNotEmpty
@@ -687,18 +687,30 @@ class _StandaloneFilterFieldState<T> extends State<StandaloneFilterField<T>>
                     : null,
                 additionalSuffixActions: [
                   if (widget.controller.queryFilterArgs.isNotEmpty)
-                    InputDecorationSuffixButton.help(
+                    // TODO(elliette): Remove ExcludeSemantics once
+                    // https://github.com/flutter/flutter/issues/161630 is
+                    // fixed and use DevToolsClearableTextField instead.
+                    ExcludeSemantics(
+                      child: InputDecorationSuffixButton.help(
+                        onPressed: () {
+                          showDevToolsDialog(
+                            context: context,
+                            title: 'Filter Syntax',
+                            content: _FilterSyntax(
+                              controller: widget.controller,
+                              filteredItem: widget.filteredItem,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ExcludeSemantics(
+                    child: InputDecorationSuffixButton.clear(
                       onPressed: () {
-                        showDevToolsDialog(
-                          context: context,
-                          title: 'Filter Syntax',
-                          content: _FilterSyntax(
-                            controller: widget.controller,
-                            filteredItem: widget.filteredItem,
-                          ),
-                        );
+                        queryTextFieldController.clear();
                       },
                     ),
+                  ),
                   DevToolsToggleButton(
                     icon: Icons.emergency,
                     message: 'Use regular expressions',

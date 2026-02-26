@@ -272,7 +272,7 @@ Future<int> _findAvailablePort({required int startingAt}) async {
 
 Future<bool> _isPortAvailable(int port) async {
   try {
-    final RawSocket socket = await RawSocket.connect('localhost', port);
+    final socket = await RawSocket.connect('localhost', port);
     socket.shutdown(SocketDirection.both);
     await socket.close();
     return false;

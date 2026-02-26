@@ -57,6 +57,10 @@ const memoryPressureReduce = 'memoryPressureReduce';
 /// Wasm.
 const jsFallback = 'jsFallback';
 
+/// Event that signals we forced the dart2js compiler via the compiler=js query
+/// parameter.
+const forceLoadJs = 'forceLoadJs';
+
 // DevTools UI action selected (clicked).
 
 // Main bar UX actions:
@@ -131,7 +135,6 @@ const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const inspectorV2Enabled = 'inspectorV2Enabled';
 const inspectorV2Disabled = 'inspectorV2Disabled';
 const inspectorAutoRefreshEnabled = 'inspectorAutoRefreshEnabled';
-const inspectorV2Docs = 'inspectorV2Docs';
 const clearLogs = 'clearLogs';
 const copyLogs = 'copyLogs';
 

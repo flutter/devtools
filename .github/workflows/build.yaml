@@ -36,9 +36,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Load Cached Flutter SDK
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
         with:
           path: |
             ./tool/flutter-sdk
@@ -57,11 +57,11 @@ jobs:
       fail-fast: false
     steps:
       - name: Clone Flutter DevTools
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           ref: "${{ github.event.pull_request.head.sha }}"
       - name: Load Cached Flutter SDK
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
         with:
           path: |
             ./tool/flutter-sdk
@@ -97,9 +97,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Load Cached Flutter SDK
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
         with:
           path: |
             ./tool/flutter-sdk
@@ -119,9 +119,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Load Cached Flutter SDK
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
         with:
           path: |
             ./tool/flutter-sdk
@@ -144,9 +144,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Load Cached Flutter SDK
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
         with:
           path: |
             ./tool/flutter-sdk
@@ -171,9 +171,9 @@ jobs:
 
     steps:
       - name: git clone
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Load Cached Flutter SDK
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
         with:
           path: |
             ./tool/flutter-sdk
@@ -186,7 +186,7 @@ jobs:
         run: ./tool/ci/bots.sh
 
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: golden_image_failures.${{ matrix.bot }}
@@ -243,9 +243,9 @@ jobs:
             shard: 3/3
     steps:
       - name: git clone
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Load Cached Flutter SDK
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
         with:
           path: |
             ./tool/flutter-sdk
@@ -259,7 +259,7 @@ jobs:
         run: ./tool/ci/bots.sh
 
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: golden_image_failures.${{ matrix.bot }}
@@ -277,9 +277,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Load Cached Flutter SDK
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
         with:
           path: |
             ./tool/flutter-sdk
@@ -290,6 +290,31 @@ jobs:
           DEVTOOLS_PACKAGE: devtools_extensions
         run: ./tool/ci/bots.sh
 
+  devtools-webdriver-test:
+    name: ${{ matrix.os }} devtools webdriver test
+    needs: flutter-prep
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          - test_webdriver
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: git clone
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: tool/ci/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+          PLATFORM: vm
+        run: ./tool/ci/bots.sh
+
   benchmark-performance:
     name: benchmark-performance
     needs: flutter-prep
@@ -298,9 +323,9 @@ jobs:
       fail-fast: false
     steps:
       - name: git clone
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Load Cached Flutter SDK
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
         with:
           path: |
             ./tool/flutter-sdk
@@ -316,9 +341,9 @@ jobs:
       fail-fast: false
     steps:
       - name: git clone
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Load Cached Flutter SDK
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
         with:
           path: |
             ./tool/flutter-sdk
@@ -339,7 +364,7 @@ jobs:
 #          - test_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+#        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 #
 #      - name: tool/ci/bots.sh
 #        env:
@@ -359,7 +384,7 @@ jobs:
 #          - integration_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+#        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 #      - name: tool/ci/bots.sh
 #        env:
 #          BOT: ${{ matrix.bot }}

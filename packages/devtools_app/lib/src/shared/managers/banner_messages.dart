@@ -521,21 +521,22 @@ The $codeType DevTools debugger is in maintenance mode. For the best debugging e
       );
 }
 
-class WelcomeToNewInspectorMessage extends BannerInfo {
-  WelcomeToNewInspectorMessage({required super.screenId})
+class LegacyInspectorWarningMessage extends BannerWarning {
+  LegacyInspectorWarningMessage({required super.screenId})
     : super(
-        key: Key('WelcomeToNewInspectorMessage - $screenId'),
+        key: buildKey(screenId),
         buildTextSpans: (context) => [
           const TextSpan(
-            text: '''
-👋 Welcome to the new Flutter inspector! To get started, check out the ''',
+            text:
+                'The legacy inspector will be removed in a future release. '
+                'Please enable the new inspector in the inspector settings. '
+                'If there is an issue preventing you from using the new '
+                'inspector, please file a ',
           ),
           GaLinkTextSpan(
-            link: GaLink(
-              display: 'documentation',
-              url: 'https://docs.flutter.dev/tools/devtools/inspector#new',
-              gaScreenName: screenId,
-              gaSelectedItemDescription: gac.inspectorV2Docs,
+            link: const GaLink(
+              display: 'bug',
+              url: 'https://github.com/flutter/devtools/issues/new',
             ),
             context: context,
             style: Theme.of(context).linkTextStyle,
@@ -543,6 +544,9 @@ class WelcomeToNewInspectorMessage extends BannerInfo {
           const TextSpan(text: '.'),
         ],
       );
+
+  static Key buildKey(String screenId) =>
+      Key('LegacyInspectorWarningMessage - $screenId');
 }
 
 void maybePushDebugModePerformanceMessage(String screenId) {
@@ -573,8 +577,8 @@ void pushDebuggerIdeRecommendationMessage(String screenId) {
   );
 }
 
-void pushWelcomeToNewInspectorMessage(String screenId) {
-  bannerMessages.addMessage(WelcomeToNewInspectorMessage(screenId: screenId));
+void pushLegacyInspectorWarning(String screenId) {
+  bannerMessages.addMessage(LegacyInspectorWarningMessage(screenId: screenId));
 }
 
 extension BannerMessageThemeExtension on ThemeData {

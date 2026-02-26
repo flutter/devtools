@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 
 import '../../../framework/scaffold/report_feedback_button.dart';
@@ -17,13 +17,12 @@ import '../../../shared/primitives/query_parameters.dart';
 import '../../../shared/ui/common_widgets.dart';
 import 'property_editor_controller.dart';
 import 'property_editor_view.dart';
-import 'reconnecting_overlay.dart';
 
 /// The side panel for the Property Editor.
 class PropertyEditorPanel extends StatefulWidget {
-  const PropertyEditorPanel(this.dtd, {super.key});
+  const PropertyEditorPanel(this.dtdManager, {super.key});
 
-  final DartToolingDaemon dtd;
+  final DTDManager dtdManager;
 
   @override
   State<PropertyEditorPanel> createState() => _PropertyEditorPanelState();
@@ -39,7 +38,7 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
   void initState() {
     super.initState();
 
-    final editor = EditorClient(widget.dtd);
+    final editor = EditorClient(widget.dtdManager);
     ga.screen(gac.PropertyEditorSidebar.id);
     unawaited(
       _editor = editor.initialized.then((_) {
@@ -106,43 +105,31 @@ class _PropertyEditorConnectedPanelState
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: widget.controller.shouldReconnect,
-      builder: (context, shouldReconnect, _) {
-        return Stack(
-          children: [
-            Scrollbar(
+    return Scrollbar(
+      controller: scrollController,
+      thumbVisibility: true,
+      child: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
               controller: scrollController,
-              thumbVisibility: true,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: scrollController,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          denseSpacing,
-                          defaultSpacing,
-                          defaultSpacing, // Additional right padding for scroll bar.
-                          defaultSpacing,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            PropertyEditorView(controller: widget.controller),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  const _PropertyEditorFooter(),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  denseSpacing,
+                  defaultSpacing,
+                  defaultSpacing, // Additional right padding for scroll bar.
+                  defaultSpacing,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [PropertyEditorView(controller: widget.controller)],
+                ),
               ),
             ),
-            if (shouldReconnect) const ReconnectingOverlay(),
-          ],
-        );
-      },
+          ),
+          const _PropertyEditorFooter(),
+        ],
+      ),
     );
   }
 }

@@ -11,7 +11,6 @@ import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/editor/api_classes.dart';
 import '../../../shared/editor/editor_client.dart';
-import '../../../shared/feature_flags.dart';
 import '../../../shared/ui/filter.dart';
 import '../../../shared/utils/utils.dart';
 import 'property_editor_types.dart';
@@ -55,19 +54,12 @@ class PropertyEditorController extends DisposableController
   String? get fileUri => _editableWidgetData.value?.fileUri;
   EditorRange? get widgetRange => _editableWidgetData.value?.range;
 
-  ValueListenable<bool> get shouldReconnect => _shouldReconnect;
-  final _shouldReconnect = ValueNotifier<bool>(false);
-
   bool get waitingForFirstEvent => _waitingForFirstEvent;
   bool _waitingForFirstEvent = true;
 
   late final Debouncer _requestDebouncer;
 
-  late final Timer _checkConnectionTimer;
-
   static const _requestDebounceDuration = Duration(milliseconds: 600);
-
-  static const _checkConnectionInterval = Duration(minutes: 1);
 
   static const _setPropertiesFilterId = 'set-properties-filter';
 
@@ -85,9 +77,6 @@ class PropertyEditorController extends DisposableController
   void init() {
     super.init();
     _requestDebouncer = Debouncer(duration: _requestDebounceDuration);
-    _checkConnectionTimer = _periodicallyCheckConnection(
-      _checkConnectionInterval,
-    );
 
     // Update in response to ActiveLocationChanged events.
     autoDisposeStreamSubscription(
@@ -134,7 +123,6 @@ class PropertyEditorController extends DisposableController
   @override
   void dispose() {
     _requestDebouncer.dispose();
-    _checkConnectionTimer.cancel();
     super.dispose();
   }
 
@@ -223,8 +211,7 @@ class PropertyEditorController extends DisposableController
     CodeActionResult? refactorsResult;
     // TODO(https://github.com/flutter/devtools/issues/8652): Enable refactors
     // in the Property Editor by default.
-    if (editableArgsResult != null &&
-        FeatureFlags.propertyEditorRefactors.isEnabled) {
+    if (editableArgsResult != null) {
       // Fetch the refactors using the start of the editable arguments' range,
       // which corresponds to the widget constructor name. This ensures that the
       // refactors are always available, even when the cursor is within the
@@ -267,16 +254,6 @@ class PropertyEditorController extends DisposableController
 
   List<CodeActionCommand> _extractRefactors(CodeActionResult? result) =>
       (result?.actions ?? <CodeActionCommand>[]).toList();
-
-  Timer _periodicallyCheckConnection(Duration interval) {
-    return Timer.periodic(interval, (timer) {
-      final isClosed = editorClient.isDtdClosed;
-      if (isClosed) {
-        _shouldReconnect.value = true;
-        timer.cancel();
-      }
-    });
-  }
 
   bool _filteredOutBySettings(
     EditableProperty property, {

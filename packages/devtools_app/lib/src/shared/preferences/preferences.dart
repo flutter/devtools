@@ -17,7 +17,6 @@ import '../analytics/constants.dart' as gac;
 import '../config_specific/logger/logger_helpers.dart';
 import '../constants.dart';
 import '../diagnostics/inspector_service.dart';
-import '../feature_flags.dart';
 import '../globals.dart';
 import '../primitives/query_parameters.dart';
 import '../server/server.dart';
@@ -43,7 +42,14 @@ enum _ExperimentPreferences {
   /// Whether a user has opted out of the dart2wasm experiment.
   wasmOptOut;
 
-  String get storageKey => '$storagePrefix.$name';
+  String get storageKey {
+    if (name == 'wasm') {
+      _log.warning(
+        '[deprecated] The "wasm" key is deprecated, use "wasmOptOut" instead.',
+      );
+    }
+    return '$storagePrefix.$name';
+  }
 
   static const storagePrefix = 'experiment';
 }
@@ -122,9 +128,7 @@ class PreferencesController extends DisposableController
     // Get the current values and listen for and write back changes.
     await _initDarkMode();
     await _initAdvancedDeveloperMode();
-    if (FeatureFlags.wasmOptInSetting.isEnabled) {
-      await _initWasmEnabled();
-    }
+    await _initWasmEnabled();
     await _initVerboseLogging();
 
     await cpuProfiler.init();
@@ -183,13 +187,16 @@ class PreferencesController extends DisposableController
   Future<void> _initWasmEnabled() async {
     wasmEnabled.value = kIsWasm;
 
+    final queryParams = DevToolsQueryParams.load();
     // If the user forced the dart2js-compiled DevTools via query parameter,
     // then set the storage value to match. This will persist across multiple
     // sessions of DevTools.
-    if (DevToolsQueryParams.load().useJs) {
+    final jsEnabledFromQueryParams = queryParams.useJs;
+    if (jsEnabledFromQueryParams) {
       safeUnawaited(
-        storage.setValue(_ExperimentPreferences.wasm.storageKey, 'false'),
+        storage.setValue(_ExperimentPreferences.wasmOptOut.storageKey, 'true'),
       );
+      ga.impression(gac.devToolsMain, gac.forceLoadJs);
     }
 
     addAutoDisposeListener(wasmEnabled, () async {
@@ -221,8 +228,6 @@ class PreferencesController extends DisposableController
       defaultsTo: false,
     );
     final enabledFromStorage = !optOutFromStorage;
-
-    final queryParams = DevToolsQueryParams.load();
     final enabledFromQueryParams = queryParams.useWasm;
 
     if (enabledFromQueryParams && !kIsWasm) {
@@ -250,6 +255,7 @@ class PreferencesController extends DisposableController
 
     final shouldEnableWasm =
         (enabledFromStorage || enabledFromQueryParams) &&
+        !jsEnabledFromQueryParams &&
         kIsWeb &&
         // Wasm cannot be enabled if DevTools was built using `flutter run`.
         !usingDebugDevToolsServer;

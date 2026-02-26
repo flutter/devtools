@@ -3,7 +3,6 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:flutter/widgets.dart';
-import '_utils_desktop.dart' if (dart.library.js_interop) '_utils_web.dart';
 
 /// Converts a [dartDocText] String into a [Text] widget.
 class DartDocConverter {
@@ -132,11 +131,4 @@ class DartDocConverter {
 
     return result;
   }
-}
-
-/// Workaround to force reload the Property Editor when it disconnects.
-///
-/// See https://github.com/flutter/devtools/issues/9028 for details.
-void forceReload() {
-  reloadIframe();
 }

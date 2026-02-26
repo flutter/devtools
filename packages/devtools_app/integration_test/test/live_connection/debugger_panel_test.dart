@@ -62,30 +62,32 @@ void main() {
       isTrue,
     );
 
-    logStatus('Navigating to line 57...');
+    logStatus('Navigating to line 55...');
 
-    await goToLine(tester, lineNumber: 57);
+    await goToLine(tester, lineNumber: 55);
 
-    logStatus('looking for line 57');
+    logStatus('looking for line 55');
 
-    // Look for the line 57 gutter item:
-    final gutter57Finder = findGutterItemWithText('57');
-    expect(gutter57Finder, findsOneWidget);
+    // Look for the line 55 gutter item:
+    final gutter55Finder = findGutterItemWithText('55');
+    expect(gutter55Finder, findsOneWidget);
 
-    // Look for the line 57 line item:
-    final line57Finder = findLineItemWithText("print('Hello!');");
-    expect(line57Finder, findsOneWidget);
+    // Look for the line 55 line item:
+    final line55Finder = findLineItemWithText("print('Hello!');");
+    expect(line55Finder, findsOneWidget);
+
+    await tester.pumpAndSettle(safePumpDuration);
 
     // Verify that the gutter item and line item are aligned:
     expect(
-      areHorizontallyAligned(gutter57Finder, line57Finder, tester: tester),
+      areHorizontallyAligned(gutter55Finder, line55Finder, tester: tester),
       isTrue,
     );
 
     logStatus('setting a breakpoint');
 
     // Tap on the gutter for the line to set a breakpoint:
-    await tester.tap(gutter57Finder);
+    await tester.tap(gutter55Finder);
     await tester.pumpAndSettle(longPumpDuration);
 
     logStatus('performing a hot restart');
@@ -93,42 +95,42 @@ void main() {
     await tester.tap(find.byType(HotRestartButton));
     await tester.pumpAndSettle(longPumpDuration);
 
-    logStatus('Navigating to line 30...');
+    logStatus('Navigating to line 28...');
 
-    await goToLine(tester, lineNumber: 30);
+    await goToLine(tester, lineNumber: 28);
 
-    logStatus('looking for line 30');
+    logStatus('looking for line 28');
 
     // Look for the line 30 gutter item:
-    final gutter30Finder = findGutterItemWithText('30');
-    expect(gutter30Finder, findsOneWidget);
+    final gutter28Finder = findGutterItemWithText('28');
+    expect(gutter28Finder, findsOneWidget);
 
-    // Look for the line 30 line item:
-    final line30Finder = findLineItemWithText('count++;');
-    expect(line30Finder, findsOneWidget);
+    // Look for the line 28 line item:
+    final line28Finder = findLineItemWithText('count++;');
+    expect(line28Finder, findsOneWidget);
 
     // Verify that the gutter item and line item are aligned:
     expect(
-      areHorizontallyAligned(gutter30Finder, line30Finder, tester: tester),
+      areHorizontallyAligned(gutter28Finder, line28Finder, tester: tester),
       isTrue,
     );
 
     logStatus('setting a breakpoint');
 
     // Tap on the gutter for the line to set a breakpoint:
-    await tester.tap(gutter30Finder);
+    await tester.tap(gutter28Finder);
     await tester.pumpAndSettle(longPumpDuration);
 
     logStatus('verifying breakpoints');
 
-    final bpSetBeforeRestart = findBreakpointWithText('main.dart:57');
+    final bpSetBeforeRestart = findBreakpointWithText('main.dart:55');
     expect(bpSetBeforeRestart, findsOneWidget);
 
     logStatus('pausing at breakpoint');
 
     final topFrameFinder = findStackFrameWithText('incrementCounter');
     expect(topFrameFinder, findsOneWidget);
-    expect(isLineFocused(line30Finder), isTrue);
+    expect(isLineFocused(line28Finder), isTrue);
 
     final countVariableFinder = find.textContaining('count:');
     expect(countVariableFinder, findsOneWidget);

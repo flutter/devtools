@@ -40,6 +40,9 @@ class NetworkScreen extends Screen {
   String get docPageId => screenId;
 
   @override
+  bool showAiAssistant() => true;
+
+  @override
   Widget buildScreenBody(BuildContext context) => const NetworkScreenBody();
 
   @override

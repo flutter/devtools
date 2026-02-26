@@ -63,7 +63,7 @@ void main() {
     ) async {
       await pumpSelectProjectView(tester);
       expect(
-        find.textContaining('Select a local flutter project to check'),
+        find.textContaining('Select a local Flutter project to check'),
         findsOneWidget,
       );
       expect(find.byType(ProjectRootsDropdown), findsOneWidget);
@@ -95,7 +95,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpSelectProjectView(tester);
         expect(
-          find.textContaining('Select a local flutter project to check'),
+          find.textContaining('Select a local Flutter project to check'),
           findsOneWidget,
         );
         expect(find.byType(ProjectRootsDropdown), findsOneWidget);

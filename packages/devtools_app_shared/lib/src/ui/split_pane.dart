@@ -295,13 +295,17 @@ final class _SplitPaneState extends State<SplitPane> {
   }
 }
 
-final class DefaultSplitter extends StatelessWidget {
+final class DefaultSplitter extends StatelessWidget
+    implements PreferredSizeWidget {
   const DefaultSplitter({super.key, required this.isHorizontal});
 
   static const iconSize = 24.0;
   static const splitterWidth = 12.0;
 
   final bool isHorizontal;
+
+  @override
+  Size get preferredSize => const Size(splitterWidth, iconSize);
 
   @override
   Widget build(BuildContext context) {

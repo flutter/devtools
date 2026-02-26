@@ -85,30 +85,12 @@ extension FeatureFlags on Never {
     enabled: true,
   );
 
-  /// Flag to enable the DevTools setting to opt-in to WASM.
+  /// Flag to enable the AI Assistant.
   ///
-  /// https://github.com/flutter/devtools/issues/7856
-  static final wasmOptInSetting = BooleanFeatureFlag(
-    name: 'wasmOptInSetting',
-    enabled: true,
-  );
-
-  /// Flag to enable refactors in the Flutter Property Editor sidebar.
-  ///
-  /// https://github.com/flutter/devtools/issues/9214
-  static final propertyEditorRefactors = BooleanFeatureFlag(
-    name: 'propertyEditorRefactors',
-    enabled: true,
-  );
-
-  /// Flag to enable refactors in the Flutter Property Editor sidebar.
-  ///
-  /// https://github.com/flutter/devtools/issues/9214
-  static const wasmByDefault = FlutterChannelFeatureFlag(
-    name: 'wasmByDefault',
-    flutterChannel: FlutterChannel.beta,
-    enabledForDartApps: false,
-    enabledForFlutterAppsFallback: false,
+  /// https://github.com/flutter/devtools/issues/9590
+  static final aiAssistant = BooleanFeatureFlag(
+    name: 'aiAssistant',
+    enabled: enableExperiments,
   );
 
   /// A set of all the boolean feature flags for debugging purposes.
@@ -121,17 +103,14 @@ extension FeatureFlags on Never {
     devToolsExtensions,
     dapDebugging,
     inspectorV2,
-    wasmOptInSetting,
-    propertyEditorRefactors,
+    aiAssistant,
   };
 
   /// A set of all the Flutter channel feature flags for debugging purposes.
   ///
   /// When adding a new Flutter channel flag, you are responsible for adding it
   /// to this map as well.
-  static final _flutterChannelFlags = <FlutterChannelFeatureFlag>{
-    wasmByDefault,
-  };
+  static final _flutterChannelFlags = <FlutterChannelFeatureFlag>{};
 
   /// A helper to print the status of all the feature flags.
   static void debugPrintFeatureFlags({ConnectedApp? connectedApp}) {
