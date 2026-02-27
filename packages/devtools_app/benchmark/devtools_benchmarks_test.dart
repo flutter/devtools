@@ -44,6 +44,8 @@ void main() {
       },
       timeout: const Timeout(Duration(minutes: 15)),
       retry: 0,
+      // TODO(elliette): Re-enable once flakiness is addressed.
+      skip: 'https://github.com/flutter/devtools/issues/9674',
     );
   }
 }
