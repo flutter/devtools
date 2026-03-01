@@ -101,8 +101,23 @@ class DartIOHttpRequestData extends NetworkRequest {
             );
         _request = updated;
         final fullRequest = _request as HttpProfileRequest;
-        _responseBody = utf8.decode(fullRequest.responseBody!);
-        _requestBody = utf8.decode(fullRequest.requestBody!);
+        if (fullRequest.responseBody != null) {
+          try {
+            _responseBody = utf8.decode(fullRequest.responseBody!);
+          } catch (_) {
+            _responseBody =
+                '[Binary data (${fullRequest.responseBody!.length} bytes)]';
+          }
+        }
+
+        if (fullRequest.requestBody != null) {
+          try {
+            _requestBody = utf8.decode(fullRequest.requestBody!);
+          } catch (_) {
+            _requestBody =
+                '[Binary data (${fullRequest.requestBody!.length} bytes)]';
+          }
+        }
         notifyListeners();
       }
     } finally {
@@ -303,14 +318,24 @@ class DartIOHttpRequestData extends NetworkRequest {
       _responseBody = utf8.decode(fullRequest.responseBody!);
       return _responseBody;
     } on FormatException {
-      return '<binary data>';
+      _responseBody =
+          '[Binary data (${fullRequest.responseBody!.length} bytes)]';
+      return _responseBody;
     }
   }
 
+  @visibleForTesting
   Uint8List? get encodedResponse {
     if (!_request.isResponseComplete) return null;
     final fullRequest = _request as HttpProfileRequest;
     return fullRequest.responseBody;
+  }
+
+  @visibleForTesting
+  Uint8List? get encodedRequest {
+    if (_request is! HttpProfileRequest) return null;
+    final fullRequest = _request as HttpProfileRequest;
+    return fullRequest.requestBody;
   }
 
   String? _responseBody;
@@ -329,7 +354,8 @@ class DartIOHttpRequestData extends NetworkRequest {
       _requestBody = utf8.decode(fullRequest.requestBody!);
       return _requestBody;
     } on FormatException {
-      return '<binary data>';
+      _requestBody = '[Binary data (${fullRequest.requestBody!.length} bytes)]';
+      return _requestBody;
     }
   }
 

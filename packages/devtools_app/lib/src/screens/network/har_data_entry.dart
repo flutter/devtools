@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import '../../screens/network/utils/http_utils.dart';
 import '../../shared/http/http_request_data.dart';
@@ -119,6 +120,11 @@ class HarDataEntry {
       };
     }).toList();
 
+    final encodedRequest = e.encodedRequest;
+    final encodedResponse = e.encodedResponse;
+    final decodedRequest = _decodeBytes(encodedRequest);
+    final decodedResponse = _decodeBytes(encodedResponse);
+
     return <String, Object?>{
       NetworkEventKeys.startedDateTime.name: e.startTimestamp
           .toUtc()
@@ -134,12 +140,12 @@ class HarDataEntry {
         NetworkEventKeys.queryString.name: queryString,
         NetworkEventKeys.postData.name: <String, Object?>{
           NetworkEventKeys.mimeType.name: e.contentType,
-          NetworkEventKeys.text.name: e.requestBody,
+          NetworkEventKeys.text.name: decodedRequest,
         },
         NetworkEventKeys.headersSize.name: calculateHeadersSize(
           e.requestHeaders,
         ),
-        NetworkEventKeys.bodySize.name: _calculateBodySize(e.requestBody),
+        NetworkEventKeys.bodySize.name: _calculateBodySize(encodedRequest),
       },
       // Response
       NetworkEventKeys.response.name: <String, Object?>{
@@ -151,15 +157,17 @@ class HarDataEntry {
         NetworkEventKeys.cookies.name: responseCookies,
         NetworkEventKeys.headers.name: responseHeaders,
         NetworkEventKeys.content.name: <String, Object?>{
-          NetworkEventKeys.size.name: e.responseBody?.length,
+          NetworkEventKeys.size.name: encodedResponse?.length ?? 0,
           NetworkEventKeys.mimeType.name: e.type,
-          NetworkEventKeys.text.name: e.responseBody,
+          NetworkEventKeys.text.name: decodedResponse,
+          if (_isBinary(encodedResponse))
+            NetworkEventKeys.encoding.name: 'base64',
         },
         NetworkEventKeys.redirectURL.name: '',
         NetworkEventKeys.headersSize.name: calculateHeadersSize(
           e.responseHeaders,
         ),
-        NetworkEventKeys.bodySize.name: _calculateBodySize(e.responseBody),
+        NetworkEventKeys.bodySize.name: _calculateBodySize(encodedResponse),
       },
       // Cache
       NetworkEventKeys.cache.name: <String, Object?>{},
@@ -192,6 +200,25 @@ class HarDataEntry {
   /// Returns the original [DartIOHttpRequestData] that this HAR entry was created from or parsed into.
   DartIOHttpRequestData toDartIOHttpRequest() {
     return request;
+  }
+
+  static String? _decodeBytes(Uint8List? bytes) {
+    if (bytes == null) return null;
+    try {
+      return utf8.decode(bytes);
+    } catch (_) {
+      return base64Encode(bytes);
+    }
+  }
+
+  static bool _isBinary(Uint8List? bytes) {
+    if (bytes == null) return false;
+    try {
+      utf8.decode(bytes);
+      return false;
+    } catch (_) {
+      return true;
+    }
   }
 
   static Map<String, Object?> _convertHeadersListToMap(
@@ -271,9 +298,6 @@ class HarDataEntry {
   }
 }
 
-int _calculateBodySize(String? requestBody) {
-  if (requestBody.isNullOrEmpty) {
-    return 0;
-  }
-  return utf8.encode(requestBody!).length;
+int _calculateBodySize(Uint8List? body) {
+  return body?.length ?? 0;
 }
