@@ -324,14 +324,12 @@ class DartIOHttpRequestData extends NetworkRequest {
     }
   }
 
-  @visibleForTesting
   Uint8List? get encodedResponse {
     if (!_request.isResponseComplete) return null;
     final fullRequest = _request as HttpProfileRequest;
     return fullRequest.responseBody;
   }
 
-  @visibleForTesting
   Uint8List? get encodedRequest {
     if (_request is! HttpProfileRequest) return null;
     final fullRequest = _request as HttpProfileRequest;

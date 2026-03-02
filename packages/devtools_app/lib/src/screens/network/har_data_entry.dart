@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import '../../screens/network/utils/http_utils.dart';
 import '../../shared/http/http_request_data.dart';
-import '../../shared/primitives/utils.dart';
 import 'constants.dart';
 
 /// A class representing a single entry in the HTTP Archive (HAR) format.
