@@ -39,7 +39,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any updates.
+- Fix crash in the Network tab when viewing binary multipart request or response bodies (#9978)
 
 ## Logging updates
 
