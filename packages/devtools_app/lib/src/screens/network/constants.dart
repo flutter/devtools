@@ -56,6 +56,7 @@ enum NetworkEventKeys {
   httpOnly,
   secure,
   reasonPhrase,
+  encoding,
 }
 
 class NetworkEventDefaults {
