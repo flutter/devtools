@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 
@@ -15,10 +14,6 @@ class AccessibilityController extends DevToolsScreenController
     with AutoDisposeControllerMixin {
   @override
   String get screenId => ScreenMetaData.accessibility.id;
-
-  /// The root node of the semantics tree.
-  ValueListenable<RemoteDiagnosticsNode?> get rootNode => _rootNode;
-  final _rootNode = ValueNotifier<RemoteDiagnosticsNode?>(null);
 
   /// Whether the accessibility feature is enabled.
   ValueListenable<bool> get accessibilityEnabled => _accessibilityEnabled;
@@ -33,33 +28,22 @@ class AccessibilityController extends DevToolsScreenController
   ValueListenable<bool> get autoAuditEnabled => _autoAuditEnabled;
   final _autoAuditEnabled = ValueNotifier<bool>(false);
 
-  Future<void> toggleAccessibility(bool enable) async {
-    _accessibilityEnabled.value = enable;
-    if (enable) {
-      // TODO(kenz): enable semantics and other accessibility features.
-    } else {
-      // TODO(kenz): disable semantics and other accessibility features.
-    }
-  }
-
   Future<void> setTextScaleFactor(double factor) async {
     _textScaleFactor.value = factor;
-    // TODO(kenz): set text scale factor on device.
+    // TODO(chunhtai): set text scale factor on device.
   }
 
   Future<void> toggleHighContrast(bool enable) async {
     _highContrastEnabled.value = enable;
-    // TODO(kenz): set high contrast on device.
+    // TODO(chunhtai): set high contrast on device.
   }
 
   Future<void> toggleAutoAudit(bool enable) async {
     _autoAuditEnabled.value = enable;
-    if (enable) {
-      await runAudit();
-    }
+    // TODO(chunhtai): auto run audit when enabled.
   }
 
   Future<void> runAudit() async {
-    // TODO(kenz): run accessibility audit.
+    // TODO(chunhtai): run accessibility audit.
   }
 }
