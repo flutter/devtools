@@ -95,7 +95,7 @@ extension FeatureFlags on Never {
 
   /// Flag to enable the Accessibility screen.
   ///
-  /// https://github.com/flutter/devtools/issues/9044
+  /// https://github.com/flutter/devtools/issues/9687
   static final accessibility = BooleanFeatureFlag(
     name: 'accessibility',
     enabled: enableExperiments,
