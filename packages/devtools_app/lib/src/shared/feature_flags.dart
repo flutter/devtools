@@ -98,7 +98,7 @@ extension FeatureFlags on Never {
   /// https://github.com/flutter/devtools/issues/9044
   static final accessibility = BooleanFeatureFlag(
     name: 'accessibility',
-    enabled: true,
+    enabled: enableExperiments,
   );
 
   /// A set of all the boolean feature flags for debugging purposes.

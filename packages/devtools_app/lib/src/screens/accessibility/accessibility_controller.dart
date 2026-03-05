@@ -15,7 +15,6 @@ class AccessibilityController extends DevToolsScreenController
   @override
   String get screenId => ScreenMetaData.accessibility.id;
 
-  /// Whether the accessibility feature is enabled.
   ValueListenable<bool> get accessibilityEnabled => _accessibilityEnabled;
   final _accessibilityEnabled = ValueNotifier<bool>(false);
 
