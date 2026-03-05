@@ -140,9 +140,27 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   @override
   Duration? get duration {
-    if (inProgress || !isValid) return null;
-    // Timestamps are in microseconds
-    return _endTime!.difference(_request.startTime);
+    if (_hasError) {
+      final start = _request.startTime;
+      final end = _request.endTime;
+      return end != null ? end.difference(start) : null;
+    }
+
+    // Cancelled request
+    if (_request.isRequestComplete &&
+        !_request.isResponseComplete &&
+        _request.response == null) {
+      return Duration.zero;
+    }
+
+    final start = _request.startTime;
+    final end = _request.response?.endTime ?? _request.endTime;
+
+    if (end != null) {
+      return end.difference(start);
+    }
+
+    return null;
   }
 
   /// Whether the request is safe to display in the UI.
@@ -227,11 +245,19 @@ class DartIOHttpRequestData extends NetworkRequest {
     return connectionInfo != null ? connectionInfo[_localPortKey] : null;
   }
 
-  /// True if the HTTP request hasn't completed yet, determined by the lack of
-  /// an end time in the response data.
   @override
-  bool get inProgress =>
-      _hasError ? !_request.isRequestComplete : !_request.isResponseComplete;
+  bool get inProgress {
+    // Detect cancelled requests (request finished but response never arrived)
+    if (_request.isRequestComplete &&
+        !_request.isResponseComplete &&
+        _request.response == null) {
+      return false;
+    }
+
+    return _hasError
+        ? !_request.isRequestComplete
+        : !_request.isResponseComplete;
+  }
 
   /// All instant events logged to the timeline for this HTTP request.
   List<DartIOHttpInstantEvent> get instantEvents {
@@ -301,8 +327,17 @@ class DartIOHttpRequestData extends NetworkRequest {
   DateTime get startTimestamp => _request.startTime;
 
   @override
-  String? get status =>
-      _hasError ? 'Error' : _request.response?.statusCode.toString();
+  String? get status {
+    if (_hasError) return 'Error';
+
+    if (_request.isRequestComplete &&
+        !_request.isResponseComplete &&
+        _request.response == null) {
+      return 'Cancelled';
+    }
+
+    return _request.response?.statusCode.toString();
+  }
 
   @override
   String get uri => _request.uri.toString();

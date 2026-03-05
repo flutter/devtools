@@ -505,5 +505,16 @@ void main() {
       expect(httpPatch.didFail, false);
       expect(httpWsHandshake.didFail, false);
     });
+
+    test('cancelled request should not remain pending', () {
+      final cancelledRequest = DartIOHttpRequestData(
+        HttpProfileRequest.parse(httpGetPendingJson)!,
+        requestFullDataFromVmService: false,
+      );
+
+      expect(cancelledRequest.inProgress, false);
+      expect(cancelledRequest.status, 'Cancelled');
+      expect(cancelledRequest.duration, Duration.zero);
+    });
   });
 }

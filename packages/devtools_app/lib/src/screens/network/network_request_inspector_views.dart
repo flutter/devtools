@@ -721,7 +721,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   Widget _buildHttpTimeGraph() {
     final data = this.data as DartIOHttpRequestData;
-    if (data.duration == null || data.instantEvents.isEmpty) {
+    if (data.duration == null ||
+        data.duration!.inMicroseconds == 0 ||
+        data.instantEvents.isEmpty) {
       return Container(
         key: httpTimingGraphKey,
         height: 18.0,

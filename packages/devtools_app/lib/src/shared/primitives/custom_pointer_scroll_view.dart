@@ -31,7 +31,7 @@ abstract class CustomPointerScrollView extends BoxScrollView {
     super.physics,
     super.shrinkWrap,
     super.padding,
-    super.scrollCacheExtent,
+    super.cacheExtent,
     super.semanticChildCount,
     super.dragStartBehavior,
     this.customPointerSignalHandler,
