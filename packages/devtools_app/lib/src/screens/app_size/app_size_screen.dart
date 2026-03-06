@@ -361,10 +361,7 @@ class _ImportInstructions extends StatelessWidget {
           textAlign: TextAlign.center,
           text: TextSpan(
             children: [
-              TextSpan(
-                text: 'Read ',
-                style: theme.regularTextStyle,
-              ),
+              TextSpan(text: 'Read ', style: theme.regularTextStyle),
               LinkTextSpan(
                 link: const Link(
                   display: 'documentation',
