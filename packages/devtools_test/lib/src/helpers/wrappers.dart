@@ -8,6 +8,7 @@
 library;
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/accessibility/accessibility_controller.dart';
 import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -96,6 +97,7 @@ Widget wrapWithControllers(
   ReleaseNotesController? releaseNotes,
   VMDeveloperToolsController? vmDeveloperTools,
   DTDToolsController? dtdTools,
+  AccessibilityController? accessibility,
   bool includeRouter = true,
   DevToolsQueryParams? queryParams,
 }) {
@@ -170,6 +172,12 @@ Widget wrapWithControllers(
   if (dtdTools != null) {
     screenControllers.register<DTDToolsController>(
       () => dtdTools,
+      offline: offline,
+    );
+  }
+  if (accessibility != null) {
+    screenControllers.register<AccessibilityController>(
+      () => accessibility,
       offline: offline,
     );
   }
