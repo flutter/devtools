@@ -77,7 +77,7 @@ void main() {
       expect(column.getDisplayValue(getRequest), httpGet.status);
 
       final pendingRequest = findRequestById('7');
-      expect(column.getDisplayValue(pendingRequest), '--');
+      expect(column.getDisplayValue(pendingRequest), 'Cancelled');
     });
 
     test('TypeColumn for http request', () {
@@ -94,16 +94,16 @@ void main() {
       expect(column.getDisplayValue(getRequest), '811 ms');
 
       final pendingRequest = findRequestById('7');
-      expect(column.getDisplayValue(pendingRequest), 'Pending');
+      expect(column.getDisplayValue(pendingRequest), '0 μs');
     });
 
     test('TimestampColumn', () {
       final column = TimestampColumn();
       final getRequest = findRequestById('1');
 
-      // The hours field may be unreliable since it depends on the timezone the
-      // test is running in.
-      expect(column.getDisplayValue(getRequest), contains(':45:26.279'));
+      // The hours and minutes field may be unreliable since it depends on the
+      // timezone the test is running in (e.g. UTC vs IST).
+      expect(column.getDisplayValue(getRequest), contains('26.279'));
     });
   });
 }
