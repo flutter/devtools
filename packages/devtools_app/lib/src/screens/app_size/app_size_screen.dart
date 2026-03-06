@@ -356,7 +356,7 @@ class _ImportInstructions extends StatelessWidget {
           textAlign: TextAlign.center,
           text: TextSpan(children: buildInstructionText()),
         ),
-        const SizedBox(height: 4.0),
+        const SizedBox(height: densePadding),
         RichText(
           textAlign: TextAlign.center,
           text: TextSpan(
