@@ -27,22 +27,22 @@ class AccessibilityController extends DevToolsScreenController
   ValueListenable<bool> get autoAuditEnabled => _autoAuditEnabled;
   final _autoAuditEnabled = ValueNotifier<bool>(false);
 
-  Future<void> setTextScaleFactor(double factor) async {
+  void setTextScaleFactor(double factor) {
     _textScaleFactor.value = factor;
     // TODO(chunhtai): set text scale factor on device.
   }
 
-  Future<void> toggleHighContrast(bool enable) async {
+  void toggleHighContrast(bool enable) {
     _highContrastEnabled.value = enable;
     // TODO(chunhtai): set high contrast on device.
   }
 
-  Future<void> toggleAutoAudit(bool enable) async {
+  void toggleAutoAudit(bool enable) {
     _autoAuditEnabled.value = enable;
     // TODO(chunhtai): auto run audit when enabled.
   }
 
-  Future<void> runAudit() async {
+  void runAudit() {
     // TODO(chunhtai): run accessibility audit.
   }
 }

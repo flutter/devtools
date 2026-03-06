@@ -53,8 +53,7 @@ class _SystemSimulationControls extends StatelessWidget {
             return SwitchListTile(
               title: const Text('High Contrast Mode'),
               value: enabled,
-              onChanged: (value) =>
-                  unawaited(controller.toggleHighContrast(value)),
+              onChanged: (value) => controller.toggleHighContrast(value),
             );
           },
         ),
@@ -72,8 +71,7 @@ class _SystemSimulationControls extends StatelessWidget {
                   max: 3.0,
                   divisions: 25,
                   label: factor.toStringAsFixed(1),
-                  onChanged: (value) =>
-                      unawaited(controller.setTextScaleFactor(value)),
+                  onChanged: (value) => controller.setTextScaleFactor(value),
                 ),
               ],
             );
@@ -100,7 +98,7 @@ class _AuditControls extends StatelessWidget {
           child: ElevatedButton.icon(
             icon: const Icon(Icons.play_arrow),
             label: const Text('Run Audit'),
-            onPressed: () => unawaited(controller.runAudit()),
+            onPressed: () => controller.runAudit(),
           ),
         ),
         const SizedBox(height: denseSpacing),
@@ -110,8 +108,7 @@ class _AuditControls extends StatelessWidget {
             return SwitchListTile(
               title: const Text('Auto-run Audit'),
               value: enabled,
-              onChanged: (value) =>
-                  unawaited(controller.toggleAutoAudit(value)),
+              onChanged: (value) => controller.toggleAutoAudit(value),
             );
           },
         ),
