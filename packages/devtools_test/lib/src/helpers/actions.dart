@@ -185,5 +185,5 @@ Future<void> scrollToEnd<T>(WidgetController controller) async {
     duration: const Duration(milliseconds: 500),
     curve: Curves.easeInOutCubic,
   );
-  await controller.pump(shortPumpDuration);
+  await controller.pumpAndSettle(shortPumpDuration);
 }
