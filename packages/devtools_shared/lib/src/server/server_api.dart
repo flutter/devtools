@@ -26,8 +26,6 @@ import 'devtools_store.dart';
 import 'file_system.dart';
 import 'flutter_store.dart';
 
-// TODO(kenz): consider using Dart augmentation libraries instead of part files
-// if there is a clear benefit.
 part 'handlers/_app_size.dart';
 part 'handlers/_deeplink.dart';
 part 'handlers/_devtools_extensions.dart';
