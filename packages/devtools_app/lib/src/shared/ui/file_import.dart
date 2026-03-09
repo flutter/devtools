@@ -218,9 +218,10 @@ class __DropdownSaveButtonState extends State<_DropdownSaveButton> {
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
-    required this.instructions,
     required this.gaScreen,
     required this.gaSelectionImport,
+    this.instructions,
+    this.instructionsWidget,
     this.title,
     this.backgroundColor,
     this.gaSelectionAction,
@@ -230,13 +231,15 @@ class FileImportContainer extends StatefulWidget {
     this.onFileCleared,
     this.extensions = const ['json'],
     super.key,
-  });
+  }) : assert((instructions == null) != (instructionsWidget == null));
 
   final String? title;
 
   final Color? backgroundColor;
 
-  final String instructions;
+  final String? instructions;
+
+  final Widget? instructionsWidget;
 
   /// The title of the action button.
   final String? actionText;
@@ -276,7 +279,10 @@ class _FileImportContainerState extends State<FileImportContainer> {
           Text(title, style: const TextStyle(fontSize: 18.0)),
           const SizedBox(height: extraLargeSpacing),
         ],
-        CenteredMessage(message: widget.instructions),
+        if (widget.instructionsWidget != null)
+          widget.instructionsWidget!
+        else if (widget.instructions != null)
+          CenteredMessage(message: widget.instructions),
         const SizedBox(height: denseSpacing),
         _buildImportFileRow(),
         if (widget.actionText != null && widget.onAction != null)
@@ -477,8 +483,10 @@ class DualFileImportContainer extends StatefulWidget {
     super.key,
     required this.firstFileTitle,
     required this.secondFileTitle,
-    required this.firstInstructions,
-    required this.secondInstructions,
+    this.firstInstructions,
+    this.secondInstructions,
+    this.firstInstructionsWidget,
+    this.secondInstructionsWidget,
     required this.actionText,
     required this.onAction,
     required this.gaScreen,
@@ -489,8 +497,10 @@ class DualFileImportContainer extends StatefulWidget {
 
   final String firstFileTitle;
   final String secondFileTitle;
-  final String firstInstructions;
-  final String secondInstructions;
+  final String? firstInstructions;
+  final String? secondInstructions;
+  final Widget? firstInstructionsWidget;
+  final Widget? secondInstructionsWidget;
   final String gaScreen;
   final String gaSelectionImportFirst;
   final String gaSelectionImportSecond;
@@ -525,6 +535,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
             title: widget.firstFileTitle,
             backgroundColor: backgroundColor,
             instructions: widget.firstInstructions,
+            instructionsWidget: widget.firstInstructionsWidget,
             onFileSelected: onFirstFileSelected,
             onFileCleared: onFirstFileCleared,
             gaScreen: widget.gaScreen,
@@ -539,6 +550,7 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
             title: widget.secondFileTitle,
             backgroundColor: backgroundColor,
             instructions: widget.secondInstructions,
+            instructionsWidget: widget.secondInstructionsWidget,
             onFileSelected: onSecondFileSelected,
             onFileCleared: onSecondFileCleared,
             gaScreen: widget.gaScreen,
