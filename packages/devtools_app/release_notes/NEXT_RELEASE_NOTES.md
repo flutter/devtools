@@ -19,7 +19,9 @@ TODO: Remove this section if there are not any updates.
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any updates.
+- Added a "Reconnect" button to the disconnected overlay in embedded/IDE mode,
+  and fixed reconnection to restore the VM service connection after machine
+  sleep/wake (#9683).
 
 ## Performance updates
 
