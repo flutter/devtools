@@ -143,7 +143,7 @@ class DartIOHttpRequestData extends NetworkRequest {
     if (_hasError) {
       final start = _request.startTime;
       final end = _request.endTime;
-      return end != null ? end.difference(start) : null;
+      return end?.difference(start);
     }
 
     // Cancelled request
