@@ -254,9 +254,9 @@ class DartIOHttpRequestData extends NetworkRequest {
       return false;
     }
 
-    return _hasError
-        ? !_request.isRequestComplete
-        : !_request.isResponseComplete;
+    return !(_hasError
+        ? _request.isRequestComplete
+        : _request.isResponseComplete);
   }
 
   /// All instant events logged to the timeline for this HTTP request.
