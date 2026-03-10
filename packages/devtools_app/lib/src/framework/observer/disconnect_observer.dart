@@ -127,10 +127,20 @@ class DisconnectObserverState extends State<DisconnectObserver>
                 Text('Disconnected', style: theme.textTheme.headlineMedium),
                 const SizedBox(height: defaultSpacing),
                 if (!isEmbedded())
-                  ConnectToNewAppButton(
-                    routerDelegate: widget.routerDelegate,
-                    onPressed: hideDisconnectedOverlay,
-                    gaScreen: gac.devToolsMain,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: _attemptReconnect,
+                        child: const Text('Reconnect'),
+                      ),
+                      const SizedBox(width: defaultSpacing),
+                      ConnectToNewAppButton(
+                        routerDelegate: widget.routerDelegate,
+                        onPressed: hideDisconnectedOverlay,
+                        gaScreen: gac.devToolsMain,
+                      ),
+                    ],
                   )
                 else
                   const Text('Run a new debug session to reconnect.'),
@@ -149,5 +159,13 @@ class DisconnectObserverState extends State<DisconnectObserver>
       ),
     );
     return currentDisconnectedOverlay!;
+  }
+
+  Future<void> _attemptReconnect() async {
+    // Hide the overlay immediately so user knows something happened
+    hideDisconnectedOverlay();
+    
+    // Try to reconnect DTD which may help restore service connection
+    await dtdManager.reconnect();
   }
 }
