@@ -1248,10 +1248,9 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
         String? foundExact;
 
         // What the user has typed in so far.
-        final searchToMatch = widget.controller.search.toLowerCase();
         // Find exact match in autocomplete list - use that as our search value.
         for (final autoEntry in widget.controller.searchAutoComplete.value) {
-          if (searchToMatch == autoEntry.text.toLowerCase()) {
+          if (autoEntry.text.caseInsensitiveEquals(widget.controller.search)) {
             foundExact = autoEntry.text;
             break;
           }
