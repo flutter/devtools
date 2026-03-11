@@ -15,8 +15,8 @@
 ### Issues checklist
 
 - [ ] I listed at least one issue that this PR fixes in the description above.
-- [ ] I listed at least one issue which has the [`soliciting-contributions`] label. 
-- [ ] I did not list at least one issue with the [`soliciting-contributions`] label. I understand this means my PR might take longer to be reviewed. 
+- [ ] I listed at least one issue which has the [`contributions-welcome`] or [`good-first-issue`] label. 
+- [ ] I did not list at least one issue with the [`contributions-welcome`] or [`good-first-issue`] label. I understand this means my PR might take longer to be reviewed. 
 
 ### Tests checklist
 
@@ -50,7 +50,8 @@ If you need help, consider asking for help on [Discord].
 [Tree Hygiene]: https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md
 [Flutter Style Guide]: https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md
 [CLA]: https://cla.developers.google.com/
-[`soliciting-contributions`]: https://github.com/flutter/devtools/issues?q=state%3Aopen%20label%3Asoliciting-contributions
+[`contributions-welcome`]: https://github.com/flutter/devtools/issues?q=state%3Aopen%20label%3Acontributions-welcome
+[`good-first-issue`]: https://github.com/flutter/devtools/issues?q=state%3Aopen%20label%3Agood-first-issue
 [AI contributions guideline]: https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md#ai-contribution-guidelines
 [build.yaml badge]: https://github.com/flutter/devtools/actions/workflows/build.yaml/badge.svg
 [Discord]: https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md
