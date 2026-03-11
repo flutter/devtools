@@ -39,7 +39,6 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-- Fix crash in the Network tab when viewing binary multipart request or response bodies (#9978)
 - Fix cancelled HTTP requests incorrectly showing as "Pending" in the Network tab (#9683)
 
 ## Logging updates
