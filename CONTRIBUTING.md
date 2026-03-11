@@ -20,10 +20,12 @@ follow our [beta testing guidance](https://github.com/flutter/devtools/blob/mast
 We gladly accept contributions via GitHub pull requests! We encourage you to read the
 [Welcome](https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md#welcome) remarks in the Flutter
 framework's contributing guide, as all of that information applies to contributing to the `flutter/devtools`
-repo as well. Small edit
+repo as well.
 
 We communicate primarily over GitHub and [Discord](https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md) on the
 [#hackers-devtools](https://discord.com/channels/608014603317936148/1106667330093723668) channel.
+
+We prioritize reviewing PRs for issues with the [`soliciting-contributions`](https://github.com/flutter/devtools/issues?q=state%3Aopen%20label%3Asoliciting-contributions) label. If you are looking for an issue to fix, please check that label first. 
 
 Before contributing code:
 
