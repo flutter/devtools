@@ -144,6 +144,9 @@ class NetworkController extends DevToolsScreenController
 
   final selectedRequest = ValueNotifier<NetworkRequest?>(null);
 
+  /// When true, hides tcp Socket rows that are created by HTTP profiling.
+  final filterHttpSockets = ValueNotifier<bool>(false);
+
   final _currentNetworkRequests = CurrentNetworkRequests();
 
   /// Notifies that the timeline is currently being recorded.
@@ -167,7 +170,7 @@ class NetworkController extends DevToolsScreenController
 
   PeriodicDebouncer? _pollingTimer;
 
-  @visibleForTesting
+  // Removed @visibleForTesting annotation
   bool get isPolling => _pollingTimer != null;
 
   static const _pollingDuration = Duration(milliseconds: 2000);
@@ -180,6 +183,7 @@ class NetworkController extends DevToolsScreenController
       _currentNetworkRequests,
       _filterAndRefreshSearchMatches,
     );
+    addAutoDisposeListener(filterHttpSockets, _filterAndRefreshSearchMatches);
   }
 
   @override
@@ -188,6 +192,7 @@ class NetworkController extends DevToolsScreenController
     _pollingTimer?.dispose();
     _pollingTimer = null;
     _currentResponseViewType.dispose();
+    filterHttpSockets.dispose();
     selectedRequest.dispose();
     _recordingNotifier.dispose();
     _currentNetworkRequests.dispose();
@@ -237,7 +242,7 @@ class NetworkController extends DevToolsScreenController
     }
   }
 
-  @visibleForTesting
+  // Removed @visibleForTesting annotation
   void processNetworkTrafficHelper(
     List<SocketStatistic> sockets,
     List<HttpProfileRequest>? httpRequests,
@@ -437,18 +442,27 @@ class NetworkController extends DevToolsScreenController
   void filterData(Filter<NetworkRequest> filter) {
     super.filterData(filter);
     serviceConnection.errorBadgeManager.clearErrorCount(NetworkScreen.id);
+
+    // Apply socket filter first.
+    final allRequests = _currentNetworkRequests.value.where((r) {
+      if (filterHttpSockets.value && r is Socket && r.socketType == 'tcp') {
+        return false;
+      }
+      return true;
+    }).toList();
+
     final queryFilter = filter.queryFilter;
     if (queryFilter.isEmpty) {
-      _currentNetworkRequests.value.forEach(_checkForError);
+      allRequests.forEach(_checkForError);
       filteredData
         ..clear()
-        ..addAll(_currentNetworkRequests.value);
+        ..addAll(allRequests);
       return;
     }
     filteredData
       ..clear()
       ..addAll(
-        _currentNetworkRequests.value.where((NetworkRequest r) {
+        allRequests.where((NetworkRequest r) {
           final filteredOutByQueryFilterArgument = queryFilter.filterArguments
               .any((argument) => !argument.matchesValue(r));
           if (filteredOutByQueryFilterArgument) return false;

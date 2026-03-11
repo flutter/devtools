@@ -4,4 +4,4 @@
 
 part of '../constants.dart';
 
-enum NetworkEvent { downloadAsHar }
+enum NetworkEvent { downloadAsHar, hideHttpSockets }

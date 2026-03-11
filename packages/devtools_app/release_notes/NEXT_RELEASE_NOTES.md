@@ -15,7 +15,9 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any updates.
+
+- Removed @visibleForTesting annotation from NetworkController and fixed analyzer warnings in network_screen.dart/network_controller.dart.
+	This improves code clarity and resolves unnecessary analyzer warnings.
 
 ## Inspector updates
 

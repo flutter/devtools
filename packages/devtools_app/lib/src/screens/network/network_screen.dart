@@ -232,6 +232,29 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               onPressed: controller.clear,
             ),
             const SizedBox(width: denseSpacing),
+            // Toggle to hide tcp sockets created by the HTTP profiler.
+            ValueListenableBuilder<bool>(
+              valueListenable: controller.filterHttpSockets,
+              builder: (context, filterEnabled, _) {
+                return ToolbarAction(
+                  icon: Icons.lan,
+                  tooltip: filterEnabled
+                      ? 'Showing HTTP sockets — click to show all sockets'
+                      : 'Click to hide HTTP profiler sockets',
+                  onPressed: () {
+                    ga.select(
+                      gac.network,
+                      gac.NetworkEvent.hideHttpSockets.name,
+                    );
+                    controller.filterHttpSockets.value = !filterEnabled;
+                  },
+                  color: filterEnabled
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
+                );
+              },
+            ),
+            const SizedBox(width: denseSpacing),
             // TODO(kenz): fix focus issue when state is refreshed
             Expanded(
               child: SearchField<NetworkController>(
