@@ -21,7 +21,7 @@
 ### Tests checklist
 
 - [ ] I added new tests to check the change I am making...
-- [ ] OR there is a reason for not adding tests.
+- [ ] OR there is a reason for not adding tests. If this is the case, please explain why in the PR description.
 
 ### AI-tooling checklist
 
