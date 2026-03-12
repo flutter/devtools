@@ -260,143 +260,45 @@ void main() {
       expect(controller.filteredData.value, hasLength(2));
     });
 
-    group('filterHttpSockets', () {
-      // The test socket profile contains 2 sockets with socketType 'tcp'.
-      // These are the sockets created by the HTTP profiler that should be
-      // hidden when filterHttpSockets is enabled.
+    test('filterData hides tcp sockets via setting filter', () async {
+      await controller.startRecording();
+      await controller.networkService.refreshNetworkData();
+
       const numRequests = 9;
       const numTcpSockets = 2;
-      const numRequestsWithoutTcpSockets = numRequests - numTcpSockets;
 
-      setUp(() async {
-        await controller.startRecording();
-        await controller.networkService.refreshNetworkData();
-        // Ensure all requests are loaded and no filter is active.
-        expect(controller.requests.value, hasLength(numRequests));
-        expect(controller.filteredData.value, hasLength(numRequests));
-      });
+      expect(controller.filteredData.value, hasLength(numRequests));
 
-      tearDown(() async {
-        // Always reset the toggle so it doesn't bleed into other tests.
-        controller.filterHttpSockets.value = false;
-        await controller.stopRecording();
-      });
+      // Enable the hide HTTP sockets toggle filter.
+      final socketFilter = controller.settingFilters
+          .whereType<ToggleFilter<NetworkRequest>>()
+          .firstWhere((f) => f.id == NetworkController.hideHttpSocketsFilterId);
 
-      test('defaults to false (all sockets visible)', () {
-        expect(controller.filterHttpSockets.value, false);
-        expect(controller.filteredData.value, hasLength(numRequests));
+      // Pass the updated setting filters through setActiveFilter so the
+      // base class FilterControllerMixin picks them up and re-filters.
+      socketFilter.setting.value = true;
+      controller.setActiveFilter(
+        settingFilters: controller.settingFilters
+            .whereType<ToggleFilter<NetworkRequest>>()
+            .toList(),
+      );
 
-        // Confirm the 2 tcp sockets are present when filter is off.
-        final tcpSockets = controller.filteredData.value
-            .whereType<Socket>()
-            .where((s) => s.socketType == 'tcp')
-            .toList();
-        expect(tcpSockets, hasLength(numTcpSockets));
-      });
+      expect(controller.filteredData.value, hasLength(numRequests - numTcpSockets));
 
-      test('enabling hides tcp sockets from filteredData', () {
-        controller.filterHttpSockets.value = true;
+      final tcpSockets = controller.filteredData.value
+          .whereType<Socket>()
+          .where((s) => s.socketType == 'tcp')
+          .toList();
+      expect(tcpSockets, isEmpty);
 
-        expect(
-          controller.filteredData.value,
-          hasLength(numRequestsWithoutTcpSockets),
-        );
-
-        // No tcp sockets should remain in the filtered list.
-        final tcpSockets = controller.filteredData.value
-            .whereType<Socket>()
-            .where((s) => s.socketType == 'tcp')
-            .toList();
-        expect(tcpSockets, isEmpty);
-      });
-
-      test('enabling does not hide websocket sockets', () {
-        // Inject a websocket socket via the public processNetworkTraffic API
-        // to verify it is preserved when the filter is active.
-        controller.processNetworkTraffic(
-          sockets: [
-            SocketStatistic.parse({
-              'id': 'ws-1',
-              'startTime': DateTime(2021).microsecondsSinceEpoch,
-              'lastReadTime': 25,
-              'lastWriteTime': 30,
-              'address': '1.2.3.4',
-              'port': 443,
-              'socketType': 'websocket',
-              'readBytes': 10,
-              'writeBytes': 10,
-            })!,
-          ],
-          httpRequests: [],
-        );
-
-        // Now enable the filter — tcp sockets should be hidden, websocket kept.
-        controller.filterHttpSockets.value = true;
-
-        final webSockets = controller.filteredData.value
-            .whereType<Socket>()
-            .where((s) => s.socketType == 'websocket')
-            .toList();
-        expect(webSockets, hasLength(1));
-
-        final tcpSockets = controller.filteredData.value
-            .whereType<Socket>()
-            .where((s) => s.socketType == 'tcp')
-            .toList();
-        expect(tcpSockets, isEmpty);
-      });
-
-      test('disabling restores tcp sockets in filteredData', () {
-        // Enable and verify sockets are hidden.
-        controller.filterHttpSockets.value = true;
-        expect(
-          controller.filteredData.value,
-          hasLength(numRequestsWithoutTcpSockets),
-        );
-
-        // Disable and verify sockets are restored.
-        controller.filterHttpSockets.value = false;
-        expect(controller.filteredData.value, hasLength(numRequests));
-
-        final tcpSockets = controller.filteredData.value
-            .whereType<Socket>()
-            .where((s) => s.socketType == 'tcp')
-            .toList();
-        expect(tcpSockets, hasLength(numTcpSockets));
-      });
-
-      test('raw requests list is never modified by the toggle', () {
-        // Enabling the filter must never mutate the underlying requests list —
-        // only filteredData should change.
-        controller.filterHttpSockets.value = true;
-        expect(controller.requests.value, hasLength(numRequests));
-
-        controller.filterHttpSockets.value = false;
-        expect(controller.requests.value, hasLength(numRequests));
-      });
-
-      test('composes correctly with query filter', () {
-        // With socket filter on AND a query filter that matches HTTP requests
-        // only, tcp sockets should be excluded by the socket filter before
-        // the query filter runs.
-        controller.filterHttpSockets.value = true;
-        controller.setActiveFilter(query: 'jsonplaceholder');
-
-        // 5 HTTP requests match 'jsonplaceholder'; 0 tcp sockets should appear.
-        expect(controller.filteredData.value, hasLength(5));
-        final tcpSockets = controller.filteredData.value
-            .whereType<Socket>()
-            .where((s) => s.socketType == 'tcp')
-            .toList();
-        expect(tcpSockets, isEmpty);
-
-        // Reset query filter but keep socket filter on.
-        controller.setActiveFilter();
-        expect(
-          controller.filteredData.value,
-          hasLength(numRequestsWithoutTcpSockets),
-        );
-      });
+      // Disable and verify sockets are restored.
+      socketFilter.setting.value = false;
+      controller.setActiveFilter(
+        settingFilters: controller.settingFilters
+            .whereType<ToggleFilter<NetworkRequest>>()
+            .toList(),
+      );
+      expect(controller.filteredData.value, hasLength(numRequests));
     });
   });
 

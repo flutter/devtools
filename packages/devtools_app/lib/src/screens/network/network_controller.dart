@@ -91,11 +91,24 @@ class NetworkController extends DevToolsScreenController
     return null;
   }
 
+  static const hideHttpSocketsFilterId = 'network-hide-http-sockets';
+
   static const methodFilterId = 'network-method-filter';
 
   static const statusFilterId = 'network-status-filter';
 
   static const typeFilterId = 'network-type-filter';
+
+  @override
+  SettingFilters<NetworkRequest> createSettingFilters() => [
+    ToggleFilter<NetworkRequest>(
+      id: hideHttpSocketsFilterId,
+      name: 'Hide HTTP profiler sockets',
+      includeCallback: (request) =>
+          !(request is Socket && request.socketType == 'tcp'),
+      defaultValue: false,
+    ),
+  ];
 
   @override
   Map<String, QueryFilterArgument<NetworkRequest>> createQueryFilterArgs() => {
@@ -144,9 +157,6 @@ class NetworkController extends DevToolsScreenController
 
   final selectedRequest = ValueNotifier<NetworkRequest?>(null);
 
-  /// When true, hides tcp Socket rows that are created by HTTP profiling.
-  final filterHttpSockets = ValueNotifier<bool>(false);
-
   final _currentNetworkRequests = CurrentNetworkRequests();
 
   /// Notifies that the timeline is currently being recorded.
@@ -183,7 +193,6 @@ class NetworkController extends DevToolsScreenController
       _currentNetworkRequests,
       _filterAndRefreshSearchMatches,
     );
-    addAutoDisposeListener(filterHttpSockets, _filterAndRefreshSearchMatches);
   }
 
   @override
@@ -192,7 +201,6 @@ class NetworkController extends DevToolsScreenController
     _pollingTimer?.dispose();
     _pollingTimer = null;
     _currentResponseViewType.dispose();
-    filterHttpSockets.dispose();
     selectedRequest.dispose();
     _recordingNotifier.dispose();
     _currentNetworkRequests.dispose();
@@ -443,10 +451,13 @@ class NetworkController extends DevToolsScreenController
     super.filterData(filter);
     serviceConnection.errorBadgeManager.clearErrorCount(NetworkScreen.id);
 
-    // Apply socket filter first.
+    // Apply setting filters (e.g. hide HTTP profiler tcp sockets toggle).
+    final settingFiltersList = filter.settingFilters;
     final allRequests = _currentNetworkRequests.value.where((r) {
-      if (filterHttpSockets.value && r is Socket && r.socketType == 'tcp') {
-        return false;
+      if (settingFiltersList != null) {
+        for (final settingFilter in settingFiltersList) {
+          if (!settingFilter.includeData(r)) return false;
+        }
       }
       return true;
     }).toList();
