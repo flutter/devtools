@@ -180,7 +180,6 @@ class NetworkController extends DevToolsScreenController
 
   PeriodicDebouncer? _pollingTimer;
 
-  // Removed @visibleForTesting annotation
   bool get isPolling => _pollingTimer != null;
 
   static const _pollingDuration = Duration(milliseconds: 2000);
@@ -250,7 +249,6 @@ class NetworkController extends DevToolsScreenController
     }
   }
 
-  // Removed @visibleForTesting annotation
   void processNetworkTrafficHelper(
     List<SocketStatistic> sockets,
     List<HttpProfileRequest>? httpRequests,
