@@ -27,10 +27,11 @@
 
 - [ ] I did not use any AI tooling in creating this PR.
 - [ ] OR I did use AI tooling, and...
-    * [ ] I read the [AI contributions guidelines]
+    * [ ] I read the [AI contributions guidelines] and agree to follow them.
     * [ ] I reviewed all AI-generated code before opening this PR.
     * [ ] I understand and am able to discuss the code in this PR.
     * [ ] I have verifed the accuracy of any AI-generated text included in the PR description.
+    * [ ] I commit to verifying the accuracy of any AI-generated code or text that I upload in response to review comments.
 
 ### Feature-change checklist 
 
