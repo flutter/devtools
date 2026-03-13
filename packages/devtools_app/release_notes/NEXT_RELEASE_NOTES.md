@@ -15,9 +15,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-
-- Removed @visibleForTesting annotation from NetworkController and fixed analyzer warnings in network_screen.dart/network_controller.dart.
-	This improves code clarity and resolves unnecessary analyzer warnings.
+- Updated the Network profiler to use the standard setting filters UI for hiding HTTP-profiler socket rows, so the toggle now appears in the filter dropdown and is applied consistently during filtering.
 
 ## Inspector updates
 
@@ -41,7 +39,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-- Fix crash in the Network tab when viewing binary multipart request or response bodies (#9978)
+TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 

@@ -283,7 +283,10 @@ void main() {
             .toList(),
       );
 
-      expect(controller.filteredData.value, hasLength(numRequests - numTcpSockets));
+      expect(
+        controller.filteredData.value,
+        hasLength(numRequests - numTcpSockets),
+      );
 
       final tcpSockets = controller.filteredData.value
           .whereType<Socket>()

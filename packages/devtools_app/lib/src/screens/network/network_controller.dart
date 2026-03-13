@@ -104,8 +104,7 @@ class NetworkController extends DevToolsScreenController
     ToggleFilter<NetworkRequest>(
       id: hideHttpSocketsFilterId,
       name: 'Hide HTTP profiler sockets',
-      includeCallback: (request) =>
-          !(request is Socket && request.socketType == 'tcp'),
+      includeCallback: (request) => request is! Socket,
       defaultValue: false,
     ),
   ];
@@ -180,6 +179,7 @@ class NetworkController extends DevToolsScreenController
 
   PeriodicDebouncer? _pollingTimer;
 
+  @visibleForTesting
   bool get isPolling => _pollingTimer != null;
 
   static const _pollingDuration = Duration(milliseconds: 2000);
@@ -448,30 +448,23 @@ class NetworkController extends DevToolsScreenController
   void filterData(Filter<NetworkRequest> filter) {
     super.filterData(filter);
     serviceConnection.errorBadgeManager.clearErrorCount(NetworkScreen.id);
-
-    // Apply setting filters (e.g. hide HTTP profiler tcp sockets toggle).
-    final settingFiltersList = filter.settingFilters;
-    final allRequests = _currentNetworkRequests.value.where((r) {
-      if (settingFiltersList != null) {
-        for (final settingFilter in settingFiltersList) {
-          if (!settingFilter.includeData(r)) return false;
-        }
-      }
-      return true;
-    }).toList();
-
     final queryFilter = filter.queryFilter;
-    if (queryFilter.isEmpty) {
-      allRequests.forEach(_checkForError);
+    if (filter.isEmpty) {
+      _currentNetworkRequests.value.forEach(_checkForError);
       filteredData
         ..clear()
-        ..addAll(allRequests);
+        ..addAll(_currentNetworkRequests.value);
       return;
     }
     filteredData
       ..clear()
       ..addAll(
-        allRequests.where((NetworkRequest r) {
+        _currentNetworkRequests.value.where((NetworkRequest r) {
+          final filteredOutBySettingFilters = filter.settingFilters.any(
+            (settingFilter) => !settingFilter.includeData(r),
+          );
+          if (filteredOutBySettingFilters) return false;
+
           final filteredOutByQueryFilterArgument = queryFilter.filterArguments
               .any((argument) => !argument.matchesValue(r));
           if (filteredOutByQueryFilterArgument) return false;
