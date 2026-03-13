@@ -8,7 +8,8 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 When you add a user-facing change to DevTools,
 please add a release note entry to document this improvement.
 
-This entry should be phrased in the past tense (e.g. "Added XYZ" instead of "Add XYZ").
+This entry should be phrased in the past tense.
+For example, "Added XYZ" instead of "Add XYZ".
 
 ### Release note entry
 
@@ -16,12 +17,12 @@ Use this format for the entry:
 
 ```markdown
 * Created the best feature ever. -
-[#10000000001](https://github.com/flutter/devtools/pull/10000000001),
-[#10000000002](https://github.com/flutter/devtools/pull/10000000002),
-[#10000000003](https://github.com/flutter/devtools/pull/10000000003)
+  [#10000000001](https://github.com/flutter/devtools/pull/10000000001),
+  [#10000000002](https://github.com/flutter/devtools/pull/10000000002),
+  [#10000000003](https://github.com/flutter/devtools/pull/10000000003)
 ```
 
-Find other examples in [previous notes](https://github.com/flutter/website/tree/main/src/tools/devtools/release-notes).
+Find other examples in [previous notes](https://github.com/flutter/website/tree/main/src/content/tools/devtools/release-notes).
 
 ### Adding images to a release note entry
 
@@ -37,10 +38,12 @@ Consider adding an image to the release note entry:
     ```
 
 #### Image style
-Please use DevTools in **dark mode** when taking screenshots for release
-notes. We use a dark theme since this is the default theme for DevTools.
+
+Please use DevTools in **dark mode** when taking screenshots for release notes.
+We use a dark theme since this is the default theme for DevTools.
 
 #### Image size
+
 When adding images, be cognizant that the images will be rendered in a
 relatively small window in DevTools, and they should be sized accordingly.
 A wide aspect ratio is preferred so that the space of the release notes
@@ -58,7 +61,9 @@ Before continuing, ensure you have your local environment set up for
 
 ### Creating the release notes PR
 
-Draft release notes on a local `flutter/website` branch using the following command:
+Draft release notes on a local `flutter/website` branch by running
+the following command with the path to your local `flutter/website` repo:
+
 ```console
 dt release-notes -w /Users/me/absolute/path/to/flutter/website
 ```

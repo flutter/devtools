@@ -211,7 +211,7 @@ class EvalOnDartLibrary extends DisposableController
       if (result is ErrorRef) {
         throw result;
       }
-      return result as FutureOr<InstanceRef?>;
+      return await (result as FutureOr<InstanceRef?>);
     } catch (e, stack) {
       if (shouldLogError) {
         _handleError('$e - $expression', stack);
@@ -242,7 +242,7 @@ class EvalOnDartLibrary extends DisposableController
       if (result is ErrorRef) {
         throw result;
       }
-      return result as FutureOr<InstanceRef?>;
+      return await (result as FutureOr<InstanceRef?>);
     } catch (e, stack) {
       if (shouldLogError) {
         _handleError('$e - $name', stack);
