@@ -39,7 +39,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any updates.
+- Added a filter setting to hide HTTP-profiler socket data. [#9698](https://github.com/flutter/devtools/pull/9698)
 
 ## Logging updates
 
