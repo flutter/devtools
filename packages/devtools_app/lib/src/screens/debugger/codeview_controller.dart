@@ -19,6 +19,7 @@ import '../../shared/framework/routing.dart';
 import '../../shared/globals.dart';
 import '../../shared/managers/notifications.dart';
 import '../../shared/primitives/history_manager.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils/utils.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
@@ -419,12 +420,11 @@ class CodeViewController extends DisposableController
       return [];
     }
     final matches = <SourceToken>[];
-    final caseInsensitiveSearch = search.toLowerCase();
 
     final currentScript = parsedScript.value!;
     for (int i = 0; i < currentScript.lines.length; i++) {
-      final line = currentScript.lines[i].toLowerCase();
-      final matchesForLine = caseInsensitiveSearch.allMatches(line);
+      final line = currentScript.lines[i];
+      final matchesForLine = search.caseInsensitiveAllMatches(line);
       if (matchesForLine.isNotEmpty) {
         matches.addAll(
           matchesForLine.map(

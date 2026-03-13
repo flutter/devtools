@@ -4,15 +4,19 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:dtd/dtd.dart';
 import 'package:flutter/foundation.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
+import 'package:logging/logging.dart';
 
 import '../analytics/constants.dart';
 import '../framework/app_error_handling.dart';
 import 'api_classes.dart';
+
+final _log = Logger('editor_client');
 
 /// A client wrapper that connects to an editor over DTD.
 ///
@@ -20,69 +24,34 @@ import 'api_classes.dart';
 /// ensure they are not breaking changes to already-shipped editors.
 class EditorClient extends DisposableController
     with AutoDisposeControllerMixin {
-  EditorClient(this._dtd) {
+  EditorClient(this._dtdManager) {
     unawaited(initialized); // Trigger async initialization.
   }
 
-  final DartToolingDaemon _dtd;
+  final DTDManager _dtdManager;
   late final initialized = _initialize();
+
+  DartToolingDaemon get _dtd => _dtdManager.connection.value!;
 
   String get gaId => EditorSidebar.id;
 
   Future<void> _initialize() async {
     autoDisposeStreamSubscription(
-      _dtd.onEvent(CoreDtdServiceConstants.servicesStreamId).listen((data) {
-        final kind = data.kind;
-        if (kind != CoreDtdServiceConstants.serviceRegisteredKind &&
-            kind != CoreDtdServiceConstants.serviceUnregisteredKind) {
-          return;
-        }
-
+      _dtdManager.serviceRegistrationBroadcastStream.listen((data) {
         final service = data.data[DtdParameters.service] as String?;
-        if (service == null ||
-            (service != editorServiceName && service != lspServiceName)) {
-          return;
-        }
-
+        if (service == null) return;
         final isRegistered =
-            kind == CoreDtdServiceConstants.serviceRegisteredKind;
+            data.kind == CoreDtdServiceConstants.serviceRegisteredKind;
         final method = data.data[DtdParameters.method] as String;
         final capabilities =
             data.data[DtdParameters.capabilities] as Map<String, Object?>?;
-        final lspMethod = LspMethod.fromMethodName(method);
-        if (lspMethod != null) {
-          lspMethod.isRegistered = isRegistered;
-          if (lspMethod == LspMethod.editableArguments) {
-            // Update the notifier so that the Property Editor is aware that the
-            // editableArguments API is registered.
-            _editableArgumentsApiIsRegistered.value = isRegistered;
-          }
-        } else if (method == EditorMethod.getDevices.name) {
-          _supportsGetDevices = isRegistered;
-        } else if (method == EditorMethod.getDebugSessions.name) {
-          _supportsGetDebugSessions = isRegistered;
-        } else if (method == EditorMethod.selectDevice.name) {
-          _supportsSelectDevice = isRegistered;
-        } else if (method == EditorMethod.hotReload.name) {
-          _supportsHotReload = isRegistered;
-        } else if (method == EditorMethod.hotRestart.name) {
-          _supportsHotRestart = isRegistered;
-        } else if (method == EditorMethod.openDevToolsPage.name) {
-          _supportsOpenDevToolsPage = isRegistered;
-          _supportsOpenDevToolsForceExternal =
-              capabilities?[Field.supportsForceExternal] == true;
-        } else {
-          return;
-        }
 
-        final info = isRegistered
-            ? ServiceRegistered(
-                service: service,
-                method: method,
-                capabilities: capabilities,
-              )
-            : ServiceUnregistered(service: service, method: method);
-        _editorServiceChangedController.add(info);
+        _handleServiceRegistration(
+          service: service,
+          method: method,
+          capabilities: capabilities,
+          isRegistered: isRegistered,
+        );
       }),
     );
 
@@ -126,15 +95,75 @@ class EditorClient extends DisposableController
         }
       }),
     );
-    await [
-      _dtd.streamListen(CoreDtdServiceConstants.servicesStreamId),
-      _dtd.streamListen(editorStreamName).catchError((_) {
-        // Because we currently call streamListen in two places (here and
-        // ThemeManager) this can fail. It doesn't matter if this happens,
-        // however we should refactor this code to better support using the DTD
-        // connection in multiple places without them having to coordinate.
-      }),
-    ].wait;
+
+    await _dtd.streamListen(editorStreamName).catchError((_) {
+      // Because we currently call streamListen in two places (here and
+      // ThemeManager) this can fail. It doesn't matter if this happens,
+      // however we should refactor this code to better support using the DTD
+      // connection in multiple places without them having to coordinate.
+    });
+
+    // Check if any client services have already been registered against DTD.
+    try {
+      final response = await _dtd.getRegisteredServices();
+      for (final service in response.clientServices) {
+        for (final method in service.methods.values) {
+          _handleServiceRegistration(
+            service: service.name,
+            method: method.name,
+            capabilities: method.capabilities,
+          );
+        }
+      }
+    } catch (e) {
+      _log.warning('Failed to fetch registered services: $e');
+    }
+  }
+
+  void _handleServiceRegistration({
+    required String service,
+    required String method,
+    Map<String, Object?>? capabilities,
+    bool isRegistered = true,
+  }) {
+    if (service != editorServiceName && service != lspServiceName) {
+      return;
+    }
+
+    final lspMethod = LspMethod.fromMethodName(method);
+    if (lspMethod != null) {
+      lspMethod.isRegistered = isRegistered;
+      if (lspMethod == LspMethod.editableArguments) {
+        // Update the notifier so that the Property Editor is aware that the
+        // editableArguments API is registered.
+        _editableArgumentsApiIsRegistered.value = isRegistered;
+      }
+    } else if (method == EditorMethod.getDevices.name) {
+      _supportsGetDevices = isRegistered;
+    } else if (method == EditorMethod.getDebugSessions.name) {
+      _supportsGetDebugSessions = isRegistered;
+    } else if (method == EditorMethod.selectDevice.name) {
+      _supportsSelectDevice = isRegistered;
+    } else if (method == EditorMethod.hotReload.name) {
+      _supportsHotReload = isRegistered;
+    } else if (method == EditorMethod.hotRestart.name) {
+      _supportsHotRestart = isRegistered;
+    } else if (method == EditorMethod.openDevToolsPage.name) {
+      _supportsOpenDevToolsPage = isRegistered;
+      _supportsOpenDevToolsForceExternal =
+          capabilities?[Field.supportsForceExternal] == true;
+    } else {
+      return;
+    }
+
+    final info = isRegistered
+        ? ServiceRegistered(
+            service: service,
+            method: method,
+            capabilities: capabilities,
+          )
+        : ServiceUnregistered(service: service, method: method);
+    _editorServiceChangedController.add(info);
   }
 
   /// Close the connection to DTD.

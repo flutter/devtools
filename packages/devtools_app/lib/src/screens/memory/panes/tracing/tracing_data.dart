@@ -89,9 +89,8 @@ class TracedClass with PinnableListEntry, Serializable {
       '${clazz.name} instances: $instances trace: $traceAllocations';
 }
 
-// TODO(kenz): include the selected class in the toJson and fromJson methods.
 @visibleForTesting
-enum TracingIsolateStateJson { isolate, classes, profiles }
+enum TracingIsolateStateJson { isolate, classes, profiles, selectedClass }
 
 /// Contains allocation tracing state for a single isolate.
 ///
@@ -107,6 +106,9 @@ class TracingIsolateState with Serializable {
     this.classes = classes ?? [];
     classesById = {for (final e in this.classes) e.clazz.id!: e};
     this.profiles = profiles ?? {};
+    if (selectedClass != null) {
+      this.selectedClass.value = classesById[selectedClass];
+    }
   }
 
   TracingIsolateState.empty() : this(isolate: IsolateRef());
@@ -125,6 +127,8 @@ class TracingIsolateState with Serializable {
       classes: (json[TracingIsolateStateJson.classes.name] as List)
           .map((e) => deserialize<TracedClass>(e, TracedClass.fromJson))
           .toList(),
+      selectedClass:
+          json[TracingIsolateStateJson.selectedClass.name] as String?,
     );
   }
 
@@ -134,6 +138,9 @@ class TracingIsolateState with Serializable {
       TracingIsolateStateJson.isolate.name: isolate,
       TracingIsolateStateJson.classes.name: classesById.values.toList(),
       TracingIsolateStateJson.profiles.name: profiles,
+      if (selectedClass.value != null)
+        TracingIsolateStateJson.selectedClass.name:
+            selectedClass.value!.clazz.id!,
     };
   }
 

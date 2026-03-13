@@ -29,7 +29,7 @@ void main() {
 }
 ''';
       final settings = UniversalLinkSettings.fromJson(json);
-      expect(settings.bundleIdentifier, isNull);
+      expect(settings.bundleIdentifier, isEmpty);
       expect(settings.teamIdentifier, 'TEAMID');
       expect(settings.associatedDomains, ['applinks:example.com']);
     });
@@ -43,7 +43,7 @@ void main() {
 ''';
       final settings = UniversalLinkSettings.fromJson(json);
       expect(settings.bundleIdentifier, 'com.example.app');
-      expect(settings.teamIdentifier, isNull);
+      expect(settings.teamIdentifier, isEmpty);
       expect(settings.associatedDomains, ['applinks:example.com']);
     });
   });

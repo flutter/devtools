@@ -154,7 +154,8 @@ class ServeCommand extends Command {
         results[SharedCommandArgs.updatePerfetto.flagName] as bool;
     final useWasm = results[SharedCommandArgs.wasm.flagName] as bool;
     final noStripWasm = results[SharedCommandArgs.noStripWasm.flagName] as bool;
-    final noMinifyWasm = results[SharedCommandArgs.noMinifyWasm.flagName] as bool;
+    final noMinifyWasm =
+        results[SharedCommandArgs.noMinifyWasm.flagName] as bool;
     final runPubGet = results[SharedCommandArgs.pubGet.flagName] as bool;
     final devToolsAppBuildMode =
         results[SharedCommandArgs.buildMode.flagName] as String;
@@ -241,10 +242,10 @@ class ServeCommand extends Command {
       logStatus('completed building DevTools: $devToolsBuildLocation');
     }
 
-    logStatus('running pub get for DDS in the local dart sdk');
+    logStatus('running gclient sync in the local dart sdk');
     await processManager.runProcess(
-      CliCommand.dart(['pub', 'get']),
-      workingDirectory: path.join(localDartSdkLocation, 'pkg', 'dds'),
+      CliCommand.gclient(['sync']),
+      workingDirectory: localDartSdkLocation,
     );
 
     logStatus('serving DevTools with a local devtools server...');

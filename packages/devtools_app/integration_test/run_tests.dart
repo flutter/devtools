@@ -34,6 +34,8 @@ final _disabledTestsForDevice = <String, Set<String>>{
     'eval_and_browse_test.dart',
     // https://github.com/flutter/devtools/issues/7425
     'export_snapshot_test.dart',
+    // https://github.com/flutter/devtools/issues/9641
+    'perfetto_test.dart',
   },
   TestAppDevice.flutterChrome.name: {
     // TODO(https://github.com/flutter/devtools/issues/7145): Figure out why
