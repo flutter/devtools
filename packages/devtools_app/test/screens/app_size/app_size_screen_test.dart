@@ -214,7 +214,9 @@ void main() {
       expect(find.byType(ClearButton), findsOneWidget);
 
       expect(find.byType(FileImportContainer), findsOneWidget);
-      expect(find.text(AnalysisView.importInstructions), findsOneWidget);
+      const importInstructions =
+          'Drag and drop an AOT snapshot or size analysis file for debugging, or click "Open file".';
+      expect(find.richText(importInstructions), findsOneWidget);
       expect(find.text('No File Selected'), findsOneWidget);
 
       appSizeController.loadTreeFromJsonFile(
@@ -227,7 +229,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(FileImportContainer), findsNothing);
-      expect(find.text(AnalysisView.importInstructions), findsNothing);
+      expect(find.richText(importInstructions), findsNothing);
       expect(find.text('No File Selected'), findsNothing);
       expect(find.byType(AnalysisView), findsOneWidget);
       expect(
@@ -261,7 +263,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(FileImportContainer), findsOneWidget);
-      expect(find.text(AnalysisView.importInstructions), findsOneWidget);
+      const importInstructions =
+          'Drag and drop an AOT snapshot or size analysis file for debugging, or click "Open file".';
+      expect(find.richText(importInstructions), findsOneWidget);
       expect(find.text('No File Selected'), findsOneWidget);
     });
   });
@@ -302,8 +306,12 @@ void main() {
 
       expect(find.byType(DualFileImportContainer), findsOneWidget);
       expect(find.byType(FileImportContainer), findsNWidgets(2));
-      expect(find.text(DiffView.importOldInstructions), findsOneWidget);
-      expect(find.text(DiffView.importNewInstructions), findsOneWidget);
+      const importOldInstructions =
+          'Drag and drop an original (old) AOT snapshot or size analysis file for debugging, or click "Open file".';
+      const importNewInstructions =
+          'Drag and drop a modified (new) AOT snapshot or size analysis file for debugging, or click "Open file".';
+      expect(find.richText(importOldInstructions), findsOneWidget);
+      expect(find.richText(importNewInstructions), findsOneWidget);
       expect(find.text('No File Selected'), findsNWidgets(2));
     });
 
@@ -323,8 +331,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(FileImportContainer), findsNothing);
-      expect(find.text(DiffView.importOldInstructions), findsNothing);
-      expect(find.text(DiffView.importNewInstructions), findsNothing);
+      const importOldInstructions =
+          'Drag and drop an original (old) AOT snapshot or size analysis file for debugging, or click "Open file".';
+      const importNewInstructions =
+          'Drag and drop a modified (new) AOT snapshot or size analysis file for debugging, or click "Open file".';
+      expect(find.richText(importOldInstructions), findsNothing);
+      expect(find.richText(importNewInstructions), findsNothing);
       expect(find.text('No File Selected'), findsNothing);
 
       expect(find.byType(DiffView), findsOneWidget);
@@ -393,8 +405,12 @@ void main() {
 
       expect(find.byType(DualFileImportContainer), findsOneWidget);
       expect(find.byType(FileImportContainer), findsNWidgets(2));
-      expect(find.text(DiffView.importOldInstructions), findsOneWidget);
-      expect(find.text(DiffView.importNewInstructions), findsOneWidget);
+      const importOldInstructions =
+          'Drag and drop an original (old) AOT snapshot or size analysis file for debugging, or click "Open file".';
+      const importNewInstructions =
+          'Drag and drop a modified (new) AOT snapshot or size analysis file for debugging, or click "Open file".';
+      expect(find.richText(importOldInstructions), findsOneWidget);
+      expect(find.richText(importNewInstructions), findsOneWidget);
       expect(find.text('No File Selected'), findsNWidgets(2));
     });
   });
