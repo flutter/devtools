@@ -269,10 +269,10 @@ void main() {
 
       expect(controller.filteredData.value, hasLength(numRequests));
 
-        // Enable the hide HTTP sockets toggle filter using activeFilter.
-        final socketFilter = controller.activeFilter.value.settingFilters[0];
-        socketFilter.setting.value = true;
-        controller.setActiveFilter();
+      // Enable the hide HTTP sockets toggle filter using activeFilter.
+      final socketFilter = controller.activeFilter.value.settingFilters[0];
+      socketFilter.setting.value = true;
+      controller.setActiveFilter();
 
       expect(
         controller.filteredData.value,
