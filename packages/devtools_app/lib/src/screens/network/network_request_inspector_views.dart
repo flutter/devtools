@@ -50,8 +50,11 @@ ExpansionTile _buildTile(
 class HttpRequestHeadersView extends StatelessWidget {
   const HttpRequestHeadersView(this.data, {super.key});
 
+  @visibleForTesting
   static const generalKey = Key('General');
+  @visibleForTesting
   static const requestHeadersKey = Key('Request Headers');
+  @visibleForTesting
   static const responseHeadersKey = Key('Response Headers');
 
   final DartIOHttpRequestData data;
@@ -457,7 +460,9 @@ bool _isJsonDecodable(String source) {
 class HttpRequestCookiesView extends StatelessWidget {
   const HttpRequestCookiesView(this.data, {super.key});
 
+  @visibleForTesting
   static const requestCookiesKey = Key('Request Cookies');
+  @visibleForTesting
   static const responseCookiesKey = Key('Response Cookies');
 
   final DartIOHttpRequestData data;
@@ -595,7 +600,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   static const _keyWidth = 110.0;
   static const _timingGraphHeight = 18.0;
+  @visibleForTesting
   static const httpTimingGraphKey = Key('Http Timing Graph Key');
+  @visibleForTesting
   static const socketTimingGraphKey = Key('Socket Timing Graph Key');
 
   final NetworkRequest data;
