@@ -15,7 +15,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-- Updated the Network profiler to use the standard setting filters UI for hiding HTTP-profiler socket rows, so the toggle now appears in the filter dropdown and is applied consistently during filtering.
+- TODO: Remove this section if there are not any updates.
 
 ## Inspector updates
 
