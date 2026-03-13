@@ -22,13 +22,20 @@ Release Notes Progress:
 
 ### 1. Formulate the Entry
 - **Tense**: Always use **past tense** (e.g., "Added", "Improved", "Fixed").
+- **Punctuation**: Always end entries with a **period**.
 - **Template**: `* <Description>. [#<PR_NUMBER>](https://github.com/flutter/devtools/pull/<PR_NUMBER>)`
 - **Placeholder**: Use `TODO` if you do not have a PR number yet.
 - **Examples**:
   - `* Added support for XYZ. [#12345](https://github.com/flutter/devtools/pull/12345)`
   - `* Fixed a crash in the ABC screen. [#67890](https://github.com/flutter/devtools/pull/67890)`
 
-### 2. Determine Section
+### 2. User-Facing Changes Only
+- **Criteria**: Focus on **what** changed for the user, not **how** it was implemented.
+- **Avoid**: Technical details like "Implemented XYZ with a new controller", "Updated the build method", or naming internal classes.
+- **Example (Bad)**: `* Implemented log details search using SearchControllerMixin. [#TODO](https://github.com/flutter/devtools/pull/TODO)`
+- **Example (Good)**: `* Added search support to the log details view. [#TODO](https://github.com/flutter/devtools/pull/TODO)`
+
+### 3. Determine Section
 Match the change to the section in `NEXT_RELEASE_NOTES.md`:
 - `General updates`
 - `Inspector updates`

@@ -29,12 +29,8 @@ void main(List<String> args) {
     exit(1);
   }
 
-  final prLink = pr == 'TODO'
-      ? '[#TODO]'
-      : '[#$pr](https://github.com/flutter/devtools/pull/$pr)';
-
-  final newEntry =
-      '- ${note.replaceAll(RegExp(r'\.+$'), '')} $prLink\n';
+  final noteWithPeriod = note.endsWith('.') ? note : '$note.';
+  final newEntry = '- $noteWithPeriod $prLink\n';
 
   // Check for TODO placeholder.
   const todoText = 'TODO: Remove this section if there are not any updates.';
