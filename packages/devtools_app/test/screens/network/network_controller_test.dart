@@ -269,19 +269,10 @@ void main() {
 
       expect(controller.filteredData.value, hasLength(numRequests));
 
-      // Enable the hide HTTP sockets toggle filter.
-      final socketFilter = controller.settingFilters
-          .whereType<ToggleFilter<NetworkRequest>>()
-          .firstWhere((f) => f.id == NetworkController.hideHttpSocketsFilterId);
-
-      // Pass the updated setting filters through setActiveFilter so the
-      // base class FilterControllerMixin picks them up and re-filters.
-      socketFilter.setting.value = true;
-      controller.setActiveFilter(
-        settingFilters: controller.settingFilters
-            .whereType<ToggleFilter<NetworkRequest>>()
-            .toList(),
-      );
+        // Enable the hide HTTP sockets toggle filter using activeFilter.
+        final socketFilter = controller.activeFilter.value.settingFilters[0];
+        socketFilter.setting.value = true;
+        controller.setActiveFilter();
 
       expect(
         controller.filteredData.value,
@@ -296,11 +287,7 @@ void main() {
 
       // Disable and verify sockets are restored.
       socketFilter.setting.value = false;
-      controller.setActiveFilter(
-        settingFilters: controller.settingFilters
-            .whereType<ToggleFilter<NetworkRequest>>()
-            .toList(),
-      );
+      controller.setActiveFilter();
       expect(controller.filteredData.value, hasLength(numRequests));
     });
   });
