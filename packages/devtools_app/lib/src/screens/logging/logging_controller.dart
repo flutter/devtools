@@ -28,6 +28,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../inspector/inspector_tree_controller.dart';
+import 'log_details_controller.dart';
 import 'logging_screen.dart';
 import 'metadata.dart';
 
@@ -110,6 +111,8 @@ class LoggingController extends DevToolsScreenController
   @override
   void init() {
     super.init();
+    logDetailsController = LogDetailsController(selectedLog: selectedLog)
+      ..init();
     addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
         _handleConnectionStart(serviceConnection.serviceManager.service!);
@@ -138,6 +141,7 @@ class LoggingController extends DevToolsScreenController
 
   @override
   void dispose() {
+    logDetailsController.dispose();
     selectedLog.dispose();
     unawaited(_logStatusController.close());
     super.dispose();
@@ -233,6 +237,8 @@ class LoggingController extends DevToolsScreenController
   Stream<String> get onLogStatusChanged => _logStatusController.stream;
 
   final _logStatusController = StreamController<String>.broadcast();
+
+  late final LogDetailsController logDetailsController;
 
   List<LogData> data = <LogData>[];
 

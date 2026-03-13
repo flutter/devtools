@@ -11,12 +11,15 @@ import 'package:flutter/material.dart';
 import '../../shared/globals.dart';
 import '../../shared/preferences/preferences.dart';
 import '../../shared/ui/common_widgets.dart';
+import '../../shared/ui/search.dart';
+import 'log_details_controller.dart';
 import 'logging_controller.dart';
 
 class LogDetails extends StatefulWidget {
-  const LogDetails({super.key, required this.log});
+  const LogDetails({super.key, required this.log, required this.controller});
 
   final LogData? log;
+  final LogDetailsController controller;
 
   @override
   State<LogDetails> createState() => _LogDetailsState();
@@ -44,6 +47,10 @@ class _LogDetailsState extends State<LogDetails>
     super.didUpdateWidget(oldWidget);
     if (widget.log != oldWidget.log) {
       unawaited(_computeLogDetails());
+    }
+    if (widget.controller != oldWidget.controller) {
+      cancelListeners();
+      addAutoDisposeListener(preferences.logging.detailsFormat);
     }
   }
 
@@ -81,6 +88,7 @@ class _LogDetailsState extends State<LogDetails>
       header: _LogDetailsHeader(
         log: log,
         format: preferences.logging.detailsFormat.value,
+        controller: widget.controller,
       ),
       child: Scrollbar(
         controller: scrollController,
@@ -93,9 +101,9 @@ class _LogDetailsState extends State<LogDetails>
               ? Padding(
                   padding: const EdgeInsets.all(denseSpacing),
                   child: SelectionArea(
-                    child: Text(
-                      log?.prettyPrinted() ?? '',
-                      textAlign: TextAlign.left,
+                    child: _SearchableLogDetailsText(
+                      text: log?.prettyPrinted() ?? '',
+                      controller: widget.controller,
                     ),
                   ),
                 )
@@ -107,10 +115,15 @@ class _LogDetailsState extends State<LogDetails>
 }
 
 class _LogDetailsHeader extends StatelessWidget {
-  const _LogDetailsHeader({required this.log, required this.format});
+  const _LogDetailsHeader({
+    required this.log,
+    required this.format,
+    required this.controller,
+  });
 
   final LogData? log;
   final LoggingDetailsFormat format;
+  final LogDetailsController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +135,13 @@ class _LogDetailsHeader extends StatelessWidget {
       title: const Text('Details'),
       includeTopBorder: false,
       roundedTopBorder: false,
+      tall: true,
       actions: [
+        // Only supporting search for the text format now since supporting this
+        // for the expandable JSON viewer would require a more complicated
+        // refactor of that shared component.
+        if (format == LoggingDetailsFormat.text)
+          _LogDetailsSearchField(controller: controller, log: log),
         LogDetailsFormatButton(format: format),
         const SizedBox(width: densePadding),
         CopyToClipboardControl(
@@ -130,6 +149,140 @@ class _LogDetailsHeader extends StatelessWidget {
           buttonKey: LogDetails.copyToClipboardButtonKey,
         ),
       ],
+    );
+  }
+}
+
+/// An animated search field for the log details view that toggles between an icon
+/// and a full [SearchField].
+class _LogDetailsSearchField extends StatefulWidget {
+  const _LogDetailsSearchField({required this.controller, required this.log});
+
+  final LogDetailsController controller;
+  final LogData? log;
+
+  @override
+  State<_LogDetailsSearchField> createState() => _LogDetailsSearchFieldState();
+}
+
+class _LogDetailsSearchFieldState extends State<_LogDetailsSearchField>
+    with AutoDisposeMixin {
+  late bool _isExpanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = widget.controller.search.isNotEmpty;
+    addAutoDisposeListener(widget.controller.searchFieldFocusNode, () {
+      final hasFocus =
+          widget.controller.searchFieldFocusNode?.hasFocus ?? false;
+      if (hasFocus != _isExpanded) {
+        setState(() {
+          _isExpanded = hasFocus;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: defaultDuration,
+      curve: defaultCurve,
+      width: _isExpanded ? mediumSearchFieldWidth : defaultButtonHeight,
+      child: OverflowBox(
+        minWidth: 0.0,
+        maxWidth: mediumSearchFieldWidth,
+        child: _isExpanded
+            ? Padding(
+                padding: const EdgeInsets.symmetric(horizontal: densePadding),
+                child: SearchField<LogDetailsController>(
+                  searchController: widget.controller,
+                  searchFieldEnabled:
+                      widget.log != null && widget.log!.details != null,
+                  shouldRequestFocus: true,
+                  searchFieldWidth: mediumSearchFieldWidth,
+                ),
+              )
+            : ToolbarAction(
+                icon: Icons.search,
+                tooltip: 'Search details',
+                size: defaultIconSize,
+                onPressed: () {
+                  setState(() {
+                    _isExpanded = true;
+                  });
+                  widget.controller.searchFieldFocusNode?.requestFocus();
+                },
+              ),
+      ),
+    );
+  }
+}
+
+/// A text widget for the log details view that highlights search matches.
+class _SearchableLogDetailsText extends StatelessWidget {
+  const _SearchableLogDetailsText({
+    required this.text,
+    required this.controller,
+  });
+
+  final String text;
+  final LogDetailsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiValueListenableBuilder(
+      listenables: [controller.searchMatches, controller.activeSearchMatch],
+      builder: (context, values, _) {
+        final theme = Theme.of(context);
+
+        final matches = values[0] as List<LogDetailsMatch>;
+        final activeMatch = values[1] as LogDetailsMatch?;
+        if (matches.isEmpty) {
+          return Text(
+            text,
+            textAlign: TextAlign.left,
+            style: theme.regularTextStyle,
+          );
+        }
+
+        final spans = <TextSpan>[];
+        int previousEnd = 0;
+        for (final match in matches) {
+          if (match.range.begin > previousEnd) {
+            spans.add(
+              TextSpan(
+                text: text.substring(previousEnd, match.range.begin as int),
+              ),
+            );
+          }
+          final isActive = match == activeMatch;
+          spans.add(
+            TextSpan(
+              text: text.substring(
+                match.range.begin as int,
+                match.range.end as int,
+              ),
+              style: theme.regularTextStyle.copyWith(
+                backgroundColor: isActive
+                    ? activeSearchMatchColor
+                    : searchMatchColor,
+                color: Colors.black,
+              ),
+            ),
+          );
+          previousEnd = match.range.end as int;
+        }
+
+        if (previousEnd < text.length) {
+          spans.add(TextSpan(text: text.substring(previousEnd)));
+        }
+
+        return Text.rich(
+          TextSpan(style: theme.regularTextStyle, children: spans),
+        );
+      },
     );
   }
 }

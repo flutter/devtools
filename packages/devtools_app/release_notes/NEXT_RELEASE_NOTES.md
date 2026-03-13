@@ -43,7 +43,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any updates.
+- Added support for searching within the log details view (raw text mode). [TODO](https://github.com/flutter/devtools/pull/TODO)
+  ![](images/log_details_search.png)
 
 ## App size tool updates
 
