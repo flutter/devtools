@@ -183,11 +183,13 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
   }
 
   void _refilter() {
-    final filter = filterController.text.trim().toLowerCase();
+    final filter = filterController.text.trim();
 
     filteredFlags = filter.isEmpty
         ? flags
-        : flags.where((flag) => flag.filterText.contains(filter)).toList();
+        : flags
+              .where((flag) => flag.filterText.caseInsensitiveContains(filter))
+              .toList();
   }
 
   @override
