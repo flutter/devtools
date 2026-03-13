@@ -87,7 +87,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
               ValueListenableBuilder<LogData?>(
                 valueListenable: controller.selectedLog,
                 builder: (context, selected, _) {
-                  return LogDetails(log: selected);
+                  return LogDetails(
+                    log: selected,
+                    controller: controller.logDetailsController,
+                  );
                 },
               ),
             ],
