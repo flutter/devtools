@@ -15,7 +15,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any updates.
+- TODO: Remove this section if there are not any updates.
 
 ## Inspector updates
 
@@ -39,8 +39,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-- Fix crash in the Network tab when viewing binary multipart request or 
-response bodies. [#9680](https://github.com/flutter/devtools/pull/9680)
+- Added a filter setting to hide HTTP-profiler socket data. [#9698](https://github.com/flutter/devtools/pull/9698)
 
 ## Logging updates
 
