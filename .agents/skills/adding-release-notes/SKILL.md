@@ -25,6 +25,12 @@ Release Notes Progress:
 - **Punctuation**: Always end entries with a **period**.
 - **Template**: `* <Description>. [#<PR_NUMBER>](https://github.com/flutter/devtools/pull/<PR_NUMBER>)`
 - **Placeholder**: Use `TODO` if you do not have a PR number yet.
+- **Images**: If adding an image, indent it by two spaces to align with the bullet point, and ensure there is only one newline between the text and the image.
+  - Correct Format:
+    ```markdown
+    - Added support for XYZ. [#TODO](https://github.com/flutter/devtools/pull/TODO)
+      ![](images/my_feature.png)
+    ```
 - **Examples**:
   - `* Added support for XYZ. [#12345](https://github.com/flutter/devtools/pull/12345)`
   - `* Fixed a crash in the ABC screen. [#67890](https://github.com/flutter/devtools/pull/67890)`
