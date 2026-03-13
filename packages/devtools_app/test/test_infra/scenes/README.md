@@ -8,7 +8,7 @@ run as an application.
 
 To generate scene runners:
 ```
-flutter pub run build_runner build --delete-conflicting-outputs
+dart run build_runner build --delete-conflicting-outputs
 ```
 
 To run:

@@ -3,6 +3,13 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
+# 12.1.0
+* Adds additional logging to `IntegrationTestRunner`.
+* Fixes assertion error when parsing Flutter channel versions using the format `X.XX.X-X.X.pre-XXX`.
+* Fixes breakage associated with ChromeDriver 138 when using `IntegrationTestRunner`.
+* Adds `sanitizeVersionStr` helper to `SemanticVersion`.
+* Fixes null error when parsing `bundleIdentifier` or `teamIndentifier` in `UniversalLinkSettings`.
+
 # 12.0.0
 * Update `dtd` dependency to `^4.0.0`.
 * Register and unregister VM service connections on DTD. This change only

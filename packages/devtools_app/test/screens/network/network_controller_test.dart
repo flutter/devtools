@@ -259,6 +259,37 @@ void main() {
       expect(profile, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(2));
     });
+
+    test('filterData hides tcp sockets via setting filter', () async {
+      await controller.startRecording();
+      await controller.networkService.refreshNetworkData();
+
+      const numRequests = 9;
+      const numTcpSockets = 2;
+
+      expect(controller.filteredData.value, hasLength(numRequests));
+
+      // Enable the hide HTTP sockets toggle filter using activeFilter.
+      final socketFilter = controller.activeFilter.value.settingFilters[0];
+      socketFilter.setting.value = true;
+      controller.setActiveFilter();
+
+      expect(
+        controller.filteredData.value,
+        hasLength(numRequests - numTcpSockets),
+      );
+
+      final tcpSockets = controller.filteredData.value
+          .whereType<Socket>()
+          .where((s) => s.socketType == 'tcp')
+          .toList();
+      expect(tcpSockets, isEmpty);
+
+      // Disable and verify sockets are restored.
+      socketFilter.setting.value = false;
+      controller.setActiveFilter();
+      expect(controller.filteredData.value, hasLength(numRequests));
+    });
   });
 
   group('CurrentNetworkRequests', () {

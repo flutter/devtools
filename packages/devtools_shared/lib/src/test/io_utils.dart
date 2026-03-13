@@ -94,11 +94,11 @@ mixin IOMixin {
     Process.killPid(processId);
     return process.exitCode.timeout(
       killTimeout,
-      onTimeout: () => _killForcefully(process, debugLogging: debugLogging),
+      onTimeout: () => killForcefully(process, debugLogging: debugLogging),
     );
   }
 
-  Future<int> _killForcefully(
+  Future<int> killForcefully(
     Process process, {
     bool debugLogging = false,
   }) {

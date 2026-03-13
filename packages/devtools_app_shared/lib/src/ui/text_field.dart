@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'common.dart';
 import 'theme/theme.dart';
 
-/// A DevTools-styled text field with a suffix action to clear the search field.
-final class DevToolsClearableTextField extends StatelessWidget {
-  DevToolsClearableTextField({
+/// A DevTools-styled text field.
+final class DevToolsTextField extends StatelessWidget {
+  DevToolsTextField({
     super.key,
     TextEditingController? controller,
     this.labelText,
@@ -78,19 +78,63 @@ final class DevToolsClearableTextField extends StatelessWidget {
             height: inputDecorationElementHeight,
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                ...additionalSuffixActions,
-                InputDecorationSuffixButton.clear(
-                  onPressed: () {
-                    controller.clear();
-                    onChanged?.call('');
-                  },
-                ),
-              ],
+              children: additionalSuffixActions,
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// A DevTools-styled text field with a suffix action to clear the search field.
+final class DevToolsClearableTextField extends StatelessWidget {
+  DevToolsClearableTextField({
+    super.key,
+    TextEditingController? controller,
+    this.labelText,
+    this.hintText,
+    this.prefixIcon,
+    this.additionalSuffixActions = const <Widget>[],
+    this.onChanged,
+    this.onSubmitted,
+    this.autofocus = false,
+    this.enabled,
+    this.roundedBorder = false,
+  }) : controller = controller ?? TextEditingController();
+
+  final TextEditingController controller;
+  final String? hintText;
+  final Widget? prefixIcon;
+  final List<Widget> additionalSuffixActions;
+  final String? labelText;
+  final void Function(String)? onChanged;
+  final void Function(String)? onSubmitted;
+  final bool autofocus;
+  final bool? enabled;
+  final bool roundedBorder;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTextField(
+      controller: controller,
+      labelText: labelText,
+      hintText: hintText,
+      prefixIcon: prefixIcon,
+      additionalSuffixActions: [
+        ...additionalSuffixActions,
+        InputDecorationSuffixButton.clear(
+          onPressed: () {
+            controller.clear();
+            onChanged?.call('');
+          },
+        ),
+      ],
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      autofocus: autofocus,
+      enabled: enabled,
+      roundedBorder: roundedBorder,
     );
   }
 }

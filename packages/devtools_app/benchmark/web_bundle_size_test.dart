@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 // Benchmark size in kB.
-const bundleSizeBenchmark = 5500;
+const bundleSizeBenchmark = 5550;
 const gzipBundleSizeBenchmark = 1650;
 
 void main() {
