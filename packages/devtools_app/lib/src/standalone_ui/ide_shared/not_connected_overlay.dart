@@ -26,8 +26,8 @@ class _NotConnectedOverlayState extends State<NotConnectedOverlay> {
     final connectionState = widget.connectionState;
     final theme = Theme.of(context);
 
-    final showSpinner = connectionState is! ConnectionFailedDTDState;
-    final showReconnectButton = connectionState is ConnectionFailedDTDState;
+    final showSpinner = connectionState is ConnectingDTDState || connectionState is WaitingToRetryDTDState;
+    final showReconnectButton = connectionState is NotConnectedDTDState || connectionState is ConnectionFailedDTDState;
     final stateLabel = switch (connectionState) {
       NotConnectedDTDState() => 'Waiting to connect...',
       ConnectingDTDState() => 'Connecting...',
@@ -52,7 +52,7 @@ class _NotConnectedOverlayState extends State<NotConnectedOverlay> {
           if (showReconnectButton)
             ElevatedButton(
               onPressed: () => dtdManager.reconnect(),
-              child: const Text('Retry'),
+              child: const Text('Reconnect'),
             ),
         ],
       ),

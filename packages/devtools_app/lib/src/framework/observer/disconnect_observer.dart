@@ -9,6 +9,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
+import '../../framework/framework_core.dart';
 import '../../service/connected_app/connection_info.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
@@ -37,6 +38,12 @@ class DisconnectObserverState extends State<DisconnectObserver>
 
   late ConnectedState currentConnectionState;
 
+  /// Stores the last known VM service URI so we can attempt to reconnect
+  /// after the connection is lost (e.g. when the machine sleeps).
+  String? _lastVmServiceUri;
+
+  bool _isReconnecting = false;
+
   @override
   void initState() {
     super.initState();
@@ -59,8 +66,15 @@ class DisconnectObserverState extends State<DisconnectObserver>
             !currentConnectionState.connected &&
             !currentConnectionState.userInitiatedConnectionState) {
           // We became disconnected by means other than a manual disconnect
-          // action, so show the overlay and ensure the 'uri' query paraemter
+          // action, so show the overlay and ensure the 'uri' query parameter
           // has been cleared.
+          //
+          // Store the VM service URI before clearing so we can attempt
+          // reconnection later (e.g. after machine sleep/wake).
+          // Fall back to the live service URI if router params are already gone.
+          _lastVmServiceUri =
+              widget.routerDelegate.currentConfiguration?.params.vmServiceUri ??
+              serviceConnection.serviceManager.serviceUri;
           unawaited(widget.routerDelegate.clearUriParameter());
           showDisconnectedOverlay();
         }
@@ -126,14 +140,39 @@ class DisconnectObserverState extends State<DisconnectObserver>
                 const Spacer(),
                 Text('Disconnected', style: theme.textTheme.headlineMedium),
                 const SizedBox(height: defaultSpacing),
-                if (!isEmbedded())
-                  ConnectToNewAppButton(
-                    routerDelegate: widget.routerDelegate,
-                    onPressed: hideDisconnectedOverlay,
-                    gaScreen: gac.devToolsMain,
+                if (_isReconnecting)
+                  const CircularProgressIndicator()
+                else if (!isEmbedded())
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: _attemptReconnect,
+                        child: const Text('Reconnect'),
+                      ),
+                      const SizedBox(width: defaultSpacing),
+                      ConnectToNewAppButton(
+                        routerDelegate: widget.routerDelegate,
+                        onPressed: hideDisconnectedOverlay,
+                        gaScreen: gac.devToolsMain,
+                      ),
+                    ],
                   )
                 else
-                  const Text('Run a new debug session to reconnect.'),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ElevatedButton(
+                        onPressed: _attemptReconnect,
+                        child: const Text('Reconnect'),
+                      ),
+                      const SizedBox(height: defaultSpacing),
+                      Text(
+                        'Or run a new debug session to reconnect.',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
                 const Spacer(),
                 if (offlineDataController.offlineDataJson.isNotEmpty) ...[
                   ElevatedButton(
@@ -149,5 +188,47 @@ class DisconnectObserverState extends State<DisconnectObserver>
       ),
     );
     return currentDisconnectedOverlay!;
+  }
+
+  Future<void> _attemptReconnect() async {
+    setState(() => _isReconnecting = true);
+    currentDisconnectedOverlay?.markNeedsBuild();
+
+    try {
+      await dtdManager.reconnect();
+
+      final uri = _lastVmServiceUri;
+      if (uri != null &&
+          !serviceConnection.serviceManager.connectedState.value.connected) {
+        // Call initVmService directly — do NOT use routerDelegate.navigate()
+        // because that goes through _replaceStack which calls manuallyDisconnect
+        // when clearing the URI, causing the disconnect observer to suppress
+        // the overlay (userInitiatedConnectionState = true).
+        await FrameworkCore.initVmService(
+          serviceUriAsString: uri,
+          logException: false,
+          // Suppress the error notification — we handle failure ourselves below.
+          errorReporter: (_, __) {},
+        );
+      }
+    } catch (e) {
+      // Swallow errors — we check connected state in finally instead.
+    } finally {
+      _isReconnecting = false;
+
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        // Success — also update the router so the URI is reflected in the URL.
+        unawaited(
+          widget.routerDelegate.updateArgsIfChanged({
+            DevToolsQueryParams.vmServiceUriKey: _lastVmServiceUri,
+          }),
+        );
+        setState(() => hideDisconnectedOverlay());
+      } else {
+        // Failed (stale URI, VM dead, etc.) — restore the overlay with buttons.
+        currentDisconnectedOverlay?.markNeedsBuild();
+        showDisconnectedOverlay();
+      }
+    }
   }
 }

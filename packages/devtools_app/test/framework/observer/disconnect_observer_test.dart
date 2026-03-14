@@ -67,8 +67,14 @@ void main() {
         find.byType(ConnectToNewAppButton),
         showingOverlay && !isEmbedded() ? findsOneWidget : findsNothing,
       );
+      // The Reconnect button should be present in both embedded and
+      // non-embedded modes when the overlay is showing.
       expect(
-        find.text('Run a new debug session to reconnect.'),
+        find.text('Reconnect'),
+        showingOverlay ? findsOneWidget : findsNothing,
+      );
+      expect(
+        find.text('Or run a new debug session to reconnect.'),
         showingOverlay && isEmbedded() ? findsOneWidget : findsNothing,
       );
       expect(
