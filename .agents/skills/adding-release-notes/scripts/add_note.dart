@@ -14,6 +14,10 @@ void main(List<String> args) {
   final note = args[1].trim();
   final pr = args[2].trim();
 
+  final prLink = pr == 'TODO' 
+      ? '[TODO](https://github.com/flutter/devtools/pull/TODO)'
+      : '[#$pr](https://github.com/flutter/devtools/pull/$pr)';
+
   final filePath = 'packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md';
   final file = File(filePath);
 
