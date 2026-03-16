@@ -12,6 +12,7 @@ import '../../shared/globals.dart';
 import '../../shared/preferences/preferences.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/search.dart';
+import '../../shared/ui/search_highlighter.dart';
 import 'log_details_controller.dart';
 import 'logging_controller.dart';
 
@@ -237,50 +238,19 @@ class _SearchableLogDetailsText extends StatelessWidget {
       builder: (context, values, _) {
         final theme = Theme.of(context);
 
-        final matches = values[0] as List<LogDetailsMatch>;
-        final activeMatch = values[1] as LogDetailsMatch?;
-        if (matches.isEmpty) {
-          return Text(
-            text,
-            textAlign: TextAlign.left,
-            style: theme.regularTextStyle,
-          );
-        }
-
-        final spans = <TextSpan>[];
-        int previousEnd = 0;
-        for (final match in matches) {
-          if (match.range.begin > previousEnd) {
-            spans.add(
-              TextSpan(
-                text: text.substring(previousEnd, match.range.begin as int),
-              ),
-            );
-          }
-          final isActive = match == activeMatch;
-          spans.add(
-            TextSpan(
-              text: text.substring(
-                match.range.begin as int,
-                match.range.end as int,
-              ),
-              style: theme.regularTextStyle.copyWith(
-                backgroundColor: isActive
-                    ? activeSearchMatchColor
-                    : searchMatchColor,
-                color: Colors.black,
-              ),
-            ),
-          );
-          previousEnd = match.range.end as int;
-        }
-
-        if (previousEnd < text.length) {
-          spans.add(TextSpan(text: text.substring(previousEnd)));
-        }
+        final matches = (values[0] as List<LogDetailsMatch>)
+            .map((m) => m.range)
+            .toList();
+        final activeMatch = (values[1] as LogDetailsMatch?)?.range;
 
         return Text.rich(
-          TextSpan(style: theme.regularTextStyle, children: spans),
+          SearchHighlighter.highlight(
+            text,
+            matches,
+            activeMatch: activeMatch,
+            colorScheme: theme.colorScheme,
+            style: theme.regularTextStyle,
+          ),
         );
       },
     );

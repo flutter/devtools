@@ -52,6 +52,8 @@ class SourceToken with SearchableDataMixin {
 
   final int length;
 
+  Range get range => Range(position.column!, position.column! + length);
+
   @override
   String toString() {
     return '$position-${position.column! + length}';
