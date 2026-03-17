@@ -9,6 +9,7 @@ import 'dart:convert' show JsonEncoder;
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:test/test.dart';
 import 'package:web_benchmarks/metrics.dart';
 import 'package:web_benchmarks/server.dart';
@@ -44,8 +45,6 @@ void main() {
       },
       timeout: const Timeout(Duration(minutes: 15)),
       retry: 0,
-      // TODO(elliette): Re-enable once flakiness is addressed.
-      skip: 'https://github.com/flutter/devtools/issues/9674',
     );
   }
 }
@@ -53,20 +52,44 @@ void main() {
 Future<void> _runBenchmarks({bool useWasm = false}) async {
   stdout.writeln('Starting web benchmark tests ...');
 
-  final benchmarkPort = await _findAvailablePort(startingAt: 9999);
-  final chromePort = await _findAvailablePort(startingAt: benchmarkPort + 1);
+  var benchmarkPort = await _findAvailablePort(startingAt: 9999);
+  var chromePort = await _findAvailablePort(startingAt: benchmarkPort + 1);
 
-  final taskResult = await serveWebBenchmark(
-    benchmarkAppDirectory: projectRootDirectory(),
-    entryPoint: generateBenchmarkEntryPoint(useWasm: useWasm),
-    compilationOptions: useWasm
-        ? const CompilationOptions.wasm()
-        : const CompilationOptions.js(),
-    treeShakeIcons: false,
-    benchmarkPath: benchmarkPath(useWasm: useWasm),
-    benchmarkServerPort: benchmarkPort,
-    chromeDebugPort: chromePort,
+  // TODO(elliette): Retry logic can likely be removed after
+  // https://github.com/flutter/flutter/issues/183335 is resolved.
+  final taskResult = await retryAsync<BenchmarkResults?>(
+    () async {
+      try {
+        logStatus(
+          'Serving benchmarks (server port: $benchmarkPort, chrome port: $chromePort)',
+        );
+        return await serveWebBenchmark(
+          benchmarkAppDirectory: projectRootDirectory(),
+          entryPoint: generateBenchmarkEntryPoint(useWasm: useWasm),
+          compilationOptions: useWasm
+              ? const CompilationOptions.wasm()
+              : const CompilationOptions.js(),
+          treeShakeIcons: false,
+          benchmarkPath: benchmarkPath(useWasm: useWasm),
+          benchmarkServerPort: benchmarkPort,
+          chromeDebugPort: chromePort,
+        );
+      } catch (e) {
+        logStatus('Serving benchmarks failed with error: $e');
+        return null;
+      }
+    },
+    condition: (result) => result != null,
+    onRetry: () async {
+      logStatus('Retrying with new ports...');
+      benchmarkPort = await _findAvailablePort(startingAt: chromePort + 1);
+      chromePort = await _findAvailablePort(startingAt: benchmarkPort + 1);
+    },
   );
+  if (taskResult == null) {
+    throw Exception('Failed to serve benchmarks after retries.');
+  }
+
   stdout.writeln('Web benchmark tests finished.');
 
   expect(

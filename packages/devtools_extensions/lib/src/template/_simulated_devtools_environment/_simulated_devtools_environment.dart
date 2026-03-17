@@ -207,8 +207,6 @@ class _SimulatedApi extends StatelessWidget {
                 label: 'FORCE RELOAD',
                 onPressed: simController.forceReload,
               ),
-              // TODO(kenz): add buttons for other simulated events as the extension
-              // API expands.
             ],
           ),
           const SizedBox(height: defaultSpacing),

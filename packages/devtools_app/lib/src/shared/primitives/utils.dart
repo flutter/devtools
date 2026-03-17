@@ -945,8 +945,6 @@ extension NullableStringExtension on String? {
 }
 
 // TODO(kenz): consider moving other String helpers into this extension.
-// TODO(kenz): replace other uses of toLowerCase() for string matching with
-// this extension method.
 extension StringExtension on String {
   bool caseInsensitiveContains(Pattern? pattern) {
     if (pattern is RegExp) {
