@@ -271,6 +271,8 @@ class FlutterMaterialIcons {
 
   static Icon getIconForCodePoint(int charCode, ColorScheme colorScheme) {
     return Icon(
+      // The code point is dynamic. Flutter Icon Tree Shaking disabled.
+      // ignore: non_const_argument_for_const_parameter
       IconData(charCode, fontFamily: 'MaterialIcons'),
       color: colorScheme.onSurface,
     );

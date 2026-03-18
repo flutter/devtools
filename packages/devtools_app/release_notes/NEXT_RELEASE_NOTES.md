@@ -11,7 +11,7 @@ This is a draft for future release notes that are going to land on
 The 2.57.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
-[DevTools overview](/tools/devtools).
+[DevTools overview](https://docs.flutter.dev/tools/devtools).
 
 ## General updates
 
@@ -43,7 +43,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any updates.
+- Added support for searching within the log details view (raw text mode). [#9712](https://github.com/flutter/devtools/pull/9712)
+  ![Search in log details](images/log_details_search.png "Searching within the log details view")
 
 ## App size tool updates
 
