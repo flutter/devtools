@@ -217,7 +217,8 @@ void main() {
     const index = 9;
     bool containsJson(Widget widget) {
       if (widget is! Text) return false;
-      final content = (widget.data ?? widget.textSpan?.toPlainText() ?? '').trim();
+      final content = (widget.data ?? widget.textSpan?.toPlainText() ?? '')
+          .trim();
       return content.startsWith('{') &&
           content.endsWith('}') &&
           content != '{ }';
