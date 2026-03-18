@@ -1284,7 +1284,7 @@ class _HoverableLine extends StatelessWidget {
         lineContentsSpans.cast<TextSpan>(),
         matches: searchMatches?.map((m) => m.range).toList() ?? [],
         activeMatch: activeSearchMatch?.range,
-        colorScheme: theme.colorScheme,
+        style: theme.regularTextStyle,
       ),
       style: lineContents.style,
     );

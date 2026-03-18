@@ -248,7 +248,6 @@ class _SearchableLogDetailsText extends StatelessWidget {
             text,
             matches,
             activeMatch: activeMatch,
-            colorScheme: theme.colorScheme,
             style: theme.regularTextStyle,
           ),
         );
