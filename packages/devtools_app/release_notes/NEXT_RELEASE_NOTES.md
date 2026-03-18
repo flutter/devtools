@@ -15,7 +15,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any updates.
+- TODO: Remove this section if there are not any updates.
 
 ## Inspector updates
 
