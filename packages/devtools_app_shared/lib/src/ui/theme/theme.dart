@@ -278,6 +278,7 @@ const defaultDialogWidth = 700.0;
 
 const extraWideSearchFieldWidth = 600.0;
 const wideSearchFieldWidth = 400.0;
+const mediumSearchFieldWidth = 300.0;
 const defaultSearchFieldWidth = 200.0;
 
 const defaultTextFieldHeight = 26.0;

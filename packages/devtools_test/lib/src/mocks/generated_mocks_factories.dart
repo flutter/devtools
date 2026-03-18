@@ -196,9 +196,13 @@ MockLoggingController createMockLoggingControllerWithDefaults({
   provideDummy<ListValueNotifier<LogData>>(ListValueNotifier<LogData>(data));
   final mockLoggingController = MockLoggingController();
   when(mockLoggingController.data).thenReturn(data);
+  final selectedLog = ValueNotifier<LogData?>(null);
+  when(mockLoggingController.selectedLog).thenReturn(selectedLog);
+
+  final logDetailsController = LogDetailsController(selectedLog: selectedLog);
   when(
-    mockLoggingController.selectedLog,
-  ).thenReturn(ValueNotifier<LogData?>(null));
+    mockLoggingController.logDetailsController,
+  ).thenReturn(logDetailsController);
 
   // Set up mock filter state.
   when(

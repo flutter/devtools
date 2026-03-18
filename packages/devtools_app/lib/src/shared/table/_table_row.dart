@@ -263,7 +263,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     final box = SizedBox(
       height: widget._rowType == _TableRowType.data
           ? defaultRowHeight
-          : defaultHeaderHeight + (widget.tall ? densePadding : 0.0),
+          : defaultHeaderHeight + (widget.tall ? 2 * densePadding : 0.0),
       child: Material(
         color: _searchAwareBackgroundColor(),
         child: onPressed != null

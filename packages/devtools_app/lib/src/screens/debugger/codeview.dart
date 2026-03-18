@@ -26,6 +26,7 @@ import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/history_viewport.dart';
 import '../../shared/ui/hover.dart';
 import '../../shared/ui/search.dart';
+import '../../shared/ui/search_highlighter.dart';
 import '../../shared/ui/utils.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'breakpoints.dart';
@@ -1272,130 +1273,21 @@ class _HoverableLine extends StatelessWidget {
     return null;
   }
 
-  List<InlineSpan> _contentsWithMatch(
-    List<InlineSpan> startingContents,
-    SourceToken match,
-    Color matchColor, {
-    required BuildContext context,
-  }) {
-    final contentsWithMatch = <InlineSpan>[];
-    var startColumnForSpan = 0;
-    for (final span in startingContents) {
-      final spanText = span.toPlainText();
-      final startColumnForMatch = match.position.column!;
-      if (startColumnForSpan <= startColumnForMatch &&
-          startColumnForSpan + spanText.length > startColumnForMatch) {
-        // The active search is part of this [span].
-        final matchStartInSpan = startColumnForMatch - startColumnForSpan;
-        final matchEndInSpan = matchStartInSpan + match.length;
-
-        // Add the part of [span] that occurs before the search match.
-        contentsWithMatch.add(
-          TextSpan(
-            text: spanText.substring(0, matchStartInSpan),
-            style: span.style,
-          ),
-        );
-
-        final matchStyle = (span.style ?? DefaultTextStyle.of(context).style)
-            .copyWith(color: Colors.black, backgroundColor: matchColor);
-
-        if (matchEndInSpan <= spanText.length) {
-          final matchText = spanText.substring(
-            matchStartInSpan,
-            matchEndInSpan,
-          );
-          final trailingText = spanText.substring(matchEndInSpan);
-          // Add the match and any part of [span] that occurs after the search
-          // match.
-          contentsWithMatch.addAll([
-            TextSpan(text: matchText, style: matchStyle),
-            if (trailingText.isNotEmpty)
-              TextSpan(
-                text: spanText.substring(matchEndInSpan),
-                style: span.style,
-              ),
-          ]);
-        } else {
-          // In this case, the active search match exists across multiple spans,
-          // so we need to add the part of the match that is in this [span] and
-          // continue looking for the remaining part of the match in the spans
-          // to follow.
-          contentsWithMatch.add(
-            TextSpan(
-              text: spanText.substring(matchStartInSpan),
-              style: matchStyle,
-            ),
-          );
-          final remainingMatchLength =
-              match.length - (spanText.length - matchStartInSpan);
-          match = SourceToken(
-            position: SourcePosition(
-              line: match.position.line,
-              column: startColumnForMatch + match.length - remainingMatchLength,
-            ),
-            length: remainingMatchLength,
-          );
-        }
-      } else {
-        contentsWithMatch.add(span);
-      }
-      startColumnForSpan += spanText.length;
-    }
-    return contentsWithMatch;
-  }
-
   TextSpan searchAwareLineContents(BuildContext context) {
     // If syntax highlighting is disabled for the script, then
     // `lineContents` is simply a `TextSpan` with no children.
     final lineContentsSpans = lineContents.children ?? [lineContents];
-    final activeSearchAwareContents = _activeSearchAwareLineContents(
-      lineContentsSpans,
-      context: context,
-    );
-    final allSearchAwareContents = _searchMatchAwareLineContents(
-      activeSearchAwareContents!,
-      context: context,
-    );
+    final theme = Theme.of(context);
+
     return TextSpan(
-      children: allSearchAwareContents,
+      children: SearchHighlighter.highlightSpans(
+        lineContentsSpans.cast<TextSpan>(),
+        matches: searchMatches?.map((m) => m.range).toList() ?? [],
+        activeMatch: activeSearchMatch?.range,
+        style: theme.regularTextStyle,
+      ),
       style: lineContents.style,
     );
-  }
-
-  List<InlineSpan>? _activeSearchAwareLineContents(
-    List<InlineSpan> startingContents, {
-    required BuildContext context,
-  }) {
-    final match = activeSearchMatch;
-    if (match == null) return startingContents;
-    return _contentsWithMatch(
-      startingContents,
-      match,
-      activeSearchMatchColor,
-      context: context,
-    );
-  }
-
-  List<InlineSpan> _searchMatchAwareLineContents(
-    List<InlineSpan> startingContents, {
-    required BuildContext context,
-  }) {
-    final matches = searchMatches;
-    if (matches == null || matches.isEmpty) return startingContents;
-    final searchMatchesToFind = List<SourceToken>.of(matches)
-      ..remove(activeSearchMatch);
-
-    var contentsWithMatch = startingContents;
-    for (final match in searchMatchesToFind) {
-      contentsWithMatch = _contentsWithMatch(
-        contentsWithMatch,
-        match,
-        searchMatchColor,
-        context: context,
-      );
-    }
-    return contentsWithMatch;
   }
 }
 
