@@ -53,6 +53,6 @@ If you need help, consider asking for help on [Discord].
 [CLA]: https://cla.developers.google.com/
 [`contributions-welcome`]: https://github.com/flutter/devtools/issues?q=state%3Aopen%20label%3Acontributions-welcome
 [`good-first-issue`]: https://github.com/flutter/devtools/issues?q=state%3Aopen%20label%3Agood-first-issue
-[AI contributions guideline]: https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md#ai-contribution-guidelines
+[AI contributions guidelines]: https://github.com/flutter/flutter/blob/master/docs/contributing/Tree-hygiene.md#ai-contribution-guidelines
 [build.yaml badge]: https://github.com/flutter/devtools/actions/workflows/build.yaml/badge.svg
 [Discord]: https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md
