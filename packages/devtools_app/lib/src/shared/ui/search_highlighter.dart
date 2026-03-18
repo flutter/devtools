@@ -31,14 +31,10 @@ extension SearchHighlighter on Never {
 
       final isActive = activeMatch == match;
       spans.add(
-        TextSpan(
+        _searchAwareText(
           text: text.substring(begin, end),
-          style: style.copyWith(
-            backgroundColor: isActive
-                ? activeSearchMatchColor
-                : searchMatchColor,
-            color: Colors.black,
-          ),
+          baseStyle: style,
+          isActive: isActive,
         ),
       );
       lastIndex = end;
@@ -103,14 +99,10 @@ extension SearchHighlighter on Never {
             .toInt();
         final isActive = activeMatch == match;
         result.add(
-          TextSpan(
+          _searchAwareText(
             text: spanText.substring(matchStartInSpan, matchEndInSpan),
-            style: (span.style ?? style).copyWith(
-              backgroundColor: isActive
-                  ? activeSearchMatchColor
-                  : searchMatchColor,
-              color: Colors.black,
-            ),
+            baseStyle: span.style ?? style,
+            isActive: isActive,
           ),
         );
 
@@ -134,4 +126,18 @@ extension SearchHighlighter on Never {
 
     return result;
   }
+}
+
+TextSpan _searchAwareText({
+  required String text,
+  required TextStyle baseStyle,
+  bool isActive = false,
+}) {
+  return TextSpan(
+    text: text,
+    style: baseStyle.copyWith(
+      backgroundColor: isActive ? activeSearchMatchColor : searchMatchColor,
+      color: Colors.black,
+    ),
+  );
 }
