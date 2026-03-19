@@ -42,7 +42,9 @@ class DisconnectObserverState extends State<DisconnectObserver>
   /// after the connection is lost (e.g. when the machine sleeps).
   String? _lastVmServiceUri;
 
-  bool _isReconnecting = false;
+  final _isReconnecting = ValueNotifier<bool>(false);
+
+  final _reconnectErrorText = ValueNotifier<String?>(null);
 
   @override
   void initState() {
@@ -71,7 +73,6 @@ class DisconnectObserverState extends State<DisconnectObserver>
           //
           // Store the VM service URI before clearing so we can attempt
           // reconnection later (e.g. after machine sleep/wake).
-          // Fall back to the live service URI if router params are already gone.
           _lastVmServiceUri =
               widget.routerDelegate.currentConfiguration?.params.vmServiceUri ??
               serviceConnection.serviceManager.serviceUri;
@@ -85,6 +86,8 @@ class DisconnectObserverState extends State<DisconnectObserver>
   @override
   void dispose() {
     hideDisconnectedOverlay();
+    _isReconnecting.dispose();
+    _reconnectErrorText.dispose();
     super.dispose();
   }
 
@@ -134,55 +137,77 @@ class DisconnectObserverState extends State<DisconnectObserver>
       builder: (context) => Material(
         child: Container(
           color: theme.colorScheme.surface,
-          child: Center(
-            child: Column(
-              children: [
-                const Spacer(),
-                Text('Disconnected', style: theme.textTheme.headlineMedium),
-                const SizedBox(height: defaultSpacing),
-                if (_isReconnecting)
-                  const CircularProgressIndicator()
-                else if (!isEmbedded())
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: _attemptReconnect,
-                        child: const Text('Reconnect'),
-                      ),
-                      const SizedBox(width: defaultSpacing),
-                      ConnectToNewAppButton(
-                        routerDelegate: widget.routerDelegate,
-                        onPressed: hideDisconnectedOverlay,
-                        gaScreen: gac.devToolsMain,
-                      ),
-                    ],
-                  )
-                else
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ElevatedButton(
-                        onPressed: _attemptReconnect,
-                        child: const Text('Reconnect'),
-                      ),
-                      const SizedBox(height: defaultSpacing),
-                      Text(
-                        'Or run a new debug session to reconnect.',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                    ],
+          child: ValueListenableBuilder<bool>(
+            valueListenable: _isReconnecting,
+            builder: (context, isReconnecting, _) =>
+                ValueListenableBuilder<String?>(
+                  valueListenable: _reconnectErrorText,
+                  builder: (context, reconnectErrorText, _) => Center(
+                    child: Column(
+                      children: [
+                        const Spacer(),
+                        Text(
+                          'Disconnected',
+                          style: theme.textTheme.headlineMedium,
+                        ),
+                        const SizedBox(height: defaultSpacing),
+                        if (isReconnecting)
+                          const CircularProgressIndicator()
+                        else if (!isEmbedded())
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: _attemptReconnect,
+                                child: const Text('Reconnect'),
+                              ),
+                              const SizedBox(width: defaultSpacing),
+                              ConnectToNewAppButton(
+                                routerDelegate: widget.routerDelegate,
+                                onPressed: hideDisconnectedOverlay,
+                                gaScreen: gac.devToolsMain,
+                              ),
+                            ],
+                          )
+                        else
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ElevatedButton(
+                                onPressed: _attemptReconnect,
+                                child: const Text('Reconnect'),
+                              ),
+                              const SizedBox(height: defaultSpacing),
+                              Text(
+                                'Or run a new debug session to connect to it.',
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        if (reconnectErrorText case final error?) ...[
+                          const SizedBox(height: denseSpacing),
+                          Text(
+                            error,
+                            style: theme.regularTextStyle.copyWith(
+                              color: theme.colorScheme.error,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                        const Spacer(),
+                        if (offlineDataController
+                            .offlineDataJson
+                            .isNotEmpty) ...[
+                          ElevatedButton(
+                            onPressed: _reviewHistory,
+                            child: const Text('Review recent data (offline)'),
+                          ),
+                          const Spacer(),
+                        ],
+                      ],
+                    ),
                   ),
-                const Spacer(),
-                if (offlineDataController.offlineDataJson.isNotEmpty) ...[
-                  ElevatedButton(
-                    onPressed: _reviewHistory,
-                    child: const Text('Review recent data (offline)'),
-                  ),
-                  const Spacer(),
-                ],
-              ],
-            ),
+                ),
           ),
         ),
       ),
@@ -191,8 +216,10 @@ class DisconnectObserverState extends State<DisconnectObserver>
   }
 
   Future<void> _attemptReconnect() async {
-    setState(() => _isReconnecting = true);
-    currentDisconnectedOverlay?.markNeedsBuild();
+    _isReconnecting.value = true;
+    _reconnectErrorText.value = null;
+
+    var reconnectionSuccess = false;
 
     try {
       await dtdManager.reconnect();
@@ -204,29 +231,34 @@ class DisconnectObserverState extends State<DisconnectObserver>
         // because that goes through _replaceStack which calls manuallyDisconnect
         // when clearing the URI, causing the disconnect observer to suppress
         // the overlay (userInitiatedConnectionState = true).
-        await FrameworkCore.initVmService(
+        reconnectionSuccess = await FrameworkCore.initVmService(
           serviceUriAsString: uri,
           logException: false,
-          // Suppress the error notification — we handle failure ourselves below.
-          errorReporter: (_, __) {},
+          errorReporter: (title, error) {
+            _reconnectErrorText.value = '$title, $error';
+          },
         );
+      } else {
+        reconnectionSuccess =
+            serviceConnection.serviceManager.connectedState.value.connected;
       }
     } catch (e) {
-      // Swallow errors — we check connected state in finally instead.
+      _reconnectErrorText.value = e.toString();
     } finally {
-      _isReconnecting = false;
+      _isReconnecting.value = false;
 
-      if (serviceConnection.serviceManager.connectedState.value.connected) {
+      if (reconnectionSuccess ||
+          serviceConnection.serviceManager.connectedState.value.connected) {
         // Success — also update the router so the URI is reflected in the URL.
         unawaited(
           widget.routerDelegate.updateArgsIfChanged({
             DevToolsQueryParams.vmServiceUriKey: _lastVmServiceUri,
           }),
         );
-        setState(() => hideDisconnectedOverlay());
+        _reconnectErrorText.value = null;
+        hideDisconnectedOverlay();
       } else {
         // Failed (stale URI, VM dead, etc.) — restore the overlay with buttons.
-        currentDisconnectedOverlay?.markNeedsBuild();
         showDisconnectedOverlay();
       }
     }

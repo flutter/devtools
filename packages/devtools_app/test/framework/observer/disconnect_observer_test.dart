@@ -4,7 +4,9 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/observer/disconnect_observer.dart';
+import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:devtools_app/src/shared/framework/framework_controller.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -12,16 +14,21 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../test_infra/matchers/matchers.dart';
 
 void main() {
   group('DisconnectObserver', () {
     late FakeServiceConnectionManager fakeServiceConnectionManager;
+    late MockDTDManager mockDtdManager;
 
     setUp(() {
       fakeServiceConnectionManager = FakeServiceConnectionManager();
+      mockDtdManager = MockDTDManager();
+      when(mockDtdManager.reconnect()).thenAnswer((_) async {});
       setGlobal(ServiceConnectionManager, fakeServiceConnectionManager);
+      setGlobal(DTDManager, mockDtdManager);
       setGlobal(FrameworkController, FrameworkController());
       setGlobal(OfflineDataController, OfflineDataController());
       setGlobal(IdeTheme, IdeTheme());
@@ -30,6 +37,7 @@ void main() {
     Future<void> pumpDisconnectObserver(
       WidgetTester tester, {
       Widget child = const Placeholder(),
+      DevToolsQueryParams? queryParams,
     }) async {
       await tester.pumpWidget(
         wrap(
@@ -41,6 +49,7 @@ void main() {
               );
             },
           ),
+          queryParams: queryParams,
         ),
       );
       await tester.pumpAndSettle();
@@ -74,7 +83,7 @@ void main() {
         showingOverlay ? findsOneWidget : findsNothing,
       );
       expect(
-        find.text('Or run a new debug session to reconnect.'),
+        find.text('Or run a new debug session to connect to it.'),
         showingOverlay && isEmbedded() ? findsOneWidget : findsNothing,
       );
       expect(
@@ -139,6 +148,40 @@ void main() {
         offlineDataController.offlineDataJson = {'foo': 'bar'};
         await showOverlayAndVerifyContents(tester);
       });
+
+      testWidgets(
+        'reconnect button restores previous VM service URI on success',
+        (WidgetTester tester) async {
+          const previousVmServiceUri = 'http://127.0.0.1:8181/';
+          when(mockDtdManager.reconnect()).thenAnswer((_) async {
+            fakeServiceConnectionManager.serviceManager.setConnectedState(true);
+          });
+
+          await pumpDisconnectObserver(
+            tester,
+            queryParams: DevToolsQueryParams({
+              DevToolsQueryParams.vmServiceUriKey: previousVmServiceUri,
+            }),
+          );
+          verifyObserverState(tester, connected: true, showingOverlay: false);
+
+          fakeServiceConnectionManager.serviceManager.setConnectedState(false);
+          await tester.pumpAndSettle();
+          verifyObserverState(tester, connected: false, showingOverlay: true);
+
+          await tester.tap(find.text('Reconnect'));
+          await tester.pumpAndSettle();
+
+          verify(mockDtdManager.reconnect()).called(1);
+          verifyObserverState(tester, connected: true, showingOverlay: false);
+          final context = tester.element(find.byType(DisconnectObserver));
+          final routerDelegate = DevToolsRouterDelegate.of(context);
+          expect(
+            routerDelegate.currentConfiguration!.params.vmServiceUri,
+            previousVmServiceUri,
+          );
+        },
+      );
 
       // Regression test for https://github.com/flutter/devtools/issues/8050.
       testWidgets('hides widgets at lower z-index', (
