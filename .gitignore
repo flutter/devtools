@@ -51,3 +51,7 @@ DEPENDENCIES.md
 
 # Ignore devtools_options.yaml files under example.
 **/example/**/devtools_options.yaml
+
+# macOS generated Flutter files
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/GeneratedPluginRegistrant.swift
