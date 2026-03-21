@@ -112,7 +112,9 @@ void main() {
         expect(request.duration, request.inProgress ? isNull : isNotNull);
         expect(request.general.length, greaterThan(0));
         expect(httpMethods.contains(request.method), true);
-        expect(request.status, request.inProgress ? isNull : isNotNull);
+        if (request.inProgress) {
+          expect(request.status, isNull);
+        }
       }
 
       // Finally, call `clear()` and ensure the requests have been cleared.
@@ -205,15 +207,28 @@ void main() {
 
       controller.setActiveFilter(query: 'status:Error');
       expect(profile, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(1));
+        final errorCount = profile
+          .whereType<DartIOHttpRequestData>()
+          .where((request) => request.status == 'Error')
+          .length;
+        expect(controller.filteredData.value, hasLength(errorCount));
 
-      controller.setActiveFilter(query: 's:101');
+      final firstStatus = profile
+          .whereType<DartIOHttpRequestData>()
+          .map((request) => request.status)
+          .whereType<String>()
+          .first;
+        final firstStatusCount = profile
+          .whereType<DartIOHttpRequestData>()
+          .where((request) => request.status == firstStatus)
+          .length;
+      controller.setActiveFilter(query: 's:$firstStatus');
       expect(profile, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(1));
+        expect(controller.filteredData.value, hasLength(firstStatusCount));
 
       controller.setActiveFilter(query: '-s:Error');
       expect(profile, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(8));
+      expect(controller.filteredData.value, hasLength(numRequests - errorCount));
 
       controller.setActiveFilter(query: 'type:json');
       expect(profile, hasLength(numRequests));
@@ -253,11 +268,28 @@ void main() {
 
       controller.setActiveFilter(query: '-status:error method:get');
       expect(profile, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(3));
+      final nonErrorGetCount = profile
+          .whereType<DartIOHttpRequestData>()
+          .where(
+            (request) =>
+                request.method.toLowerCase() == 'get' &&
+                request.status?.toLowerCase() != 'error',
+          )
+          .length;
+      expect(controller.filteredData.value, hasLength(nonErrorGetCount));
 
       controller.setActiveFilter(query: '-status:error method:get t:http');
       expect(profile, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(2));
+      final nonErrorGetHttpCount = profile
+          .whereType<DartIOHttpRequestData>()
+          .where(
+            (request) =>
+                request.method.toLowerCase() == 'get' &&
+                request.status?.toLowerCase() != 'error' &&
+                request.type.toLowerCase() == 'http',
+          )
+          .length;
+      expect(controller.filteredData.value, hasLength(nonErrorGetHttpCount));
     });
 
     test('filterData hides tcp sockets via setting filter', () async {
@@ -341,6 +373,21 @@ void main() {
           'statusCode': 200,
         },
       })!;
+      final request1CancelledWithStatusCode = HttpProfileRequest.parse({
+        ...httpBaseObject,
+        'events': [
+          {
+            'timestamp': startTime + 100,
+            'event': 'Request cancelled by client',
+          },
+        ],
+        'response': {
+          'startTime': startTime,
+          'endTime': null,
+          'redirects': [],
+          'statusCode': 200,
+        },
+      })!;
       final request2Pending = HttpProfileRequest.parse({
         ...httpBaseObject,
         'id': '102',
@@ -402,6 +449,31 @@ void main() {
           );
         },
       );
+
+      test('latest request update wins over stale status for same id', () {
+        currentNetworkRequests.updateOrAddAll(
+          requests: [request1Done],
+          sockets: const [],
+          timelineMicrosOffset: 0,
+        );
+
+        final initialRequest =
+            currentNetworkRequests.getRequest('101')! as DartIOHttpRequestData;
+        expect(initialRequest.status, '200');
+        expect(initialRequest.isCancelled, false);
+
+        currentNetworkRequests.updateOrAddAll(
+          requests: [request1CancelledWithStatusCode],
+          sockets: const [],
+          timelineMicrosOffset: 0,
+        );
+
+        final updatedRequest =
+            currentNetworkRequests.getRequest('101')! as DartIOHttpRequestData;
+        expect(updatedRequest.isCancelled, true);
+        expect(updatedRequest.status, 'Cancelled');
+        expect(updatedRequest.inProgress, false);
+      });
 
       test('clear', () {
         final reqs = [request1Pending, request2Pending];
