@@ -92,6 +92,19 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
 
   @override
   Widget build(BuildContext context) {
+    final isProfileBuild =
+        serviceConnection.serviceManager.connectedApp?.isProfileBuildNow ??
+        false;
+    if (isProfileBuild) {
+      return const Center(
+        child: Text(
+          'Rebuild information is not available for this frame.\n'
+          'Widget rebuild counts are only available when running '
+          'an app in debug-mode.',
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -138,7 +151,7 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
               if (metrics.isEmpty) {
                 return const Center(
                   child: Text('Interact with the app to trigger rebuilds.'),
-                ); // No data to display but there should be data soon.
+                );
               }
               return RebuildTable(
                 key: const Key('Rebuild Table'),
