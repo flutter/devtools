@@ -8,6 +8,7 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../../framework/framework_core.dart';
 import '../../service/connected_app/connection_info.dart';
@@ -17,6 +18,8 @@ import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/framework/routing.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/query_parameters.dart';
+
+final _log = Logger('disconnect_observer');
 
 class DisconnectObserver extends StatefulWidget {
   const DisconnectObserver({
@@ -131,6 +134,40 @@ class DisconnectObserverState extends State<DisconnectObserver>
     widget.routerDelegate.navigate(snapshotScreenId, args);
   }
 
+  Widget _buildReconnectActions(ThemeData theme) {
+    final reconnectButton = ElevatedButton(
+      onPressed: _attemptReconnect,
+      child: const Text('Reconnect'),
+    );
+
+    if (!isEmbedded()) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          reconnectButton,
+          const SizedBox(width: defaultSpacing),
+          ConnectToNewAppButton(
+            routerDelegate: widget.routerDelegate,
+            onPressed: hideDisconnectedOverlay,
+            gaScreen: gac.devToolsMain,
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        reconnectButton,
+        const SizedBox(height: defaultSpacing),
+        Text(
+          'Or run a new debug session to connect to it.',
+          style: theme.textTheme.bodyMedium,
+        ),
+      ],
+    );
+  }
+
   OverlayEntry _createDisconnectedOverlay() {
     final theme = Theme.of(context);
     currentDisconnectedOverlay = OverlayEntry(
@@ -153,37 +190,8 @@ class DisconnectObserverState extends State<DisconnectObserver>
                         const SizedBox(height: defaultSpacing),
                         if (isReconnecting)
                           const CircularProgressIndicator()
-                        else if (!isEmbedded())
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ElevatedButton(
-                                onPressed: _attemptReconnect,
-                                child: const Text('Reconnect'),
-                              ),
-                              const SizedBox(width: defaultSpacing),
-                              ConnectToNewAppButton(
-                                routerDelegate: widget.routerDelegate,
-                                onPressed: hideDisconnectedOverlay,
-                                gaScreen: gac.devToolsMain,
-                              ),
-                            ],
-                          )
                         else
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ElevatedButton(
-                                onPressed: _attemptReconnect,
-                                child: const Text('Reconnect'),
-                              ),
-                              const SizedBox(height: defaultSpacing),
-                              Text(
-                                'Or run a new debug session to connect to it.',
-                                style: theme.textTheme.bodyMedium,
-                              ),
-                            ],
-                          ),
+                          _buildReconnectActions(theme),
                         if (reconnectErrorText case final error?) ...[
                           const SizedBox(height: denseSpacing),
                           Text(
@@ -219,48 +227,42 @@ class DisconnectObserverState extends State<DisconnectObserver>
     _isReconnecting.value = true;
     _reconnectErrorText.value = null;
 
-    var reconnectionSuccess = false;
-
     try {
       await dtdManager.reconnect();
+    } catch (error, stackTrace) {
+      _log.warning('Failed to reconnect DTD.', error, stackTrace);
+    }
 
-      final uri = _lastVmServiceUri;
-      if (uri != null &&
-          !serviceConnection.serviceManager.connectedState.value.connected) {
-        // Call initVmService directly — do NOT use routerDelegate.navigate()
-        // because that goes through _replaceStack which calls manuallyDisconnect
-        // when clearing the URI, causing the disconnect observer to suppress
-        // the overlay (userInitiatedConnectionState = true).
-        reconnectionSuccess = await FrameworkCore.initVmService(
-          serviceUriAsString: uri,
-          logException: false,
-          errorReporter: (title, error) {
-            _reconnectErrorText.value = '$title, $error';
-          },
-        );
-      } else {
-        reconnectionSuccess =
-            serviceConnection.serviceManager.connectedState.value.connected;
-      }
-    } catch (e) {
-      _reconnectErrorText.value = e.toString();
-    } finally {
-      _isReconnecting.value = false;
+    var reconnectionSuccess =
+        serviceConnection.serviceManager.connectedState.value.connected;
 
-      if (reconnectionSuccess ||
-          serviceConnection.serviceManager.connectedState.value.connected) {
-        // Success — also update the router so the URI is reflected in the URL.
-        unawaited(
-          widget.routerDelegate.updateArgsIfChanged({
-            DevToolsQueryParams.vmServiceUriKey: _lastVmServiceUri,
-          }),
-        );
-        _reconnectErrorText.value = null;
-        hideDisconnectedOverlay();
-      } else {
-        // Failed (stale URI, VM dead, etc.) — restore the overlay with buttons.
-        showDisconnectedOverlay();
-      }
+    final uri = _lastVmServiceUri;
+    if (!reconnectionSuccess && uri != null) {
+      // Call initVmService directly — do NOT use routerDelegate.navigate()
+      // because that goes through _replaceStack which calls manuallyDisconnect
+      // when clearing the URI, causing the disconnect observer to suppress
+      // the overlay (userInitiatedConnectionState = true).
+      reconnectionSuccess = await FrameworkCore.initVmService(
+        serviceUriAsString: uri,
+        logException: false,
+        errorReporter: (title, error) {
+          _reconnectErrorText.value = '$title, $error';
+        },
+      );
+    }
+
+    _isReconnecting.value = false;
+
+    if (reconnectionSuccess) {
+      unawaited(
+        widget.routerDelegate.updateArgsIfChanged({
+          DevToolsQueryParams.vmServiceUriKey: _lastVmServiceUri,
+        }),
+      );
+      _reconnectErrorText.value = null;
+      hideDisconnectedOverlay();
+    } else {
+      showDisconnectedOverlay();
     }
   }
 }
