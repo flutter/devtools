@@ -13,22 +13,22 @@ const httpGetCancelledJson = <String, dynamic>{
   'isolateId': 'isolates/123',
   'method': 'GET',
   'uri': 'https://jsonplaceholder.typicode.com/albums/1',
-  'events': <dynamic>[
+  'events': <Map<String, Object>>[
     {'timestamp': 6326379935, 'event': 'Request cancelled by client'},
   ],
-  'startTime': 6326279935,  // microseconds
-  'endTime': 6326479935,    // 200ms later
+  'startTime': 6326279935, // microseconds
+  'endTime': 6326479935, // 200ms later
   'request': <String, dynamic>{
     'headers': <String, dynamic>{},
     'compressionState': 'HttpClientRequestCompressionState.notCompressed',
     'connectionInfo': null,
     'contentLength': 0,
-    'cookies': <dynamic>[],
+    'cookies': <Object>[],
     'followRedirects': true,
     'maxRedirects': 5,
     'method': 'GET',
     'persistentConnection': true,
     'uri': 'https://jsonplaceholder.typicode.com/albums/1',
   },
-  'response': null,   // ← key: no response
+  'response': null, // ← key: no response
 };
