@@ -138,19 +138,21 @@ class DartIOHttpRequestData extends NetworkRequest {
   DateTime? get _endTime =>
       _hasError ? _request.endTime : _request.response?.endTime;
 
-  static const _cancellationMarkers = [
-    'cancel',
-    'canceled',
-    'cancelled',
-    'operation canceled',
-    'operation cancelled',
-    'abort',
-    'aborted',
-  ];
-
   bool _matchesCancellationMarker(String? value) {
-    final normalized = value?.toLowerCase();
-    if (normalized == null) return false;
+    if (value == null) return false;
+    final normalized = value.toLowerCase();
+
+    /// Markers used for substring matching against request / response errors
+    /// and request event names to classify cancelled requests.
+    ///
+    /// Derived from observed cancellation wording in HTTP profiler payloads,
+    /// keeping specific terms to reduce false positives.
+    const _cancellationMarkers = [
+      'canceled',
+      'cancelled',
+      'aborted',
+    ];
+
     return _cancellationMarkers.any(normalized.contains);
   }
 
@@ -172,7 +174,6 @@ class DartIOHttpRequestData extends NetworkRequest {
       return end?.difference(start);
     }
 
-    // Cancelled request
     if (isCancelled) {
       return Duration.zero;
     }
