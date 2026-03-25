@@ -43,6 +43,7 @@ class InspectorScreenController extends DevToolsScreenController {
       treeType: FlutterTreeType.widget,
     );
 
+    // TODO(elliette): Remove legacy inspector.
     legacyInspectorTreeController = legacy.InspectorTreeController(
       gaId: InspectorScreenMetrics.summaryTreeGaId,
     );
