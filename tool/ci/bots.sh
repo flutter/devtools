@@ -72,7 +72,13 @@ elif [ "$BOT" = "test_webdriver" ]; then
 # elif [ "$BOT" = "integration_ddc" ]; then
 
 # TODO(https://github.com/flutter/devtools/issues/1987): rewrite legacy integration tests.
-elif [ "$BOT" = "integration_dart2js" ]; then
+elif [[ "$BOT" == "integration_dart2js" || "$BOT" == "integration_wasm" ]]; then
+    if [ "$BOT" == "integration_wasm" ]; then
+        MAYBE_WASM_FLAG="--wasm"
+    else
+        MAYBE_WASM_FLAG=""
+    fi
+
     if [ "$DEVTOOLS_PACKAGE" = "devtools_app" ]; then
         flutter pub get
 
@@ -85,15 +91,15 @@ run to see if golden image failures have been uploaded (this only happens once a
 completed). Download these goldens and update them in the codebase to apply the updates."
 
         if [ "$DEVICE" = "flutter" ]; then
-            dart run integration_test/run_tests.dart --headless --shard="$SHARD"
+            dart run integration_test/run_tests.dart $MAYBE_WASM_FLAG --headless --shard="$SHARD"
         elif [ "$DEVICE" = "flutter-web" ]; then
-            dart run integration_test/run_tests.dart --test-app-device=chrome --headless --shard="$SHARD"
+            dart run integration_test/run_tests.dart --test-app-device=chrome $MAYBE_WASM_FLAG --headless --shard="$SHARD"
         elif [ "$DEVICE" = "dart-cli" ]; then
-            dart run integration_test/run_tests.dart --test-app-device=cli --headless --shard="$SHARD"
+            dart run integration_test/run_tests.dart --test-app-device=cli $MAYBE_WASM_FLAG --headless --shard="$SHARD"
         fi
     elif [ "$DEVTOOLS_PACKAGE" = "devtools_extensions" ]; then
         pushd $DEVTOOLS_DIR/packages/devtools_extensions
-        dart run integration_test/run_tests.dart --headless
+        dart run integration_test/run_tests.dart $MAYBE_WASM_FLAG --headless
         popd
     fi
 fi

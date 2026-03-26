@@ -27,6 +27,7 @@ class IntegrationTestRunner with IOMixin {
     String testTarget, {
     required String testDriver,
     bool headless = false,
+    bool useWasm = false,
     List<String> dartDefineArgs = const <String>[],
     bool debugLogging = false,
   }) async {
@@ -40,6 +41,7 @@ class IntegrationTestRunner with IOMixin {
 
       final flutterDriveArgs = [
         'drive',
+        if (useWasm) '--wasm',
         // Debug outputs from the test will not show up in profile mode. Since
         // we rely on debug outputs for detecting errors and exceptions from the
         // test, we cannot run this these tests in profile mode until this issue
@@ -223,6 +225,9 @@ class IntegrationTestRunnerArgs {
   /// instead of 'chrome'.
   bool get headless => argResults.flag(_headlessArg);
 
+  /// Whether this integration test should be run on wasm.
+  bool get useWasm => argResults.flag(_wasmArg);
+
   /// Sharding information for this test run.
   ({int shardNumber, int totalShards})? get shard {
     final shardValue = argResults.option(_shardArg);
@@ -250,6 +255,7 @@ class IntegrationTestRunnerArgs {
   static const _helpArg = 'help';
   static const testTargetArg = 'target';
   static const _headlessArg = 'headless';
+  static const _wasmArg = 'wasm';
   static const _shardArg = 'shard';
 
   /// Builds an arg parser for DevTools integration tests.
@@ -276,6 +282,11 @@ class IntegrationTestRunnerArgs {
             'Runs the integration test on the \'web-server\' device instead of '
             'the \'chrome\' device. For headless test runs, you will not be '
             'able to see the integration test run visually in a Chrome browser.',
+      )
+      ..addFlag(
+        _wasmArg,
+        negatable: false,
+        help: 'Runs the integration test on wasm.',
       )
       ..addOption(
         _shardArg,
