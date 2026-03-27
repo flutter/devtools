@@ -207,28 +207,31 @@ void main() {
 
       controller.setActiveFilter(query: 'status:Error');
       expect(profile, hasLength(numRequests));
-        final errorCount = profile
+      final errorCount = profile
           .whereType<DartIOHttpRequestData>()
           .where((request) => request.status == 'Error')
           .length;
-        expect(controller.filteredData.value, hasLength(errorCount));
+      expect(controller.filteredData.value, hasLength(errorCount));
 
       final firstStatus = profile
           .whereType<DartIOHttpRequestData>()
           .map((request) => request.status)
           .whereType<String>()
           .first;
-        final firstStatusCount = profile
+      final firstStatusCount = profile
           .whereType<DartIOHttpRequestData>()
           .where((request) => request.status == firstStatus)
           .length;
       controller.setActiveFilter(query: 's:$firstStatus');
       expect(profile, hasLength(numRequests));
-        expect(controller.filteredData.value, hasLength(firstStatusCount));
+      expect(controller.filteredData.value, hasLength(firstStatusCount));
 
       controller.setActiveFilter(query: '-s:Error');
       expect(profile, hasLength(numRequests));
-      expect(controller.filteredData.value, hasLength(numRequests - errorCount));
+      expect(
+        controller.filteredData.value,
+        hasLength(numRequests - errorCount),
+      );
 
       controller.setActiveFilter(query: 'type:json');
       expect(profile, hasLength(numRequests));

@@ -147,11 +147,7 @@ class DartIOHttpRequestData extends NetworkRequest {
     ///
     /// Derived from observed cancellation wording in HTTP profiler payloads,
     /// keeping specific terms to reduce false positives.
-    const _cancellationMarkers = [
-      'canceled',
-      'cancelled',
-      'aborted',
-    ];
+    const _cancellationMarkers = ['canceled', 'cancelled', 'aborted'];
 
     return _cancellationMarkers.any(normalized.contains);
   }
