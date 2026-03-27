@@ -625,6 +625,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
   }
 
   List<Widget> _buildGeneralRows(BuildContext context) {
+    final bytes = data.responseBytes;
     return [
       // TODO(kenz): show preview for requests (png, response body, proto)
       _buildRow(
@@ -662,7 +663,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Response Size',
-        child: _valueText(_formatBytes(data.responseBytes)),
+        child: _valueText(bytes != null ? _formatBytes(bytes) : '-'),
       ),
       const SizedBox(height: defaultSpacing),
 
