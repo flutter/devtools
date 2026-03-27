@@ -658,6 +658,14 @@ class NetworkRequestOverviewView extends StatelessWidget {
         ),
         const SizedBox(height: defaultSpacing),
       ],
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Size',
+        child: _valueText(_formatBytes(data.responseBytes)),
+      ),
+      const SizedBox(height: defaultSpacing),
+
       if (data.contentType != null) ...[
         _buildRow(
           context: context,
@@ -667,6 +675,15 @@ class NetworkRequestOverviewView extends StatelessWidget {
         const SizedBox(height: defaultSpacing),
       ],
     ];
+  }
+
+  String _formatBytes(int? bytes) {
+    if (bytes == null) return '-';
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    }
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
   List<Widget> _buildTimingOverview(BuildContext context) {
