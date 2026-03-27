@@ -236,7 +236,14 @@ class DartIOHttpRequestData extends NetworkRequest {
       return int.tryParse(contentLength);
     }
     if (contentLength is List && contentLength.isNotEmpty) {
-      return int.tryParse(contentLength.first);
+      final first = contentLength.first;
+
+      if (first is int) {
+        return first;
+      }
+      if (first is String) {
+        return int.tryParse(first);
+      }
     }
     return null;
   }
