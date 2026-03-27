@@ -432,8 +432,8 @@ class AddressColumn extends ColumnData<NetworkRequest>
       );
 
   @override
-  String getValue(NetworkRequest dataObject) {
-    return dataObject.uri;
+  String getValue(NetworkRequest data) {
+    return data.uri;
   }
 
   @override
