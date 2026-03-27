@@ -677,6 +677,11 @@ class NetworkRequestOverviewView extends StatelessWidget {
     ];
   }
 
+  // Output Formats:
+  // - 512 → "512 B"
+  // - 2048 → "2.0 KB"
+  // - 1048576 → "1.0 MB"
+  // Values are rounded to one decimal place for KB and MB.
   String _formatBytes(int? bytes) {
     if (bytes == null) return '-';
     if (bytes < 1024) return '$bytes B';
