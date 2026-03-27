@@ -43,7 +43,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any updates.
+- Added response size ("Size") column to the Network tab and displayed size in the request inspector overview. -
+  [#9744](https://github.com/flutter/devtools/pull/9744)
 
 ## Logging updates
 
