@@ -29,6 +29,9 @@ abstract class NetworkRequest
 
   int? get port;
 
+  int? get requestBytes => null;
+  int? get responseBytes => null;
+
   bool get didFail;
 
   /// True if the request hasn't completed yet.
@@ -159,6 +162,12 @@ class Socket extends NetworkRequest {
 
   @override
   int get port => _socket.port;
+
+  @override
+  int get requestBytes => writeBytes;
+
+  @override
+  int get responseBytes => readBytes;
 
   // TODO(kenz): what determines a web socket request failure?
   @override

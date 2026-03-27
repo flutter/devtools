@@ -360,6 +360,7 @@ class NetworkRequestsTable extends StatelessWidget {
     statusColumn,
     typeColumn,
     durationColumn,
+    const ResponseSizeColumn(),
     timestampColumn,
     actionsColumn,
   ];
@@ -391,6 +392,28 @@ class NetworkRequestsTable extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+String _formatBytes(int? bytes) {
+  if (bytes == null) return '-';
+  if (bytes < 1024) return '$bytes B';
+  if (bytes < 1024 * 1024) {
+    return '${(bytes / 1024).toStringAsFixed(1)} KB';
+  }
+  return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+}
+
+class ResponseSizeColumn extends ColumnData<NetworkRequest> {
+  const ResponseSizeColumn()
+    : super('Size', alignment: ColumnAlignment.right, fixedWidthPx: 90);
+
+  @override
+  int? getValue(NetworkRequest data) => data.responseBytes;
+
+  @override
+  String getDisplayValue(NetworkRequest data) {
+    return _formatBytes(data.responseBytes);
   }
 }
 
