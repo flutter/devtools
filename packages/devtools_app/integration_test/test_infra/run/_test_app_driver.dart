@@ -22,8 +22,12 @@ class TestFlutterApp extends IntegrationTestApp {
   @override
   Future<void> startProcess() async {
     runProcess = await Process.start(
-      Platform.isWindows ? 'flutter.bat' : 'flutter',
+      Platform.isWindows
+          ? 'flutter.bat'
+          : '/Users/elliottbrooks/dev/flutter/bin/dart',
       [
+        '/Users/elliottbrooks/dev/flutter/packages/flutter_tools/bin/flutter_tools.dart',
+
         'run',
         '--machine',
         '-d',
