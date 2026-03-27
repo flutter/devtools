@@ -658,10 +658,10 @@ class NetworkRequestOverviewView extends StatelessWidget {
         ),
         const SizedBox(height: defaultSpacing),
       ],
-      const SizedBox(height: defaultSpacing),
+
       _buildRow(
         context: context,
-        title: 'Size',
+        title: 'Response Size',
         child: _valueText(_formatBytes(data.responseBytes)),
       ),
       const SizedBox(height: defaultSpacing),
