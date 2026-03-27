@@ -417,8 +417,8 @@ class ResponseSizeColumn extends ColumnData<NetworkRequest> {
   int? getValue(NetworkRequest data) => data.responseBytes;
 
   @override
-  String getDisplayValue(NetworkRequest data) {
-    return _formatBytes(data.responseBytes);
+  String getDisplayValue(NetworkRequest dataObject) {
+    return _formatBytes(dataObject.responseBytes);
   }
 }
 
