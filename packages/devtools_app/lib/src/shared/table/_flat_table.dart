@@ -33,6 +33,7 @@ class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable<T> {
     super.sizeColumnsToFit = true,
     super.rowHeight,
     super.selectionNotifier,
+    super.tallHeaders,
   }) : super(
          searchMatchesNotifier: searchController.searchMatches,
          activeSearchMatchNotifier: searchController.activeSearchMatch,

@@ -29,6 +29,7 @@ export 'src/screens/inspector/inspector_screen_body.dart';
 export 'src/screens/inspector/inspector_tree_controller.dart';
 export 'src/screens/inspector_shared/inspector_screen.dart';
 export 'src/screens/inspector_shared/inspector_screen_controller.dart';
+export 'src/screens/logging/log_details_controller.dart';
 export 'src/screens/logging/logging_controller.dart';
 export 'src/screens/logging/logging_screen.dart';
 export 'src/screens/memory/framework/memory_controller.dart';

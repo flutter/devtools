@@ -8,6 +8,7 @@
 # Exclude pubspec.lock files in tests and example fixtures.
 packages/devtools_app/test/**/pubspec.lock
 packages/devtools_extensions/example/**/pubspec.lock
+third_party/**/pubspec.lock
 
 .idea/
 .data_dir/
@@ -50,3 +51,7 @@ DEPENDENCIES.md
 
 # Ignore devtools_options.yaml files under example.
 **/example/**/devtools_options.yaml
+
+# macOS generated Flutter files
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/GeneratedPluginRegistrant.swift

@@ -32,6 +32,21 @@ class DTDManager {
   Uri? get uri => _uri;
   Uri? _uri;
 
+  /// A stream of [CoreDtdServiceConstants.serviceRegisteredKind] and
+  /// [CoreDtdServiceConstants.serviceUnregisteredKind] events.
+  ///
+  /// Since this is a broadcast stream, it supports multiple subscribers.
+  /// Subscribers should also call [DartToolingDaemon.getRegisteredServices] to
+  /// detect any services that were already registered.
+  Stream<DTDEvent> get serviceRegistrationBroadcastStream =>
+      _serviceRegistrationController.stream;
+  final _serviceRegistrationController = StreamController<DTDEvent>.broadcast();
+
+  /// The subscription to the current service registration stream.
+  ///
+  /// This is canceled and reset with the DTD connection changes.
+  StreamSubscription<DTDEvent>? _currentServiceRegistrationSubscription;
+
   /// Whether or not to automatically reconnect if disconnected.
   ///
   /// This will happen by default as long as the disconnect wasn't
@@ -74,7 +89,7 @@ class DTDManager {
   }
 
   /// Triggers a reconnect to the last connected URI if the current state is
-  /// [ConnectionFailedDTDState] (and there was a pervious connection).
+  /// [ConnectionFailedDTDState] (and there was a previous connection).
   Future<void> reconnect() {
     final reconnectFunc = _lastConnectFunc;
     if (_connectionState.value is! ConnectionFailedDTDState ||
@@ -149,11 +164,18 @@ class DTDManager {
 
     try {
       final connection = await _connectWithRetries(uri, maxRetries: maxRetries);
+      await _listenForServiceRegistrationEvents(connection);
 
+      // Save the previous connection so that we can close it after the new
+      // connection is reestablished.
+      final previousConnection = _connection.value;
       _uri = uri;
       // Set this after setting the value of [_uri] so that [_uri] can be used
       // by any listeners of the [_connection] notifier.
       _connection.value = connection;
+      // Close the previous connection.
+      await previousConnection?.close();
+
       _connectionState.value = ConnectedDTDState();
       _log.info('Successfully connected to DTD at: $uri');
 
@@ -230,16 +252,19 @@ class DTDManager {
       // an explicit disconnect.
       _automaticallyReconnect = false;
 
-      // We only clear the connection if we are explicitly disconnecting. In the
-      // case where the connection just dropped, we leave it so that we can
-      // continue to render a page (usually with an overlay).
+      // We only close and clear the connection if we are explicitly
+      // disconnecting.
+      //
+      // In the case where the connection just dropped, we leave it so
+      // that we can continue to render a page (usually with an overlay), then
+      // only close it once the new connection is established.
+      if (_connection.value case final connection?) {
+        await connection.close();
+      }
       _connection.value = null;
     }
 
     _periodicConnectionCheck?.cancel();
-    if (_connection.value case final connection?) {
-      await connection.close();
-    }
 
     _connectionState.value = NotConnectedDTDState();
     _uri = null;
@@ -249,7 +274,45 @@ class DTDManager {
 
   Future<void> dispose() async {
     await disconnect();
+    await _currentServiceRegistrationSubscription?.cancel();
+    await _serviceRegistrationController.close();
     _connection.dispose();
+  }
+
+  /// Listens for service registration events on the [dtd] connection.
+  Future<void> _listenForServiceRegistrationEvents(
+      DartToolingDaemon dtd) async {
+    // We immediately begin listening for service registration events on the new
+    // DTD connection before canceling the previous subscription. This
+    // guarantees that we don't miss any events across reconnects.
+    // ignore: cancel_subscriptions, false positive, it is canceled below.
+    final nextServiceRegistrationSubscription = dtd
+        .onEvent(CoreDtdServiceConstants.servicesStreamId)
+        .listen(_forwardServiceRegistrationEvents,
+            onError: _logServiceStreamError);
+    await dtd.streamListen(CoreDtdServiceConstants.servicesStreamId);
+
+    // Cancel the previous subscription.
+    await _currentServiceRegistrationSubscription?.cancel();
+    _currentServiceRegistrationSubscription =
+        nextServiceRegistrationSubscription;
+  }
+
+  /// Forwards service registration events to the
+  /// [_serviceRegistrationController].
+  void _forwardServiceRegistrationEvents(DTDEvent event) {
+    final kind = event.kind;
+    final isRegistrationEvent =
+        kind == CoreDtdServiceConstants.serviceRegisteredKind ||
+            kind == CoreDtdServiceConstants.serviceUnregisteredKind;
+
+    if (isRegistrationEvent) {
+      _serviceRegistrationController.add(event);
+    }
+  }
+
+  void _logServiceStreamError(Object error) {
+    _log.warning('Error in DTD service stream', error);
   }
 
   /// Returns the workspace roots for the Dart Tooling Daemon connection.

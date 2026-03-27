@@ -21,10 +21,11 @@ extension type const UniversalLinkSettings._(Map<String, Object?> _json) {
   });
 
   /// The bundle identifier of the iOS build of this Flutter project.
-  String? get bundleIdentifier => _json[_kBundleIdentifierKey] as String?;
+  String get bundleIdentifier =>
+      (_json[_kBundleIdentifierKey] as String?) ?? '';
 
   /// The team identifier of the iOS build of this Flutter project.
-  String? get teamIdentifier => _json[_kTeamIdentifierKey] as String?;
+  String get teamIdentifier => (_json[_kTeamIdentifierKey] as String?) ?? '';
 
   /// The associated domains of the iOS build of this Flutter project.
   List<String> get associatedDomains =>

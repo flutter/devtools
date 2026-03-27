@@ -48,6 +48,7 @@ class LogsTable extends StatelessWidget {
       defaultSortDirection: SortDirection.ascending,
       secondarySortColumn: messageColumn,
       rowHeight: _logRowHeight,
+      tallHeaders: true,
     );
   }
 }

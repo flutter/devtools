@@ -397,16 +397,16 @@ class TableUiState {
   }
 }
 
-// Ignoring the 'avoid_classes_with_only_static_members' lint because the static
-// members here allow us to add asserts that guarantee unique keys for tables
-// across DevTools.
-// ignore: avoid_classes_with_only_static_members
 /// Stores the [TableUiState] for each table, keyed on a unique [String].
 ///
 /// This store will remain alive for the entire life of the DevTools instance.
 /// This allows us to cache the [TableUiState] for tables without having to
 /// keep table [State] classes or table controller classes alive.
 @visibleForTesting
+// Note: Ignoring the 'avoid_classes_with_only_static_members' lint because the
+// static members here allow us to add asserts that guarantee unique keys for
+// tables across DevTools.
+// ignore: avoid_classes_with_only_static_members, see reason above.
 abstract class TableUiStateStore<T> {
   static final _tableUiStateStore = <String, TableUiState>{};
 

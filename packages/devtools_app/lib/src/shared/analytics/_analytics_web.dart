@@ -746,16 +746,10 @@ set flutterClientId(String newFlutterClientId) {
   _flutterClientId = newFlutterClientId;
 }
 
-bool _computingDimensions = false;
-bool _analyticsComputed = false;
-
-bool _computingUserApplicationDimensions = false;
-bool _userApplicationDimensionsComputed = false;
+Completer<void>? _computingDimensionsCompleter;
 
 // Computes the running application.
 void _computeUserApplicationCustomGTagData() {
-  if (_userApplicationDimensionsComputed) return;
-
   final connectedApp = serviceConnection.serviceManager.connectedApp!;
   assert(connectedApp.isFlutterAppNow != null);
   assert(connectedApp.isDartWebAppNow != null);
@@ -779,8 +773,6 @@ void _computeUserApplicationCustomGTagData() {
   userBuildType = connectedApp.isProfileBuildNow!
       ? buildTypeProfile
       : buildTypeDebug;
-
-  _analyticsComputed = true;
 }
 
 @JS('getDevToolsPropertyID')
@@ -837,22 +829,31 @@ Future<void> computeFlutterClientId() async {
 }
 
 Future<void> setupDimensions() async {
-  if (!_analyticsComputed && !_computingDimensions) {
-    _computingDimensions = true;
+  if (_computingDimensionsCompleter != null) {
+    return _computingDimensionsCompleter!.future;
+  }
+
+  _computingDimensionsCompleter = Completer<void>();
+  try {
     computeDevToolsCustomGTagsData();
     computeDevToolsQueryParams();
     await computeFlutterClientId();
-    _analyticsComputed = true;
+  } catch (e, st) {
+    _log.warning('Failed to compute dimensions', e, st);
+  } finally {
+    _computingDimensionsCompleter!.complete();
   }
 }
 
 void setupUserApplicationDimensions() {
-  if (serviceConnection.serviceManager.connectedApp != null &&
-      !_userApplicationDimensionsComputed &&
-      !_computingUserApplicationDimensions) {
-    _computingUserApplicationDimensions = true;
+  if (serviceConnection.serviceManager.connectedApp == null) {
+    return;
+  }
+
+  try {
     _computeUserApplicationCustomGTagData();
-    _userApplicationDimensionsComputed = true;
+  } catch (e, st) {
+    _log.warning('Failed to compute user application dimensions', e, st);
   }
 }
 

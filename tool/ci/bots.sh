@@ -64,6 +64,9 @@ elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
         exit 1
     fi
 
+elif [ "$BOT" = "test_webdriver" ]; then
+    flutter test webdriver_test
+
 # TODO(https://github.com/flutter/devtools/issues/1987): consider running integration tests
 # for a DDC build of DevTools
 # elif [ "$BOT" = "integration_ddc" ]; then

@@ -132,6 +132,8 @@ class ExtensionView extends StatelessWidget {
 
 extension ExtensionConfigExtension on DevToolsExtensionConfig {
   IconData get icon =>
+      // The code point is dynamic. Flutter Icon Tree Shaking disabled.
+      // ignore: non_const_argument_for_const_parameter
       IconData(materialIconCodePoint, fontFamily: 'MaterialIcons');
 
   String get screenId => '${name}_ext';

@@ -4,7 +4,7 @@
 
 import 'package:devtools_shared/devtools_shared.dart';
 
-import '../../utils.dart';
+import '../utils/enum_utils.dart';
 
 /// Flutter version service registered by Flutter Tools.
 ///
@@ -122,7 +122,7 @@ final class FlutterVersion extends SemanticVersion {
     String versionStr, {
     String? channelStr,
   }) {
-    // Check if channel string is valid. 
+    // Check if channel string is valid.
     if (channelStr != null) {
       final channel = FlutterChannel.fromName(channelStr);
       if (channel != null) return channel;

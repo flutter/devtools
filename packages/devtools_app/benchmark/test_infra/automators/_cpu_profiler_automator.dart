@@ -35,19 +35,19 @@ class CpuProfilerScreenAutomator {
     // Switch to all other CPU profiler tabs and scroll to the end.
     logStatus('Switching to Call Tree tab.');
     await controller.tap(find.widgetWithText(InkWell, 'Call Tree'));
-    await controller.pump(longPumpDuration);
+    await controller.pumpAndSettle(longPumpDuration);
     logStatus('Scrolling through Call Tree table.');
     await scrollToEnd<CpuCallTreeTable>(controller);
 
     logStatus('Switching to Method Table tab.');
     await controller.tap(find.widgetWithText(InkWell, 'Method Table'));
-    await controller.pump(longPumpDuration);
+    await controller.pumpAndSettle(longPumpDuration);
     logStatus('Scrolling through Method Table.');
     await scrollToEnd<MethodTable>(controller);
 
     logStatus('Switching to CPU Flame Chart tab.');
     await controller.tap(find.widgetWithText(InkWell, 'CPU Flame Chart'));
-    await controller.pump(longPumpDuration);
+    await controller.pumpAndSettle(longPumpDuration);
     logStatus('Scrolling through CPU Flame Chart.');
     await scrollToEnd<CpuProfileFlameChart>(controller);
 
