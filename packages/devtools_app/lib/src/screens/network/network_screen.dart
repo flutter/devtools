@@ -425,7 +425,7 @@ class ResponseSizeColumn extends ColumnData<NetworkRequest> {
     : super('Size', alignment: ColumnAlignment.right, fixedWidthPx: 90);
 
   @override
-  int? getValue(NetworkRequest data) => data.responseBytes;
+  int? getValue(NetworkRequest dataObject) => dataObject.responseBytes;
 
   @override
   String getDisplayValue(NetworkRequest dataObject) {
