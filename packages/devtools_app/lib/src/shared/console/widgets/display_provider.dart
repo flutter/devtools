@@ -46,11 +46,17 @@ class _DisplayProviderState extends State<DisplayProvider> {
       return InteractivityWrapper(
         onTap: widget.onTap,
         menuButtons: _getMenuButtons(context),
-        child: Text.rich(
-          TextSpan(
-            children: textSpansFromAnsi(
-              widget.variable.text!,
-              theme.subtleFixedFontStyle,
+        child: DevToolsTooltip(
+          message: widget.variable.text,
+          child: Text.rich(
+            maxLines: 1,
+            softWrap: false,
+            overflow: TextOverflow.ellipsis,
+            TextSpan(
+              children: textSpansFromAnsi(
+                widget.variable.text!,
+                theme.subtleFixedFontStyle,
+              ),
             ),
           ),
         ),
@@ -88,6 +94,7 @@ class _DisplayProviderState extends State<DisplayProvider> {
               Expanded(
                 child: Text.rich(
                   maxLines: 1,
+                  softWrap: false,
                   overflow: TextOverflow.ellipsis,
                   TextSpan(
                     text: hasName ? widget.variable.name : null,
@@ -248,18 +255,27 @@ class DapDisplayProvider extends StatelessWidget {
     // TODO(https://github.com/flutter/devtools/issues/6056): Wrap in
     // interactivity wrapper to provide inspect and re-root functionality. Add
     // tooltip on hover to provide type information.
-    return Text.rich(
-      TextSpan(
-        text: name,
-        style: theme.fixedFontStyle.apply(
-          color: theme.colorScheme.controlFlowSyntaxColor,
+    return DevToolsTooltip(
+      message: value,
+      child: Text.rich(
+        maxLines: 1,
+        softWrap: false,
+        overflow: TextOverflow.ellipsis,
+        TextSpan(
+          text: name,
+          style: theme.fixedFontStyle.apply(
+            color: theme.colorScheme.controlFlowSyntaxColor,
+          ),
+          children: [
+            TextSpan(text: ': ', style: theme.fixedFontStyle),
+            // TODO(https://github.com/flutter/devtools/issues/6056): Change text
+            // style based on variable type.
+            TextSpan(
+              text: value.replaceAll('\n', '\\n'),
+              style: theme.subtleFixedFontStyle,
+            ),
+          ],
         ),
-        children: [
-          TextSpan(text: ': ', style: theme.fixedFontStyle),
-          // TODO(https://github.com/flutter/devtools/issues/6056): Change text
-          // style based on variable type.
-          TextSpan(text: value, style: theme.subtleFixedFontStyle),
-        ],
       ),
     );
   }
