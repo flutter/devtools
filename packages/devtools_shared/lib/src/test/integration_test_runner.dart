@@ -41,7 +41,6 @@ class IntegrationTestRunner with IOMixin {
 
       final flutterDriveArgs = [
         'drive',
-        if (useWasm) '--wasm',
         // Debug outputs from the test will not show up in profile mode. Since
         // we rely on debug outputs for detecting errors and exceptions from the
         // test, we cannot run this these tests in profile mode until this issue
@@ -53,7 +52,10 @@ class IntegrationTestRunner with IOMixin {
         headless ? 'web-server' : 'chrome',
         // --disable-gpu speeds up tests that use ChromeDriver when run on
         // GitHub Actions. See https://github.com/flutter/devtools/issues/8301.
-        '--web-browser-flag=--disable-gpu',
+        // However, it also breaks the tests when running with the wasm flag,
+        // because it prevents capturing browser logs. See:
+        // https://github.com/flutter/devtools/issues/9727
+        useWasm ? '--wasm' : '--web-browser-flag=--disable-gpu',
         if (headless) ...[
           // Flags to avoid breakage with chromedriver 138. See
           // https://github.com/flutter/devtools/issues/9357.
