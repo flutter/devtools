@@ -227,7 +227,7 @@ class IntegrationTestRunnerArgs {
   /// instead of 'chrome'.
   bool get headless => argResults.flag(_headlessArg);
 
-  /// Whether this integration test should be run on wasm.
+  /// Whether this integration test should be run against dart2wasm-compiled DevTools.
   bool get useWasm => argResults.flag(_wasmArg);
 
   /// Sharding information for this test run.
@@ -288,7 +288,7 @@ class IntegrationTestRunnerArgs {
       ..addFlag(
         _wasmArg,
         negatable: false,
-        help: 'Runs the integration test on wasm.',
+        help: 'Runs the integration test against dart2wasm-compiled DevTools.',
       )
       ..addOption(
         _shardArg,

@@ -33,22 +33,6 @@ class TestFlutterApp extends IntegrationTestApp {
       ],
       workingDirectory: testAppPath,
     );
-
-    // runProcess = await Process.start(
-    //   Platform.isWindows
-    //       ? 'flutter.bat'
-    //       : '/Users/elliottbrooks/dev/flutter/bin/dart',
-    //   [
-    //     '/Users/elliottbrooks/dev/flutter/packages/flutter_tools/bin/flutter_tools.dart',
-    //     'run',
-    //     '--machine',
-    //     '-d',
-    //     testAppDevice.argName,
-    //     // Do not serve DevTools from Flutter Tools.
-    //     '--no-devtools',
-    //   ],
-    //   workingDirectory: testAppPath,
-    // );
   }
 
   @override
