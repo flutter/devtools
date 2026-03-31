@@ -680,16 +680,17 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   // Output Formats:
   // - 512 → "512 B"
-  // - 2048 → "2.0 KB"
-  // - 1048576 → "1.0 MB"
-  // Values are rounded to one decimal place for KB and MB.
+  // - 2000 → "2.0 kB"
+  // - 1000000 → "1.0 MB"
+  // Values are rounded to one decimal place for kB and MB.
+  // Uses decimal (base-10) units to match Chrome DevTools.
   String _formatBytes(int? bytes) {
     if (bytes == null) return '-';
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) {
-      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    if (bytes < 1000) return '$bytes B';
+    if (bytes < 1000 * 1000) {
+      return '${(bytes / 1000).toStringAsFixed(1)} kB';
     }
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    return '${(bytes / (1000 * 1000)).toStringAsFixed(1)} MB';
   }
 
   List<Widget> _buildTimingOverview(BuildContext context) {
