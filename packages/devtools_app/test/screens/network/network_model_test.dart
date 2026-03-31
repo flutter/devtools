@@ -540,7 +540,7 @@ void main() {
   );
 
   test(
-    'request without response and endTime is complete but not cancelled',
+    'request without response and endTime remains in progress and not cancelled',
     () {
       final pendingRequest = DartIOHttpRequestData(
         HttpProfileRequest.parse(Map<String, dynamic>.of(httpGetPendingJson))!,
@@ -548,7 +548,7 @@ void main() {
       );
 
       expect(pendingRequest.status, isNull);
-      expect(pendingRequest.inProgress, false);
+      expect(pendingRequest.inProgress, true);
       expect(pendingRequest.duration, isNull);
     },
   );
@@ -582,7 +582,7 @@ void main() {
     );
 
     expect(cancelledWithStatusRequest.status, isNot('Cancelled'));
-    expect(cancelledWithStatusRequest.inProgress, false);
+    expect(cancelledWithStatusRequest.inProgress, true);
     expect(cancelledWithStatusRequest.status, '200');
     expect(cancelledWithStatusRequest.didFail, false);
   });

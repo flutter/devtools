@@ -407,7 +407,7 @@ void main() {
         expect(find.text('Method: '), findsOneWidget);
         expect(find.text('GET'), findsOneWidget);
         expect(find.text('Status: '), findsOneWidget);
-        expect(find.text('Cancelled'), findsOneWidget);
+        expect(find.text('Error'), findsOneWidget);
         expect(find.text('Port: '), findsNothing);
         expect(find.text('Content type: '), findsNothing);
 

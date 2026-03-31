@@ -165,9 +165,7 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   @override
   Duration? get duration {
-    if (inProgress || !isValid) {
-      return null;
-    }
+    if (inProgress || !isValid) return null;
     return _endTime?.difference(_request.startTime);
   }
 
@@ -253,10 +251,14 @@ class DartIOHttpRequestData extends NetworkRequest {
     return connectionInfo != null ? connectionInfo[_localPortKey] : null;
   }
 
+  /// True if the HTTP request hasn't completed yet, determined by
+  /// `isRequestComplete` / `isResponseComplete` from the profile data.
   @override
   bool get inProgress {
     if (_isCancelled) return false;
-    return _request.endTime == null;
+    return _hasError
+        ? !_request.isRequestComplete
+        : !_request.isResponseComplete;
   }
 
   /// All instant events logged to the timeline for this HTTP request.
@@ -333,10 +335,7 @@ class DartIOHttpRequestData extends NetworkRequest {
 
     if (_hasError) return 'Error';
 
-    final statusCode = _request.response?.statusCode;
-    if (statusCode != null) return statusCode.toString();
-
-    return null;
+    return _request.response?.statusCode.toString();
   }
 
   @override

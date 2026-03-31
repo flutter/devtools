@@ -707,18 +707,21 @@ class NetworkRequestOverviewView extends StatelessWidget {
     ];
   }
 
+  Duration? get _totalDuration => (data as DartIOHttpRequestData).duration;
+
   Widget _buildTimingRow(
     Color color,
-    String label,
-    Duration duration,
-    Duration totalDuration,
+    String segmentLabel,
+    Duration segmentDuration,
   ) {
-    final flex = (duration.inMicroseconds / totalDuration.inMicroseconds * 100)
-        .round();
+    final totalDuration = _totalDuration!;
+    final flex =
+        (segmentDuration.inMicroseconds / totalDuration.inMicroseconds * 100)
+            .round();
     return Flexible(
       flex: flex,
       child: DevToolsTooltip(
-        message: '$label - ${durationText(duration)}',
+        message: '$segmentLabel - ${durationText(segmentDuration)}',
         child: Container(height: _timingGraphHeight, color: color),
       ),
     );
@@ -726,9 +729,8 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   Widget _buildHttpTimeGraph() {
     final data = this.data as DartIOHttpRequestData;
-    final requestDuration = data.duration;
-    if (requestDuration == null ||
-        requestDuration.inMicroseconds == 0 ||
+    if (_totalDuration == null ||
+        _totalDuration!.inMicroseconds == 0 ||
         data.instantEvents.isEmpty) {
       return Container(
         key: httpTimingGraphKey,
@@ -751,18 +753,14 @@ class NetworkRequestOverviewView extends StatelessWidget {
     final timingWidgets = <Widget>[];
     for (final instant in data.instantEvents) {
       final duration = instant.timeRange.duration;
-      timingWidgets.add(
-        _buildTimingRow(nextColor(), instant.name, duration, requestDuration),
-      );
+      timingWidgets.add(_buildTimingRow(nextColor(), instant.name, duration));
     }
     final duration = Duration(
       microseconds:
           data.endTimestamp!.microsecondsSinceEpoch -
           data.instantEvents.last.timestamp.microsecondsSinceEpoch,
     );
-    timingWidgets.add(
-      _buildTimingRow(nextColor(), 'Response', duration, requestDuration),
-    );
+    timingWidgets.add(_buildTimingRow(nextColor(), 'Response', duration));
     return Row(key: httpTimingGraphKey, children: timingWidgets);
   }
 
