@@ -17,6 +17,7 @@ import '../../shared/ui/colors.dart';
 import '../../shared/ui/common_widgets.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
+import 'utils/http_utils.dart';
 
 // Approximately double the indent of the expandable tile's title.
 const _rowIndentPadding = 30.0;
@@ -663,7 +664,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Response Size',
-        child: _valueText(bytes != null ? _formatBytes(bytes) : '-'),
+        child: _valueText(bytes != null ? formatBytes(bytes) : '-'),
       ),
       const SizedBox(height: defaultSpacing),
 
@@ -676,21 +677,6 @@ class NetworkRequestOverviewView extends StatelessWidget {
         const SizedBox(height: defaultSpacing),
       ],
     ];
-  }
-
-  // Output Formats:
-  // - 512 → "512 B"
-  // - 2000 → "2.0 kB"
-  // - 1000000 → "1.0 MB"
-  // Values are rounded to one decimal place for kB and MB.
-  // Uses decimal (base-10) units to match Chrome DevTools.
-  String _formatBytes(int? bytes) {
-    if (bytes == null) return '-';
-    if (bytes < 1000) return '$bytes B';
-    if (bytes < 1000 * 1000) {
-      return '${(bytes / 1000).toStringAsFixed(1)} kB';
-    }
-    return '${(bytes / (1000 * 1000)).toStringAsFixed(1)} MB';
   }
 
   List<Widget> _buildTimingOverview(BuildContext context) {

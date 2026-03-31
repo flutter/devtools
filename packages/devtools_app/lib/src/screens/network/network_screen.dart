@@ -30,6 +30,7 @@ import '../../shared/ui/utils.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
+import 'utils/http_utils.dart';
 
 class NetworkScreen extends Screen {
   NetworkScreen() : super.fromMetaData(ScreenMetaData.network);
@@ -407,21 +408,6 @@ class NetworkRequestsTable extends StatelessWidget {
   }
 }
 
-// Output Formats:
-// - 512 → "512 B"
-// - 2000 → "2.0 kB"
-// - 1000000 → "1.0 MB"
-// Values are rounded to one decimal place for kB and MB.
-// Uses decimal (base-10) units to match Chrome DevTools.
-String _formatBytes(int? bytes) {
-  if (bytes == null) return '-';
-  if (bytes < 1000) return '$bytes B';
-  if (bytes < 1000 * 1000) {
-    return '${(bytes / 1000).toStringAsFixed(1)} kB';
-  }
-  return '${(bytes / (1000 * 1000)).toStringAsFixed(1)} MB';
-}
-
 class ResponseSizeColumn extends ColumnData<NetworkRequest> {
   const ResponseSizeColumn()
     : super('Size', alignment: ColumnAlignment.right, fixedWidthPx: 90);
@@ -432,7 +418,7 @@ class ResponseSizeColumn extends ColumnData<NetworkRequest> {
   @override
   String getDisplayValue(NetworkRequest dataObject) {
     final bytes = dataObject.responseBytes;
-    return bytes != null ? _formatBytes(bytes) : '-';
+    return bytes != null ? formatBytes(bytes) : '-';
   }
 }
 
