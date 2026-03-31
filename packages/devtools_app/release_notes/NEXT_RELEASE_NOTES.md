@@ -39,7 +39,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-- Added response size ("Res Size") column to the Network tab and displayed response size in the request inspector overview. -
+- Added response size column to the Network tab and displayed response size in the request inspector overview. -
   [#9744](https://github.com/flutter/devtools/pull/9744)
 
 - Added a filter setting to hide HTTP-profiler socket data. [#9698](https://github.com/flutter/devtools/pull/9698)
