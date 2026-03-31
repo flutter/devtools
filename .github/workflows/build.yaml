@@ -208,7 +208,7 @@ jobs:
         # TODO(https://github.com/flutter/devtools/issues/9357): Re-enable tests on windows-latest.
         os: [macos-latest]
         # Consider running integration tests in ddc mode, too.
-        bot: [integration_dart2js]
+        bot: [integration_dart2js, integration_dart2wasm]
         device: [flutter, flutter-web, dart-cli]
         # Option 1/1 will run all tests for a device in a single shard.
         # Option 1/2 and 2/2 should be enabled to run tests for a device in 2 shards.
@@ -273,7 +273,7 @@ jobs:
       fail-fast: false
       matrix:
         # Consider running integration tests in ddc mode, too.
-        bot: [integration_dart2js]
+        bot: [integration_dart2js, integration_wasm]
         os: [ubuntu-latest, windows-latest]
     steps:
       - name: git clone

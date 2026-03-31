@@ -82,6 +82,7 @@ Future<void> runFlutterIntegrationTest(
       testTarget,
       testDriver: 'test_driver/integration_test.dart',
       headless: testRunnerArgs.headless,
+      useWasm: testRunnerArgs.useWasm,
       dartDefineArgs: [
         'test_args=${jsonEncode(testArgs)}',
         if (testFileArgs.experimentsOn) 'enable_experiments=true',

@@ -38,6 +38,7 @@ Future<void> _runIntegrationTest(
       testRunnerArgs.testTarget!,
       testDriver: 'test_driver/integration_test.dart',
       headless: testRunnerArgs.headless,
+      useWasm: testRunnerArgs.useWasm,
       dartDefineArgs: ['use_simulated_environment=true'],
       debugLogging: debugTestScript,
     );
