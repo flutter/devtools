@@ -19,6 +19,30 @@ import '../../primitives/utils.dart';
 import '../../ui/colors.dart';
 import 'description.dart';
 
+class OverflowingText extends StatelessWidget {
+  const OverflowingText({
+    super.key,
+    required this.textSpan,
+    this.tooltipMessage,
+  });
+
+  final InlineSpan textSpan;
+  final String? tooltipMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    final textWidget = Text.rich(
+      textSpan,
+      maxLines: 1,
+      softWrap: false,
+      overflow: TextOverflow.ellipsis,
+    );
+    final message = tooltipMessage;
+    if (message == null) return textWidget;
+    return DevToolsTooltip(message: message, child: textWidget);
+  }
+}
+
 /// The display provider for variables fetched via the VM service protocol.
 class DisplayProvider extends StatefulWidget {
   const DisplayProvider({
@@ -46,17 +70,12 @@ class _DisplayProviderState extends State<DisplayProvider> {
       return InteractivityWrapper(
         onTap: widget.onTap,
         menuButtons: _getMenuButtons(context),
-        child: DevToolsTooltip(
-          message: widget.variable.text,
-          child: Text.rich(
-            maxLines: 1,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-            TextSpan(
-              children: textSpansFromAnsi(
-                widget.variable.text!,
-                theme.subtleFixedFontStyle,
-              ),
+        child: OverflowingText(
+          tooltipMessage: widget.variable.text,
+          textSpan: TextSpan(
+            children: textSpansFromAnsi(
+              widget.variable.text!,
+              theme.subtleFixedFontStyle,
             ),
           ),
         ),
@@ -85,45 +104,40 @@ class _DisplayProviderState extends State<DisplayProvider> {
     final contents = InteractivityWrapper(
       onTap: widget.onTap,
       menuButtons: _getMenuButtons(context),
-      child: DevToolsTooltip(
-        message: originalDisplayValue,
-        child: Container(
-          color: isHovered ? Theme.of(context).highlightColor : null,
-          child: Row(
-            children: [
-              Expanded(
-                child: Text.rich(
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  TextSpan(
-                    text: hasName ? widget.variable.name : null,
-                    style: widget.variable.artificialName
-                        ? theme.subtleFixedFontStyle
-                        : theme.fixedFontStyle.apply(
-                            color: theme.colorScheme.controlFlowSyntaxColor,
-                          ),
-                    children: [
-                      if (hasName)
-                        TextSpan(text: ': ', style: theme.fixedFontStyle),
-                      TextSpan(
-                        text: displayValue,
-                        style: widget.variable.artificialValue
-                            ? theme.subtleFixedFontStyle
-                            : _variableDisplayStyle(theme, widget.variable),
-                      ),
-                    ],
-                  ),
+      child: Container(
+        color: isHovered ? Theme.of(context).highlightColor : null,
+        child: Row(
+          children: [
+            Expanded(
+              child: OverflowingText(
+                tooltipMessage: originalDisplayValue,
+                textSpan: TextSpan(
+                  text: hasName ? widget.variable.name : null,
+                  style: widget.variable.artificialName
+                      ? theme.subtleFixedFontStyle
+                      : theme.fixedFontStyle.apply(
+                          color: theme.colorScheme.controlFlowSyntaxColor,
+                        ),
+                  children: [
+                    if (hasName)
+                      TextSpan(text: ': ', style: theme.fixedFontStyle),
+                    TextSpan(
+                      text: displayValue,
+                      style: widget.variable.artificialValue
+                          ? theme.subtleFixedFontStyle
+                          : _variableDisplayStyle(theme, widget.variable),
+                    ),
+                  ],
                 ),
               ),
-              if (isHovered && widget.onCopy != null)
-                DevToolsButton(
-                  icon: Icons.copy_outlined,
-                  outlined: false,
-                  onPressed: () => widget.onCopy!.call(widget.variable),
-                ),
-            ],
-          ),
+            ),
+            if (isHovered && widget.onCopy != null)
+              DevToolsButton(
+                icon: Icons.copy_outlined,
+                outlined: false,
+                onPressed: () => widget.onCopy!.call(widget.variable),
+              ),
+          ],
         ),
       ),
     );
@@ -255,27 +269,22 @@ class DapDisplayProvider extends StatelessWidget {
     // TODO(https://github.com/flutter/devtools/issues/6056): Wrap in
     // interactivity wrapper to provide inspect and re-root functionality. Add
     // tooltip on hover to provide type information.
-    return DevToolsTooltip(
-      message: value,
-      child: Text.rich(
-        maxLines: 1,
-        softWrap: false,
-        overflow: TextOverflow.ellipsis,
-        TextSpan(
-          text: name,
-          style: theme.fixedFontStyle.apply(
-            color: theme.colorScheme.controlFlowSyntaxColor,
-          ),
-          children: [
-            TextSpan(text: ': ', style: theme.fixedFontStyle),
-            // TODO(https://github.com/flutter/devtools/issues/6056): Change text
-            // style based on variable type.
-            TextSpan(
-              text: value.replaceAll('\n', '\\n'),
-              style: theme.subtleFixedFontStyle,
-            ),
-          ],
+    return OverflowingText(
+      tooltipMessage: value,
+      textSpan: TextSpan(
+        text: name,
+        style: theme.fixedFontStyle.apply(
+          color: theme.colorScheme.controlFlowSyntaxColor,
         ),
+        children: [
+          TextSpan(text: ': ', style: theme.fixedFontStyle),
+          // TODO(https://github.com/flutter/devtools/issues/6056): Change text
+          // style based on variable type.
+          TextSpan(
+            text: value.replaceAll('\n', '\\n'),
+            style: theme.subtleFixedFontStyle,
+          ),
+        ],
       ),
     );
   }
