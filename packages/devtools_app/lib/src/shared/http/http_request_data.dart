@@ -229,8 +229,7 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   @override
   int? get responseBytes {
-    final headers = responseHeaders;
-    final contentLength = headers?['content-length'];
+    final contentLength = responseHeaders?['content-length'];
 
     if (contentLength is String) {
       return int.tryParse(contentLength);
