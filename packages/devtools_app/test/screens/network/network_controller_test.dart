@@ -109,7 +109,12 @@ void main() {
       expect(requests.length, numRequests);
       final httpRequests = requests.whereType<DartIOHttpRequestData>().toList();
       for (final request in httpRequests) {
-        expect(request.duration, request.inProgress ? isNull : isNotNull);
+        expect(
+          request.duration,
+          request.inProgress || request.endTimestamp == null
+              ? isNull
+              : isNotNull,
+        );
         expect(request.general.length, greaterThan(0));
         expect(httpMethods.contains(request.method), true);
         if (request.inProgress) {
@@ -463,7 +468,7 @@ void main() {
         final initialRequest =
             currentNetworkRequests.getRequest('101')! as DartIOHttpRequestData;
         expect(initialRequest.status, '200');
-        expect(initialRequest.isCancelled, false);
+        expect(initialRequest.status, isNot('Cancelled'));
 
         currentNetworkRequests.updateOrAddAll(
           requests: [request1CancelledWithStatusCode],
@@ -473,7 +478,6 @@ void main() {
 
         final updatedRequest =
             currentNetworkRequests.getRequest('101')! as DartIOHttpRequestData;
-        expect(updatedRequest.isCancelled, true);
         expect(updatedRequest.status, 'Cancelled');
         expect(updatedRequest.inProgress, false);
       });

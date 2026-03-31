@@ -707,8 +707,13 @@ class NetworkRequestOverviewView extends StatelessWidget {
     ];
   }
 
-  Widget _buildTimingRow(Color color, String label, Duration duration) {
-    final flex = (duration.inMicroseconds / data.duration!.inMicroseconds * 100)
+  Widget _buildTimingRow(
+    Color color,
+    String label,
+    Duration duration,
+    Duration totalDuration,
+  ) {
+    final flex = (duration.inMicroseconds / totalDuration.inMicroseconds * 100)
         .round();
     return Flexible(
       flex: flex,
@@ -721,8 +726,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   Widget _buildHttpTimeGraph() {
     final data = this.data as DartIOHttpRequestData;
-    if (data.duration == null ||
-        data.duration!.inMicroseconds == 0 ||
+    final requestDuration = data.duration;
+    if (requestDuration == null ||
+        requestDuration.inMicroseconds == 0 ||
         data.instantEvents.isEmpty) {
       return Container(
         key: httpTimingGraphKey,
@@ -745,14 +751,18 @@ class NetworkRequestOverviewView extends StatelessWidget {
     final timingWidgets = <Widget>[];
     for (final instant in data.instantEvents) {
       final duration = instant.timeRange.duration;
-      timingWidgets.add(_buildTimingRow(nextColor(), instant.name, duration));
+      timingWidgets.add(
+        _buildTimingRow(nextColor(), instant.name, duration, requestDuration),
+      );
     }
     final duration = Duration(
       microseconds:
           data.endTimestamp!.microsecondsSinceEpoch -
           data.instantEvents.last.timestamp.microsecondsSinceEpoch,
     );
-    timingWidgets.add(_buildTimingRow(nextColor(), 'Response', duration));
+    timingWidgets.add(
+      _buildTimingRow(nextColor(), 'Response', duration, requestDuration),
+    );
     return Row(key: httpTimingGraphKey, children: timingWidgets);
   }
 

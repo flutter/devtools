@@ -30,5 +30,5 @@ const httpGetCancelledJson = <String, dynamic>{
     'persistentConnection': true,
     'uri': 'https://jsonplaceholder.typicode.com/albums/1',
   },
-  'response': null, // ← key: no response
+  'response': null,
 };
