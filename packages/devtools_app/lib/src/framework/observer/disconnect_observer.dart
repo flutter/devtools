@@ -18,6 +18,8 @@ import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/framework/routing.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/query_parameters.dart';
+import '../../shared/ui/common_widgets.dart';
+import '../../shared/utils/utils.dart';
 
 final _log = Logger('disconnect_observer');
 
@@ -134,88 +136,54 @@ class DisconnectObserverState extends State<DisconnectObserver>
     widget.routerDelegate.navigate(snapshotScreenId, args);
   }
 
-  Widget _buildReconnectActions(ThemeData theme) {
-    final reconnectButton = ElevatedButton(
-      onPressed: _attemptReconnect,
-      child: const Text('Reconnect'),
-    );
-
-    if (!isEmbedded()) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          reconnectButton,
-          const SizedBox(width: defaultSpacing),
-          ConnectToNewAppButton(
-            routerDelegate: widget.routerDelegate,
-            onPressed: hideDisconnectedOverlay,
-            gaScreen: gac.devToolsMain,
-          ),
-        ],
-      );
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        reconnectButton,
-        const SizedBox(height: defaultSpacing),
-        Text(
-          'Or run a new debug session to connect to it.',
-          style: theme.textTheme.bodyMedium,
-        ),
-      ],
-    );
-  }
-
   OverlayEntry _createDisconnectedOverlay() {
     final theme = Theme.of(context);
     currentDisconnectedOverlay = OverlayEntry(
       builder: (context) => Material(
         child: Container(
           color: theme.colorScheme.surface,
-          child: ValueListenableBuilder<bool>(
-            valueListenable: _isReconnecting,
-            builder: (context, isReconnecting, _) =>
-                ValueListenableBuilder<String?>(
-                  valueListenable: _reconnectErrorText,
-                  builder: (context, reconnectErrorText, _) => Center(
-                    child: Column(
-                      children: [
-                        const Spacer(),
-                        Text(
-                          'Disconnected',
-                          style: theme.textTheme.headlineMedium,
+          child: MultiValueListenableBuilder(
+            listenables: [_isReconnecting, _reconnectErrorText],
+            builder: (context, values, _) {
+              final isReconnecting = values[0]! as bool;
+              final reconnectErrorText = values[1] as String?;
+              return Center(
+                child: Column(
+                  children: [
+                    const Spacer(),
+                    Text('Disconnected', style: theme.textTheme.headlineMedium),
+                    const SizedBox(height: defaultSpacing),
+                    if (isReconnecting)
+                      const CircularProgressIndicator()
+                    else
+                      _ReconnectActions(
+                        theme: theme,
+                        onReconnect: _attemptReconnect,
+                        routerDelegate: widget.routerDelegate,
+                        onConnectToNewApp: hideDisconnectedOverlay,
+                      ),
+                    if (reconnectErrorText case final error?) ...[
+                      const SizedBox(height: denseSpacing),
+                      Text(
+                        error,
+                        style: theme.regularTextStyle.copyWith(
+                          color: theme.colorScheme.error,
                         ),
-                        const SizedBox(height: defaultSpacing),
-                        if (isReconnecting)
-                          const CircularProgressIndicator()
-                        else
-                          _buildReconnectActions(theme),
-                        if (reconnectErrorText case final error?) ...[
-                          const SizedBox(height: denseSpacing),
-                          Text(
-                            error,
-                            style: theme.regularTextStyle.copyWith(
-                              color: theme.colorScheme.error,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                        const Spacer(),
-                        if (offlineDataController
-                            .offlineDataJson
-                            .isNotEmpty) ...[
-                          ElevatedButton(
-                            onPressed: _reviewHistory,
-                            child: const Text('Review recent data (offline)'),
-                          ),
-                          const Spacer(),
-                        ],
-                      ],
-                    ),
-                  ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                    const Spacer(),
+                    if (offlineDataController.offlineDataJson.isNotEmpty) ...[
+                      ElevatedButton(
+                        onPressed: _reviewHistory,
+                        child: const Text('Review recent data (offline)'),
+                      ),
+                      const Spacer(),
+                    ],
+                  ],
                 ),
+              );
+            },
           ),
         ),
       ),
@@ -254,7 +222,7 @@ class DisconnectObserverState extends State<DisconnectObserver>
     _isReconnecting.value = false;
 
     if (reconnectionSuccess) {
-      unawaited(
+      safeUnawaited(
         widget.routerDelegate.updateArgsIfChanged({
           DevToolsQueryParams.vmServiceUriKey: _lastVmServiceUri,
         }),
@@ -264,5 +232,54 @@ class DisconnectObserverState extends State<DisconnectObserver>
     } else {
       showDisconnectedOverlay();
     }
+  }
+}
+
+class _ReconnectActions extends StatelessWidget {
+  const _ReconnectActions({
+    required this.theme,
+    required this.onReconnect,
+    required this.routerDelegate,
+    required this.onConnectToNewApp,
+  });
+
+  final ThemeData theme;
+  final VoidCallback onReconnect;
+  final DevToolsRouterDelegate routerDelegate;
+  final VoidCallback onConnectToNewApp;
+
+  @override
+  Widget build(BuildContext context) {
+    final reconnectButton = ElevatedButton(
+      onPressed: onReconnect,
+      child: const Text('Reconnect'),
+    );
+
+    if (!isEmbedded()) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          reconnectButton,
+          const SizedBox(width: defaultSpacing),
+          ConnectToNewAppButton(
+            routerDelegate: routerDelegate,
+            onPressed: onConnectToNewApp,
+            gaScreen: gac.devToolsMain,
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        reconnectButton,
+        const SizedBox(height: defaultSpacing),
+        Text(
+          'Or run a new debug session to connect to it.',
+          style: theme.textTheme.bodyMedium,
+        ),
+      ],
+    );
   }
 }
