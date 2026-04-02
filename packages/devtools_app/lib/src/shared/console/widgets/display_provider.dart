@@ -71,7 +71,6 @@ class _DisplayProviderState extends State<DisplayProvider> {
         onTap: widget.onTap,
         menuButtons: _getMenuButtons(context),
         child: OverflowingText(
-          tooltipMessage: widget.variable.text,
           textSpan: TextSpan(
             children: textSpansFromAnsi(
               widget.variable.text!,
@@ -270,7 +269,6 @@ class DapDisplayProvider extends StatelessWidget {
     // interactivity wrapper to provide inspect and re-root functionality. Add
     // tooltip on hover to provide type information.
     return OverflowingText(
-      tooltipMessage: value,
       textSpan: TextSpan(
         text: name,
         style: theme.fixedFontStyle.apply(
@@ -281,7 +279,7 @@ class DapDisplayProvider extends StatelessWidget {
           // TODO(https://github.com/flutter/devtools/issues/6056): Change text
           // style based on variable type.
           TextSpan(
-            text: value.replaceAll('\n', '\\n'),
+            text: value,
             style: theme.subtleFixedFontStyle,
           ),
         ],
