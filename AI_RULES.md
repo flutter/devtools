@@ -31,4 +31,5 @@ Follow these rules when working in this repository.
 -   **Reuse Patterns**: Reuse common patterns and styles used in other UI code in the repository.
 
 ### Code Reuse
--   **Use Shared Components**: Prefer using reusable components from `shared/ui/` (such as `packages/devtools_app/lib/src/shared/ui/common_widgets.dart`) rather than creating UI elements from scratch.
+-   **Use Shared Components & Utils**: Prefer using reusable components from `shared/ui/` (such as `packages/devtools_app/lib/src/shared/ui/common_widgets.dart`), primitives from `shared/primitives/`, and utilities from `shared/utils/` rather than creating things from scratch.
+
