@@ -14,7 +14,6 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';
 import '../../shared/config_specific/import_export/import_export.dart';
-import '../../shared/feature_flags.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
@@ -250,34 +249,24 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               ),
             ),
             const SizedBox(width: denseSpacing),
-            if (FeatureFlags.networkSaveLoad.isEnabled)
-              OpenSaveButtonGroup(
-                screenId: ScreenMetaData.network.id,
-                saveFormats: const [SaveFormat.devtools, SaveFormat.har],
-                gaItemForSaveFormatSelection: (SaveFormat format) =>
-                    switch (format) {
-                      SaveFormat.devtools => gac.saveFile,
-                      SaveFormat.har => gac.NetworkEvent.downloadAsHar.name,
-                    },
-                onSave: (SaveFormat format) async {
+            OpenSaveButtonGroup(
+              screenId: ScreenMetaData.network.id,
+              saveFormats: const [SaveFormat.devtools, SaveFormat.har],
+              gaItemForSaveFormatSelection: (SaveFormat format) =>
                   switch (format) {
-                    case SaveFormat.devtools:
-                      await controller.fetchFullDataBeforeExport();
-                      controller.exportData();
-                    case SaveFormat.har:
-                      await controller.exportAsHarFile();
-                  }
-                },
-              )
-            else
-              DownloadButton(
-                tooltip: 'Download as .har file',
-                minScreenWidthForText:
-                    _NetworkProfilerControls._includeTextWidth,
-                onPressed: controller.exportAsHarFile,
-                gaScreen: gac.network,
-                gaSelection: gac.NetworkEvent.downloadAsHar.name,
-              ),
+                    SaveFormat.devtools => gac.saveFile,
+                    SaveFormat.har => gac.NetworkEvent.downloadAsHar.name,
+                  },
+              onSave: (SaveFormat format) async {
+                switch (format) {
+                  case SaveFormat.devtools:
+                    await controller.fetchFullDataBeforeExport();
+                    controller.exportData();
+                  case SaveFormat.har:
+                    await controller.exportAsHarFile();
+                }
+              },
+            ),
           ],
         ),
         if (!_recording)
