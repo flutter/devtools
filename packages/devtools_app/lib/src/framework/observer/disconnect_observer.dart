@@ -145,7 +145,7 @@ class DisconnectObserverState extends State<DisconnectObserver>
           child: MultiValueListenableBuilder(
             listenables: [_isReconnecting, _reconnectErrorText],
             builder: (context, values, _) {
-              final isReconnecting = values[0]! as bool;
+              final isReconnecting = values.first as bool;
               final reconnectErrorText = values[1] as String?;
               return Center(
                 child: Column(
