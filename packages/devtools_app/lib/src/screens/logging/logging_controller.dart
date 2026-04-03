@@ -293,13 +293,13 @@ class LoggingController extends DevToolsScreenController
 
   void _handleConnectionStart(VmServiceWrapper service) {
     // Log stdout events.
-    final stdoutHandler = _StdoutEventHandler(this, 'stdout');
+    final stdoutHandler = StdoutEventHandler(this, 'stdout');
     autoDisposeStreamSubscription(
       service.onStdoutEventWithHistorySafe.listen(stdoutHandler.handle),
     );
 
     // Log stderr events.
-    final stderrHandler = _StdoutEventHandler(this, 'stderr', isError: true);
+    final stderrHandler = StdoutEventHandler(this, 'stderr', isError: true);
     autoDisposeStreamSubscription(
       service.onStderrEventWithHistorySafe.listen(stderrHandler.handle),
     );
@@ -841,12 +841,9 @@ extension type _LogRecord(Map<String, dynamic> json) {
 /// stdout message and its newline. Currently, `foo\n` is sent as two VM events;
 /// we wait for up to 1ms when we get the `foo` event, to see if the next event
 /// is a single newline. If so, we add the newline to the previous log message.
-class _StdoutEventHandler {
-  _StdoutEventHandler(
-    this.loggingController,
-    this.name, {
-    this.isError = false,
-  });
+@visibleForTesting
+class StdoutEventHandler {
+  StdoutEventHandler(this.loggingController, this.name, {this.isError = false});
 
   final LoggingController loggingController;
   final String name;
@@ -873,6 +870,28 @@ class _StdoutEventHandler {
           ),
         );
         buffer = null;
+        return;
+      }
+
+      // If the buffered message ends with a newline, the next message is a
+      // continuation of the same print statement (e.g. debugPrint('line1\nline2')
+      // is sent by the VM as two events: 'line1\n' and 'line2'). Combine them
+      // into a single log entry.
+      // See: https://github.com/flutter/devtools/issues/9557
+      if (buffer!.details!.endsWith('\n')) {
+        final combined = LogData(
+          buffer!.kind,
+          buffer!.details! + message,
+          buffer!.timestamp,
+          summary: buffer!.summary,
+          isError: buffer!.isError,
+          isolateRef: e.isolateRef,
+        );
+        buffer = combined;
+        timer = Timer(const Duration(milliseconds: 1), () {
+          loggingController.log(buffer!);
+          buffer = null;
+        });
         return;
       }
 
