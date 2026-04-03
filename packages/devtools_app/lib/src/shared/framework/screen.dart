@@ -129,6 +129,11 @@ enum ScreenMetaData {
     requiresAdvancedDeveloperMode: true,
     requiresConnection: false,
   ),
+  accessibility(
+    'accessibility',
+    title: 'Accessibility',
+    icon: Icons.accessibility_new_rounded,
+  ),
   simple('simple');
 
   const ScreenMetaData(
