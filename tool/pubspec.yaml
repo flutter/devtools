@@ -18,6 +18,7 @@ dependencies:
   cli_util: ^0.4.1
   collection: ^1.19.0
   io: ^1.0.4
+  meta: ^1.18.0
   path: ^1.9.0
   yaml: ^3.1.2
   
