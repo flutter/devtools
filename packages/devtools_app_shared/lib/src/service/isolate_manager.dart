@@ -166,23 +166,25 @@ final class IsolateManager with DisposerMixin {
         !event.isolate!.isSystemIsolate!) {
       await _registerIsolate(event.isolate!);
       _isolateCreatedController.add(event.isolate);
-      // TODO(jacobr): we assume the first isolate started is the main isolate
-      // but that may not always be a safe assumption.
-      // TODO(https://github.com/flutter/devtools/issues/9747): Detect main
-      // isolate using root library information for test connections here too,
-      // not just in _computeMainIsolate().
-      if (_mainIsolate.value == null) {
+
+      // Recompute whenever a new isolate starts so test connections can move
+      // from the runner isolate to the user test-suite isolate when available.
+      final previousMain = _mainIsolate.value;
+      final computedMain = await _computeMainIsolate();
+      if (computedMain != null) {
+        _mainIsolate.value = computedMain;
+      } else if (_mainIsolate.value == null) {
         _mainIsolate.value = event.isolate;
-        if (_shouldReselectMainIsolate) {
-          // Assume the main isolate has come back up after a hot restart, so
-          // select it.
-          _shouldReselectMainIsolate = false;
-          _setSelectedIsolate(event.isolate);
-        }
       }
 
-      if (_selectedIsolate.value == null) {
-        _setSelectedIsolate(event.isolate);
+      if (_mainIsolate.value != null &&
+          (_shouldReselectMainIsolate ||
+              _selectedIsolate.value == null ||
+              _selectedIsolate.value == previousMain)) {
+        // If the previous main exited and returned (hot restart) or we were
+        // following the previous main, follow the newly computed main isolate.
+        _shouldReselectMainIsolate = false;
+        _setSelectedIsolate(_mainIsolate.value);
       }
     } else if (event.kind == EventKind.kServiceExtensionAdded) {
       // Check to see if there is a new isolate.
@@ -226,13 +228,11 @@ final class IsolateManager with DisposerMixin {
 
     final service = _service;
     for (final isolateState in _isolateStates.values) {
-      if (_selectedIsolate.value == null) {
-        final isolate = await isolateState.isolate;
-        if (service != _service) return null;
-        for (final extensionName in isolate?.extensionRPCs ?? <String>[]) {
-          if (extensions.isFlutterExtension(extensionName)) {
-            return isolateState.isolateRef;
-          }
+      final isolate = await isolateState.isolate;
+      if (service != _service) return null;
+      for (final extensionName in isolate?.extensionRPCs ?? <String>[]) {
+        if (extensions.isFlutterExtension(extensionName)) {
+          return isolateState.isolateRef;
         }
       }
     }
