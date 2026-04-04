@@ -166,20 +166,25 @@ final class IsolateManager with DisposerMixin {
         !event.isolate!.isSystemIsolate!) {
       await _registerIsolate(event.isolate!);
       _isolateCreatedController.add(event.isolate);
-      // TODO(jacobr): we assume the first isolate started is the main isolate
-      // but that may not always be a safe assumption.
-      if (_mainIsolate.value == null) {
+
+      // Recompute whenever a new isolate starts so test connections can move
+      // from the runner isolate to the user test-suite isolate when available.
+      final previousMain = _mainIsolate.value;
+      final computedMain = await _computeMainIsolate();
+      if (computedMain != null) {
+        _mainIsolate.value = computedMain;
+      } else if (_mainIsolate.value == null) {
         _mainIsolate.value = event.isolate;
-        if (_shouldReselectMainIsolate) {
-          // Assume the main isolate has come back up after a hot restart, so
-          // select it.
-          _shouldReselectMainIsolate = false;
-          _setSelectedIsolate(event.isolate);
-        }
       }
 
-      if (_selectedIsolate.value == null) {
-        _setSelectedIsolate(event.isolate);
+      if (_mainIsolate.value != null &&
+          (_shouldReselectMainIsolate ||
+              _selectedIsolate.value == null ||
+              _selectedIsolate.value == previousMain)) {
+        // If the previous main exited and returned (hot restart) or we were
+        // following the previous main, follow the newly computed main isolate.
+        _shouldReselectMainIsolate = false;
+        _setSelectedIsolate(_mainIsolate.value);
       }
     } else if (event.kind == EventKind.kServiceExtensionAdded) {
       // Check to see if there is a new isolate.
@@ -223,23 +228,69 @@ final class IsolateManager with DisposerMixin {
 
     final service = _service;
     for (final isolateState in _isolateStates.values) {
-      if (_selectedIsolate.value == null) {
-        final isolate = await isolateState.isolate;
-        if (service != _service) return null;
-        for (final extensionName in isolate?.extensionRPCs ?? <String>[]) {
-          if (extensions.isFlutterExtension(extensionName)) {
-            return isolateState.isolateRef;
-          }
+      final isolate = await isolateState.isolate;
+      if (service != _service) return null;
+      for (final extensionName in isolate?.extensionRPCs ?? <String>[]) {
+        if (extensions.isFlutterExtension(extensionName)) {
+          return isolateState.isolateRef;
         }
       }
     }
 
     final ref = _isolateStates.keys.firstWhereOrNull((IsolateRef ref) {
       // 'foo.dart:main()'
-      return ref.name!.contains(':main(');
+      return ref.name?.contains(':main(') ?? false;
     });
 
+    if (ref == null) {
+      final rootLibraryTestSuiteRef =
+          await _findTestSuiteByRootLibrary(service);
+      if (rootLibraryTestSuiteRef != null) return rootLibraryTestSuiteRef;
+
+      // When connecting to a test run, the test package (package:test_core)
+      // spawns each test suite in a separate isolate with a debug name
+      // prefixed with 'test_suite:'. DevTools should connect to this isolate
+      // rather than the test runner isolate ('main'), since the test suite
+      // isolate is where user code actually runs.
+      // See: https://github.com/flutter/devtools/issues/9747
+      final testSuiteRef = _isolateStates.keys.firstWhereOrNull(
+        (IsolateRef ref) => ref.name?.startsWith('test_suite:') ?? false,
+      );
+      if (testSuiteRef != null) return testSuiteRef;
+    }
+
     return ref ?? _isolateStates.keys.first;
+  }
+
+  Future<IsolateRef?> _findTestSuiteByRootLibrary(VmService? service) async {
+    for (final isolateState in _isolateStates.values) {
+      final isolate = await isolateState.isolate;
+      if (service != _service) return null;
+
+      final rootLibraryUri = isolate?.rootLib?.uri;
+      if (rootLibraryUri == null) continue;
+
+      if (_isDartTestRunnerRootLibrary(rootLibraryUri)) continue;
+
+      if (_isLikelyUserTestRootLibrary(rootLibraryUri)) {
+        return isolateState.isolateRef;
+      }
+    }
+
+    return null;
+  }
+
+  bool _isDartTestRunnerRootLibrary(String uri) {
+    return uri.contains('dart_test.kernel') ||
+        uri.startsWith('package:test_core/') ||
+        uri.startsWith('package:test_api/');
+  }
+
+  bool _isLikelyUserTestRootLibrary(String uri) {
+    return (uri.endsWith('_test.dart') ||
+            uri.contains('/test/') ||
+            uri.contains('\\test\\')) &&
+        !uri.startsWith('dart:');
   }
 
   void _setSelectedIsolate(IsolateRef? ref) {
