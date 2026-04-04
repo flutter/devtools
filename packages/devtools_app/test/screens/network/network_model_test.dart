@@ -10,6 +10,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../test_infra/test_data/http_get_cancelled_json.dart';
 import '../../test_infra/test_data/network.dart';
 import 'utils/network_test_utils.dart';
 
@@ -506,4 +507,183 @@ void main() {
       expect(httpWsHandshake.didFail, false);
     });
   });
+
+  test('cancelled request should not remain pending', () {
+    // No controller needed — construct directly from fixture
+    final cancelledRequest = DartIOHttpRequestData(
+      HttpProfileRequest.parse(Map<String, dynamic>.of(httpGetCancelledJson))!,
+      requestFullDataFromVmService: false,
+    );
+
+    expect(cancelledRequest.status, 'Cancelled');
+    expect(cancelledRequest.inProgress, false);
+    expect(cancelledRequest.status, 'Cancelled');
+    expect(cancelledRequest.duration, isNotNull);
+  });
+
+  test(
+    'request with cancellation evidence is cancelled even with null endTime',
+    () {
+      final inFlightData = Map<String, dynamic>.of(httpGetCancelledJson)
+        ..['endTime'] = null;
+
+      final inFlightRequest = DartIOHttpRequestData(
+        HttpProfileRequest.parse(inFlightData)!,
+        requestFullDataFromVmService: false,
+      );
+
+      expect(inFlightRequest.status, 'Cancelled');
+      expect(inFlightRequest.inProgress, false);
+      expect(inFlightRequest.status, 'Cancelled');
+      expect(inFlightRequest.duration, isNull);
+    },
+  );
+
+  test(
+    'request without response and endTime remains in progress and not cancelled',
+    () {
+      final pendingRequest = DartIOHttpRequestData(
+        HttpProfileRequest.parse(Map<String, dynamic>.of(httpGetPendingJson))!,
+        requestFullDataFromVmService: false,
+      );
+
+      expect(pendingRequest.status, isNull);
+      expect(pendingRequest.inProgress, true);
+      expect(pendingRequest.duration, isNull);
+    },
+  );
+
+  test('request without response and null endTime remains pending', () {
+    final pendingData = Map<String, dynamic>.of(httpGetPendingJson)
+      ..['endTime'] = null;
+
+    final pendingRequest = DartIOHttpRequestData(
+      HttpProfileRequest.parse(pendingData)!,
+      requestFullDataFromVmService: false,
+    );
+
+    expect(pendingRequest.status, isNot('Cancelled'));
+    expect(pendingRequest.inProgress, true);
+    expect(pendingRequest.status, isNull);
+    expect(pendingRequest.duration, isNull);
+  });
+
+  test('request with incomplete response and status code is completed', () {
+    final responseData = Map<String, dynamic>.of(
+      httpGetJson['response'] as Map<String, Object?>,
+    )..['endTime'] = null;
+
+    final cancelledWithStatusData = Map<String, dynamic>.of(httpGetJson)
+      ..['response'] = responseData;
+
+    final cancelledWithStatusRequest = DartIOHttpRequestData(
+      HttpProfileRequest.parse(cancelledWithStatusData)!,
+      requestFullDataFromVmService: false,
+    );
+
+    expect(cancelledWithStatusRequest.status, isNot('Cancelled'));
+    expect(cancelledWithStatusRequest.inProgress, true);
+    expect(cancelledWithStatusRequest.status, '200');
+    expect(cancelledWithStatusRequest.didFail, false);
+  });
+
+  test('request with partial response and cancellation error is cancelled', () {
+    final responseData =
+        Map<String, dynamic>.of(httpGetJson['response'] as Map<String, Object?>)
+          ..['endTime'] = null
+          ..['error'] = 'Response stream aborted by client cancellation';
+
+    final cancelledDuringResponseData = Map<String, dynamic>.of(httpGetJson)
+      ..['response'] = responseData;
+
+    final cancelledDuringResponseRequest = DartIOHttpRequestData(
+      HttpProfileRequest.parse(cancelledDuringResponseData)!,
+      requestFullDataFromVmService: false,
+    );
+
+    expect(cancelledDuringResponseRequest.status, 'Cancelled');
+    expect(cancelledDuringResponseRequest.inProgress, false);
+    expect(cancelledDuringResponseRequest.status, 'Cancelled');
+    expect(cancelledDuringResponseRequest.duration, isNotNull);
+  });
+
+  test(
+    'request with partial response and generic response error is not cancelled',
+    () {
+      final responseData =
+          Map<String, dynamic>.of(
+              httpGetJson['response'] as Map<String, Object?>,
+            )
+            ..['endTime'] = null
+            ..['error'] = 'Connection closed before full response was received';
+
+      final cancelledDuringResponseData = Map<String, dynamic>.of(httpGetJson)
+        ..['response'] = responseData;
+
+      final cancelledDuringResponseRequest = DartIOHttpRequestData(
+        HttpProfileRequest.parse(cancelledDuringResponseData)!,
+        requestFullDataFromVmService: false,
+      );
+
+      expect(cancelledDuringResponseRequest.status, isNot('Cancelled'));
+      expect(cancelledDuringResponseRequest.status, '200');
+    },
+  );
+
+  test('request with response hasError and status code is not cancelled', () {
+    final responseData =
+        Map<String, dynamic>.of(httpGetJson['response'] as Map<String, Object?>)
+          ..['error'] = 'HttpException: connection terminated'
+          ..['endTime'] = httpGetJson['endTime'];
+
+    final cancelledData = Map<String, dynamic>.of(httpGetJson)
+      ..['response'] = responseData;
+
+    final cancelledRequest = DartIOHttpRequestData(
+      HttpProfileRequest.parse(cancelledData)!,
+      requestFullDataFromVmService: false,
+    );
+
+    expect(cancelledRequest.status, isNot('Cancelled'));
+    expect(cancelledRequest.status, '200');
+  });
+
+  test('request with request hasError and response present is cancelled', () {
+    final requestData = Map<String, dynamic>.of(
+      httpGetJson['request'] as Map<String, Object?>,
+    )..['error'] = 'Cancelled by client before completion';
+
+    final cancelledData = Map<String, dynamic>.of(httpGetJson)
+      ..['request'] = requestData;
+
+    final cancelledRequest = DartIOHttpRequestData(
+      HttpProfileRequest.parse(cancelledData)!,
+      requestFullDataFromVmService: false,
+    );
+
+    expect(cancelledRequest.status, 'Cancelled');
+    expect(cancelledRequest.status, 'Cancelled');
+  });
+
+  test(
+    'request with non-cancellation error and no response has error status',
+    () {
+      final requestData = Map<String, dynamic>.of(
+        httpGetJson['request'] as Map<String, Object?>,
+      )..['error'] = 'SocketException: connection reset by peer';
+
+      final errorData = Map<String, dynamic>.of(httpGetJson)
+        ..['request'] = requestData
+        ..['response'] = null;
+
+      final errorRequest = DartIOHttpRequestData(
+        HttpProfileRequest.parse(errorData)!,
+        requestFullDataFromVmService: false,
+      );
+
+      expect(errorRequest.status, 'Error');
+      expect(errorRequest.status, isNot('Cancelled'));
+      expect(errorRequest.inProgress, false);
+    },
+  );
 }

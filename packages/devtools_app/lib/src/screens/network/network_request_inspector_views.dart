@@ -707,13 +707,21 @@ class NetworkRequestOverviewView extends StatelessWidget {
     ];
   }
 
-  Widget _buildTimingRow(Color color, String label, Duration duration) {
-    final flex = (duration.inMicroseconds / data.duration!.inMicroseconds * 100)
-        .round();
+  Duration? get _totalDuration => (data as DartIOHttpRequestData).duration;
+
+  Widget _buildTimingRow(
+    Color color,
+    String segmentLabel,
+    Duration segmentDuration,
+  ) {
+    final totalDuration = _totalDuration!;
+    final flex =
+        (segmentDuration.inMicroseconds / totalDuration.inMicroseconds * 100)
+            .round();
     return Flexible(
       flex: flex,
       child: DevToolsTooltip(
-        message: '$label - ${durationText(duration)}',
+        message: '$segmentLabel - ${durationText(segmentDuration)}',
         child: Container(height: _timingGraphHeight, color: color),
       ),
     );
@@ -721,7 +729,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
 
   Widget _buildHttpTimeGraph() {
     final data = this.data as DartIOHttpRequestData;
-    if (data.duration == null || data.instantEvents.isEmpty) {
+    if (_totalDuration == null ||
+        _totalDuration!.inMicroseconds == 0 ||
+        data.instantEvents.isEmpty) {
       return Container(
         key: httpTimingGraphKey,
         height: 18.0,

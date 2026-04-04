@@ -22,9 +22,13 @@ void main() {
     isAlive = Disposable();
   });
 
-  tearDown(() async {
+  tearDown(() {
     isAlive.dispose();
+  });
+
+  tearDownAll(() async {
     await env.tearDownEnvironment(force: true);
+    env.finalTeardown();
   });
 
   group('EvalOnDartLibrary', () {
