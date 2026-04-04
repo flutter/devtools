@@ -10,12 +10,12 @@ import 'package:vm_service/vm_service.dart';
 
 /// Minimal fake VmService for IsolateManager tests.
 class _FakeVmService extends Fake implements VmService {
+  _FakeVmService(this.isolates);
+
   /// Map of isolate id -> Isolate to return from getIsolate().
   final Map<String, Isolate> isolates;
 
   final _isolateEventController = StreamController<Event>.broadcast();
-
-  _FakeVmService(this.isolates);
 
   @override
   Stream<Event> get onIsolateEvent => _isolateEventController.stream;
@@ -53,6 +53,7 @@ class _FakeVmService extends Fake implements VmService {
     await Future<void>.delayed(Duration.zero);
   }
 
+  @override
   Future<void> dispose() async {
     await _isolateEventController.close();
   }
@@ -94,7 +95,7 @@ void main() {
     tearDown(() {
       manager.handleVmServiceClosed();
       for (final fakeService in fakeServices) {
-        fakeService.dispose();
+        unawaited(fakeService.dispose());
       }
       fakeServices.clear();
     });
@@ -132,8 +133,7 @@ void main() {
         expect(
           manager.mainIsolate.value?.name,
           equals('test_suite:file:///tmp/dart_test.kernel.dill'),
-          reason:
-              'Main isolate should also resolve to the test_suite isolate',
+          reason: 'Main isolate should also resolve to the test_suite isolate',
         );
       },
     );
@@ -204,8 +204,7 @@ void main() {
         expect(
           manager.selectedIsolate.value?.name,
           equals('isolate-2'),
-          reason:
-              'Should choose user test isolate using root library metadata',
+          reason: 'Should choose user test isolate using root library metadata',
         );
         expect(
           manager.mainIsolate.value?.name,
@@ -240,7 +239,8 @@ void main() {
         expect(
           manager.selectedIsolate.value?.name,
           equals('test_suite:file:///tmp/dart_test.kernel.dill'),
-          reason: 'Should switch selection to test_suite isolate once it starts',
+          reason:
+              'Should switch selection to test_suite isolate once it starts',
         );
         expect(
           manager.mainIsolate.value?.name,
