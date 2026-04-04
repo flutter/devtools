@@ -29,3 +29,18 @@ int calculateHeadersSize(Map<String, Object?>? headers) {
   // Calculate the byte length of the headers string
   return utf8.encode(headersString).length;
 }
+
+// Output Formats:
+// - 512 → "512 B"
+// - 2000 → "2.0 kB"
+// - 1000000 → "1.0 MB"
+// Values are rounded to one decimal place for kB and MB.
+// Uses decimal (base-10) units to match Chrome DevTools.
+String formatBytes(int? bytes) {
+  if (bytes == null || bytes < 0) return '-';
+  if (bytes < 1000) return '$bytes B';
+  if (bytes < 1000 * 1000) {
+    return '${(bytes / 1000).toStringAsFixed(1)} kB';
+  }
+  return '${(bytes / (1000 * 1000)).toStringAsFixed(1)} MB';
+}

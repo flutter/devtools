@@ -227,6 +227,26 @@ class DartIOHttpRequestData extends NetworkRequest {
     return connectionInfo != null ? connectionInfo[_localPortKey] : null;
   }
 
+  @override
+  int? get responseBytes {
+    final contentLength = responseHeaders?['content-length'];
+
+    if (contentLength is String) {
+      return int.tryParse(contentLength);
+    }
+    if (contentLength is List && contentLength.isNotEmpty) {
+      final first = contentLength.first;
+
+      if (first is int) {
+        return first;
+      }
+      if (first is String) {
+        return int.tryParse(first);
+      }
+    }
+    return null;
+  }
+
   /// True if the HTTP request hasn't completed yet, determined by the lack of
   /// an end time in the response data.
   @override
