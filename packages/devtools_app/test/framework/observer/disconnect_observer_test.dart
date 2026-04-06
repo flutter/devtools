@@ -4,8 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/observer/disconnect_observer.dart';
-import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:devtools_app/src/shared/framework/framework_controller.dart';
+import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
