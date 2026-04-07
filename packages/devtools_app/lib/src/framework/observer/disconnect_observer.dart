@@ -139,8 +139,8 @@ class DisconnectObserverState extends State<DisconnectObserver>
   OverlayEntry _createDisconnectedOverlay() {
     final theme = Theme.of(context);
     currentDisconnectedOverlay = OverlayEntry(
-      builder: (context) => Material(
-        child: Container(
+      builder: (context) => Positioned.fill(
+        child: Material(
           color: theme.colorScheme.surface,
           child: MultiValueListenableBuilder(
             listenables: [_isReconnecting, _reconnectErrorText],
