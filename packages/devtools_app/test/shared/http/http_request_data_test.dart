@@ -30,6 +30,7 @@ void main() {
           'isRedirect': false,
           'persistentConnection': true,
           'reasonPhrase': 'OK',
+          'redirects': <Map<String, dynamic>>[],
           'statusCode': 200,
           'startTime': DateTime.now().microsecondsSinceEpoch,
         },
