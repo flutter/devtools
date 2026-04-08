@@ -77,7 +77,7 @@ void main() {
       expect(column.getDisplayValue(getRequest), httpGet.status);
 
       final pendingRequest = findRequestById('7');
-      expect(column.getDisplayValue(pendingRequest), 'Cancelled');
+      expect(column.getDisplayValue(pendingRequest), '--');
     });
 
     test('TypeColumn for http request', () {
@@ -94,7 +94,7 @@ void main() {
       expect(column.getDisplayValue(getRequest), '811 ms');
 
       final pendingRequest = findRequestById('7');
-      expect(column.getDisplayValue(pendingRequest), '0 μs');
+      expect(column.getDisplayValue(pendingRequest), 'Pending');
     });
 
     test('TimestampColumn', () {
