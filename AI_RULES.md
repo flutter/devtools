@@ -14,8 +14,9 @@ Follow these rules when working in this repository.
 
 ## Running Tests
 
--   **Standard Packages**: Run tests with `flutter test`.
+-   **Standard Packages**: Run unit and widget tests with `flutter test`.
 -   **`packages/devtools_shared`**: Run tests with `dart test`.
+-   **Integration Tests**: Refer to the [Integration Test README](packages/devtools_app/integration_test/README.md) for instructions on running integration tests.
 
 ## Tooling Best Practices
 
