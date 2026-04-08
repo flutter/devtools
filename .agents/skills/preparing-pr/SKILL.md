@@ -9,7 +9,7 @@ Follow these steps to prepare a pull request for DevTools:
 
 1.  **Verify `dt` configuration**:
     -   Ensure `dt` is available on the path by running `dt --help` or verifying its alias.
-    -   If not available, refer to the [CONTRIBUTING guide](file:///Users/kenzieschmoll/develop/devtools/CONTRIBUTING.md#L64-L80) for instructions on how to set up the `dt` executable on your path.
+    -   If not available, refer to the [CONTRIBUTING guide](../../../CONTRIBUTING.md#L64-L80) for instructions on how to set up the `dt` executable on your path.
 2.  **Update Flutter SDK**:
     -   Run `dt update-flutter-sdk` to ensure the SDK is up to date.
 3.  **Run Presubmit with Fixes**:
