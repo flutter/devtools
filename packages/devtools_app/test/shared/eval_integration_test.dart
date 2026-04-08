@@ -115,17 +115,18 @@ void main() {
             serviceManager: serviceConnection.serviceManager,
           );
 
-          final instance = await eval
-              .asyncEval(
-                'await Future.error(StateError("foo"), StackTrace.current)',
-                isAlive: isAlive,
-              )
-              .then<FutureFailedException>(
-                (_) => throw Exception(
-                  'The FutureFailedException was not thrown as expected.',
-                ),
-                onError: (Object? err) => err,
-              );
+          late final FutureFailedException instance;
+          try {
+            await eval.asyncEval(
+              'await Future.error(StateError("foo"), StackTrace.current)',
+              isAlive: isAlive,
+            );
+            throw Exception(
+              'The FutureFailedException was not thrown as expected.',
+            );
+          } on FutureFailedException catch (e) {
+            instance = e;
+          }
 
           expect(
             instance.expression,
