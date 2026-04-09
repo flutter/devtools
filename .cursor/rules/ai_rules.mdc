@@ -1,0 +1,8 @@
+---
+description: Apply rules from AI_RULES.md to all interactions.
+globs: "*"
+alwaysApply: true
+---
+# AI Rules
+
+Follow the rules defined in [AI_RULES.md](../../AI_RULES.md).
