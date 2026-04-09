@@ -8,6 +8,174 @@ import 'package:devtools_app_shared/src/service/isolate_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
+void main() {
+  group('IsolateManager._computeMainIsolate', () {
+    late IsolateManager manager;
+    final fakeServices = <_FakeVmService>[];
+
+    setUp(() {
+      manager = IsolateManager();
+    });
+
+    tearDown(() {
+      manager.handleVmServiceClosed();
+      for (final fakeService in fakeServices) {
+        unawaited(fakeService.dispose());
+      }
+      fakeServices.clear();
+    });
+
+    test(
+      'selects test_suite isolate instead of test runner when running tests',
+      () async {
+        // Simulates the isolate list seen when connecting to a test run:
+        // - 'main' is the test runner isolate (wrong choice)
+        // - 'test_suite:...' is where user code actually runs (correct choice)
+        // - 'vm-service' is infrastructure
+        final testRunnerRef = _makeRef('main', 'isolates/1');
+        final testSuiteRef = _makeRef(
+          'test_suite:file:///tmp/dart_test.kernel.dill',
+          'isolates/2',
+        );
+        final vmServiceRef = _makeRef('vm-service', 'isolates/3');
+
+        final fakeService = _FakeVmService({
+          testRunnerRef.id!: _makeIsolate(testRunnerRef),
+          testSuiteRef.id!: _makeIsolate(testSuiteRef),
+          vmServiceRef.id!: _makeIsolate(vmServiceRef),
+        });
+        fakeServices.add(fakeService);
+
+        manager.vmServiceOpened(fakeService);
+        await manager.init([testRunnerRef, testSuiteRef, vmServiceRef]);
+
+        expect(
+          manager.selectedIsolate.value?.name,
+          equals('test_suite:file:///tmp/dart_test.kernel.dill'),
+          reason:
+              'Should auto-select the test_suite isolate, not the test runner',
+        );
+        expect(
+          manager.mainIsolate.value?.name,
+          equals('test_suite:file:///tmp/dart_test.kernel.dill'),
+          reason: 'Main isolate should also resolve to the test_suite isolate',
+        );
+      },
+    );
+
+    test('selects main isolate for normal (non-test) app runs', () async {
+      final mainRef = _makeRef('main', 'isolates/1');
+      final vmServiceRef = _makeRef('vm-service', 'isolates/2');
+
+      final fakeService = _FakeVmService({
+        mainRef.id!: _makeIsolate(mainRef),
+        vmServiceRef.id!: _makeIsolate(vmServiceRef),
+      });
+      fakeServices.add(fakeService);
+
+      manager.vmServiceOpened(fakeService);
+      await manager.init([mainRef, vmServiceRef]);
+
+      expect(
+        manager.selectedIsolate.value?.name,
+        equals('main'),
+        reason: 'Should select the main isolate for normal app runs',
+      );
+    });
+
+    test('selects isolate containing :main( for dart scripts', () async {
+      final scriptRef = _makeRef('foo.dart:main()', 'isolates/1');
+
+      final fakeService = _FakeVmService({
+        scriptRef.id!: _makeIsolate(scriptRef),
+      });
+      fakeServices.add(fakeService);
+
+      manager.vmServiceOpened(fakeService);
+      await manager.init([scriptRef]);
+
+      expect(
+        manager.selectedIsolate.value?.name,
+        equals('foo.dart:main()'),
+      );
+    });
+
+    test(
+      'selects test isolate by root library when test_suite prefix is absent',
+      () async {
+        final testRunnerRef = _makeRef('main', 'isolates/1');
+        final userTestRef = _makeRef('isolate-2', 'isolates/2');
+        final vmServiceRef = _makeRef('vm-service', 'isolates/3');
+
+        final fakeService = _FakeVmService({
+          testRunnerRef.id!: _makeIsolate(
+            testRunnerRef,
+            rootLibraryUri: 'file:///tmp/dart_test.kernel.abcd/test.dart',
+          ),
+          userTestRef.id!: _makeIsolate(
+            userTestRef,
+            rootLibraryUri: 'package:my_app/foo_test.dart',
+          ),
+          vmServiceRef.id!: _makeIsolate(
+            vmServiceRef,
+            rootLibraryUri: 'dart:developer',
+          ),
+        });
+        fakeServices.add(fakeService);
+
+        manager.vmServiceOpened(fakeService);
+        await manager.init([testRunnerRef, userTestRef, vmServiceRef]);
+
+        expect(
+          manager.selectedIsolate.value?.name,
+          equals('isolate-2'),
+          reason: 'Should choose user test isolate using root library metadata',
+        );
+        expect(
+          manager.mainIsolate.value?.name,
+          equals('isolate-2'),
+        );
+      },
+    );
+
+    test(
+      'promotes main isolate from test runner to test suite on isolate start',
+      () async {
+        final testRunnerRef = _makeRef('main', 'isolates/1');
+        final testSuiteRef = _makeRef(
+          'test_suite:file:///tmp/dart_test.kernel.dill',
+          'isolates/2',
+        );
+
+        final fakeService = _FakeVmService({
+          testRunnerRef.id!: _makeIsolate(testRunnerRef),
+          testSuiteRef.id!: _makeIsolate(testSuiteRef),
+        });
+        fakeServices.add(fakeService);
+
+        manager.vmServiceOpened(fakeService);
+        await manager.init(const []);
+
+        await fakeService.emitIsolateStart(testRunnerRef);
+        expect(manager.selectedIsolate.value?.name, equals('main'));
+        expect(manager.mainIsolate.value?.name, equals('main'));
+
+        await fakeService.emitIsolateStart(testSuiteRef);
+        expect(
+          manager.selectedIsolate.value?.name,
+          equals('test_suite:file:///tmp/dart_test.kernel.dill'),
+          reason:
+              'Should switch selection to test_suite isolate once it starts',
+        );
+        expect(
+          manager.mainIsolate.value?.name,
+          equals('test_suite:file:///tmp/dart_test.kernel.dill'),
+        );
+      },
+    );
+  });
+}
+
 /// Minimal fake VmService for IsolateManager tests.
 class _FakeVmService extends Fake implements VmService {
   _FakeVmService(this.isolates);
@@ -81,172 +249,4 @@ Isolate _makeIsolate(IsolateRef ref, {String? rootLibraryUri}) {
 /// Creates an [IsolateRef] with the given name and id.
 IsolateRef _makeRef(String name, String id) {
   return IsolateRef.parse({'name': name, 'id': id, 'isSystemIsolate': false})!;
-}
-
-void main() {
-  group('IsolateManager._computeMainIsolate', () {
-    late IsolateManager manager;
-    final fakeServices = <_FakeVmService>[];
-
-    setUp(() {
-      manager = IsolateManager();
-    });
-
-    tearDown(() {
-      manager.handleVmServiceClosed();
-      for (final fakeService in fakeServices) {
-        unawaited(fakeService.dispose());
-      }
-      fakeServices.clear();
-    });
-
-    test(
-      'selects test_suite isolate instead of test runner when running tests',
-      () async {
-        // Simulates the isolate list seen when connecting to a test run:
-        // - 'main' is the test runner isolate (wrong choice)
-        // - 'test_suite:...' is where user code actually runs (correct choice)
-        // - 'vm-service' is infrastructure
-        final testRunnerRef = _makeRef('main', 'isolates/1');
-        final testSuiteRef = _makeRef(
-          'test_suite:file:///tmp/dart_test.kernel.dill',
-          'isolates/2',
-        );
-        final vmServiceRef = _makeRef('vm-service', 'isolates/3');
-
-        final fakeService = _FakeVmService({
-          'isolates/1': _makeIsolate(testRunnerRef),
-          'isolates/2': _makeIsolate(testSuiteRef),
-          'isolates/3': _makeIsolate(vmServiceRef),
-        });
-        fakeServices.add(fakeService);
-
-        manager.vmServiceOpened(fakeService);
-        await manager.init([testRunnerRef, testSuiteRef, vmServiceRef]);
-
-        expect(
-          manager.selectedIsolate.value?.name,
-          equals('test_suite:file:///tmp/dart_test.kernel.dill'),
-          reason:
-              'Should auto-select the test_suite isolate, not the test runner',
-        );
-        expect(
-          manager.mainIsolate.value?.name,
-          equals('test_suite:file:///tmp/dart_test.kernel.dill'),
-          reason: 'Main isolate should also resolve to the test_suite isolate',
-        );
-      },
-    );
-
-    test('selects main isolate for normal (non-test) app runs', () async {
-      final mainRef = _makeRef('main', 'isolates/1');
-      final vmServiceRef = _makeRef('vm-service', 'isolates/2');
-
-      final fakeService = _FakeVmService({
-        'isolates/1': _makeIsolate(mainRef),
-        'isolates/2': _makeIsolate(vmServiceRef),
-      });
-      fakeServices.add(fakeService);
-
-      manager.vmServiceOpened(fakeService);
-      await manager.init([mainRef, vmServiceRef]);
-
-      expect(
-        manager.selectedIsolate.value?.name,
-        equals('main'),
-        reason: 'Should select the main isolate for normal app runs',
-      );
-    });
-
-    test('selects isolate containing :main( for dart scripts', () async {
-      final scriptRef = _makeRef('foo.dart:main()', 'isolates/1');
-
-      final fakeService = _FakeVmService({
-        'isolates/1': _makeIsolate(scriptRef),
-      });
-      fakeServices.add(fakeService);
-
-      manager.vmServiceOpened(fakeService);
-      await manager.init([scriptRef]);
-
-      expect(
-        manager.selectedIsolate.value?.name,
-        equals('foo.dart:main()'),
-      );
-    });
-
-    test(
-      'selects test isolate by root library when test_suite prefix is absent',
-      () async {
-        final testRunnerRef = _makeRef('main', 'isolates/1');
-        final userTestRef = _makeRef('isolate-2', 'isolates/2');
-        final vmServiceRef = _makeRef('vm-service', 'isolates/3');
-
-        final fakeService = _FakeVmService({
-          'isolates/1': _makeIsolate(
-            testRunnerRef,
-            rootLibraryUri: 'file:///tmp/dart_test.kernel.abcd/test.dart',
-          ),
-          'isolates/2': _makeIsolate(
-            userTestRef,
-            rootLibraryUri: 'package:my_app/foo_test.dart',
-          ),
-          'isolates/3': _makeIsolate(
-            vmServiceRef,
-            rootLibraryUri: 'dart:developer',
-          ),
-        });
-        fakeServices.add(fakeService);
-
-        manager.vmServiceOpened(fakeService);
-        await manager.init([testRunnerRef, userTestRef, vmServiceRef]);
-
-        expect(
-          manager.selectedIsolate.value?.name,
-          equals('isolate-2'),
-          reason: 'Should choose user test isolate using root library metadata',
-        );
-        expect(
-          manager.mainIsolate.value?.name,
-          equals('isolate-2'),
-        );
-      },
-    );
-
-    test(
-      'promotes main isolate from test runner to test suite on isolate start',
-      () async {
-        final testRunnerRef = _makeRef('main', 'isolates/1');
-        final testSuiteRef = _makeRef(
-          'test_suite:file:///tmp/dart_test.kernel.dill',
-          'isolates/2',
-        );
-
-        final fakeService = _FakeVmService({
-          'isolates/1': _makeIsolate(testRunnerRef),
-          'isolates/2': _makeIsolate(testSuiteRef),
-        });
-        fakeServices.add(fakeService);
-
-        manager.vmServiceOpened(fakeService);
-        await manager.init(const []);
-
-        await fakeService.emitIsolateStart(testRunnerRef);
-        expect(manager.selectedIsolate.value?.name, equals('main'));
-        expect(manager.mainIsolate.value?.name, equals('main'));
-
-        await fakeService.emitIsolateStart(testSuiteRef);
-        expect(
-          manager.selectedIsolate.value?.name,
-          equals('test_suite:file:///tmp/dart_test.kernel.dill'),
-          reason:
-              'Should switch selection to test_suite isolate once it starts',
-        );
-        expect(
-          manager.mainIsolate.value?.name,
-          equals('test_suite:file:///tmp/dart_test.kernel.dill'),
-        );
-      },
-    );
-  });
 }
