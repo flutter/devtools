@@ -181,8 +181,9 @@ final class IsolateManager with DisposerMixin {
           (_shouldReselectMainIsolate ||
               _selectedIsolate.value == null ||
               _selectedIsolate.value == previousMain)) {
-        // If the previous main exited and returned (hot restart) or we were
-        // following the previous main, follow the newly computed main isolate.
+        // If the previous main exited and returned (hot restart), or if the
+        // selected isolate was previously the main isolate, update selection to
+        // the newly computed main isolate.
         _shouldReselectMainIsolate = false;
         _setSelectedIsolate(_mainIsolate.value);
       }
