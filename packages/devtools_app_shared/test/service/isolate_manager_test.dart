@@ -178,10 +178,14 @@ void main() {
 
 /// Minimal fake VmService for IsolateManager tests.
 class _FakeVmService extends Fake implements VmService {
-  _FakeVmService(this.isolates);
+  _FakeVmService(this.isolates, {this.vmRootUri});
 
   /// Map of isolate id -> Isolate to return from getIsolate().
   final Map<String, Isolate> isolates;
+
+  /// Optional root URI returned by [getVM], used to scope test library
+  /// detection to the current project.
+  final String? vmRootUri;
 
   final _isolateEventController = StreamController<Event>.broadcast();
 
@@ -190,6 +194,14 @@ class _FakeVmService extends Fake implements VmService {
 
   @override
   Stream<Event> get onDebugEvent => const Stream.empty();
+
+  @override
+  Future<VM> getVM() async {
+    return VM.parse({
+      'type': 'VM',
+      if (vmRootUri != null) 'rootUri': vmRootUri,
+    })!;
+  }
 
   @override
   Future<Isolate> getIsolate(String isolateId) async {

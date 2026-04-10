@@ -264,6 +264,19 @@ final class IsolateManager with DisposerMixin {
   }
 
   Future<IsolateRef?> _findTestSuiteByRootLibrary(VmService? service) async {
+    String? projectRootUri;
+    if (service != null) {
+      try {
+        final vm = await service.getVM();
+        if (service != _service) return null;
+        // `rootUri` is not a typed field on `VM` in the current vm_service
+        // version, so read it from the raw JSON response.
+        projectRootUri = vm.json?['rootUri'] as String?;
+      } catch (_) {
+        // If getVM() fails, proceed without project-root scoping.
+      }
+    }
+
     for (final isolateState in _isolateStates.values) {
       final isolate = await isolateState.isolate;
       if (service != _service) return null;
@@ -273,7 +286,10 @@ final class IsolateManager with DisposerMixin {
 
       if (_isDartTestRunnerRootLibrary(rootLibraryUri)) continue;
 
-      if (_isLikelyUserTestRootLibrary(rootLibraryUri)) {
+      if (_isLikelyUserTestRootLibrary(
+        rootLibraryUri,
+        projectRootUri: projectRootUri,
+      )) {
         return isolateState.isolateRef;
       }
     }
@@ -281,17 +297,37 @@ final class IsolateManager with DisposerMixin {
     return null;
   }
 
+  /// Returns true if [uri] looks like the root library of a dart:test runner
+  /// isolate (as opposed to the user's test suite isolate).
+  ///
+  /// Note: 'dart_test.kernel', 'package:test_core/', and 'package:test_api/'
+  /// are implementation details of package:test that DevTools depends on.
+  /// Changing these in package:test will break this logic.
   bool _isDartTestRunnerRootLibrary(String uri) {
     return uri.contains('dart_test.kernel') ||
         uri.startsWith('package:test_core/') ||
         uri.startsWith('package:test_api/');
   }
 
-  bool _isLikelyUserTestRootLibrary(String uri) {
-    return (uri.endsWith('_test.dart') ||
-            uri.contains('/test/') ||
-            uri.contains('\\test\\')) &&
-        !uri.startsWith('dart:');
+  /// Returns true if [uri] looks like the root library of a user test isolate.
+  ///
+  /// When [projectRootUri] is provided, `file://` URIs must be under it to
+  /// avoid false positives from other packages in the workspace that happen to
+  /// contain '/test/' or end with '_test.dart'.
+  bool _isLikelyUserTestRootLibrary(String uri, {String? projectRootUri}) {
+    if (uri.startsWith('dart:')) return false;
+
+    // Scope file:// URIs to the current project to avoid matching test files
+    // from other packages in a workspace.
+    if (projectRootUri != null &&
+        uri.startsWith('file:') &&
+        !uri.startsWith(projectRootUri)) {
+      return false;
+    }
+
+    return uri.endsWith('_test.dart') ||
+        uri.contains('/test/') ||
+        uri.contains('\\test\\');
   }
 
   void _setSelectedIsolate(IsolateRef? ref) {
