@@ -9,6 +9,9 @@ import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/performance_controls.dart';
+import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frame_model.dart';
+import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_stats.dart';
+import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_stats_model.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
 import 'package:devtools_app/src/shared/feature_flags.dart';
@@ -18,6 +21,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -153,7 +157,6 @@ void main() {
           findsOneWidget,
         );
 
-        // Make sure NO Flutter-specific information is included:
         expect(
           markdownFinder('The Flutter framework emits timeline events'),
           findsNothing,
@@ -183,7 +186,6 @@ void main() {
           findsOneWidget,
         );
 
-        // Make sure Flutter-specific information is included:
         expect(
           markdownFinder('The Flutter framework emits timeline events'),
           findsOneWidget,
@@ -222,7 +224,6 @@ void main() {
             final chartButtonFinder = find.byType(VisibilityButton);
             expect(chartButtonFinder, findsOneWidget);
 
-            // The flutter frames chart is visible.
             expect(find.byType(FramesChartControls), findsOneWidget);
             expect(
               preferences.performance.showFlutterFramesChart.value,
@@ -232,7 +233,6 @@ void main() {
             await tester.tap(chartButtonFinder);
             await tester.pumpAndSettle();
 
-            // The flutter frames chart should no longer be visible.
             expect(find.byType(FramesChartControls), findsNothing);
             expect(
               preferences.performance.showFlutterFramesChart.value,
@@ -242,7 +242,6 @@ void main() {
             await tester.tap(chartButtonFinder);
             await tester.pumpAndSettle();
 
-            // The flutter frames chart should be visible again.
             expect(find.byType(FramesChartControls), findsOneWidget);
             expect(
               preferences.performance.showFlutterFramesChart.value,
@@ -251,46 +250,6 @@ void main() {
           });
         },
       );
-
-      // testWidgetsWithWindowSize(
-      //   'clears timeline on clear',
-      //   windowSize,
-      //   (WidgetTester tester) async {
-      //     await tester.runAsync(() async {
-      //       await pumpPerformanceScreen(tester, runAsync: true);
-      //       await tester.pumpAndSettle();
-
-      //       // Ensure the Timeline Events tab is selected.
-      //       final timelineEventsTabFinder = find.text('Timeline Events');
-      //       expect(timelineEventsTabFinder, findsOneWidget);
-      //       await tester.tap(timelineEventsTabFinder);
-      //       await tester.pumpAndSettle();
-
-      //       expect(
-      //         controller.timelineEventsController.allTraceEvents,
-      //         isNotEmpty,
-      //       );
-      //       expect(find.byType(FlutterFramesChart), findsOneWidget);
-      //       expect(find.byType(TimelineFlameChart), findsOneWidget);
-      //       expect(
-      //         find.byKey(TimelineEventsView.emptyTimelineKey),
-      //         findsNothing,
-      //       );
-      //       expect(find.byType(EventDetails), findsOneWidget);
-
-      //       await tester.tap(find.byIcon(Icons.block));
-      //       await tester.pumpAndSettle();
-      //       expect(controller.timelineEventsController.allTraceEvents, isEmpty);
-      //       expect(find.byType(FlutterFramesChart), findsOneWidget);
-      //       expect(find.byType(TimelineFlameChart), findsNothing);
-      //       expect(
-      //         find.byKey(TimelineEventsView.emptyTimelineKey),
-      //         findsOneWidget,
-      //       );
-      //       expect(find.byType(EventDetails), findsNothing);
-      //     });
-      //   },
-      // );
 
       testWidgetsWithWindowSize('opens enhance tracing overlay', windowSize, (
         WidgetTester tester,
@@ -392,6 +351,77 @@ void main() {
               findsNothing,
             );
           });
+        },
+      );
+    });
+
+    group('RebuildStatsView', () {
+      late FakeServiceConnectionManager fakeServiceConnection;
+      late RebuildCountModel model;
+      late ValueNotifier<FlutterFrame?> selectedFrame;
+
+      setUp(() {
+        fakeServiceConnection = FakeServiceConnectionManager();
+        final app = fakeServiceConnection.serviceManager.connectedApp!;
+        when(app.initialized).thenReturn(Completer()..complete(true));
+        when(app.isDartWebAppNow).thenReturn(false);
+        when(app.isFlutterAppNow).thenReturn(true);
+        when(app.isDartCliAppNow).thenReturn(false);
+        when(app.isDartWebApp).thenAnswer((_) async => false);
+        when(app.isProfileBuild).thenAnswer((_) async => false);
+        setGlobal(ServiceConnectionManager, fakeServiceConnection);
+        setGlobal(IdeTheme, IdeTheme());
+        setGlobal(NotificationService, NotificationService());
+        setGlobal(BannerMessagesController, BannerMessagesController());
+        setGlobal(PreferencesController, PreferencesController());
+        setGlobal(OfflineDataController, OfflineDataController());
+        model = RebuildCountModel();
+        selectedFrame = ValueNotifier<FlutterFrame?>(null);
+      });
+
+      testWidgets(
+        'shows message when running in profile mode',
+        (WidgetTester tester) async {
+          final app = fakeServiceConnection.serviceManager.connectedApp!;
+          when(app.isProfileBuildNow).thenReturn(true);
+
+          await tester.pumpWidget(
+            wrapWithControllers(
+              RebuildStatsView(
+                model: model,
+                selectedFrame: selectedFrame,
+              ),
+            ),
+          );
+          await tester.pump();
+
+          expect(
+            find.textContaining('Widget rebuild counts are only available'),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets(
+        'shows normal UI when running in debug mode',
+        (WidgetTester tester) async {
+          final app = fakeServiceConnection.serviceManager.connectedApp!;
+          when(app.isProfileBuildNow).thenReturn(false);
+
+          await tester.pumpWidget(
+            wrapWithControllers(
+              RebuildStatsView(
+                model: model,
+                selectedFrame: selectedFrame,
+              ),
+            ),
+          );
+          await tester.pump();
+
+          expect(
+            find.textContaining('Widget rebuild counts are only available'),
+            findsNothing,
+          );
         },
       );
     });
