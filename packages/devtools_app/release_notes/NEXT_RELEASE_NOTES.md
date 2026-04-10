@@ -45,6 +45,7 @@ TODO: Remove this section if there are not any updates.
 
 - Added support for searching within the log details view (raw text mode). [#9712](https://github.com/flutter/devtools/pull/9712)
   ![Search in log details](images/log_details_search.png "Searching within the log details view")
+- Fixed an issue where log messages containing newline characters were incorrectly split into multiple separate entries in the Logging screen (#9557).
 
 ## App size tool updates
 

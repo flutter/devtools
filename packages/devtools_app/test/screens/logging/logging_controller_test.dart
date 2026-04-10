@@ -381,4 +381,55 @@ void main() {
       },
     );
   });
+
+  group('StdoutEventHandler', () {
+    late LoggingController controller;
+    late StdoutEventHandler stdoutHandler;
+
+    Event stdoutEvent(String message, {int? timestamp}) {
+      return Event(
+        bytes: base64Encode(utf8.encode(message)),
+        timestamp: timestamp ?? ++timestampCounter,
+      );
+    }
+
+    setUp(() {
+      setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
+      setGlobal(MessageBus, MessageBus());
+      setGlobal(PreferencesController, PreferencesController());
+
+      controller = LoggingController()..init();
+      stdoutHandler = StdoutEventHandler(controller, 'stdout');
+    });
+
+    test('combines newline-terminated continuation into one log', () async {
+      stdoutHandler.handle(stdoutEvent('line1\n'));
+      stdoutHandler.handle(stdoutEvent('line2'));
+
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(controller.data, hasLength(1));
+      expect(controller.data.single.kind, 'stdout');
+      expect(controller.data.single.details, 'line1\nline2');
+    });
+
+    test('still combines message followed by lone newline', () {
+      stdoutHandler.handle(stdoutEvent('line1'));
+      stdoutHandler.handle(stdoutEvent('\n'));
+
+      expect(controller.data, hasLength(1));
+      expect(controller.data.single.details, 'line1\n');
+    });
+
+    test('keeps separate entries for distinct non-newline chunks', () async {
+      stdoutHandler.handle(stdoutEvent('line1'));
+      stdoutHandler.handle(stdoutEvent('line2'));
+
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(controller.data, hasLength(2));
+      expect(controller.data[0].details, 'line1');
+      expect(controller.data[1].details, 'line2');
+    });
+  });
 }
