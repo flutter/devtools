@@ -94,9 +94,7 @@ Future<List<String>> autoCompleteResultsFor(
       }
     } catch (_) {}
   }
-  return result.nonNulls
-      .where((name) => name.startsWith(parts.activeWord))
-      .toList();
+  return result.where((name) => name.startsWith(parts.activeWord)).toList();
 }
 
 // Due to https://github.com/dart-lang/sdk/issues/46221
@@ -197,7 +195,7 @@ Future<Set<String>> _libraryMemberAutocompletes(
     final members = functions.map(
       (funcRef) => funcRef.name!.replaceAll('=', ''),
     );
-    result.addAll(members.nonNulls);
+    result.addAll(members);
   }
   final classes = library.classes;
   if (classes != null) {
