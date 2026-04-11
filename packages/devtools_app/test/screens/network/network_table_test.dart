@@ -101,9 +101,9 @@ void main() {
       final column = TimestampColumn();
       final getRequest = findRequestById('1');
 
-      // The hours field may be unreliable since it depends on the timezone the
-      // test is running in.
-      expect(column.getDisplayValue(getRequest), contains(':45:26.279'));
+      // The hours and minutes field may be unreliable since it depends on the
+      // timezone the test is running in (e.g. UTC vs IST).
+      expect(column.getDisplayValue(getRequest), contains('26.279'));
     });
   });
 }
