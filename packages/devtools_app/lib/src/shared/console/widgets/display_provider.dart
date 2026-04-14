@@ -19,6 +19,23 @@ import '../../primitives/utils.dart';
 import '../../ui/colors.dart';
 import 'description.dart';
 
+/// The display provider for variables fetched via the VM service protocol.
+class DisplayProvider extends StatefulWidget {
+  const DisplayProvider({
+    super.key,
+    required this.variable,
+    required this.onTap,
+    this.onCopy,
+  });
+
+  final DartObjectNode variable;
+  final VoidCallback onTap;
+  final void Function(DartObjectNode)? onCopy;
+
+  @override
+  State<DisplayProvider> createState() => _DisplayProviderState();
+}
+
 class OverflowingText extends StatelessWidget {
   const OverflowingText({
     super.key,
@@ -43,22 +60,6 @@ class OverflowingText extends StatelessWidget {
   }
 }
 
-/// The display provider for variables fetched via the VM service protocol.
-class DisplayProvider extends StatefulWidget {
-  const DisplayProvider({
-    super.key,
-    required this.variable,
-    required this.onTap,
-    this.onCopy,
-  });
-
-  final DartObjectNode variable;
-  final VoidCallback onTap;
-  final void Function(DartObjectNode)? onCopy;
-
-  @override
-  State<DisplayProvider> createState() => _DisplayProviderState();
-}
 
 class _DisplayProviderState extends State<DisplayProvider> {
   bool isHovered = false;
