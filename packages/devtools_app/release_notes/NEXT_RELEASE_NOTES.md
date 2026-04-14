@@ -1,11 +1,14 @@
 # DevTools 2.58.0 release notes
 
+# DevTools 2.58.0 release notes
+
 The 2.58.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
-[DevTools overview](https://docs.flutter.dev/tools/devtools).
+[DevTools overview](/tools/devtools).
 
 ## General updates
+
 TODO: Remove this section if there are not any updates.
 
 ## Inspector updates
@@ -34,6 +37,16 @@ TODO: Remove this section if there are not any updates.
 ## App size tool updates
 - Added documentation links and improved handling for null files. [#9689](https://github.com/flutter/devtools/pull/9689)
 
+TODO: Remove this section if there are not any updates.
+
+## Logging updates
+
+TODO: Remove this section if there are not any updates.
+
+## App size tool updates
+
+TODO: Remove this section if there are not any updates.
+
 ## Deep links tool updates
 TODO: Remove this section if there are not any updates.
 
@@ -48,4 +61,5 @@ TODO: Remove this section if there are not any updates.
 
 ## Full commit history
 To find a complete list of changes in this release, check out the
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.58.0).
 [DevTools git log](https://github.com/flutter/devtools/tree/v2.58.0).

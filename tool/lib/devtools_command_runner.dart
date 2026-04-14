@@ -18,6 +18,7 @@ import 'package:devtools_tool/model.dart';
 
 import 'commands/analyze.dart';
 import 'commands/list.dart';
+import 'commands/presubmit.dart';
 import 'commands/pub_get.dart';
 import 'commands/release_helper.dart';
 import 'commands/repo_check.dart';
@@ -37,6 +38,7 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(FixGoldensCommand());
     addCommand(GenerateCodeCommand());
     addCommand(ListCommand());
+    addCommand(PresubmitCommand());
     addCommand(PubGetCommand());
     addCommand(ReleaseHelperCommand());
     addCommand(ReleaseNotesCommand());
