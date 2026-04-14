@@ -90,6 +90,8 @@ void main() {
       await tester.pump();
 
       if (runAsync) {
+        // Await a small delay to allow the PerformanceController to complete
+        // initialization.
         await Future.delayed(const Duration(seconds: 1));
       }
 
@@ -114,6 +116,24 @@ void main() {
       expect(find.text('Performance'), findsOneWidget);
     });
 
+    testWidgetsWithWindowSize('builds initial content', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await tester.runAsync(() async {
+        await pumpPerformanceScreen(tester, runAsync: true);
+        await tester.pumpAndSettle();
+        expect(find.byType(PerformanceScreenBody), findsOneWidget);
+        expect(find.byType(WebPerformanceScreenBody), findsNothing);
+        expect(find.byType(PerformanceControls), findsOneWidget);
+        expect(find.byType(FlutterFramesChart), findsOneWidget);
+        expect(find.byType(TabbedPerformanceView), findsOneWidget);
+        expect(
+          find.text('Select a frame above to view analysis data.'),
+          findsOneWidget,
+        );
+      });
+    });
+
     testWidgetsWithWindowSize(
       'builds initial content for Dart web app',
       windowSize,
@@ -128,10 +148,15 @@ void main() {
           wrap(Builder(builder: PerformanceScreen().build)),
         );
         await tester.pumpAndSettle();
-
+        expect(find.byType(PerformanceScreenBody), findsNothing);
         expect(find.byType(WebPerformanceScreenBody), findsOneWidget);
+        expect(
+          markdownFinder(
+            'How to use Chrome DevTools for performance profiling',
+          ),
+          findsOneWidget,
+        );
 
-        // Make sure NO Flutter-specific information is included:
         expect(
           markdownFinder('The Flutter framework emits timeline events'),
           findsNothing,
@@ -152,14 +177,38 @@ void main() {
           wrap(Builder(builder: PerformanceScreen().build)),
         );
         await tester.pumpAndSettle();
-
+        expect(find.byType(PerformanceScreenBody), findsNothing);
         expect(find.byType(WebPerformanceScreenBody), findsOneWidget);
+        expect(
+          markdownFinder(
+            'How to use Chrome DevTools for performance profiling',
+          ),
+          findsOneWidget,
+        );
 
-        // Make sure Flutter-specific information IS included:
         expect(
           markdownFinder('The Flutter framework emits timeline events'),
           findsOneWidget,
         );
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds initial content for non-flutter app',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.runAsync(() async {
+          mockConnectedApp(
+            fakeServiceConnection.serviceManager.connectedApp!,
+            isFlutterApp: false,
+          );
+          await pumpPerformanceScreen(tester, runAsync: true);
+          await tester.pumpAndSettle();
+          expect(find.byType(PerformanceControls), findsOneWidget);
+          expect(find.byType(FlutterFramesChart), findsNothing);
+          expect(find.byType(TabbedPerformanceView), findsOneWidget);
+          expect(find.byType(TimelineEventsTabView), findsOneWidget);
+        });
       },
     );
 
@@ -173,31 +222,159 @@ void main() {
             await tester.pumpAndSettle();
 
             final chartButtonFinder = find.byType(VisibilityButton);
+            expect(chartButtonFinder, findsOneWidget);
 
-            // The flutter frames chart is visible.
             expect(find.byType(FramesChartControls), findsOneWidget);
+            expect(
+              preferences.performance.showFlutterFramesChart.value,
+              isTrue,
+            );
 
             await tester.tap(chartButtonFinder);
             await tester.pumpAndSettle();
 
-            // The flutter frames chart should no longer be visible.
             expect(find.byType(FramesChartControls), findsNothing);
+            expect(
+              preferences.performance.showFlutterFramesChart.value,
+              isFalse,
+            );
 
             await tester.tap(chartButtonFinder);
             await tester.pumpAndSettle();
 
-            // The flutter frames chart should be visible again.
             expect(find.byType(FramesChartControls), findsOneWidget);
+            expect(
+              preferences.performance.showFlutterFramesChart.value,
+              isTrue,
+            );
+          });
+        },
+      );
+
+      testWidgetsWithWindowSize('opens enhance tracing overlay', windowSize, (
+        WidgetTester tester,
+      ) async {
+        await tester.runAsync(() async {
+          await pumpPerformanceScreen(tester, runAsync: true);
+          await tester.pumpAndSettle();
+          expect(find.text('Enhance Tracing'), findsOneWidget);
+          await tester.tap(find.text('Enhance Tracing'));
+          await tester.pumpAndSettle();
+          expect(
+            find.richTextContaining('frame times may be negatively affected'),
+            findsOneWidget,
+          );
+          expect(
+            find.richTextContaining(
+              'you will need to reproduce activity in your app',
+            ),
+            findsOneWidget,
+          );
+          expect(
+            find.richTextContaining('Trace widget builds'),
+            findsOneWidget,
+          );
+          expect(find.richTextContaining('Trace layouts'), findsOneWidget);
+          expect(find.richTextContaining('Trace paints'), findsOneWidget);
+          expect(
+            find.richTextContaining('Trace platform channels'),
+            findsOneWidget,
+          );
+          expect(find.byType(MoreInfoLink), findsNWidgets(4));
+        });
+      });
+
+      testWidgetsWithWindowSize(
+        'opens more debugging options overlay',
+        windowSize,
+        (WidgetTester tester) async {
+          await tester.runAsync(() async {
+            await pumpPerformanceScreen(tester, runAsync: true);
+            await tester.pumpAndSettle();
+            expect(find.text('More debugging options'), findsOneWidget);
+            await tester.tap(find.text('More debugging options'));
+            await tester.pumpAndSettle();
+            expect(
+              find.richTextContaining(
+                'After toggling a rendering layer on/off, '
+                'reproduce the activity in your app to see the effects',
+              ),
+              findsOneWidget,
+            );
+            expect(
+              find.richTextContaining('Render Clip layers'),
+              findsOneWidget,
+            );
+            expect(
+              find.richTextContaining('Render Opacity layers'),
+              findsOneWidget,
+            );
+            expect(
+              find.richTextContaining('Render Physical Shape layers'),
+              findsOneWidget,
+            );
+            expect(
+              find.richTextContaining(
+                "These debugging options aren't available in profile mode. "
+                'To use them, run your app in debug mode.',
+              ),
+              findsOneWidget,
+            );
+            expect(find.byType(MoreInfoLink), findsNWidgets(3));
+          });
+        },
+      );
+
+      testWidgetsWithWindowSize(
+        'hides warning in debugging options overlay when in debug mode',
+        windowSize,
+        (WidgetTester tester) async {
+          when(
+            fakeServiceConnection
+                .serviceManager
+                .connectedApp!
+                .isProfileBuildNow,
+          ).thenReturn(false);
+
+          await tester.runAsync(() async {
+            await pumpPerformanceScreen(tester, runAsync: true);
+            await tester.pumpAndSettle();
+            expect(find.text('More debugging options'), findsOneWidget);
+            await tester.tap(find.text('More debugging options'));
+            await tester.pumpAndSettle();
+
+            expect(
+              find.richTextContaining(
+                "These debugging options aren't available in profile mode. "
+                'To use them, run your app in debug mode.',
+              ),
+              findsNothing,
+            );
           });
         },
       );
     });
 
     group('RebuildStatsView', () {
+      late FakeServiceConnectionManager fakeServiceConnection;
       late RebuildCountModel model;
       late ValueNotifier<FlutterFrame?> selectedFrame;
 
       setUp(() {
+        fakeServiceConnection = FakeServiceConnectionManager();
+        final app = fakeServiceConnection.serviceManager.connectedApp!;
+        when(app.initialized).thenReturn(Completer()..complete(true));
+        when(app.isDartWebAppNow).thenReturn(false);
+        when(app.isFlutterAppNow).thenReturn(true);
+        when(app.isDartCliAppNow).thenReturn(false);
+        when(app.isDartWebApp).thenAnswer((_) async => false);
+        when(app.isProfileBuild).thenAnswer((_) async => false);
+        setGlobal(ServiceConnectionManager, fakeServiceConnection);
+        setGlobal(IdeTheme, IdeTheme());
+        setGlobal(NotificationService, NotificationService());
+        setGlobal(BannerMessagesController, BannerMessagesController());
+        setGlobal(PreferencesController, PreferencesController());
+        setGlobal(OfflineDataController, OfflineDataController());
         model = RebuildCountModel();
         selectedFrame = ValueNotifier<FlutterFrame?>(null);
       });
@@ -205,6 +382,9 @@ void main() {
       testWidgets('shows message when running in profile mode', (
         WidgetTester tester,
       ) async {
+        final app = fakeServiceConnection.serviceManager.connectedApp!;
+        when(app.isProfileBuildNow).thenReturn(true);
+
         await tester.pumpWidget(
           wrapWithControllers(
             RebuildStatsView(model: model, selectedFrame: selectedFrame),
@@ -221,6 +401,9 @@ void main() {
       testWidgets('shows normal UI when running in debug mode', (
         WidgetTester tester,
       ) async {
+        final app = fakeServiceConnection.serviceManager.connectedApp!;
+        when(app.isProfileBuildNow).thenReturn(false);
+
         await tester.pumpWidget(
           wrapWithControllers(
             RebuildStatsView(model: model, selectedFrame: selectedFrame),
