@@ -84,4 +84,4 @@ Add images to `packages/devtools_app/release_notes/images/` and reference them:
 **Constraint**: Use **dark mode** for screenshots.
 
 ## Resources
-- [README.md](../../../packages/devtools_app/release_notes/README.md): Official project guidance.
+- [README.md](../../packages/devtools_app/release_notes/README.md): Official project guidance.
