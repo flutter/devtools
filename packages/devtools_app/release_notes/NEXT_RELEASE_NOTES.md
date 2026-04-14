@@ -24,7 +24,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+- Added a message in the Performance panel when widget rebuild tracking is
+  unavailable because the app is running in profile mode. [#9755](https://github.com/flutter/devtools/pull/9755)
 
 ## CPU profiler updates
 
@@ -40,14 +41,10 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-- Added response size column to the Network tab and displayed response size in the request inspector overview.  
+- Added response size column to the Network tab and displayed response size in the request inspector overview.
   [#9744](https://github.com/flutter/devtools/pull/9744)
-
 - Improved HTTP request status classification in the Network tab to better distinguish cancelled, completed, and in-flight requests (for example, avoiding some cases where cancelled requests appeared as pending). [#9683](https://github.com/flutter/devtools/pull/9683)
 
-- Added a filter setting to hide HTTP-profiler socket data.  
-  [#9698](https://github.com/flutter/devtools/pull/9698)
-  
 ## Logging updates
 
 - Fixed an issue where log messages containing newline characters were incorrectly split into multiple separate entries in the Logging screen. [#9757](https://github.com/flutter/devtools/pull/9757)

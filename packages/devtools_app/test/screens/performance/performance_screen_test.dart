@@ -379,51 +379,43 @@ void main() {
         selectedFrame = ValueNotifier<FlutterFrame?>(null);
       });
 
-      testWidgets(
-        'shows message when running in profile mode',
-        (WidgetTester tester) async {
-          final app = fakeServiceConnection.serviceManager.connectedApp!;
-          when(app.isProfileBuildNow).thenReturn(true);
+      testWidgets('shows message when running in profile mode', (
+        WidgetTester tester,
+      ) async {
+        final app = fakeServiceConnection.serviceManager.connectedApp!;
+        when(app.isProfileBuildNow).thenReturn(true);
 
-          await tester.pumpWidget(
-            wrapWithControllers(
-              RebuildStatsView(
-                model: model,
-                selectedFrame: selectedFrame,
-              ),
-            ),
-          );
-          await tester.pump();
+        await tester.pumpWidget(
+          wrapWithControllers(
+            RebuildStatsView(model: model, selectedFrame: selectedFrame),
+          ),
+        );
+        await tester.pump();
 
-          expect(
-            find.textContaining('Widget rebuild counts are only available'),
-            findsOneWidget,
-          );
-        },
-      );
+        expect(
+          find.textContaining('Widget rebuild counts are only available'),
+          findsOneWidget,
+        );
+      });
 
-      testWidgets(
-        'shows normal UI when running in debug mode',
-        (WidgetTester tester) async {
-          final app = fakeServiceConnection.serviceManager.connectedApp!;
-          when(app.isProfileBuildNow).thenReturn(false);
+      testWidgets('shows normal UI when running in debug mode', (
+        WidgetTester tester,
+      ) async {
+        final app = fakeServiceConnection.serviceManager.connectedApp!;
+        when(app.isProfileBuildNow).thenReturn(false);
 
-          await tester.pumpWidget(
-            wrapWithControllers(
-              RebuildStatsView(
-                model: model,
-                selectedFrame: selectedFrame,
-              ),
-            ),
-          );
-          await tester.pump();
+        await tester.pumpWidget(
+          wrapWithControllers(
+            RebuildStatsView(model: model, selectedFrame: selectedFrame),
+          ),
+        );
+        await tester.pump();
 
-          expect(
-            find.textContaining('Widget rebuild counts are only available'),
-            findsNothing,
-          );
-        },
-      );
+        expect(
+          find.textContaining('Widget rebuild counts are only available'),
+          findsNothing,
+        );
+      });
     });
   });
 }
