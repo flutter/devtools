@@ -157,6 +157,7 @@ void main() {
           findsOneWidget,
         );
 
+        // Make sure NO Flutter-specific information is included:
         expect(
           markdownFinder('The Flutter framework emits timeline events'),
           findsNothing,
@@ -186,6 +187,7 @@ void main() {
           findsOneWidget,
         );
 
+        // Make sure Flutter-specific information is included:
         expect(
           markdownFinder('The Flutter framework emits timeline events'),
           findsOneWidget,
@@ -220,10 +222,10 @@ void main() {
           await tester.runAsync(() async {
             await pumpPerformanceScreen(tester, runAsync: true);
             await tester.pumpAndSettle();
-
             final chartButtonFinder = find.byType(VisibilityButton);
             expect(chartButtonFinder, findsOneWidget);
 
+            // The flutter frames chart is visible.
             expect(find.byType(FramesChartControls), findsOneWidget);
             expect(
               preferences.performance.showFlutterFramesChart.value,
@@ -232,7 +234,7 @@ void main() {
 
             await tester.tap(chartButtonFinder);
             await tester.pumpAndSettle();
-
+            // The flutter frames chart should no longer be visible.
             expect(find.byType(FramesChartControls), findsNothing);
             expect(
               preferences.performance.showFlutterFramesChart.value,
@@ -242,6 +244,7 @@ void main() {
             await tester.tap(chartButtonFinder);
             await tester.pumpAndSettle();
 
+            // The flutter frames chart should be visible again.
             expect(find.byType(FramesChartControls), findsOneWidget);
             expect(
               preferences.performance.showFlutterFramesChart.value,
