@@ -32,7 +32,6 @@ TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 - Added support for searching within the log details view (raw text mode). [#9712](https://github.com/flutter/devtools/pull/9712)
-  ![Search in log details](images/log_details_search.png "Searching within the log details view")
 
 ## App size tool updates
 - Added documentation links and improved handling for null files. [#9689](https://github.com/flutter/devtools/pull/9689)
