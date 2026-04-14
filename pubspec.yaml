@@ -15,3 +15,8 @@ workspace:
 dev_dependencies:
   build_runner: ^2.5.4
   flutter_lints: ^5.0.0
+  dart_skills_lint:
+    git:
+      url: https://github.com/flutter/skills
+      path: tool/dart_skills_lint
+      ref: 9eff6bbcfa27c2724ea9ad67a611c19fe77057ea
