@@ -16,6 +16,8 @@ void main() {
     });
 
     try {
+      // Update test to use dart_skills_lint.yaml for config when available.
+      // See https://github.com/flutter/skills/issues/85.
       final bool isValid = await validateSkills(
         skillDirPaths: ['../.agents/skills'],
         resolvedRules: {
