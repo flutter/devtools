@@ -217,16 +217,14 @@ void main() {
     const index = 9;
     bool containsJson(Widget widget) {
       if (widget is! Text) return false;
-      final content = (widget.data ?? '').trim();
+      final content = (widget.data ?? widget.textSpan?.toPlainText() ?? '')
+          .trim();
       return content.startsWith('{') &&
           content.endsWith('}') &&
           content != '{ }';
     }
 
-    final findJson = find.descendant(
-      of: find.byType(LogDetails),
-      matching: find.byWidgetPredicate(containsJson),
-    );
+    final findJson = find.byWidgetPredicate(containsJson);
 
     await pumpLoggingScreen(tester);
     await tester.pumpAndSettle();
