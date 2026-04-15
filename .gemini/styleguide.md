@@ -45,5 +45,3 @@ Please refer to the following files for specific rules:
   * Strict avoidance of raw values in UI (use named constants).
   * Usage of established themes and text styles.
   * Usage of shared components and utilities.
-
-
