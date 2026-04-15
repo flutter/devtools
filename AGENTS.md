@@ -19,19 +19,15 @@ Follow these rules when working in this repository.
 -   **Formatting & Analysis**: Always ensure code is formatted properly and has no analysis errors or warnings before completing a task.
 
 ### Code Quality & Maintainability
+-   **Single Responsibility**: Methods should ideally be 10-20 lines. If a method exceeds 30 lines, suggest a refactor.
 -   **DRY (Don't Repeat Yourself)**: Identify blocks of code that are 90%+ identical to existing utility methods in this repo and flag them for duplication.
 -   **Meaningful Naming**: Variables should describe their intent (e.g., `timeoutInMs` instead of `t`).
 -   **Descriptive Pull Request**: Contributors should include the information recommended in the pull request template (In `.github/PULL_REQUEST_TEMPLATE.md`).
 
 ## Running Tests
-
 -   **Standard Packages**: Run unit and widget tests with `flutter test`.
 -   **`packages/devtools_shared`**: Run tests with `dart test`.
 -   **Integration Tests**: Refer to the [Integration Test README](packages/devtools_app/integration_test/README.md) for instructions on running integration tests.
-
-## Tooling Best Practices
-
--   **MCP Tools**: Prefer using MCP server tools over shell commands whenever possible.
 
 ## UI Development Guidelines
 

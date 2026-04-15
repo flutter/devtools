@@ -28,6 +28,7 @@ and the CI testing ensures that the code is formatted correctly.
 * **Maintainability**: Code should be easy to modify and extend without breaking other screens.
 * **Consistency**: Adhering to consistent style across all DevTools packages improves collaboration and reduces errors.
 * **Code Reuse**: Use shared primitives and components rather than recreating them from scratch.
+* **Testing**: All changes should include automated tests to ensure correctness and prevent regressions.
 
 ## 3. Guidelines from Existing Documentation
 
@@ -42,6 +43,9 @@ Please refer to the following files for specific rules:
 * **Repository Constraints**: See [AGENTS.md](AGENTS.md) for rules on:
   * Constraints on `packages/devtools_shared` (no Flutter dependency).
   * Import restrictions (no importing `devtools_app.dart` from `src/`).
+  * Published packages management (CHANGELOGs, versions, breaking changes).
+  * Code quality (Single Responsibility, DRY, Meaningful Naming).
   * Strict avoidance of raw values in UI (use named constants).
   * Usage of established themes and text styles.
   * Usage of shared components and utilities.
+  * Widget structure (avoiding long build methods, widgets vs methods).
