@@ -44,7 +44,7 @@ Please refer to the following files for specific rules:
   * Constraints on `packages/devtools_shared` (no Flutter dependency).
   * Import restrictions (no importing `devtools_app.dart` from `src/`).
   * Published packages management (CHANGELOGs, versions, breaking changes).
-  * Code quality (Single Responsibility, DRY, Meaningful Naming).
+  * Code quality (DRY, Meaningful Naming).
   * Strict avoidance of raw values in UI (use named constants).
   * Usage of established themes and text styles.
   * Usage of shared components and utilities.
