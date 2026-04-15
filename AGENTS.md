@@ -21,7 +21,7 @@ Follow these rules when working in this repository.
 ### Code Quality & Maintainability
 -   **DRY (Don't Repeat Yourself)**: Identify blocks of code that are 90%+ identical to existing utility methods in this repo and flag them for duplication.
 -   **Meaningful Naming**: Variables should describe their intent (e.g., `timeoutInMs` instead of `t`).
--   **Descriptive Pull Request**: Contributors should include the information recommended in the pull request template (In `.github/PULL_REQUEST_TEMPLATE.md`).
+-   **Descriptive Pull Request**: Contributors should include the information recommended in the pull request template (in `.github/PULL_REQUEST_TEMPLATE.md`).
 
 ## Documentation
 - All public members should have documentation.
