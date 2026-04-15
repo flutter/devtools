@@ -8,6 +8,12 @@ Follow these rules when working in this repository.
 -   **`packages/devtools_shared`**: Never introduce a Flutter dependency or a dependency on web-only Dart libraries.
 -   **Imports**: Never import `packages/devtools_app/lib/devtools_app.dart` in code under `packages/devtools_app/lib/src/`. It is acceptable in test code.
 
+### Published Packages (`packages/devtools_shared`, `packages/devtools_app_shared`, `packages/devtools_extensions`)
+- Document file changes in the respective `CHANGELOG.md` files.
+- Ensure version numbers in `pubspec.yaml` are updated accordingly for required changes.
+- Ensure no breaking changes are introduced. If introduced, they must be intentional and documented.
+- The published packages should not depend on unpublished packages like `packages/devtools_app` and `packages/devtools_test`.
+
 ### Code Style
 -   **Style Guide**: Follow the DevTools style guide in [STYLE.md](STYLE.md).
 -   **Formatting & Analysis**: Always ensure code is formatted properly and has no analysis errors or warnings before completing a task.

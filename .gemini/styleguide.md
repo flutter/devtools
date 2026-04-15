@@ -46,32 +46,4 @@ Please refer to the following files for specific rules:
   * Usage of established themes and text styles.
   * Usage of shared components and utilities.
 
-## Bot Review Focus
 
-When reviewing code, Gemini Code Assist should pay special attention to:
-
-### Dependencies and Imports
-* Ensure no Flutter dependencies creep into `packages/devtools_shared`.
-* Regarding the packages that are published on pub (`packages/devtools_shared`,
-`packages/devtools_app_shared`, `packages/devtools_extensions`):
-  * Ensure changes are documented in the respective `CHANGELOG.md` files.
-  * If version bumps are required for these changes, ensure the version
-    numbers in the respective `pubspec.yaml` files have been updated accordingly.
-  * Thorougly review changes to these packages to ensure no breaking changes have
-    been introduced. If a breaking change was introduced, the PR author should
-    acknowledge that this was in fact intentional and that they are aware of the
-    implications.
-  * The published packages should not depend on unpublished packages like
-    `packages/devtools_app` and `packages/devtools_test`.
-
-### UI Development
-* Flag hardcoded magic strings or numbers used in the interface.
-* Flag new style declarations. Wherever possible, prefer using existing
-  styles from `packages/devtools_app_shared/lib/src/ui/theme/theme.dart`.
-* Encourage the reuse of components described in `packages/devtools_app/lib/src/shared/ui/common_widgets.dart`, primitives in `shared/primitives/`, and utilities in `shared/utils/`.
-* Verify that themes are accessed using existing patterns.
-
-## Tooling
-
-* Code must be formatted with `flutter format`.
-* There must be no analysis errors or warnings.
