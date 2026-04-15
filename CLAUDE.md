@@ -1,3 +1,3 @@
 # Claude Code Guidelines
 
-Refer to the shared [AI Rules](AI_RULES.md) for guidelines when working in this repository.
+Before starting any work in this repository, you MUST read and follow the instructions in the `AGENTS.md` file.
