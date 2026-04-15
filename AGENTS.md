@@ -24,6 +24,13 @@ Follow these rules when working in this repository.
 -   **Meaningful Naming**: Variables should describe their intent (e.g., `timeoutInMs` instead of `t`).
 -   **Descriptive Pull Request**: Contributors should include the information recommended in the pull request template (In `.github/PULL_REQUEST_TEMPLATE.md`).
 
+## Documentation
+- All public members should have documentation.
+- **Answer your own questions**: If you have a question, find the answer, and then document it where you first looked.
+- **Documentation should be useful**: Explain the *why* and the *how*.
+- **Introduce terms**: Assume the reader does not know everything. Link to definitions.
+- Use `///` for public-quality documentation, even on private members.
+
 ## Running Tests
 -   **Standard Packages**: Run unit and widget tests with `flutter test`.
 -   **`packages/devtools_shared`**: Run tests with `dart test`.
