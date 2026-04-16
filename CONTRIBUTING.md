@@ -24,7 +24,7 @@ repo as well.
 
 We prioritize reviewing PRs that address issues with the following labels:
 * [`good-first-issue`](https://github.com/flutter/devtools/issues?q=state%3Aopen%20label%3Agood-first-issue): Small and easy issues that can be tackled by a first-time contributor.
-* [`contributions-welcome`](https://github.com/flutter/devtools/issues?q=state%3Aopen%20label%3Acontributions-welcome): Issues of any size or difficulty that we consider high-priority fixes.
+* [`contributions-welcome`](https://github.com/flutter/devtools/issues?q=state%3Aopen%20label%3A%22contributions%20welcome%22): Issues of any size or difficulty that we consider high-priority fixes.
 
 We communicate primarily over GitHub and [Discord](https://github.com/flutter/flutter/blob/master/docs/contributing/Chat.md) on the
 [#hackers-devtools](https://discord.com/channels/608014603317936148/1106667330093723668) channel.

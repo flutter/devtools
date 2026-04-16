@@ -52,14 +52,6 @@ extension FeatureFlags on Never {
     enabled: enableExperiments,
   );
 
-  /// Flag to enable save/load for the Network screen.
-  ///
-  /// https://github.com/flutter/devtools/issues/4470
-  static final networkSaveLoad = BooleanFeatureFlag(
-    name: 'networkSaveLoad',
-    enabled: true,
-  );
-
   /// Flag to enable DevTools extensions.
   ///
   /// TODO(https://github.com/flutter/devtools/issues/6443): remove this flag
@@ -99,7 +91,6 @@ extension FeatureFlags on Never {
   /// map as well.
   static final _booleanFlags = <BooleanFeatureFlag>{
     memorySaveLoad,
-    networkSaveLoad,
     devToolsExtensions,
     dapDebugging,
     inspectorV2,
