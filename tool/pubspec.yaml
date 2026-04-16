@@ -23,7 +23,7 @@ dependencies:
   yaml: ^3.1.2
 
 dev_dependencies:
-  # Update to published version tracked in https://github.com/flutter/devtools/issues/9771
+  # TODO(https://github.com/flutter/devtools/issues/9771): Update to published version
   dart_skills_lint:
     git:
       url: https://github.com/flutter/skills
