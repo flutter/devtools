@@ -38,6 +38,7 @@ mixin FilterControllerMixin<T> on DisposableController
   ///
   /// This should be overriden as a getter by subclasses to support persisting
   /// the most recent filter to DevTools preferences.
+  @visibleForOverriding
   ValueNotifier<String>? get filterTagNotifier => null;
 
   ValueListenable<Filter<T>> get activeFilter => _activeFilter;
@@ -127,7 +128,7 @@ mixin FilterControllerMixin<T> on DisposableController
     return FilterTag(
       query: filter.queryFilter.query,
       settingFilterValues: settingFilters
-          .map((filter) => filter.valueAsJson)
+          .map((filter) => filter._valueAsJson)
           .toList(),
       useRegExp: useRegExp.value,
     ).tag;
@@ -136,6 +137,7 @@ mixin FilterControllerMixin<T> on DisposableController
   /// Sets the active filter state from the given [tag].
   ///
   /// See also [FilterTag].
+  @visibleForTesting
   void setFilterFromTag(FilterTag? tag) {
     if (tag == null) return;
 
@@ -148,11 +150,11 @@ mixin FilterControllerMixin<T> on DisposableController
       );
       return (id: value.keys.first, value: value.values.first);
     });
-    final settingFilterIds = settingFilters.map((filter) => filter.id);
+    final settingFilterIds = settingFilters.map((filter) => filter._id);
     for (final settingFilterValue in valuesFromTag) {
       if (settingFilterIds.contains(settingFilterValue.id)) {
         final settingFilter = settingFilters.firstWhere(
-          (filter) => filter.id == settingFilterValue.id,
+          (filter) => filter._id == settingFilterValue.id,
         );
         settingFilter.setting.value = settingFilterValue.value!;
       }
@@ -169,6 +171,7 @@ mixin FilterControllerMixin<T> on DisposableController
     queryFilterArgs.forEach((key, value) => value.reset());
   }
 
+  @visibleForTesting
   void resetFilter() {
     _resetToDefaultFilter();
     _activeFilter.value = Filter(
@@ -192,16 +195,18 @@ mixin FilterControllerMixin<T> on DisposableController
 /// This dialog interacts with a [FilterControllerMixin] to manage and preserve
 /// the filter state.
 class FilterDialog<T> extends StatefulWidget {
-  FilterDialog({super.key, required this.controller})
-    : settingFilterValuesAtOpen = List.generate(
+  FilterDialog({super.key, required FilterControllerMixin<T> controller})
+    : assert(controller.queryFilterArgs.isNotEmpty),
+      _controller = controller,
+      _settingFilterValuesAtOpen = List.generate(
         controller.activeFilter.value.settingFilters.length,
         (index) =>
             controller.activeFilter.value.settingFilters[index].setting.value,
       );
 
-  final FilterControllerMixin<T> controller;
+  final FilterControllerMixin<T> _controller;
 
-  final List<Object> settingFilterValuesAtOpen;
+  final List<Object> _settingFilterValuesAtOpen;
 
   @override
   State<FilterDialog<T>> createState() => _FilterDialogState<T>();
@@ -209,26 +214,26 @@ class FilterDialog<T> extends StatefulWidget {
 
 class _FilterDialogState<T> extends State<FilterDialog<T>>
     with AutoDisposeMixin {
-  late final TextEditingController queryTextFieldController;
-  late bool useRegExp;
-  late bool pendingUseRegExp;
+  late final TextEditingController _queryTextFieldController;
+  late bool _useRegExp;
+  late bool _pendingUseRegExp;
 
   @override
   void initState() {
     super.initState();
-    queryTextFieldController = TextEditingController(
-      text: widget.controller.activeFilter.value.queryFilter.query,
+    _queryTextFieldController = TextEditingController(
+      text: widget._controller.activeFilter.value.queryFilter.query,
     );
-    useRegExp = widget.controller.useRegExp.value;
-    addAutoDisposeListener(widget.controller.useRegExp, () {
-      useRegExp = widget.controller.useRegExp.value;
+    _useRegExp = widget._controller.useRegExp.value;
+    addAutoDisposeListener(widget._controller.useRegExp, () {
+      _useRegExp = widget._controller.useRegExp.value;
     });
-    pendingUseRegExp = useRegExp;
+    _pendingUseRegExp = _useRegExp;
   }
 
   @override
   void dispose() {
-    queryTextFieldController.dispose();
+    _queryTextFieldController.dispose();
     super.dispose();
   }
 
@@ -243,7 +248,7 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (final filter in widget.controller.settingFilters)
+          for (final filter in widget._controller.settingFilters)
             if (filter is ToggleFilter<T>)
               _ToggleFilterElement(filter: filter)
             else
@@ -254,54 +259,55 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
   }
 
   void _applyFilterChanges() {
-    widget.controller
-      ..useRegExp.value = pendingUseRegExp
+    widget._controller
+      ..useRegExp.value = _pendingUseRegExp
       ..setActiveFilter(
-        query: widget.controller.activeFilter.value.queryFilter.query,
-        settingFilters: widget.controller.settingFilters,
+        query: widget._controller.activeFilter.value.queryFilter.query,
+        settingFilters: widget._controller.settingFilters,
       );
   }
 
   void _resetFilters() {
-    queryTextFieldController.clear();
-    widget.controller._resetToDefaultFilter();
+    _queryTextFieldController.clear();
+    widget._controller._resetToDefaultFilter();
   }
 
   void _restoreOldValues() {
-    for (var i = 0; i < widget.controller.settingFilters.length; i++) {
-      final filter = widget.controller.settingFilters[i];
-      filter.setting.value = widget.settingFilterValuesAtOpen[i];
+    for (var i = 0; i < widget._controller.settingFilters.length; i++) {
+      final filter = widget._controller.settingFilters[i];
+      filter.setting.value = widget._settingFilterValuesAtOpen[i];
     }
   }
 }
 
 class _ToggleFilterElement extends StatelessWidget {
-  const _ToggleFilterElement({required this.filter});
+  const _ToggleFilterElement({required ToggleFilter filter}) : _filter = filter;
 
-  final ToggleFilter filter;
+  final ToggleFilter _filter;
 
   @override
   Widget build(BuildContext context) {
     Widget content = InkWell(
-      onTap: () => filter.setting.value = !filter.setting.value,
+      onTap: () => _filter.setting.value = !_filter.setting.value,
       child: Row(
         children: [
-          NotifierCheckbox(notifier: filter.setting),
-          Expanded(child: Text(filter.name)),
+          NotifierCheckbox(notifier: _filter.setting),
+          Expanded(child: Text(_filter._name)),
         ],
       ),
     );
-    if (filter.tooltip != null) {
-      content = DevToolsTooltip(message: filter.tooltip, child: content);
+    if (_filter._tooltip != null) {
+      content = DevToolsTooltip(message: _filter._tooltip, child: content);
     }
     return content;
   }
 }
 
 class _SettingFilterElement extends StatelessWidget {
-  const _SettingFilterElement({required this.filter});
+  const _SettingFilterElement({required SettingFilter filter})
+    : _filter = filter;
 
-  final SettingFilter filter;
+  final SettingFilter _filter;
 
   static const _leadingInset = 6.0;
 
@@ -313,31 +319,31 @@ class _SettingFilterElement extends StatelessWidget {
       padding: const EdgeInsets.only(left: _leadingInset),
       child: Row(
         children: [
-          Text(filter.name),
+          Text(_filter._name),
           const BulletSpacer(),
           ValueListenableBuilder(
-            valueListenable: filter.setting,
+            valueListenable: _filter.setting,
             builder: (context, value, _) {
               return RoundedDropDownButton(
                 value: value,
                 items: [
-                  for (int i = 0; i < filter.possibleValues.length; i++)
+                  for (int i = 0; i < _filter._possibleValues.length; i++)
                     DropdownMenuItem(
-                      value: filter.possibleValues[i],
+                      value: _filter._possibleValues[i],
                       child: Text(
-                        '${filter.possibleValueDisplays?[i] ?? filter.possibleValues[i]}',
+                        '${_filter._possibleValueDisplays?[i] ?? _filter._possibleValues[i]}',
                       ),
                     ),
                 ],
-                onChanged: (value) => filter.setting.value = value!,
+                onChanged: (value) => _filter.setting.value = value!,
               );
             },
           ),
         ],
       ),
     );
-    if (filter.tooltip != null) {
-      content = DevToolsTooltip(message: filter.tooltip, child: content);
+    if (_filter._tooltip != null) {
+      content = DevToolsTooltip(message: _filter._tooltip, child: content);
     }
     return content;
   }
@@ -369,23 +375,28 @@ class ToggleFilter<T> extends SettingFilter<T, bool> {
 }
 
 /// A filter setting that can be set to any of the predefined values
-/// [possibleValues].
+/// [_possibleValues].
 ///
-/// The generic type [V] must be a json encodable type, since this value will
-/// be JSON encoded and decoded during the creation and parsing of [FilterTag]
+/// The generic type [V] must be a JSON-encodable type, since this value will
+/// be JSON-encoded and decoded during the creation and parsing of [FilterTag]
 /// objects.
 class SettingFilter<T, V> {
   SettingFilter({
-    required this.id,
-    required this.name,
+    required String id,
+    required String name,
     required bool Function(T element, V currentFilterValue) includeCallback,
     required bool Function(V filterValue) enabledCallback,
     required this.defaultValue,
-    required this.possibleValues,
-    this.possibleValueDisplays,
-    this.tooltip,
-  }) : _includeCallback = includeCallback,
+    required List<V> possibleValues,
+    List<String>? possibleValueDisplays,
+    String? tooltip,
+  }) : _id = id,
+       _name = name,
+       _includeCallback = includeCallback,
        _enabledCallback = enabledCallback,
+       _possibleValues = possibleValues,
+       _possibleValueDisplays = possibleValueDisplays,
+       _tooltip = tooltip,
        setting = ValueNotifier<V>(defaultValue),
        assert(possibleValues.contains(defaultValue)),
        assert(
@@ -395,40 +406,41 @@ class SettingFilter<T, V> {
 
   /// The unique id for this setting filter.
   ///
-  /// This value will be used when reading and writing setting filter values to
+  /// This value is used when reading and writing setting filter values to
   /// DevTools preferences on disk.
-  final String id;
+  final String _id;
 
   /// The name of this setting filter.
-  final String name;
+  final String _name;
 
   /// The set of possible values that [setting] can be set to.
-  final List<V> possibleValues;
+  final List<V> _possibleValues;
 
   /// An optional List of values to use for the display of the setting filter
   /// options in a dropdown menu.
   ///
-  /// If null, the String representation of each value in [possibleValues] will
-  /// be used for the dropdown menu items instead.
+  /// If `null`, the String representation of each value in [_possibleValues] is
+  /// used for the dropdown menu items instead.
   ///
-  /// The length and order of this List should match that of [possibleValues].
-  final List<String>? possibleValueDisplays;
+  /// The length and order of this List should match that of [_possibleValues].
+  final List<String>? _possibleValueDisplays;
 
   /// The default value of the filter.
   ///
-  /// This will be used to set the initial [setting] of the filter, and may be set
+  /// This is used to set the initial [setting] of the filter, and may be set
   /// again later if the user triggers "reset to default" behavior from the
   /// filter dialog or from some other source.
   final V defaultValue;
 
   /// The current value of this setting filter.
   ///
-  /// Filter dialogs and other filter affordances will read this value and
-  /// listen to this notifier for changes.
+  /// Filter dialogs and other filter affordances read this value and listen to
+  /// this notifier for changes.
+  @visibleForTesting
   final ValueNotifier<V> setting;
 
   /// The tooltip to describe the setting filter.
-  final String? tooltip;
+  final String? _tooltip;
 
   /// The callback that determines whether a data element should be included
   /// based on the filter criteria.
@@ -438,16 +450,17 @@ class SettingFilter<T, V> {
   /// current value of the filter.
   final bool Function(V filterValue) _enabledCallback;
 
-  /// Whether a data element should be included based on the current state of the
-  /// filter.
+  /// Whether a data element should be included based on the current state of
+  /// the filter.
   bool includeData(T data) {
     return !enabled || _includeCallback(data, setting.value);
   }
 
   /// Whether this filter is enabled based on the current value of the filter.
+  @visibleForTesting
   bool get enabled => _enabledCallback(setting.value);
 
-  Map<String, Object?> get valueAsJson => {id: setting.value};
+  Map<String, Object?> get _valueAsJson => {_id: setting.value};
 }
 
 class QueryFilter<T> {
@@ -488,10 +501,10 @@ class QueryFilter<T> {
         if (value.isEmpty) {
           continue;
         }
-        final valueStrings = value.split(QueryFilterArgument.valueSeparator);
+        final valueStrings = value.split(QueryFilterArgument._valueSeparator);
         for (final arg in args.values.where((arg) => arg.matchesKey(part))) {
           arg
-            ..isNegative = part.startsWith(QueryFilterArgument.negativePrefix)
+            ..isNegative = part.startsWith(QueryFilterArgument._negativePrefix)
             ..values = useRegExp
                 ? valueStrings
                       .map((v) => RegExp(v, caseSensitive: false))
@@ -537,21 +550,22 @@ class QueryFilter<T> {
 
 class QueryFilterArgument<T> {
   QueryFilterArgument({
-    required this.keys,
+    required List<String> keys,
     required this.exampleUsages,
-    required this.dataValueProvider,
+    required String? Function(T data) dataValueProvider,
     required this.substringMatch,
     this.values = const [],
     this.isNegative = false,
-  });
+  }) : _keys = keys,
+       _dataValueProvider = dataValueProvider;
 
-  static const negativePrefix = '-';
+  static const _negativePrefix = '-';
 
-  static const valueSeparator = ',';
+  static const _valueSeparator = ',';
 
-  final List<String> keys;
+  final List<String> _keys;
 
-  final String? Function(T data) dataValueProvider;
+  final String? Function(T data) _dataValueProvider;
 
   final bool substringMatch;
 
@@ -563,12 +577,12 @@ class QueryFilterArgument<T> {
 
   String get display {
     if (values.isEmpty) return '';
-    return '${isNegative ? negativePrefix : ''}${keys.first}:'
-        '${values.toStringList().join(valueSeparator)}';
+    return '${isNegative ? _negativePrefix : ''}${_keys.first}:'
+        '${values.toStringList().join(_valueSeparator)}';
   }
 
   bool matchesKey(String query) {
-    for (final key in keys) {
+    for (final key in _keys) {
       if (query.startsWith('$key:') || query.startsWith('-$key:')) return true;
     }
     return false;
@@ -579,7 +593,7 @@ class QueryFilterArgument<T> {
     // this filter.
     if (values.isEmpty) return true;
 
-    final dataValue = dataValueProvider(data);
+    final dataValue = _dataValueProvider(data);
     if (dataValue == null) {
       return isNegative;
     }
@@ -752,7 +766,7 @@ class _FilterSyntax<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final queryFilterArgs = controller.queryFilterArgs.values;
     final filterKeys = queryFilterArgs.map(
-      (arg) => arg.keys.map((key) => "'$key'").join(_separator),
+      (arg) => arg._keys.map((key) => "'$key'").join(_separator),
     );
     final filterExampleUsages = queryFilterArgs.map(
       (arg) => arg.exampleUsages.map((usage) => "'$usage'").join(_separator),
