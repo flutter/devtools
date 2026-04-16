@@ -43,7 +43,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any updates.
+- Fixed an issue where log messages containing newline characters were incorrectly split into multiple separate entries in the Logging screen. [#9757](https://github.com/flutter/devtools/pull/9757)
 
 ## App size tool updates
 
