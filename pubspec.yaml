@@ -15,9 +15,4 @@ workspace:
 dev_dependencies:
   build_runner: ^2.5.4
   flutter_lints: ^5.0.0
-  # TODO(https://github.com/flutter/devtools/issues/9771): Update to published version.
-  dart_skills_lint:
-    git:
-      url: https://github.com/flutter/skills
-      path: tool/dart_skills_lint
-      ref: 2420128e11101002e2eac98eb90512103a388714
+

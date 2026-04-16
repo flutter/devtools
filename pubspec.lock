@@ -210,7 +210,7 @@ packages:
     source: hosted
     version: "0.0.3"
   dart_skills_lint:
-    dependency: "direct dev"
+    dependency: transitive
     description:
       path: "tool/dart_skills_lint"
       ref: "2420128e11101002e2eac98eb90512103a388714"

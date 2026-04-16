@@ -15,18 +15,18 @@ You should also validate your skills locally before submitting a review.
 
 ### Running the Linter Locally
 
-To validate skills locally before review, run the linter from the root of the repository:
+To validate skills locally before review, run the linter from the `tool` directory:
 
 ```bash
-dart run dart_skills_lint:cli
+cd tool && dart run dart_skills_lint:cli
 ```
 
-This will use the configuration in `dart_skills_lint.yaml` to validate all skills in the `.agents/skills` directory.
+This will use the configuration in `tool/dart_skills_lint.yaml` to validate all skills in the `.agents/skills` directory.
 
-Or for a single skill:
+Or for a single skill (also from the `tool` directory):
 
 ```bash
-dart run dart_skills_lint:cli --skill .agents/skills/my-skill
+cd tool && dart run dart_skills_lint:cli --skill ../.agents/skills/my-skill
 ```
 
 ### Running via Dart Test
