@@ -3,14 +3,11 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/shared.dart';
-import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/feature_flags.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
-import '../inspector/inspector_screen_body.dart' as legacy;
-import '../inspector_v2/inspector_screen_body.dart' as v2;
+import '../inspector_v2/inspector_screen_body.dart';
 import 'inspector_screen_controller.dart';
 
 class InspectorScreen extends Screen {
@@ -32,58 +29,8 @@ class InspectorScreen extends Screen {
   String get docPageId => screenId;
 
   @override
-  Widget buildScreenBody(BuildContext context) =>
-      const InspectorScreenSwitcher();
-}
-
-class InspectorScreenSwitcher extends StatefulWidget {
-  const InspectorScreenSwitcher({super.key});
-
-  @override
-  State<InspectorScreenSwitcher> createState() =>
-      _InspectorScreenSwitcherState();
-}
-
-class _InspectorScreenSwitcherState extends State<InspectorScreenSwitcher>
-    with AutoDisposeMixin {
-  late InspectorScreenController controller;
-
-  bool get shouldShowInspectorV2 =>
-      FeatureFlags.inspectorV2.isEnabled &&
-      !preferences.inspector.legacyInspectorEnabled.value;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = screenControllers.lookup<InspectorScreenController>();
-    addAutoDisposeListener(
-      preferences.inspector.legacyInspectorEnabled,
-      () async {
-        controller.legacyInspectorController.setVisibleToUser(
-          !shouldShowInspectorV2,
-        );
-        await controller.v2InspectorController.setVisibleToUser(
-          shouldShowInspectorV2,
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: preferences.inspector.legacyInspectorEnabled,
-      builder: (context, _, _) {
-        if (shouldShowInspectorV2) {
-          return v2.InspectorScreenBody(
-            controller: controller.v2InspectorController,
-          );
-        }
-
-        return legacy.InspectorScreenBody(
-          controller: controller.legacyInspectorController,
-        );
-      },
-    );
+  Widget buildScreenBody(BuildContext context) {
+    final controller = screenControllers.lookup<InspectorScreenController>();
+    return InspectorScreenBody(controller: controller.inspectorController);
   }
 }

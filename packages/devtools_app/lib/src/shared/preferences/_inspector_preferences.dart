@@ -4,25 +4,10 @@
 
 part of 'preferences.dart';
 
-enum InspectorDetailsViewType {
-  layoutExplorer(nameOverride: 'Layout Explorer'),
-  widgetDetailsTree(nameOverride: 'Widget Details Tree');
-
-  const InspectorDetailsViewType({String? nameOverride})
-    : _nameOverride = nameOverride;
-
-  final String? _nameOverride;
-
-  String get key => _nameOverride ?? name;
-}
-
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
-  ValueListenable<bool> get legacyInspectorEnabled => _legacyInspectorEnabled;
   ValueListenable<bool> get autoRefreshEnabled => _autoRefreshEnabled;
-  ValueListenable<InspectorDetailsViewType> get defaultDetailsView =>
-      _defaultDetailsView;
   ListValueNotifier<String> get pubRootDirectories => _pubRootDirectories;
   ValueListenable<bool> get isRefreshingPubRootDirectories =>
       _pubRootDirectoriesAreBusy;
@@ -30,21 +15,13 @@ class InspectorPreferencesController extends DisposableController
       serviceConnection.inspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
-  final _legacyInspectorEnabled = ValueNotifier<bool>(false);
   final _autoRefreshEnabled = ValueNotifier<bool>(true);
   final _pubRootDirectories = ListValueNotifier<String>([]);
   final _pubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
-  final _defaultDetailsView = ValueNotifier<InspectorDetailsViewType>(
-    InspectorDetailsViewType.layoutExplorer,
-  );
 
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
-  static const _legacyInspectorEnabledStorageId =
-      'inspector.legacyInspectorEnabled';
   static const _autoRefreshEnabledStorageId = 'inspector.autoRefreshEnabled';
-  static const _defaultDetailsViewStorageId =
-      'inspector.defaultDetailsViewType';
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';
 
@@ -83,11 +60,8 @@ class InspectorPreferencesController extends DisposableController
   @override
   Future<void> init() async {
     await _initHoverEvalMode();
-    await _initLegacyInspectorEnabled();
     await _initAutoRefreshEnabled();
-    // TODO(jacobr): consider initializing this first as it is not blocking.
     _initPubRootDirectories();
-    await _initDefaultInspectorDetailsView();
   }
 
   Future<void> _initHoverEvalMode() async {
@@ -95,16 +69,6 @@ class InspectorPreferencesController extends DisposableController
     _saveBooleanPreferenceChanges(
       preferenceStorageId: _hoverEvalModeStorageId,
       preferenceNotifier: _hoverEvalMode,
-    );
-  }
-
-  Future<void> _initLegacyInspectorEnabled() async {
-    // TODO(https://github.com/flutter/devtools/issues/8667): Consider removing
-    // the old 'inspector.inspectorV2Enabled' key if it is set.
-    await _updateLegacyInspectorEnabled();
-    _saveBooleanPreferenceChanges(
-      preferenceStorageId: _legacyInspectorEnabledStorageId,
-      preferenceNotifier: _legacyInspectorEnabled,
     );
   }
 
@@ -121,14 +85,6 @@ class InspectorPreferencesController extends DisposableController
       preferenceStorageId: _hoverEvalModeStorageId,
       preferenceNotifier: _hoverEvalMode,
       defaultValue: _inspectorService?.hoverEvalModeEnabledByDefault ?? false,
-    );
-  }
-
-  Future<void> _updateLegacyInspectorEnabled() async {
-    await _updateBooleanPreference(
-      preferenceStorageId: _legacyInspectorEnabledStorageId,
-      preferenceNotifier: _legacyInspectorEnabled,
-      defaultValue: false,
     );
   }
 
@@ -162,31 +118,6 @@ class InspectorPreferencesController extends DisposableController
     String? preferenceValue = await storage.getValue(preferenceStorageId);
     preferenceValue ??= (defaultValue).toString();
     preferenceNotifier.value = preferenceValue == 'true';
-  }
-
-  Future<void> _initDefaultInspectorDetailsView() async {
-    await _updateInspectorDetailsViewSelection();
-
-    addAutoDisposeListener(_defaultDetailsView, () {
-      safeUnawaited(
-        storage.setValue(
-          _defaultDetailsViewStorageId,
-          _defaultDetailsView.value.name.toString(),
-        ),
-      );
-    });
-  }
-
-  Future<void> _updateInspectorDetailsViewSelection() async {
-    final inspectorDetailsView = await storage.getValue(
-      _defaultDetailsViewStorageId,
-    );
-
-    if (inspectorDetailsView != null) {
-      _defaultDetailsView.value = InspectorDetailsViewType.values.firstWhere(
-        (e) => e.name.toString() == inspectorDetailsView,
-      );
-    }
   }
 
   void _initPubRootDirectories() {
@@ -245,9 +176,7 @@ class InspectorPreferencesController extends DisposableController
     _checkedFlutterPubRoot = false;
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
-    await _updateLegacyInspectorEnabled();
     await loadPubRootDirectories();
-    await _updateInspectorDetailsViewSelection();
   }
 
   Future<void> loadPubRootDirectories() async {
@@ -474,16 +403,7 @@ class InspectorPreferencesController extends DisposableController
   }
 
   @visibleForTesting
-  void setLegacyInspectorEnabled(bool legacyInspectorEnabled) {
-    _legacyInspectorEnabled.value = legacyInspectorEnabled;
-  }
-
-  @visibleForTesting
   void setAutoRefreshEnabled(bool autoRefreshEnabled) {
     _autoRefreshEnabled.value = autoRefreshEnabled;
-  }
-
-  void setDefaultInspectorDetailsView(InspectorDetailsViewType value) {
-    _defaultDetailsView.value = value;
   }
 }

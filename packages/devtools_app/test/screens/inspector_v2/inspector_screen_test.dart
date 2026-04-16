@@ -7,19 +7,11 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/devtools_app.dart'
-    hide
-        InspectorController,
-        InspectorTreeController,
-        InspectorScreenBody,
-        ErrorNavigator,
-        InspectorTreeNode;
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/inspector_shared/inspector_settings_dialog.dart';
-import 'package:devtools_app/src/screens/inspector_v2/inspector_screen_body.dart';
 import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/screens/inspector_v2/widget_details.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
-import 'package:devtools_app/src/shared/console/eval/inspector_tree_v2.dart';
 import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/ui/tab.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -311,7 +303,7 @@ void main() {
       'should render StoryOfYourFlexWidget',
       windowSize,
       (WidgetTester tester) async {
-        final controller = TestInspectorV2Controller()
+        final controller = TestInspectorController()
           ..setSelectedNode(treeNode)
           ..setSelectedDiagnostic(diagnostic);
         await tester.pumpWidget(
@@ -332,7 +324,7 @@ void main() {
       'should listen to controller selection event',
       windowSize,
       (WidgetTester tester) async {
-        final controller = TestInspectorV2Controller();
+        final controller = TestInspectorController();
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(body: WidgetDetails(controller: controller)),

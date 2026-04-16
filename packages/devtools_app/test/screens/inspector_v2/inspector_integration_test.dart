@@ -8,13 +8,7 @@ library;
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:devtools_app/devtools_app.dart'
-    hide InspectorScreenBodyState, InspectorScreenBody, InspectorRowContent;
-import 'package:devtools_app/src/screens/inspector/inspector_screen_body.dart'
-    as legacy;
-import 'package:devtools_app/src/screens/inspector_shared/inspector_controls.dart';
-import 'package:devtools_app/src/screens/inspector_v2/inspector_screen_body.dart';
-import 'package:devtools_app/src/screens/inspector_v2/inspector_tree_controller.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/ui/utils.dart';
 import 'package:devtools_app/src/screens/inspector_v2/widget_properties/properties_view.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -63,15 +57,11 @@ void main() {
 
   setUp(() async {
     await env.setupEnvironment();
-    // Enable the V2 inspector:
-    preferences.inspector.setLegacyInspectorEnabled(false);
     setGlobal(BannerMessagesController, BannerMessagesController());
   });
 
   tearDown(() async {
     await env.tearDownEnvironment(force: true);
-    // Re-set changes to preferences:
-    preferences.inspector.setLegacyInspectorEnabled(true);
   });
 
   tearDownAll(() {
@@ -369,65 +359,6 @@ void main() {
     );
   });
 
-  testWidgetsWithWindowSize('can revert to legacy inspector', windowSize, (
-    WidgetTester tester,
-  ) async {
-    await _loadInspectorUI(tester);
-
-    // Select the CustomCenter widget (row index #4)
-    await tester.tap(find.richText('CustomCenter'));
-    await tester.pumpAndSettle(inspectorChangeSettleTime);
-
-    // Disable Inspector V2:
-    await toggleLegacyInspector(tester);
-    await tester.pumpAndSettle(inspectorChangeSettleTime);
-
-    // Verify the legacy inspector is visible:
-    await expectLater(
-      find.byType(legacy.InspectorScreenBody),
-      matchesDevToolsGolden(
-        '../../test_infra/goldens/integration_inspector_v2_revert_to_legacy.png',
-      ),
-    );
-  });
-
-  // Test to verify https://github.com/flutter/devtools/issues/8487 is fixed.
-  testWidgetsWithWindowSize(
-    'revert to legacy inspector, hot-restart, and back to new inspector',
-    windowSize,
-    (WidgetTester tester) async {
-      await _loadInspectorUI(tester);
-
-      // Disable Inspector V2.
-      await toggleLegacyInspector(tester);
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
-
-      // Verify the legacy inspector is visible.
-      expect(find.richTextContaining('Widget Details Tree'), findsOneWidget);
-
-      // Trigger a hot restart.
-      await env.flutter!.hotRestart();
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
-
-      // Enable Inspector V2.
-      await toggleLegacyInspector(tester);
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
-
-      // Verify the legacy inspector is not visible.
-      expect(find.richTextContaining('Widget Details Tree'), findsNothing);
-
-      // Wait for the widget tree to load.
-      final centerWidgetFinder = find.richText('Center');
-      final centerWidgetFinderWithRetries = await retryUntilFound(
-        centerWidgetFinder,
-        tester: tester,
-        retries: 10,
-      );
-      expect(centerWidgetFinderWithRetries, findsOneWidget);
-    },
-    skip: true, // https://github.com/flutter/devtools/issues/8490
-  );
-
   testWidgetsWithWindowSize(
     'tree nodes contain only essential information',
     windowSize,
@@ -686,33 +617,6 @@ Finder findExpandCollapseButtonForRow({
   expect(expandCollapseButtonTextFinder, findsOneWidget);
 
   return expandCollapseButtonFinder;
-}
-
-Future<void> toggleLegacyInspector(WidgetTester tester) async {
-  // Open settings dialog.
-  final inspectorSettingsDialogButton = find.descendant(
-    of: find.byType(InspectorServiceExtensionButtonGroup),
-    matching: find.byType(SettingsOutlinedButton),
-  );
-  await tester.tap(inspectorSettingsDialogButton);
-  await tester.pumpAndSettle(inspectorChangeSettleTime);
-
-  // Toggle the "legacy Inspector" checkbox.
-  final settingsRow = find.ancestor(
-    of: find.richTextContaining('Use legacy inspector'),
-    matching: find.byType(Row),
-  );
-  final inspectorCheckbox = find.descendant(
-    of: settingsRow,
-    matching: find.byType(NotifierCheckbox),
-  );
-  await tester.tap(inspectorCheckbox);
-  await tester.pumpAndSettle(inspectorChangeSettleTime);
-
-  // Close the settings dialog.
-  final closeButton = find.byType(DialogCloseButton);
-  await tester.tap(closeButton);
-  await tester.pumpAndSettle(inspectorChangeSettleTime);
 }
 
 void verifyPropertyIsVisible({

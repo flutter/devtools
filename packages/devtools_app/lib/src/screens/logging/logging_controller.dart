@@ -27,7 +27,7 @@ import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
-import '../inspector/inspector_tree_controller.dart';
+import '../inspector_v2/inspector_tree_controller.dart';
 import 'log_details_controller.dart';
 import 'logging_screen.dart';
 import 'metadata.dart';

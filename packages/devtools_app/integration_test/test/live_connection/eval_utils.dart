@@ -73,7 +73,7 @@ class EvalTester {
   Future<void> selectWidgetTreeNode(Finder finder) async {
     await tapAndPump(
       find.descendant(
-        of: find.byKey(InspectorScreenBodyState.summaryTreeKey),
+        of: find.byKey(InspectorScreenBodyState.inspectorTreeKey),
         matching: finder,
       ),
     );

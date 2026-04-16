@@ -7,12 +7,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
-// ignore: implementation_imports, required to separate V2 inspector imports.
-import 'package:devtools_app/src/screens/inspector_v2/inspector_controller.dart'
-    as inspector_v2;
-// ignore: implementation_imports, required to separate V2 inspector imports.
-import 'package:devtools_app/src/shared/console/eval/inspector_tree_v2.dart'
-    as inspector_v2;
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
@@ -86,30 +80,27 @@ class TestInspectorController extends Fake implements InspectorController {
   InspectorService get inspectorService => service;
 }
 
-class TestInspectorV2Controller extends Fake
-    implements inspector_v2.InspectorController {
+class TestInspectorController extends Fake implements InspectorController {
   InspectorService service = FakeInspectorService();
 
   @override
-  ValueListenable<inspector_v2.InspectorTreeNode?> get selectedNode =>
-      _selectedNode;
-  final _selectedNode = ValueNotifier<inspector_v2.InspectorTreeNode?>(null);
+  ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
+  final _selectedNode = ValueNotifier<InspectorTreeNode?>(null);
 
   @override
   RemoteDiagnosticsNode? get selectedDiagnostic => _selectedDiagnostic;
   RemoteDiagnosticsNode? _selectedDiagnostic;
 
   @override
-  ValueListenable<inspector_v2.WidgetTreeNodeProperties>
-  get selectedNodeProperties =>
-      ValueNotifier<inspector_v2.WidgetTreeNodeProperties>((
+  ValueListenable<WidgetTreeNodeProperties> get selectedNodeProperties =>
+      ValueNotifier<WidgetTreeNodeProperties>((
         widgetProperties: [],
         renderProperties: [],
         layoutProperties: null,
       ));
 
   @override
-  void setSelectedNode(inspector_v2.InspectorTreeNode? newSelection) {
+  void setSelectedNode(InspectorTreeNode? newSelection) {
     _selectedNode.value = newSelection;
   }
 

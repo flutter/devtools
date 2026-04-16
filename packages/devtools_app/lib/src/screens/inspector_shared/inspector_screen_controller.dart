@@ -6,10 +6,8 @@ import '../../shared/analytics/metrics.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
-import '../inspector/inspector_controller.dart' as legacy;
-import '../inspector/inspector_tree_controller.dart' as legacy;
-import '../inspector_v2/inspector_controller.dart' as v2;
-import '../inspector_v2/inspector_tree_controller.dart' as v2;
+import '../inspector_v2/inspector_controller.dart';
+import '../inspector_v2/inspector_tree_controller.dart';
 
 /// Screen controller for the Inspector screen.
 ///
@@ -25,46 +23,25 @@ class InspectorScreenController extends DevToolsScreenController {
   @override
   final screenId = ScreenMetaData.inspector.id;
 
-  late v2.InspectorController v2InspectorController;
-  late v2.InspectorTreeController v2InspectorTreeController;
-
-  late legacy.InspectorController legacyInspectorController;
-  late legacy.InspectorTreeController legacyInspectorTreeController;
-  late legacy.InspectorTreeController legacyDetailsTreeController;
+  late InspectorController inspectorController;
+  late InspectorTreeController inspectorTreeController;
 
   @override
   void init() {
     super.init();
-    v2InspectorTreeController = v2.InspectorTreeController(
+    inspectorTreeController = InspectorTreeController(
       gaId: InspectorScreenMetrics.summaryTreeGaId,
     );
-    v2InspectorController = v2.InspectorController(
-      inspectorTree: v2InspectorTreeController,
-      treeType: FlutterTreeType.widget,
-    );
-
-    // TODO(elliette): Remove legacy inspector.
-    legacyInspectorTreeController = legacy.InspectorTreeController(
-      gaId: InspectorScreenMetrics.summaryTreeGaId,
-    );
-    legacyDetailsTreeController = legacy.InspectorTreeController(
-      gaId: InspectorScreenMetrics.detailsTreeGaId,
-    );
-    legacyInspectorController = legacy.InspectorController(
-      inspectorTree: legacyInspectorTreeController,
-      detailsTree: legacyDetailsTreeController,
+    inspectorController = InspectorController(
+      inspectorTree: inspectorTreeController,
       treeType: FlutterTreeType.widget,
     );
   }
 
   @override
   void dispose() {
-    v2InspectorTreeController.dispose();
-    v2InspectorController.dispose();
-
-    legacyInspectorTreeController.dispose();
-    legacyDetailsTreeController.dispose();
-    legacyInspectorController.dispose();
+    inspectorTreeController.dispose();
+    inspectorController.dispose();
     super.dispose();
   }
 }
