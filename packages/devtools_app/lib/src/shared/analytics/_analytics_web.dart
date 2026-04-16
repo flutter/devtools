@@ -720,14 +720,11 @@ void _computeUserApplicationCustomGTagData() {
       : _UserBuildType.debug.name;
 }
 
-/// Computes the DevTools application. Fills in the devtoolsPlatformType and
-/// devtoolsChrome.
-void computeDevToolsCustomGTagsData() {
-  // Platform
-  final platform = window.navigator.platform;
-  platform.replaceAll(' ', '_');
-  _devtoolsPlatformType = platform;
-
+/// Computes the DevTools application data.
+///
+/// Fills in the [_devtoolsPlatformType] and [_devtoolsChrome].
+void computeDevToolsCustomData() {
+  _devtoolsPlatformType = window.navigator.platform.replaceAll(' ', '_');
   final appVersion = window.navigator.appVersion;
   final splits = appVersion.split(' ');
   final len = splits.length;
@@ -737,13 +734,14 @@ void computeDevToolsCustomGTagsData() {
     if (value.startsWith(_ChromePrefix.chrome.value) ||
         value.startsWith(_ChromePrefix.crios.value)) {
       _devtoolsChrome = value;
-    } else if (value.startsWith('Android')) {
+    } else if (value.startsWith('Android') && index + 1 < splits.length) {
       // appVersion for Android is 'Android n.n.n'
       _devtoolsPlatformType =
           '$devToolsPlatformTypeAndroid${splits[index + 1]}';
     } else if (value == _ChromePrefix.cros.value) {
       // Chrome OS will return a platform e.g., CrOS_Linux_x86_64
-      _devtoolsPlatformType = '${_ChromePrefix.cros.value}_$platform';
+      _devtoolsPlatformType =
+          '${_ChromePrefix.cros.value}_$_devtoolsPlatformType';
     }
   }
 }
@@ -778,7 +776,7 @@ Future<void> setupDimensions() async {
 
   _computingDimensionsCompleter = Completer<void>();
   try {
-    computeDevToolsCustomGTagsData();
+    computeDevToolsCustomData();
     computeDevToolsQueryParams();
     await computeFlutterClientId();
   } catch (e, st) {
