@@ -135,14 +135,38 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   bool get _hasError => _request.request?.hasError ?? false;
 
-  DateTime? get _endTime =>
-      _hasError ? _request.endTime : _request.response?.endTime;
+  DateTime? get _endTime => (_hasError || _isCancelled)
+      ? _request.endTime
+      : _request.response?.endTime;
+
+  bool _matchesCancellationMarker(String? value) {
+    if (value == null) return false;
+    final normalized = value.toLowerCase();
+
+    // Markers used for substring matching against request / response errors
+    // and request event names to classify cancelled requests.
+    //
+    // Derived from observed cancellation wording in HTTP profiler payloads,
+    // keeping specific terms to reduce false positives.
+    const cancellationMarkers = ['canceled', 'cancelled', 'aborted'];
+
+    return cancellationMarkers.any(normalized.contains);
+  }
+
+  bool get _hasCancellationError {
+    final requestError = _request.request?.error;
+    final responseError = _request.response?.error;
+    return _matchesCancellationMarker(requestError) ||
+        _matchesCancellationMarker(responseError);
+  }
+
+  bool get _hasCancellationEvent =>
+      _request.events.any((event) => _matchesCancellationMarker(event.event));
 
   @override
   Duration? get duration {
     if (inProgress || !isValid) return null;
-    // Timestamps are in microseconds
-    return _endTime!.difference(_request.startTime);
+    return _endTime?.difference(_request.startTime);
   }
 
   /// Whether the request is safe to display in the UI.
@@ -156,7 +180,7 @@ class DartIOHttpRequestData extends NetworkRequest {
     return {
       'method': _request.method,
       'uri': _request.uri.toString(),
-      if (!didFail) ...{
+      if (!didFail && !_isCancelled) ...{
         'connectionInfo': _request.request?.connectionInfo,
         'contentLength': _request.request?.contentLength,
       },
@@ -247,11 +271,16 @@ class DartIOHttpRequestData extends NetworkRequest {
     return null;
   }
 
-  /// True if the HTTP request hasn't completed yet, determined by the lack of
-  /// an end time in the response data.
+  /// True if the HTTP request hasn't completed yet, determined by
+  /// `isRequestComplete` / `isResponseComplete` from the profile data.
+
   @override
-  bool get inProgress =>
-      _hasError ? !_request.isRequestComplete : !_request.isResponseComplete;
+  bool get inProgress {
+    if (_isCancelled) return false;
+    return _hasError
+        ? !_request.isRequestComplete
+        : !_request.isResponseComplete;
+  }
 
   /// All instant events logged to the timeline for this HTTP request.
   List<DartIOHttpInstantEvent> get instantEvents {
@@ -293,6 +322,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   bool get didFail {
     if (status == null) return false;
     if (status == 'Error') return true;
+    if (status == 'Cancelled') return false;
 
     try {
       final code = int.parse(status!);
@@ -321,11 +351,18 @@ class DartIOHttpRequestData extends NetworkRequest {
   DateTime get startTimestamp => _request.startTime;
 
   @override
-  String? get status =>
-      _hasError ? 'Error' : _request.response?.statusCode.toString();
+  String? get status {
+    if (_isCancelled) return 'Cancelled';
+
+    if (_hasError) return 'Error';
+
+    return _request.response?.statusCode.toString();
+  }
 
   @override
   String get uri => _request.uri.toString();
+
+  bool get _isCancelled => _hasCancellationError || _hasCancellationEvent;
 
   String? get responseBody {
     if (_request is! HttpProfileRequest) {

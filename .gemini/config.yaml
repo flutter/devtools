@@ -1,0 +1,28 @@
+# Customize Gemini Code Assist behavior for DevTools.
+#
+# Schema: https://developers.google.com/gemini-code-assist/docs/customize-repo-review#config.yaml-schema
+# Based on Flutter config: https://github.com/flutter/flutter/blob/master/.gemini/config.yaml
+
+# Minimize verbosity.
+have_fun: false
+
+code_review:
+  # (DEFAULT) - Include field in the config for easy shut off if needed.
+  disable: false
+  # LOW, MEDIUM, HIGH or CRITICAL.
+  comment_severity_threshold: MEDIUM
+  # (DEFAULT) -1 is unlimited.
+  max_review_comments: -1
+  pull_request_opened:
+    # (DEFAULT) Explicitly set help to false in case the default changes in the
+    # future, as having a help message on every PR would be spammy.
+    help: false
+    # These tend to be verbose, and since we expect PR authors to clearly
+    # describe their PRs this would be at best duplicative.
+    summary: false
+    # Avoid comments on draft PRs.
+    include_drafts: false 
+
+ignore_patterns:
+  # Ignore third party files by default
+  - "**/third_party/**" 

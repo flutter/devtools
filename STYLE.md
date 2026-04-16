@@ -6,14 +6,14 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 # DevTools style guide
 
 We fully follow [Effective Dart](https://dart.dev/effective-dart)
-and some items of
-[Style guide for Flutter repo](https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md):
+and certain guidelines from the
+[Flutter repository style guide](https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md):
 
 ## Order of getters and setters
 
-When an object owns and exposes a (listenable) value,
-more complicated than just public field
-we declare the related class members always in the same order,
+When an object owns and exposes a (listenable) value
+that is more complex than a simple public field,
+we always declare the related class members in the same order,
 without new lines separating the members,
 in compliance with
 [Flutter repo style guide](https://github.com/flutter/flutter/blob/master/docs/contributing/Style-guide-for-Flutter-repo.md#order-other-class-members-in-a-way-that-makes-sense):
@@ -41,10 +41,10 @@ converted to paths when required to interact with the file system.
 
 Additionally:
 
-- `Uri.parse()` should not be used for converting file paths to URIs, instead
-  `Uri.file()` should be used
-- `Uri.path` should not be used for extracting a file path from a URI, instead
-  `uri.toFilePath()` should be used
+- `Uri.parse()` should not be used for converting file paths to URIs; instead,
+  `Uri.file()` should be used.
+- `Uri.path` should not be used for extracting a file path from a URI; instead,
+  `uri.toFilePath()` should be used.
 - In code compiled to run in the browser, `Uri.file()` and `uri.toFilePath()`
   will assume POSIX-style paths even on Windows, so care should be taken to
   handle these correctly (if possible, avoid converting between URIs and file
