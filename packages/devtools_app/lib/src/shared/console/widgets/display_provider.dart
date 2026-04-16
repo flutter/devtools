@@ -60,7 +60,6 @@ class OverflowingText extends StatelessWidget {
   }
 }
 
-
 class _DisplayProviderState extends State<DisplayProvider> {
   bool isHovered = false;
   @override
@@ -279,10 +278,7 @@ class DapDisplayProvider extends StatelessWidget {
           TextSpan(text: ': ', style: theme.fixedFontStyle),
           // TODO(https://github.com/flutter/devtools/issues/6056): Change text
           // style based on variable type.
-          TextSpan(
-            text: value,
-            style: theme.subtleFixedFontStyle,
-          ),
+          TextSpan(text: value, style: theme.subtleFixedFontStyle),
         ],
       ),
     );
