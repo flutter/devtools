@@ -3,7 +3,6 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
-
 This is a draft for future release notes that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
@@ -12,7 +11,7 @@ This is a draft for future release notes that are going to land on
 The 2.58.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
-[DevTools overview](https://docs.flutter.dev/tools/devtools).
+[DevTools overview](/tools/devtools)
 
 ## General updates
 
