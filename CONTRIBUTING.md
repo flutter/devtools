@@ -154,6 +154,12 @@ not want to merge `upstream/master` or update your Flutter SDK version, instead 
     If the version of DCM used on the bots is outdated, consider contributing a
 	PR to update the version on the bots to the latest.
 
+## Companion app
+
+For most DevTools features, we recommend using the [DevTools companion
+app](https://github.com/flutter/demos/tree/main/devexp_demos/devtools_companion)
+as the example Flutter app to connect to when working on DevTools.
+
 ## Running and debugging DevTools
 
 Please see [DEBUGGING.md]() for guidance on running and debugging DevTools.
