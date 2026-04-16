@@ -19,7 +19,6 @@ const windowSize = Size(2000.0, 1000.0);
 void main() {
   late AnalyticsController controller;
 
-  late bool didCallEnableAnalytics;
   late bool didMarkConsentMessageAsShown;
 
   Widget wrapWithAnalytics(
@@ -61,7 +60,6 @@ void main() {
 
   group('AnalyticsPrompt', () {
     setUp(() {
-      didCallEnableAnalytics = false;
       didMarkConsentMessageAsShown = false;
       setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
       setGlobal(IdeTheme, IdeTheme());
@@ -71,13 +69,9 @@ void main() {
     group('with analytics enabled', () {
       group('on first run', () {
         setUp(() {
-          didCallEnableAnalytics = false;
           controller = TestAnalyticsController(
             enabled: true,
             shouldShowConsentMessage: true,
-            legacyOnEnableAnalytics: () {
-              didCallEnableAnalytics = true;
-            },
             onMarkConsentMessageAsShown: () {
               didMarkConsentMessageAsShown = true;
             },
@@ -90,11 +84,6 @@ void main() {
           windowSize,
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(
-              didCallEnableAnalytics,
-              isTrue,
-              reason: 'Analytics is enabled on first run',
-            );
             expect(didMarkConsentMessageAsShown, isFalse);
             final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(child: Text('Child Text')),
@@ -130,9 +119,6 @@ void main() {
           controller = AnalyticsController(
             enabled: true,
             shouldShowConsentMessage: false,
-            legacyOnEnableAnalytics: () {
-              didCallEnableAnalytics = true;
-            },
             consentMessage: 'fake message',
           );
         });
@@ -142,7 +128,6 @@ void main() {
           windowSize,
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isFalse);
             final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(child: Text('Child Text')),
             );
@@ -153,7 +138,6 @@ void main() {
               findsNothing,
             );
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isFalse);
           },
         );
 
@@ -189,9 +173,6 @@ void main() {
           controller = AnalyticsController(
             enabled: false,
             shouldShowConsentMessage: true,
-            legacyOnEnableAnalytics: () {
-              didCallEnableAnalytics = true;
-            },
             consentMessage: 'fake message',
           );
         });
@@ -201,7 +182,6 @@ void main() {
           windowSize,
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isTrue);
             final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(child: Text('Child Text')),
             );
@@ -212,7 +192,6 @@ void main() {
               findsOneWidget,
             );
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isTrue);
           },
         );
 
@@ -229,7 +208,6 @@ void main() {
           windowSize,
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isTrue);
             final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(child: Text('Child Text')),
             );
@@ -240,7 +218,6 @@ void main() {
               findsOneWidget,
             );
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isTrue);
 
             final closeButtonFinder = find.byType(IconButton);
             expect(closeButtonFinder, findsOneWidget);
@@ -259,7 +236,6 @@ void main() {
           windowSize,
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isTrue);
             final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(child: Text('Child Text')),
             );
@@ -270,7 +246,6 @@ void main() {
               findsOneWidget,
             );
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isTrue);
 
             final soundsGoodFinder = find.text('Sounds good!');
             expect(soundsGoodFinder, findsOneWidget);
@@ -289,7 +264,6 @@ void main() {
           windowSize,
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isTrue);
             final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(child: Text('Child Text')),
             );
@@ -300,7 +274,6 @@ void main() {
               findsOneWidget,
             );
             expect(controller.analyticsEnabled.value, isTrue);
-            expect(didCallEnableAnalytics, isTrue);
 
             final noThanksFinder = find.text('No thanks');
             expect(noThanksFinder, findsOneWidget);
@@ -320,9 +293,6 @@ void main() {
           controller = AnalyticsController(
             enabled: false,
             shouldShowConsentMessage: false,
-            legacyOnEnableAnalytics: () {
-              didCallEnableAnalytics = true;
-            },
             consentMessage: 'fake message',
           );
         });
@@ -332,7 +302,6 @@ void main() {
           windowSize,
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isFalse);
-            expect(didCallEnableAnalytics, isFalse);
             final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(child: Text('Child Text')),
             );
@@ -343,7 +312,6 @@ void main() {
               findsNothing,
             );
             expect(controller.analyticsEnabled.value, isFalse);
-            expect(didCallEnableAnalytics, isFalse);
           },
         );
 
@@ -380,9 +348,6 @@ class TestAnalyticsController extends AnalyticsController {
     required super.enabled,
     required super.shouldShowConsentMessage,
     required super.consentMessage,
-    super.legacyOnEnableAnalytics,
-    super.legacyOnDisableAnalytics,
-    super.legacyOnSetupAnalytics,
     this.onMarkConsentMessageAsShown,
   });
 

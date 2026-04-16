@@ -15,18 +15,11 @@ const apiNotifyForVmServiceConnection =
 const apiParameterVmServiceConnected = 'connected';
 
 /// Flutter GA properties APIs:
-const apiGetFlutterGAEnabled = '${apiPrefix}getFlutterGAEnabled';
 const apiGetFlutterGAClientId = '${apiPrefix}getFlutterGAClientId';
 
 /// DevTools GA properties APIs:
 const apiResetDevTools = '${apiPrefix}resetDevTools';
 const apiGetDevToolsFirstRun = '${apiPrefix}getDevToolsFirstRun';
-const apiGetDevToolsEnabled = '${apiPrefix}getDevToolsEnabled';
-const apiSetDevToolsEnabled = '${apiPrefix}setDevToolsEnabled';
-
-/// Property name to apiSetDevToolsEnabled the DevToolsEnabled is the name used
-/// in queryParameter:
-const devToolsEnabledPropertyName = 'enabled';
 
 abstract class PreferencesApi {
   /// Returns the preference value in the DevTools store file for the key
