@@ -72,22 +72,6 @@ class TestInspectorController extends Fake implements InspectorController {
   final _selectedNode = ValueNotifier<InspectorTreeNode?>(null);
 
   @override
-  void setSelectedNode(InspectorTreeNode? newSelection) {
-    _selectedNode.value = newSelection;
-  }
-
-  @override
-  InspectorService get inspectorService => service;
-}
-
-class TestInspectorController extends Fake implements InspectorController {
-  InspectorService service = FakeInspectorService();
-
-  @override
-  ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
-  final _selectedNode = ValueNotifier<InspectorTreeNode?>(null);
-
-  @override
   RemoteDiagnosticsNode? get selectedDiagnostic => _selectedDiagnostic;
   RemoteDiagnosticsNode? _selectedDiagnostic;
 
