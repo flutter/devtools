@@ -18,8 +18,8 @@ executables:
 
 dependencies:
   args: ^2.4.2
-  devtools_shared: ^13.0.0
-  devtools_app_shared: ^0.5.0
+  devtools_shared: ^13.0.0-wip
+  devtools_app_shared: ^0.5.1-wip
   flutter:
     sdk: flutter
   io: ^1.0.4

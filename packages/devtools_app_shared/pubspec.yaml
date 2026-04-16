@@ -15,7 +15,7 @@ resolution: workspace
 dependencies:
   collection: ^1.15.0
   dds_service_extensions: ^2.0.0
-  devtools_shared: ^13.0.0
+  devtools_shared: ^13.0.0-wip
   dtd: ^4.0.0
   flutter:
     sdk: flutter
