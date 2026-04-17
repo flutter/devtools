@@ -23,7 +23,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+- Showed a message in the Performance panel when widget rebuild tracking was unavailable because the app was running in profile mode.
+  unavailable because the app is running in profile mode. [#9755](https://github.com/flutter/devtools/pull/9755)
 
 ## CPU profiler updates
 
