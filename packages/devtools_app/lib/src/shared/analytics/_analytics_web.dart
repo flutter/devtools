@@ -4,84 +4,92 @@
 
 // ignore_for_file: non_constant_identifier_names
 
-@JS()
-library;
-
 import 'dart:async';
-import 'dart:js_interop';
 
-import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/ui.dart' as app_ui;
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:unified_analytics/unified_analytics.dart' as ua;
 import 'package:web/web.dart';
 
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../managers/dtd_manager_extensions.dart';
 import '../primitives/query_parameters.dart';
 import '../server/server.dart' as server;
 import '../utils/utils.dart';
 import 'analytics_common.dart';
 import 'constants.dart' as gac;
-import 'gtags.dart';
 import 'metrics.dart';
 
-// Dimensions1 AppType values:
-const appTypeFlutter = 'flutter';
-const appTypeWeb = 'web';
-const appTypeFlutterWeb = 'flutter_web';
-const appTypeDartCLI = 'dart_cli';
-// Dimensions2 BuildType values:
-const buildTypeDebug = 'debug';
-const buildTypeProfile = 'profile';
+/// userApp values.
+enum _UserAppType {
+  flutter,
+  web,
+  flutterWeb,
+  dartCLI;
+
+  String get value {
+    switch (this) {
+      case _UserAppType.flutter:
+        return 'flutter';
+      case _UserAppType.web:
+        return 'web';
+      case _UserAppType.flutterWeb:
+        return 'flutter_web';
+      case _UserAppType.dartCLI:
+        return 'dart_cli';
+    }
+  }
+}
+
+/// userBuild values.
+enum _UserBuildType { debug, profile }
+
 // Start with Android_n.n.n
 const devToolsPlatformTypeAndroid = 'Android_';
-// Dimension5 devToolsChrome starts with
-const devToolsChromeName = 'Chrome/'; // starts with and ends with n.n.n
-const devToolsChromeIos = 'Crios/'; // starts with and ends with n.n.n
-const devToolsChromeOS = 'CrOS'; // Chrome OS
-// Dimension6 devToolsVersion
 
-// Dimension7 ideLaunched
-const ideLaunchedCLI = 'CLI'; // Command Line Interface
+/// devToolsChrome prefix identifiers.
+enum _ChromePrefix {
+  chrome,
+  crios,
+  cros;
+
+  String get value {
+    switch (this) {
+      case _ChromePrefix.chrome:
+        return 'Chrome/'; // starts with and ends with n.n.n
+      case _ChromePrefix.crios:
+        return 'Crios/'; // starts with and ends with n.n.n
+      case _ChromePrefix.cros:
+        return 'CrOS'; // Chrome OS
+    }
+  }
+}
 
 final _log = Logger('_analytics_web');
 
-@JS('initializeGA')
-external void initializeGA();
-
-extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
-  // TODO(kenz): try to make this accept a JSON map of extra parameters rather
-  // than a fixed list of fields. See
-  // https://github.com/flutter/devtools/pull/3281#discussion_r692376353.
-  external factory GtagEventDevTools({
-    String? screen,
-    String? event_category,
-    String? event_label, // Event e.g., gaScreenViewEvent, gaSelectEvent, etc.
-    String? send_to, // UA ID of target GA property to receive event data.
-
-    int value,
-    bool non_interaction,
-    JSObject? custom_map,
-
-    // NOTE: Do not reorder any of these. Order here must match the order in the
-    // Google Analytics console.
+class DevToolsAnalyticsEvent {
+  DevToolsAnalyticsEvent._({
+    required this.screen,
+    required this.eventCategory,
+    required this.eventLabel,
+    required this.value,
+    required this.nonInteraction,
     // IMPORTANT! Only string and int values are supported. All other value
     // types will be ignored in GA4.
-    String? user_app, // dimension1 (flutter or web)
-    String? user_build, // dimension2 (debug or profile)
-    String? user_platform, // dimension3 (android/ios/fuchsia/linux/mac/windows)
-    String? devtools_platform, // dimension4 linux/android/mac/windows
-    String? devtools_chrome, // dimension5 Chrome version #
-    String? devtools_version, // dimension6 DevTools version #
-    String? ide_launched, // dimension7 Devtools launched (CLI, VSCode, Android)
-    String?
-    flutter_client_id, // dimension8 Flutter tool client_id (~/.flutter).
-    String? is_external_build, // dimension9 External build or google3
-    String? is_embedded, // dimension10 Whether devtools is embedded
-    String? g3_username, // dimension11 g3 username (null for external users)
-    // dimension12 IDE feature that launched Devtools
+    this.userApp, // [_UserAppType]
+    this.userBuild, // [_UserBuildType]
+    this.userPlatform, // (android/ios/fuchsia/linux/mac/windows)
+    this.devtoolsPlatform, // linux/android/mac/windows
+    this.devtoolsChrome, // Chrome version #
+    this.devtoolsVersion, // DevTools version #
+    this.ideLaunched, // Devtools launched (CLI, VSCode, Android)
+    this.flutterClientId, // Flutter tool client_id (~/.flutter).
+    this.isExternalBuild, // External build or google3
+    this.isEmbedded, // Whether devtools is embedded
+    this.g3Username, // g3 username (null for external users)
+    // IDE feature that launched Devtools
     // The following is a non-exhaustive list of possible values for this dimension:
     // "command" - VS Code command palette
     // "sidebarContent" - the content of the sidebar (e.g. the DevTools dropdown for a debug session)
@@ -91,173 +99,173 @@ extension type GtagEventDevTools._(JSObject _) implements GtagEvent {
     // "onDebugAutomatic" - configured to always run on debug session start
     // "onDebugPrompt" - user responded to prompt when running a debug session
     // "languageStatus" - launched from the language status popout
-    String? ide_launched_feature,
-    String? is_wasm, // dimension13 whether DevTools is running with WASM.
+    this.ideLaunchedFeature,
+    this.isWasm, // whether DevTools is running with WASM.
     // Performance screen metrics. See [PerformanceScreenMetrics].
-    int? ui_duration_micros, // metric1
-    int? raster_duration_micros, // metric2
-    int? shader_compilation_duration_micros, // metric3
+    this.uiDurationMicros, // metric1
+    this.rasterDurationMicros, // metric2
+    this.shaderCompilationDurationMicros, // metric3
     // Profiler screen metrics. See [ProfilerScreenMetrics].
-    int? cpu_sample_count, // metric4
-    int? cpu_stack_depth, // metric5
+    this.cpuSampleCount, // metric4
+    this.cpuStackDepth, // metric5
     // Performance screen metric. See [PerformanceScreenMetrics].
-    int? trace_event_count, // metric6
+    this.traceEventCount, // metric6
     // Memory screen metric. See [MemoryScreenMetrics].
-    int? heap_diff_objects_before, // metric7
-    int? heap_diff_objects_after, // metric8
-    int? heap_objects_total, // metric9
+    this.heapDiffObjectsBefore, // metric7
+    this.heapDiffObjectsAfter, // metric8
+    this.heapObjectsTotal, // metric9
     // Inspector screen metrics. See [InspectorScreenMetrics].
-    int? root_set_count, // metric10
-    int? row_count, // metric11
-    int? inspector_tree_controller_id, // metric12
+    this.rootSetCount, // metric10
+    this.rowCount, // metric11
+    this.inspectorTreeControllerId, // metric12
     // Deep Link screen metrics. See [DeepLinkScreenMetrics].
-    String? android_app_id, //metric13
-    String? ios_bundle_id, //metric14
+    this.androidAppId, //metric13
+    this.iosBundleId, //metric14
     // Inspector screen metrics. See [InspectorScreenMetrics].
-    String? is_v2_inspector, // metric15
+    this.isV2Inspector, // metric15
   });
 
-  factory GtagEventDevTools._create({
+  factory DevToolsAnalyticsEvent._create({
     required String screen,
-    required String event_category,
-    required String event_label,
-    String? send_to,
-    bool non_interaction = false,
+    required String eventCategory,
+    required String eventLabel,
+    bool nonInteraction = false,
     int value = 0,
     ScreenAnalyticsMetrics? screenMetrics,
   }) {
-    return GtagEventDevTools(
+    return DevToolsAnalyticsEvent._(
       screen: screen,
-      event_category: event_category,
-      event_label: event_label,
-      send_to: send_to,
-      non_interaction: non_interaction,
+      eventCategory: eventCategory,
+      eventLabel: eventLabel,
+      nonInteraction: nonInteraction,
       value: value,
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: ideLaunched,
-      flutter_client_id: flutterClientId,
-      is_external_build: isExternalBuild.toString(),
-      is_embedded: isEmbedded().toString(),
-      g3_username: devToolsEnvironmentParameters.username(),
-      ide_launched_feature: ideLaunchedFeature,
-      is_wasm: kIsWasm.toString(),
+      userApp: userAppType,
+      userBuild: userBuildType,
+      userPlatform: userPlatformType,
+      devtoolsPlatform: _devtoolsPlatformType,
+      devtoolsChrome: _devtoolsChrome,
+      devtoolsVersion: devToolsVersion,
+      ideLaunched: _ideLaunched,
+      flutterClientId: _flutterClientId,
+      isExternalBuild: globals.isExternalBuild.toString(),
+      isEmbedded: app_ui.isEmbedded().toString(),
+      g3Username: globals.devToolsEnvironmentParameters.username(),
+      ideLaunchedFeature: _ideLaunchedFeature,
+      isWasm: kIsWasm.toString(),
       // [PerformanceScreenMetrics]
-      ui_duration_micros: screenMetrics is PerformanceScreenMetrics
+      uiDurationMicros: screenMetrics is PerformanceScreenMetrics
           ? screenMetrics.uiDuration?.inMicroseconds
           : null,
-      raster_duration_micros: screenMetrics is PerformanceScreenMetrics
+      rasterDurationMicros: screenMetrics is PerformanceScreenMetrics
           ? screenMetrics.rasterDuration?.inMicroseconds
           : null,
-      shader_compilation_duration_micros:
-          screenMetrics is PerformanceScreenMetrics
+      shaderCompilationDurationMicros: screenMetrics is PerformanceScreenMetrics
           ? screenMetrics.shaderCompilationDuration?.inMicroseconds
           : null,
-      trace_event_count: screenMetrics is PerformanceScreenMetrics
+      traceEventCount: screenMetrics is PerformanceScreenMetrics
           ? screenMetrics.traceEventCount
           : null,
       // [ProfilerScreenMetrics]
-      cpu_sample_count: screenMetrics is ProfilerScreenMetrics
+      cpuSampleCount: screenMetrics is ProfilerScreenMetrics
           ? screenMetrics.cpuSampleCount
           : null,
-      cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
+      cpuStackDepth: screenMetrics is ProfilerScreenMetrics
           ? screenMetrics.cpuStackDepth
           : null,
       // [MemoryScreenMetrics]
-      heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
+      heapDiffObjectsBefore: screenMetrics is MemoryScreenMetrics
           ? screenMetrics.heapDiffObjectsBefore
           : null,
-      heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
+      heapDiffObjectsAfter: screenMetrics is MemoryScreenMetrics
           ? screenMetrics.heapDiffObjectsAfter
           : null,
-      heap_objects_total: screenMetrics is MemoryScreenMetrics
+      heapObjectsTotal: screenMetrics is MemoryScreenMetrics
           ? screenMetrics.heapObjectsTotal
           : null,
       // [InspectorScreenMetrics]
-      root_set_count: screenMetrics is InspectorScreenMetrics
+      rootSetCount: screenMetrics is InspectorScreenMetrics
           ? screenMetrics.rootSetCount
           : null,
-      row_count: screenMetrics is InspectorScreenMetrics
+      rowCount: screenMetrics is InspectorScreenMetrics
           ? screenMetrics.rowCount
           : null,
-      inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
+      inspectorTreeControllerId: screenMetrics is InspectorScreenMetrics
           ? screenMetrics.inspectorTreeControllerId
           : null,
       // [DeepLinkScreenMetrics]
-      android_app_id: screenMetrics is DeepLinkScreenMetrics
+      androidAppId: screenMetrics is DeepLinkScreenMetrics
           ? screenMetrics.androidAppId
           : null,
-      ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
+      iosBundleId: screenMetrics is DeepLinkScreenMetrics
           ? screenMetrics.iosBundleId
           : null,
       // [InspectorScreenMetrics]
-      is_v2_inspector: screenMetrics is InspectorScreenMetrics
+      isV2Inspector: screenMetrics is InspectorScreenMetrics
           ? screenMetrics.isV2.toString()
           : null,
     );
   }
 
-  external String? get screen;
+  String? screen;
+  String? eventCategory;
+  String? eventLabel;
+  bool nonInteraction;
+  int value;
 
   // Custom dimensions:
-  external String? get user_app;
-  external String? get user_build;
-  external String? get user_platform;
-  external String? get devtools_platform;
-  external String? get devtools_chrome;
-  external String? get devtools_version;
-  external String? get ide_launched;
-  external String? get flutter_client_id;
-  external String? get is_external_build;
-  external String? get is_embedded;
-  external String? get g3_username;
-  external String? get ide_launched_feature;
-  external String? get is_wasm;
+  String? userApp;
+  String? userBuild;
+  String? userPlatform;
+  String? devtoolsPlatform;
+  String? devtoolsChrome;
+  String? devtoolsVersion;
+  String? ideLaunched;
+  String? flutterClientId;
+  String? isExternalBuild;
+  String? isEmbedded;
+  String? g3Username;
+  String? ideLaunchedFeature;
+  String? isWasm;
 
   // Custom metrics:
-  external int? get ui_duration_micros;
-  external int? get raster_duration_micros;
-  external int? get shader_compilation_duration_micros;
-  external int? get cpu_sample_count;
-  external int? get cpu_stack_depth;
-  external int? get trace_event_count;
-  external int? get heap_diff_objects_before;
-  external int? get heap_diff_objects_after;
-  external int? get heap_objects_total;
-  external int? get root_set_count;
-  external int? get row_count;
-  external int? get inspector_tree_controller_id;
-  external String? get android_app_id;
-  external String? get ios_bundle_id;
-  external String? get is_v2_inspector;
+  int? uiDurationMicros;
+  int? rasterDurationMicros;
+  int? shaderCompilationDurationMicros;
+  int? cpuSampleCount;
+  int? cpuStackDepth;
+  int? traceEventCount;
+  int? heapDiffObjectsBefore;
+  int? heapDiffObjectsAfter;
+  int? heapObjectsTotal;
+  int? rootSetCount;
+  int? rowCount;
+  int? inspectorTreeControllerId;
+  String? androidAppId;
+  String? iosBundleId;
+  String? isV2Inspector;
 }
 
-extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
-  external factory GtagExceptionDevTools({
-    String? screen,
-    String? description,
-    bool fatal,
+class DevToolsAnalyticsException {
+  DevToolsAnalyticsException._({
+    this.description,
+    required this.fatal,
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
     // Google Analytics console.
     // IMPORTANT! Only string and int values are supported. All other value
     // types will be ignored in GA4.
-    String? user_app, // dimension1 (flutter or web)
-    String? user_build, // dimension2 (debug or profile)
-    String? user_platform, // dimension3 (android or ios)
-    String? devtools_platform, // dimension4 linux/android/mac/windows
-    String? devtools_chrome, // dimension5 Chrome version #
-    String? devtools_version, // dimension6 DevTools version #
-    String? ide_launched, // dimension7 IDE launched DevTools
-    String? flutter_client_id, // dimension8 Flutter tool clientId
-    String? is_external_build, // dimension9 External build or google3
-    String? is_embedded, // dimension10 Whether devtools is embedded
-    String? g3_username, // dimension11 g3 username (null for external users)
-    // dimension12 IDE feature that launched Devtools
+    this.userApp, // [_UserAppType]
+    this.userBuild, // [_UserBuildType]
+    this.userPlatform, // (android/ios/fuchsia/linux/mac/windows)
+    this.devtoolsPlatform, // linux/android/mac/windows
+    this.devtoolsChrome, // Chrome version #
+    this.devtoolsVersion, // DevTools version #
+    this.ideLaunched, // IDE launched DevTools
+    this.flutterClientId, // Flutter tool clientId
+    this.isExternalBuild, // External build or google3
+    this.isEmbedded, // Whether devtools is embedded
+    this.g3Username, // g3 username (null for external users)
+    // IDE feature that launched Devtools
     // The following is a non-exhaustive list of possible values for this dimension:
     // "command" - VS Code command palette
     // "sidebarContent" - the content of the sidebar (e.g. the DevTools dropdown for a debug session)
@@ -267,186 +275,150 @@ extension type GtagExceptionDevTools._(JSObject _) implements GtagException {
     // "onDebugAutomatic" - configured to always run on debug session start
     // "onDebugPrompt" - user responded to prompt when running a debug session
     // "languageStatus" - launched from the language status popout
-    String? ide_launched_feature,
-    String? is_wasm, // dimension13 whether DevTools is running with WASM.
+    this.ideLaunchedFeature,
+    this.isWasm, // whether DevTools is running with WASM.
     // Performance screen metrics. See [PerformanceScreenMetrics].
-    int? ui_duration_micros, // metric1
-    int? raster_duration_micros, // metric2
-    int? shader_compilation_duration_micros, // metric3
+    this.uiDurationMicros, // metric1
+    this.rasterDurationMicros, // metric2
+    this.shaderCompilationDurationMicros, // metric3
     // Profiler screen metrics. See [ProfilerScreenMetrics].
-    int? cpu_sample_count, // metric4
-    int? cpu_stack_depth, // metric5
+    this.cpuSampleCount, // metric4
+    this.cpuStackDepth, // metric5
     // Performance screen metric. See [PerformanceScreenMetrics].
-    int? trace_event_count, // metric6
+    this.traceEventCount, // metric6
     // Memory screen metric. See [MemoryScreenMetrics].
-    int? heap_diff_objects_before, // metric7
-    int? heap_diff_objects_after, // metric8
-    int? heap_objects_total, // metric9
+    this.heapDiffObjectsBefore, // metric7
+    this.heapDiffObjectsAfter, // metric8
+    this.heapObjectsTotal, // metric9
     // Inspector screen metrics. See [InspectorScreenMetrics].
-    int? root_set_count, // metric10
-    int? row_count, // metric11
-    int? inspector_tree_controller_id, // metric12
+    this.rootSetCount, // metric10
+    this.rowCount, // metric11
+    this.inspectorTreeControllerId, // metric12
     // Deep Link screen metrics. See [DeepLinkScreenMetrics].
-    String? android_app_id, //metric13
-    String? ios_bundle_id, //metric14
+    this.androidAppId, //metric13
+    this.iosBundleId, //metric14
     // Inspector screen metrics. See [InspectorScreenMetrics].
-    String? is_v2_inspector, // metric15
+    this.isV2Inspector, // metric15
   });
 
-  factory GtagExceptionDevTools._create(
+  factory DevToolsAnalyticsException._create(
     String errorMessage, {
     bool fatal = false,
     ScreenAnalyticsMetrics? screenMetrics,
   }) {
-    return GtagExceptionDevTools(
+    return DevToolsAnalyticsException._(
       description: errorMessage,
       fatal: fatal,
-      user_app: userAppType,
-      user_build: userBuildType,
-      user_platform: userPlatformType,
-      devtools_platform: devtoolsPlatformType,
-      devtools_chrome: devtoolsChrome,
-      devtools_version: devtoolsVersion,
-      ide_launched: _ideLaunched,
-      flutter_client_id: flutterClientId,
-      is_external_build: isExternalBuild.toString(),
-      is_embedded: isEmbedded().toString(),
-      g3_username: devToolsEnvironmentParameters.username(),
-      ide_launched_feature: ideLaunchedFeature,
-      is_wasm: kIsWasm.toString(),
+      userApp: userAppType,
+      userBuild: userBuildType,
+      userPlatform: userPlatformType,
+      devtoolsPlatform: _devtoolsPlatformType,
+      devtoolsChrome: _devtoolsChrome,
+      devtoolsVersion: devToolsVersion,
+      ideLaunched: _ideLaunched,
+      flutterClientId: _flutterClientId,
+      isExternalBuild: globals.isExternalBuild.toString(),
+      isEmbedded: app_ui.isEmbedded().toString(),
+      g3Username: globals.devToolsEnvironmentParameters.username(),
+      ideLaunchedFeature: _ideLaunchedFeature,
+      isWasm: kIsWasm.toString(),
       // [PerformanceScreenMetrics]
-      ui_duration_micros: screenMetrics is PerformanceScreenMetrics
+      uiDurationMicros: screenMetrics is PerformanceScreenMetrics
           ? screenMetrics.uiDuration?.inMicroseconds
           : null,
-      raster_duration_micros: screenMetrics is PerformanceScreenMetrics
+      rasterDurationMicros: screenMetrics is PerformanceScreenMetrics
           ? screenMetrics.rasterDuration?.inMicroseconds
           : null,
-      trace_event_count: screenMetrics is PerformanceScreenMetrics
+      traceEventCount: screenMetrics is PerformanceScreenMetrics
           ? screenMetrics.traceEventCount
           : null,
-      shader_compilation_duration_micros:
-          screenMetrics is PerformanceScreenMetrics
+      shaderCompilationDurationMicros: screenMetrics is PerformanceScreenMetrics
           ? screenMetrics.shaderCompilationDuration?.inMicroseconds
           : null,
       // [ProfilerScreenMetrics]
-      cpu_sample_count: screenMetrics is ProfilerScreenMetrics
+      cpuSampleCount: screenMetrics is ProfilerScreenMetrics
           ? screenMetrics.cpuSampleCount
           : null,
-      cpu_stack_depth: screenMetrics is ProfilerScreenMetrics
+      cpuStackDepth: screenMetrics is ProfilerScreenMetrics
           ? screenMetrics.cpuStackDepth
           : null,
       // [MemoryScreenMetrics]
-      heap_diff_objects_before: screenMetrics is MemoryScreenMetrics
+      heapDiffObjectsBefore: screenMetrics is MemoryScreenMetrics
           ? screenMetrics.heapDiffObjectsBefore
           : null,
-      heap_diff_objects_after: screenMetrics is MemoryScreenMetrics
+      heapDiffObjectsAfter: screenMetrics is MemoryScreenMetrics
           ? screenMetrics.heapDiffObjectsAfter
           : null,
-      heap_objects_total: screenMetrics is MemoryScreenMetrics
+      heapObjectsTotal: screenMetrics is MemoryScreenMetrics
           ? screenMetrics.heapObjectsTotal
           : null,
       // [InspectorScreenMetrics]
-      root_set_count: screenMetrics is InspectorScreenMetrics
+      rootSetCount: screenMetrics is InspectorScreenMetrics
           ? screenMetrics.rootSetCount
           : null,
-      row_count: screenMetrics is InspectorScreenMetrics
+      rowCount: screenMetrics is InspectorScreenMetrics
           ? screenMetrics.rowCount
           : null,
-      inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
+      inspectorTreeControllerId: screenMetrics is InspectorScreenMetrics
           ? screenMetrics.inspectorTreeControllerId
           : null,
       // [DeepLinkScreenMetrics]
-      android_app_id: screenMetrics is DeepLinkScreenMetrics
+      androidAppId: screenMetrics is DeepLinkScreenMetrics
           ? screenMetrics.androidAppId
           : null,
-      ios_bundle_id: screenMetrics is DeepLinkScreenMetrics
+      iosBundleId: screenMetrics is DeepLinkScreenMetrics
           ? screenMetrics.iosBundleId
           : null,
       // [InspectorScreenMetrics]
-      is_v2_inspector: screenMetrics is InspectorScreenMetrics
+      isV2Inspector: screenMetrics is InspectorScreenMetrics
           ? screenMetrics.isV2.toString()
           : null,
     );
   }
 
+  String? description;
+  bool fatal;
+
   // Custom dimensions:
-  external String? get user_app;
-  external String? get user_build;
-  external String? get user_platform;
-  external String? get devtools_platform;
-  external String? get devtools_chrome;
-  external String? get devtools_version;
-  external String? get ide_launched;
-  external String? get flutter_client_id;
-  external String? get is_external_build;
-  external String? get is_embedded;
-  external String? get g3_username;
-  external String? get ide_launched_feature;
-  external String? get is_wasm;
+  String? userApp;
+  String? userBuild;
+  String? userPlatform;
+  String? devtoolsPlatform;
+  String? devtoolsChrome;
+  String? devtoolsVersion;
+  String? ideLaunched;
+  String? flutterClientId;
+  String? isExternalBuild;
+  String? isEmbedded;
+  String? g3Username;
+  String? ideLaunchedFeature;
+  String? isWasm;
 
   // Custom metrics:
-  external int? get ui_duration_micros;
-  external int? get raster_duration_micros;
-  external int? get shader_compilation_duration_micros;
-  external int? get cpu_sample_count;
-  external int? get cpu_stack_depth;
-  external int? get trace_event_count;
-  external int? get heap_diff_objects_before;
-  external int? get heap_diff_objects_after;
-  external int? get heap_objects_total;
-  external int? get root_set_count;
-  external int? get row_count;
-  external int? get inspector_tree_controller_id;
-  external String? get android_app_id;
-  external String? get ios_bundle_id;
-  external bool? get is_v2_inspector;
-}
-
-/// Whether google analytics are enabled.
-Future<bool> isAnalyticsEnabled() async {
-  bool enabled = false;
-  if (kReleaseMode) {
-    enabled = await dtdManager.analyticsTelemetryEnabled();
-  }
-
-  // TODO(https://github.com/flutter/devtools/issues/7083): remove this block
-  // when the legacy analytics are fully removed. For now, check that both
-  // unified analytics are enabled and the legacy analytics are enabled.
-  if (enabled) {
-    enabled = await server.isAnalyticsEnabled();
-  }
-
-  return enabled;
-}
-
-/// Whether the google analytics consent message should be shown.
-Future<bool> shouldShowAnalyticsConsentMessage() async {
-  bool shouldShow = false;
-  if (kReleaseMode) {
-    // When asked if the consent message should be shown,
-    // package:unified_analytics will return true if this the user's first run
-    // of DevTools with package:unified_analytics support or when the consent
-    // message version has been updated.
-    shouldShow = await dtdManager.shouldShowAnalyticsConsentMessage();
-  }
-
-  // TODO(https://github.com/flutter/devtools/issues/7083): remove this block
-  // when the legacy analytics are fully removed.
-  if (!shouldShow) {
-    shouldShow = await server.isFirstRun();
-  }
-
-  return shouldShow;
+  int? uiDurationMicros;
+  int? rasterDurationMicros;
+  int? shaderCompilationDurationMicros;
+  int? cpuSampleCount;
+  int? cpuStackDepth;
+  int? traceEventCount;
+  int? heapDiffObjectsBefore;
+  int? heapDiffObjectsAfter;
+  int? heapObjectsTotal;
+  int? rootSetCount;
+  int? rowCount;
+  int? inspectorTreeControllerId;
+  String? androidAppId;
+  String? iosBundleId;
+  String? isV2Inspector;
 }
 
 void screen(String screenName, [int value = 0]) {
   _log.fine('Event: Screen(screenName:$screenName, value:$value)');
-  final gtagEvent = GtagEventDevTools._create(
+  final gtagEvent = DevToolsAnalyticsEvent._create(
     screen: screenName,
-    event_category: gac.screenViewEvent,
-    event_label: gac.init,
+    eventCategory: gac.screenViewEvent,
+    eventLabel: gac.init,
     value: value,
-    send_to: gaDevToolsPropertyId(),
   );
   _sendEvent(gtagEvent);
 }
@@ -582,12 +554,11 @@ void _timing(
     'timedOperation:$timedOperation, '
     'durationMicros:$durationMicros)',
   );
-  final gtagEvent = GtagEventDevTools._create(
+  final gtagEvent = DevToolsAnalyticsEvent._create(
     screen: screenName,
-    event_category: gac.timingEvent,
-    event_label: timedOperation,
+    eventCategory: gac.timingEvent,
+    eventLabel: timedOperation,
     value: durationMicros,
-    send_to: gaDevToolsPropertyId(),
     screenMetrics: screenMetrics,
   );
   _sendEvent(gtagEvent);
@@ -608,13 +579,12 @@ void select(
     'value:$value, '
     'nonInteraction:$nonInteraction)',
   );
-  final gtagEvent = GtagEventDevTools._create(
+  final gtagEvent = DevToolsAnalyticsEvent._create(
     screen: screenName,
-    event_category: gac.selectEvent,
-    event_label: selectedItem,
+    eventCategory: gac.selectEvent,
+    eventLabel: selectedItem,
     value: value,
-    non_interaction: nonInteraction,
-    send_to: gaDevToolsPropertyId(),
+    nonInteraction: nonInteraction,
     screenMetrics: screenMetricsProvider != null
         ? screenMetricsProvider()
         : null,
@@ -635,12 +605,11 @@ void impression(
     'screenName:$screenName, '
     'item:$item)',
   );
-  final gtagEvent = GtagEventDevTools._create(
+  final gtagEvent = DevToolsAnalyticsEvent._create(
     screen: screenName,
-    event_category: gac.impressionEvent,
-    event_label: item,
-    non_interaction: true,
-    send_to: gaDevToolsPropertyId(),
+    eventCategory: gac.impressionEvent,
+    eventLabel: item,
+    nonInteraction: true,
     screenMetrics: screenMetricsProvider != null
         ? screenMetricsProvider()
         : null,
@@ -663,41 +632,37 @@ void reportError(
   if (_lastGaError == errorMessage) return;
   _lastGaError = errorMessage;
 
-  final gTagExceptionWithStackTrace = GtagExceptionDevTools._create(
-    // Include the stack trace in the message for legacy analytics.
-    '$errorMessage\n${stackTrace?.toString() ?? ''}',
-    fatal: fatal,
-  );
-  GTag.exception(gaExceptionProvider: () => gTagExceptionWithStackTrace);
-
-  final uaEvent = _uaEventFromGtagException(
-    GtagExceptionDevTools._create(errorMessage, fatal: fatal),
+  final uaEvent = _uaEventFromDevToolsException(
+    DevToolsAnalyticsException._create(errorMessage, fatal: fatal),
     stackTrace: stackTrace,
   );
-  unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
+  unawaited(globals.dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Utilities to collect all platform and DevTools state for Analytics.
 ////////////////////////////////////////////////////////////////////////////////
 
-// GA dimensions:
-String _userAppType = ''; // dimension1
-String _userBuildType = ''; // dimension2
-String _userPlatformType = ''; // dimension3
+String _userAppType = '';
+String _userBuildType = '';
+String _userPlatformType = '';
 
-String _devtoolsPlatformType =
-    ''; // dimension4 MacIntel/Linux/Windows/Android_n
-String _devtoolsChrome = ''; // dimension5 Chrome/n.n.n  or Crios/n.n.n
+/// MacIntel/Linux/Windows/Android_n
+String _devtoolsPlatformType = '';
 
-final devtoolsVersion = devToolsVersion; //dimension6 n.n.n
+/// Chrome/n.n.n  or Crios/n.n.n
+String _devtoolsChrome = '';
 
-String _ideLaunched = ''; // dimension7 IDE launched DevTools (VSCode, CLI, ...)
+/// IDE launched DevTools (VSCode, CLI, ...)
+String _ideLaunched = '';
 
-// dimension12 IDE feature that launched DevTools
+/// The IDE feature that launched DevTools.
+///
+/// Defaults to [_ideLaunchedCLI] if DevTools was not launched from the IDE.
 String _ideLaunchedFeature = '';
 
-String _flutterClientId = ''; // dimension8 Flutter tool clientId.
+/// Flutter tool clientId.
+String _flutterClientId = '';
 
 String get userAppType => _userAppType;
 
@@ -717,21 +682,6 @@ set userPlatformType(String newUserPlatformType) {
   _userPlatformType = newUserPlatformType;
 }
 
-String get devtoolsPlatformType => _devtoolsPlatformType;
-
-set devtoolsPlatformType(String newDevtoolsPlatformType) {
-  _devtoolsPlatformType = newDevtoolsPlatformType;
-}
-
-String get devtoolsChrome => _devtoolsChrome;
-
-set devtoolsChrome(String newDevtoolsChrome) {
-  _devtoolsChrome = newDevtoolsChrome;
-}
-
-/// The IDE that DevTools was launched from.
-///
-/// Defaults to [ideLaunchedCLI] if DevTools was not launched from the IDE.
 String get ideLaunched => _ideLaunched;
 
 String get ideLaunchedFeature => _ideLaunchedFeature;
@@ -740,17 +690,11 @@ set ideLaunchedFeature(String newIdeLaunchedFeature) {
   _ideLaunchedFeature = newIdeLaunchedFeature;
 }
 
-String get flutterClientId => _flutterClientId;
-
-set flutterClientId(String newFlutterClientId) {
-  _flutterClientId = newFlutterClientId;
-}
-
 Completer<void>? _computingDimensionsCompleter;
 
-// Computes the running application.
+/// Computes the running application.
 void _computeUserApplicationCustomGTagData() {
-  final connectedApp = serviceConnection.serviceManager.connectedApp!;
+  final connectedApp = globals.serviceConnection.serviceManager.connectedApp!;
   assert(connectedApp.isFlutterAppNow != null);
   assert(connectedApp.isDartWebAppNow != null);
   assert(connectedApp.isProfileBuildNow != null);
@@ -758,59 +702,56 @@ void _computeUserApplicationCustomGTagData() {
   const unknownOS = 'unknown';
   if (connectedApp.isFlutterAppNow!) {
     userPlatformType =
-        serviceConnection.serviceManager.vm?.operatingSystem ?? unknownOS;
+        globals.serviceConnection.serviceManager.vm?.operatingSystem ??
+        unknownOS;
   }
   if (connectedApp.isFlutterWebAppNow) {
-    userAppType = appTypeFlutterWeb;
+    userAppType = _UserAppType.flutterWeb.value;
   } else if (connectedApp.isFlutterAppNow!) {
-    userAppType = appTypeFlutter;
+    userAppType = _UserAppType.flutter.value;
   } else if (connectedApp.isDartWebAppNow!) {
-    userAppType = appTypeWeb;
+    userAppType = _UserAppType.web.value;
   } else {
-    userAppType = appTypeDartCLI;
+    userAppType = _UserAppType.dartCLI.value;
   }
 
   userBuildType = connectedApp.isProfileBuildNow!
-      ? buildTypeProfile
-      : buildTypeDebug;
+      ? _UserBuildType.profile.name
+      : _UserBuildType.debug.name;
 }
 
-@JS('getDevToolsPropertyID')
-external String gaDevToolsPropertyId();
-
-@JS('hookupListenerForGA')
-external void jsHookupListenerForGA();
-
-/// Computes the DevTools application. Fills in the devtoolsPlatformType and
-/// devtoolsChrome.
-void computeDevToolsCustomGTagsData() {
-  // Platform
-  final platform = window.navigator.platform;
-  platform.replaceAll(' ', '_');
-  devtoolsPlatformType = platform;
-
+/// Computes the DevTools application data.
+///
+/// Fills in the [_devtoolsPlatformType] and [_devtoolsChrome].
+void computeDevToolsCustomData() {
+  _devtoolsPlatformType = window.navigator.platform.replaceAll(' ', '_');
   final appVersion = window.navigator.appVersion;
   final splits = appVersion.split(' ');
   final len = splits.length;
   for (int index = 0; index < len; index++) {
     final value = splits[index];
     // Chrome or Chrome iOS
-    if (value.startsWith(devToolsChromeName) ||
-        value.startsWith(devToolsChromeIos)) {
-      devtoolsChrome = value;
-    } else if (value.startsWith('Android')) {
+    if (value.startsWith(_ChromePrefix.chrome.value) ||
+        value.startsWith(_ChromePrefix.crios.value)) {
+      _devtoolsChrome = value;
+    } else if (value.startsWith('Android') && index + 1 < splits.length) {
       // appVersion for Android is 'Android n.n.n'
-      devtoolsPlatformType = '$devToolsPlatformTypeAndroid${splits[index + 1]}';
-    } else if (value == devToolsChromeOS) {
+      _devtoolsPlatformType =
+          '$devToolsPlatformTypeAndroid${splits[index + 1]}';
+    } else if (value == _ChromePrefix.cros.value) {
       // Chrome OS will return a platform e.g., CrOS_Linux_x86_64
-      devtoolsPlatformType = '${devToolsChromeOS}_$platform';
+      _devtoolsPlatformType =
+          '${_ChromePrefix.cros.value}_$_devtoolsPlatformType';
     }
   }
 }
 
-// Look at the query parameters '&ide=' and record in GA.
+const _ideLaunchedCLI = 'CLI';
+
+/// Look at the query parameters '&ide=' and set values.
 void computeDevToolsQueryParams() {
-  _ideLaunched = ideLaunchedCLI; // Default is Command Line launch.
+  // Default is Command Line launch.
+  _ideLaunched = _ideLaunchedCLI;
 
   final queryParams = DevToolsQueryParams.load();
   final ide = queryParams.ide;
@@ -825,7 +766,7 @@ void computeDevToolsQueryParams() {
 }
 
 Future<void> computeFlutterClientId() async {
-  flutterClientId = await server.flutterGAClientID();
+  _flutterClientId = await server.flutterGAClientID();
 }
 
 Future<void> setupDimensions() async {
@@ -835,7 +776,7 @@ Future<void> setupDimensions() async {
 
   _computingDimensionsCompleter = Completer<void>();
   try {
-    computeDevToolsCustomGTagsData();
+    computeDevToolsCustomData();
     computeDevToolsQueryParams();
     await computeFlutterClientId();
   } catch (e, st) {
@@ -846,7 +787,7 @@ Future<void> setupDimensions() async {
 }
 
 void setupUserApplicationDimensions() {
-  if (serviceConnection.serviceManager.connectedApp == null) {
+  if (globals.serviceConnection.serviceManager.connectedApp == null) {
     return;
   }
 
@@ -863,78 +804,63 @@ Map<String, Object?> generateSurveyQueryParameters() {
   const internalKey = 'Internal';
   return {
     ideKey: _ideLaunched,
-    versionKey: devtoolsVersion,
-    internalKey: (!isExternalBuild).toString(),
+    versionKey: devToolsVersion,
+    internalKey: (!globals.isExternalBuild).toString(),
   };
 }
 
-FutureOr<void> legacyOnEnableAnalytics() async {
-  await server.setAnalyticsEnabled();
+void _sendEvent(DevToolsAnalyticsEvent event) {
+  final uaEvent = _uaEventFromDevToolsEvent(event);
+  unawaited(globals.dtdManager.sendAnalyticsEvent(uaEvent));
 }
 
-FutureOr<void> legacyOnDisableAnalytics() async {
-  await server.setAnalyticsEnabled(false);
-}
-
-void legacyOnSetupAnalytics() {
-  initializeGA();
-  jsHookupListenerForGA();
-}
-
-void _sendEvent(GtagEventDevTools gtagEvent) {
-  GTag.event(gtagEvent.screen!, gaEventProvider: () => gtagEvent);
-  final uaEvent = _uaEventFromGtagEvent(gtagEvent);
-  unawaited(dtdManager.sendAnalyticsEvent(uaEvent));
-}
-
-ua.Event _uaEventFromGtagEvent(GtagEventDevTools gtagEvent) {
+ua.Event _uaEventFromDevToolsEvent(DevToolsAnalyticsEvent event) {
   // Any dimensions or metrics that have a null value will be removed from
   // the event data in the [ua.Event.devtoolsEvent] constructor.
   return ua.Event.devtoolsEvent(
-    screen: gtagEvent.screen!,
-    eventCategory: gtagEvent.event_category!,
-    label: gtagEvent.event_label!,
-    value: gtagEvent.value,
-    userInitiatedInteraction: !gtagEvent.non_interaction,
-    userApp: gtagEvent.user_app,
-    userBuild: gtagEvent.user_build,
-    userPlatform: gtagEvent.user_platform,
-    devtoolsPlatform: gtagEvent.devtools_platform,
-    devtoolsChrome: gtagEvent.devtools_chrome,
-    devtoolsVersion: gtagEvent.devtools_version,
-    ideLaunched: gtagEvent.ide_launched,
-    ideLaunchedFeature: gtagEvent.ide_launched_feature,
-    isExternalBuild: gtagEvent.is_external_build,
-    isEmbedded: gtagEvent.is_embedded,
-    isWasm: gtagEvent.is_wasm,
-    g3Username: gtagEvent.g3_username,
+    screen: event.screen!,
+    eventCategory: event.eventCategory!,
+    label: event.eventLabel!,
+    value: event.value,
+    userInitiatedInteraction: !event.nonInteraction,
+    userApp: event.userApp,
+    userBuild: event.userBuild,
+    userPlatform: event.userPlatform,
+    devtoolsPlatform: event.devtoolsPlatform,
+    devtoolsChrome: event.devtoolsChrome,
+    devtoolsVersion: event.devtoolsVersion,
+    ideLaunched: event.ideLaunched,
+    ideLaunchedFeature: event.ideLaunchedFeature,
+    isExternalBuild: event.isExternalBuild,
+    isEmbedded: event.isEmbedded,
+    isWasm: event.isWasm,
+    g3Username: event.g3Username,
     // Only 25 entries are permitted for GA4 event parameters, but since not
     // all of the below metrics will be non-null at the same time, it is okay to
     // include all the metrics here. The [ua.Event.devtoolsEvent] constructor
     // will remove any entries with a null value from the sent event parameters.
     additionalMetrics: _DevToolsEventMetrics(
-      uiDurationMicros: gtagEvent.ui_duration_micros,
-      rasterDurationMicros: gtagEvent.raster_duration_micros,
-      shaderCompilationDurationMicros:
-          gtagEvent.shader_compilation_duration_micros,
-      traceEventCount: gtagEvent.trace_event_count,
-      cpuSampleCount: gtagEvent.cpu_sample_count,
-      cpuStackDepth: gtagEvent.cpu_stack_depth,
-      heapDiffObjectsBefore: gtagEvent.heap_diff_objects_before,
-      heapDiffObjectsAfter: gtagEvent.heap_diff_objects_after,
-      heapObjectsTotal: gtagEvent.heap_objects_total,
-      rootSetCount: gtagEvent.root_set_count,
-      rowCount: gtagEvent.row_count,
-      inspectorTreeControllerId: gtagEvent.inspector_tree_controller_id,
-      isV2Inspector: gtagEvent.is_v2_inspector,
-      androidAppId: gtagEvent.android_app_id,
-      iosBundleId: gtagEvent.ios_bundle_id,
+      uiDurationMicros: event.uiDurationMicros,
+      rasterDurationMicros: event.rasterDurationMicros,
+      shaderCompilationDurationMicros: event.shaderCompilationDurationMicros,
+      traceEventCount: event.traceEventCount,
+      cpuSampleCount: event.cpuSampleCount,
+      cpuStackDepth: event.cpuStackDepth,
+      heapDiffObjectsBefore: event.heapDiffObjectsBefore,
+      heapDiffObjectsAfter: event.heapDiffObjectsAfter,
+      heapObjectsTotal: event.heapObjectsTotal,
+      rootSetCount: event.rootSetCount,
+      rowCount: event.rowCount,
+      inspectorTreeControllerId: event.inspectorTreeControllerId,
+      isV2Inspector: event.isV2Inspector,
+      androidAppId: event.androidAppId,
+      iosBundleId: event.iosBundleId,
     ),
   );
 }
 
-ua.Event _uaEventFromGtagException(
-  GtagExceptionDevTools gtagException, {
+ua.Event _uaEventFromDevToolsException(
+  DevToolsAnalyticsException exception, {
   stack_trace.Trace? stackTrace,
 }) {
   final stackTraceAsMap = createStackTraceForAnalytics(stackTrace);
@@ -942,22 +868,22 @@ ua.Event _uaEventFromGtagException(
   // Any data entries that have a null value will be removed from the event data
   // in the [ua.Event.exception] constructor.
   return ua.Event.exception(
-    exception: gtagException.description ?? 'unknown exception',
+    exception: exception.description ?? 'unknown exception',
     data: {
-      'fatal': gtagException.fatal,
+      'fatal': exception.fatal,
       ...stackTraceAsMap,
-      'userApp': gtagException.user_app,
-      'userBuild': gtagException.user_build,
-      'userPlatform': gtagException.user_platform,
-      'devtoolsPlatform': gtagException.devtools_platform,
-      'devtoolsChrome': gtagException.devtools_chrome,
-      'devtoolsVersion': gtagException.devtools_version,
-      'ideLaunched': gtagException.ide_launched,
-      'ideLaunchedFeature': gtagException.ide_launched_feature,
-      'isExternalBuild': gtagException.is_external_build,
-      'isEmbedded': gtagException.is_embedded,
-      'isWasm': gtagException.is_wasm,
-      'g3Username': gtagException.g3_username,
+      'userApp': exception.userApp,
+      'userBuild': exception.userBuild,
+      'userPlatform': exception.userPlatform,
+      'devtoolsPlatform': exception.devtoolsPlatform,
+      'devtoolsChrome': exception.devtoolsChrome,
+      'devtoolsVersion': exception.devtoolsVersion,
+      'ideLaunched': exception.ideLaunched,
+      'ideLaunchedFeature': exception.ideLaunchedFeature,
+      'isExternalBuild': exception.isExternalBuild,
+      'isEmbedded': exception.isEmbedded,
+      'isWasm': exception.isWasm,
+      'g3Username': exception.g3Username,
       // Do not include metrics in exceptions because GA4 event parameter are
       // limited to 25 entries, and we need to reserve entries for the stack
       // trace chunks.

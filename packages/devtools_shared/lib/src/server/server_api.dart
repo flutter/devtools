@@ -72,14 +72,6 @@ class ServerApi {
       // is complete and verified for robustness (est. Fall 2025).
 
       // ----- Flutter Tool GA store. -----
-      case apiGetFlutterGAEnabled:
-        // Is Analytics collection enabled?
-        return _encodeResponse(
-          LocalFileSystem.flutterStoreExists()
-              ? _flutterStore.gaEnabled
-              : false,
-          api: api,
-        );
       case apiGetFlutterGAClientId:
         // Flutter Tool GA clientId - ONLY get Flutter's clientId if enabled is
         // true.
@@ -90,7 +82,7 @@ class ServerApi {
           api: api,
         );
 
-      // ----- DevTools GA store. -----
+      // ----- DevTools Store. -----
 
       case apiResetDevTools:
         _devToolsStore.reset();
@@ -99,19 +91,6 @@ class ServerApi {
         // Has DevTools been run first time? To bring up analytics dialog.
         final isFirstRun = _devToolsStore.isFirstRun;
         return _encodeResponse(isFirstRun, api: api);
-      case apiGetDevToolsEnabled:
-        // Is DevTools Analytics collection enabled?
-        final isEnabled = _devToolsStore.analyticsEnabled;
-        return _encodeResponse(isEnabled, api: api);
-      case apiSetDevToolsEnabled:
-        // Enable or disable DevTools analytics collection.
-        if (queryParams.containsKey(devToolsEnabledPropertyName)) {
-          final analyticsEnabled =
-              json.decode(queryParams[devToolsEnabledPropertyName]!);
-
-          _devToolsStore.analyticsEnabled = analyticsEnabled;
-        }
-        return _encodeResponse(_devToolsStore.analyticsEnabled, api: api);
 
       // ----- Preferences api. -----
       case PreferencesApi.getPreferenceValue:
