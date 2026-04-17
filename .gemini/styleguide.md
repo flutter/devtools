@@ -14,7 +14,7 @@ and the CI testing ensures that the code is formatted correctly.
     - `[NIT]`: Idiomatic improvements or minor naming suggestions.
 - **Focus:** Prioritize logic, performance on the UI thread, and architectural consistency.
 - **No Empty Praise:** Do not leave "Looks good" or "Nice change" comments. If there are no issues, leave no comments.
-- **Copyright Headers:** Ensure all new files have a proper copyright header with the current year. For example:
+- **Copyright Headers:** Ensure all new files (except for agent skills and generated files) have a proper copyright header with the current year. For example:
   ```
   // Copyright 2026 The Flutter Authors
   // Use of this source code is governed by a BSD-style license that can be
