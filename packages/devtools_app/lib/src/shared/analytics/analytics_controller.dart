@@ -9,22 +9,19 @@ import 'package:flutter/foundation.dart';
 import '../development_helpers.dart';
 import '../globals.dart';
 import '../managers/dtd_manager_extensions.dart';
-import 'analytics.dart' as ga;
 
 Future<AnalyticsController> get analyticsController async {
   if (_analyticsController != null) return _analyticsController!;
 
-  // TODO(https://github.com/flutter/devtools/issues/7083): when the legacy
-  // analytics are fully removed, this try-catch is unnecessary because we will
-  // get these values directly from [dtdManater], like how the consentMessage
-  // parameter is specified below.
   var enabled = false;
   var shouldShowConsentMessage = false;
   try {
-    enabled = await ga.isAnalyticsEnabled();
+    enabled =
+        debugSendAnalytics ||
+        (kReleaseMode && await dtdManager.analyticsTelemetryEnabled());
     shouldShowConsentMessage =
         debugShowAnalyticsConsentMessage ||
-        await ga.shouldShowAnalyticsConsentMessage();
+        (kReleaseMode && await dtdManager.shouldShowAnalyticsConsentMessage());
   } catch (_) {
     // Ignore issues if analytics could not be initialized.
   }
@@ -32,11 +29,6 @@ Future<AnalyticsController> get analyticsController async {
     enabled: enabled,
     shouldShowConsentMessage: shouldShowConsentMessage,
     consentMessage: await dtdManager.analyticsConsentMessage(),
-    // TODO(https://github.com/flutter/devtools/issues/7083): remove these
-    // when the legacy analytics are fully removed.
-    legacyOnEnableAnalytics: ga.legacyOnEnableAnalytics,
-    legacyOnDisableAnalytics: ga.legacyOnDisableAnalytics,
-    legacyOnSetupAnalytics: ga.legacyOnSetupAnalytics,
   );
 }
 
@@ -49,9 +41,6 @@ class AnalyticsController {
     required bool enabled,
     required bool shouldShowConsentMessage,
     required this.consentMessage,
-    this.legacyOnEnableAnalytics,
-    this.legacyOnDisableAnalytics,
-    this.legacyOnSetupAnalytics,
   }) : analyticsEnabled = ValueNotifier<bool>(enabled),
        _shouldPrompt = ValueNotifier<bool>(
          shouldShowConsentMessage && consentMessage.isNotEmpty,
@@ -80,12 +69,6 @@ class AnalyticsController {
   /// Consent message for package:unified_analytics to be shown on first run.
   final String consentMessage;
 
-  // TODO(https://github.com/flutter/devtools/issues/7083): remove these
-  // when the legacy analytics are fully removed.
-  final AsyncAnalyticsCallback? legacyOnEnableAnalytics;
-  final AsyncAnalyticsCallback? legacyOnDisableAnalytics;
-  final VoidCallback? legacyOnSetupAnalytics;
-
   /// Sets whether google analytics are enabled.
   Future<void> toggleAnalyticsEnabled(bool? enable) async {
     if (enable == true) {
@@ -96,21 +79,18 @@ class AnalyticsController {
       if (kReleaseMode) {
         await dtdManager.setAnalyticsTelemetry(true);
       }
-      await legacyOnEnableAnalytics?.call();
     } else {
       analyticsEnabled.value = false;
       hidePrompt();
       if (kReleaseMode) {
         await dtdManager.setAnalyticsTelemetry(false);
       }
-      await legacyOnDisableAnalytics?.call();
     }
   }
 
   void setUpAnalytics() {
     if (_analyticsInitialized) return;
     assert(analyticsEnabled.value = true);
-    legacyOnSetupAnalytics?.call();
     _analyticsInitialized = true;
   }
 

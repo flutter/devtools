@@ -38,8 +38,6 @@ String? _debugDtdUri;
 
 /// Enable this flag to send and debug analytics when DevTools is run in debug
 /// or profile mode, otherwise analytics will only be sent in release builds.
-///
-/// `ga.isAnalyticsEnabled()` still must return true for analytics to be sent.
 bool debugSendAnalytics = false;
 
 /// Enable this flag to always show the analytics consent message, regardless

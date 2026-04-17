@@ -21,14 +21,6 @@ final _log = Logger('_analytics_stub');
 /// both web and desktop, and manipulate this value for tests running on the VM.
 String ideLaunched = '';
 
-FutureOr<bool> isAnalyticsEnabled() => false;
-
-FutureOr<bool> shouldShowAnalyticsConsentMessage() => false;
-
-void initializeGA() {}
-
-void jsHookupListenerForGA() {}
-
 void screen(String screenName, [int value = 0]) {
   _log.fine('Event: screen(screenName:$screenName, value:$value)');
 }
@@ -104,9 +96,3 @@ Future<void> setupDimensions() async {}
 void setupUserApplicationDimensions() {}
 
 Map<String, Object?> generateSurveyQueryParameters() => {};
-
-// TODO(https://github.com/flutter/devtools/issues/7083): remove these
-// when the legacy analytics are fully removed.
-FutureOr<void> legacyOnEnableAnalytics() {}
-FutureOr<void> legacyOnDisableAnalytics() {}
-void legacyOnSetupAnalytics() {}
