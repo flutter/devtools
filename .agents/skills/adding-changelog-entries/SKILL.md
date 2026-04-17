@@ -1,6 +1,6 @@
 ---
 name: adding-changelog-entries
-description: Guides the creation of changelog entries for published packages in the DevTools repository. Use when documenting changes in CHANGELOG.md files for devtools_shared, devtools_app_shared, or devtools_extensions.
+description: Use when documenting changes in CHANGELOG.md files for devtools_shared, devtools_app_shared, or devtools_extensions.
 ---
 
 # Adding Changelog Entries
