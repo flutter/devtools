@@ -139,53 +139,51 @@ class DisconnectObserverState extends State<DisconnectObserver>
   OverlayEntry _createDisconnectedOverlay() {
     final theme = Theme.of(context);
     currentDisconnectedOverlay = OverlayEntry(
-      builder: (context) => Positioned.fill(
-        child: Material(
-          child: Container(
-            color: theme.colorScheme.surface,
-            child: MultiValueListenableBuilder(
-              listenables: [_isReconnecting, _reconnectErrorText],
-              builder: (context, values, _) {
-                final isReconnecting = values.first as bool;
-                final reconnectErrorText = values[1] as String?;
-                return Center(
-                  child: Column(
-                    children: [
-                      const Spacer(),
-                      Text('Disconnected', style: theme.textTheme.headlineMedium),
-                      const SizedBox(height: defaultSpacing),
-                      if (isReconnecting)
-                        const CircularProgressIndicator()
-                      else
-                        _ReconnectActions(
-                          theme: theme,
-                          onReconnect: _attemptReconnect,
-                          routerDelegate: widget.routerDelegate,
-                          onConnectToNewApp: hideDisconnectedOverlay,
+      builder: (context) => Material(
+        child: Container(
+          color: theme.colorScheme.surface,
+          child: MultiValueListenableBuilder(
+            listenables: [_isReconnecting, _reconnectErrorText],
+            builder: (context, values, _) {
+              final isReconnecting = values.first as bool;
+              final reconnectErrorText = values[1] as String?;
+              return Center(
+                child: Column(
+                  children: [
+                    const Spacer(),
+                    Text('Disconnected', style: theme.textTheme.headlineMedium),
+                    const SizedBox(height: defaultSpacing),
+                    if (isReconnecting)
+                      const CircularProgressIndicator()
+                    else
+                      _ReconnectActions(
+                        theme: theme,
+                        onReconnect: _attemptReconnect,
+                        routerDelegate: widget.routerDelegate,
+                        onConnectToNewApp: hideDisconnectedOverlay,
+                      ),
+                    if (reconnectErrorText case final error?) ...[
+                      const SizedBox(height: denseSpacing),
+                      Text(
+                        error,
+                        style: theme.regularTextStyle.copyWith(
+                          color: theme.colorScheme.error,
                         ),
-                      if (reconnectErrorText case final error?) ...[
-                        const SizedBox(height: denseSpacing),
-                        Text(
-                          error,
-                          style: theme.regularTextStyle.copyWith(
-                            color: theme.colorScheme.error,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                      const Spacer(),
-                      if (offlineDataController.offlineDataJson.isNotEmpty) ...[
-                        ElevatedButton(
-                          onPressed: _reviewHistory,
-                          child: const Text('Review recent data (offline)'),
-                        ),
-                        const Spacer(),
-                      ],
+                        textAlign: TextAlign.center,
+                      ),
                     ],
-                  ),
-                );
-              },
-            ),
+                    const Spacer(),
+                    if (offlineDataController.offlineDataJson.isNotEmpty) ...[
+                      ElevatedButton(
+                        onPressed: _reviewHistory,
+                        child: const Text('Review recent data (offline)'),
+                      ),
+                      const Spacer(),
+                    ],
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
