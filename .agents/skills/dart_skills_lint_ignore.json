@@ -1,0 +1,10 @@
+{
+  "skills": {
+    "adding-release-notes": [
+      {
+        "rule_id": "check-relative-paths",
+        "file_name": "SKILL.md"
+      }
+    ]
+  }
+}
