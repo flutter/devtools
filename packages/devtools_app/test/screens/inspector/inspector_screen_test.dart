@@ -8,9 +8,9 @@
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/inspector_shared/inspector_settings_dialog.dart';
-import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/flex/flex.dart';
-import 'package:devtools_app/src/screens/inspector_v2/widget_details.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_settings_dialog.dart';
+import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
+import 'package:devtools_app/src/screens/inspector/widget_details.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/ui/tab.dart';
@@ -29,7 +29,7 @@ void main() {
 
   late FakeServiceConnectionManager fakeServiceConnection;
   late FakeServiceExtensionManager fakeExtensionManager;
-  const windowSize = Size(2600.0, 1200.0);
+  const windowSize = Size(3500.0, 1200.0);
 
   final debuggerController = createMockDebuggerControllerWithDefaults();
 

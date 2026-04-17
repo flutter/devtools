@@ -31,8 +31,8 @@ import 'screens/deep_link_validation/deep_links_controller.dart';
 import 'screens/deep_link_validation/deep_links_screen.dart';
 import 'screens/dtd/dtd_tools_controller.dart';
 import 'screens/dtd/dtd_tools_screen.dart';
-import 'screens/inspector_v2/inspector_screen.dart';
-import 'screens/inspector_v2/inspector_screen_controller.dart';
+import 'screens/inspector/inspector_screen.dart';
+import 'screens/inspector/inspector_screen_controller.dart';
 import 'screens/logging/logging_controller.dart';
 import 'screens/logging/logging_screen.dart';
 import 'screens/memory/framework/memory_controller.dart';
@@ -684,7 +684,7 @@ List<DevToolsScreen> defaultScreens({
       HomeScreen(sampleData: sampleData),
     ),
     // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
-    // Inspector V2 has been released.
+    // Inspector has been released.
     DevToolsScreen<InspectorScreenController>(
       InspectorScreen(),
       createController: (_) => InspectorScreenController(),
