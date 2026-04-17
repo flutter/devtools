@@ -5,8 +5,6 @@ description: Adds copyright headers to files based on file type. Use when creati
 
 # Adding Copyright Headers
 
-This skill provides instructions for adding copyright headers to source files in this repository based on their file type.
-
 ## Formats
 
 ### Dart Files (`.dart`)
