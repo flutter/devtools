@@ -14,6 +14,7 @@ When updating dependency versions in published package `pubspec.yaml` files (`de
 - **Match Exact Versions**: Always use the **actual** version specified in the target package's `pubspec.yaml` file.
 - **Suffix Preservation**: If a requested version contains a suffix like `-wip` (e.g., `13.0.0-wip`), the full string MUST be used in dependency constraints (e.g., `devtools_shared: ^13.0.0-wip`).
 - **Prevent Graph Failures**: Do not drop the suffix or estimate the base version tags. Version solver operations will fail in the local workspace if dependencies point to published strings that can't be resolved in non-published repositories.
+- **No Dependencies on Unpublished Packages**: Published packages (`devtools_shared`, `devtools_app_shared`, and `devtools_extensions`) MUST NOT depend on unpublished packages like `devtools_app` or `devtools_test`.
 - **Resolution Testing**: After updating versions, run `flutter pub get` in the repository to ensure version solving is satisfied. If this returns errors, you should fix the errors and try again.
 - **Updating devtools_app**: In `packages/devtools_app/pubspec.yaml`:
   - Dependencies on published packages do not have version constraints. This is intentional; do not change this when updating versions.
