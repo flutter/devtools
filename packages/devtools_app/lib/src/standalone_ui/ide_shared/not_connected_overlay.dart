@@ -52,7 +52,7 @@ class _NotConnectedOverlayState extends State<NotConnectedOverlay> {
           if (showReconnectButton)
             ElevatedButton(
               onPressed: () => dtdManager.reconnect(),
-              child: const Text('Retry'),
+              child: const Text('Reconnect'),
             ),
         ],
       ),
