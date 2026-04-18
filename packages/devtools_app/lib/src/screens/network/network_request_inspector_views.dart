@@ -17,6 +17,7 @@ import '../../shared/ui/colors.dart';
 import '../../shared/ui/common_widgets.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
+import 'utils/http_utils.dart';
 
 // Approximately double the indent of the expandable tile's title.
 const _rowIndentPadding = 30.0;
@@ -625,6 +626,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
   }
 
   List<Widget> _buildGeneralRows(BuildContext context) {
+    final bytes = data.responseBytes;
     return [
       // TODO(kenz): show preview for requests (png, response body, proto)
       _buildRow(
@@ -658,6 +660,14 @@ class NetworkRequestOverviewView extends StatelessWidget {
         ),
         const SizedBox(height: defaultSpacing),
       ],
+
+      _buildRow(
+        context: context,
+        title: 'Response Size',
+        child: _valueText(bytes != null ? formatBytes(bytes) : '-'),
+      ),
+      const SizedBox(height: defaultSpacing),
+
       if (data.contentType != null) ...[
         _buildRow(
           context: context,
