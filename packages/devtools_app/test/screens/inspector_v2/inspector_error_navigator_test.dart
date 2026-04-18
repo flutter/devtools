@@ -5,7 +5,7 @@
 import 'dart:collection';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/inspector_v2/inspector_screen_body.dart';
+
 import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
