@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -439,7 +440,7 @@ class _NotificationCardSection extends StatelessWidget {
           children: [
             if (domainErrorCount > 0)
               NotificationCard(
-                title: '$domainErrorCount domain not verified',
+               title: '$domainErrorCount ${pluralize('domain', domainErrorCount)} not verified',
                 description:
                     'This affects all deep links. Fix issues to make users go directly to your app.',
                 actionButton: TextButton(
