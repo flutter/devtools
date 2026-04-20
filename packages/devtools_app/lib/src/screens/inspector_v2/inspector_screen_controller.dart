@@ -6,8 +6,8 @@ import '../../shared/analytics/metrics.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
-import '../inspector_v2/inspector_controller.dart';
-import '../inspector_v2/inspector_tree_controller.dart';
+import 'inspector_controller.dart';
+import 'inspector_tree_controller.dart';
 
 /// Screen controller for the Inspector screen.
 ///

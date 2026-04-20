@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
-import '../inspector_v2/inspector_screen_body.dart';
+import 'inspector_screen_body.dart';
 import 'inspector_screen_controller.dart';
 
 class InspectorScreen extends Screen {
