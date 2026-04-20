@@ -440,7 +440,8 @@ class _NotificationCardSection extends StatelessWidget {
           children: [
             if (domainErrorCount > 0)
               NotificationCard(
-               title: '$domainErrorCount ${pluralize('domain', domainErrorCount)} not verified',
+               title: 
+                   '$domainErrorCount ${pluralize('domain', domainErrorCount)} not verified',
                 description:
                     'This affects all deep links. Fix issues to make users go directly to your app.',
                 actionButton: TextButton(
@@ -462,7 +463,8 @@ class _NotificationCardSection extends StatelessWidget {
               const SizedBox(width: defaultSpacing),
             if (pathErrorCount > 0)
               NotificationCard(
-                title: '$pathErrorCount path not working',
+                title:
+                    '$pathErrorCount ${pluralize('path', pathErrorCount)} not working',
                 description:
                     'Fix these path to make sure users are directed to your app',
                 actionButton: TextButton(
