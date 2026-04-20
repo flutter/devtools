@@ -253,7 +253,10 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   @override
   int? get responseBytes {
-    final contentLength = responseHeaders?['content-length'];
+    final headers = _request.response?.headers;
+    if (headers == null) return null;
+
+    final contentLength = headers['content-length'];
 
     if (contentLength is String) {
       return int.tryParse(contentLength);
@@ -261,12 +264,8 @@ class DartIOHttpRequestData extends NetworkRequest {
     if (contentLength is List && contentLength.isNotEmpty) {
       final first = contentLength.first;
 
-      if (first is int) {
-        return first;
-      }
-      if (first is String) {
-        return int.tryParse(first);
-      }
+      if (first is int) return first;
+      if (first is String) return int.tryParse(first);
     }
     return null;
   }
