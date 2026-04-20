@@ -63,23 +63,14 @@ void main() {
   }
 
   Future<void> pumpMemoryScreen(WidgetTester tester) async {
-    await tester.runAsync(() async {
-      await tester.pumpWidget(
-        wrapWithControllers(const MemoryScreenBody(), memory: controller),
-      );
+    await tester.pumpWidget(
+      wrapWithControllers(const MemoryScreenBody(), memory: controller),
+    );
 
-      // Current workaround for flaky image asset testing.
-      // See: https://github.com/flutter/flutter/issues/38997
-      for (final element in find.byType(Image).evaluate()) {
-        final widget = element.widget as Image;
-        final image = widget.image;
-        await precacheImage(image, element);
-        await tester.pumpAndSettle();
-      }
-
-      // Delay to ensure the memory profiler has collected data.
-      await tester.pumpAndSettle(const Duration(seconds: 2));
-    });
+    // Delay to ensure the memory profiler has collected data.
+    await tester.runAsync(
+      () async => await tester.pumpAndSettle(const Duration(seconds: 2)),
+    );
     expect(find.byType(MemoryScreenBody), findsOneWidget);
   }
 
