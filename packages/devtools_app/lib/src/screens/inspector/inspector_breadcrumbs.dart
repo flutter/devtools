@@ -126,7 +126,7 @@ class _InspectorBreadcrumb extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (icon != null) icon,
+            ?icon,
             Flexible(child: text),
           ],
         ),

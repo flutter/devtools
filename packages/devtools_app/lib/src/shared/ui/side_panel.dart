@@ -104,7 +104,7 @@ class SidePanelViewerState extends State<SidePanelViewer>
           );
           return Stack(
             children: [
-              if (child != null) child,
+              ?child,
               SidePanel(
                 sidePanelController: widget.controller,
                 visibilityAnimation: visibilityAnimation,
