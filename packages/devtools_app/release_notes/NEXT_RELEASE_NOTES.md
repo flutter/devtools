@@ -58,7 +58,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Deep links tool updates
 
-TODO: Remove this section if there are not any updates.
+- Pluralized "domain" and "path" in the validation summary notification titles when multiple errors are present. [#9790](https://github.com/flutter/devtools/pull/9790)
 
 ## VS Code sidebar updates
 
