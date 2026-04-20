@@ -201,6 +201,7 @@ Future<Set<String>> _libraryMemberAutocompletes(
   if (classes != null) {
     // Autocomplete class names as well
     final classNames = classes.map((clazz) => clazz.name);
+    // ignore: avoid-unnecessary-type-assertions
     result.addAll(classNames.nonNulls);
   }
 
