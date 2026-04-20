@@ -13,14 +13,14 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/ui/common_widgets.dart';
-import '../inspector_shared/inspector_settings_dialog.dart';
-import '../inspector_v2/inspector_controller.dart' as v2;
+import 'inspector_controller.dart';
+import 'inspector_settings_dialog.dart';
 
 /// Control buttons for the inspector panel.
 class InspectorControls extends StatelessWidget {
   const InspectorControls({super.key, this.controller});
 
-  final v2.InspectorController? controller;
+  final InspectorController? controller;
 
   static const minScreenWidthForTextBeforeTruncating = 800.0;
   static const minScreenWidthForText = 550.0;
@@ -113,7 +113,7 @@ class InspectorServiceExtensionButtonGroup extends StatelessWidget {
 class ShowImplementationWidgetsButton extends StatelessWidget {
   const ShowImplementationWidgetsButton({super.key, required this.controller});
 
-  final v2.InspectorController controller;
+  final InspectorController controller;
 
   @override
   Widget build(BuildContext context) {

@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../inspector/layout_explorer/ui/dimension.dart';
 import '../../inspector_data_models.dart';
+import 'dimension.dart';
 import 'overflow_indicator_painter.dart';
 import 'theme.dart';
 import 'widgets_theme.dart';

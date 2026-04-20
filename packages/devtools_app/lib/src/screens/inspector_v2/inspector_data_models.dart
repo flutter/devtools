@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-/// @docImport '../inspector/layout_explorer/ui/overflow_indicator_painter.dart';
+/// @docImport '../inspector_v2/layout_explorer/ui/overflow_indicator_painter.dart';
 library;
 
 import 'dart:math' as math;

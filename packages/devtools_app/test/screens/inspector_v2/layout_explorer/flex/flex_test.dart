@@ -260,7 +260,7 @@ void main() {
       null,
     );
     final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
-    final controller = TestInspectorV2Controller()..setSelectedNode(treeNode);
+    final controller = TestInspectorController()..setSelectedNode(treeNode);
     final widget = wrap(FlexLayoutExplorerWidget(controller));
     await pump(tester, widget);
     await tester.pumpAndSettle();
@@ -281,7 +281,7 @@ void main() {
       null,
     );
     final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
-    final controller = TestInspectorV2Controller()..setSelectedNode(treeNode);
+    final controller = TestInspectorController()..setSelectedNode(treeNode);
     final widget = wrap(FlexLayoutExplorerWidget(controller));
     await pump(tester, widget);
     await expectLater(
