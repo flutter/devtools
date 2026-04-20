@@ -19,7 +19,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any updates.
+- Deleted the option to use the legacy inspector.
+  [#9782](https://github.com/flutter/devtools/pull/9782)
 
 ## Performance updates
 
