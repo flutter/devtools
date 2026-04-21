@@ -269,6 +269,7 @@ class DapDisplayProvider extends StatelessWidget {
     // interactivity wrapper to provide inspect and re-root functionality. Add
     // tooltip on hover to provide type information.
     return OverflowingText(
+      tooltipMessage: value,
       textSpan: TextSpan(
         text: name,
         style: theme.fixedFontStyle.apply(
