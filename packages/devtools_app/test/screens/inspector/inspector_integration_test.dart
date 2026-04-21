@@ -11,6 +11,7 @@ import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/ui/utils.dart';
 import 'package:devtools_app/src/screens/inspector/widget_properties/properties_view.dart';
+import 'package:devtools_app/src/shared/ui/tab.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/helpers.dart';
@@ -534,6 +535,14 @@ void main() {
         await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
         await tester.pumpAndSettle(inspectorChangeSettleTime);
       }
+
+      final flexExplorerTab = find.descendant(
+        of: find.byType(DevToolsTab),
+        matching: find.text('Flex explorer'),
+      );
+      await tester.tap(flexExplorerTab);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
