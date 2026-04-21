@@ -11,7 +11,6 @@ import 'package:provider/provider.dart';
 import '../../app.dart';
 import '../../extensions/extension_settings.dart';
 import '../../screens/debugger/debugger_screen.dart';
-import '../../shared/ai_assistant/widgets/ai_assistant_pane.dart';
 import '../../shared/analytics/prompt.dart';
 import '../../shared/config_specific/drag_and_drop/drag_and_drop.dart';
 import '../../shared/config_specific/import_export/import_export.dart';
@@ -317,11 +316,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             !offlineDataController.showingOfflineData.value;
         final showConsole =
             isConnectedAppView && _currentScreen.showConsole(widget.embedMode);
-        final showAiAssistant =
-            FeatureFlags.aiAssistant.isEnabled &&
-            isConnectedAppView &&
-            _currentScreen.showAiAssistant();
-        final showBottomPane = showConsole || showAiAssistant;
+        final showBottomPane = showConsole;
         final containsSingleSimpleScreen =
             widget.screens.length == 1 && widget.screens.first is SimpleScreen;
         final showAppBar =
@@ -367,10 +362,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                             content,
                             BottomPane(
                               screenId: _currentScreen.screenId,
-                              tabs: [
-                                if (showConsole) const ConsolePane(),
-                                if (showAiAssistant) const AiAssistantPane(),
-                              ],
+                              tabs: [if (showConsole) const ConsolePane()],
                             ),
                           ],
                         )
