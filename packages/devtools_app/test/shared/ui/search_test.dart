@@ -368,7 +368,7 @@ class TestSearchData with SearchableDataMixin {
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
-    return regExpSearch.hasMatch(name);
+    return name.caseInsensitiveContains(regExpSearch);
   }
 }
 
