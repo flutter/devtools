@@ -100,7 +100,7 @@ class ArrowWrapper extends StatelessWidget {
             ),
           ),
         ),
-        if (child != null) child!,
+        ?child,
         Expanded(
           child: Container(
             margin: EdgeInsets.only(

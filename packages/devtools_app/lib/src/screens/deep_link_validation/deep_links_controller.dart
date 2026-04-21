@@ -444,7 +444,7 @@ class DeepLinksController extends DevToolsScreenController
             appLink.intentFilterChecks,
           ),
           os: {PlatformOS.android},
-          scheme: {if (scheme != null) scheme},
+          scheme: {?scheme},
         );
       } else {
         final linkData = domainPathToLinkData[domainAndPath]!;
