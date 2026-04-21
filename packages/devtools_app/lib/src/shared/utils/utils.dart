@@ -110,7 +110,7 @@ List<ConnectionDescription> generateDeviceDescription(
       title: 'Connected app type',
       description: connectedApp.display,
     ),
-    if (vmServiceConnection != null) vmServiceConnection,
+    ?vmServiceConnection,
     ConnectionDescription(title: 'Dart Version', description: version),
     if (flutterVersion != null && !flutterVersion.unknown) ...{
       ConnectionDescription(

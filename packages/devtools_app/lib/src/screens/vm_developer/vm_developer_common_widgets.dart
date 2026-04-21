@@ -155,7 +155,7 @@ class VMInfoList extends StatelessWidget {
               ),
             ),
           ),
-        if (table != null) table,
+        ?table,
       ],
     );
   }

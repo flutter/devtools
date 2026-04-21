@@ -134,10 +134,7 @@ Uri _newDevToolsGitHubIssueUri({
   String? additionalInfo,
   String? issueTitle,
 }) {
-  final issueBody = [
-    if (additionalInfo != null) additionalInfo,
-    ...environment,
-  ].join('\n');
+  final issueBody = [?additionalInfo, ...environment].join('\n');
 
   return Uri.parse(
     'https://$_newDevToolsIssueUriDisplay',
