@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:devtools_tool/commands/update_version.dart';
 import 'package:test/test.dart';
-import '../lib/commands/update_version.dart';
 
 void main() {
   group('calculateNewVersion', () {
