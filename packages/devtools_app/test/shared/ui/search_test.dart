@@ -136,7 +136,7 @@ void main() {
         ); // Has not updated yet
         expect(debounceController.isSearchInProgress, isTrue);
 
-        async.elapse(const Duration(milliseconds: 150));
+        async.elapse(debounceController.debounceDelay! * 1.5);
 
         expect(debounceController.isSearchInProgress, isFalse);
         expect(debounceController.searchMatches.value.length, equals(3));
