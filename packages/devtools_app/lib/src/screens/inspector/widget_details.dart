@@ -6,7 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../shared/console/eval/inspector_tree_v2.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import 'inspector_controller.dart';
 import 'layout_explorer/box/box.dart';

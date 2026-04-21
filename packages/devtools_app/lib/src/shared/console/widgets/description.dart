@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-/// @docImport '../../../screens/inspector_v2/inspector_tree_controller.dart';
+/// @docImport '../../../screens/inspector/inspector_tree_controller.dart';
 library;
 
 import 'package:devtools_app_shared/ui.dart';
@@ -17,7 +17,7 @@ import '../../primitives/utils.dart';
 import '../../ui/hover.dart';
 import '../../ui/icons.dart';
 import '../../ui/utils.dart';
-import '../eval/inspector_tree_v2.dart';
+import '../eval/inspector_tree.dart';
 import 'expandable_variable.dart';
 
 final _colorIconMaker = ColorIconMaker();
@@ -58,7 +58,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final TextStyle? style;
   final TextStyle? nodeDescriptionHighlightStyle;
   // TODO(https://github.com/flutter/devtools/issues/7860): Remove and default
-  // to true when turning on inspector V2. This is currently true for the V2
+  // to true when turning on inspector. This is currently true for the
   // inspector and false for the legacy inspector.
   final bool emphasizeNodesFromLocalProject;
   final String? actionLabel;

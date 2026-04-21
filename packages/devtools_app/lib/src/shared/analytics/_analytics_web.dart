@@ -122,7 +122,7 @@ class DevToolsAnalyticsEvent {
     this.androidAppId, //metric13
     this.iosBundleId, //metric14
     // Inspector screen metrics. See [InspectorScreenMetrics].
-    this.isV2Inspector, // metric15
+    this.isInspector, // metric15
   });
 
   factory DevToolsAnalyticsEvent._create({
@@ -200,8 +200,8 @@ class DevToolsAnalyticsEvent {
           ? screenMetrics.iosBundleId
           : null,
       // [InspectorScreenMetrics]
-      isV2Inspector: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.isV2.toString()
+      isInspector: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.isInspector.toString()
           : null,
     );
   }
@@ -242,7 +242,7 @@ class DevToolsAnalyticsEvent {
   int? inspectorTreeControllerId;
   String? androidAppId;
   String? iosBundleId;
-  String? isV2Inspector;
+  String? isInspector;
 }
 
 class DevToolsAnalyticsException {
@@ -298,7 +298,7 @@ class DevToolsAnalyticsException {
     this.androidAppId, //metric13
     this.iosBundleId, //metric14
     // Inspector screen metrics. See [InspectorScreenMetrics].
-    this.isV2Inspector, // metric15
+    this.isInspector, // metric15
   });
 
   factory DevToolsAnalyticsException._create(
@@ -370,8 +370,8 @@ class DevToolsAnalyticsException {
           ? screenMetrics.iosBundleId
           : null,
       // [InspectorScreenMetrics]
-      isV2Inspector: screenMetrics is InspectorScreenMetrics
-          ? screenMetrics.isV2.toString()
+      isInspector: screenMetrics is InspectorScreenMetrics
+          ? screenMetrics.isInspector.toString()
           : null,
     );
   }
@@ -409,7 +409,7 @@ class DevToolsAnalyticsException {
   int? inspectorTreeControllerId;
   String? androidAppId;
   String? iosBundleId;
-  String? isV2Inspector;
+  String? isInspector;
 }
 
 void screen(String screenName, [int value = 0]) {
@@ -852,7 +852,7 @@ ua.Event _uaEventFromDevToolsEvent(DevToolsAnalyticsEvent event) {
       rootSetCount: event.rootSetCount,
       rowCount: event.rowCount,
       inspectorTreeControllerId: event.inspectorTreeControllerId,
-      isV2Inspector: event.isV2Inspector,
+      isInspector: event.isInspector,
       androidAppId: event.androidAppId,
       iosBundleId: event.iosBundleId,
     ),
@@ -904,7 +904,7 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
     required this.rootSetCount,
     required this.rowCount,
     required this.inspectorTreeControllerId,
-    required this.isV2Inspector,
+    required this.isInspector,
     required this.androidAppId,
     required this.iosBundleId,
     required this.uiDurationMicros,
@@ -929,7 +929,7 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
   final int? rootSetCount;
   final int? rowCount;
   final int? inspectorTreeControllerId;
-  final String? isV2Inspector;
+  final String? isInspector;
 
   // [DeepLinkScreenMetrics]
   final String? androidAppId;
@@ -949,7 +949,7 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
     'rootSetCount': rootSetCount,
     'rowCount': rowCount,
     'inspectorTreeControllerId': inspectorTreeControllerId,
-    'isV2Inspector': isV2Inspector,
+    'isInspector': isInspector,
     'androidAppId': androidAppId,
     'iosBundleId': iosBundleId,
   }..removeWhere((key, value) => value == null)).cast<String, Object>();

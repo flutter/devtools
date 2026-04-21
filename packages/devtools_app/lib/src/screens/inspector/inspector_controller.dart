@@ -26,7 +26,7 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
-import '../../shared/console/eval/inspector_tree_v2.dart';
+import 'package:devtools_app/src/shared/console/eval/inspector_tree.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
@@ -397,7 +397,7 @@ class InspectorController extends DisposableController
       ga.select(
         gac.inspector,
         gac.refreshEmptyTree,
-        screenMetricsProvider: () => InspectorScreenMetrics.v2(),
+        screenMetricsProvider: () => InspectorScreenMetrics(),
       );
       firstInspectorTreeLoadCompleted = true;
     }
@@ -776,7 +776,7 @@ class InspectorController extends DisposableController
       ga.select(
         gac.inspector,
         gac.onDeviceSelection,
-        screenMetricsProvider: () => InspectorScreenMetrics.v2(),
+        screenMetricsProvider: () => InspectorScreenMetrics(),
       );
     } catch (error, st) {
       if (selectionGroups.next == group) {

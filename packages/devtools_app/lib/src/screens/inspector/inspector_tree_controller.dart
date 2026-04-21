@@ -16,7 +16,7 @@ import 'package:logging/logging.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
-import '../../shared/console/eval/inspector_tree_v2.dart';
+import 'package:devtools_app/src/shared/console/eval/inspector_tree.dart';
 import '../../shared/console/widgets/description.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/globals.dart';
@@ -133,7 +133,7 @@ class InspectorTreeController extends DisposableController
       gac.inspector,
       gac.inspectorTreeControllerInitialized,
       nonInteraction: true,
-      screenMetricsProvider: () => InspectorScreenMetrics.v2(
+      screenMetricsProvider: () => InspectorScreenMetrics(
         inspectorTreeControllerId: gaId,
         rootSetCount: _rootSetCount,
         rowCount: _rowsInTree.value.length,
@@ -181,7 +181,7 @@ class InspectorTreeController extends DisposableController
       gac.inspector,
       gac.inspectorTreeControllerRootChange,
       nonInteraction: true,
-      screenMetricsProvider: () => InspectorScreenMetrics.v2(
+      screenMetricsProvider: () => InspectorScreenMetrics(
         inspectorTreeControllerId: gaId,
         rootSetCount: ++_rootSetCount,
         rowCount: _rowsInTree.value.length,
@@ -567,7 +567,7 @@ class InspectorTreeController extends DisposableController
     ga.select(
       gac.inspector,
       gac.treeNodeSelection,
-      screenMetricsProvider: () => InspectorScreenMetrics.v2(),
+      screenMetricsProvider: () => InspectorScreenMetrics(),
     );
     final diagnostic = node?.diagnostic;
     if (diagnostic != null && diagnostic.groupIsHidden) {
@@ -1156,7 +1156,7 @@ class _InspectorTreeState extends State<InspectorTree>
               screenId,
               gac.pageReady,
               screenMetricsProvider: () =>
-                  InspectorScreenMetrics.v2(rowCount: rows.length),
+                  InspectorScreenMetrics(rowCount: rows.length),
             );
             unawaited(
               serviceConnection.sendDwdsEvent(

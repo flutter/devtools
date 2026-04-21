@@ -9,8 +9,8 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/ui/utils.dart';
-import 'package:devtools_app/src/screens/inspector_v2/widget_properties/properties_view.dart';
+import 'package:devtools_app/src/screens/inspector/layout_explorer/ui/utils.dart';
+import 'package:devtools_app/src/screens/inspector/widget_properties/properties_view.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/helpers.dart';
@@ -80,7 +80,7 @@ void main() {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../../test_infra/goldens/integration_inspector_v2_initial_load.png',
+          '../../test_infra/goldens/integration_inspector_initial_load.png',
         ),
       );
     });
@@ -110,7 +110,7 @@ void main() {
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../../test_infra/goldens/integration_inspector_v2_after_hot_restart.png',
+            '../../test_infra/goldens/integration_inspector_after_hot_restart.png',
           ),
         );
       },
@@ -128,7 +128,7 @@ void main() {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../../test_infra/goldens/integration_inspector_v2_select_center.png',
+          '../../test_infra/goldens/integration_inspector_select_center.png',
         ),
       );
 
@@ -170,7 +170,7 @@ void main() {
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../../test_infra/goldens/integration_inspector_v2_implementation_widgets_expanded.png',
+            '../../test_infra/goldens/integration_inspector_implementation_widgets_expanded.png',
           ),
           // Implementation widgets from Flutter framework are not guaranteed to
           // be stable.
@@ -184,7 +184,7 @@ void main() {
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../../test_infra/goldens/integration_inspector_v2_hideable_widget_selected.png',
+            '../../test_infra/goldens/integration_inspector_hideable_widget_selected.png',
           ),
           // Implementation widgets from Flutter framework are not guaranteed to
           // be stable.
@@ -202,7 +202,7 @@ void main() {
         await expectLater(
           find.byType(InspectorScreenBody),
           matchesDevToolsGolden(
-            '../../test_infra/goldens/integration_inspector_v2_implementation_widgets_collapsed.png',
+            '../../test_infra/goldens/integration_inspector_implementation_widgets_collapsed.png',
           ),
         );
       },
@@ -238,7 +238,7 @@ void main() {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../../test_infra/goldens/integration_inspector_v2_hideable_widget_selected_from_search.png',
+          '../../test_infra/goldens/integration_inspector_hideable_widget_selected_from_search.png',
         ),
         // Implementation widgets from Flutter framework are not guaranteed to
         // be stable.
@@ -267,7 +267,7 @@ void main() {
     await expectLater(
       find.byType(InspectorScreenBody),
       matchesDevToolsGolden(
-        '../../test_infra/goldens/integration_inspector_v2_implementation_widgets_hidden.png',
+        '../../test_infra/goldens/integration_inspector_implementation_widgets_hidden.png',
       ),
     );
 
@@ -525,7 +525,7 @@ void main() {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../../test_infra/goldens/integration_inspector_v2_errors_1_initial_load.png',
+          '../../test_infra/goldens/integration_inspector_errors_1_initial_load.png',
         ),
       );
 
@@ -537,7 +537,7 @@ void main() {
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
-          '../../test_infra/goldens/integration_inspector_v2_errors_2_error_selected.png',
+          '../../test_infra/goldens/integration_inspector_errors_2_error_selected.png',
         ),
       );
     });
