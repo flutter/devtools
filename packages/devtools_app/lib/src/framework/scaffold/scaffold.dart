@@ -316,7 +316,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             !offlineDataController.showingOfflineData.value;
         final showConsole =
             isConnectedAppView && _currentScreen.showConsole(widget.embedMode);
-        final showBottomPane = showConsole;
         final containsSingleSimpleScreen =
             widget.screens.length == 1 && widget.screens.first is SimpleScreen;
         final showAppBar =
@@ -348,7 +347,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               body: OutlineDecoration.onlyTop(
                 child: Padding(
                   padding: widget.appPadding,
-                  child: showBottomPane
+                  child: showConsole
                       ? SplitPane(
                           axis: Axis.vertical,
                           initialFractions: const [0.8, 0.2],
@@ -362,7 +361,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                             content,
                             BottomPane(
                               screenId: _currentScreen.screenId,
-                              tabs: [if (showConsole) const ConsolePane()],
+                              tabs: const [ConsolePane()],
                             ),
                           ],
                         )
