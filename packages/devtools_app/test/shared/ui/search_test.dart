@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -120,24 +121,26 @@ void main() {
       }
     });
 
-    test('debounce', () async {
-      final debounceController = TestDebounceSearchController()
-        ..data.addAll(testData);
-      expect(debounceController.search, isEmpty);
-      expect(debounceController.searchMatches.value, isEmpty);
+    test('debounce', () {
+      fakeAsync((async) {
+        final debounceController = TestDebounceSearchController()
+          ..data.addAll(testData);
+        expect(debounceController.search, isEmpty);
+        expect(debounceController.searchMatches.value, isEmpty);
 
-      debounceController.search = 'foo';
-      expect(debounceController.search, equals('foo'));
-      expect(
-        debounceController.searchMatches.value,
-        isEmpty,
-      ); // Has not updated yet
-      expect(debounceController.isSearchInProgress, isTrue);
+        debounceController.search = 'foo';
+        expect(debounceController.search, equals('foo'));
+        expect(
+          debounceController.searchMatches.value,
+          isEmpty,
+        ); // Has not updated yet
+        expect(debounceController.isSearchInProgress, isTrue);
 
-      await Future.delayed(const Duration(milliseconds: 150));
+        async.elapse(const Duration(milliseconds: 150));
 
-      expect(debounceController.isSearchInProgress, isFalse);
-      expect(debounceController.searchMatches.value.length, equals(3));
+        expect(debounceController.isSearchInProgress, isFalse);
+        expect(debounceController.searchMatches.value.length, equals(3));
+      });
     });
   });
 
@@ -365,7 +368,7 @@ class TestSearchData with SearchableDataMixin {
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
-    return name.caseInsensitiveContains(regExpSearch.pattern);
+    return regExpSearch.hasMatch(name);
   }
 }
 
@@ -376,7 +379,7 @@ class TestAutoCompleteSearchController extends DisposableController
   }
 
   @override
-  GlobalKey<State<StatefulWidget>> get searchFieldKey => GlobalKey();
+  final searchFieldKey = GlobalKey();
 
   @override
   Iterable<SearchableDataMixin> get currentDataToSearchThrough => [];
