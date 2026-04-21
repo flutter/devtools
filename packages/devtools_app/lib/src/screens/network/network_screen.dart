@@ -29,6 +29,7 @@ import '../../shared/ui/utils.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
+import 'utils/http_utils.dart';
 
 class NetworkScreen extends Screen {
   NetworkScreen() : super.fromMetaData(ScreenMetaData.network);
@@ -352,6 +353,7 @@ class NetworkRequestsTable extends StatelessWidget {
   static const statusColumn = StatusColumn();
   static const typeColumn = TypeColumn();
   static const durationColumn = DurationColumn();
+  static const responseSizeColumn = ResponseSizeColumn();
   static final timestampColumn = TimestampColumn();
   static const actionsColumn = ActionsColumn();
   static final columns = <ColumnData<NetworkRequest>>[
@@ -360,6 +362,7 @@ class NetworkRequestsTable extends StatelessWidget {
     statusColumn,
     typeColumn,
     durationColumn,
+    responseSizeColumn,
     timestampColumn,
     actionsColumn,
   ];
@@ -391,6 +394,20 @@ class NetworkRequestsTable extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+class ResponseSizeColumn extends ColumnData<NetworkRequest> {
+  const ResponseSizeColumn()
+    : super('Size', alignment: ColumnAlignment.right, fixedWidthPx: 90);
+
+  @override
+  int? getValue(NetworkRequest dataObject) => dataObject.responseBytes;
+
+  @override
+  String getDisplayValue(NetworkRequest dataObject) {
+    final bytes = dataObject.responseBytes;
+    return bytes != null ? formatBytes(bytes) : '-';
   }
 }
 

@@ -36,8 +36,8 @@ import '../../shared/managers/notifications.dart';
 import '../../shared/primitives/query_parameters.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/utils/utils.dart';
-import '../inspector_shared/inspector_screen.dart';
 import 'inspector_data_models.dart';
+import 'inspector_screen.dart';
 import 'inspector_tree_controller.dart';
 
 final _log = Logger('inspector_controller');

@@ -8,7 +8,6 @@ library;
 import 'package:devtools_shared/devtools_extensions.dart';
 
 import '../framework/screen.dart';
-import '../preferences/preferences.dart';
 
 part 'constants/_cpu_profiler_constants.dart';
 part 'constants/_debugger_constants.dart';
@@ -97,6 +96,9 @@ const onDeviceSelection = 'onDeviceSelection';
 const inspectorSettings = 'inspectorSettings';
 const loggingSettings = 'loggingSettings';
 const refreshPubRoots = 'refreshPubRoots';
+
+enum InspectorDetailsViewType { layoutExplorer, widgetDetailsTree }
+
 final defaultDetailsViewToLayoutExplorer =
     InspectorDetailsViewType.layoutExplorer.name;
 final defaultDetailsViewToWidgetDetails =

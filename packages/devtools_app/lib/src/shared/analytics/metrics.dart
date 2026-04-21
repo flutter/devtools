@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-/// @docImport '../../screens/inspector/inspector_tree_controller.dart';
+/// @docImport '../../screens/inspector_v2/inspector_tree_controller.dart';
 /// @docImport '../../screens/performance/panes/flutter_frames/flutter_frame_model.dart';
 library;
 
@@ -67,12 +67,6 @@ class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
 }
 
 class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
-  InspectorScreenMetrics.legacy({
-    this.rootSetCount,
-    this.rowCount,
-    this.inspectorTreeControllerId,
-  }) : isV2 = false;
-
   InspectorScreenMetrics.v2({
     this.rootSetCount,
     this.rowCount,
