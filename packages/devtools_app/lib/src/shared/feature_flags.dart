@@ -69,14 +69,6 @@ extension FeatureFlags on Never {
     enabled: enableExperiments,
   );
 
-  /// Flag to enable the new Inspector panel.
-  ///
-  /// https://github.com/flutter/devtools/issues/7854
-  static final inspector = BooleanFeatureFlag(
-    name: 'inspector',
-    enabled: true,
-  );
-
   /// Flag to enable the AI Assistant.
   ///
   /// https://github.com/flutter/devtools/issues/9590
@@ -93,7 +85,6 @@ extension FeatureFlags on Never {
     memorySaveLoad,
     devToolsExtensions,
     dapDebugging,
-    inspector,
     aiAssistant,
   };
 

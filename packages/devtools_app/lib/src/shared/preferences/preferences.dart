@@ -106,8 +106,6 @@ class PreferencesController extends DisposableController
   ExtensionsPreferencesController get devToolsExtensions => _extensions;
   final _extensions = ExtensionsPreferencesController();
 
-  // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
-  // Inspector has been released.
   InspectorPreferencesController get inspector => _inspector;
   final _inspector = InspectorPreferencesController();
 

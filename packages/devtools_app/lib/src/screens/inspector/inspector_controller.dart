@@ -26,7 +26,7 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
-import 'package:devtools_app/src/shared/console/eval/inspector_tree.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';

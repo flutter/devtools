@@ -16,7 +16,7 @@ import 'package:logging/logging.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
-import 'package:devtools_app/src/shared/console/eval/inspector_tree.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/console/widgets/description.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/globals.dart';
@@ -1467,7 +1467,6 @@ class InspectorRowContent extends StatelessWidget {
                           isSelected: row.isSelected,
                           searchValue: searchValue,
                           errorText: error?.errorMessage,
-                          emphasizeNodesFromLocalProject: true,
                           nodeDescriptionHighlightStyle:
                               searchValue.isEmpty || !row.isSearchMatch
                               ? DiagnosticsTextStyles.regular(

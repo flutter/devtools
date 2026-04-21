@@ -683,8 +683,6 @@ List<DevToolsScreen> defaultScreens({
     DevToolsScreen<DevToolsScreenController>(
       HomeScreen(sampleData: sampleData),
     ),
-    // TODO(https://github.com/flutter/devtools/issues/7860): Clean-up after
-    // Inspector has been released.
     DevToolsScreen<InspectorScreenController>(
       InspectorScreen(),
       createController: (_) => InspectorScreenController(),
