@@ -94,7 +94,7 @@ Future<List<String>> autoCompleteResultsFor(
       }
     } catch (_) {}
   }
-  return result.nonNulls
+    return result
       .where((name) => name.startsWith(parts.activeWord))
       .toList();
 }
@@ -189,7 +189,7 @@ Future<Set<String>> _libraryMemberAutocompletes(
   final variables = library.variables;
   if (variables != null) {
     final fields = variables.map((field) => field.name);
-    result.addAll(fields.nonNulls);
+    result.addAll(fields);
   }
   final functions = library.functions;
   if (functions != null) {
@@ -197,13 +197,13 @@ Future<Set<String>> _libraryMemberAutocompletes(
     final members = functions.map(
       (funcRef) => funcRef.name!.replaceAll('=', ''),
     );
-    result.addAll(members.nonNulls);
+    result.addAll(members);
   }
   final classes = library.classes;
   if (classes != null) {
     // Autocomplete class names as well
     final classNames = classes.map((clazz) => clazz.name);
-    result.addAll(classNames.nonNulls);
+    result.addAll(classNames);
   }
 
   if (debugIncludeExports) {
