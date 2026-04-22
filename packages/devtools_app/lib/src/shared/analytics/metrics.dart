@@ -71,13 +71,10 @@ class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
     this.rootSetCount,
     this.rowCount,
     this.inspectorTreeControllerId,
-  }) : isInspector = true;
+  });
 
   static const summaryTreeGaId = 0;
   static const detailsTreeGaId = 1;
-
-  /// Whether these metrics are for the inspector.
-  final bool isInspector;
 
   /// The number of times the root has been set, since the
   /// [InspectorTreeController] with id [inspectorTreeControllerId], has been
