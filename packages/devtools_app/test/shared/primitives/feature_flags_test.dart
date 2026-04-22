@@ -19,7 +19,6 @@ void main() {
     expect(FeatureFlags.memorySaveLoad.isEnabled, false);
     expect(FeatureFlags.devToolsExtensions.isEnabled, isExternalBuild);
     expect(FeatureFlags.dapDebugging.isEnabled, false);
-    expect(FeatureFlags.aiAssistant.isEnabled, false);
   });
 
   group('FlutterChannelFeatureFlag', () {
