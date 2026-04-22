@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/ui/common_widgets.dart';
 import 'inspector_controller.dart';
@@ -30,8 +29,6 @@ class InspectorControls extends StatelessWidget {
     final activeButtonColor = Theme.of(
       context,
     ).colorScheme.activeToggleButtonColor;
-    final isInspectorV2 =
-        controller != null && FeatureFlags.inspectorV2.isEnabled;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -49,16 +46,13 @@ class InspectorControls extends StatelessWidget {
                     : extensions.toggleOnDeviceWidgetInspector,
               ],
               minScreenWidthForText: minScreenWidthForText,
-              minScreenWidthForTextBeforeTruncating: isInspectorV2
-                  ? minScreenWidthForTextBeforeTruncating
-                  : null,
+              minScreenWidthForTextBeforeTruncating:
+                  minScreenWidthForTextBeforeTruncating,
             );
           },
         ),
-        if (isInspectorV2) ...[
-          const SizedBox(width: defaultSpacing),
-          ShowImplementationWidgetsButton(controller: controller!),
-        ],
+        const SizedBox(width: defaultSpacing),
+        ShowImplementationWidgetsButton(controller: controller!),
         const Spacer(),
         const SizedBox(width: defaultSpacing),
         const InspectorServiceExtensionButtonGroup(),

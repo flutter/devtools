@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
-import '../../shared/console/eval/inspector_tree_v2.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/globals.dart';
 import '../../shared/managers/error_badge_manager.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
@@ -206,7 +206,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     ga.select(
       gac.inspector,
       gac.refresh,
-      screenMetricsProvider: () => InspectorScreenMetrics.v2(),
+      screenMetricsProvider: () => InspectorScreenMetrics(),
     );
     unawaited(
       blockWhileInProgress(() async {

@@ -4,8 +4,8 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/screens/inspector_v2/layout_explorer/flex/flex.dart';
-import 'package:devtools_app/src/shared/console/eval/inspector_tree_v2.dart';
+import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
+import 'package:devtools_app/src/shared/console/eval/inspector_tree.dart';
 import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
@@ -19,7 +19,7 @@ import '../../../../test_infra/matchers/matchers.dart';
 void main() {
   const windowSize = Size(1750, 1750);
   const relativeGoldenPath =
-      '../../../../test_infra/goldens/inspector_v2/layout_explorer/flex';
+      '../../../../test_infra/goldens/inspector/layout_explorer/flex';
 
   Map<String, Object> buildDiagnosticsNodeJson(Axis axis) => jsonDecode('''
       {
