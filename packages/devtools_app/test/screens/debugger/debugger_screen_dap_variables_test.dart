@@ -126,4 +126,39 @@ void main() {
     // String is now visible.
     expect(stringFinder, findsOneWidget);
   });
+  testWidgetsWithWindowSize(
+    'Truncates long variables to a single line with tooltip',
+    windowSize,
+    (WidgetTester tester) async {
+      final longString = 'a' * 1000;
+      final node = DapObjectNode(
+        service: vmService,
+        variable: dap.Variable(
+          name: 'longVar',
+          value: longString,
+          variablesReference: 0,
+        ),
+      );
+
+      fakeServiceConnection.appState.setDapVariables([node]);
+      await pumpDebuggerScreen(tester, debuggerController);
+
+      final tooltipFinder = find.byWidgetPredicate(
+        (widget) => widget is DevToolsTooltip && widget.message == longString,
+      );
+      expect(tooltipFinder, findsOneWidget);
+
+      final finder = find.byType(RichText);
+      bool foundTruncated = false;
+      for (final widget in tester.widgetList<RichText>(finder)) {
+        if (widget.text.toPlainText().contains('longVar: $longString')) {
+          expect(widget.maxLines, 1);
+          expect(widget.softWrap, false);
+          expect(widget.overflow, TextOverflow.ellipsis);
+          foundTruncated = true;
+        }
+      }
+      expect(foundTruncated, isTrue);
+    },
+  );
 }
