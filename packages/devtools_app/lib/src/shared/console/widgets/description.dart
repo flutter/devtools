@@ -302,7 +302,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         );
         // provide some contrast between the name and description if both are
         // present.
-        textStyle = textStyle.merge(theme.subtleTextStyle);
+        final fontSize = textStyle.fontSize;
+        textStyle = textStyle.merge(
+          theme.subtleTextStyle.copyWith(fontSize: fontSize),
+        );
       }
 
       if (diagnosticLocal.isCreatedByLocalProject) {
@@ -399,10 +402,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       if (!diagnosticLocal.isCreatedByLocalProject &&
           diagnosticLocal.description != '[root]') {
         final fontSize = textStyle.fontSize;
-        textStyle = textStyle.merge(theme.subtleTextStyle);
-        if (fontSize != null) {
-          textStyle = textStyle.copyWith(fontSize: fontSize);
-        }
+        textStyle = textStyle.merge(
+          theme.subtleTextStyle.copyWith(fontSize: fontSize),
+        );
       }
 
       var diagnosticDescription = buildDescription(
