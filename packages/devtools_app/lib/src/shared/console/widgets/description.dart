@@ -303,10 +303,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         // provide some contrast between the name and description if both are
         // present.
         textStyle = textStyle.merge(theme.subtleTextStyle);
-        final fontSize = textStyle.fontSize;
-        if (fontSize != null) {
-          textStyle = textStyle.copyWith(fontSize: fontSize);
-        }
       }
 
       if (diagnosticLocal.isCreatedByLocalProject) {
