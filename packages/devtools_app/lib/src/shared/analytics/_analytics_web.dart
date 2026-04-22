@@ -200,6 +200,10 @@ class DevToolsAnalyticsEvent {
           ? screenMetrics.iosBundleId
           : null,
       // [InspectorScreenMetrics]
+      // TODO(https://github.com/flutter/devtools/issues/9563): Remove this
+      // dimension after dashboards have been updated to not include it. The
+      // legacy inspector will be removed in Flutter 3.47 (Aug 2026), leaving
+      // the V2 inspector the only inspector.
       isV2Inspector: screenMetrics is InspectorScreenMetrics
           ? true.toString()
           : null,
