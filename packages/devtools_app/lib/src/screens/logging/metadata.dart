@@ -14,9 +14,10 @@ import '../../shared/primitives/utils.dart';
 import 'logging_controller.dart';
 
 class MetadataChips extends StatelessWidget {
-  const MetadataChips({super.key, required this.data});
+  const MetadataChips({super.key, required this.data, this.onKindTapped});
 
   final LogData data;
+  final void Function(String kind)? onKindTapped;
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +92,7 @@ class MetadataChips extends StatelessWidget {
           iconAsset: kindIcon.iconAsset,
           backgroundColor: kindColors.background,
           foregroundColor: kindColors.foreground,
+          onTap: onKindTapped != null ? () => onKindTapped!(data.kind) : null,
         ),
         logLevelChip,
         if (elapsedFrameTimeAsString != null)
@@ -115,6 +117,7 @@ abstract class MetadataChip extends StatelessWidget {
     this.foregroundColor,
     this.outlined = false,
     this.includeLeadingMargin = true,
+    this.onTap,
   });
 
   final IconData? icon;
@@ -125,6 +128,7 @@ abstract class MetadataChip extends StatelessWidget {
   final Color? foregroundColor;
   final bool outlined;
   final bool includeLeadingMargin;
+  final VoidCallback? onTap;
 
   static const horizontalPadding = densePadding;
   static const verticalPadding = borderPadding;
@@ -140,50 +144,69 @@ abstract class MetadataChip extends StatelessWidget {
     final foregroundColor =
         this.foregroundColor ?? theme.colorScheme.onSecondaryContainer;
 
-    return maybeWrapWithTooltip(
-      tooltip: tooltip,
-      child: Container(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(_borderRadius),
-          border: outlined
-              ? Border.all(color: theme.colorScheme.subtleTextColor)
-              : null,
-        ),
-        margin: includeLeadingMargin
-            ? const EdgeInsets.only(left: denseSpacing)
+    Widget chip = Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(_borderRadius),
+        border: outlined
+            ? Border.all(color: theme.colorScheme.subtleTextColor)
             : null,
-        padding: const EdgeInsets.symmetric(
-          horizontal: horizontalPadding,
-          vertical: verticalPadding,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null || iconAsset != null) ...[
-              DevToolsIcon(
-                icon: icon,
-                iconAsset: iconAsset,
-                size: _metadataIconSize,
-                color: foregroundColor,
-              ),
-              const SizedBox(width: iconPadding),
-            ] else
-              // Include an empty SizedBox to ensure a consistent height for the
-              // chips, regardless of whether the chip includes an icon.
-              const SizedBox(height: _metadataIconSize),
-            RichText(
-              text: TextSpan(
-                text: text,
-                style: theme
-                    .regularTextStyleWithColor(foregroundColor)
-                    .copyWith(fontSize: smallFontSize),
-              ),
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: verticalPadding,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null || iconAsset != null) ...[
+            DevToolsIcon(
+              icon: icon,
+              iconAsset: iconAsset,
+              size: _metadataIconSize,
+              color: foregroundColor,
             ),
-          ],
-        ),
+            const SizedBox(width: iconPadding),
+          ] else
+            // Include an empty SizedBox to ensure a consistent height for the
+            // chips, regardless of whether the chip includes an icon.
+            const SizedBox(height: _metadataIconSize),
+          RichText(
+            text: TextSpan(
+              text: text,
+              style: theme
+                  .regularTextStyleWithColor(foregroundColor)
+                  .copyWith(fontSize: smallFontSize),
+            ),
+          ),
+        ],
       ),
     );
+
+    if (onTap != null) {
+      chip = Padding(
+        padding: includeLeadingMargin
+            ? const EdgeInsets.only(left: denseSpacing)
+            : EdgeInsets.zero,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: chip,
+          ),
+        ),
+      );
+    } else {
+      chip = Padding(
+        padding: includeLeadingMargin
+            ? const EdgeInsets.only(left: denseSpacing)
+            : EdgeInsets.zero,
+        child: chip,
+      );
+    }
+
+    return maybeWrapWithTooltip(tooltip: tooltip, child: chip);
   }
 }
 
@@ -195,6 +218,7 @@ class KindMetaDataChip extends MetadataChip {
     super.iconAsset,
     super.backgroundColor,
     super.foregroundColor,
+    super.onTap,
   }) : super(text: kind, includeLeadingMargin: false);
 
   static ({IconData? icon, String? iconAsset}) generateIcon(String kind) {

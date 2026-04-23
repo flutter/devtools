@@ -5,6 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
@@ -54,7 +55,6 @@ class MessageColumn extends ColumnData<LogData>
     // This needs to be a function because the details may be computed after the
     // initial build.
     bool hasDetails() => !data.details.isNullOrEmpty;
-
     return FutureBuilder<bool>(
       future: data.detailsComputed.future,
       builder: (context, _) {
@@ -92,7 +92,12 @@ class MessageColumn extends ColumnData<LogData>
               padding: const EdgeInsets.symmetric(vertical: densePadding),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  return MetadataChips(data: data);
+                  return MetadataChips(
+                    data: data,
+                    onKindTapped: (kind) => screenControllers
+                        .lookup<LoggingController>()
+                        .setActiveFilter(query: 'k:"$kind"'),
+                  );
                 },
               ),
             ),
