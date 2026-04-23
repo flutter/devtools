@@ -5,7 +5,6 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
@@ -93,14 +92,7 @@ class MessageColumn extends ColumnData<LogData>
               padding: const EdgeInsets.symmetric(vertical: densePadding),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  return MetadataChips(
-                    data: data,
-                    onKindTapped: (kind) {
-                      final controller = screenControllers
-                          .lookup<LoggingController>();
-                      controller.setActiveFilter(query: 'k:$kind');
-                    },
-                  );
+                  return MetadataChips(data: data);
                 },
               ),
             ),
