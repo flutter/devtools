@@ -152,9 +152,6 @@ abstract class MetadataChip extends StatelessWidget {
             ? Border.all(color: theme.colorScheme.subtleTextColor)
             : null,
       ),
-      margin: includeLeadingMargin
-          ? const EdgeInsets.only(left: denseSpacing)
-          : null,
       padding: const EdgeInsets.symmetric(
         horizontal: horizontalPadding,
         vertical: verticalPadding,
@@ -187,13 +184,25 @@ abstract class MetadataChip extends StatelessWidget {
     );
 
     if (onTap != null) {
-      chip = MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: chip,
+      chip = Padding(
+        padding: includeLeadingMargin
+            ? const EdgeInsets.only(left: denseSpacing)
+            : EdgeInsets.zero,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: chip,
+          ),
         ),
+      );
+    } else {
+      chip = Padding(
+        padding: includeLeadingMargin
+            ? const EdgeInsets.only(left: denseSpacing)
+            : EdgeInsets.zero,
+        child: chip,
       );
     }
 

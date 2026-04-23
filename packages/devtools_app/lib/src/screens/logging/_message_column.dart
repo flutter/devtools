@@ -94,11 +94,9 @@ class MessageColumn extends ColumnData<LogData>
                 builder: (context, constraints) {
                   return MetadataChips(
                     data: data,
-                    onKindTapped: (kind) {
-                      final controller = screenControllers
-                          .lookup<LoggingController>();
-                      controller.setActiveFilter(query: 'k:$kind');
-                    },
+                    onKindTapped: (kind) => screenControllers
+                        .lookup<LoggingController>()
+                        .setActiveFilter(query: 'k:"$kind"'),
                   );
                 },
               ),
