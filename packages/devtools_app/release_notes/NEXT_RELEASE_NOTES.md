@@ -28,7 +28,7 @@ TODO: Remove this section if there are not any updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any updates.
+- Fixed an issue where DevTools would auto-select the test runner isolate instead of the test suite isolate when connecting to a test run, causing CPU profiling and other tools to show no data (#9747). [#9747](https://github.com/flutter/devtools/pull/9747)
 
 ## Memory updates
 
