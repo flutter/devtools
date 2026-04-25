@@ -21,6 +21,8 @@ TODO: Remove this section if there are not any updates.
 
 - Deleted the option to use the legacy inspector.
   [#9782](https://github.com/flutter/devtools/pull/9782)
+- Fixed an issue where the Inspector error badge count would improperly increase or disappear during navigation. [#9524](https://github.com/flutter/devtools/issues/9524)
+
 
 ## Performance updates
 
