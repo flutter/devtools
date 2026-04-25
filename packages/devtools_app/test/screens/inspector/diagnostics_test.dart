@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/ui/utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -46,6 +47,7 @@ void main() {
         }
       ''');
     setUp(() {
+      setEnableExperiments();
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),

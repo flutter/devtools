@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
@@ -9,24 +9,21 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../service/service_extension_widgets.dart';
-import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/globals.dart';
-import '../../shared/managers/banner_messages.dart';
 import '../../shared/managers/error_badge_manager.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/search.dart';
-import '../inspector_shared/inspector_controls.dart';
-import '../inspector_shared/inspector_screen.dart';
-import '../inspector_shared/inspector_settings_dialog.dart';
+import '../../shared/utils/utils.dart';
 import 'inspector_controller.dart';
-import 'inspector_screen_details_tab.dart';
+import 'inspector_controls.dart';
+import 'inspector_screen.dart';
 import 'inspector_tree_controller.dart';
+import 'widget_details.dart';
 
 class InspectorScreenBody extends StatefulWidget {
   const InspectorScreenBody({super.key, required this.controller});
@@ -41,15 +38,12 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     with BlockingActionMixin, AutoDisposeMixin {
   InspectorController get controller => widget.controller;
 
-  InspectorTreeController get _summaryTreeController =>
+  InspectorTreeController get _inspectorTreeController =>
       controller.inspectorTree;
-
-  InspectorTreeController get _detailsTreeController =>
-      controller.details!.inspectorTree;
 
   bool searchVisible = false;
 
-  SearchControllerMixin get searchController => _summaryTreeController;
+  SearchControllerMixin get searchController => _inspectorTreeController;
 
   /// Indicates whether search can be closed. The value is set to true when
   /// search target type dropdown is displayed
@@ -58,10 +52,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   SearchTargetType searchTarget = SearchTargetType.widget;
 
-  static const summaryTreeKey = Key('Summary Tree');
-  static const detailsTreeKey = Key('Details Tree');
+  static const inspectorTreeKey = Key('Inspector Tree');
   static const minScreenWidthForText = 900.0;
-  static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
 
   @override
   void initState() {
@@ -103,7 +95,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     addAutoDisposeListener(preferences.inspector.pubRootDirectories, () {
       if (serviceConnection.serviceManager.connectedState.value.connected &&
           controller.firstInspectorTreeLoadCompleted) {
-        _refreshInspector();
+        safeUnawaited(controller.refreshInspector());
       }
     });
 
@@ -111,55 +103,45 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       ga.timeStart(InspectorScreen.id, gac.pageReady);
     }
 
-    _summaryTreeController.setSearchTarget(searchTarget);
-
-    _showLegacyInspectorWarning(context);
+    _inspectorTreeController.setSearchTarget(searchTarget);
   }
 
   @override
   Widget build(BuildContext context) {
-    final summaryTree = _buildSummaryTreeColumn();
-
-    final detailsTree = InspectorTree(
-      key: detailsTreeKey,
-      controller: controller,
-      treeController: _detailsTreeController,
-      summaryTreeController: _summaryTreeController,
-      screenId: InspectorScreen.id,
-    );
+    final inspectorTree = _buildInspectorTreeColumn();
 
     final splitAxis = SplitPane.axisFor(context, 0.85);
     final widgetTrees = SplitPane(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [
-        summaryTree,
-        InspectorDetails(detailsTree: detailsTree, controller: controller),
+        inspectorTree,
+        WidgetDetails(controller: controller),
       ],
     );
     return Column(
       children: <Widget>[
-        const InspectorControls(),
+        InspectorControls(controller: controller),
         const SizedBox(height: intermediateSpacing),
         Expanded(child: widgetTrees),
       ],
     );
   }
 
-  Widget _buildSummaryTreeColumn() {
+  Widget _buildInspectorTreeColumn() {
     return LayoutBuilder(
       builder: (context, constraints) {
         return RoundedOutlinedBorder(
           child: Column(
             children: [
-              InspectorSummaryTreeControls(
+              InspectorTreeControls(
                 isSearchVisible: searchVisible,
                 constraints: constraints,
-                onRefreshInspectorPressed: _refreshInspector,
+                onRefreshInspectorPressed: _manualInspectorRefresh,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
                 searchFieldBuilder: () =>
                     StatelessSearchField<InspectorTreeRow>(
-                      controller: _summaryTreeController,
+                      controller: _inspectorTreeController,
                       searchFieldEnabled: true,
                       shouldRequestFocus: searchVisible,
                       supportsNavigation: true,
@@ -182,10 +164,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                     return Stack(
                       children: [
                         InspectorTree(
-                          key: summaryTreeKey,
+                          key: inspectorTreeKey,
                           controller: controller,
-                          treeController: _summaryTreeController,
-                          isSummaryTree: true,
+                          treeController: _inspectorTreeController,
                           widgetErrors: inspectableErrors,
                           screenId: InspectorScreen.id,
                         ),
@@ -218,76 +199,25 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     setState(() {
       searchVisible = !searchVisible;
     });
-    _summaryTreeController.resetSearch();
+    _inspectorTreeController.resetSearch();
   }
 
-  void _showLegacyInspectorWarning(BuildContext context) {
-    if (context.mounted) {
-      pushLegacyInspectorWarning(InspectorScreen.id);
-    }
-  }
-
-  List<Widget> getServiceExtensionWidgets() {
-    return [
-      ServiceExtensionButtonGroup(
-        minScreenWidthForText: serviceExtensionButtonsIncludeTextWidth,
-        extensions: [
-          extensions.slowAnimations,
-          extensions.debugPaint,
-          extensions.debugPaintBaselines,
-          extensions.repaintRainbow,
-          extensions.invertOversizedImages,
-        ],
-      ),
-      const SizedBox(width: defaultSpacing),
-      SettingsOutlinedButton(
-        gaScreen: gac.inspector,
-        gaSelection: gac.inspectorSettings,
-        tooltip: 'Flutter Inspector Settings',
-        onPressed: () {
-          unawaited(
-            showDialog(
-              context: context,
-              builder: (context) => const FlutterInspectorSettingsDialog(),
-            ),
-          );
-        },
-      ),
-      // TODO(jacobr): implement TogglePlatformSelector.
-      //  TogglePlatformSelector().selector
-    ];
-  }
-
-  void _refreshInspector() {
+  void _manualInspectorRefresh() {
     ga.select(
       gac.inspector,
       gac.refresh,
-      screenMetricsProvider: () => InspectorScreenMetrics.legacy(),
+      screenMetricsProvider: () => InspectorScreenMetrics(),
     );
     unawaited(
       blockWhileInProgress(() async {
-        // If the user is force refreshing the inspector before the first load has
-        // completed, this could indicate a slow load time or that the inspector
-        // failed to load the tree once available.
-        if (!controller.firstInspectorTreeLoadCompleted) {
-          // We do not want to complete this timing operation because the force
-          // refresh will skew the results.
-          ga.cancelTimingOperation(InspectorScreen.id, gac.pageReady);
-          ga.select(
-            gac.inspector,
-            gac.refreshEmptyTree,
-            screenMetricsProvider: () => InspectorScreenMetrics.legacy(),
-          );
-          controller.firstInspectorTreeLoadCompleted = true;
-        }
-        await controller.onForceRefresh();
+        await controller.refreshInspector(isManualRefresh: true);
       }),
     );
   }
 }
 
-class InspectorSummaryTreeControls extends StatelessWidget {
-  const InspectorSummaryTreeControls({
+class InspectorTreeControls extends StatelessWidget {
+  const InspectorTreeControls({
     super.key,
     required this.constraints,
     required this.isSearchVisible,

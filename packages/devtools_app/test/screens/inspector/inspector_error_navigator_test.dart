@@ -5,6 +5,8 @@
 import 'dart:collection';
 
 import 'package:devtools_app/devtools_app.dart';
+
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   setUp(() {
+    setEnableExperiments();
     setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
   });

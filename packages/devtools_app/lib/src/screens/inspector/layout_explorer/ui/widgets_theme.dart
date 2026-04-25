@@ -1,4 +1,4 @@
-// Copyright 2021 The Flutter Authors
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
@@ -192,7 +192,6 @@ class WidgetTheme {
     'PageView': WidgetTheme(iconAsset: WidgetIcons.pageView),
     'Material': WidgetTheme(iconAsset: WidgetIcons.material),
     'AppBar': WidgetTheme(iconAsset: WidgetIcons.appBar),
-    'HiddenGroup': WidgetTheme(iconAsset: WidgetIcons.hidden),
   };
 }
 
@@ -246,5 +245,4 @@ class WidgetIcons {
   static const materialApp = 'icons/inspector/widget_icons/materialapp.png';
   static const bottomNavigationBar =
       'icons/inspector/widget_icons/bottomnavigationbar.png';
-  static const hidden = 'icons/inspector/widget_icons/onedot.png';
 }

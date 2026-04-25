@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
@@ -286,6 +286,7 @@ class FlexLayoutExplorerWidgetState
         child: InkWell(
           onTap: () => unawaited(onTap(propertiesLocal)),
           child: WidgetVisualizer(
+            isFlex: true,
             title: flexType,
             layoutProperties: propertiesLocal,
             isSelected: highlighted == properties,
@@ -752,6 +753,7 @@ class FlexChildVisualizer extends StatelessWidget {
             animation: state.entranceController,
             builder: buildEntranceAnimation,
             child: WidgetVisualizer(
+              isFlex: true,
               isSelected: isSelected,
               layoutProperties: layoutProperties,
               title: propertiesLocal.description ?? '',

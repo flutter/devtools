@@ -11,7 +11,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../screens/inspector_shared/inspector_screen.dart';
+import '../../screens/inspector/inspector_screen.dart';
 import '../../screens/logging/logging_screen.dart';
 import '../../screens/network/network_screen.dart';
 import '../../screens/performance/performance_screen.dart';
@@ -112,7 +112,9 @@ class ErrorBadgeManager extends DisposableController
   }
 
   void incrementBadgeCount(String screenId) {
-    if (_activeErrors.containsKey(screenId)) return;
+    if (screenId == InspectorScreen.id || _activeErrors.containsKey(screenId)) {
+      return;
+    }
 
     final notifier = _errorCountNotifier(screenId);
     if (notifier == null) return;

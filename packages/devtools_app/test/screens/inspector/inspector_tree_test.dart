@@ -3,7 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
+
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -37,7 +37,6 @@ void main() {
 
     inspectorController = InspectorController(
       inspectorTree: InspectorTreeController(),
-      detailsTree: InspectorTreeController(),
       treeType: FlutterTreeType.widget,
     )..firstInspectorTreeLoadCompleted = true;
   });
@@ -45,24 +44,17 @@ void main() {
   Future<void> pumpInspectorTree(
     WidgetTester tester, {
     required InspectorTreeController treeController,
-    bool isSummaryTree = false,
   }) async {
     final debuggerController = DebuggerController();
-    final summaryTreeController = isSummaryTree
-        ? null
-        : InspectorTreeController();
     await tester.pumpWidget(
       wrapWithControllers(
         debugger: debuggerController,
         InspectorTree(
           controller: inspectorController,
           treeController: treeController,
-          summaryTreeController: summaryTreeController,
-          isSummaryTree: isSummaryTree,
         ),
       ),
     );
-    await tester.pumpAndSettle();
   }
 
   group('InspectorTreeController', () {
@@ -76,21 +68,21 @@ void main() {
         );
       await pumpInspectorTree(tester, treeController: treeController);
 
-      expect(treeController.getRow(const Offset(0, -100.0)), isNull);
-      expect(treeController.getRowOffset(-1), equals(0));
+      expect(treeController.rowForOffset(const Offset(0, -100.0)), isNull);
+      expect(treeController.rowOffset(-1), equals(0));
 
-      expect(treeController.getRow(const Offset(0, 0.0)), isNull);
-      expect(treeController.getRowOffset(0), equals(0));
+      expect(treeController.rowForOffset(const Offset(0, 0.0)), isNull);
+      expect(treeController.rowOffset(0), equals(0));
 
       treeController.root = InspectorTreeNode()
         ..appendChild(InspectorTreeNode());
 
       await pumpInspectorTree(tester, treeController: treeController);
 
-      expect(treeController.getRow(const Offset(0, -20))!.index, 0);
-      expect(treeController.getRowOffset(-1), equals(0));
-      expect(treeController.getRow(const Offset(0, 0.0)), isNotNull);
-      expect(treeController.getRowOffset(0), equals(0));
+      expect(treeController.rowForOffset(const Offset(0, -20))!.index, 0);
+      expect(treeController.rowOffset(-1), equals(0));
+      expect(treeController.rowForOffset(const Offset(0, 0.0)), isNotNull);
+      expect(treeController.rowOffset(0), equals(0));
 
       // This operation would previously throw an exception in debug builds
       // and infinite loop in release builds.
@@ -142,34 +134,6 @@ void main() {
       await pumpInspectorTree(tester, treeController: treeController);
 
       expect(find.richText('Text: "Multiline text  content"'), findsOneWidget);
-    });
-
-    testWidgets('Shows breadcrumbs in Widget detail tree', (tester) async {
-      final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
-        widget: const Text('Hello'),
-        tester: tester,
-      );
-
-      final treeController = inspectorTreeControllerFromNode(diagnosticNode);
-      await pumpInspectorTree(tester, treeController: treeController);
-
-      expect(find.byType(InspectorBreadcrumbNavigator), findsOneWidget);
-    });
-
-    testWidgets('Shows no breadcrumbs widget in summary tree', (tester) async {
-      final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
-        widget: const Text('Hello'),
-        tester: tester,
-      );
-
-      final treeController = inspectorTreeControllerFromNode(diagnosticNode);
-      await pumpInspectorTree(
-        tester,
-        treeController: treeController,
-        isSummaryTree: true,
-      );
-
-      expect(find.byType(InspectorBreadcrumbNavigator), findsNothing);
     });
   });
 }

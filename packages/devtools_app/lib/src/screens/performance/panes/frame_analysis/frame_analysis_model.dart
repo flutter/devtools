@@ -92,9 +92,7 @@ class FrameAnalysis {
     final paintEvent = uiEvent.firstChildWithCondition(
       (event) => FramePhaseType.paint.isMatchForEventName(event.name),
     );
-    return FramePhase.paint(
-      events: <FlutterTimelineEvent>[if (paintEvent != null) paintEvent],
-    );
+    return FramePhase.paint(events: <FlutterTimelineEvent>[?paintEvent]);
   }
 
   /// Data for the raster phase of [frame].

@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
@@ -188,7 +188,7 @@ abstract class LayoutExplorerWidgetState<
 
   // update selected widget and trigger selection listener event to change focus.
   void refreshSelection(RemoteDiagnosticsNode node) {
-    inspectorController.refreshSelection(node, node, true);
+    inspectorController.refreshSelection(node);
   }
 
   Future<void> onTap(LayoutProperties properties) async {

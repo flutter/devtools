@@ -67,23 +67,14 @@ class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
 }
 
 class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
-  InspectorScreenMetrics.legacy({
+  InspectorScreenMetrics({
     this.rootSetCount,
     this.rowCount,
     this.inspectorTreeControllerId,
-  }) : isV2 = false;
-
-  InspectorScreenMetrics.v2({
-    this.rootSetCount,
-    this.rowCount,
-    this.inspectorTreeControllerId,
-  }) : isV2 = true;
+  });
 
   static const summaryTreeGaId = 0;
   static const detailsTreeGaId = 1;
-
-  /// Whether these metrics are for the V2 inspector.
-  final bool isV2;
 
   /// The number of times the root has been set, since the
   /// [InspectorTreeController] with id [inspectorTreeControllerId], has been

@@ -2,15 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+@TestOn('vm')
+library;
+
+import 'dart:io';
+
+import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/inspector/layout_explorer/ui/utils.dart';
+import 'package:devtools_app/src/screens/inspector/widget_properties/properties_view.dart';
+import 'package:devtools_app/src/shared/ui/tab.dart';
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as p;
 
 import '../../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../../test_infra/flutter_test_environment.dart';
 import '../../test_infra/matchers/matchers.dart';
+
+// Note: This test uses packages/devtools_app/test/test_infra/fixtures/flutter_app
+// running on the flutter-tester device.
 
 // This is a bit conservative to ensure we do not get flakes due to
 // slow interactions with the VM Service. This delay could likely be
@@ -18,76 +32,99 @@ import '../../test_infra/matchers/matchers.dart';
 const inspectorChangeSettleTime = Duration(seconds: 2);
 
 void main() {
-  const windowSize = Size(2600.0, 1200.0);
   // We need to use real async in this test so we need to use this binding.
   initializeLiveTestWidgetsFlutterBindingWithAssets();
+  const windowSize = Size(2600.0, 1200.0);
 
-  late FlutterTestEnvironment env;
+  final env = FlutterTestEnvironment(
+    const FlutterRunConfiguration(withDebugger: true),
+    testAppDirectory: 'test/test_infra/fixtures/inspector_app',
+  );
 
-  Future<void> resetInspectorSelection() async {
+  env.afterEverySetup = () async {
     final service = serviceConnection.inspectorService;
+    await _resetPubRootDirectories(service as InspectorService);
     if (env.reuseTestEnvironment) {
       // Ensure the previous test did not set the selection on the device.
       // TODO(jacobr): add a proper method to WidgetInspectorService that does
       // this. setSelection currently ignores null selection requests which is
       // a misfeature.
-      await service!.inspectorLibrary.eval(
+      await service.inspectorLibrary.eval(
         'WidgetInspectorService.instance.selection.clear()',
         isAlive: null,
       );
     }
-  }
+  };
 
   setUp(() async {
     await env.setupEnvironment();
     setGlobal(BannerMessagesController, BannerMessagesController());
-    // Ensure the legacy inspector is enabled:
-    preferences.inspector.setLegacyInspectorEnabled(true);
+  });
+
+  tearDown(() async {
+    await env.tearDownEnvironment(force: true);
+  });
+
+  tearDownAll(() {
+    env.finalTeardown();
   });
 
   group('screenshot tests', () {
-    setUpAll(() {
-      env = FlutterTestEnvironment(
-        const FlutterRunConfiguration(withDebugger: true),
-      );
-      env.afterEverySetup = resetInspectorSelection;
-    });
-
-    tearDownAll(() async {
-      await env.tearDownEnvironment(force: true);
-    });
-
-    testWidgetsWithWindowSize('navigation', windowSize, (
+    testWidgetsWithWindowSize('initial load', windowSize, (
       WidgetTester tester,
     ) async {
-      await env.setupEnvironment();
       expect(serviceConnection.serviceManager.service, equals(env.service));
       expect(serviceConnection.serviceManager.isolateManager, isNotNull);
 
-      final screen = InspectorScreen();
-      await tester.pumpWidget(
-        wrapWithInspectorControllers(Builder(builder: screen.build)),
-      );
-      await tester.pump(const Duration(seconds: 1));
-      final InspectorScreenBodyState state = tester.state(
-        find.byType(InspectorScreenBody),
-      );
-      final controller = state.controller;
-      while (!controller.flutterAppFrameReady) {
-        await controller.maybeLoadUI();
-        await tester.pumpAndSettle();
-      }
-      // Give time for the initial animation to complete.
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await _loadInspectorUI(tester);
+
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
           '../../test_infra/goldens/integration_inspector_initial_load.png',
         ),
       );
+    });
 
-      // Click on the Center widget (row index #5)
-      await tester.tap(find.richText('Center'));
+    testWidgetsWithWindowSize(
+      'loads after a hot-restart',
+      windowSize,
+      (WidgetTester tester) async {
+        // Load the inspector panel.
+        await _loadInspectorUI(tester);
+
+        // Expect the Center widget to be visible in the widget tree.
+        final centerWidgetFinder = find.richText('CustomCenter');
+        expect(centerWidgetFinder, findsOneWidget);
+
+        // Trigger a hot-restart and wait for the first Flutter frame.
+        await env.flutter!.hotRestart();
+        await _waitForFlutterFrame(tester, isInitialLoad: false);
+
+        // Wait for the Center widget to be visible again.
+        final centerWidgetFinderWithRetries = await retryUntilFound(
+          centerWidgetFinder,
+          tester: tester,
+        );
+        expect(centerWidgetFinderWithRetries, findsOneWidget);
+
+        await expectLater(
+          find.byType(InspectorScreenBody),
+          matchesDevToolsGolden(
+            '../../test_infra/goldens/integration_inspector_after_hot_restart.png',
+          ),
+        );
+      },
+      skip: true, // https://github.com/flutter/devtools/issues/8179
+    );
+
+    testWidgetsWithWindowSize('widget selection', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await _loadInspectorUI(tester);
+
+      // Select the CustomCenter widget (row index #4)
+      await tester.tap(find.richText('CustomCenter'));
       await tester.pumpAndSettle(inspectorChangeSettleTime);
       await expectLater(
         find.byType(InspectorScreenBody),
@@ -96,349 +133,383 @@ void main() {
         ),
       );
 
-      // Select the details tree.
-      await tester.tap(
-        find.text(InspectorDetailsViewType.widgetDetailsTree.key),
+      // Verify the properties are displayed:
+      verifyPropertyIsVisible(
+        name: 'alignment',
+        value: 'Alignment.center',
+        tester: tester,
       );
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
-      await expectLater(
-        find.byType(InspectorScreenBody),
-        matchesDevToolsGolden(
-          '../../test_infra/goldens/integration_inspector_select_center_details_tree.png',
-        ),
-        // Implementation widgets from Flutter framework are not guaranteed to
-        // be stable.
-        skip: 'https://github.com/flutter/flutter/issues/172037',
+      verifyPropertyIsVisible(
+        name: 'dependencies',
+        value: '[Directionality]',
+        tester: tester,
       );
-
-      // Select the RichText row.
-      await tester.tap(find.richText('RichText'));
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
-      await expectLater(
-        find.byType(InspectorScreenBody),
-        matchesDevToolsGolden(
-          '../../test_infra/goldens/integration_inspector_richtext_selected.png',
-        ),
-        // Implementation widgets from Flutter framework are not guaranteed to
-        // be stable.
-        skip: 'https://github.com/flutter/flutter/issues/172037',
-      );
-
-      // Test hovering over the icon shown when a property has its default
-      // value.
-      // TODO(jacobr): support tooltips in the Flutter version of the inspector.
-      // https://github.com/flutter/devtools/issues/2570.
-      // For example, verify that the tooltip hovering over the default value
-      // icons is "Default value".
-      // Test selecting a widget.
-
-      // Two 'Scaffold's: a breadcrumb and an actual tree item
-      expect(find.richText('Scaffold'), findsNWidgets(2));
-      // select Scaffold widget in summary tree.
-      await tester.tap(find.richText('Scaffold').last);
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
-      // This tree is huge. If there is a change to package:flutter it may
-      // change. If this happens don't panic and rebaseline the golden.
-      await expectLater(
-        find.byType(InspectorScreenBody),
-        matchesDevToolsGolden(
-          '../../test_infra/goldens/integration_inspector_scaffold_selected.png',
-        ),
-        // Implementation widgets from Flutter framework are not guaranteed to
-        // be stable.
-        skip: 'https://github.com/flutter/flutter/issues/172037',
-      );
-
-      // The important thing about this is that the details tree should scroll
-      // instead of re-rooting as the selected row is already visible in the
-      // details tree.
-      await tester.tap(find.richText('AnimatedPhysicalModel'));
-      await tester.pumpAndSettle(inspectorChangeSettleTime);
-      await expectLater(
-        find.byType(InspectorScreenBody),
-        matchesDevToolsGolden(
-          '../../test_infra/goldens/integration_animated_physical_model_selected.png',
-        ),
-        // Implementation widgets from Flutter framework are not guaranteed to
-        // be stable.
-        skip: 'https://github.com/flutter/flutter/issues/172037',
-      );
-
-      await env.tearDownEnvironment();
     });
 
-    // TODO(jacobr): convert these tests to screenshot tests like the initial
-    // state test.
-    /*
+    testWidgetsWithWindowSize(
+      'expand and collapse implementation widgets',
+      windowSize,
+      (WidgetTester tester) async {
+        await _loadInspectorUI(tester);
 
+        // Toggle implementation widgets on.
+        await _toggleImplementationWidgets(tester);
 
-      // Intentionally trigger multiple quick navigate action to ensure that
-      // multiple quick navigation commands in a row do not trigger race
-      // conditions getting out of order updates from the server.
-      tree.navigateDown();
-      tree.navigateDown();
-      tree.navigateDown();
-      await detailsTree.nextUiFrame;
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▼[A]AppBar <-- selected\n'
-          '          [/icons/inspector/textArea.png]Text\n',
-        ),
-      );
-      // Make sure we don't go off the bottom of the tree.
-      tree.navigateDown();
-      tree.navigateDown();
-      tree.navigateDown();
-      tree.navigateDown();
-      tree.navigateDown();
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▼[A]AppBar\n'
-          '          [/icons/inspector/textArea.png]Text <-- selected\n',
-        ),
-      );
-      tree.navigateUp();
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▼[A]AppBar <-- selected\n'
-          '          [/icons/inspector/textArea.png]Text\n',
-        ),
-      );
-      tree.navigateLeft();
-      await detailsTree.nextUiFrame;
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▶[A]AppBar <-- selected\n',
-        ),
-      );
-      tree.navigateLeft();
-      // First navigate left goes to the parent.
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold <-- selected\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▶[A]AppBar\n',
-        ),
-      );
-      tree.navigateLeft();
-      // Next navigate left closes the parent.
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▶[S]Scaffold <-- selected\n',
-        ),
-      );
+        // Before hidden widgets are expanded, confirm the implementing
+        // Container of CustomContainer is hidden:
+        final hideableNodeFinder = findNodeMatching('Container');
+        expect(hideableNodeFinder, findsNothing);
 
-      tree.navigateRight();
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold <-- selected\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▶[A]AppBar\n',
+        // Expand the hidden group that contains the Container:
+        final moreWidgetsRow = findChildRowOf('CustomContainer');
+        final expandButton = findExpandCollapseButtonForRow(
+          rowFinder: moreWidgetsRow,
+          isExpand: true,
+        );
+        await tester.tap(expandButton);
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+        await expectLater(
+          find.byType(InspectorScreenBody),
+          matchesDevToolsGolden(
+            '../../test_infra/goldens/integration_inspector_implementation_widgets_expanded.png',
+          ),
+          // Implementation widgets from Flutter framework are not guaranteed to
+          // be stable.
+          skip: 'https://github.com/flutter/flutter/issues/172037',
+        );
+
+        // Confirm the Container is visible, and select it:
+        expect(hideableNodeFinder, findsOneWidget);
+        await tester.tap(hideableNodeFinder);
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+        await expectLater(
+          find.byType(InspectorScreenBody),
+          matchesDevToolsGolden(
+            '../../test_infra/goldens/integration_inspector_hideable_widget_selected.png',
+          ),
+          // Implementation widgets from Flutter framework are not guaranteed to
+          // be stable.
+          skip: 'https://github.com/flutter/flutter/issues/172037',
+        );
+
+        // Collapse the hidden group that contains the Container:
+        final collapsibleRow = findChildRowOf('CustomContainer');
+        final collapseButton = findExpandCollapseButtonForRow(
+          rowFinder: collapsibleRow,
+          isExpand: false,
+        );
+        await tester.tap(collapseButton);
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+        await expectLater(
+          find.byType(InspectorScreenBody),
+          matchesDevToolsGolden(
+            '../../test_infra/goldens/integration_inspector_implementation_widgets_collapsed.png',
+          ),
+        );
+      },
+    );
+
+    testWidgetsWithWindowSize('search for implementation widgets', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await _loadInspectorUI(tester);
+
+      // Toggle implementation widgets on.
+      await _toggleImplementationWidgets(tester);
+
+      // Before searching, confirm the implementing DefaultTextStyle of
+      // CustomApp is hidden:
+      final hideableNodeFinder = findNodeMatching('DefaultTextStyle');
+      expect(hideableNodeFinder, findsNothing);
+
+      // Search for the DefaultTextStyle:
+      final searchButtonFinder = find.ancestor(
+        of: find.byIcon(Icons.search),
+        matching: find.byType(ToolbarAction),
+      );
+      await tester.tap(searchButtonFinder);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await tester.enterText(find.byType(TextField), 'DefaultTextStyle');
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+      await tester.tap(find.byIcon(Icons.close));
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+      // Confirm the DefaultTextStyle is visible and selected:
+      expect(hideableNodeFinder, findsOneWidget);
+      await expectLater(
+        find.byType(InspectorScreenBody),
+        matchesDevToolsGolden(
+          '../../test_infra/goldens/integration_inspector_hideable_widget_selected_from_search.png',
         ),
+        // Implementation widgets from Flutter framework are not guaranteed to
+        // be stable.
+        skip: 'https://github.com/flutter/flutter/issues/172037',
       );
-
-      // Node is already expanded so this is equivalent to navigate down.
-      tree.navigateRight();
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center <-- selected\n'
-          '      │     [/icons/inspector/textArea.png]Text\n'
-          '      └─▶[A]AppBar\n',
-        ),
-      );
-
-      await detailsTree.nextUiFrame;
-
-      // Make sure the details and main trees have not gotten out of sync.
-      expect(
-        detailsTree.toStringDeep(hidePropertyLines: true),
-        equalsIgnoringHashCodes('▼[C]Center <-- selected\n'
-            '└─▼[/icons/inspector/textArea.png]Text\n'
-            '  └─▼[/icons/inspector/textArea.png]RichText\n'),
-      );
-
-      await env.tearDownEnvironment();
     });
-    */
+  });
 
-    // TODO(jacobr): uncomment hotReload test once the hot reload test is not
-    // flaky. https://github.com/flutter/devtools/issues/642
-    /*
-    test('hotReload', () async {
-      if (flutterVersion == '1.2.1') {
-        // This test can be flaky in Flutter 1.2.1 because of
-        // https://github.com/dart-lang/sdk/issues/33838
-        // so we just skip it. This block of code can be removed after the next
-        // stable flutter release.
-        // TODO(dantup): Remove this.
-        return;
+  testWidgetsWithWindowSize('hide all implementation widgets', windowSize, (
+    WidgetTester tester,
+  ) async {
+    await _loadInspectorUI(tester);
+
+    // Toggle implementation widgets on.
+    await _toggleImplementationWidgets(tester);
+
+    // Confirm the hidden widgets are visible behind affordances like "X more
+    // widgets".
+    expect(find.richTextContaining('more widgets...'), findsWidgets);
+
+    // Toggle implementation widgets off.
+    await _toggleImplementationWidgets(tester);
+
+    // Confirm that the hidden widgets are no longer visible.
+    expect(find.richTextContaining('more widgets...'), findsNothing);
+    await expectLater(
+      find.byType(InspectorScreenBody),
+      matchesDevToolsGolden(
+        '../../test_infra/goldens/integration_inspector_implementation_widgets_hidden.png',
+      ),
+    );
+
+    // Refresh the tree.
+    final refreshTreeButton = find.descendant(
+      of: find.byType(ToolbarAction),
+      matching: find.byIcon(Icons.refresh),
+    );
+
+    await tester.tap(refreshTreeButton);
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+    // Confirm that the hidden widgets are still not visible.
+    expect(find.richTextContaining('more widgets...'), findsNothing);
+  });
+
+  // TODO(elliette): Expand into test group for cases when:
+  // - selected widget is implementation widget and implementation widgets are hidden (this test case)
+  // - selected widget is implementation widget and implementation widgets are visible
+  // - selected widget is not implementation widget and implementation widgets are hidden
+  // - selected widget is not implementation widget and implementation widgets are visible
+  testWidgetsWithWindowSize('selecting implementation widget', windowSize, (
+    WidgetTester tester,
+  ) async {
+    // Load the Inspector.
+    await _loadInspectorUI(tester);
+
+    // Toggle implementation widgets on.
+    await _toggleImplementationWidgets(tester);
+
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
+    final state =
+        tester.state(find.byType(InspectorScreenBody))
+            as InspectorScreenBodyState;
+
+    // Find the CustomText diagnostic node.
+    final diagnostics = state.controller.inspectorTree.rowsInTree.value.map(
+      (row) => row!.node.diagnostic,
+    );
+    final customTextDiagnostic = diagnostics.firstWhere(
+      (d) => d?.description == 'CustomText',
+    )!;
+    expect(customTextDiagnostic.isCreatedByLocalProject, isTrue);
+
+    // Toggle implementation widgets off.
+    await _toggleImplementationWidgets(tester);
+
+    // Verify the CustomText diagnostic node is still in the tree.
+    final diagnosticsNow = state.controller.inspectorTree.rowsInTree.value.map(
+      (row) => row!.node.diagnostic,
+    );
+    expect(
+      diagnosticsNow.any((d) => d?.valueRef == customTextDiagnostic.valueRef),
+      isTrue,
+    );
+
+    // Get the implementing Text child of the CustomText diagnostic node.
+    final service = serviceConnection.inspectorService as InspectorService;
+    final group = service.createObjectGroup('test-group');
+    final customTextSubtree = await group.getDetailsSubtree(
+      customTextDiagnostic,
+    );
+    final textDiagnostic = (await customTextSubtree!.children)!.firstWhere(
+      (child) => child.description == 'Text',
+    );
+
+    // Verify the Text child is an implementation node that is not in the tree.
+    expect(textDiagnostic.isCreatedByLocalProject, isFalse);
+    expect(
+      diagnosticsNow.any((d) => d?.valueRef == textDiagnostic.valueRef),
+      isFalse,
+    );
+
+    // Mimic selecting the Text diagnostic node with the on-device inspector.
+    await group.setSelectionInspector(textDiagnostic.valueRef, false);
+    await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+    // Verify the CustomText node is now selected.
+    final selectedNode = state.controller.selectedNode.value;
+    expect(
+      selectedNode!.diagnostic!.valueRef,
+      equals(customTextDiagnostic.valueRef),
+    );
+
+    // Verify the notification about selecting an implementation widget is displayed.
+    expect(
+      find.text('Selected an implementation widget of CustomText: Text.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgetsWithWindowSize(
+    'tree nodes contain only essential information',
+    windowSize,
+    (WidgetTester tester) async {
+      const requiredDetailsForTreeNode = [
+        'description',
+        'shouldIndent',
+        'valueId',
+        'widgetRuntimeType',
+      ];
+      const possibleDetailsForTreeNode = [
+        'textPreview',
+        'children',
+        'createdByLocalProject',
+      ];
+      const extraneousDetailsForTreeNode = [
+        'creationLocation',
+        'type',
+        'style',
+        'hasChildren',
+        'stateful',
+      ];
+
+      await _loadInspectorUI(tester);
+      final state =
+          tester.state(find.byType(InspectorScreenBody))
+              as InspectorScreenBodyState;
+      final rowsInTree = state.controller.inspectorTree.rowsInTree.value;
+
+      for (final row in rowsInTree) {
+        final detailKeys = row?.node.diagnostic?.json.keys ?? const <String>[];
+        expect(
+          requiredDetailsForTreeNode.every(
+            (detail) => detailKeys.contains(detail),
+          ),
+          isTrue,
+        );
+        expect(
+          detailKeys.every(
+            (detail) =>
+                requiredDetailsForTreeNode.contains(detail) ||
+                possibleDetailsForTreeNode.contains(detail),
+          ),
+          isTrue,
+        );
+        expect(
+          detailKeys.none(
+            (detail) => extraneousDetailsForTreeNode.contains(detail),
+          ),
+          isTrue,
+        );
       }
-      await env.setupEnvironment();
+    },
+  );
 
-      await serviceManager.performHotReload();
-      // Ensure the inspector does not fall over and die after a hot reload.
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-          '  ▼[M]MyApp\n'
-          '    ▼[M]MaterialApp\n'
-          '      ▼[S]Scaffold\n'
-          '      ├───▼[C]Center\n'
-          '      │     [/icons/inspector/textArea.png]Text <-- selected\n'
-          '      └─▼[A]AppBar\n'
-          '          [/icons/inspector/textArea.png]Text\n',
-        ),
-      );
+  group('auto-refresh after code edits', () {
+    final flutterAppMainPath = p.join(env.testAppDirectory, 'lib', 'main.dart');
+    String flutterMainContents = '';
 
-      // TODO(jacobr): would be nice to have some tests that trigger a hot
-      // reload that actually changes app state in a meaningful way.
+    setUp(() {
+      // Save contents of main.dart file.
+      flutterMainContents = File(flutterAppMainPath).readAsStringSync();
 
-      await env.tearDownEnvironment();
+      // Enable auto-refresh.
+      preferences.inspector.setAutoRefreshEnabled(true);
     });
-    */
-    // TODO(jacobr): uncomment out the hotRestart tests once
-    // https://github.com/flutter/devtools/issues/337 is fixed.
-    /*
-    test('hotRestart', () async {
-      await env.setupEnvironment();
 
-      // The important thing about this is that the details tree should scroll
-      // instead of re-rooting as the selected row is already visible in the
-      // details tree.
-      simulateRowClick(tree, rowIndex: 4);
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R]root]\n'
-              '  ▼[M]MyApp\n'
-              '    ▼[M]MaterialApp\n'
-              '      ▼[S]Scaffold\n'
-              '      ├───▼[C]Center <-- selected\n'
-              '      │     ▼[/icons/inspector/textArea.png]Text\n'
-              '      └─▼[A]AppBar\n'
-              '          ▼[/icons/inspector/textArea.png]Text\n',
-        ),
-      );
+    tearDown(() {
+      // Re-set contents of main.dart.
+      File(
+        flutterAppMainPath,
+      ).writeAsStringSync(flutterMainContents, flush: true);
 
-      /// After the hot restart some existing calls to the vm service may
-      /// timeout and that is ok.
-      serviceManager.manager.service.doNotWaitForPendingFuturesBeforeExit();
-
-      await serviceManager.performHotRestart();
-      // The isolate starts out paused on a hot restart so we have to resume
-      // it manually to make the test pass.
-
-      await serviceManager.manager.service
-          .resume(serviceManager.isolateManager.selectedIsolate.id);
-
-      // First UI transition is to an empty tree.
-      await detailsTree.nextUiFrame;
-      expect(tree.toStringDeep(), equalsIgnoringHashCodes('<empty>\n'));
-
-      // Notice that the selection has been lost due to the hot restart.
-      await detailsTree.nextUiFrame;
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-              '  ▼[M]MyApp\n'
-              '    ▼[M]MaterialApp\n'
-              '      ▼[S]Scaffold\n'
-              '      ├───▼[C]Center\n'
-              '      │     ▼[/icons/inspector/textArea.png]Text\n'
-              '      └─▼[A]AppBar\n'
-              '          ▼[/icons/inspector/textArea.png]Text\n',
-        ),
-      );
-
-      // Verify that the selection can actually be changed after a restart.
-      simulateRowClick(tree, rowIndex: 4);
-      expect(
-        tree.toStringDeep(),
-        equalsIgnoringHashCodes(
-          '▼[R][root]\n'
-              '  ▼[M]MyApp\n'
-              '    ▼[M]MaterialApp\n'
-              '      ▼[S]Scaffold\n'
-              '      ├───▼[C]Center <-- selected\n'
-              '      │     ▼[/icons/inspector/textArea.png]Text\n'
-              '      └─▼[A]AppBar\n'
-              '          ▼[/icons/inspector/textArea.png]Text\n',
-        ),
-      );
-      await env.tearDownEnvironment();
+      // Re-set changes to auto refresh.
+      preferences.inspector.setAutoRefreshEnabled(true);
     });
-*/
+
+    void makeEditToFlutterMain({
+      required String toReplace,
+      required String replaceWith,
+    }) {
+      final file = File(flutterAppMainPath);
+      final fileContents = file.readAsStringSync();
+      file.writeAsStringSync(
+        fileContents.replaceAll(toReplace, replaceWith),
+        flush: true,
+      );
+    }
+
+    testWidgetsWithWindowSize(
+      'changing parent widget of selected',
+      windowSize,
+      (WidgetTester tester) async {
+        await _loadInspectorUI(tester);
+
+        // Toggle implementation widgets on.
+        await _toggleImplementationWidgets(tester);
+
+        // Give time for the initial animation to complete.
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+        // Verify the CustomButton widget is after the CustomCenter widget.
+        expect(
+          _treeRowsAreInOrder(
+            treeRowDescriptions: ['CustomCenter', 'CustomButton'],
+            startingAtIndex: 7,
+          ),
+          isTrue,
+        );
+
+        // Verify the CustomButton widget is not visible in the properties view.
+        expect(_findWidgetLabelMatching('CustomButton'), findsNothing);
+
+        // Select the CustomButton widget.
+        await tester.tap(_findTreeRowMatching('CustomButton'));
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+        // Verify the CustomButton widget is now visible in the properties view.
+        expect(_findWidgetLabelMatching('CustomButton'), findsOneWidget);
+
+        // Make edit to main.dart to replace CustomCenter with an Align.
+        makeEditToFlutterMain(toReplace: 'CustomCenter', replaceWith: 'Align');
+        await env.flutter!.hotReload();
+        await tester.pumpAndSettle(inspectorChangeSettleTime);
+
+        // Verify the Align is now in the widget tree instead of Center.
+        expect(
+          _treeRowsAreInOrder(
+            treeRowDescriptions: ['Align', 'CustomButton'],
+            startingAtIndex: 7,
+          ),
+          isTrue,
+        );
+
+        // Verify the CustomButton widget is still selected.
+        expect(_findWidgetLabelMatching('CustomButton'), findsOneWidget);
+      },
+    );
   });
 
   group('widget errors', () {
-    setUpAll(() async {
-      env = FlutterTestEnvironment(
-        testAppDirectory: 'test/test_infra/fixtures/inspector_app',
-        const FlutterRunConfiguration(withDebugger: true),
-      );
+    testWidgetsWithWindowSize('show navigator and error labels', windowSize, (
+      WidgetTester tester,
+    ) async {
       await env.setupEnvironment(
         config: const FlutterRunConfiguration(
           withDebugger: true,
           entryScript: 'lib/overflow_errors.dart',
         ),
       );
-      env.afterEverySetup = resetInspectorSelection;
-      // Enable the legacy inspector.
-      preferences.inspector.setLegacyInspectorEnabled(true);
-    });
-
-    testWidgetsWithWindowSize('show navigator and error labels', windowSize, (
-      WidgetTester tester,
-    ) async {
       expect(serviceConnection.serviceManager.service, equals(env.service));
       expect(serviceConnection.serviceManager.isolateManager, isNotNull);
 
@@ -447,14 +518,8 @@ void main() {
         wrapWithInspectorControllers(Builder(builder: screen.build)),
       );
       await tester.pumpAndSettle(const Duration(seconds: 1));
-      final InspectorScreenBodyState state = tester.state(
-        find.byType(InspectorScreenBody),
-      );
-      final controller = state.controller;
-      while (!controller.flutterAppFrameReady) {
-        await controller.maybeLoadUI();
-        await tester.pumpAndSettle();
-      }
+      await _waitForFlutterFrame(tester);
+
       await env.flutter!.hotReload();
       // Give time for the initial animation to complete.
       await tester.pumpAndSettle(inspectorChangeSettleTime);
@@ -470,14 +535,182 @@ void main() {
         await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
         await tester.pumpAndSettle(inspectorChangeSettleTime);
       }
+
+      final flexExplorerTab = find.descendant(
+        of: find.byType(DevToolsTab),
+        matching: find.text('Flex explorer'),
+      );
+      await tester.tap(flexExplorerTab);
+      await tester.pumpAndSettle(inspectorChangeSettleTime);
+
       await expectLater(
         find.byType(InspectorScreenBody),
         matchesDevToolsGolden(
           '../../test_infra/goldens/integration_inspector_errors_2_error_selected.png',
         ),
       );
-
-      await env.tearDownEnvironment();
     });
   });
+}
+
+Future<void> _toggleImplementationWidgets(WidgetTester tester) async {
+  // Tap the "Show Implementation Widgets" button (selected by default).
+  final showImplementationWidgetsButton = find.descendant(
+    of: find.byType(DevToolsToggleButton),
+    matching: find.text('Show Implementation Widgets'),
+  );
+  expect(showImplementationWidgetsButton, findsOneWidget);
+  await tester.tap(showImplementationWidgetsButton);
+  await tester.pumpAndSettle(inspectorChangeSettleTime);
+}
+
+Future<void> _loadInspectorUI(WidgetTester tester) async {
+  final screen = InspectorScreen();
+  await tester.pumpWidget(
+    wrapWithInspectorControllers(Builder(builder: screen.build)),
+  );
+  await tester.pump(const Duration(seconds: 1));
+  await _waitForFlutterFrame(tester);
+
+  await tester.pumpAndSettle(inspectorChangeSettleTime);
+}
+
+Future<void> _waitForFlutterFrame(
+  WidgetTester tester, {
+  bool isInitialLoad = true,
+}) async {
+  final state =
+      tester.state(find.byType(InspectorScreenBody))
+          as InspectorScreenBodyState;
+  final controller = state.controller;
+  while (!controller.flutterAppFrameReady) {
+    // On the initial load, we might have instantiated the controller after the
+    // first Flutter frame was sent. In which case, calling `maybeLoadUI` is
+    // necessary to ensure we detect that the widget tree is ready.
+    if (isInitialLoad) {
+      await controller.maybeLoadUI();
+    }
+    await tester.pump(safePumpDuration);
+  }
+}
+
+Finder findNodeMatching(String text) => find.ancestor(
+  of: find.richText(text),
+  matching: find.byType(DescriptionDisplay),
+);
+
+Finder findChildRowOf(String description) {
+  final parentRowFinder = _findTreeRowMatching(description);
+  final parentWidget = _getWidgetFromFinder<InspectorRowContent>(
+    parentRowFinder,
+  );
+  final parentIndex = parentWidget.row.index;
+
+  return find.byType(InspectorRowContent).at(parentIndex + 1);
+}
+
+Finder findExpandCollapseButtonForRow({
+  required Finder rowFinder,
+  required bool isExpand,
+}) {
+  final expandCollapseButtonFinder = find.descendant(
+    of: rowFinder,
+    matching: find.byType(TextButton),
+  );
+  expect(expandCollapseButtonFinder, findsOneWidget);
+
+  final expandCollapseButtonTextFinder = find.descendant(
+    of: expandCollapseButtonFinder,
+    matching: find.text(isExpand ? '(expand)' : '(collapse)'),
+  );
+  expect(expandCollapseButtonTextFinder, findsOneWidget);
+
+  return expandCollapseButtonFinder;
+}
+
+void verifyPropertyIsVisible({
+  required String name,
+  required String value,
+  required WidgetTester tester,
+}) {
+  // Verify the property name is visible:
+  final propertyNameFinder = find.descendant(
+    of: find.byType(PropertyName),
+    matching: find.text(name),
+  );
+  expect(propertyNameFinder, findsOneWidget);
+
+  // Verify the property value is visible:
+  final propertyValueFinder = find.descendant(
+    of: find.byType(PropertyValue),
+    matching: find.richText(value),
+  );
+  expect(propertyValueFinder, findsOneWidget);
+
+  // Verify the property name and value are aligned:
+  final propertyNameCenter = tester.getCenter(propertyNameFinder);
+  final propertyValueCenter = tester.getCenter(propertyValueFinder);
+  expect(propertyNameCenter.dy, equals(propertyValueCenter.dy));
+}
+
+bool areHorizontallyAligned(
+  Finder widgetAFinder,
+  Finder widgetBFinder, {
+  required WidgetTester tester,
+}) {
+  final widgetACenter = tester.getCenter(widgetAFinder);
+  final widgetBCenter = tester.getCenter(widgetBFinder);
+
+  return widgetACenter.dy == widgetBCenter.dy;
+}
+
+bool _treeRowsAreInOrder({
+  required List<String> treeRowDescriptions,
+  required int startingAtIndex,
+}) {
+  final treeRowIndices = <int>[];
+
+  for (final description in treeRowDescriptions) {
+    final treeRow = _getWidgetFromFinder<InspectorRowContent>(
+      _findTreeRowMatching(description),
+    );
+    treeRowIndices.add(treeRow.row.index);
+  }
+
+  int indexToCheck = startingAtIndex;
+  for (final index in treeRowIndices) {
+    if (index == indexToCheck) {
+      indexToCheck++;
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
+Finder _findTreeRowMatching(String description) => find.ancestor(
+  of: find.richText(description),
+  matching: find.byType(InspectorRowContent),
+);
+
+Finder _findWidgetLabelMatching(String description) => find.ancestor(
+  of: find.richText(description),
+  matching: find.byType(WidgetLabel),
+);
+
+T _getWidgetFromFinder<T>(Finder finder) =>
+    finder.first.evaluate().first.widget as T;
+
+Future<void> _resetPubRootDirectories(InspectorService inspectorService) async {
+  final currentPubRootDirectories = await inspectorService
+      .getPubRootDirectories();
+  if (currentPubRootDirectories != null) {
+    await inspectorService.removePubRootDirectories(currentPubRootDirectories);
+  }
+
+  final rootLibrary = await serviceConnection.serviceManager
+      .mainIsolateRootLibraryUriAsString();
+  if (rootLibrary != null) {
+    await inspectorService.addPubRootDirectories([rootLibrary]);
+  }
 }

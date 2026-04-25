@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
@@ -96,9 +96,8 @@ class PaddingVisualizerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final heightDescription =
-        'h=${toStringAsFixed(renderProperties.realHeight)}';
-    final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
+    final heightDescription = toStringAsFixed(renderProperties.realHeight);
+    final widthDescription = toStringAsFixed(renderProperties.realWidth);
     final widthWidget = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

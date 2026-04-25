@@ -41,7 +41,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.multiline = false,
     this.style,
     this.nodeDescriptionHighlightStyle,
-    this.emphasizeNodesFromLocalProject = false,
     this.actionLabel,
     this.actionCallback,
     this.customDescription,
@@ -57,10 +56,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final bool multiline;
   final TextStyle? style;
   final TextStyle? nodeDescriptionHighlightStyle;
-  // TODO(https://github.com/flutter/devtools/issues/7860): Remove and default
-  // to true when turning on inspector V2. This is currently true for the V2
-  // inspector and false for the legacy inspector.
-  final bool emphasizeNodesFromLocalProject;
   final String? actionLabel;
   final VoidCallback? actionCallback;
   final String? customDescription;
@@ -307,7 +302,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         );
         // provide some contrast between the name and description if both are
         // present.
-        textStyle = textStyle.merge(theme.subtleTextStyle);
+        final fontSize = textStyle.fontSize;
+        textStyle = textStyle.merge(
+          theme.subtleTextStyle.copyWith(fontSize: fontSize),
+        );
       }
 
       if (diagnosticLocal.isCreatedByLocalProject) {
@@ -399,21 +397,14 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         }
       }
 
-      // TODO(https://github.com/flutter/devtools/issues/7860): Remove this
-      // if-block once the widget details tree is gone. This bolding is only
-      // used there.
-      if (!emphasizeNodesFromLocalProject &&
-          !diagnosticLocal.isSummaryTree &&
-          diagnosticLocal.isCreatedByLocalProject) {
-        textStyle = textStyle.merge(DiagnosticsTextStyles.regularBold);
-      }
-
       // Grey out nodes that were not created by the local project to emphasize
       // those that were:
-      if (emphasizeNodesFromLocalProject &&
-          !diagnosticLocal.isCreatedByLocalProject &&
+      if (!diagnosticLocal.isCreatedByLocalProject &&
           diagnosticLocal.description != '[root]') {
-        textStyle = textStyle.merge(theme.subtleTextStyle);
+        final fontSize = textStyle.fontSize;
+        textStyle = textStyle.merge(
+          theme.subtleTextStyle.copyWith(fontSize: fontSize),
+        );
       }
 
       var diagnosticDescription = buildDescription(

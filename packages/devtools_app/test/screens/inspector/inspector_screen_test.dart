@@ -8,10 +8,12 @@
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/inspector/inspector_settings_dialog.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
-import 'package:devtools_app/src/screens/inspector/layout_explorer/layout_explorer.dart';
-import 'package:devtools_app/src/screens/inspector_shared/inspector_settings_dialog.dart';
+import 'package:devtools_app/src/screens/inspector/widget_details.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
+import 'package:devtools_app/src/shared/feature_flags.dart';
+import 'package:devtools_app/src/shared/ui/tab.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -40,6 +42,7 @@ void main() {
   }
 
   setUp(() {
+    setEnableExperiments();
     fakeServiceConnection = FakeServiceConnectionManager();
     fakeExtensionManager =
         fakeServiceConnection.serviceManager.serviceExtensionManager;
@@ -57,10 +60,7 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(Storage, FlutterTestStorage());
     setGlobal(NotificationService, NotificationService());
-    setGlobal(BannerMessagesController, BannerMessagesController());
     fakeServiceConnection.consoleService.ensureServiceInitialized();
-    // Enable the legacy inspector:
-    preferences.inspector.setLegacyInspectorEnabled(true);
   });
 
   Future<void> mockExtensions() async {
@@ -100,7 +100,6 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(buildInspectorScreen());
-    await tester.pumpAndSettle();
     expect(find.byType(InspectorScreenBody), findsOneWidget);
   });
 
@@ -304,12 +303,19 @@ void main() {
       'should render StoryOfYourFlexWidget',
       windowSize,
       (WidgetTester tester) async {
-        final controller = TestInspectorController()..setSelectedNode(treeNode);
+        final controller = TestInspectorController()
+          ..setSelectedNode(treeNode)
+          ..setSelectedDiagnostic(diagnostic);
         await tester.pumpWidget(
           MaterialApp(
-            home: Scaffold(body: LayoutExplorerTab(controller: controller)),
+            home: Scaffold(body: WidgetDetails(controller: controller)),
           ),
         );
+
+        // Navigate to the flex explorer tab.
+        await tester.tap(_findFlexExplorerTab());
+        await tester.pumpAndSettle();
+
         expect(find.byType(FlexLayoutExplorerWidget), findsOneWidget);
       },
     );
@@ -321,11 +327,23 @@ void main() {
         final controller = TestInspectorController();
         await tester.pumpWidget(
           MaterialApp(
-            home: Scaffold(body: LayoutExplorerTab(controller: controller)),
+            home: Scaffold(body: WidgetDetails(controller: controller)),
           ),
         );
-        expect(find.byType(FlexLayoutExplorerWidget), findsNothing);
-        controller.setSelectedNode(treeNode);
+
+        // Flex explorer is not available for selected wiget.
+        expect(_findFlexExplorerTab(), findsNothing);
+
+        // Select a flex widget.
+        controller
+          ..setSelectedNode(treeNode)
+          ..setSelectedDiagnostic(diagnostic);
+        await tester.pumpAndSettle();
+
+        // Flex explorer is available for the flex widget.
+        final flexExplorerTab = _findFlexExplorerTab();
+        expect(flexExplorerTab, findsOneWidget);
+        await tester.tap(flexExplorerTab);
         await tester.pumpAndSettle();
         expect(find.byType(FlexLayoutExplorerWidget), findsOneWidget);
       },
@@ -346,8 +364,12 @@ void main() {
         await tester.pumpWidget(buildInspectorScreen());
 
         await tester.tap(find.byType(SettingsOutlinedButton));
-        await tester.pumpAndSettle();
-        expect(find.byType(FlutterInspectorSettingsDialog), findsOneWidget);
+
+        final settingsDialogFinder = await retryUntilFound(
+          find.byType(FlutterInspectorSettingsDialog),
+          tester: tester,
+        );
+        expect(settingsDialogFinder, findsOneWidget);
 
         final hoverCheckBoxSetting = find.ancestor(
           of: find.richTextContaining('Enable hover inspection'),
@@ -358,7 +380,7 @@ void main() {
           matching: find.byType(NotifierCheckbox),
         );
         await tester.tap(hoverModeCheckBox);
-        await tester.pumpAndSettle();
+        await tester.pump(safePumpDuration);
         expect(
           preferences.inspector.hoverEvalModeEnabled.value,
           !startingHoverEvalModeValue,
@@ -366,9 +388,13 @@ void main() {
       },
     );
   });
-
   // TODO(jacobr): add screenshot tests that connect to a test application
   // in the same way the inspector_controller test does today and take golden
   // images. Alternately: support an offline inspector mode and add tests of
   // that mode which would enable faster tests that run as unittests.
 }
+
+Finder _findFlexExplorerTab() => find.descendant(
+  of: find.byType(DevToolsTab),
+  matching: find.text('Flex explorer'),
+);

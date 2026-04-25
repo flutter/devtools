@@ -1,8 +1,8 @@
-// Copyright 2019 The Flutter Authors
+// Copyright 2024 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-/// @docImport 'layout_explorer/ui/overflow_indicator_painter.dart';
+/// @docImport '../inspector/layout_explorer/ui/overflow_indicator_painter.dart';
 library;
 
 import 'dart:math' as math;
@@ -40,6 +40,7 @@ const overflowEpsilon = 0.1;
 ///             * (largestRenderSize - smallestRenderSize)
 ///             / (largestSize - smallestSize) + smallestRenderSize
 /// ```
+///
 /// Explanation:
 /// - The computation formula for transforming size to renderSize is based on these two things:
 ///   - smallest element will be rendered to [smallestRenderSize]
@@ -61,6 +62,7 @@ const overflowEpsilon = 0.1;
 ///   ```
 ///   sum(renderSize) = maxSizeAvailable
 ///   ```
+///
 List<double> computeRenderSizes({
   required Iterable<double> sizes,
   required double smallestSize,
@@ -101,6 +103,26 @@ List<double> computeRenderSizes({
   return renderSizes;
 }
 
+/// Data pattern containing a widget's widths or heights.
+typedef WidgetSizes = ({
+  /// Whether this record represents a widget's widths or heights.
+  SizeType type,
+
+  /// Either the widget's left (if [type] is [SizeType.widths]) or top (if
+  /// [type] is [SizeType.heights]) padding.
+  double paddingA,
+
+  /// Either the widget's width (if [type] is [SizeType.widths]) or height (if
+  /// [type] is [SizeType.heights]).
+  double widgetSize,
+
+  /// Either the widget's right (if [type] is [SizeType.widths]) or bottom (if
+  /// [type] is [SizeType.heights]) padding.
+  double paddingB,
+});
+
+enum SizeType { widths, heights }
+
 // TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
 /// Represents parsed layout information for a specific [RemoteDiagnosticsNode].
 class LayoutProperties {
@@ -114,6 +136,7 @@ class LayoutProperties {
       children = copyLevel == 0
           ? []
           : node.childrenNow
+                .where((child) => child.size != null)
                 .map(
                   (child) => LayoutProperties(child, copyLevel: copyLevel - 1),
                 )
@@ -227,6 +250,45 @@ class LayoutProperties {
     return heightUsed > parentHeight + overflowEpsilon;
   }
 
+  LayoutProperties? get parentLayoutProperties {
+    final parentElement = node.parentRenderElement;
+    // Fall back to this node's properties if there is no parent.
+    if (parentElement == null) return this;
+    final parentProperties = parentElement.computeLayoutProperties(
+      forFlexLayout: false,
+    );
+    return parentProperties ?? this;
+  }
+
+  WidgetSizes? get widgetWidths => _widgetSizes(SizeType.widths);
+
+  WidgetSizes? get widgetHeights => _widgetSizes(SizeType.heights);
+
+  WidgetSizes? _widgetSizes(SizeType type) {
+    if (parentLayoutProperties == null) return null;
+    final parentProperties = parentLayoutProperties!;
+
+    final parentData = node.parentData;
+    final parentSize = parentProperties.size;
+
+    switch (type) {
+      case SizeType.heights:
+        return (
+          type: type,
+          paddingA: parentData.offset.dy,
+          widgetSize: size.height,
+          paddingB: parentSize.height - (size.height + parentData.offset.dy),
+        );
+      case SizeType.widths:
+        return (
+          type: type,
+          paddingA: parentData.offset.dx,
+          widgetSize: size.width,
+          paddingB: parentSize.width - (size.width + parentData.offset.dx),
+        );
+    }
+  }
+
   static String describeAxis(double min, double max, String axis) {
     if (min == max) return '$axis=${min.toStringAsFixed(1)}';
     return '${min.toStringAsFixed(1)}<=$axis<=${max.toStringAsFixed(1)}';
@@ -285,6 +347,37 @@ extension MainAxisAlignmentExtension on MainAxisAlignment {
         return this;
     }
   }
+}
+
+/// Encapsulation of [widths] and [heights] for the layout.
+class LayoutWidthsAndHeights {
+  LayoutWidthsAndHeights({required this.widths, required this.heights});
+
+  final WidgetSizes widths;
+  final WidgetSizes heights;
+
+  double get widgetWidth => widths.widgetSize;
+
+  double get widgetHeight => heights.widgetSize;
+
+  double get leftPadding => widths.paddingA;
+
+  double get rightPadding => widths.paddingB;
+
+  double get topPadding => heights.paddingA;
+
+  double get bottomPadding => heights.paddingB;
+
+  bool get hasLeftPadding => leftPadding > 0;
+
+  bool get hasRightPadding => rightPadding > 0;
+
+  bool get hasTopPadding => topPadding > 0;
+
+  bool get hasBottomPadding => bottomPadding > 0;
+
+  bool get hasAnyPadding =>
+      hasLeftPadding || hasRightPadding || hasTopPadding || hasBottomPadding;
 }
 
 /// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed.

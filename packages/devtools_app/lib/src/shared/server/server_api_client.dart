@@ -117,7 +117,7 @@ class DevToolsServerConnection {
       'jsonrpc': '2.0',
       'id': id,
       'method': method,
-      if (params != null) 'params': params,
+      'params': ?params,
     });
     final completer = Completer<T>();
     _completers[id] = completer;

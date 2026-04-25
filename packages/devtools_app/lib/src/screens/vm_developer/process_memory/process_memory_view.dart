@@ -194,7 +194,7 @@ class _ProcessMemoryTree extends StatelessWidget {
           keyFactory: (e) =>
               PageStorageKey<String>('${e.name}+${e.depth}+${e.byteSize}'),
           displayTreeGuidelines: true,
-          dataRoots: [if (root != null) root],
+          dataRoots: [?root],
           dataKey: 'process-memory-tree',
           columns: columns,
           treeColumn: categoryColumn,

@@ -11,12 +11,13 @@ void main() {
   test('Validate DevTools Skills', () async {
     final Level oldLevel = Logger.root.level;
     Logger.root.level = Level.ALL;
-    final StreamSubscription<LogRecord> subscription = Logger.root.onRecord.listen((record) {
-      print(record.message);
-    });
+    final StreamSubscription<LogRecord> subscription = Logger.root.onRecord
+        .listen((record) {
+          print(record.message);
+        });
 
     try {
-      // TODO(https://github.com/flutter/skills/issues/85): Update test 
+      // TODO(https://github.com/flutter/skills/issues/85): Update test
       // to use dart_skills_lint.yaml for config when available.
       final bool isValid = await validateSkills(
         skillDirPaths: ['../.agents/skills'],
@@ -26,7 +27,11 @@ void main() {
           'check-trailing-whitespace': AnalysisSeverity.error,
         },
       );
-      expect(isValid, isTrue, reason: 'Skills validation failed. See above for details.');
+      expect(
+        isValid,
+        isTrue,
+        reason: 'Skills validation failed. See above for details.',
+      );
     } finally {
       Logger.root.level = oldLevel;
       await subscription.cancel();

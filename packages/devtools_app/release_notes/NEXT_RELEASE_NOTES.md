@@ -19,7 +19,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any updates.
+- Deleted the option to use the legacy inspector.
+  [#9782](https://github.com/flutter/devtools/pull/9782)
 
 ## Performance updates
 
@@ -35,12 +36,18 @@ TODO: Remove this section if there are not any updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any updates.
+- Fixed an issue where long string values in the console/variables view would overflow and overlap with other elements. [#7112](https://github.com/flutter/devtools/issues/7112)
 
 ## Network profiler updates
 
+- Added response size column to the Network tab and displayed response size in the request inspector overview.  
+  [#9744](https://github.com/flutter/devtools/pull/9744)
+
 - Improved HTTP request status classification in the Network tab to better distinguish cancelled, completed, and in-flight requests (for example, avoiding some cases where cancelled requests appeared as pending). [#9683](https://github.com/flutter/devtools/pull/9683)
 
+- Added a filter setting to hide HTTP-profiler socket data.  
+  [#9698](https://github.com/flutter/devtools/pull/9698)
+  
 ## Logging updates
 
 - Fixed an issue where log messages containing newline characters were incorrectly split into multiple separate entries in the Logging screen. [#9757](https://github.com/flutter/devtools/pull/9757)
@@ -51,7 +58,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Deep links tool updates
 
-TODO: Remove this section if there are not any updates.
+- Pluralized "domain" and "path" in the validation summary notification titles when multiple errors are present. [#9790](https://github.com/flutter/devtools/pull/9790)
 
 ## VS Code sidebar updates
 
