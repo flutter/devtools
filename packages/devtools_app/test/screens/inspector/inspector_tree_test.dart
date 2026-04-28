@@ -3,12 +3,12 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
-
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
 import 'package:mockito/mockito.dart';
 
@@ -55,6 +55,20 @@ void main() {
         ),
       ),
     );
+  }
+
+  InspectorTreeController buildTreeController({
+    required void Function({bool notifyFlutterInspector}) onSelectionChange,
+  }) {
+    return InspectorTreeController()
+      ..config = InspectorTreeConfig(
+        onNodeAdded: (_, _) {},
+        onClientActiveChange: (_) {},
+        onSelectionChange: onSelectionChange,
+      )
+      ..root = (InspectorTreeNode()
+        ..appendChild(InspectorTreeNode())
+        ..appendChild(InspectorTreeNode()));
   }
 
   group('InspectorTreeController', () {
@@ -135,5 +149,99 @@ void main() {
 
       expect(find.richText('Text: "Multiline text  content"'), findsOneWidget);
     });
+  });
+
+  group('InspectorTreeController keyboard navigation', () {
+    testWidgets(
+      'navigateDown triggers onSelectionChange with notifyFlutterInspector true',
+      (WidgetTester tester) async {
+        bool? capturedNotify;
+        final treeController = buildTreeController(
+          onSelectionChange: ({bool notifyFlutterInspector = false}) {
+            capturedNotify = notifyFlutterInspector;
+          },
+        );
+
+        await pumpInspectorTree(tester, treeController: treeController);
+
+        treeController.navigateDown();
+        await tester.pump();
+
+        expect(capturedNotify, isTrue);
+      },
+    );
+
+    testWidgets(
+      'navigateUp triggers onSelectionChange with notifyFlutterInspector true',
+      (WidgetTester tester) async {
+        bool? capturedNotify;
+        final treeController = buildTreeController(
+          onSelectionChange: ({bool notifyFlutterInspector = false}) {
+            capturedNotify = notifyFlutterInspector;
+          },
+        );
+
+        await pumpInspectorTree(tester, treeController: treeController);
+
+        // Move selection to the second row so navigateUp has somewhere to go.
+        treeController.navigateDown();
+        await tester.pump();
+        treeController.navigateDown();
+        await tester.pump();
+
+        capturedNotify = null;
+        treeController.navigateUp();
+        await tester.pump();
+
+        expect(capturedNotify, isTrue);
+      },
+    );
+  });
+
+  group('InspectorTree keyboard events', () {
+    testWidgets(
+      'arrowDown key triggers onSelectionChange with notifyFlutterInspector true',
+      (WidgetTester tester) async {
+        bool? capturedNotify;
+        final treeController = buildTreeController(
+          onSelectionChange: ({bool notifyFlutterInspector = false}) {
+            capturedNotify = notifyFlutterInspector;
+          },
+        );
+
+        await pumpInspectorTree(tester, treeController: treeController);
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+
+        expect(capturedNotify, isTrue);
+      },
+    );
+
+    testWidgets(
+      'arrowUp key triggers onSelectionChange with notifyFlutterInspector true',
+      (WidgetTester tester) async {
+        bool? capturedNotify;
+        final treeController = buildTreeController(
+          onSelectionChange: ({bool notifyFlutterInspector = false}) {
+            capturedNotify = notifyFlutterInspector;
+          },
+        );
+
+        await pumpInspectorTree(tester, treeController: treeController);
+
+        // Move selection to the second row first.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+        await tester.pump();
+
+        capturedNotify = null;
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+        await tester.pump();
+
+        expect(capturedNotify, isTrue);
+      },
+    );
   });
 }

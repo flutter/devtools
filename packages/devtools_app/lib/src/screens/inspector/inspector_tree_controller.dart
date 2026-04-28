@@ -399,8 +399,7 @@ class InspectorTreeController extends DisposableController
                   _numRows - 1,
                 ),
               )?.node;
-        setSelectedNode(nodeToSelect);
-        return true;
+        return setSelectedNode(nodeToSelect, notifyFlutterInspector: true);
       },
     );
   }
