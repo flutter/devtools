@@ -22,7 +22,7 @@ Use this skill to find old, outdated issues in the `flutter/devtools` repository
    - **Pro Tip**: Use the bundled script `scripts/fetch_issue_details.sh <number>` to get a comprehensive view of the issue and its comments.
    - Compare the issue's request or reported bug with the current state of the codebase.
    - Refer to `references/rationale_templates.md` for a library of common reasons issues become outdated in DevTools.
-   - **Safety Rule**: Do not assume a bug is fixed just because the screen has been updated or the file modified. Verify if the specific bug behavior is still possible. Valid bugs should not be closed as stale just because they are old.
+   - **Safety Rule**: Do not assume a bug is fixed or obsolete just because the screen has been updated or the file modified. Verify if the specific bug behavior is still possible. Valid bugs or feature requests should not be closed as stale just because they are old or have no activity. Inactivity alone does not invalidate a feature request or bug report.
 
 3. **Draft and Review Closing Comments (CRITICAL MANDATE)**:
    - For issues identified as candidates for closing, draft a detailed comment for each explaining *why* it can be closed.
