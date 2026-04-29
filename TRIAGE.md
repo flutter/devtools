@@ -50,14 +50,14 @@ If the issue is actively being worked on or if it needs immediate / almost-immed
 to a product area owner.
 
 Here are some suggested owners by product area:
-* **Flutter Inspector**: @elliette
+* **Flutter Inspector**: @kenzieschmoll or @srawlins
 * **Performance**: @kenzieschmoll
 * **CPU Profiler**: @kenzieschmoll or @bkonyi
 * **Memory**: @kenzieschmoll or @bkonyi
-* **Network**: @elliette or @bkonyi
-* **Logging**: @elliette or @bkonyi
+* **Network**: @srawlins or @bkonyi
+* **Logging**: @kenzieschmoll or @bkonyi
 * **VM Tools**: @bkonyi
-* **Debugger**: @elliette
+* **Debugger**: @srawlins
 * **DevTools extensions**: @kenzieschmoll
 * **Tooling integrations with VS Code**: @DanTup
 * **Tooling integrations with IntelliJ or Android Studio**: @helin24 or @jwren
