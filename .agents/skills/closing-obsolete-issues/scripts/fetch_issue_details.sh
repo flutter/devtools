@@ -14,7 +14,7 @@ echo "--- INVESTIGATION FOR ISSUE #$ISSUE_NUMBER ---"
 # Fetching all comments to ensure full context is captured.
 gh issue view "$ISSUE_NUMBER" --repo flutter/devtools --json number,title,author,createdAt,labels,body,comments -t '
 Title: {{.title}}
-Author: {{.author.login}}
+Author: {{if .author}}{{.author.login}}{{else}}ghost{{end}}
 Created: {{.createdAt}}
 Labels: {{range .labels}}{{.name}}, {{end}}
 
@@ -23,7 +23,7 @@ Description:
 
 --- ALL COMMENTS ---
 {{range .comments}}
-{{.author.login}} ({{.createdAt}}):
+{{if .author}}{{.author.login}}{{else}}ghost{{end}} ({{.createdAt}}):
 {{.body}}
 ------------------------------------------------------------
 {{end}}
