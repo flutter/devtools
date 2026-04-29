@@ -24,7 +24,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+- Fixed an issue where 'More Debug Options' showed options as unselected in
+profile mode even when selected. [TODO](https://github.com/flutter/devtools/pull/TODO)
 
 ## CPU profiler updates
 

@@ -222,6 +222,61 @@ void main() {
       expect(toggle.value, false, reason: 'The extension is disabled.');
     });
   });
+
+  group('ServiceExtensionCheckbox', () {
+    testWidgets('shows value state even when unavailable', (WidgetTester tester) async {
+      final ext = extensions.disableClipLayers;
+      final customFake = _UnavailableServiceExtensionManager();
+      customFake.makeUnavailable(ext.extension);
+      
+      // Override the serviceExtensionManager on mockServiceManager
+      when(mockServiceManager.serviceExtensionManager).thenReturn(customFake);
+      
+      // Set state to enabled: false (which means clips not disabled -> checked true)
+      await customFake.setServiceExtensionState(
+        ext.extension,
+        enabled: false,
+        value: false,
+      );
+      
+      final checkbox = ServiceExtensionCheckbox(serviceExtension: ext);
+      await tester.pumpWidget(
+        wrap(Scaffold(body: Center(child: checkbox))),
+      );
+      await tester.pumpAndSettle();
+      
+      final checkboxFinder = find.byType(Checkbox);
+      expect(checkboxFinder, findsOneWidget);
+      
+      final checkboxWidget = tester.widget<Checkbox>(checkboxFinder);
+      expect(checkboxWidget.value, isTrue);
+      expect(checkboxWidget.onChanged, isNull);
+    });
+  });
+}
+
+base class _UnavailableServiceExtensionManager extends FakeServiceExtensionManager {
+  final _unavailableExtensions = <String>{};
+
+  void makeUnavailable(String name) {
+    _unavailableExtensions.add(name);
+  }
+
+  @override
+  Future<bool> waitForServiceExtensionAvailable(String name) {
+    if (_unavailableExtensions.contains(name)) {
+      return Future.value(false);
+    }
+    return super.waitForServiceExtensionAvailable(name);
+  }
+
+  @override
+  bool isServiceExtensionAvailable(String name) {
+    if (_unavailableExtensions.contains(name)) {
+      return false;
+    }
+    return super.isServiceExtensionAvailable(name);
+  }
 }
 
 void registerServiceExtension(
