@@ -28,6 +28,14 @@ Some issues are caused by or fixed by changes in the Flutter SDK rather than Dev
 Proposals or feature requests from several years ago with no recent activity or community interest may be closed if they no longer align with current priorities or have been superseded by general improvements.
 - **Rationale**: Note that the issue is a stale feature request with no recent activity and that DevTools has evolved significantly since then.
 
+## 7. Very Old DevTools Version
+Issues reported on very old versions of DevTools (check current version in `packages/devtools_app/pubspec.yaml` for comparison) may be closed if they are likely fixed or no longer relevant.
+- **Rationale**: "This issue looks like it occurred on an old version of DevTools. Are you still experiencing this issue with DevTools on the latest Flutter stable? If so, please reopen and we will take a look. Thanks."
+
+## 8. Insufficient Information
+Issues that lack clear descriptions, reproduction steps, or logs make it impossible to investigate.
+- **Rationale**: "Without additional information, we cannot debug this issue. Please re-open if you can provide a description of your issue and repro steps. Thanks."
+
 ---
 **Reminder**: Every closing comment MUST end with:
 "If there is more work to do here, please let us know by filing a new issue with up to date information. Thanks!"

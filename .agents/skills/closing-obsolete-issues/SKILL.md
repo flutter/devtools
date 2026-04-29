@@ -1,11 +1,11 @@
 ---
 name: closing-obsolete-issues
-description: Find and close obsolete or stale issues in the flutter/devtools repository.
+description: Find and close obsolete, stale, or not reproducible issues in the flutter/devtools repository.
 ---
 
 # Closing Obsolete Issues
 
-Use this skill to find old, outdated issues in the `flutter/devtools` repository that can be closed because they have been fixed, are stale, or are obsolete.
+Use this skill to find old, outdated issues in the `flutter/devtools` repository that can be closed because they have been fixed, are stale, obsolete, or not reproducible.
 
 ## Instructions
 
@@ -41,3 +41,4 @@ Use this skill to find old, outdated issues in the `flutter/devtools` repository
 
 - Use `grep_search` or `find_by_name` to check the current codebase for references to the issue or relevant code.
 - Look for related PRs that might have fixed the issue but didn't close it automatically.
+- For issues reporting specific versions, check the current DevTools version in `packages/devtools_app/pubspec.yaml` to determine if the reported version is very old.
