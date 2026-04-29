@@ -24,6 +24,10 @@ Requests related to old UI patterns or legacy screens that have been completely 
 Some issues are caused by or fixed by changes in the Flutter SDK rather than DevTools itself.
 - **Rationale**: If a bug was fixed in a specific Flutter version, mention it.
 
+## 6. Stale Feature Requests
+Proposals or feature requests from several years ago with no recent activity or community interest may be closed if they no longer align with current priorities or have been superseded by general improvements.
+- **Rationale**: Note that the issue is a stale feature request with no recent activity and that DevTools has evolved significantly since then.
+
 ---
 **Reminder**: Every closing comment MUST end with:
 "If there is more work to do here, please let us know by filing a new issue with up to date information. Thanks!"
