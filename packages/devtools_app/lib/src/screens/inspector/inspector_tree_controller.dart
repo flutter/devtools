@@ -357,7 +357,10 @@ class InspectorTreeController extends DisposableController
           return true;
         }
         if (selectionLocal.parent != null) {
-          return setSelectedNode(selectionLocal.parent);
+          return setSelectedNode(
+            selectionLocal.parent,
+            notifyFlutterInspector: true,
+          );
         }
         return false;
       },

@@ -196,6 +196,66 @@ void main() {
         expect(capturedNotify, isTrue);
       },
     );
+
+    testWidgets(
+      'navigateRight triggers onSelectionChange with notifyFlutterInspector true',
+      (WidgetTester tester) async {
+        bool? capturedNotify;
+        final treeController = buildTreeController(
+          onSelectionChange: ({bool notifyFlutterInspector = false}) {
+            capturedNotify = notifyFlutterInspector;
+          },
+        );
+
+        await pumpInspectorTree(tester, treeController: treeController);
+
+        final root = treeController.root!;
+        final firstChild = root.children.first;
+        root.isExpanded = false;
+        treeController.setSelectedNode(root);
+
+        // First right-arrow navigation expands the selected node.
+        capturedNotify = null;
+        treeController.navigateRight();
+        await tester.pump();
+
+        expect(root.isExpanded, isTrue);
+        expect(treeController.selection, root);
+        expect(capturedNotify, isNull);
+
+        // Once expanded, right-arrow navigation selects the next visible row.
+        treeController.navigateRight();
+        await tester.pump();
+
+        expect(treeController.selection, firstChild);
+        expect(capturedNotify, isTrue);
+      },
+    );
+
+    testWidgets(
+      'navigateLeft triggers onSelectionChange with notifyFlutterInspector true',
+      (WidgetTester tester) async {
+        bool? capturedNotify;
+        final treeController = buildTreeController(
+          onSelectionChange: ({bool notifyFlutterInspector = false}) {
+            capturedNotify = notifyFlutterInspector;
+          },
+        );
+
+        await pumpInspectorTree(tester, treeController: treeController);
+
+        final root = treeController.root!;
+        final firstChild = root.children.first..isExpanded = false;
+        treeController.setSelectedNode(firstChild);
+
+        capturedNotify = null;
+        treeController.navigateLeft();
+        await tester.pump();
+
+        expect(treeController.selection, root);
+        expect(capturedNotify, isTrue);
+      },
+    );
   });
 
   group('InspectorTree keyboard events', () {
@@ -240,6 +300,66 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
         await tester.pump();
 
+        expect(capturedNotify, isTrue);
+      },
+    );
+
+    testWidgets(
+      'arrowRight key triggers onSelectionChange with notifyFlutterInspector true',
+      (WidgetTester tester) async {
+        bool? capturedNotify;
+        final treeController = buildTreeController(
+          onSelectionChange: ({bool notifyFlutterInspector = false}) {
+            capturedNotify = notifyFlutterInspector;
+          },
+        );
+
+        await pumpInspectorTree(tester, treeController: treeController);
+
+        final root = treeController.root!;
+        final firstChild = root.children.first;
+        root.isExpanded = false;
+        treeController.setSelectedNode(root);
+
+        // First arrowRight expands the selected node.
+        capturedNotify = null;
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+
+        expect(root.isExpanded, isTrue);
+        expect(treeController.selection, root);
+        expect(capturedNotify, isNull);
+
+        // Once expanded, arrowRight selects the next visible row.
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await tester.pump();
+
+        expect(treeController.selection, firstChild);
+        expect(capturedNotify, isTrue);
+      },
+    );
+
+    testWidgets(
+      'arrowLeft key triggers onSelectionChange with notifyFlutterInspector true',
+      (WidgetTester tester) async {
+        bool? capturedNotify;
+        final treeController = buildTreeController(
+          onSelectionChange: ({bool notifyFlutterInspector = false}) {
+            capturedNotify = notifyFlutterInspector;
+          },
+        );
+
+        await pumpInspectorTree(tester, treeController: treeController);
+
+        final root = treeController.root!;
+        final firstChild = root.children.first..isExpanded = false;
+        treeController.setSelectedNode(firstChild);
+
+        capturedNotify = null;
+        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+        await tester.pump();
+
+        expect(treeController.selection, root);
         expect(capturedNotify, isTrue);
       },
     );
