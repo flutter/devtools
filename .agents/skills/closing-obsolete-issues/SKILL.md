@@ -40,7 +40,8 @@ Use this skill to find old, outdated issues in the `flutter/devtools` repository
 
 ## Tips
 
-- Use `grep_search` or `find_by_name` to check the current codebase for references to the issue or relevant code.
+- Use available file and content search tools (such as `grep`, `ripgrep`, or environment-specific
+search tools) to check the current codebase for references to the issue or relevant code.
 - Look for related PRs that might have fixed the issue but didn't close it automatically.
 - **Pro Tip**: Use the bundled script `scripts/search_prs.sh <query>` to search for PRs in the repository.
 - For issues reporting specific versions, check the current DevTools version in `packages/devtools_app/pubspec.yaml`
