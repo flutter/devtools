@@ -467,11 +467,12 @@ void main() {
     });
 
     testWidgets(
-      'onSelectNode does not re-expand collapsed siblings of the clicked node',
+      'onSelectNode does not re-expand a node the user just collapsed via '
+      'the arrow-left key',
       (WidgetTester tester) async {
         // Regression test: clicking a still-visible row used to call
         // expandPath on the clicked node, which re-expanded the clicked node
-        // itself and undid any subtree collapses the user had just performed
+        // itself and undid any subtree collapse the user had just performed
         // via the arrow-left key.
         final treeController = buildTreeController(
           onSelectionChange: ({bool notifyFlutterInspector = false}) {},
@@ -493,8 +494,8 @@ void main() {
         expect(firstChild.isExpanded, isFalse);
         expect(visibleNodes(treeController), [root, firstChild, secondChild]);
 
-        // Selecting another visible row must not re-expand [firstChild].
-        treeController.onSelectNode(secondChild);
+        // Re-selecting the just-collapsed row must not re-expand it.
+        treeController.onSelectNode(firstChild);
         await tester.pump();
 
         expect(firstChild.isExpanded, isFalse);
