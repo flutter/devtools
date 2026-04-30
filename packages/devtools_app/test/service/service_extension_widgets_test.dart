@@ -224,30 +224,30 @@ void main() {
   });
 
   group('ServiceExtensionCheckbox', () {
-    testWidgets('shows value state even when unavailable', (WidgetTester tester) async {
+    testWidgets('shows value state even when unavailable', (
+      WidgetTester tester,
+    ) async {
       final ext = extensions.disableClipLayers;
       final customFake = _UnavailableServiceExtensionManager();
       customFake.makeUnavailable(ext.extension);
-      
+
       // Override the serviceExtensionManager on mockServiceManager
       when(mockServiceManager.serviceExtensionManager).thenReturn(customFake);
-      
+
       // Set state to enabled: false (which means clips not disabled -> checked true)
       await customFake.setServiceExtensionState(
         ext.extension,
         enabled: false,
         value: false,
       );
-      
+
       final checkbox = ServiceExtensionCheckbox(serviceExtension: ext);
-      await tester.pumpWidget(
-        wrap(Scaffold(body: Center(child: checkbox))),
-      );
+      await tester.pumpWidget(wrap(Scaffold(body: Center(child: checkbox))));
       await tester.pumpAndSettle();
-      
+
       final checkboxFinder = find.byType(Checkbox);
       expect(checkboxFinder, findsOneWidget);
-      
+
       final checkboxWidget = tester.widget<Checkbox>(checkboxFinder);
       expect(checkboxWidget.value, isTrue);
       expect(checkboxWidget.onChanged, isNull);
@@ -255,7 +255,8 @@ void main() {
   });
 }
 
-base class _UnavailableServiceExtensionManager extends FakeServiceExtensionManager {
+base class _UnavailableServiceExtensionManager
+    extends FakeServiceExtensionManager {
   final _unavailableExtensions = <String>{};
 
   void makeUnavailable(String name) {
