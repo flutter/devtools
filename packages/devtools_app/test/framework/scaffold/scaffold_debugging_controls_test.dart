@@ -89,12 +89,8 @@ void main() {
 }
 
 class _TestScreen extends Screen {
-  const _TestScreen(
-    this.name,
-    this.key, {
-    super.showFloatingDebuggerControls = true,
-    super.tabKey,
-  }) : super(name, title: name, icon: Icons.computer);
+  const _TestScreen(this.name, this.key, {super.tabKey})
+    : super(name, title: name, icon: Icons.computer);
 
   final String name;
   final Key key;
