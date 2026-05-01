@@ -357,7 +357,10 @@ class InspectorTreeController extends DisposableController
           return true;
         }
         if (selectionLocal.parent != null) {
-          return setSelectedNode(selectionLocal.parent);
+          return setSelectedNode(
+            selectionLocal.parent,
+            notifyFlutterInspector: true,
+          );
         }
         return false;
       },
@@ -399,8 +402,7 @@ class InspectorTreeController extends DisposableController
                   _numRows - 1,
                 ),
               )?.node;
-        setSelectedNode(nodeToSelect);
-        return true;
+        return setSelectedNode(nodeToSelect, notifyFlutterInspector: true);
       },
     );
   }
@@ -573,7 +575,12 @@ class InspectorTreeController extends DisposableController
     if (diagnostic != null && diagnostic.groupIsHidden) {
       diagnostic.hideableGroupLeader?.toggleHiddenGroup();
     }
-    expandPath(node);
+    // Intentionally do NOT call expandPath(node) here. User clicks happen on
+    // already-visible rows, so ancestors are already expanded; calling
+    // expandPath would also re-expand the clicked node itself, undoing any
+    // collapse the user just performed via the left arrow key. Programmatic
+    // selection paths (search, on-device pick) call expandPath themselves via
+    // [InspectorController.syncTreeSelection].
   }
 
   Rect getBoundingBox(InspectorTreeRow row) {
@@ -1142,8 +1149,12 @@ class _InspectorTreeState extends State<InspectorTree>
       valueListenable: treeControllerLocal.rowsInTree,
       builder: (context, rows, _) {
         // Note: The inspector rows contain only the fake root node when the
-        // inspector tree is shutdown.
-        if (rows.length <= 1) {
+        // inspector tree is shutdown. Only show the loading indicator on the
+        // initial tree load (before [firstInspectorTreeLoadCompleted] is set);
+        // after that, a one-row tree is the legitimate result of the user
+        // collapsing all the way to the root via the keyboard, and we should
+        // render the tree (with its single row) rather than a spinner.
+        if (rows.length <= 1 && !controller.firstInspectorTreeLoadCompleted) {
           // This works around a bug when Scrollbars are present on a short lived
           // widget.
           return const SizedBox(child: CenteredCircularProgressIndicator());
