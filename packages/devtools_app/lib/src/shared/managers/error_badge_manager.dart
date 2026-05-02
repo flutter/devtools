@@ -112,7 +112,7 @@ class ErrorBadgeManager extends DisposableController
   }
 
   void incrementBadgeCount(String screenId) {
-    if (screenId == InspectorScreen.id || _activeErrors.containsKey(screenId)) {
+    if (_activeErrors.containsKey(screenId)) {
       return;
     }
 
