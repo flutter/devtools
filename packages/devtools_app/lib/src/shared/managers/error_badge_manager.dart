@@ -127,21 +127,40 @@ class ErrorBadgeManager extends DisposableController
     final errors = _activeErrors[screenId];
     if (errors == null) return;
 
+    final previousError = errors.value[error.id];
+
     // Build a new map with the new error. Adding to the existing map
     // won't cause the ValueNotifier to fire (and it's not permitted to call
     // notifyListeners() directly).
     final newValue = LinkedHashMap<String, DevToolsError>.of(errors.value);
     newValue[error.id] = error;
     errors.value = newValue;
-    _updateErrorCount(screenId);
+
+    if (previousError == null) {
+      if (!error.read) {
+        _incrementUnreadCount(screenId);
+      }
+      return;
+    }
+
+    if (previousError.read && !error.read) {
+      _incrementUnreadCount(screenId);
+    } else if (!previousError.read && error.read) {
+      _decrementUnreadCount(screenId);
+    }
   }
 
-  void _updateErrorCount(String screenId) {
-    final errors = _activeErrors[screenId];
-    if (errors == null) return;
+  void _incrementUnreadCount(String screenId) {
+    final notifier = _errorCountNotifier(screenId);
+    if (notifier == null) return;
+    notifier.value = notifier.value + 1;
+  }
 
-    final unreadCount = errors.value.values.where((e) => !e.read).length;
-    _activeErrorCounts[screenId]?.value = unreadCount;
+  void _decrementUnreadCount(String screenId) {
+    final notifier = _errorCountNotifier(screenId);
+    if (notifier == null) return;
+    if (notifier.value == 0) return;
+    notifier.value = notifier.value - 1;
   }
 
   ValueListenable<int> errorCountNotifier(String screenId) {
@@ -195,7 +214,7 @@ class ErrorBadgeManager extends DisposableController
         return MapEntry(e.key, e.value.asRead());
       }),
     );
-    _updateErrorCount(screenId);
+    _decrementUnreadCount(screenId);
   }
 }
 
