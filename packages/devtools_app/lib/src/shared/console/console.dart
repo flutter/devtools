@@ -49,7 +49,7 @@ class ConsoleFrame extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (title != null) title!,
+          ?title,
           Expanded(child: child),
         ],
       ),

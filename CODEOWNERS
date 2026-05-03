@@ -1,10 +1,10 @@
 *                   @flutter/devtools-reviewers
 
 # Inspector Files
-inspector/          @elliette
+inspector/          @kenzieschmoll @srawlins
 
 # Network Files
-network/            @bkonyi @kenzieschmoll
+network/            @srawlins @bkonyi @kenzieschmoll
 
 # Performance Files
 performance/        @kenzieschmoll
@@ -16,13 +16,13 @@ profiler/           @kenzieschmoll @bkonyi
 memory/             @bkonyi @kenzieschmoll
 
 # Debugger files
-debugger/           @elliette
+debugger/           @srawlins
 
 # VM Developer files
 vm_developer/       @bkonyi
 
 # Tooling files
-/tool/              @kenzieschmoll
+/tool/              @kenzieschmoll @srawlins
 
 # DevTools extensions and related files
 src/extensions/

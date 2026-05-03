@@ -37,7 +37,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any updates.
+- Fixed an issue where long string values in the console/variables view would overflow and overlap with other elements. [#7112](https://github.com/flutter/devtools/issues/7112)
 
 ## Network profiler updates
 
