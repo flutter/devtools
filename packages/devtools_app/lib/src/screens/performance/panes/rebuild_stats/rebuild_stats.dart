@@ -92,6 +92,19 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
 
   @override
   Widget build(BuildContext context) {
+    final isProfileBuild =
+        serviceConnection.serviceManager.connectedApp?.isProfileBuildNow ??
+        false;
+    if (isProfileBuild) {
+      return const Center(
+        child: Text(
+          'Rebuild information is not available for this frame.\n'
+          'Widget rebuild counts are only available when running '
+          'an app in debug-mode.',
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
