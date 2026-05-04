@@ -5,9 +5,11 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 -->
 # 13.0.0-wip
 * Deprecated `DevToolsStoreKeys.analyticsEnabled` since this is only used for legacy analytics.
-* **Breaking change:** Removed legacy analytics APIs and state cleanup (e.g. `apiGetFlutterGAEnabled`, `apiGetDevToolsEnabled`, `apiSetDevToolsEnabled`).
+* **Breaking change:** Removed legacy analytics storage key `DevToolsStoreKeys.isFirstRun`.
+* **Breaking change:** Removed legacy analytics APIs and state cleanup
+(e.g. `apiGetFlutterGAEnabled`, `apiGetDevToolsEnabled`, `apiSetDevToolsEnabled`, `apiGetDevToolsFirstRun`, `apiResetDevTools`).
 * **Breaking change:** Removed public constant `devToolsEnabledPropertyName`.
-* **Breaking change:** Removed the `analyticsEnabled` getter and setter from `DevToolsUsage`.
+* **Breaking change:** Removed `isFirstRun`, `reset`, and `analyticsEnabled` from `DevToolsUsage`.
 
 # 12.1.0
 * Adds additional logging to `IntegrationTestRunner`.
