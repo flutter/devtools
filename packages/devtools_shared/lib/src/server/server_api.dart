@@ -82,16 +82,6 @@ class ServerApi {
           api: api,
         );
 
-      // ----- DevTools Store. -----
-
-      case apiResetDevTools:
-        _devToolsStore.reset();
-        return _encodeResponse(true, api: api);
-      case apiGetDevToolsFirstRun:
-        // Has DevTools been run first time? To bring up analytics dialog.
-        final isFirstRun = _devToolsStore.isFirstRun;
-        return _encodeResponse(isFirstRun, api: api);
-
       // ----- Preferences api. -----
       case PreferencesApi.getPreferenceValue:
         return _PreferencesApiHandler.getPreferenceValue(
