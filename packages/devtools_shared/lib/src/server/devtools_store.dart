@@ -5,21 +5,6 @@
 import 'file_system.dart';
 
 enum DevToolsStoreKeys {
-  /// The key holding the value for whether Google Analytics (legacy) for
-  /// DevTools have been enabled.
-  @Deprecated(
-    'Use unified_analytics instead; this key is for legacy analytics and will '
-    'be removed.',
-  )
-  analyticsEnabled,
-
-  /// The key holding the value for whether this is a user's first run of
-  /// DevTools.
-  @Deprecated(
-    'This key was used for legacy analytics and will be removed.',
-  )
-  isFirstRun,
-
   /// The key holding the value for the last DevTools version that the user
   /// viewed release notes for.
   lastReleaseNotesVersion,
@@ -64,10 +49,12 @@ class DevToolsUsage {
 
   void _removeLegacyKeys() {
     // TODO(https://github.com/flutter/devtools/issues/9775): remove this logic
-    // once legacy keys have been removed for ~1 year.
+    // once legacy keys have been removed for ~1 year. We are intentionally
+    // using raw strings instead of values from [DevToolsStoreKeys] to avoid
+    // unnecessary breaking changes in the future.
     properties
-      ..remove(DevToolsStoreKeys.analyticsEnabled.name)
-      ..remove(DevToolsStoreKeys.isFirstRun.name);
+      ..remove('analyticsEnabled')
+      ..remove('isFirstRun');
   }
 
   bool surveyNameExists(String surveyName) => properties[surveyName] != null;
