@@ -13,6 +13,13 @@ enum DevToolsStoreKeys {
   )
   analyticsEnabled,
 
+  /// The key holding the value for whether this is a user's first run of
+  /// DevTools.
+  @Deprecated(
+    'This key was used for legacy analytics and will be removed.',
+  )
+  isFirstRun,
+
   /// The key holding the value for the last DevTools version that the user
   /// viewed release notes for.
   lastReleaseNotesVersion,
@@ -58,7 +65,9 @@ class DevToolsUsage {
   void _removeLegacyKeys() {
     // TODO(https://github.com/flutter/devtools/issues/9775): remove this logic
     // once legacy keys have been removed for ~1 year.
-    properties.remove(DevToolsStoreKeys.analyticsEnabled.name);
+    properties
+      ..remove(DevToolsStoreKeys.analyticsEnabled.name)
+      ..remove(DevToolsStoreKeys.isFirstRun.name);
   }
 
   bool surveyNameExists(String surveyName) => properties[surveyName] != null;
