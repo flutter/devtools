@@ -3,6 +3,9 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
+# 13.0.1
+* Handle null values for `FlutterStore.flutterClientId`.
+
 # 13.0.0
 * **Breaking change:** Removed `DevToolsStoreKeys.analyticsEnabled` and
 `DevToolsStoreKeys.isFirstRun` since these were only used for legacy analytics.

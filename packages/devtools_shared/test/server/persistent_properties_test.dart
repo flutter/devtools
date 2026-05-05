@@ -15,7 +15,8 @@ void main() {
     const storeName = 'test_store';
 
     setUp(() {
-      tempDir = Directory.systemTemp.createTempSync('persistent_properties_test');
+      tempDir =
+          Directory.systemTemp.createTempSync('persistent_properties_test');
       properties = IOPersistentProperties(
         storeName,
         documentDirPath: tempDir.path,
