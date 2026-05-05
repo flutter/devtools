@@ -68,13 +68,8 @@ class ServerApi {
           dtd,
         );
 
-      // TODO(kenz): remove legacy analytics once the unified analytics rollout
-      // is complete and verified for robustness (est. Fall 2025).
-
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAClientId:
-        // Flutter Tool GA clientId - ONLY get Flutter's clientId if enabled is
-        // true.
         return _encodeResponse(
           LocalFileSystem.flutterStoreExists()
               ? _flutterStore.flutterClientId

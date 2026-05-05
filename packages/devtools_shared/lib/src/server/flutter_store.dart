@@ -17,5 +17,6 @@ class FlutterStore {
 
   bool get gaEnabled => properties[gaEnabledKey] == true;
 
-  String get flutterClientId => (properties[flutterClientIdKey] as String?) ?? '';
+  String get flutterClientId =>
+      (properties[flutterClientIdKey] as String?) ?? '';
 }
