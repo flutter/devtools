@@ -77,7 +77,7 @@ class ServerApi {
         // true.
         return _encodeResponse(
           LocalFileSystem.flutterStoreExists()
-              ? _flutterStore.flutterClientId ?? ''
+              ? _flutterStore.flutterClientId
               : '',
           api: api,
         );
