@@ -1154,6 +1154,67 @@ void main() {
       );
     });
 
+    group('rebuilds with a different number of children', () {
+      testWidgets(
+        'does not throw a RangeError when child count shrinks',
+        (WidgetTester tester) async {
+          final threeChildSplit = buildSplitPane(
+            Axis.horizontal,
+            children: const [_w1, _w2, _w3],
+            initialFractions: const [0.2, 0.4, 0.4],
+            minSizes: const [50.0, 50.0, 50.0],
+          );
+          await tester.pumpWidget(wrap(threeChildSplit));
+          expect(find.byKey(_k1), findsOneWidget);
+          expect(find.byKey(_k2), findsOneWidget);
+          expect(find.byKey(_k3), findsOneWidget);
+
+          final twoChildSplit = buildSplitPane(
+            Axis.horizontal,
+            children: const [_w1, _w2],
+            initialFractions: const [0.5, 0.5],
+            minSizes: const [50.0, 50.0],
+          );
+          await tester.pumpWidget(wrap(twoChildSplit));
+          await tester.pumpAndSettle();
+
+          expect(tester.takeException(), isNull);
+          expect(find.byKey(_k1), findsOneWidget);
+          expect(find.byKey(_k2), findsOneWidget);
+          expect(find.byKey(_k3), findsNothing);
+        },
+      );
+
+      testWidgets(
+        'does not throw a RangeError when child count grows',
+        (WidgetTester tester) async {
+          final twoChildSplit = buildSplitPane(
+            Axis.horizontal,
+            children: const [_w1, _w2],
+            initialFractions: const [0.5, 0.5],
+            minSizes: const [50.0, 50.0],
+          );
+          await tester.pumpWidget(wrap(twoChildSplit));
+          expect(find.byKey(_k1), findsOneWidget);
+          expect(find.byKey(_k2), findsOneWidget);
+
+          final threeChildSplit = buildSplitPane(
+            Axis.horizontal,
+            children: const [_w1, _w2, _w3],
+            initialFractions: const [0.2, 0.4, 0.4],
+            minSizes: const [50.0, 50.0, 50.0],
+          );
+          await tester.pumpWidget(wrap(threeChildSplit));
+          await tester.pumpAndSettle();
+
+          expect(tester.takeException(), isNull);
+          expect(find.byKey(_k1), findsOneWidget);
+          expect(find.byKey(_k2), findsOneWidget);
+          expect(find.byKey(_k3), findsOneWidget);
+        },
+      );
+    });
+
     group('axisFor', () {
       testWidgetsWithWindowSize(
         'return Axis.horizontal',
