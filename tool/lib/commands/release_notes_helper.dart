@@ -91,6 +91,8 @@ class ReleaseNotesCommand extends Command {
     final websiteReleaseNotesDir = Directory(
       p.join(
         websiteRepoPath,
+        'sites',
+        'docs',
         'src',
         'content',
         'tools',
