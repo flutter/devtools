@@ -141,7 +141,7 @@ class IOPersistentProperties {
   }
 
   void remove(String propertyName) {
-    _map.remove(propertyName);
+    this[propertyName] = null;
   }
 }
 

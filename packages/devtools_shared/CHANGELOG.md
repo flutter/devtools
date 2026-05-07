@@ -3,11 +3,16 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
-# 13.0.0-wip
-* Deprecated `DevToolsStoreKeys.analyticsEnabled` since this is only used for legacy analytics.
-* **Breaking change:** Removed legacy analytics APIs and state cleanup (e.g. `apiGetFlutterGAEnabled`, `apiGetDevToolsEnabled`, `apiSetDevToolsEnabled`).
+# 13.0.1
+* Handle null values for `FlutterStore.flutterClientId`.
+
+# 13.0.0
+* **Breaking change:** Removed `DevToolsStoreKeys.analyticsEnabled` and
+`DevToolsStoreKeys.isFirstRun` since these were only used for legacy analytics.
+* **Breaking change:** Removed legacy analytics APIs and state cleanup
+(e.g. `apiGetFlutterGAEnabled`, `apiGetDevToolsEnabled`, `apiSetDevToolsEnabled`, `apiGetDevToolsFirstRun`, `apiResetDevTools`).
 * **Breaking change:** Removed public constant `devToolsEnabledPropertyName`.
-* **Breaking change:** Removed the `analyticsEnabled` getter and setter from `DevToolsUsage`.
+* **Breaking change:** Removed `isFirstRun`, `reset`, and `analyticsEnabled` from `DevToolsUsage`.
 
 # 12.1.0
 * Adds additional logging to `IntegrationTestRunner`.

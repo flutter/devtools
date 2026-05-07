@@ -5,18 +5,6 @@
 import 'file_system.dart';
 
 enum DevToolsStoreKeys {
-  /// The key holding the value for whether Google Analytics (legacy) for
-  /// DevTools have been enabled.
-  @Deprecated(
-    'Use unified_analytics instead; this key is for legacy analytics and will '
-    'be removed.',
-  )
-  analyticsEnabled,
-
-  /// The key holding the value for whether this is a user's first run of
-  /// DevTools.
-  isFirstRun,
-
   /// The key holding the value for the last DevTools version that the user
   /// viewed release notes for.
   lastReleaseNotesVersion,
@@ -34,12 +22,11 @@ enum DevToolsStoreKeys {
 class DevToolsUsage {
   DevToolsUsage() {
     LocalFileSystem.maybeMoveLegacyDevToolsStore();
-    _removeLegacyKeys();
-
     properties = IOPersistentProperties(
       storeName,
       documentDirPath: LocalFileSystem.devToolsDir(),
     );
+    _removeLegacyKeys();
   }
 
   static const storeName = '.devtools';
@@ -60,19 +47,14 @@ class DevToolsUsage {
 
   late IOPersistentProperties properties;
 
-  void reset() {
-    properties.remove(DevToolsStoreKeys.isFirstRun.name);
-  }
-
   void _removeLegacyKeys() {
     // TODO(https://github.com/flutter/devtools/issues/9775): remove this logic
-    // once legacy keys have been removed for ~1 year.
-    properties.remove(DevToolsStoreKeys.analyticsEnabled.name);
-  }
-
-  bool get isFirstRun {
-    return properties[DevToolsStoreKeys.isFirstRun.name] =
-        properties[DevToolsStoreKeys.isFirstRun.name] == null;
+    // once legacy keys have been removed for ~1 year. We are intentionally
+    // using raw strings instead of values from [DevToolsStoreKeys] to avoid
+    // unnecessary breaking changes in the future.
+    properties
+      ..remove('analyticsEnabled')
+      ..remove('isFirstRun');
   }
 
   bool surveyNameExists(String surveyName) => properties[surveyName] != null;

@@ -68,29 +68,14 @@ class ServerApi {
           dtd,
         );
 
-      // TODO(kenz): remove legacy analytics once the unified analytics rollout
-      // is complete and verified for robustness (est. Fall 2025).
-
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAClientId:
-        // Flutter Tool GA clientId - ONLY get Flutter's clientId if enabled is
-        // true.
         return _encodeResponse(
           LocalFileSystem.flutterStoreExists()
               ? _flutterStore.flutterClientId
               : '',
           api: api,
         );
-
-      // ----- DevTools Store. -----
-
-      case apiResetDevTools:
-        _devToolsStore.reset();
-        return _encodeResponse(true, api: api);
-      case apiGetDevToolsFirstRun:
-        // Has DevTools been run first time? To bring up analytics dialog.
-        final isFirstRun = _devToolsStore.isFirstRun;
-        return _encodeResponse(isFirstRun, api: api);
 
       // ----- Preferences api. -----
       case PreferencesApi.getPreferenceValue:
