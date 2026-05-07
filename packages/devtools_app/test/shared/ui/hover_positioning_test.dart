@@ -3,47 +3,32 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/src/shared/ui/hover.dart';
+import 'package:devtools_test/helpers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 
 void main() {
-  late HoverCardController hoverCardController;
-
-  setUp(() {
-    hoverCardController = HoverCardController();
-  });
-
   Future<void> pumpHoverCardTooltip(
     WidgetTester tester, {
     required Alignment alignment,
-    Size windowSize = const Size(800, 600),
     String? title,
   }) async {
-    await tester.binding.setSurfaceSize(windowSize);
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Provider<HoverCardController>.value(
-            value: hoverCardController,
-            child: Align(
-              alignment: alignment,
-              child: HoverCardTooltip.sync(
-                enabled: () => true,
-                generateHoverCardData: (event) => HoverCardData(
-                  title: title,
-                  contents: const SizedBox(
-                    width: 200,
-                    height: 250,
-                    child: Text('Hover Content'),
-                  ),
-                ),
-                child: const Text('Hover Me'),
+      wrapSimple(
+        Align(
+          alignment: alignment,
+          child: HoverCardTooltip.sync(
+            enabled: () => true,
+            generateHoverCardData: (event) => HoverCardData(
+              title: title,
+              contents: const SizedBox(
+                width: 200,
+                height: 250,
+                child: Text('Hover Content'),
               ),
             ),
+            child: const Text('Hover Me'),
           ),
         ),
       ),
@@ -58,64 +43,72 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('HoverCard at the bottom of the window should not overflow', (WidgetTester tester) async {
-    const windowSize = Size(800, 600);
-    // Use a title to increase the height beyond the base content height.
-    await pumpHoverCardTooltip(
-      tester,
-      alignment: Alignment.bottomCenter,
-      windowSize: windowSize,
-      title: 'A Very Important Title',
-    );
+  testWidgetsWithWindowSize(
+    'HoverCard at the bottom of the window should not overflow',
+    const Size(800, 600),
+    (WidgetTester tester) async {
+      // Use a title to increase the height beyond the base content height.
+      await pumpHoverCardTooltip(
+        tester,
+        alignment: Alignment.bottomCenter,
+        title: 'A Very Important Title',
+      );
 
-    final hoverContentFinder = find.text('Hover Content');
-    expect(hoverContentFinder, findsOneWidget);
+      final hoverContentFinder = find.text('Hover Content');
+      expect(hoverContentFinder, findsOneWidget);
 
-    final overlayContainer = find.ancestor(
-      of: hoverContentFinder,
-      matching: find.byType(Container),
-    ).last; // The outermost container of the HoverCard
+      final overlayContainer = find.ancestor(
+        of: hoverContentFinder,
+        matching: find.byType(Container),
+      ).last; // The outermost container of the HoverCard
 
-    final renderBox = tester.renderObject(overlayContainer) as RenderBox;
-    final position = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
+      final renderBox = tester.renderObject(overlayContainer) as RenderBox;
+      final position = renderBox.localToGlobal(Offset.zero);
+      final size = renderBox.size;
 
-    // _hoverMargin = 16.0
-    expect(position.dy + size.height, lessThanOrEqualTo(windowSize.height - 16.0));
-  });
+      // _hoverMargin = 16.0
+      expect(position.dy + size.height, lessThanOrEqualTo(600.0 - 16.0));
+    },
+  );
 
-  testWidgets('HoverCard at the right of the window should not overflow', (WidgetTester tester) async {
-    const windowSize = Size(800, 600);
-    await pumpHoverCardTooltip(tester, alignment: Alignment.centerRight, windowSize: windowSize);
+  testWidgetsWithWindowSize(
+    'HoverCard at the right of the window should not overflow',
+    const Size(800, 600),
+    (WidgetTester tester) async {
+      await pumpHoverCardTooltip(tester, alignment: Alignment.centerRight);
 
-    final hoverContentFinder = find.text('Hover Content');
-    expect(hoverContentFinder, findsOneWidget);
+      final hoverContentFinder = find.text('Hover Content');
+      expect(hoverContentFinder, findsOneWidget);
 
-    final overlayContainer = find.ancestor(
-      of: hoverContentFinder,
-      matching: find.byType(Container),
-    ).last;
+      final overlayContainer = find.ancestor(
+        of: hoverContentFinder,
+        matching: find.byType(Container),
+      ).last;
 
-    final renderBox = tester.renderObject(overlayContainer) as RenderBox;
-    final position = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
+      final renderBox = tester.renderObject(overlayContainer) as RenderBox;
+      final position = renderBox.localToGlobal(Offset.zero);
+      final size = renderBox.size;
 
-    // _hoverMargin = 16.0
-    expect(position.dx + size.width, lessThanOrEqualTo(windowSize.width - 16.0));
-  });
+      // _hoverMargin = 16.0
+      expect(position.dx + size.width, lessThanOrEqualTo(800.0 - 16.0));
+    },
+  );
 
-  testWidgets('HoverCard in very small window should not crash', (WidgetTester tester) async {
-    const windowSize = Size(100, 100); // Smaller than tooltip
-    await pumpHoverCardTooltip(tester, alignment: Alignment.center, windowSize: windowSize);
+  testWidgetsWithWindowSize(
+    'HoverCard in very small window should not crash',
+    const Size(100, 100), // Smaller than tooltip
+    (WidgetTester tester) async {
+      await pumpHoverCardTooltip(tester, alignment: Alignment.center);
 
-    final hoverContentFinder = find.text('Hover Content');
-    expect(hoverContentFinder, findsOneWidget);
+      final hoverContentFinder = find.text('Hover Content');
+      expect(hoverContentFinder, findsOneWidget);
 
-    final overlayContainer = find.ancestor(
-      of: hoverContentFinder,
-      matching: find.byType(Container),
-    ).last;
+      final overlayContainer = find.ancestor(
+        of: hoverContentFinder,
+        matching: find.byType(Container),
+      ).last;
 
-    expect(overlayContainer, findsOneWidget);
-  });
+      expect(overlayContainer, findsOneWidget);
+    },
+  );
 }
