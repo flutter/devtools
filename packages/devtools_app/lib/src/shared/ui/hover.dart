@@ -18,14 +18,17 @@ const _maxHoverCardContentHeight = 250.0;
 const _hoverCardTitleHeight = 24.0;
 const _hoverCardDividerHeight = 16.0;
 
-/// The total maximum height of the [HoverCard] including content, title,
-/// divider, vertical padding, and borders.
-const _totalMaxHoverCardHeight =
-    _maxHoverCardContentHeight +
-    _hoverCardTitleHeight +
-    _hoverCardDividerHeight +
-    (denseSpacing * 2) +
-    (hoverCardBorderSize * 2);
+/// Returns the total maximum height of the [HoverCard] including content,
+/// title (if present), divider, vertical padding, and borders.
+double _totalMaxHoverCardHeight({
+  required bool hasTitle,
+  double maxCardContentHeight = _maxHoverCardContentHeight,
+}) {
+  return maxCardContentHeight +
+      (hasTitle ? _hoverCardTitleHeight + _hoverCardDividerHeight : 0.0) +
+      (denseSpacing * 2) +
+      (hoverCardBorderSize * 2);
+}
 
 TextStyle get _hoverTitleTextStyle => fixBlurryText(
   const TextStyle(
@@ -230,7 +233,12 @@ class HoverCard {
          context: context,
          contents: contents,
          width: width,
-         position: _calculateCardPositionFromPointerEvent(context, event, width),
+         position: _calculateCardPositionFromPointerEvent(
+           context,
+           event,
+           width,
+           title: title,
+         ),
          title: title,
          hoverCardController: hoverCardController,
        );
@@ -238,23 +246,27 @@ class HoverCard {
   static Offset _calculateCardPositionFromPointerEvent(
     BuildContext context,
     PointerHoverEvent event,
-    double width,
-  ) {
+    double width, {
+    String? title,
+  }) {
     final overlayBox =
         Overlay.of(context).context.findRenderObject() as RenderBox;
     final overlaySize = overlayBox.size;
+    final localPosition = overlayBox.globalToLocal(event.position);
 
     final maxX = math.max(
       _hoverMargin,
       overlaySize.width - _hoverMargin - width,
     );
-    final x = (event.position.dx - (width / 2.0)).clamp(_hoverMargin, maxX);
+    final x = (localPosition.dx - (width / 2.0)).clamp(_hoverMargin, maxX);
 
     final maxY = math.max(
       _hoverMargin,
-      overlaySize.height - _hoverMargin - _totalMaxHoverCardHeight,
+      overlaySize.height -
+          _hoverMargin -
+          _totalMaxHoverCardHeight(hasTitle: title != null),
     );
-    final y = (event.position.dy + _hoverYOffset).clamp(_hoverMargin, maxY);
+    final y = (localPosition.dy + _hoverYOffset).clamp(_hoverMargin, maxY);
 
     return Offset(x, y);
   }
@@ -546,7 +558,10 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
         title: hoverCardData.title,
         contents: hoverCardData.contents,
         width: hoverCardData.width,
-        position: _calculateCardPosition(hoverCardData.width),
+        position: _calculateCardPosition(
+          hoverCardData.width,
+          title: hoverCardData.title,
+        ),
         hoverCardController: _hoverCardController,
       ),
     );
@@ -573,7 +588,10 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     return completer;
   }
 
-  Offset _calculateCardPosition(double width) {
+  Offset _calculateCardPosition(
+    double width, {
+    String? title,
+  }) {
     final overlayBox =
         Overlay.of(context).context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
@@ -584,7 +602,9 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     );
     final maxY = math.max(
       _hoverMargin,
-      overlayBox.size.height - _hoverMargin - _totalMaxHoverCardHeight,
+      overlayBox.size.height -
+          _hoverMargin -
+          _totalMaxHoverCardHeight(hasTitle: title != null),
     );
 
     final offset = box.localToGlobal(
