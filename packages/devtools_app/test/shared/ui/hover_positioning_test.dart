@@ -20,6 +20,7 @@ void main() {
     WidgetTester tester, {
     required Alignment alignment,
     Size windowSize = const Size(800, 600),
+    String? title,
   }) async {
     await tester.binding.setSurfaceSize(windowSize);
     addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -34,9 +35,10 @@ void main() {
               child: HoverCardTooltip.sync(
                 enabled: () => true,
                 generateHoverCardData: (event) => HoverCardData(
+                  title: title,
                   contents: const SizedBox(
                     width: 200,
-                    height: 200,
+                    height: 250,
                     child: Text('Hover Content'),
                   ),
                 ),
@@ -59,23 +61,28 @@ void main() {
 
   testWidgets('HoverCard at the bottom of the window should not overflow', (WidgetTester tester) async {
     const windowSize = Size(800, 600);
-    await pumpHoverCardTooltip(tester, alignment: Alignment.bottomCenter, windowSize: windowSize);
+    // Use a title to increase the height beyond the base content height.
+    await pumpHoverCardTooltip(
+      tester,
+      alignment: Alignment.bottomCenter,
+      windowSize: windowSize,
+      title: 'A Very Important Title',
+    );
 
     final hoverContentFinder = find.text('Hover Content');
     expect(hoverContentFinder, findsOneWidget);
 
-    final overlayMouseRegion = find.ancestor(
+    final overlayContainer = find.ancestor(
       of: hoverContentFinder,
-      matching: find.byType(MouseRegion),
-    );
+      matching: find.byType(Container),
+    ).last; // The outermost container of the HoverCard
 
-    expect(overlayMouseRegion, findsOneWidget);
-
-    final renderBox = tester.renderObject(overlayMouseRegion) as RenderBox;
+    final renderBox = tester.renderObject(overlayContainer) as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero);
     final size = renderBox.size;
 
-    expect(position.dy + size.height, lessThanOrEqualTo(windowSize.height));
+    // _hoverMargin = 16.0
+    expect(position.dy + size.height, lessThanOrEqualTo(windowSize.height - 16.0));
   });
 
   testWidgets('HoverCard at the right of the window should not overflow', (WidgetTester tester) async {
@@ -85,18 +92,17 @@ void main() {
     final hoverContentFinder = find.text('Hover Content');
     expect(hoverContentFinder, findsOneWidget);
 
-    final overlayMouseRegion = find.ancestor(
+    final overlayContainer = find.ancestor(
       of: hoverContentFinder,
-      matching: find.byType(MouseRegion),
-    );
+      matching: find.byType(Container),
+    ).last;
 
-    expect(overlayMouseRegion, findsOneWidget);
-
-    final renderBox = tester.renderObject(overlayMouseRegion) as RenderBox;
+    final renderBox = tester.renderObject(overlayContainer) as RenderBox;
     final position = renderBox.localToGlobal(Offset.zero);
     final size = renderBox.size;
 
-    expect(position.dx + size.width, lessThanOrEqualTo(windowSize.width));
+    // _hoverMargin = 16.0
+    expect(position.dx + size.width, lessThanOrEqualTo(windowSize.width - 16.0));
   });
 
   testWidgets('HoverCard in very small window should not crash', (WidgetTester tester) async {
@@ -106,11 +112,11 @@ void main() {
     final hoverContentFinder = find.text('Hover Content');
     expect(hoverContentFinder, findsOneWidget);
 
-    final overlayMouseRegion = find.ancestor(
+    final overlayContainer = find.ancestor(
       of: hoverContentFinder,
-      matching: find.byType(MouseRegion),
-    );
+      matching: find.byType(Container),
+    ).last;
 
-    expect(overlayMouseRegion, findsOneWidget);
+    expect(overlayContainer, findsOneWidget);
   });
 }

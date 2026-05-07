@@ -15,6 +15,17 @@ import 'common_widgets.dart';
 import 'utils.dart';
 
 const _maxHoverCardHeight = 250.0;
+const _hoverCardTitleHeight = 30.0;
+const _hoverCardDividerHeight = 16.0;
+const _hoverCardPadding = 8.0;
+
+/// The total maximum height of the [HoverCard] including content, title,
+/// divider, and padding.
+const _totalMaxHoverCardHeight =
+    _maxHoverCardHeight +
+    _hoverCardTitleHeight +
+    _hoverCardDividerHeight +
+    _hoverCardPadding;
 
 TextStyle get _hoverTitleTextStyle => fixBlurryText(
   const TextStyle(
@@ -237,7 +248,7 @@ class HoverCard {
 
     final maxY = math.max(
       _hoverMargin,
-      overlaySize.height - _hoverMargin - _maxHoverCardHeight,
+      overlaySize.height - _hoverMargin - _totalMaxHoverCardHeight,
     );
     final y = (event.position.dy + _hoverYOffset).clamp(_hoverMargin, maxY);
 
@@ -569,7 +580,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     );
     final maxY = math.max(
       _hoverMargin,
-      overlayBox.size.height - _hoverMargin - _maxHoverCardHeight,
+      overlayBox.size.height - _hoverMargin - _totalMaxHoverCardHeight,
     );
 
     final offset = box.localToGlobal(
