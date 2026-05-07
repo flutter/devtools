@@ -232,7 +232,7 @@ class HoverCard {
     final maxX = math.max(_hoverMargin, overlaySize.width - _hoverMargin - width);
     final x = (event.position.dx - (width / 2.0)).clamp(_hoverMargin, maxX);
 
-    double y = event.position.dy + _hoverYOffset;
+    var y = event.position.dy + _hoverYOffset;
     if (y + _maxHoverCardHeight > overlaySize.height - _hoverMargin) {
       y = math.max(
         _hoverMargin,
