@@ -70,9 +70,11 @@ void main() {
           expect(instance2.classRef!.name, '_Future');
         },
         timeout: const Timeout.factor(2),
-        // TODO(https://github.com/flutter/devtools/issues/6998): if this flake
-        // is addressed, we can unskip this for the Flutter customer tests.
+        // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
+        // is addressed, we can unskip this for the Flutter customer tests and
+        // remove the retry.
         tags: skipForCustomerTestsTag,
+        retry: 3,
       );
 
       test(
@@ -99,9 +101,11 @@ void main() {
           expect(instance.valueAsString, '42');
         },
         timeout: const Timeout.factor(2),
-        // TODO(https://github.com/flutter/devtools/issues/6998): if this flake
-        // is addressed, we can unskip this for the Flutter customer tests.
+        // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
+        // is addressed, we can unskip this for the Flutter customer tests and
+        // remove the retry.
         tags: skipForCustomerTestsTag,
+        retry: 3,
       );
 
       test(
@@ -151,9 +155,11 @@ void main() {
           expect(error.valueAsString, 'foo');
         },
         timeout: const Timeout.factor(2),
-        // TODO(https://github.com/flutter/devtools/issues/6998): if this flake
-        // is addressed, we can unskip this for the Flutter customer tests.
+        // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
+        // is addressed, we can unskip this for the Flutter customer tests and
+        // remove the retry.
         tags: skipForCustomerTestsTag,
+        retry: 3,
       );
     });
   });
