@@ -14,18 +14,18 @@ import 'package:provider/provider.dart';
 import 'common_widgets.dart';
 import 'utils.dart';
 
-const _maxHoverCardHeight = 250.0;
-const _hoverCardTitleHeight = 30.0;
+const _maxHoverCardContentHeight = 250.0;
+const _hoverCardTitleHeight = 24.0;
 const _hoverCardDividerHeight = 16.0;
-const _hoverCardPadding = 8.0;
 
 /// The total maximum height of the [HoverCard] including content, title,
-/// divider, and padding.
+/// divider, vertical padding, and borders.
 const _totalMaxHoverCardHeight =
-    _maxHoverCardHeight +
+    _maxHoverCardContentHeight +
     _hoverCardTitleHeight +
     _hoverCardDividerHeight +
-    _hoverCardPadding;
+    (denseSpacing * 2) +
+    (hoverCardBorderSize * 2);
 
 TextStyle get _hoverTitleTextStyle => fixBlurryText(
   const TextStyle(
@@ -153,9 +153,9 @@ class HoverCard {
     required Offset position,
     required HoverCardController hoverCardController,
     String? title,
-    double? maxCardHeight,
+    double? maxCardContentHeight,
   }) {
-    maxCardHeight ??= _maxHoverCardHeight;
+    maxCardContentHeight ??= _maxHoverCardContentHeight;
     final overlayState = Overlay.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -190,6 +190,7 @@ class HoverCard {
                   if (title != null) ...[
                     SizedBox(
                       width: width,
+                      height: _hoverCardTitleHeight,
                       child: Text(
                         title,
                         overflow: TextOverflow.ellipsis,
@@ -197,11 +198,14 @@ class HoverCard {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    Divider(color: theme.focusColor),
+                    Divider(
+                      color: theme.focusColor,
+                      height: _hoverCardDividerHeight,
+                    ),
                   ],
                   SingleChildScrollView(
                     child: Container(
-                      constraints: BoxConstraints(maxHeight: maxCardHeight!),
+                      constraints: BoxConstraints(maxHeight: maxCardContentHeight!),
                       child: contents,
                     ),
                   ),
