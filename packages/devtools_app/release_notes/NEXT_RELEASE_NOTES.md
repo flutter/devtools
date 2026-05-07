@@ -19,7 +19,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any updates.
+- Fixed an issue where hover tooltips in the widget tree were being clipped by the window boundaries. [#9823](https://github.com/flutter/devtools/pull/9823)
 
 ## Performance updates
 
