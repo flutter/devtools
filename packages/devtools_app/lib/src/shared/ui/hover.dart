@@ -215,13 +215,33 @@ class HoverCard {
          context: context,
          contents: contents,
          width: width,
-         position: Offset(
-           math.max(0, event.position.dx - (width / 2.0)),
-           event.position.dy + _hoverYOffset,
-         ),
+         position: _calculateCursorPosition(context, event, width),
          title: title,
          hoverCardController: hoverCardController,
        );
+
+  static Offset _calculateCursorPosition(
+    BuildContext context,
+    PointerHoverEvent event,
+    double width,
+  ) {
+    final overlayBox =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final overlaySize = overlayBox.size;
+
+    final maxX = math.max(_hoverMargin, overlaySize.width - _hoverMargin - width);
+    final x = (event.position.dx - (width / 2.0)).clamp(_hoverMargin, maxX);
+
+    double y = event.position.dy + _hoverYOffset;
+    if (y + _maxHoverCardHeight > overlaySize.height - _hoverMargin) {
+      y = math.max(
+        _hoverMargin,
+        overlaySize.height - _maxHoverCardHeight - _hoverMargin,
+      );
+    }
+
+    return Offset(x, y);
+  }
 
   late OverlayEntry _overlayEntry;
 
@@ -542,8 +562,12 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
         Overlay.of(context).context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
 
-    final maxX = overlayBox.size.width - _hoverMargin - width;
-    final maxY = overlayBox.size.height - _hoverMargin;
+    final maxX = math.max(_hoverMargin, overlayBox.size.width - _hoverMargin - width);
+    double maxY = overlayBox.size.height - _hoverMargin;
+    if (maxY - _maxHoverCardHeight > _hoverMargin) {
+      maxY -= _maxHoverCardHeight;
+    }
+    maxY = math.max(_hoverMargin, maxY);
 
     final offset = box.localToGlobal(
       box.size.bottomCenter(Offset.zero).translate(-width / 2, _hoverYOffset),
