@@ -215,12 +215,12 @@ class HoverCard {
          context: context,
          contents: contents,
          width: width,
-         position: _calculateCursorPosition(context, event, width),
+         position: _calculateCardPositionFromPointerEvent(context, event, width),
          title: title,
          hoverCardController: hoverCardController,
        );
 
-  static Offset _calculateCursorPosition(
+  static Offset _calculateCardPositionFromPointerEvent(
     BuildContext context,
     PointerHoverEvent event,
     double width,
@@ -531,7 +531,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
         title: hoverCardData.title,
         contents: hoverCardData.contents,
         width: hoverCardData.width,
-        position: _calculateTooltipPosition(hoverCardData.width),
+        position: _calculateCardPosition(hoverCardData.width),
         hoverCardController: _hoverCardController,
       ),
     );
@@ -558,7 +558,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     return completer;
   }
 
-  Offset _calculateTooltipPosition(double width) {
+  Offset _calculateCardPosition(double width) {
     final overlayBox =
         Overlay.of(context).context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
