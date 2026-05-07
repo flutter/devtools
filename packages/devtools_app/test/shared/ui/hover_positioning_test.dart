@@ -124,7 +124,10 @@ void main() {
       expect(hoverContentFinderWithTitle, findsOneWidget);
 
       final containerWithTitle = find
-          .ancestor(of: hoverContentFinderWithTitle, matching: find.byType(Container))
+          .ancestor(
+            of: hoverContentFinderWithTitle,
+            matching: find.byType(Container),
+          )
           .last;
 
       final renderBoxWithTitle =
@@ -140,16 +143,16 @@ void main() {
     'HoverCard height clamping without title',
     const Size(800, 600),
     (WidgetTester tester) async {
-      await pumpHoverCardTooltip(
-        tester,
-        alignment: Alignment.bottomCenter,
-      );
+      await pumpHoverCardTooltip(tester, alignment: Alignment.bottomCenter);
 
       final hoverContentFinderNoTitle = find.text('Hover Content');
       expect(hoverContentFinderNoTitle, findsOneWidget);
 
       final containerNoTitle = find
-          .ancestor(of: hoverContentFinderNoTitle, matching: find.byType(Container))
+          .ancestor(
+            of: hoverContentFinderNoTitle,
+            matching: find.byType(Container),
+          )
           .last;
 
       final renderBoxNoTitle =
