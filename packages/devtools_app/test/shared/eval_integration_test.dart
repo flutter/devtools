@@ -71,10 +71,8 @@ void main() {
         },
         timeout: const Timeout.factor(2),
         // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
-        // is addressed, we can unskip this for the Flutter customer tests and
-        // remove the retry.
+        // is addressed, we can unskip this for the Flutter customer tests.
         tags: skipForCustomerTestsTag,
-        retry: 3,
       );
 
       test(
@@ -102,10 +100,8 @@ void main() {
         },
         timeout: const Timeout.factor(2),
         // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
-        // is addressed, we can unskip this for the Flutter customer tests and
-        // remove the retry.
+        // is addressed, we can unskip this for the Flutter customer tests.
         tags: skipForCustomerTestsTag,
-        retry: 3,
       );
 
       test(
@@ -156,11 +152,11 @@ void main() {
         },
         timeout: const Timeout.factor(2),
         // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
-        // is addressed, we can unskip this for the Flutter customer tests and
-        // remove the retry.
+        // is addressed, we can unskip this for the Flutter customer tests.
         tags: skipForCustomerTestsTag,
-        retry: 3,
       );
-    });
+      // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
+      // is addressed, we can remove the retry.
+    }, retry: 3);
   });
 }
