@@ -57,10 +57,9 @@ void main() {
       final hoverContentFinder = find.text('Hover Content');
       expect(hoverContentFinder, findsOneWidget);
 
-      final overlayContainer = find.ancestor(
-        of: hoverContentFinder,
-        matching: find.byType(Container),
-      ).last; // The outermost container of the HoverCard
+      final overlayContainer = find
+          .ancestor(of: hoverContentFinder, matching: find.byType(Container))
+          .last; // The outermost container of the HoverCard
 
       final renderBox = tester.renderObject(overlayContainer) as RenderBox;
       final position = renderBox.localToGlobal(Offset.zero);
@@ -80,10 +79,9 @@ void main() {
       final hoverContentFinder = find.text('Hover Content');
       expect(hoverContentFinder, findsOneWidget);
 
-      final overlayContainer = find.ancestor(
-        of: hoverContentFinder,
-        matching: find.byType(Container),
-      ).last;
+      final overlayContainer = find
+          .ancestor(of: hoverContentFinder, matching: find.byType(Container))
+          .last;
 
       final renderBox = tester.renderObject(overlayContainer) as RenderBox;
       final position = renderBox.localToGlobal(Offset.zero);
@@ -103,10 +101,9 @@ void main() {
       final hoverContentFinder = find.text('Hover Content');
       expect(hoverContentFinder, findsOneWidget);
 
-      final overlayContainer = find.ancestor(
-        of: hoverContentFinder,
-        matching: find.byType(Container),
-      ).last;
+      final overlayContainer = find
+          .ancestor(of: hoverContentFinder, matching: find.byType(Container))
+          .last;
 
       expect(overlayContainer, findsOneWidget);
     },

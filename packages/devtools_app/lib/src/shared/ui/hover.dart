@@ -208,7 +208,9 @@ class HoverCard {
                   ],
                   SingleChildScrollView(
                     child: Container(
-                      constraints: BoxConstraints(maxHeight: maxCardContentHeight!),
+                      constraints: BoxConstraints(
+                        maxHeight: maxCardContentHeight!,
+                      ),
                       child: contents,
                     ),
                   ),
@@ -588,10 +590,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     return completer;
   }
 
-  Offset _calculateCardPosition(
-    double width, {
-    String? title,
-  }) {
+  Offset _calculateCardPosition(double width, {String? title}) {
     final overlayBox =
         Overlay.of(context).context.findRenderObject() as RenderBox;
     final box = context.findRenderObject() as RenderBox;
