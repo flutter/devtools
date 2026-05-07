@@ -229,16 +229,17 @@ class HoverCard {
         Overlay.of(context).context.findRenderObject() as RenderBox;
     final overlaySize = overlayBox.size;
 
-    final maxX = math.max(_hoverMargin, overlaySize.width - _hoverMargin - width);
+    final maxX =
+        math.max(_hoverMargin, overlaySize.width - _hoverMargin - width);
     final x = (event.position.dx - (width / 2.0)).clamp(_hoverMargin, maxX);
 
-    var y = event.position.dy + _hoverYOffset;
-    if (y + _maxHoverCardHeight > overlaySize.height - _hoverMargin) {
-      y = math.max(
-        _hoverMargin,
-        overlaySize.height - _maxHoverCardHeight - _hoverMargin,
-      );
+    double maxY = overlaySize.height - _hoverMargin;
+    if (maxY - _maxHoverCardHeight > _hoverMargin) {
+      maxY -= _maxHoverCardHeight;
     }
+    maxY = math.max(_hoverMargin, maxY);
+
+    final y = (event.position.dy + _hoverYOffset).clamp(_hoverMargin, maxY);
 
     return Offset(x, y);
   }
