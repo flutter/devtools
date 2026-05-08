@@ -22,23 +22,30 @@ void main() {
       await env.tearDownEnvironment(force: true);
     });
 
-    test('timeline streams initialized on vm service opened', () async {
-      await env.setupEnvironment();
+    test(
+      'timeline streams initialized on vm service opened',
+      () async {
+        await env.setupEnvironment();
 
-      // Await a short delay to make sure the timelineStreamManager is done
-      // initializing.
-      await delay();
+        // Await a short delay to make sure the timelineStreamManager is done
+        // initializing.
+        await delay();
 
-      expect(serviceConnection.serviceManager.service, equals(env.service));
-      expect(serviceConnection.timelineStreamManager, isNotNull);
-      expect(serviceConnection.timelineStreamManager.basicStreams, isNotEmpty);
-      expect(
-        serviceConnection.timelineStreamManager.advancedStreams,
-        isNotEmpty,
-      );
+        expect(serviceConnection.serviceManager.service, equals(env.service));
+        expect(serviceConnection.timelineStreamManager, isNotNull);
+        expect(
+          serviceConnection.timelineStreamManager.basicStreams,
+          isNotEmpty,
+        );
+        expect(
+          serviceConnection.timelineStreamManager.advancedStreams,
+          isNotEmpty,
+        );
 
-      await env.tearDownEnvironment();
-    }, timeout: const Timeout.factor(4));
+        await env.tearDownEnvironment();
+      },
+      timeout: const Timeout.factor(4),
+    );
 
     test('notifies on stream change', () async {
       await env.setupEnvironment();
