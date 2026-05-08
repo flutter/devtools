@@ -257,10 +257,7 @@ class HoverCard {
     final overlaySize = overlayBox.size;
     final localPosition = overlayBox.globalToLocal(event.position);
 
-    final maxX = math.max(
-      hoverMargin,
-      overlaySize.width - hoverMargin - width,
-    );
+    final maxX = math.max(hoverMargin, overlaySize.width - hoverMargin - width);
     final x = (localPosition.dx - (width / 2.0)).clamp(hoverMargin, maxX);
 
     final maxY = math.max(
