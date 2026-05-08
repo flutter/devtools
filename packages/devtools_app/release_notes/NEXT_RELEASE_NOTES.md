@@ -28,6 +28,7 @@ TODO: Remove this section if there are not any updates.
 - Fixed an issue where clicking a widget row after collapsing a subtree with the left arrow key unexpectedly re-expanded the subtree. [#9810](https://github.com/flutter/devtools/pull/9810)
 - Fixed an issue where collapsing the Inspector widget tree to a single row with the left arrow key caused a loading spinner to appear instead of showing the root node. [#9810](https://github.com/flutter/devtools/pull/9810)
 TODO: Remove this section if there are not any updates.
+- Fixed an issue where hover tooltips in the widget tree were being clipped by the window boundaries. [#9823](https://github.com/flutter/devtools/pull/9823)
 
 ## Performance updates
 
