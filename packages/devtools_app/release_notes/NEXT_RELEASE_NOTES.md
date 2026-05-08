@@ -15,7 +15,10 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed a `RangeError` thrown by `SplitPane` when the parent rebuilt the
+  widget with a different number of children, for example when toggling a
+  panel in or out of the layout. -
+  [#9822](https://github.com/flutter/devtools/pull/9822)
 
 ## Inspector updates
 
