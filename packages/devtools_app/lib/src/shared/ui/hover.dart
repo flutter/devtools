@@ -117,7 +117,8 @@ int _hoverIndexFor(double dx, TextSpan line) {
 const _hoverYOffset = 10.0;
 
 /// Minimum distance from the side of screen to show tooltip
-const _hoverMargin = 16.0;
+@visibleForTesting
+const hoverMargin = 16.0;
 
 /// Defines how a [HoverCardTooltip] is positioned
 enum HoverCardPosition {
@@ -256,19 +257,16 @@ class HoverCard {
     final overlaySize = overlayBox.size;
     final localPosition = overlayBox.globalToLocal(event.position);
 
-    final maxX = math.max(
-      _hoverMargin,
-      overlaySize.width - _hoverMargin - width,
-    );
-    final x = (localPosition.dx - (width / 2.0)).clamp(_hoverMargin, maxX);
+    final maxX = math.max(hoverMargin, overlaySize.width - hoverMargin - width);
+    final x = (localPosition.dx - (width / 2.0)).clamp(hoverMargin, maxX);
 
     final maxY = math.max(
-      _hoverMargin,
+      hoverMargin,
       overlaySize.height -
-          _hoverMargin -
+          hoverMargin -
           _totalMaxHoverCardHeight(hasTitle: title != null),
     );
-    final y = (localPosition.dy + _hoverYOffset).clamp(_hoverMargin, maxY);
+    final y = (localPosition.dy + _hoverYOffset).clamp(hoverMargin, maxY);
 
     return Offset(x, y);
   }
@@ -381,7 +379,8 @@ class HoverCardTooltip extends StatefulWidget {
   }) : asyncGenerateHoverCardData = null,
        asyncTimeout = null;
 
-  static const _hoverDelay = Duration(milliseconds: 500);
+  @visibleForTesting
+  static const hoverDelay = Duration(milliseconds: 500);
   static const defaultHoverWidth = 450.0;
 
   /// Whether the tooltip is currently enabled.
@@ -420,7 +419,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
 
   void _onHoverExit() {
     _showTimer?.cancel();
-    _removeTimer = Timer(HoverCardTooltip._hoverDelay, () {
+    _removeTimer = Timer(HoverCardTooltip.hoverDelay, () {
       if (_currentHoverCard != null) {
         _hoverCardController.maybeRemoveHoverCard(_currentHoverCard!);
       }
@@ -448,7 +447,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     final generateHoverCardData = widget.generateHoverCardData;
     final asyncTimeout = widget.asyncTimeout;
 
-    _showTimer = Timer(HoverCardTooltip._hoverDelay, () {
+    _showTimer = Timer(HoverCardTooltip.hoverDelay, () {
       if (asyncGenerateHoverCardData != null) {
         assert(generateHoverCardData == null);
         _showAsyncHoverCard(
@@ -596,13 +595,13 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     final box = context.findRenderObject() as RenderBox;
 
     final maxX = math.max(
-      _hoverMargin,
-      overlayBox.size.width - _hoverMargin - width,
+      hoverMargin,
+      overlayBox.size.width - hoverMargin - width,
     );
     final maxY = math.max(
-      _hoverMargin,
+      hoverMargin,
       overlayBox.size.height -
-          _hoverMargin -
+          hoverMargin -
           _totalMaxHoverCardHeight(hasTitle: title != null),
     );
 
@@ -612,8 +611,8 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     );
 
     return Offset(
-      offset.dx.clamp(_hoverMargin, maxX),
-      offset.dy.clamp(_hoverMargin, maxY),
+      offset.dx.clamp(hoverMargin, maxX),
+      offset.dy.clamp(hoverMargin, maxY),
     );
   }
 
