@@ -213,11 +213,11 @@ packages:
     dependency: transitive
     description:
       path: "tool/dart_skills_lint"
-      ref: "2420128e11101002e2eac98eb90512103a388714"
-      resolved-ref: "2420128e11101002e2eac98eb90512103a388714"
+      ref: e4497873950727ee781fa411c1a2f624b1ec50c6
+      resolved-ref: e4497873950727ee781fa411c1a2f624b1ec50c6
       url: "https://github.com/flutter/skills"
     source: git
-    version: "0.2.0"
+    version: "0.3.0"
   dart_style:
     dependency: transitive
     description:
