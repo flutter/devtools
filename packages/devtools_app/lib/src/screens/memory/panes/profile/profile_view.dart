@@ -562,8 +562,8 @@ class _AllocationProfileTableState extends State<_AllocationProfileTable> {
 
   static const _fieldSizeColumn = _FieldSizeColumn(heap: HeapGeneration.total);
 
-  late final _PinColumn _pinColumn;
-  late final List<ColumnData<ProfileRecord>> _columns;
+  late _PinColumn _pinColumn;
+  late List<ColumnData<ProfileRecord>> _columns;
 
   late final _advancedDeveloperModeColumns = [
     const _FieldExternalSizeColumn(heap: HeapGeneration.total),
