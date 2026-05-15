@@ -580,6 +580,18 @@ class _AllocationProfileTableState extends State<_AllocationProfileTable> {
   @override
   void initState() {
     super.initState();
+    _initColumns();
+  }
+
+  @override
+  void didUpdateWidget(covariant _AllocationProfileTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      _initColumns();
+    }
+  }
+
+  void _initColumns() {
     _pinColumn = _PinColumn(controller: widget.controller);
     _columns = <ColumnData<ProfileRecord>>[
       _pinColumn,
@@ -607,33 +619,26 @@ class _AllocationProfileTableState extends State<_AllocationProfileTable> {
         if (profile == null) {
           return const CenteredCircularProgressIndicator();
         }
-        return ValueListenableBuilder<Set<String>>(
-          valueListenable: widget.controller.pinnedClassFullNames,
-          builder: (context, pinnedClassFullNames, _) {
-            return ValueListenableBuilder<bool>(
-              valueListenable: preferences.advancedDeveloperModeEnabled,
-              builder: (context, advancedDeveloperModeEnabled, _) {
-                return FlatTable<ProfileRecord>(
-                  keyFactory: (element) => Key(element.heapClass.fullName),
-                  data: profile.records,
-                  dataKey:
-                      'allocation-profile-${pinnedClassFullNames.length}-'
-                      '${pinnedClassFullNames.toList()..sort()}',
-                  columnGroups: advancedDeveloperModeEnabled
-                      ? _AllocationProfileTableState._vmModeColumnGroups
-                      : null,
-                  columns: [
-                    ..._columns,
-                    if (advancedDeveloperModeEnabled)
-                      ..._advancedDeveloperModeColumns,
-                  ],
-                  defaultSortColumn: _AllocationProfileTableState._fieldSizeColumn,
-                  defaultSortDirection: SortDirection.descending,
-                  pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
-                  includeColumnGroupHeaders: false,
-                  selectionNotifier: widget.controller.selection,
-                );
-              },
+        return ValueListenableBuilder<bool>(
+          valueListenable: preferences.advancedDeveloperModeEnabled,
+          builder: (context, advancedDeveloperModeEnabled, _) {
+            return FlatTable<ProfileRecord>(
+              keyFactory: (element) => Key(element.heapClass.fullName),
+              data: profile.records,
+              dataKey: 'allocation-profile',
+              columnGroups: advancedDeveloperModeEnabled
+                  ? _AllocationProfileTableState._vmModeColumnGroups
+                  : null,
+              columns: [
+                ..._columns,
+                if (advancedDeveloperModeEnabled)
+                  ..._advancedDeveloperModeColumns,
+              ],
+              defaultSortColumn: _AllocationProfileTableState._fieldSizeColumn,
+              defaultSortDirection: SortDirection.descending,
+              pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
+              includeColumnGroupHeaders: false,
+              selectionNotifier: widget.controller.selection,
             );
           },
         );
