@@ -34,7 +34,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any updates.
+* Added the ability to pin classes to the top of the Profile Memory table. [#8898](https://github.com/flutter/devtools/issues/8898)
 
 ## Debugger updates
 
