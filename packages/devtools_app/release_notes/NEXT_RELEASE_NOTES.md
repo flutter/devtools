@@ -22,6 +22,15 @@ To learn more about DevTools, check out the
 
 ## Inspector updates
 
+- Deleted the option to use the legacy inspector.
+  [#9782](https://github.com/flutter/devtools/pull/9782)
+  
+- Fixed an issue where the Inspector error badge count would improperly increase or disappear during navigation. [#9524](https://github.com/flutter/devtools/issues/9524)
+
+- Fixed an issue where navigating the Inspector widget tree with the keyboard arrow keys did not update the selected widget in the connected Flutter app. [#9810](https://github.com/flutter/devtools/pull/9810)
+- Fixed an issue where clicking a widget row after collapsing a subtree with the left arrow key unexpectedly re-expanded the subtree. [#9810](https://github.com/flutter/devtools/pull/9810)
+- Fixed an issue where collapsing the Inspector widget tree to a single row with the left arrow key caused a loading spinner to appear instead of showing the root node. [#9810](https://github.com/flutter/devtools/pull/9810)
+TODO: Remove this section if there are not any updates.
 - Fixed an issue where hover tooltips in the widget tree were being clipped by the window boundaries. [#9823](https://github.com/flutter/devtools/pull/9823)
 
 ## Performance updates
