@@ -27,6 +27,7 @@ class ProfilePaneController extends DisposableController
   }) {
     if (pinnedClassFullNames != null) {
       _pinnedClassFullNames.addAll(pinnedClassFullNames);
+      _pinnedClassFullNamesListenable.value = pinnedClassFullNames;
     }
     // [profile] should only be non-null when loading offline data.
     if (profile != null) {
