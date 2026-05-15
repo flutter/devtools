@@ -29,6 +29,7 @@ class ProfilePaneController extends DisposableController
       _pinnedClassFullNames.addAll(pinnedClassFullNames);
       _pinnedClassFullNamesListenable.value = pinnedClassFullNames;
     }
+    _pinnedClassFullNamesListenable.value = Set.of(_pinnedClassFullNames);
     // [profile] should only be non-null when loading offline data.
     if (profile != null) {
       _currentAllocationProfile.value = AdaptedProfile.withPinnedClasses(
