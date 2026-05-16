@@ -80,6 +80,19 @@ extension _ExtensionsApiHandler on Never {
     final devtoolsOptionsFileUriString =
         queryParams[ExtensionsApi.devtoolsOptionsUriPropertyName]!;
     final devtoolsOptionsFileUri = Uri.parse(devtoolsOptionsFileUriString);
+
+    // Validate that the URI is a local file URI pointing to a
+    // 'devtools_options.yaml' file. Accepting arbitrary URIs from the query
+    // string would allow an untrusted caller to create or overwrite any file
+    // writable by the DevTools server process.
+    if (devtoolsOptionsFileUri.scheme != 'file' ||
+        !devtoolsOptionsFileUri.path.endsWith('devtools_options.yaml')) {
+      return api.badRequest(
+        'Invalid devtoolsOptionsUri: must be a file: URI ending in '
+        "'devtools_options.yaml'.",
+      );
+    }
+
     final extensionName = queryParams[ExtensionsApi.extensionNamePropertyName]!;
 
     final activate = queryParams[ExtensionsApi.enabledStatePropertyName];
