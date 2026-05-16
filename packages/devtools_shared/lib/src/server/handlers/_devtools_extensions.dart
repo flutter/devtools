@@ -86,7 +86,7 @@ extension _ExtensionsApiHandler on Never {
     // string would allow an untrusted caller to create or overwrite any file
     // writable by the DevTools server process.
     if (devtoolsOptionsFileUri.scheme != 'file' ||
-        !devtoolsOptionsFileUri.path.endsWith('devtools_options.yaml')) {
+        !devtoolsOptionsFileUri.path.endsWith('/devtools_options.yaml')) {
       return api.badRequest(
         'Invalid devtoolsOptionsUri: must be a file: URI ending in '
         "'devtools_options.yaml'.",
