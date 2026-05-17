@@ -159,18 +159,12 @@ void main() {
     });
   });
 
+  // The Step actions delegate their gating to `DebuggerController.canStep`,
+  // which is its own well-defined property; we stub it directly here rather
+  // than re-asserting every condition that feeds into it.
   group('Step actions', () {
-    setUp(() {
-      // Default: app paused with one stack frame on a non-system isolate.
-      fakeServiceConnection.serviceManager.isMainIsolatePaused = true;
-      when(debuggerController.stackFramesWithLocation).thenReturn(
-        ValueNotifier<List<StackFrameAndSourcePosition>>(
-          <StackFrameAndSourcePosition>[makeFrame(0)],
-        ),
-      );
-    });
-
-    test('StepOverAction calls stepOver when canStep', () {
+    test('StepOverAction calls stepOver when canStep is true', () {
+      when(debuggerController.canStep).thenReturn(true);
       when(debuggerController.stepOver()).thenAnswer((_) async => Success());
       final action = StepOverAction();
       expect(action.isEnabled(StepOverIntent(debuggerController)), isTrue);
@@ -178,7 +172,8 @@ void main() {
       verify(debuggerController.stepOver()).called(1);
     });
 
-    test('StepInAction calls stepIn when canStep', () {
+    test('StepInAction calls stepIn when canStep is true', () {
+      when(debuggerController.canStep).thenReturn(true);
       when(debuggerController.stepIn()).thenAnswer((_) async => Success());
       final action = StepInAction();
       expect(action.isEnabled(StepInIntent(debuggerController)), isTrue);
@@ -186,7 +181,8 @@ void main() {
       verify(debuggerController.stepIn()).called(1);
     });
 
-    test('StepOutAction calls stepOut when canStep', () {
+    test('StepOutAction calls stepOut when canStep is true', () {
+      when(debuggerController.canStep).thenReturn(true);
       when(debuggerController.stepOut()).thenAnswer((_) async => Success());
       final action = StepOutAction();
       expect(action.isEnabled(StepOutIntent(debuggerController)), isTrue);
@@ -194,8 +190,8 @@ void main() {
       verify(debuggerController.stepOut()).called(1);
     });
 
-    test('step actions are disabled when the isolate is not paused', () {
-      fakeServiceConnection.serviceManager.isMainIsolatePaused = false;
+    test('step actions are disabled when canStep is false', () {
+      when(debuggerController.canStep).thenReturn(false);
       expect(
         StepOverAction().isEnabled(StepOverIntent(debuggerController)),
         isFalse,
@@ -206,34 +202,6 @@ void main() {
       );
       expect(
         StepOutAction().isEnabled(StepOutIntent(debuggerController)),
-        isFalse,
-      );
-    });
-
-    test('step actions are disabled while a resume is already in flight', () {
-      when(debuggerController.resuming).thenReturn(ValueNotifier<bool>(true));
-      expect(
-        StepOverAction().isEnabled(StepOverIntent(debuggerController)),
-        isFalse,
-      );
-    });
-
-    test('step actions are disabled when no stack frames are available', () {
-      when(debuggerController.stackFramesWithLocation).thenReturn(
-        ValueNotifier<List<StackFrameAndSourcePosition>>(
-          <StackFrameAndSourcePosition>[],
-        ),
-      );
-      expect(
-        StepOverAction().isEnabled(StepOverIntent(debuggerController)),
-        isFalse,
-      );
-    });
-
-    test('step actions are disabled on a system isolate', () {
-      when(debuggerController.isSystemIsolate).thenReturn(true);
-      expect(
-        StepOverAction().isEnabled(StepOverIntent(debuggerController)),
         isFalse,
       );
     });

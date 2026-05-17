@@ -424,20 +424,9 @@ class OpenFileAction extends Action<OpenFileIntent> {
 
 // ----- Stepping / pause keyboard intents (issue #3867) -----------------------
 //
-// These mirror the gating used by the debugger control buttons in
-// `controls.dart`: stepping requires a paused, non-system isolate with at
-// least one stack frame and no in-flight resume; pause/resume is gated by
-// `isSystemIsolate` and the current paused state.
-
-bool _isSystemIsolate(DebuggerController controller) =>
-    controller.isSystemIsolate;
-
-bool _canStep(DebuggerController controller) {
-  return serviceConnection.serviceManager.isMainIsolatePaused &&
-      !controller.resuming.value &&
-      controller.stackFramesWithLocation.value.isNotEmpty &&
-      !controller.isSystemIsolate;
-}
+// Each Action delegates to `DebuggerController` for both the gating
+// (`isEnabled`) and the side-effecting call (`invoke`), so the keyboard
+// shortcuts stay in lock-step with the debugger buttons in `controls.dart`.
 
 class PauseResumeIntent extends Intent {
   const PauseResumeIntent(this._controller);
@@ -448,7 +437,7 @@ class PauseResumeIntent extends Intent {
 class PauseResumeAction extends Action<PauseResumeIntent> {
   @override
   bool isEnabled(PauseResumeIntent intent) {
-    if (_isSystemIsolate(intent._controller)) {
+    if (intent._controller.isSystemIsolate) {
       return false;
     }
     final isPaused = serviceConnection.serviceManager.isMainIsolatePaused;
@@ -486,9 +475,6 @@ class NextStackFrameAction extends Action<NextStackFrameIntent> {
   void invoke(NextStackFrameIntent intent) {
     final controller = intent._controller;
     final frames = controller.stackFramesWithLocation.value;
-    if (frames.length < 2) {
-      return;
-    }
     final currentlySelected = controller.selectedStackFrame.value;
     final currentIndex = currentlySelected == null
         ? -1
@@ -510,7 +496,7 @@ class StepOverIntent extends Intent {
 
 class StepOverAction extends Action<StepOverIntent> {
   @override
-  bool isEnabled(StepOverIntent intent) => _canStep(intent._controller);
+  bool isEnabled(StepOverIntent intent) => intent._controller.canStep;
 
   @override
   void invoke(StepOverIntent intent) {
@@ -526,7 +512,7 @@ class StepInIntent extends Intent {
 
 class StepInAction extends Action<StepInIntent> {
   @override
-  bool isEnabled(StepInIntent intent) => _canStep(intent._controller);
+  bool isEnabled(StepInIntent intent) => intent._controller.canStep;
 
   @override
   void invoke(StepInIntent intent) {
@@ -542,7 +528,7 @@ class StepOutIntent extends Intent {
 
 class StepOutAction extends Action<StepOutIntent> {
   @override
-  bool isEnabled(StepOutIntent intent) => _canStep(intent._controller);
+  bool isEnabled(StepOutIntent intent) => intent._controller.canStep;
 
   @override
   void invoke(StepOutIntent intent) {

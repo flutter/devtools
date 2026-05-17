@@ -203,6 +203,18 @@ class DebuggerController extends DevToolsScreenController
 
   bool get isSystemIsolate => _isolate.value?.isSystemIsolate ?? false;
 
+  /// Whether the debugger is currently in a state where step operations
+  /// (Step Over / In / Out) can be performed.
+  ///
+  /// Used by the debugger control buttons in `controls.dart` and by the
+  /// keyboard-shortcut Actions in `debugger_screen.dart` so that both
+  /// surfaces gate on the same conditions.
+  bool get canStep =>
+      serviceConnection.serviceManager.isMainIsolatePaused &&
+      !resuming.value &&
+      stackFramesWithLocation.value.isNotEmpty &&
+      !isSystemIsolate;
+
   String get _isolateRefId {
     final id = _isolate.value?.id;
     if (id == null) return '';
