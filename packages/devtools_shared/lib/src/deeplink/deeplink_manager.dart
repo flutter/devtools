@@ -65,13 +65,10 @@ class DeeplinkManager {
     String? ide,
     bool suppressAnalytics = false,
   }) {
-    final environment = <String, String>{
-      ...getEnvironment(
-        currentTool: ide != null ? _mapIdeToDashTool(ide) : DashTool.devtools,
-        suppressAnalytics: suppressAnalytics,
-      ),
-      if (ide != null) DashEnvVar.tool.name: ide,
-    };
+    final environment = getEnvironment(
+      currentTool: ide != null ? _mapIdeToDashTool(ide) : DashTool.devtools,
+      suppressAnalytics: suppressAnalytics,
+    );
 
     return Process.run(
       executable,
