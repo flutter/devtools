@@ -80,10 +80,12 @@ Uri buildDevToolsServerRequestUri(String url) {
   final queryParams = DevToolsQueryParams.load();
   // Forward the parent IDE name and the client-side analytics opt-out status
   // to the server, so they can be propagated to any spawned subprocesses.
+  // Fail-safe: default to suppressing analytics if the controller is not yet
+  // initialized.
   final newParams = <String, String>{
     ...uri.queryParameters,
     if (queryParams.ide != null) 'ide': queryParams.ide!,
-    if (isAnalyticsControllerInitialized && !isAnalyticsEnabled)
+    if (!isAnalyticsControllerInitialized || !isAnalyticsEnabled)
       'suppress_analytics': 'true',
   };
 
