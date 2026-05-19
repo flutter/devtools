@@ -20,8 +20,11 @@ extension _DeeplinkApiHandler on Never {
     if (missingRequiredParams != null) return missingRequiredParams;
 
     final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
-    final result =
-        await deeplinkManager.getAndroidBuildVariants(rootPath: rootPath);
+    final result = await deeplinkManager.getAndroidBuildVariants(
+      rootPath: rootPath,
+      ide: queryParams.ide,
+      suppressAnalytics: queryParams.suppressAnalytics,
+    );
     return _resultOutputOrError(api, result);
   }
 
@@ -47,6 +50,8 @@ extension _DeeplinkApiHandler on Never {
     final result = await deeplinkManager.getAndroidAppLinkSettings(
       rootPath: rootPath,
       buildVariant: buildVariant,
+      ide: queryParams.ide,
+      suppressAnalytics: queryParams.suppressAnalytics,
     );
     return _resultOutputOrError(api, result);
   }
@@ -65,7 +70,11 @@ extension _DeeplinkApiHandler on Never {
     if (missingRequiredParams != null) return missingRequiredParams;
 
     final rootPath = queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!;
-    final result = await deeplinkManager.getIosBuildOptions(rootPath: rootPath);
+    final result = await deeplinkManager.getIosBuildOptions(
+      rootPath: rootPath,
+      ide: queryParams.ide,
+      suppressAnalytics: queryParams.suppressAnalytics,
+    );
     return _resultOutputOrError(api, result);
   }
 
@@ -90,6 +99,8 @@ extension _DeeplinkApiHandler on Never {
       rootPath: queryParams[DeeplinkApi.deeplinkRootPathPropertyName]!,
       configuration: queryParams[DeeplinkApi.xcodeConfigurationPropertyName]!,
       target: queryParams[DeeplinkApi.xcodeTargetPropertyName]!,
+      ide: queryParams.ide,
+      suppressAnalytics: queryParams.suppressAnalytics,
     );
     return _resultOutputOrError(api, result);
   }
@@ -106,4 +117,9 @@ extension _DeeplinkApiHandler on Never {
       result[DeeplinkManager.kOutputJsonField]! as String,
     );
   }
+}
+
+extension on Map<String, String> {
+  String? get ide => this['ide'];
+  bool get suppressAnalytics => this['suppress_analytics'] == 'true';
 }
