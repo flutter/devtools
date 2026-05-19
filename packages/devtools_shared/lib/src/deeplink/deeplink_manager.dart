@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
-import 'package:unified_analytics/unified_analytics.dart';
 
 class DeeplinkManager {
   /// A regex to retrieve the json part from the stdout of Android analyzer.
@@ -33,21 +32,26 @@ class DeeplinkManager {
   /// APIs.
   static const kOutputJsonField = 'json';
 
+  // TODO(https://github.com/flutter/devtools/issues/9702): Use the `DashTool`
+  // and `DashEnvVar` enums and `getEnvironment()` helper directly from
+  // `package:unified_analytics` once the pinned Flutter candidate SDK in this
+  // repository is bumped to a stable Dart SDK version >= 3.10.0 (resolving the
+  // dev SDK version solving conflict on CI).
   /// Mappings from case-insensitive IDE query parameter values to their
-  /// corresponding [DashTool] enum values used by `package:unified_analytics`.
+  /// corresponding DashTool canonical label strings used by `package:unified_analytics`.
   ///
   /// Contains multiple spelling and format variations (with/without hyphens
   /// or suffixes) passed by different IDE integrations to ensure O(1) lookup.
-  static const _ideToDashToolMap = <String, DashTool>{
-    'vs-code': DashTool.vscodePlugins,
-    'vscode': DashTool.vscodePlugins,
-    'vscodeplugins': DashTool.vscodePlugins,
-    'intellij-idea': DashTool.intellijPlugins,
-    'intellij': DashTool.intellijPlugins,
-    'intellijplugins': DashTool.intellijPlugins,
-    'android-studio': DashTool.androidStudioPlugins,
-    'androidstudio': DashTool.androidStudioPlugins,
-    'androidstudioplugins': DashTool.androidStudioPlugins,
+  static const _ideToDashToolMap = <String, String>{
+    'vs-code': 'vscode-plugins',
+    'vscode': 'vscode-plugins',
+    'vscodeplugins': 'vscode-plugins',
+    'intellij-idea': 'intellij-plugins',
+    'intellij': 'intellij-plugins',
+    'intellijplugins': 'intellij-plugins',
+    'android-studio': 'android-studio-plugins',
+    'androidstudio': 'android-studio-plugins',
+    'androidstudioplugins': 'android-studio-plugins',
   };
 
   /// A regex to retrieve the file path from the stdout of iOS or Android
@@ -65,10 +69,11 @@ class DeeplinkManager {
     String? ide,
     bool suppressAnalytics = false,
   }) {
-    final environment = getEnvironment(
-      currentTool: ide != null ? _mapIdeToDashTool(ide) : DashTool.devtools,
-      suppressAnalytics: suppressAnalytics,
-    );
+    final environment = <String, String>{
+      ...Platform.environment,
+      'DASH__SUPPRESS_ANALYTICS': suppressAnalytics.toString(),
+      'DASH__TOOL': ide != null ? _mapIdeToDashToolLabel(ide) : 'devtools',
+    };
 
     return Process.run(
       executable,
@@ -77,19 +82,13 @@ class DeeplinkManager {
     );
   }
 
-  DashTool _mapIdeToDashTool(String ide) {
+  String _mapIdeToDashToolLabel(String ide) {
     final lowerIde = ide.toLowerCase();
     final mappedTool = _ideToDashToolMap[lowerIde];
     if (mappedTool != null) {
       return mappedTool;
     }
-
-    for (final value in DashTool.values) {
-      if (value.name.toLowerCase() == lowerIde) {
-        return value;
-      }
-    }
-    return DashTool.devtools;
+    return 'devtools';
   }
 
   @visibleForTesting
