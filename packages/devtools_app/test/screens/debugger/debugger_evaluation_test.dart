@@ -261,9 +261,6 @@ void main() {
 
     test(
       'returns no operators for int',
-      // Temporarily skip this test while Flutter gets a Dart SDK with new
-      // properties on 'int'.
-      skip: true,
       () async {
         await runMethodAndWaitForPause(
           'AnotherClass().pauseWithScopedVariablesMethod()',
@@ -278,6 +275,8 @@ void main() {
             'bitLength',
             'toString',
             'remainder',
+            'trailingZeroBitCount',
+            'oneBitCount',
             'abs',
             'sign',
             'isEven',
