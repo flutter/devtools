@@ -13,8 +13,10 @@ import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
+import '../analytics/analytics_controller.dart';
 import '../development_helpers.dart';
 import '../globals.dart';
+import '../primitives/query_parameters.dart';
 import '../primitives/storage.dart';
 import '../primitives/utils.dart';
 
@@ -73,7 +75,21 @@ Uri buildDevToolsServerRequestUri(String url) {
   // [_debugDevToolsServerFlag] environment variable declaration was not set
   // using `--dart-define`.
   const baseUri = _debugDevToolsServerEnvironmentVariable;
-  return Uri.parse(path.join(baseUri, url));
+  final uri = Uri.parse(path.join(baseUri, url));
+
+  final queryParams = DevToolsQueryParams.load();
+  // Forward the parent IDE name and the client-side analytics opt-out status
+  // to the server, so they can be propagated to any spawned subprocesses.
+  // Fail-safe: default to suppressing analytics if the controller is not yet
+  // initialized.
+  final newParams = <String, String>{
+    ...uri.queryParameters,
+    if (queryParams.ide != null) 'ide': queryParams.ide!,
+    if (!isAnalyticsControllerInitialized || !isAnalyticsEnabled)
+      'suppress_analytics': 'true',
+  };
+
+  return uri.replace(queryParameters: newParams);
 }
 
 /// Helper to catch any server request which could fail.

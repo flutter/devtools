@@ -60,6 +60,43 @@ Running Gradle task 'printBuildVariants'...                        10.4s
       );
     });
 
+    test('getBuildVariants propagates parent IDE and analytics opt-out status',
+        () async {
+      const projectRoot = '/abc';
+      manager.expectedCommands.add(
+        TestCommand(
+          executable: manager.mockedFlutterBinary,
+          arguments: <String>[
+            'analyze',
+            '--android',
+            '--list-build-variants',
+            projectRoot,
+          ],
+          ide: 'VS-Code',
+          suppressAnalytics: true,
+          result: ProcessResult(
+            0,
+            0,
+            r'''
+Running Gradle task 'printBuildVariants'...                        10.4s
+["debug"]
+            ''',
+            '',
+          ),
+        ),
+      );
+      final response = await manager.getAndroidBuildVariants(
+        rootPath: projectRoot,
+        ide: 'VS-Code',
+        suppressAnalytics: true,
+      );
+      expect(response[DeeplinkManager.kErrorField], isNull);
+      expect(
+        response[DeeplinkManager.kOutputJsonField],
+        '["debug"]',
+      );
+    });
+
     test(
       'getBuildVariants return internal server error if command failed',
       () async {
@@ -217,15 +254,19 @@ class StubbedDeeplinkManager extends DeeplinkManager {
   Future<ProcessResult> runProcess(
     String executable, {
     required List<String> arguments,
+    String? ide,
+    bool suppressAnalytics = false,
   }) async {
     if (expectedCommands.isNotEmpty) {
       final expectedCommand = expectedCommands.removeAt(0);
-      expect(expectedCommand.executable, executable);
+      expect(executable, expectedCommand.executable);
       expect(
         const ListEquality<String>()
-            .equals(expectedCommand.arguments, arguments),
+            .equals(arguments, expectedCommand.arguments),
         isTrue,
       );
+      expect(ide, expectedCommand.ide);
+      expect(suppressAnalytics, expectedCommand.suppressAnalytics);
       return expectedCommand.result;
     }
     throw 'Received unexpected command: $executable ${arguments.join(' ')}';
@@ -236,10 +277,14 @@ class TestCommand {
   const TestCommand({
     required this.executable,
     required this.arguments,
+    this.ide,
+    this.suppressAnalytics = false,
     required this.result,
   });
   final String executable;
   final List<String> arguments;
+  final String? ide;
+  final bool suppressAnalytics;
   final ProcessResult result;
 
   @override
