@@ -9,7 +9,7 @@ repository: https://github.com/flutter/devtools/tree/master/packages/devtools_ex
 
 environment:
   sdk: ^3.11.0
-  flutter: ">=3.27.1"
+  flutter: ^3.41.0
 
 resolution: workspace
 
