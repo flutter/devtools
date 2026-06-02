@@ -15,7 +15,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-* The minimum Dart SDK version is bumped to 3.11.0.
+TODO: Remove this section if there are not any updates.
 
 ## Inspector updates
 

@@ -6,6 +6,8 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 ## 0.5.2-wip
 * Fix a `RangeError` thrown by `SplitPane` when the number of children
   changes between rebuilds.
+* The minimum Dart SDK version is bumped to 3.11.0.
+* The minimum Flutter SDK version is bumped to 3.41.0.
 
 ## 0.5.1
 * Add DevTools-styled text field `DevToolsTextField`.
