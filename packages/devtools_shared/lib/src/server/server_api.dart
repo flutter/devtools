@@ -30,11 +30,11 @@ part 'handlers/_app_size.dart';
 part 'handlers/_deeplink.dart';
 part 'handlers/_devtools_extensions.dart';
 part 'handlers/_dtd.dart';
-part 'handlers/_vm_service.dart';
 part 'handlers/_preferences.dart';
 part 'handlers/_release_notes.dart';
 part 'handlers/_storage.dart';
 part 'handlers/_survey.dart';
+part 'handlers/_vm_service.dart';
 
 /// The DevTools server API.
 ///
@@ -268,10 +268,7 @@ class ServerApi {
     return shelf.Response(
       HttpStatus.internalServerError,
       body: error != null || logs != null
-          ? jsonEncode(<String, Object?>{
-              if (error != null) errorKey: error,
-              if (logs != null) logsKey: logs,
-            })
+          ? jsonEncode({errorKey: ?error, logsKey: ?logs})
           : null,
     );
   }
