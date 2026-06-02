@@ -8,7 +8,7 @@ version: 0.5.1
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_extensions
 
 environment:
-  sdk: ">=3.6.0 <4.0.0"
+  sdk: ^3.10.0
   flutter: ">=3.27.1"
 
 resolution: workspace
