@@ -7,7 +7,7 @@ version: 0.5.2-wip
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app_shared
 
 environment:
-  sdk: ^3.10.0
+  sdk: ^3.11.0
   flutter: ">=3.27.1"
 
 resolution: workspace
