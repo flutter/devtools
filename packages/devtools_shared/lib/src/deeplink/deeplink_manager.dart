@@ -32,6 +32,28 @@ class DeeplinkManager {
   /// APIs.
   static const kOutputJsonField = 'json';
 
+  // TODO(https://github.com/flutter/devtools/issues/9702): Use the `DashTool`
+  // and `DashEnvVar` enums and `getEnvironment()` helper directly from
+  // `package:unified_analytics` once the pinned Flutter candidate SDK in this
+  // repository is bumped to a stable Dart SDK version >= 3.10.0 (resolving the
+  // dev SDK version solving conflict on CI).
+  /// Mappings from case-insensitive IDE query parameter values to their
+  /// corresponding DashTool canonical label strings used by `package:unified_analytics`.
+  ///
+  /// Contains multiple spelling and format variations (with/without hyphens
+  /// or suffixes) passed by different IDE integrations to ensure O(1) lookup.
+  static const _ideToDashToolMap = <String, String>{
+    'vs-code': 'vscode-plugins',
+    'vscode': 'vscode-plugins',
+    'vscodeplugins': 'vscode-plugins',
+    'intellij-idea': 'intellij-plugins',
+    'intellij': 'intellij-plugins',
+    'intellijplugins': 'intellij-plugins',
+    'android-studio': 'android-studio-plugins',
+    'androidstudio': 'android-studio-plugins',
+    'androidstudioplugins': 'android-studio-plugins',
+  };
+
   /// A regex to retrieve the file path from the stdout of iOS or Android
   /// analyzers.
   ///
@@ -44,11 +66,29 @@ class DeeplinkManager {
   Future<ProcessResult> runProcess(
     String executable, {
     required List<String> arguments,
+    String? ide,
+    bool suppressAnalytics = false,
   }) {
+    final environment = <String, String>{
+      ...Platform.environment,
+      'DASH__SUPPRESS_ANALYTICS': suppressAnalytics.toString(),
+      'DASH__TOOL': ide != null ? _mapIdeToDashToolLabel(ide) : 'devtools',
+    };
+
     return Process.run(
       executable,
       arguments,
+      environment: environment,
     );
+  }
+
+  String _mapIdeToDashToolLabel(String ide) {
+    final lowerIde = ide.toLowerCase();
+    final mappedTool = _ideToDashToolMap[lowerIde];
+    if (mappedTool != null) {
+      return mappedTool;
+    }
+    return 'devtools';
   }
 
   @visibleForTesting
@@ -81,9 +121,16 @@ class DeeplinkManager {
   Future<String> _runFlutterCommand(
     List<String> arguments, {
     required RegExp outputMatcher,
+    String? ide,
+    bool suppressAnalytics = false,
   }) async {
     final flutterPath = getFlutterBinary();
-    final result = await runProcess(flutterPath, arguments: arguments);
+    final result = await runProcess(
+      flutterPath,
+      arguments: arguments,
+      ide: ide,
+      suppressAnalytics: suppressAnalytics,
+    );
     if (result.exitCode != 0) {
       throw _FlutterProcessError(
         'Flutter command exit with non-zero error code ${result.exitCode}\n${result.stderr}',
@@ -126,10 +173,14 @@ class DeeplinkManager {
 
   Future<Map<String, Object?>> getAndroidBuildVariants({
     required String rootPath,
+    String? ide,
+    bool suppressAnalytics = false,
   }) {
     return _runFlutterCommand(
       <String>['analyze', '--android', '--list-build-variants', rootPath],
       outputMatcher: _androidBuildVariantJsonRegex,
+      ide: ide,
+      suppressAnalytics: suppressAnalytics,
     ).then<Map<String, Object?>>(
       _handleJsonOutput,
       onError: _handleRunFlutterError,
@@ -139,6 +190,8 @@ class DeeplinkManager {
   Future<Map<String, Object?>> getAndroidAppLinkSettings({
     required String rootPath,
     required String buildVariant,
+    String? ide,
+    bool suppressAnalytics = false,
   }) {
     return _runFlutterCommand(
       <String>[
@@ -149,6 +202,8 @@ class DeeplinkManager {
         rootPath,
       ],
       outputMatcher: _outputFilePathRegex,
+      ide: ide,
+      suppressAnalytics: suppressAnalytics,
     ).then<Map<String, Object?>>(
       _handleReadJsonFile,
       onError: _handleRunFlutterError,
@@ -157,10 +212,14 @@ class DeeplinkManager {
 
   Future<Map<String, Object?>> getIosBuildOptions({
     required String rootPath,
+    String? ide,
+    bool suppressAnalytics = false,
   }) {
     return _runFlutterCommand(
       <String>['analyze', '--ios', '--list-build-options', rootPath],
       outputMatcher: _iosBuildOptionsJsonRegex,
+      ide: ide,
+      suppressAnalytics: suppressAnalytics,
     ).then<Map<String, Object?>>(
       _handleJsonOutput,
       onError: _handleRunFlutterError,
@@ -171,6 +230,8 @@ class DeeplinkManager {
     required String rootPath,
     required String configuration,
     required String target,
+    String? ide,
+    bool suppressAnalytics = false,
   }) {
     return _runFlutterCommand(
       <String>[
@@ -182,6 +243,8 @@ class DeeplinkManager {
         rootPath,
       ],
       outputMatcher: _outputFilePathRegex,
+      ide: ide,
+      suppressAnalytics: suppressAnalytics,
     ).then<Map<String, Object?>>(
       _handleReadJsonFile,
       onError: _handleRunFlutterError,

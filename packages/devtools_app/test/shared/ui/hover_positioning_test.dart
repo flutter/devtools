@@ -7,7 +7,10 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
+
+const _windowWidth = 800.0;
+const _windowHeight = 600.0;
+const _windowSize = Size(_windowWidth, _windowHeight);
 
 void main() {
   Future<void> pumpHoverCardTooltip(
@@ -40,13 +43,13 @@ void main() {
     await gesture.addPointer(location: Offset.zero);
     final center = tester.getCenter(find.text('Hover Me'));
     await gesture.moveTo(center);
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(HoverCardTooltip.hoverDelay);
     await tester.pumpAndSettle();
   }
 
   testWidgetsWithWindowSize(
     'HoverCard at the bottom of the window should not overflow',
-    const Size(800, 600),
+    _windowSize,
     (WidgetTester tester) async {
       // Use a title to increase the height beyond the base content height.
       await pumpHoverCardTooltip(
@@ -66,14 +69,16 @@ void main() {
       final position = renderBox.localToGlobal(Offset.zero);
       final size = renderBox.size;
 
-      // _hoverMargin = 16.0
-      expect(position.dy + size.height, lessThanOrEqualTo(600.0 - 16.0));
+      expect(
+        position.dy + size.height,
+        lessThanOrEqualTo(_windowHeight - hoverMargin),
+      );
     },
   );
 
   testWidgetsWithWindowSize(
     'HoverCard at the right of the window should not overflow',
-    const Size(800, 600),
+    _windowSize,
     (WidgetTester tester) async {
       await pumpHoverCardTooltip(tester, alignment: Alignment.centerRight);
 
@@ -88,8 +93,10 @@ void main() {
       final position = renderBox.localToGlobal(Offset.zero);
       final size = renderBox.size;
 
-      // _hoverMargin = 16.0
-      expect(position.dx + size.width, lessThanOrEqualTo(800.0 - 16.0));
+      expect(
+        position.dx + size.width,
+        lessThanOrEqualTo(_windowWidth - hoverMargin),
+      );
     },
   );
 
@@ -110,38 +117,36 @@ void main() {
     },
   );
 
-  testWidgetsWithWindowSize(
-    'HoverCard height clamping with title',
-    const Size(800, 600),
-    (WidgetTester tester) async {
-      await pumpHoverCardTooltip(
-        tester,
-        alignment: Alignment.bottomCenter,
-        title: 'An Important Title',
-      );
+  testWidgetsWithWindowSize('HoverCard height clamping with title', _windowSize, (
+    WidgetTester tester,
+  ) async {
+    await pumpHoverCardTooltip(
+      tester,
+      alignment: Alignment.bottomCenter,
+      title: 'An Important Title',
+    );
 
-      final hoverContentFinderWithTitle = find.text('Hover Content');
-      expect(hoverContentFinderWithTitle, findsOneWidget);
+    final hoverContentFinderWithTitle = find.text('Hover Content');
+    expect(hoverContentFinderWithTitle, findsOneWidget);
 
-      final containerWithTitle = find
-          .ancestor(
-            of: hoverContentFinderWithTitle,
-            matching: find.byType(Container),
-          )
-          .last;
+    final containerWithTitle = find
+        .ancestor(
+          of: hoverContentFinderWithTitle,
+          matching: find.byType(Container),
+        )
+        .last;
 
-      final renderBoxWithTitle =
-          tester.renderObject(containerWithTitle) as RenderBox;
-      final positionWithTitle = renderBoxWithTitle.localToGlobal(Offset.zero);
+    final renderBoxWithTitle =
+        tester.renderObject(containerWithTitle) as RenderBox;
+    final positionWithTitle = renderBoxWithTitle.localToGlobal(Offset.zero);
 
-      // Clamps strictly at y = 274.0 because of dynamic height containing title/divider.
-      expect(positionWithTitle.dy, equals(274.0));
-    },
-  );
+    // Clamps strictly at y = 274.0 because of dynamic height containing title/divider.
+    expect(positionWithTitle.dy, equals(274.0));
+  });
 
   testWidgetsWithWindowSize(
     'HoverCard height clamping without title',
-    const Size(800, 600),
+    _windowSize,
     (WidgetTester tester) async {
       await pumpHoverCardTooltip(tester, alignment: Alignment.bottomCenter);
 
@@ -166,39 +171,34 @@ void main() {
 
   testWidgetsWithWindowSize(
     'HoverCard translates global coordinates to local coordinates for offset overlays',
-    const Size(800, 600),
+    _windowSize,
     (WidgetTester tester) async {
       final overlayKey = GlobalKey();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: Padding(
-              padding: const EdgeInsets.only(left: 50.0, top: 100.0),
-              child: Provider<HoverCardController>.value(
-                value: HoverCardController(),
-                child: Overlay(
-                  key: overlayKey,
-                  initialEntries: [
-                    OverlayEntry(
-                      builder: (context) => Align(
-                        alignment: Alignment.topLeft,
-                        child: HoverCardTooltip.sync(
-                          enabled: () => true,
-                          generateHoverCardData: (event) => HoverCardData(
-                            contents: const SizedBox(
-                              width: 200,
-                              height: 250,
-                              child: Text('Hover Content'),
-                            ),
-                          ),
-                          child: const Text('Hover Me Offset'),
+        wrapSimple(
+          Padding(
+            padding: const EdgeInsets.only(left: 50.0, top: 100.0),
+            child: Overlay(
+              key: overlayKey,
+              initialEntries: [
+                OverlayEntry(
+                  builder: (context) => Align(
+                    alignment: Alignment.topLeft,
+                    child: HoverCardTooltip.sync(
+                      enabled: () => true,
+                      generateHoverCardData: (event) => HoverCardData(
+                        contents: const SizedBox(
+                          width: 200,
+                          height: 250,
+                          child: Text('Hover Content'),
                         ),
                       ),
+                      child: const Text('Hover Me Offset'),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -210,7 +210,7 @@ void main() {
 
       final center = tester.getCenter(find.text('Hover Me Offset'));
       await gesture.moveTo(center);
-      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pump(HoverCardTooltip.hoverDelay);
       await tester.pumpAndSettle();
 
       final hoverContentFinder = find.text('Hover Content');

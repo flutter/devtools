@@ -88,7 +88,7 @@ final class SplitPane extends StatefulWidget {
 }
 
 final class _SplitPaneState extends State<SplitPane> {
-  late final List<double> fractions;
+  late List<double> fractions;
 
   bool get isHorizontal => widget.axis == Axis.horizontal;
 
@@ -96,6 +96,18 @@ final class _SplitPaneState extends State<SplitPane> {
   void initState() {
     super.initState();
     fractions = List.of(widget.initialFractions);
+  }
+
+  @override
+  void didUpdateWidget(SplitPane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // When the number of children changes, the previously stored [fractions]
+    // list will be out of sync with [widget.minSizes] and [widget.children],
+    // which causes a RangeError during layout. Reset to the new
+    // [initialFractions] when the child count changes.
+    if (oldWidget.children.length != widget.children.length) {
+      fractions = List.of(widget.initialFractions);
+    }
   }
 
   @override

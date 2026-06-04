@@ -275,6 +275,8 @@ void main() {
             'bitLength',
             'toString',
             'remainder',
+            'trailingZeroBitCount',
+            'oneBitCount',
             'abs',
             'sign',
             'isEven',

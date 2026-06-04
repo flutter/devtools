@@ -10,15 +10,12 @@ import 'api.dart';
 /// See [DevToolsExtensionEventType] for different types of events that are
 /// supported over this communication channel.
 class DevToolsExtensionEvent {
-  DevToolsExtensionEvent(
-    this.type, {
-    this.data,
-    this.source,
-  });
+  DevToolsExtensionEvent(this.type, {this.data, this.source});
 
   factory DevToolsExtensionEvent.parse(Map<String, Object?> json) {
-    final eventType =
-        DevToolsExtensionEventType.from(json[_typeKey]! as String);
+    final eventType = DevToolsExtensionEventType.from(
+      json[_typeKey]! as String,
+    );
     final data = (json[_dataKey] as Map?)?.cast<String, Object?>();
     final source = json[sourceKey] as String?;
     return DevToolsExtensionEvent(eventType, data: data, source: source);
@@ -44,10 +41,7 @@ class DevToolsExtensionEvent {
   final String? source;
 
   Map<String, Object?> toJson() {
-    return {
-      _typeKey: type.name,
-      if (data != null) _dataKey: data!,
-    };
+    return {_typeKey: type.name, _dataKey: ?data};
   }
 
   @override
@@ -65,10 +59,10 @@ typedef ExtensionEventHandler = void Function(DevToolsExtensionEvent event);
 /// notification the the DevTools notification framework.
 class ShowNotificationExtensionEvent extends DevToolsExtensionEvent {
   ShowNotificationExtensionEvent({required String message})
-      : super(
-          DevToolsExtensionEventType.showNotification,
-          data: {_messageKey: message},
-        );
+    : super(
+        DevToolsExtensionEventType.showNotification,
+        data: {_messageKey: message},
+      );
 
   factory ShowNotificationExtensionEvent.from(DevToolsExtensionEvent event) {
     assert(event.type == DevToolsExtensionEventType.showNotification);
@@ -93,18 +87,18 @@ class ShowBannerMessageExtensionEvent extends DevToolsExtensionEvent {
     required String extensionName,
     bool ignoreIfAlreadyDismissed = true,
     bool dismissOnConnectionChanges = true,
-  })  : assert(bannerMessageType == 'warning' || bannerMessageType == 'error'),
-        super(
-          DevToolsExtensionEventType.showBannerMessage,
-          data: {
-            _idKey: id,
-            _bannerMessageTypeKey: bannerMessageType,
-            _messageKey: message,
-            _extensionNameKey: extensionName,
-            _ignoreIfAlreadyDismissedKey: ignoreIfAlreadyDismissed,
-            _dismissOnConnectionChangesKey: dismissOnConnectionChanges,
-          },
-        );
+  }) : assert(bannerMessageType == 'warning' || bannerMessageType == 'error'),
+       super(
+         DevToolsExtensionEventType.showBannerMessage,
+         data: {
+           _idKey: id,
+           _bannerMessageTypeKey: bannerMessageType,
+           _messageKey: message,
+           _extensionNameKey: extensionName,
+           _ignoreIfAlreadyDismissedKey: ignoreIfAlreadyDismissed,
+           _dismissOnConnectionChangesKey: dismissOnConnectionChanges,
+         },
+       );
 
   factory ShowBannerMessageExtensionEvent.from(DevToolsExtensionEvent event) {
     assert(event.type == DevToolsExtensionEventType.showBannerMessage);
@@ -154,12 +148,9 @@ class CopyToClipboardExtensionEvent extends DevToolsExtensionEvent {
     required String content,
     String successMessage = defaultSuccessMessage,
   }) : super(
-          DevToolsExtensionEventType.copyToClipboard,
-          data: {
-            _contentKey: content,
-            _successMessageKey: successMessage,
-          },
-        );
+         DevToolsExtensionEventType.copyToClipboard,
+         data: {_contentKey: content, _successMessageKey: successMessage},
+       );
 
   factory CopyToClipboardExtensionEvent.from(DevToolsExtensionEvent event) {
     assert(event.type == DevToolsExtensionEventType.copyToClipboard);

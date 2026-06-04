@@ -3,6 +3,12 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
+## 0.5.2-wip
+* Fix a `RangeError` thrown by `SplitPane` when the number of children
+  changes between rebuilds.
+* The minimum Dart SDK version is bumped to 3.11.0.
+* The minimum Flutter SDK version is bumped to 3.41.0.
+
 ## 0.5.1
 * Add DevTools-styled text field `DevToolsTextField`.
 * Updates `devtools_shared` constraint to `^13.0.0`.

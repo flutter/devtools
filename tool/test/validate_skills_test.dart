@@ -7,6 +7,8 @@ import 'package:dart_skills_lint/dart_skills_lint.dart';
 import 'package:logging/logging.dart';
 import 'package:test/test.dart';
 
+const String _configFilePath = 'dart_skills_lint.yaml';
+
 void main() {
   test('Validate DevTools Skills', () async {
     final Level oldLevel = Logger.root.level;
@@ -17,16 +19,10 @@ void main() {
         });
 
     try {
-      // TODO(https://github.com/flutter/skills/issues/85): Update test
-      // to use dart_skills_lint.yaml for config when available.
-      final bool isValid = await validateSkills(
-        skillDirPaths: ['../.agents/skills'],
-        resolvedRules: {
-          'check-relative-paths': AnalysisSeverity.error,
-          'check-absolute-paths': AnalysisSeverity.error,
-          'check-trailing-whitespace': AnalysisSeverity.error,
-        },
+      final Configuration config = await ConfigParser.loadConfig(
+        path: _configFilePath,
       );
+      final bool isValid = await validateSkills(config: config);
       expect(
         isValid,
         isTrue,

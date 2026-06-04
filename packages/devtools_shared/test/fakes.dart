@@ -11,23 +11,27 @@ class FakeDeeplinkManager extends DeeplinkManager {
   String? receivedBuildVariant;
   String? receivedConfiguration;
   String? receivedTarget;
-  late Map<String, String> responseForGetAndroidBuildVariants;
-  late Map<String, String> responseForGetAndroidAppLinkSettings;
-  late Map<String, String> responseForGetIosBuildOptions;
-  late Map<String, String> responseForGetIosUniversalLinkSettings;
+  late Map<String, Object?> responseForGetAndroidBuildVariants;
+  late Map<String, Object?> responseForGetAndroidAppLinkSettings;
+  late Map<String, Object?> responseForGetIosBuildOptions;
+  late Map<String, Object?> responseForGetIosUniversalLinkSettings;
 
   @override
-  Future<Map<String, String>> getAndroidBuildVariants({
+  Future<Map<String, Object?>> getAndroidBuildVariants({
     required String rootPath,
+    String? ide,
+    bool suppressAnalytics = false,
   }) async {
     receivedPath = rootPath;
     return responseForGetAndroidBuildVariants;
   }
 
   @override
-  Future<Map<String, String>> getAndroidAppLinkSettings({
+  Future<Map<String, Object?>> getAndroidAppLinkSettings({
     required String rootPath,
     required String buildVariant,
+    String? ide,
+    bool suppressAnalytics = false,
   }) async {
     receivedPath = rootPath;
     receivedBuildVariant = buildVariant;
@@ -35,18 +39,22 @@ class FakeDeeplinkManager extends DeeplinkManager {
   }
 
   @override
-  Future<Map<String, String>> getIosBuildOptions({
+  Future<Map<String, Object?>> getIosBuildOptions({
     required String rootPath,
+    String? ide,
+    bool suppressAnalytics = false,
   }) async {
     receivedPath = rootPath;
     return responseForGetIosBuildOptions;
   }
 
   @override
-  Future<Map<String, String>> getIosUniversalLinkSettings({
+  Future<Map<String, Object?>> getIosUniversalLinkSettings({
     required String rootPath,
     required String configuration,
     required String target,
+    String? ide,
+    bool suppressAnalytics = false,
   }) async {
     receivedPath = rootPath;
     receivedConfiguration = configuration;
