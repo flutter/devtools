@@ -6,6 +6,8 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 ## 0.5.2-wip
 * Fix a `RangeError` thrown by `SplitPane` when the number of children
   changes between rebuilds.
+* Add `IsolateManager.onIsolateCreated` stream for detecting when new isolates
+  are spawned.
 
 ## 0.5.1
 * Add DevTools-styled text field `DevToolsTextField`.

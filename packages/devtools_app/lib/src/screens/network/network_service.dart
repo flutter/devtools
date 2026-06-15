@@ -202,8 +202,14 @@ class NetworkService {
   }
 
   Future<void> clearData() async {
-    await updateLastSocketDataRefreshTime();
-    updateLastHttpDataRefreshTime();
+    final service = serviceConnection.serviceManager.service;
+    if (service == null) return;
+
+    final timestamp = (await service.getVMTimelineMicros()).timestamp!;
+    networkController.lastSocketDataRefreshMicros = timestamp;
+    await service.forEachIsolate((isolate) async {
+      lastHttpDataRefreshTimePerIsolate[isolate.id!] = timestamp;
+    });
     await _clearSocketProfile();
     await _clearHttpProfile();
   }

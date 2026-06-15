@@ -338,6 +338,37 @@ void main() {
       // Wait to ensure all the timers have been cancelled.
       await tester.pumpAndSettle(const Duration(seconds: 2));
     });
+
+    testWidgetsWithWindowSize(
+      'search field stays enabled after clear while recording',
+      windowSize,
+      (WidgetTester tester) async {
+        controller = NetworkController();
+        await pumpNetworkScreen(tester);
+        await tester.pumpAndSettle();
+        expect(controller.isPolling, isTrue);
+
+        controller.search = 'jsonplaceholder';
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byType(ClearButton));
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+
+        expect(controller.requests.value, isEmpty);
+        expect(controller.isPolling, isTrue);
+        expect(controller.search, 'jsonplaceholder');
+
+        final searchField = tester.widget<TextField>(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is TextField && widget.decoration?.hintText == 'Search',
+          ),
+        );
+        expect(searchField.enabled, isTrue);
+
+        await clearTimeouts(tester);
+      },
+    );
   });
 
   group('NetworkRequestOverviewView', () {
