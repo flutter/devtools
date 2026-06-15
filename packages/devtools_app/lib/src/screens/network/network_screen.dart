@@ -194,8 +194,6 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         _recording = controller.recordingNotifier.value;
       });
     });
-
-    addAutoDisposeListener(controller.filteredData);
   }
 
   @override
