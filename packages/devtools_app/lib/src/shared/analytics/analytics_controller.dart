@@ -34,6 +34,15 @@ Future<AnalyticsController> get analyticsController async {
 
 AnalyticsController? _analyticsController;
 
+/// A synchronous check to see if analytics are enabled.
+///
+/// Returns `false` if analytics are disabled or not yet initialized.
+bool get isAnalyticsEnabled =>
+    _analyticsController?.analyticsEnabled.value ?? false;
+
+/// Whether the analytics controller has been initialized.
+bool get isAnalyticsControllerInitialized => _analyticsController != null;
+
 typedef AsyncAnalyticsCallback = FutureOr<void> Function();
 
 class AnalyticsController {
