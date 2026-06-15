@@ -25,6 +25,7 @@ class ConnectedMemoryBody extends StatefulWidget {
 
 class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
+  // ignore: dispose-fields, false positive. Disposed via autoDisposeFocusNode.
   final _focusNode = FocusNode(debugLabel: 'memory');
 
   @override

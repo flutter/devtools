@@ -14,7 +14,8 @@ import 'dtd_tools_model.dart';
 /// information about service methods registered on DTD and provides
 /// functionality for calling them.
 class ServicesController extends FeatureController {
-  late DartToolingDaemon dtd;
+  // ignore: dispose-class-fields, reference is nulled in dispose(). This class is not the owner of this object.
+  DartToolingDaemon? dtd;
 
   @visibleForTesting
   final services = ValueNotifier<List<DtdServiceMethod>>([]);
@@ -32,6 +33,7 @@ class ServicesController extends FeatureController {
   void dispose() {
     services.dispose();
     selectedService.dispose();
+    dtd = null;
     super.dispose();
   }
 
@@ -40,7 +42,7 @@ class ServicesController extends FeatureController {
   /// Refreshes [services] with the current set of services registered on
   /// [dtd].
   Future<void> refresh() async {
-    final response = await dtd.getRegisteredServices();
+    final response = await dtd!.getRegisteredServices();
     services.value = <DtdServiceMethod>[
       ...response.dtdServices.map((value) {
         // If the DTD service has the form 'service.method', split up the two
@@ -153,7 +155,7 @@ class _ServicesViewState extends State<ServicesView> {
               builder: (context, service, child) {
                 return ManuallyCallService(
                   serviceMethod: service,
-                  dtd: widget.controller.dtd,
+                  dtd: widget.controller.dtd!,
                 );
               },
             ),

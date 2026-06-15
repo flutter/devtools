@@ -30,6 +30,7 @@ class DebuggingControls extends StatefulWidget {
 
 class _DebuggingControlsState extends State<DebuggingControls>
     with AutoDisposeMixin {
+  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late DebuggerController controller;
 
   @override

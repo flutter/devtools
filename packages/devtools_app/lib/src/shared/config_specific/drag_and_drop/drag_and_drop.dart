@@ -38,6 +38,8 @@ abstract class DragAndDropManager {
   @mustCallSuper
   void dispose() {
     _dragAndDropStates.clear();
+    activeState?.dispose();
+    activeState = null;
   }
 
   void registerDragAndDrop(DragAndDropState state) {
@@ -139,7 +141,11 @@ class DragAndDropState extends State<DragAndDrop> {
 
   @override
   void dispose() {
-    _dragAndDropManager?.unregisterDragAndDrop(this);
+    _dragAndDropManager
+      ?..unregisterDragAndDrop(this)
+      ..dispose();
+    _dragAndDropManager = null;
+    _dragging.dispose();
     super.dispose();
   }
 

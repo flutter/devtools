@@ -33,6 +33,7 @@ class DeepLinkListView extends StatefulWidget {
 }
 
 class _DeepLinkListViewState extends State<DeepLinkListView> {
+  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late DeepLinksController controller;
 
   @override

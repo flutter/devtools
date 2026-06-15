@@ -65,6 +65,7 @@ class NetworkController extends DevToolsScreenController
   @override
   final screenId = ScreenMetaData.network.id;
 
+  // ignore: dispose-class-fields, false positive. List items are disposed in the dispose method.
   List<DartIOHttpRequestData>? _httpRequests;
 
   Future<String?> exportAsHarFile() async {
@@ -203,6 +204,10 @@ class NetworkController extends DevToolsScreenController
     selectedRequest.dispose();
     _recordingNotifier.dispose();
     _currentNetworkRequests.dispose();
+    for (final r in _httpRequests ?? <DartIOHttpRequestData>[]) {
+      r.dispose();
+    }
+    _httpRequests?.clear();
     super.dispose();
   }
 

@@ -94,6 +94,7 @@ class _DebuggerScreenBodyWrapper extends StatefulWidget {
 
 class _DebuggerScreenBodyWrapperState extends State<_DebuggerScreenBodyWrapper>
     with AutoDisposeMixin {
+  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late DebuggerController controller;
 
   late bool _shownFirstScript;
@@ -520,6 +521,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
     with AutoDisposeMixin {
   bool get _isPaused => serviceConnection.serviceManager.isMainIsolatePaused;
 
+  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late final DebuggerController _controller;
   late double _controlHeight;
   late double _controlOpacity;

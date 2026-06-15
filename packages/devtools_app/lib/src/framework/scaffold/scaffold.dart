@@ -403,6 +403,7 @@ class KeyboardShortcuts extends StatefulWidget {
 
 class KeyboardShortcutsState extends State<KeyboardShortcuts>
     with AutoDisposeMixin {
+  // ignore: dispose-fields, false positive. Disposed via autoDisposeFocusNode.
   late final FocusNode _focusNode;
 
   @override

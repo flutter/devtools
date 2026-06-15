@@ -115,9 +115,14 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     with AutoDisposeMixin {
   static const _resizingDebounceDuration = Duration(milliseconds: 200);
 
-  late ScrollController scrollController;
+  @visibleForTesting
+  // ignore: dispose-fields, reference is nulled in dispose(). This class is not the owner of this object.
+  ScrollController? verticalScrollController;
+
+  // ignore: dispose-fields, reference is nulled in dispose(). This class is not the owner of this object.
+  ScrollController? _horizontalScrollbarController;
+
   late ScrollController pinnedScrollController;
-  late ScrollController _horizontalScrollbarController;
 
   late List<T> _data;
 
@@ -142,13 +147,13 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
         ? widget.tableController.tableUiState.scrollOffset
         : 0.0;
     widget.tableController.initScrollController(initialScrollOffset);
-    scrollController = widget.tableController.verticalScrollController!;
+    verticalScrollController = widget.tableController.verticalScrollController!;
     _horizontalScrollbarController =
         widget.tableController.horizontalScrollController!;
 
     if (widget.startScrolledAtBottom) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(scrollController.autoScrollToBottom(jump: true));
+        unawaited(verticalScrollController!.autoScrollToBottom(jump: true));
       });
     }
 
@@ -208,7 +213,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
             final newPos = selectedDisplayRow * defaultRowHeight;
 
-            maybeScrollToPosition(scrollController, newPos);
+            maybeScrollToPosition(verticalScrollController!, newPos);
           }
         });
       });
@@ -232,13 +237,15 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     final index = _data.indexOf(activeSearch);
 
     if (index == -1) return;
-
+    final verticalScrollController = this.verticalScrollController!;
     final y = index * defaultRowHeight;
     final indexInView =
-        y > scrollController.offset &&
-        y < scrollController.offset + scrollController.position.extentInside;
+        y > verticalScrollController.offset &&
+        y <
+            verticalScrollController.offset +
+                verticalScrollController.position.extentInside;
     if (!indexInView) {
-      await scrollController.animateTo(
+      await verticalScrollController.animateTo(
         index * defaultRowHeight,
         duration: defaultDuration,
         curve: defaultCurve,
@@ -257,6 +264,9 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   @override
   void dispose() {
     pinnedScrollController.dispose();
+    verticalScrollController = null;
+    _horizontalScrollbarController = null;
+    _resizingDebouncer.dispose();
     super.dispose();
   }
 
@@ -388,10 +398,13 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
   @override
   Widget build(BuildContext context) {
+    final verticalScrollController = this.verticalScrollController!;
+
     // If we're at the end already, scroll to expose the new content.
     if (widget.autoScrollContent) {
-      if (scrollController.hasClients && scrollController.atScrollBottom) {
-        unawaited(scrollController.autoScrollToBottom());
+      if (verticalScrollController.hasClients &&
+          verticalScrollController.atScrollBottom) {
+        unawaited(verticalScrollController.autoScrollToBottom());
       }
     }
 
@@ -405,8 +418,9 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     final tableUiState = widget.tableController.tableUiState;
     final sortColumn =
         widget.tableController.columns[tableUiState.sortColumnIndex];
-    if (widget.preserveVerticalScrollPosition && scrollController.hasClients) {
-      scrollController.jumpTo(tableUiState.scrollOffset);
+    if (widget.preserveVerticalScrollPosition &&
+        verticalScrollController.hasClients) {
+      verticalScrollController.jumpTo(tableUiState.scrollOffset);
     }
 
     return LayoutBuilder(
@@ -478,7 +492,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                     Expanded(
                       child: Scrollbar(
                         thumbVisibility: true,
-                        controller: scrollController,
+                        controller: verticalScrollController,
                         child: GestureDetector(
                           behavior: HitTestBehavior.translucent,
                           onTapDown: (a) => widget.focusNode?.requestFocus(),
@@ -488,13 +502,13 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
                                 widget.handleKeyEvent != null
                                 ? widget.handleKeyEvent!(
                                     event,
-                                    scrollController,
+                                    verticalScrollController,
                                     constraints,
                                   )
                                 : KeyEventResult.ignored,
                             focusNode: widget.focusNode,
                             child: ListView.builder(
-                              controller: scrollController,
+                              controller: verticalScrollController,
                               itemCount: _dataRowCount(
                                 constraints,
                                 showColumnGroupHeader,

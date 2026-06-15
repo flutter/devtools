@@ -201,7 +201,9 @@ class InspectorController extends DisposableController
   /// for now mainly to minimize risk.
   static const refreshFramesPerSecond = 5.0;
 
+  // ignore: dispose-class-fields, set from the constructor. This class is not the owner of this object.
   InspectorTreeController inspectorTree;
+
   final FlutterTreeType treeType;
 
   late RateLimiter _refreshRateLimiter;

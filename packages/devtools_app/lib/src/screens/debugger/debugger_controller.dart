@@ -89,6 +89,8 @@ class DebuggerController extends DevToolsScreenController
     _selectedBreakpoint.dispose();
     _exceptionPauseMode.dispose();
     _hasTruncatedFrames.dispose();
+    unawaited(_getStackOperation?.cancel());
+    _lastService = null;
     super.dispose();
   }
 
@@ -134,6 +136,7 @@ class DebuggerController extends DevToolsScreenController
     _firstDebuggerScreenLoaded = false;
   }
 
+  // ignore: dispose-class-fields, reference is nulled in dispose().
   VmServiceWrapper? _lastService;
 
   void _handleConnectionAvailable(VmServiceWrapper service) {

@@ -202,6 +202,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     FrameworkCore.dispose();
     // Workaround for https://github.com/flutter/flutter/issues/155265.
     removeTextFieldFocusFixHandler();
+    routerDelegate.dispose();
     super.dispose();
   }
 

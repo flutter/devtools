@@ -86,6 +86,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
   );
   static final tabs = [analysisTab, diffTab];
 
+  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late AppSizeController controller;
 
   late final TabController _tabController;
@@ -390,6 +391,7 @@ class AnalysisView extends StatefulWidget {
 }
 
 class _AnalysisViewState extends State<AnalysisView> with AutoDisposeMixin {
+  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late AppSizeController controller;
 
   TreemapNode? analysisRoot;
@@ -482,6 +484,7 @@ class DiffView extends StatefulWidget {
 }
 
 class _DiffViewState extends State<DiffView> with AutoDisposeMixin {
+  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late AppSizeController controller;
 
   TreemapNode? diffRoot;

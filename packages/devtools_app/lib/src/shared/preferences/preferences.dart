@@ -282,13 +282,17 @@ class PreferencesController extends DisposableController
 
   @override
   void dispose() {
-    cpuProfiler.dispose();
-    devToolsExtensions.dispose();
-    inspector.dispose();
-    logging.dispose();
-    memory.dispose();
-    network.dispose();
-    performance.dispose();
+    _cpuProfiler.dispose();
+    _extensions.dispose();
+    _inspector.dispose();
+    _logging.dispose();
+    _memory.dispose();
+    _network.dispose();
+    _performance.dispose();
+    darkModeEnabled.dispose();
+    advancedDeveloperModeEnabled.dispose();
+    wasmEnabled.dispose();
+    verboseLoggingEnabled.dispose();
     super.dispose();
   }
 
