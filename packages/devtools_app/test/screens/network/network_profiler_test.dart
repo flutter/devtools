@@ -338,6 +338,48 @@ void main() {
       // Wait to ensure all the timers have been cancelled.
       await tester.pumpAndSettle(const Duration(seconds: 2));
     });
+
+    testWidgetsWithWindowSize(
+      'search field stays enabled after clearing',
+      windowSize,
+      (WidgetTester tester) async {
+        // Load the network profiler screen.
+        controller = NetworkController();
+        await pumpNetworkScreen(tester);
+
+        // Populate the screen with requests.
+        await loadRequestsAndCheck(tester);
+
+        Finder searchFieldTextField() => find.descendant(
+          of: find.byType(SearchField<NetworkController>),
+          matching: find.byType(TextField),
+        );
+
+        // The search field is enabled while requests are present.
+        expect(
+          tester.widget<TextField>(searchFieldTextField()).enabled,
+          isTrue,
+        );
+
+        // Pause the profiler so polling does not repopulate the requests after
+        // they are cleared below.
+        await tester.tap(find.byType(StartStopRecordingButton));
+        await tester.pumpAndSettle();
+
+        // Clear the results.
+        await tester.tap(find.byType(ClearButton));
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+        expect(controller.requests.value, isEmpty);
+
+        // The search field must stay enabled even with no requests present, so
+        // the query can still be edited before the next batch of requests
+        // arrives.
+        expect(
+          tester.widget<TextField>(searchFieldTextField()).enabled,
+          isTrue,
+        );
+      },
+    );
   });
 
   group('NetworkRequestOverviewView', () {
