@@ -197,7 +197,7 @@ class NetworkController extends DevToolsScreenController
         _,
       ) async {
         if (_recordingNotifier.value) {
-          await _enableNetworkTrafficRecordingOnAllIsolates();
+          await allowedError(_enableNetworkTrafficRecordingOnAllIsolates());
         }
       }),
     );

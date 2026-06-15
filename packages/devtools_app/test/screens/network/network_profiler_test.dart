@@ -65,6 +65,8 @@ void main() {
 
   group('Network Profiler', () {
     setUp(() {
+      socketProfile = loadSocketProfile();
+      httpProfile = loadHttpProfile();
       fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           socketProfile: socketProfile,
@@ -357,6 +359,31 @@ void main() {
         expect(controller.requests.value, isEmpty);
         expect(controller.isPolling, isTrue);
         expect(controller.search, 'jsonplaceholder');
+
+        final searchField = tester.widget<TextField>(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is TextField && widget.decoration?.hintText == 'Search',
+          ),
+        );
+        expect(searchField.enabled, isTrue);
+
+        await clearTimeouts(tester);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'search field stays enabled when recording is paused with requests',
+      windowSize,
+      (WidgetTester tester) async {
+        controller = NetworkController();
+        await pumpNetworkScreen(tester);
+        await loadRequestsAndCheck(tester);
+
+        await tester.tap(find.byType(StartStopRecordingButton));
+        await tester.pumpAndSettle();
+
+        expect(controller.isPolling, isFalse);
 
         final searchField = tester.widget<TextField>(
           find.byWidgetPredicate(

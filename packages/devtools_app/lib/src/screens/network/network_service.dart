@@ -205,12 +205,18 @@ class NetworkService {
     final service = serviceConnection.serviceManager.service;
     if (service == null) return;
 
-    final timestamp = (await service.getVMTimelineMicros()).timestamp!;
-    networkController.lastSocketDataRefreshMicros = timestamp;
-    await service.forEachIsolate((isolate) async {
-      lastHttpDataRefreshTimePerIsolate[isolate.id!] = timestamp;
-    });
-    await _clearSocketProfile();
-    await _clearHttpProfile();
+    try {
+      final timestamp = (await service.getVMTimelineMicros()).timestamp!;
+      networkController.lastSocketDataRefreshMicros = timestamp;
+      await service.forEachIsolate((isolate) async {
+        lastHttpDataRefreshTimePerIsolate[isolate.id!] = timestamp;
+      });
+      await _clearSocketProfile();
+      await _clearHttpProfile();
+    } on RPCError catch (e) {
+      if (!e.isServiceDisposedError) {
+        rethrow;
+      }
+    }
   }
 }
