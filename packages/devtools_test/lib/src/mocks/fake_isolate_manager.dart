@@ -48,9 +48,7 @@ base class FakeIsolateManager extends Fake with TestIsolateManager {
 
   @override
   ValueNotifier<List<IsolateRef>> get isolates {
-    final value = _selectedIsolate.value;
-    _isolates ??= ValueNotifier([if (value != null) value]);
-    return _isolates!;
+    return _isolates ??= ValueNotifier([?_selectedIsolate.value]);
   }
 
   final _pausedState = ValueNotifier<bool>(false);
