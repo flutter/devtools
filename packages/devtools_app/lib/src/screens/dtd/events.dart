@@ -13,8 +13,8 @@ import 'shared.dart';
 /// Manages business logic for the [EventsView] widget, which displays
 /// information about events sent and received over DTD event streams.
 class EventsController extends FeatureController {
-  // ignore: dispose-class-fields, reference is nulled in dispose(). This class is not the owner of this object.
-  DartToolingDaemon? dtd;
+  // ignore: dispose-class-fields, this class is not the owner of this object.
+  late DartToolingDaemon dtd;
 
   @visibleForTesting
   final events = ListValueNotifier<DTDEvent>([]);
@@ -29,7 +29,7 @@ class EventsController extends FeatureController {
     super.init();
     for (final stream in knownDtdStreams) {
       autoDisposeStreamSubscription(
-        dtd!.onEvent(stream).listen((event) {
+        dtd.onEvent(stream).listen((event) {
           events.add(event);
           // Schedule a scroll to the bottom after the frame is built.
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -49,7 +49,6 @@ class EventsController extends FeatureController {
     events.dispose();
     selectedEvent.dispose();
     scrollController.dispose();
-    dtd = null;
     super.dispose();
   }
 }

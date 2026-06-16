@@ -116,11 +116,11 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   static const _resizingDebounceDuration = Duration(milliseconds: 200);
 
   @visibleForTesting
-  // ignore: dispose-fields, reference is nulled in dispose(). This class is not the owner of this object.
-  ScrollController? verticalScrollController;
+  // ignore: dispose-fields, this class is not the owner of this object.
+  late final ScrollController verticalScrollController;
 
-  // ignore: dispose-fields, reference is nulled in dispose(). This class is not the owner of this object.
-  ScrollController? _horizontalScrollbarController;
+  // ignore: dispose-fields, this class is not the owner of this object.
+  late final ScrollController _horizontalScrollbarController;
 
   late ScrollController pinnedScrollController;
 
@@ -153,7 +153,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
     if (widget.startScrolledAtBottom) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(verticalScrollController!.autoScrollToBottom(jump: true));
+        unawaited(verticalScrollController.autoScrollToBottom(jump: true));
       });
     }
 
@@ -213,7 +213,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
             final newPos = selectedDisplayRow * defaultRowHeight;
 
-            maybeScrollToPosition(verticalScrollController!, newPos);
+            maybeScrollToPosition(verticalScrollController, newPos);
           }
         });
       });
@@ -237,7 +237,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     final index = _data.indexOf(activeSearch);
 
     if (index == -1) return;
-    final verticalScrollController = this.verticalScrollController!;
+    final verticalScrollController = this.verticalScrollController;
     final y = index * defaultRowHeight;
     final indexInView =
         y > verticalScrollController.offset &&
@@ -264,8 +264,6 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   @override
   void dispose() {
     pinnedScrollController.dispose();
-    verticalScrollController = null;
-    _horizontalScrollbarController = null;
     _resizingDebouncer.dispose();
     super.dispose();
   }
@@ -398,7 +396,7 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
 
   @override
   Widget build(BuildContext context) {
-    final verticalScrollController = this.verticalScrollController!;
+    final verticalScrollController = this.verticalScrollController;
 
     // If we're at the end already, scroll to expose the new content.
     if (widget.autoScrollContent) {

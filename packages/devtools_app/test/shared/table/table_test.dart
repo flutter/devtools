@@ -1193,7 +1193,7 @@ void main() {
           final tableState = tester.state<DevToolsTableState>(
             find.byType(DevToolsTable<TestData>),
           );
-          final scrollController = tableState.verticalScrollController!;
+          final scrollController = tableState.verticalScrollController;
 
           expect(scrollController.offset, 0.0);
           expect(scrollController.position.maxScrollExtent, greaterThan(0.0));
@@ -1221,7 +1221,7 @@ void main() {
           final tableState = tester.state<DevToolsTableState>(
             find.byType(DevToolsTable<TestData>),
           );
-          final scrollController = tableState.verticalScrollController!;
+          final scrollController = tableState.verticalScrollController;
 
           expect(scrollController.offset, isNot(0.0));
           expect(scrollController.position.maxScrollExtent, greaterThan(0.0));

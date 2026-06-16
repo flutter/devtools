@@ -15,6 +15,7 @@ import '../../debugger/program_explorer_model.dart';
 import '../vm_developer_tools_controller.dart';
 import '../vm_developer_tools_screen.dart';
 import 'class_hierarchy_explorer.dart';
+import 'object_inspector_view_controller.dart';
 import 'object_store.dart';
 import 'object_viewport.dart';
 
@@ -38,13 +39,16 @@ class _ObjectInspectorView extends StatefulWidget {
 
 class _ObjectInspectorViewState extends State<_ObjectInspectorView>
     with TickerProviderStateMixin {
+  // ignore: dispose-fields, this class is not the owner of this object.
+  late ObjectInspectorViewController controller;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     final vmDeveloperToolsController = screenControllers
         .lookup<VMDeveloperToolsController>();
-    unawaited(vmDeveloperToolsController.objectInspectorViewController.init());
+    controller = vmDeveloperToolsController.objectInspectorViewController;
+    unawaited(controller.init());
   }
 
   @override
@@ -54,13 +58,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
       initialFractions: const [0.2, 0.8],
       children: [
         const ObjectInspectorSelector(),
-        SelectionArea(
-          child: ObjectViewport(
-            controller: screenControllers
-                .lookup<VMDeveloperToolsController>()
-                .objectInspectorViewController,
-          ),
-        ),
+        SelectionArea(child: ObjectViewport(controller: controller)),
       ],
     );
   }
@@ -81,12 +79,16 @@ class ObjectInspectorSelector extends StatefulWidget {
 class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
   String value = ObjectInspectorSelector.kProgramExplorer;
 
+  // ignore: dispose-fields, this class is not the owner of this object.
+  late ObjectInspectorViewController controller;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final vmDeveloperToolsController = screenControllers
         .lookup<VMDeveloperToolsController>();
-    unawaited(vmDeveloperToolsController.objectInspectorViewController.init());
+    controller = vmDeveloperToolsController.objectInspectorViewController;
+    unawaited(controller.init());
   }
 
   @override
@@ -143,9 +145,6 @@ class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
   }
 
   Widget _selectedWidget() {
-    final controller = screenControllers
-        .lookup<VMDeveloperToolsController>()
-        .objectInspectorViewController;
     switch (value) {
       case ObjectInspectorSelector.kProgramExplorer:
         return ProgramExplorer(
@@ -166,9 +165,6 @@ class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
   }
 
   void _onNodeSelected(VMServiceObjectNode node) {
-    final controller = screenControllers
-        .lookup<VMDeveloperToolsController>()
-        .objectInspectorViewController;
     final objRef = node.object;
     final location = node.location;
     if (objRef != null &&

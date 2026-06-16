@@ -86,8 +86,9 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
 
   @override
   void dispose() {
-    _overlayEntry!.remove();
-    _overlayEntry?.dispose();
+    _overlayEntry
+      ?..remove()
+      ..dispose();
     _overlayEntry = null;
     super.dispose();
   }
