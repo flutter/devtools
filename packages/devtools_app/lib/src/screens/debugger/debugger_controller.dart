@@ -136,7 +136,6 @@ class DebuggerController extends DevToolsScreenController
     _firstDebuggerScreenLoaded = false;
   }
 
-  // ignore: dispose-class-fields, reference is nulled in dispose().
   VmServiceWrapper? _lastService;
 
   void _handleConnectionAvailable(VmServiceWrapper service) {

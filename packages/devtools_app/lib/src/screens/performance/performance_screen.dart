@@ -59,7 +59,6 @@ class PerformanceScreenBody extends StatefulWidget {
 
 class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     with AutoDisposeMixin {
-  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late PerformanceController controller;
 
   @override

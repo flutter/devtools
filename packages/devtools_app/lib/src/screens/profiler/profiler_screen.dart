@@ -57,7 +57,6 @@ class ProfilerScreenBody extends StatefulWidget {
 
 class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     with AutoDisposeMixin {
-  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late ProfilerScreenController controller;
 
   bool recording = false;

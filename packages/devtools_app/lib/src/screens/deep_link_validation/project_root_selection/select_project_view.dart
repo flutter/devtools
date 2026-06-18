@@ -31,7 +31,6 @@ class SelectProjectView extends StatefulWidget {
 }
 
 class _SelectProjectViewState extends State<SelectProjectView> {
-  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late DeepLinksController controller;
 
   bool _retrievingFlutterProject = false;

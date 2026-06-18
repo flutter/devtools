@@ -25,7 +25,6 @@ class CallStack extends StatefulWidget {
 class _CallStackState extends State<CallStack> {
   StackFrameAndSourcePosition? _clickedOnFrame;
 
-  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late DebuggerController controller;
 
   @override

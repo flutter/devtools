@@ -50,7 +50,6 @@ class LoggingScreenBody extends StatefulWidget {
 
 class _LoggingScreenState extends State<LoggingScreenBody>
     with AutoDisposeMixin {
-  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late LoggingController controller;
 
   @override

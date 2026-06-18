@@ -39,8 +39,8 @@ class _ObjectInspectorView extends StatefulWidget {
 
 class _ObjectInspectorViewState extends State<_ObjectInspectorView>
     with TickerProviderStateMixin {
-  // ignore: dispose-fields, this class is not the owner of this object.
   late ObjectInspectorViewController controller;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -79,7 +79,6 @@ class ObjectInspectorSelector extends StatefulWidget {
 class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
   String value = ObjectInspectorSelector.kProgramExplorer;
 
-  // ignore: dispose-fields, this class is not the owner of this object.
   late ObjectInspectorViewController controller;
 
   @override

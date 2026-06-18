@@ -29,7 +29,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     with AutoDisposeMixin {
   static const _gaPrefix = 'performanceTab';
 
-  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late PerformanceController controller;
 
   FlutterFrame? _selectedFlutterFrame;

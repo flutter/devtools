@@ -34,7 +34,7 @@ void main() {
   late ErrorBadgeManager errorBadgeManager;
 
   group('ErrorBadgeManager', () {
-    int getActiveErrorCount(screenId) =>
+    int getActiveErrorCount(String screenId) =>
         errorBadgeManager.erroredItemsForPage(screenId).value.entries.length;
 
     setUp(() {

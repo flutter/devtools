@@ -131,7 +131,6 @@ class NetworkScreenBody extends StatefulWidget {
 
 class _NetworkScreenBodyState extends State<NetworkScreenBody>
     with AutoDisposeMixin {
-  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late NetworkController controller;
 
   @override
@@ -181,7 +180,6 @@ class _NetworkProfilerControls extends StatefulWidget {
 
 class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     with AutoDisposeMixin {
-  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late NetworkController controller;
 
   bool _recording = false;

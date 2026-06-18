@@ -39,7 +39,6 @@ class DeepLinkPage extends StatefulWidget {
 }
 
 class _DeepLinkPageState extends State<DeepLinkPage> {
-  // ignore: dispose-fields, screen controller disposal is handled by the [ScreenControllers] class.
   late DeepLinksController controller;
 
   @override

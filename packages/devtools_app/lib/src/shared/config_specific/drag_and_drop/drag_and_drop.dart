@@ -26,7 +26,6 @@ abstract class DragAndDropManager {
 
   final _dragAndDropStates = <DragAndDropState>{};
 
-  // ignore: dispose-class-fields, dispose should not be manually called on a State object.
   DragAndDropState? activeState;
 
   /// The method is abstract, because we want to force descendants to define it.
@@ -115,7 +114,7 @@ class DragAndDrop extends StatefulWidget {
 
 class DragAndDropState extends State<DragAndDrop> {
   final _dragging = ValueNotifier<bool>(false);
-  // ignore: dispose-fields, this class is not the owner of this object.
+
   DragAndDropManager? _dragAndDropManager;
 
   bool _isActive = false;
