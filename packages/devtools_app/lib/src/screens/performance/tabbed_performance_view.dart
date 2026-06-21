@@ -80,17 +80,27 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         .map((t) => t.featureController)
         .toList();
 
-    // If there is not an active feature, activate the first.
+    // The set of visible tabs can differ between when offline data was exported
+    // and when it is loaded (e.g. the Frame Analysis and Rebuild Stats tabs are
+    // only shown for Flutter apps with the relevant data). Clamp the restored
+    // tab index to the tabs that are actually available to avoid an
+    // out-of-bounds selection.
+    final selectedTabIndex = controller.selectedFeatureTabIndex.clamp(
+      0,
+      tabs.length - 1,
+    );
+
+    // If there is not an active feature, activate the selected one.
     if (featureControllers.firstWhereOrNull(
           (controller) => controller?.isActiveFeature ?? false,
         ) ==
         null) {
-      _setActiveFeature(0, featureControllers[0]);
+      _setActiveFeature(selectedTabIndex, featureControllers[selectedTabIndex]);
     }
 
     return AnalyticsTabbedView(
       tabs: tabs,
-      initialSelectedIndex: controller.selectedFeatureTabIndex,
+      initialSelectedIndex: selectedTabIndex,
       gaScreen: gac.performance,
       onTabChanged: (int index) {
         _setActiveFeature(index, featureControllers[index]);

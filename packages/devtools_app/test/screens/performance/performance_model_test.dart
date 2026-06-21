@@ -53,6 +53,15 @@ void main() {
       offlineData = OfflinePerformanceData.fromJson(rawPerformanceData);
       expect(offlineData.toJson(), rawPerformanceData);
     });
+
+    test('round trips a non-zero selectedTab', () {
+      final offlineData = OfflinePerformanceData(selectedTab: 2);
+      final json = offlineData.toJson();
+      expect(json[OfflinePerformanceData.selectedTabKey], equals(2));
+
+      final parsed = OfflinePerformanceData.fromJson(json);
+      expect(parsed.selectedTab, equals(2));
+    });
   });
 
   group('$FlutterTimelineEvent', () {
