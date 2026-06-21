@@ -16,6 +16,7 @@ void main() {
       expect(offlineData.selectedFrame, isNull);
       expect(offlineData.rebuildCountModel, isNull);
       expect(offlineData.displayRefreshRate, 60.0);
+      expect(offlineData.selectedTab, 0);
     });
 
     test('init from parse', () {
@@ -32,6 +33,7 @@ void main() {
       expect(offlineData.selectedFrame!.id, equals(2));
       expect(offlineData.displayRefreshRate, equals(60));
       expect(offlineData.rebuildCountModel, isNull);
+      expect(offlineData.selectedTab, equals(0));
     });
 
     test('to json', () {
@@ -44,6 +46,7 @@ void main() {
           OfflinePerformanceData.selectedFrameIdKey: null,
           OfflinePerformanceData.displayRefreshRateKey: 60,
           OfflinePerformanceData.rebuildCountModelKey: null,
+          OfflinePerformanceData.selectedTabKey: 0,
         }),
       );
 
