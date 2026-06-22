@@ -52,8 +52,6 @@ void main() {
   setUpAll(() {
     setGlobal(OfflineDataController, OfflineDataController());
     socketProfile = loadSocketProfile();
-    httpProfile = loadHttpProfile();
-    setGlobal(IdeTheme, IdeTheme());
     setGlobal(
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
@@ -65,6 +63,12 @@ void main() {
 
   group('Network Profiler', () {
     setUp(() {
+      // Reload the fixtures for every test. Clearing requests mutates these
+      // shared profiles in place (FakeVmServiceWrapper clears the same lists
+      // aliased by _startingRequests/_startingSockets), so a test that taps
+      // Clear would otherwise leave them empty for the next test.
+      socketProfile = loadSocketProfile();
+      httpProfile = loadHttpProfile();
       fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           socketProfile: socketProfile,
