@@ -15,7 +15,10 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any updates.
+* Validated the `devtoolsOptionsUri` parameter in the extension enabled-state
+  handler so it must be a `file:` URI named `devtools_options.yaml`, preventing
+  the DevTools server from writing to arbitrary file paths. -
+  [#9834](https://github.com/flutter/devtools/pull/9834)
 
 ## Inspector updates
 

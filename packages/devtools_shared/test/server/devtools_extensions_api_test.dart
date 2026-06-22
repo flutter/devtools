@@ -144,13 +144,17 @@ void main() {
 
   group(ExtensionsApi.apiExtensionEnabledState, () {
     late File optionsFile;
-    late final optionsFileUriString = p.posix.join(
-      extensionTestManager.runtimeAppRoot,
-      devtoolsOptionsFileName,
-    );
+    late String optionsFileUriString;
 
     setUp(() async {
       await initializeTestDirectory();
+      // Recompute per test: each test gets a fresh temp directory, so this
+      // must not be cached across tests (otherwise it would point at a
+      // previous test's directory).
+      optionsFileUriString = p.posix.join(
+        extensionTestManager.runtimeAppRoot,
+        devtoolsOptionsFileName,
+      );
       optionsFile = File.fromUri(Uri.parse(optionsFileUriString));
     });
 
