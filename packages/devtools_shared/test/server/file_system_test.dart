@@ -16,9 +16,7 @@ void main() {
       // directory and read an arbitrary file on disk.
       expect(LocalFileSystem.devToolsFileFromPath('/etc/passwd'), isNull);
       expect(
-        LocalFileSystem.devToolsFileFromPath(
-          '/home/user/.config/gcloud/application_default_credentials.json',
-        ),
+        LocalFileSystem.devToolsFileFromPath('/absolute/path/to/file.json'),
         isNull,
       );
     });
