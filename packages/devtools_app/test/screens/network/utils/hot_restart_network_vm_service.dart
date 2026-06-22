@@ -1,4 +1,4 @@
-// Copyright 2025 The Flutter Authors
+// Copyright 2026 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
@@ -40,11 +40,24 @@ class HotRestartNetworkVmService extends FakeVmServiceWrapper {
   static final _testVmFlagManager = VmFlagManager();
 
   String _currentIsolateId = 'isolates/1';
-  int _timelineMicros = 1000000;
 
+  /// A monotonic microsecond counter simulating the VM timeline clock.
+  int _timelineMicros = 1_000_000;
+
+  /// A map of isolate ID to the list of mock HTTP requests recorded on that
+  /// isolate.
   final _httpProfiles = <String, List<HttpProfileRequest>>{};
+
+  /// A map of isolate ID to the list of mock socket statistics recorded on that
+  /// isolate.
   final _socketProfiles = <String, List<SocketStatistic>>{};
+
+  /// A map tracking whether HTTP timeline logging is enabled (true/false) per
+  /// isolate ID.
   final _httpLoggingEnabled = <String, bool>{};
+
+  /// A map tracking whether socket profiling is enabled (true/false) per isolate
+  /// ID.
   final _socketProfilingEnabled = <String, bool>{};
 
   /// The isolate ID currently returned by [forEachIsolate].
@@ -79,28 +92,27 @@ class HotRestartNetworkVmService extends FakeVmServiceWrapper {
     _currentIsolateId = nextId;
     _httpLoggingEnabled[nextId] = false;
     _socketProfilingEnabled[nextId] = false;
-    _timelineMicros += 5000000;
+    // Advance past pre-restart request timestamps so refresh logic treats them
+    // as stale on the new isolate.
+    _timelineMicros += 5_000_000;
     return nextId;
   }
 
   /// Appends [request] to the HTTP profile for [isolateId].
   void appendHttpRequest(String isolateId, HttpProfileRequest request) {
-    _httpProfiles[isolateId] = [
-      ...(_httpProfiles[isolateId] ?? const []),
-      request,
-    ];
+    _httpProfiles[isolateId] = [...?_httpProfiles[isolateId], request];
   }
 
   @override
-  Future<Success> clearHttpProfileWrapper(String isolateId) {
+  Future<Success> clearHttpProfileWrapper(String isolateId) async {
     _httpProfiles[isolateId] = [];
-    return Future.value(Success());
+    return Success();
   }
 
   @override
-  Future<Success> clearSocketProfileWrapper(String isolateId) {
+  Future<Success> clearSocketProfileWrapper(String isolateId) async {
     _socketProfiles[isolateId] = [];
-    return Future.value(Success());
+    return Success();
   }
 
   @override
@@ -111,15 +123,13 @@ class HotRestartNetworkVmService extends FakeVmServiceWrapper {
   Future<HttpTimelineLoggingState> httpEnableTimelineLoggingWrapper(
     String isolateId, [
     bool? enabled,
-  ]) {
+  ]) async {
     if (enabled != null) {
       _httpLoggingEnabled[isolateId] = enabled;
-      return Future.value(HttpTimelineLoggingState(enabled: enabled));
+      return HttpTimelineLoggingState(enabled: enabled);
     }
-    return Future.value(
-      HttpTimelineLoggingState(
-        enabled: _httpLoggingEnabled[isolateId] ?? false,
-      ),
+    return HttpTimelineLoggingState(
+      enabled: _httpLoggingEnabled[isolateId] ?? false,
     );
   }
 
@@ -127,15 +137,13 @@ class HotRestartNetworkVmService extends FakeVmServiceWrapper {
   Future<SocketProfilingState> socketProfilingEnabledWrapper(
     String isolateId, [
     bool? enabled,
-  ]) {
+  ]) async {
     if (enabled != null) {
       _socketProfilingEnabled[isolateId] = enabled;
-      return Future.value(SocketProfilingState(enabled: enabled));
+      return SocketProfilingState(enabled: enabled);
     }
-    return Future.value(
-      SocketProfilingState(
-        enabled: _socketProfilingEnabled[isolateId] ?? false,
-      ),
+    return SocketProfilingState(
+      enabled: _socketProfilingEnabled[isolateId] ?? false,
     );
   }
 
@@ -143,13 +151,11 @@ class HotRestartNetworkVmService extends FakeVmServiceWrapper {
   Future<HttpProfile> getHttpProfileWrapper(
     String isolateId, {
     DateTime? updatedSince,
-  }) {
+  }) async {
     if (!(_httpLoggingEnabled[isolateId] ?? false)) {
-      return Future.value(
-        HttpProfile(
-          requests: [],
-          timestamp: DateTime.fromMicrosecondsSinceEpoch(_timelineMicros),
-        ),
+      return HttpProfile(
+        requests: [],
+        timestamp: DateTime.fromMicrosecondsSinceEpoch(_timelineMicros),
       );
     }
 
@@ -165,25 +171,21 @@ class HotRestartNetworkVmService extends FakeVmServiceWrapper {
           )
           .toList();
     }
-    return Future.value(
-      HttpProfile(
-        requests: requests,
-        timestamp: DateTime.fromMicrosecondsSinceEpoch(_timelineMicros),
-      ),
+    return HttpProfile(
+      requests: requests,
+      timestamp: DateTime.fromMicrosecondsSinceEpoch(_timelineMicros),
     );
   }
 
   @override
-  Future<SocketProfile> getSocketProfileWrapper(String isolateId) {
+  Future<SocketProfile> getSocketProfileWrapper(String isolateId) async {
     if (!(_socketProfilingEnabled[isolateId] ?? false)) {
-      return Future.value(SocketProfile(sockets: []));
+      return SocketProfile(sockets: []);
     }
-    return Future.value(
-      SocketProfile(sockets: _socketProfiles[isolateId] ?? const []),
-    );
+    return SocketProfile(sockets: _socketProfiles[isolateId] ?? const []);
   }
 
   @override
-  Future<Timestamp> getVMTimelineMicros() =>
-      Future.value(Timestamp(timestamp: _timelineMicros));
+  Future<Timestamp> getVMTimelineMicros() async =>
+      Timestamp(timestamp: _timelineMicros);
 }

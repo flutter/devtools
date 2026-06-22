@@ -1,4 +1,4 @@
-// Copyright 2025 The Flutter Authors
+// Copyright 2026 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
@@ -83,7 +83,7 @@ void main() {
             createTestHttpRequest(
               id: 'post-restart',
               method: 'POST',
-              startTime: 8000000,
+              startTime: 8_000_000,
             ),
           ]);
 
@@ -187,7 +187,7 @@ void main() {
             createTestHttpRequest(
               id: 'new-isolate-request',
               method: 'PUT',
-              startTime: 9000000,
+              startTime: 9_000_000,
             ),
           ]);
 
@@ -224,7 +224,7 @@ void main() {
           controller
                   .networkService
                   .lastHttpDataRefreshTimePerIsolate[preRestartIsolateId] =
-              DateTime.now().microsecondsSinceEpoch;
+              12_000_000;
 
           final postRestartIsolateId = vmService.simulateHotRestart();
           notifyMainIsolateChanged(fakeServiceConnection, postRestartIsolateId);
@@ -232,7 +232,7 @@ void main() {
             createTestHttpRequest(
               id: 'after-stale-isolate',
               method: 'DELETE',
-              startTime: 10000000,
+              startTime: 10_000_000,
             ),
           ]);
           await pumpEventQueue();
@@ -266,7 +266,7 @@ void main() {
           createTestHttpRequest(
             id: 'new-request',
             method: 'POST',
-            startTime: 11000000,
+            startTime: 11_000_000,
           ),
         ]);
         await pumpEventQueue();

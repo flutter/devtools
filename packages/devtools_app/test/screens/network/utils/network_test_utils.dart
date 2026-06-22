@@ -10,7 +10,7 @@ import '../../../test_infra/test_data/network.dart';
 HttpProfileRequest createTestHttpRequest({
   required String id,
   required String method,
-  int startTime = 2000000,
+  int startTime = 2_000_000,
   String uri = 'https://example.com/test',
 }) {
   final endTime = startTime + 1000;

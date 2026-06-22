@@ -1,4 +1,4 @@
-// Copyright 2025 The Flutter Authors
+// Copyright 2026 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
@@ -121,7 +121,7 @@ void main() {
           controller
                   .networkService
                   .lastHttpDataRefreshTimePerIsolate[isolateId] =
-              DateTime.now().microsecondsSinceEpoch;
+              500_000;
 
           await controller.clear();
 
@@ -144,7 +144,7 @@ void main() {
             createTestHttpRequest(
               id: 'stale-request',
               method: 'GET',
-              startTime: 1500000,
+              startTime: 1_500_000,
             ),
           ],
         );
@@ -179,7 +179,7 @@ void main() {
           createTestHttpRequest(
             id: 'after-clear-and-restart',
             method: 'PUT',
-            startTime: 9000000,
+            startTime: 9_000_000,
           ),
         );
         await controller.networkService.refreshNetworkData();
@@ -211,7 +211,7 @@ void main() {
           createTestHttpRequest(
             id: 'after-restart',
             method: 'POST',
-            startTime: 8000000,
+            startTime: 8_000_000,
           ),
         );
         await controller.networkService.refreshNetworkData();
@@ -225,7 +225,7 @@ void main() {
           createTestHttpRequest(
             id: 'after-restart-and-clear',
             method: 'DELETE',
-            startTime: 10000000,
+            startTime: 10_000_000,
           ),
         );
         await controller.networkService.refreshNetworkData();
@@ -295,7 +295,7 @@ void main() {
           createTestHttpRequest(
             id: 'after-multi-clear',
             method: 'PATCH',
-            startTime: 3000000,
+            startTime: 3_000_000,
           ),
         );
         await controller.networkService.refreshNetworkData();
