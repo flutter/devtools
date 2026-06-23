@@ -23,7 +23,9 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed a bug where the selected feature tab was not restored when loading
+  exported Performance data. -
+  [#9861](https://github.com/flutter/devtools/pull/9861)
 
 ## CPU profiler updates
 
