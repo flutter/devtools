@@ -115,6 +115,7 @@ enum ScreenMetaData {
     iconAsset: 'icons/app_bar/deep_links.png',
     requiresConnection: false,
     requiresDartVm: true,
+    requiresFlutter: true,
   ),
   vmTools(
     'vm-tools',
