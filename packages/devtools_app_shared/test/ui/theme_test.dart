@@ -99,4 +99,15 @@ void main() {
       );
     });
   });
+
+  group('search match colors', () {
+    // Regression test for https://github.com/flutter/devtools/issues/9010: the
+    // "opaque" search match colors are blended over the row background, so they
+    // must stay translucent. Otherwise the (theme-colored) row text is drawn on
+    // a fully opaque highlight and becomes unreadable.
+    test('are translucent so row text stays legible', () {
+      expect(searchMatchColorTranslucent.a, closeTo(0.5, 0.001));
+      expect(activeSearchMatchColorTranslucent.a, closeTo(0.5, 0.001));
+    });
+  });
 }

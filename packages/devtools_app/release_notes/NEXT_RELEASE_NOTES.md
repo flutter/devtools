@@ -16,10 +16,13 @@ To learn more about DevTools, check out the
 ## General updates
 
 * Resolve several memory leaks. - [#9857](https://github.com/flutter/devtools/pull/9857)
+* Fixed a bug where highlighted search matches in tables were unreadable in dark
+  mode because the highlight color had become fully opaque. -
+  [#9863](https://github.com/flutter/devtools/pull/9863)
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any updates.
+- Fixed an issue where the Inspector error badge count would improperly increase or disappear during navigation. [#9524](https://github.com/flutter/devtools/issues/9524)
 
 ## Performance updates
 
