@@ -45,7 +45,7 @@ jobs:
 
       - name: Load Cached Flutter SDK
         id: cache-flutter
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
+        uses: actions/cache@2c8a9bd7457de244a408f35966fab2fb45fda9c8
         with:
           path: |
             ./tool/flutter-sdk
