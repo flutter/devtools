@@ -157,9 +157,8 @@ class InspectorController extends DisposableController
     // TODO(kenz): When this method is called outside  createState(), this post
     // frame callback can be removed.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      serviceConnection.errorBadgeManager.clearErrorCount(InspectorScreen.id);
+      serviceConnection.errorBadgeManager.clearErrors(InspectorScreen.id);
     });
-    filterErrors();
   }
 
   void _handleConnectionStop() {
@@ -381,8 +380,6 @@ class InspectorController extends DisposableController
       return;
     }
 
-    filterErrors();
-
     return _waitForPendingUpdateDone();
   }
 
@@ -402,13 +399,6 @@ class InspectorController extends DisposableController
       firstInspectorTreeLoadCompleted = true;
     }
     await onForceRefresh();
-  }
-
-  void filterErrors() {
-    serviceConnection.errorBadgeManager.filterErrors(
-      InspectorScreen.id,
-      (id) => hasDiagnosticsValue(InspectorInstanceRef(id)),
-    );
   }
 
   void setActivate(bool enabled) {
@@ -977,17 +967,12 @@ class InspectorController extends DisposableController
     _selectedErrorIndex.value = errorIndex;
 
     if (errorIndex != null) {
-      // Mark the error as "seen" as this will render slightly differently
-      // so the user can track which errored nodes they've viewed.
+      // Marking an error as read will automatically update the badge count to
+      // reflect the remaining unread errors.
       serviceConnection.errorBadgeManager.markErrorAsRead(
         InspectorScreen.id,
         errors[inspectorRef!]!,
       );
-      // Also clear the error badge since new errors may have arrived while
-      // the inspector was visible (normally they're cleared when visiting
-      // the screen) and visiting an errored node seems an appropriate
-      // acknowledgement of the errors.
-      serviceConnection.errorBadgeManager.clearErrorCount(InspectorScreen.id);
     }
   }
 

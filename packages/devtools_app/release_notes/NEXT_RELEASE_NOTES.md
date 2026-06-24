@@ -21,7 +21,7 @@ To learn more about DevTools, check out the
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any updates.
+- Fixed an issue where the Inspector error badge count would improperly increase or disappear during navigation. [#9524](https://github.com/flutter/devtools/issues/9524)
 
 ## Performance updates
 
