@@ -21,7 +21,9 @@ To learn more about DevTools, check out the
 
 ## Inspector updates
 
-- Fixed an issue where the Inspector error badge count would improperly increase or disappear during navigation. [#9524](https://github.com/flutter/devtools/issues/9524)
+- Fixed an issue where the Inspector error badge count would improperly
+  increase or disappear during navigation.
+  [#9524](https://github.com/flutter/devtools/issues/9524)
 
 ## Performance updates
 
@@ -53,7 +55,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Deep links tool updates
 
-TODO: Remove this section if there are not any updates.
+- Only validate deep links when connected to a Flutter app.
+  [#8081](https://github.com/flutter/devtools/issues/8081)
 
 ## VS Code sidebar updates
 
