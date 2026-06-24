@@ -13,11 +13,7 @@ import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/shared/managers/error_badge_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final supportedScreenIds = [
-  InspectorScreen.id,
-  PerformanceScreen.id,
-  NetworkScreen.id,
-];
+final screensWithCountOnly = [PerformanceScreen.id, NetworkScreen.id];
 
 final allScreenIds = [
   InspectorScreen.id,
@@ -55,7 +51,7 @@ void main() {
       allScreenIds.forEach(errorBadgeManager.incrementBadgeCount);
 
       for (final id in allScreenIds) {
-        if (supportedScreenIds.contains(id)) {
+        if (screensWithCountOnly.contains(id)) {
           expect(errorBadgeManager.errorCountNotifier(id).value, equals(1));
         } else {
           expect(errorBadgeManager.errorCountNotifier(id).value, equals(0));
@@ -67,7 +63,7 @@ void main() {
       allScreenIds.forEach(errorBadgeManager.incrementBadgeCount);
 
       for (final id in allScreenIds) {
-        if (supportedScreenIds.contains(id)) {
+        if (screensWithCountOnly.contains(id)) {
           expect(errorBadgeManager.errorCountNotifier(id).value, equals(1));
         } else {
           expect(errorBadgeManager.errorCountNotifier(id).value, equals(0));
@@ -108,7 +104,6 @@ void main() {
         InspectorScreen.id,
         DevToolsError('An error', InspectorScreen.id),
       );
-      errorBadgeManager.incrementBadgeCount(InspectorScreen.id);
 
       expect(getActiveErrorCount(InspectorScreen.id), equals(1));
       expect(
