@@ -14,7 +14,6 @@ import 'dtd_tools_model.dart';
 /// information about service methods registered on DTD and provides
 /// functionality for calling them.
 class ServicesController extends FeatureController {
-  // ignore: dispose-class-fields, this class is not the owner of this object.
   late DartToolingDaemon dtd;
 
   @visibleForTesting

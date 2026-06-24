@@ -53,7 +53,7 @@ class _ObjectColumn extends ColumnData<ObjectStoreEntry>
     return VmServiceObjectLink(
       // TODO(srawlins): What type is `data` at runtime? If cast to `int`, no
       // tests fail, but that can't be right...
-      // ignore: avoid-dynamic
+      // ignore: avoid-dynamic, avoid-unnecessary-type-casts
       object: (data as dynamic).value,
       onTap: onTap,
     );

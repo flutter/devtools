@@ -116,10 +116,8 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
   static const _resizingDebounceDuration = Duration(milliseconds: 200);
 
   @visibleForTesting
-  // ignore: dispose-fields, this class is not the owner of this object.
   late final ScrollController verticalScrollController;
 
-  // ignore: dispose-fields, this class is not the owner of this object.
   late final ScrollController _horizontalScrollbarController;
 
   late ScrollController pinnedScrollController;

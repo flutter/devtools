@@ -13,7 +13,6 @@ import 'shared.dart';
 /// Manages business logic for the [EventsView] widget, which displays
 /// information about events sent and received over DTD event streams.
 class EventsController extends FeatureController {
-  // ignore: dispose-class-fields, this class is not the owner of this object.
   late DartToolingDaemon dtd;
 
   @visibleForTesting
