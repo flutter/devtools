@@ -43,7 +43,9 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed the Network tab search field becoming disabled after clearing all
+  requests, so the search query can now be edited at any time. -
+  [#9855](https://github.com/flutter/devtools/pull/9855)
 
 ## Logging updates
 
