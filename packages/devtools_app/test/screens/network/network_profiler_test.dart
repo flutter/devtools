@@ -52,6 +52,7 @@ void main() {
   setUpAll(() {
     setGlobal(OfflineDataController, OfflineDataController());
     socketProfile = loadSocketProfile();
+    httpProfile = loadHttpProfile();
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(
       DevToolsEnvironmentParameters,
