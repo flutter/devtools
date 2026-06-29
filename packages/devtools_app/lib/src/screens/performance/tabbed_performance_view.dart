@@ -13,7 +13,6 @@ import '../../shared/globals.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/tab.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
-import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
 import 'panes/rebuild_stats/rebuild_stats.dart';
 import 'panes/timeline_events/timeline_events_view.dart';
@@ -32,20 +31,18 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
   late PerformanceController controller;
 
-  late FlutterFramesController _flutterFramesController;
-
   FlutterFrame? _selectedFlutterFrame;
 
   @override
   void initState() {
     super.initState();
     controller = screenControllers.lookup<PerformanceController>();
-    _flutterFramesController = controller.flutterFramesController;
+    final flutterFramesController = controller.flutterFramesController;
 
-    _selectedFlutterFrame = _flutterFramesController.selectedFrame.value;
-    addAutoDisposeListener(_flutterFramesController.selectedFrame, () {
+    _selectedFlutterFrame = flutterFramesController.selectedFrame.value;
+    addAutoDisposeListener(flutterFramesController.selectedFrame, () {
       setState(() {
-        _selectedFlutterFrame = _flutterFramesController.selectedFrame.value;
+        _selectedFlutterFrame = flutterFramesController.selectedFrame.value;
       });
     });
   }

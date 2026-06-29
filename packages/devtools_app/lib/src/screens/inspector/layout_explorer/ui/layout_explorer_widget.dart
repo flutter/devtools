@@ -162,6 +162,9 @@ abstract class LayoutExplorerWidgetState<
     entranceController.dispose();
     changeController.dispose();
     _unregisterInspectorControllerService();
+    entranceCurve.dispose();
+    changeAnimation.dispose();
+    rateLimiter.dispose();
     super.dispose();
   }
 

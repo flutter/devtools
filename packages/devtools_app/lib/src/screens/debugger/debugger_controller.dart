@@ -89,6 +89,8 @@ class DebuggerController extends DevToolsScreenController
     _selectedBreakpoint.dispose();
     _exceptionPauseMode.dispose();
     _hasTruncatedFrames.dispose();
+    unawaited(_getStackOperation?.cancel());
+    _lastService = null;
     super.dispose();
   }
 

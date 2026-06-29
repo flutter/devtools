@@ -109,6 +109,12 @@ class _TableOfThingsState extends State<TableOfThings> {
   }
 
   @override
+  void dispose() {
+    things.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,

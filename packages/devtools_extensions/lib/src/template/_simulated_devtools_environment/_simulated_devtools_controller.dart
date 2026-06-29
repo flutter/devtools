@@ -48,6 +48,7 @@ class SimulatedDevToolsController extends DisposableController
   void dispose() {
     window.removeEventListener('message', _handleMessageListener);
     _handleMessageListener = null;
+    messageLogs.dispose();
     super.dispose();
   }
 

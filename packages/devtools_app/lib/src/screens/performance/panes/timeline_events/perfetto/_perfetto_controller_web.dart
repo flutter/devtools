@@ -191,6 +191,7 @@ class PerfettoControllerImpl extends PerfettoController {
     await perfettoPostEventStream.close();
     processor.dispose();
     _activeScrollToTimeRange.dispose();
+    activeTrace.dispose();
     super.dispose();
   }
 

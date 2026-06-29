@@ -175,6 +175,12 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
     });
   }
 
+  @override
+  void dispose() {
+    filterController.dispose();
+    super.dispose();
+  }
+
   void _updateFromController() {
     flags = (serviceConnection.vmFlagManager.flags.value?.flags ?? [])
         .map((flag) => _DialogFlag(flag))

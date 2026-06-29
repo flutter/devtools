@@ -48,6 +48,7 @@ class IsolateState {
       null,
       () => _isolateLoadCompleter = Completer()..complete(null),
     );
+    _isPaused.dispose();
   }
 
   void handleDebugEvent(String? kind) {

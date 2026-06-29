@@ -15,6 +15,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
+* Resolve several memory leaks. - [#9857](https://github.com/flutter/devtools/pull/9857)
 * Fixed a bug where highlighted search matches in tables were unreadable in dark
   mode because the highlight color had become fully opaque. -
   [#9863](https://github.com/flutter/devtools/pull/9863)

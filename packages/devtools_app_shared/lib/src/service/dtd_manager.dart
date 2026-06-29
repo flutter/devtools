@@ -276,6 +276,9 @@ class DTDManager {
     await disconnect();
     await _currentServiceRegistrationSubscription?.cancel();
     await _serviceRegistrationController.close();
+    _periodicConnectionCheck?.cancel();
+    _periodicConnectionCheck = null;
+    _connectionState.dispose();
     _connection.dispose();
   }
 

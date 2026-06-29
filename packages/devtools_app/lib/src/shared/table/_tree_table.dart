@@ -122,6 +122,8 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
 class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     with TickerProviderStateMixin, AutoDisposeMixin {
   FocusNode? get focusNode => _focusNode;
+
+  // ignore: dispose-fields, false positive. Disposed via autoDisposeFocusNode.
   late FocusNode _focusNode;
 
   TreeTableController<T> get tableController => _tableController!;
@@ -165,6 +167,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
 
   @override
   void dispose() {
+    _tableController?.dispose();
     _tableController = null;
     super.dispose();
   }

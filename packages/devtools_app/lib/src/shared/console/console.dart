@@ -90,6 +90,12 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
     _initHelper();
   }
 
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
   void _onScrollChanged() {
     // Detect if the user has scrolled up and stop scrolling to the bottom if
     // they have scrolled up.

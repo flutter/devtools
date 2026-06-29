@@ -200,7 +200,8 @@ class InspectorController extends DisposableController
   /// for now mainly to minimize risk.
   static const refreshFramesPerSecond = 5.0;
 
-  InspectorTreeController inspectorTree;
+  final InspectorTreeController inspectorTree;
+
   final FlutterTreeType treeType;
 
   late RateLimiter _refreshRateLimiter;
