@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:devtools_shared/src/server/file_system.dart' hide fileSystem;
 import 'package:file/memory.dart';
+import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 void main() {
@@ -25,31 +26,50 @@ void main() {
       // stay confined to the ~/.flutter-devtools/ directory.
 
       test('rejects absolute paths', () {
-        // path.join() discards the base directory when its second argument is
+        final root = path.style == .windows ? 'C:\\' : '/';
+        // `path.join()` discards the base directory when its second argument is
         // absolute, so an absolute path would otherwise escape the DevTools
         // directory and read an arbitrary file on disk.
-        expect(fs.devToolsFileFromPath('/etc/passwd'), isNull);
-        expect(fs.devToolsFileFromPath('/absolute/path/to/file.json'), isNull);
+        expect(
+          fs.devToolsFileFromPath(path.join('${root}etc', 'passwd')),
+          isNull,
+        );
+        expect(
+          fs.devToolsFileFromPath(
+            path.join('${root}absolute', 'path', 'to', 'file.json'),
+          ),
+          isNull,
+        );
       });
 
       test('rejects paths containing ".."', () {
         expect(fs.devToolsFileFromPath('..'), isNull);
-        expect(fs.devToolsFileFromPath('../../../etc/passwd'), isNull);
-        expect(fs.devToolsFileFromPath('subdir/../../escape.json'), isNull);
+        expect(
+          fs.devToolsFileFromPath(path.join('..', '..', '..', 'etc', 'passwd')),
+          isNull,
+        );
+        expect(
+          fs.devToolsFileFromPath(
+            path.join('subdir', '..', '..', 'escape.json'),
+          ),
+          isNull,
+        );
       });
     });
 
     test('returns file when path is valid and file exists', () {
-      final devToolsDir = FileSystemExtension.devToolsDir;
-      final testFile = fs.file('$devToolsDir/sub/file.json')
-        ..createSync(recursive: true);
+      final testFile = fs.file(
+        path.join(FileSystemExtension.devToolsDir, 'sub', 'file.json'),
+      )..createSync(recursive: true);
 
-      final file = fs.devToolsFileFromPath('sub/file.json')!;
+      final file = fs.devToolsFileFromPath(path.join('sub', 'file.json'))!;
       expect(file.path, testFile.path);
     });
 
     test('returns null when path is valid but file does not exist', () {
-      final file = fs.devToolsFileFromPath('sub/non_existent.json');
+      final file = fs.devToolsFileFromPath(
+        path.join('sub', 'non_existent.json'),
+      );
       expect(file, isNull);
     });
   });
@@ -70,17 +90,16 @@ void main() {
     });
 
     test('returns null if file is not json', () {
-      final devToolsDir = FileSystemExtension.devToolsDir;
-      fs.file('$devToolsDir/test.txt')
+      fs.file(path.join(FileSystemExtension.devToolsDir, 'test.txt'))
         ..createSync(recursive: true)
         ..writeAsStringSync('hello');
       expect(fs.devToolsFileAsJson('test.txt'), isNull);
     });
 
     test('returns json content with lastModifiedTime', () {
-      final devToolsDir = FileSystemExtension.devToolsDir;
-      final file = fs.file('$devToolsDir/test.json')
-        ..createSync(recursive: true);
+      final file = fs.file(
+        path.join(FileSystemExtension.devToolsDir, 'test.json'),
+      )..createSync(recursive: true);
       file.writeAsStringSync('{"key": "value"}');
 
       final jsonStr = fs.devToolsFileAsJson('test.json')!;

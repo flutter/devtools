@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:devtools_shared/src/server/file_system.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 void main() {
@@ -32,7 +33,7 @@ void main() {
       properties['key1'] = 'value1';
       properties['key2'] = 'value2';
 
-      final file = fs.file('${tempDir.path}/$storeName');
+      final file = fs.file(path.join(tempDir.path, storeName));
       expect(file.existsSync(), isTrue);
 
       var content = file.readAsStringSync();
