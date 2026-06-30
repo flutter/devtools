@@ -13,6 +13,11 @@ if [ "$PACKAGE" = "devtools_app_shared" ]; then
 
     pushd $DEVTOOLS_DIR/packages/devtools_app_shared
     echo `pwd`
+
+    echo "Checking formatting..."
+    # Here, we use the dart instance from the flutter SDK.
+    $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
+
     flutter test test/
     popd
 
@@ -20,6 +25,13 @@ elif [ "$PACKAGE" = "devtools_extensions" ]; then
 
     pushd $DEVTOOLS_DIR/packages/devtools_extensions
     echo `pwd`
+
+    echo "Checking formatting..."
+    # Here, we use the dart instance from the flutter SDK.
+    $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
+
+    # Note that this will _not_ test any tests in nested directories, if we add
+    # any.
     flutter test test/*_test.dart
     # Skip this on Windows because `flutter test --platform chrome`
     # appears to hang there.
@@ -33,6 +45,11 @@ elif [ "$PACKAGE" = "devtools_shared" ]; then
 
     pushd $DEVTOOLS_DIR/packages/devtools_shared
     echo `pwd`
+
+    echo "Checking formatting..."
+    # Here, we use the dart instance from the flutter SDK.
+    $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
+
     dart test test/
     popd
 
