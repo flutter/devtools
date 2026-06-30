@@ -19,6 +19,10 @@ To learn more about DevTools, check out the
 * Fixed a bug where highlighted search matches in tables were unreadable in dark
   mode because the highlight color had become fully opaque. -
   [#9863](https://github.com/flutter/devtools/pull/9863)
+* Rejected absolute paths in DevTools server file reads so they stay within
+  the `~/.flutter-devtools/` directory and cannot resolve to arbitrary files
+  on disk. -
+  [#9844](https://github.com/flutter/devtools/pull/9844)
 
 ## Inspector updates
 
