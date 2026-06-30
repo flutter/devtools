@@ -21,10 +21,10 @@ enum DevToolsStoreKeys {
 /// Provides access to the local DevTools store (~/.flutter-devtools/.devtools).
 class DevToolsUsage {
   DevToolsUsage() {
-    LocalFileSystem.maybeMoveLegacyDevToolsStore();
+    fileSystem.maybeMoveLegacyDevToolsStore();
     properties = IOPersistentProperties(
       storeName,
-      documentDirPath: LocalFileSystem.devToolsDir(),
+      documentDirPath: FileSystemExtension.devToolsDir,
     );
     _removeLegacyKeys();
   }

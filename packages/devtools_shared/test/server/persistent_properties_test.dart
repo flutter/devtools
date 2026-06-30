@@ -3,36 +3,36 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:devtools_shared/src/server/file_system.dart';
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('IOPersistentProperties', () {
+    late MemoryFileSystem fs;
     late Directory tempDir;
     late IOPersistentProperties properties;
     const storeName = 'test_store';
 
     setUp(() {
-      tempDir = Directory.systemTemp.createTempSync(
+      fs = MemoryFileSystem();
+      tempDir = fs.systemTempDirectory.createTempSync(
         'persistent_properties_test',
       );
       properties = IOPersistentProperties(
         storeName,
         documentDirPath: tempDir.path,
+        fs: fs,
       );
-    });
-
-    tearDown(() {
-      tempDir.deleteSync(recursive: true);
     });
 
     test('remove persists changes to disk', () {
       properties['key1'] = 'value1';
       properties['key2'] = 'value2';
 
-      final file = File('${tempDir.path}/$storeName');
+      final file = fs.file('${tempDir.path}/$storeName');
       expect(file.existsSync(), isTrue);
 
       var content = file.readAsStringSync();

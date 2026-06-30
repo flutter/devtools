@@ -3,9 +3,31 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
-# 13.0.2-wip
+# 14.0.0-wip
 * The minimum Dart SDK version is bumped to 3.11.0.
 * The minimum Flutter SDK version is bumped to 3.41.0.
+* **Braking changes**: `LocalFileSystem`, an extension which provided some handy
+  helpers, has been refactored into an extension on the `file` package's
+  `FileSystem` abstraction. In detail:
+  * `fileSystem` is a new top-level constant which represents the local (real)
+    file system.
+  * `LocalFileSystem.devToolsDir()` is now a static getter,
+    `FileSystemExtension.devToolsDir`.
+  * `LocalFileSystem.maybeMoveLegacyDevToolsStore()` is now an instance method,
+    `FileSystemExtension.maybeMoveLegacyDevToolsStore()`.
+  * `LocalFileSystem.devToolsStoreLocation()` is now a static getter,
+    `FileSystemExtension.devToolsStoreLocation`.
+  * `LocalFileSystem.ensureDevToolsDirectory()` is now private.
+  * `LocalFileSystem.devToolsFileFromPath()` is now an instance method,
+    `FileSystemExtension.devToolsFileFromPath()`.
+  * `LocalFileSystem.devToolsFileAsJson()` is now an instance method,
+    `FileSystemExtension.devToolsFileAsJson()`.
+  * `LocalFileSystem.flutterStoreExists()` is now an instance getter,
+    `FileSystemExtension.flutterStoreExists`.
+  * `IOPersistentProperties.new` accepts a new optional `FileSystem fs`
+    argument.
+* Update `LocalFileSystem` and `IOPersistentProperties` to use `package:file`
+  instead of `dart:io` to allow mocking the file system.
 
 # 13.0.1
 * Handle null values for `FlutterStore.flutterClientId`.

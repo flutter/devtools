@@ -71,9 +71,7 @@ class ServerApi {
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAClientId:
         return _encodeResponse(
-          LocalFileSystem.flutterStoreExists()
-              ? _flutterStore.flutterClientId
-              : '',
+          fileSystem.flutterStoreExists ? _flutterStore.flutterClientId : '',
           api: api,
         );
 
@@ -222,16 +220,16 @@ class ServerApi {
         : null;
   }
 
-  /// Accessing DevTools store file e.g., ~/.flutter-devtools/.devtools
+  /// Accessing DevTools store file e.g., `~/.flutter-devtools/.devtools`.
   static final _devToolsStore = DevToolsUsage();
 
-  /// Accessing Flutter store file e.g., ~/.flutter
+  /// Accessing Flutter store file e.g., `~/.flutter`.
   static final _flutterStore = FlutterStore();
 
   static DevToolsUsage get devToolsPreferences => _devToolsStore;
 
   /// Provides read and write access to DevTools options files
-  /// (e.g. path/to/app/root/devtools_options.yaml).
+  /// (e.g. `path/to/app/root/devtools_options.yaml`).
   static final _devToolsOptions = DevToolsOptions();
 
   /// Logs a page view in the DevTools server.
