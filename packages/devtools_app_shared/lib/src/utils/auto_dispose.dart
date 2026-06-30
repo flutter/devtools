@@ -191,8 +191,9 @@ mixin DisposerMixin {
     if (listener == null) return;
 
     assert(_listenables.length == _listeners.length);
-    final foundIndex =
-        _listeners.indexWhere((currentListener) => currentListener == listener);
+    final foundIndex = _listeners.indexWhere(
+      (currentListener) => currentListener == listener,
+    );
     if (foundIndex == -1) return;
     _listenables[foundIndex].removeListener(_listeners[foundIndex]);
     _listenables.removeAt(foundIndex);
@@ -350,9 +351,7 @@ extension _AutoDisposeListExtension<T> on List<T> {
   ///
   /// If any index in [indices] is out of range, an exception will be thrown.
   void removeAllExceptIndices(List<int> indices) {
-    final tmp = [
-      for (final index in indices) this[index],
-    ];
+    final tmp = [for (final index in indices) this[index]];
     clear();
     addAll(tmp);
   }

@@ -88,8 +88,8 @@ class DevToolsUsage {
 
   /// The active survey in [properties], as a [_ActiveSurveyJson].
   _ActiveSurveyJson get _activeSurveyFromProperties => _ActiveSurveyJson(
-        (properties[activeSurvey!] as Map).cast<String, Object?>(),
-      );
+    (properties[activeSurvey!] as Map).cast<String, Object?>(),
+  );
 
   int get surveyShownCount {
     assert(activeSurvey != null);
@@ -104,10 +104,7 @@ class DevToolsUsage {
     assert(activeSurvey != null);
     surveyShownCount; // Ensure surveyShownCount has been initialized.
     final prop = _activeSurveyFromProperties;
-    rewriteActiveSurvey(
-      prop.surveyActionTaken,
-      prop.surveyShownCount! + 1,
-    );
+    rewriteActiveSurvey(prop.surveyActionTaken, prop.surveyShownCount! + 1);
   }
 
   bool get surveyActionTaken {
@@ -115,10 +112,7 @@ class DevToolsUsage {
   }
 
   set surveyActionTaken(bool value) {
-    rewriteActiveSurvey(
-      value,
-      _activeSurveyFromProperties.surveyShownCount!,
-    );
+    rewriteActiveSurvey(value, _activeSurveyFromProperties.surveyShownCount!);
   }
 
   String get lastReleaseNotesVersion {

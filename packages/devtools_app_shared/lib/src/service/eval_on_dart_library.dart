@@ -105,8 +105,9 @@ class EvalOnDartLibrary extends DisposableController
     }
 
     try {
-      final isolate =
-          await serviceManager.isolateManager.isolateState(isolateRef).isolate;
+      final isolate = await serviceManager.isolateManager
+          .isolateState(isolateRef)
+          .isolate;
       if (_currentRequestId != requestId) {
         // The initialize request is obsolete.
         return;
@@ -150,11 +151,7 @@ class EvalOnDartLibrary extends DisposableController
     }
     return await addRequest<InstanceRef?>(
       isAlive,
-      () => _eval(
-        expression,
-        scope: scope,
-        shouldLogError: shouldLogError,
-      ),
+      () => _eval(expression, scope: scope, shouldLogError: shouldLogError),
     );
   }
 
@@ -626,12 +623,14 @@ class EvalOnDartLibrary extends DisposableController
     int? count,
   }) {
     return addRequest<T>(isAlive, () async {
-      final T value = await service.getObject(
-        _isolateRef!.id!,
-        instance.id!,
-        offset: offset,
-        count: count,
-      ) as T;
+      final T value =
+          await service.getObject(
+                _isolateRef!.id!,
+                instance.id!,
+                offset: offset,
+                count: count,
+              )
+              as T;
       return value;
     });
   }

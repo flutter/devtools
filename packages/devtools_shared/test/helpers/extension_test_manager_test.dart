@@ -51,24 +51,18 @@ void main() {
         staticExtension1Package.relativePathFromExtensions,
         staticExtension1Package.name,
       );
-      expect(
-        staticExtension1Package.pubspecContent,
-        '''
+      expect(staticExtension1Package.pubspecContent, '''
 name: static_extension_1
 environment:
   sdk: ">=3.4.0-282.1.beta <4.0.0"
-''',
-      );
-      expect(
-        staticExtension1Package.configYamlContent,
-        '''
+''');
+      expect(staticExtension1Package.configYamlContent, '''
 name: static_extension_1
 issueTracker: https://www.google.com/
 version: 1.0.0
 materialIconCodePoint: 58634
 requiresConnection: false
-''',
-      );
+''');
     });
 
     test('$staticExtension2Package', () {
@@ -83,24 +77,18 @@ requiresConnection: false
         staticExtension2Package.relativePathFromExtensions,
         staticExtension2Package.name,
       );
-      expect(
-        staticExtension2Package.pubspecContent,
-        '''
+      expect(staticExtension2Package.pubspecContent, '''
 name: static_extension_2
 environment:
   sdk: ">=3.4.0-282.1.beta <4.0.0"
-''',
-      );
-      expect(
-        staticExtension2Package.configYamlContent,
-        '''
+''');
+      expect(staticExtension2Package.configYamlContent, '''
 name: static_extension_2
 issueTracker: https://www.google.com/
 version: 2.0.0
 materialIconCodePoint: 58634
 requiresConnection: false
-''',
-      );
+''');
     });
 
     test('$newerStaticExtension1Package', () {
@@ -118,24 +106,18 @@ requiresConnection: false
         newerStaticExtension1Package.relativePathFromExtensions,
         p.join('newer', 'static_extension_1'),
       );
-      expect(
-        newerStaticExtension1Package.pubspecContent,
-        '''
+      expect(newerStaticExtension1Package.pubspecContent, '''
 name: static_extension_1
 environment:
   sdk: ">=3.4.0-282.1.beta <4.0.0"
-''',
-      );
-      expect(
-        newerStaticExtension1Package.configYamlContent,
-        '''
+''');
+      expect(newerStaticExtension1Package.configYamlContent, '''
 name: static_extension_1
 issueTracker: https://www.google.com/
 version: 2.0.0
 materialIconCodePoint: 58634
 requiresConnection: false
-''',
-      );
+''');
     });
 
     test('$badExtensionPackage', () {
@@ -150,24 +132,18 @@ requiresConnection: false
         badExtensionPackage.relativePathFromExtensions,
         badExtensionPackage.name.toLowerCase(),
       );
-      expect(
-        badExtensionPackage.pubspecContent,
-        '''
+      expect(badExtensionPackage.pubspecContent, '''
 name: bad_extension
 environment:
   sdk: ">=3.4.0-282.1.beta <4.0.0"
-''',
-      );
-      expect(
-        badExtensionPackage.configYamlContent,
-        '''
+''');
+      expect(badExtensionPackage.configYamlContent, '''
 name: BAD_EXTENSION
 issueTracker: https://www.google.com/
 version: 1.0.0
 materialIconCodePoint: 58634
 
-''',
-      );
+''');
     });
   });
 
@@ -175,9 +151,7 @@ materialIconCodePoint: 58634
     test('$myAppPackage', () {
       expect(myAppPackage.name, 'my_app');
       expect(myAppPackage.dependencies.length, 3);
-      expect(
-        myAppPackage.pubspecContent,
-        '''
+      expect(myAppPackage.pubspecContent, '''
 name: my_app
 environment:
   sdk: "^3.5.0"
@@ -187,16 +161,13 @@ dependencies:
   static_extension_1:
     path: ../../extensions/static_extension_1
 
-''',
-      );
+''');
     });
 
     test('$myAppPackageWithBadExtension', () {
       expect(myAppPackageWithBadExtension.name, 'my_app');
       expect(myAppPackageWithBadExtension.dependencies.length, 4);
-      expect(
-        myAppPackageWithBadExtension.pubspecContent,
-        '''
+      expect(myAppPackageWithBadExtension.pubspecContent, '''
 name: my_app
 environment:
   sdk: "^3.5.0"
@@ -208,16 +179,13 @@ dependencies:
   bad_extension:
     path: ../../extensions/bad_extension
 
-''',
-      );
+''');
     });
 
     test('$otherRoot1Package', () {
       expect(otherRoot1Package.name, 'other_root_1');
       expect(otherRoot1Package.dependencies.length, 2);
-      expect(
-        otherRoot1Package.pubspecContent,
-        '''
+      expect(otherRoot1Package.pubspecContent, '''
 name: other_root_1
 environment:
   sdk: "^3.5.0"
@@ -227,16 +195,13 @@ dependencies:
   static_extension_2:
     path: ../../extensions/static_extension_2
 
-''',
-      );
+''');
     });
 
     test('$otherRoot2Package', () {
       expect(otherRoot2Package.name, 'other_root_2');
       expect(otherRoot2Package.dependencies.length, 1);
-      expect(
-        otherRoot2Package.pubspecContent,
-        '''
+      expect(otherRoot2Package.pubspecContent, '''
 name: other_root_2
 environment:
   sdk: "^3.5.0"
@@ -244,8 +209,7 @@ dependencies:
   static_extension_1:
     path: ../../extensions/newer/static_extension_1
 
-''',
-      );
+''');
     });
 
     test('createTestPackageFrom when excluding dependencies', () {
@@ -253,58 +217,46 @@ dependencies:
         myAppPackage,
         includeDependenciesWithExtensions: false,
       );
-      expect(
-        pkg.pubspecContent,
-        '''
+      expect(pkg.pubspecContent, '''
 name: my_app
 environment:
   sdk: "^3.5.0"
 dependencies:
 
-''',
-      );
+''');
       pkg = createTestPackageFrom(
         myAppPackageWithBadExtension,
         includeDependenciesWithExtensions: false,
       );
-      expect(
-        pkg.pubspecContent,
-        '''
+      expect(pkg.pubspecContent, '''
 name: my_app
 environment:
   sdk: "^3.5.0"
 dependencies:
 
-''',
-      );
+''');
       pkg = createTestPackageFrom(
         otherRoot1Package,
         includeDependenciesWithExtensions: false,
       );
-      expect(
-        pkg.pubspecContent,
-        '''
+      expect(pkg.pubspecContent, '''
 name: other_root_1
 environment:
   sdk: "^3.5.0"
 dependencies:
 
-''',
-      );
+''');
       pkg = createTestPackageFrom(
         otherRoot2Package,
         includeDependenciesWithExtensions: false,
       );
-      expect(
-        pkg.pubspecContent,
-        '''
+      expect(pkg.pubspecContent, '''
 name: other_root_2
 environment:
   sdk: "^3.5.0"
 dependencies:
 
-''',
-      );
+''');
     });
   });
 }

@@ -55,14 +55,12 @@ class VmServiceHelp extends StatelessWidget {
           RichText(
             text: TextSpan(
               style: theme.regularTextStyle,
-              text: '1. Run a Dart or Flutter application. If you also need to '
+              text:
+                  '1. Run a Dart or Flutter application. If you also need to '
                   'connect your extension to the Dart Tooling Daemon, run your '
                   'app with the ',
               children: [
-                TextSpan(
-                  text: '--print-dtd',
-                  style: theme.boldTextStyle,
-                ),
+                TextSpan(text: '--print-dtd', style: theme.boldTextStyle),
                 const TextSpan(text: ' flag.'),
               ],
             ),
@@ -74,12 +72,14 @@ class VmServiceHelp extends StatelessWidget {
               text: '2. This will output text to the command line:',
               children: [
                 TextSpan(
-                  text: ' "A Dart VM Service is available at: '
+                  text:
+                      ' "A Dart VM Service is available at: '
                       'http://127.0.0.1:53985/6RVz1q0e9ok=". ',
                   style: theme.boldTextStyle,
                 ),
                 const TextSpan(
-                  text: 'Copy the VM Service URI and paste it into the "Dart '
+                  text:
+                      'Copy the VM Service URI and paste it into the "Dart '
                       'VM Service Connection" text field to connect.',
                 ),
               ],

@@ -17,52 +17,30 @@ void main() {
   group('AreaPaneHeader', () {
     const titleText = 'The title';
 
-    testWidgets(
-      'actions do not take up space when not present',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrap(
-            const AreaPaneHeader(
-              title: Text(titleText),
-            ),
-          ),
-        );
+    testWidgets('actions do not take up space when not present', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(const AreaPaneHeader(title: Text(titleText))),
+      );
 
-        final row = tester.widget(find.byType(Row)) as Row;
-        expect(
-          row.children.length,
-          equals(1),
-        );
-        expect(
-          find.text(titleText),
-          findsOneWidget,
-        );
-      },
-    );
+      final row = tester.widget(find.byType(Row)) as Row;
+      expect(row.children.length, equals(1));
+      expect(find.text(titleText), findsOneWidget);
+    });
 
     testWidgets('shows actions', (WidgetTester tester) async {
       const actionText = 'The Action Text';
       const action = Text(actionText);
 
       await tester.pumpWidget(
-        wrap(
-          const AreaPaneHeader(
-            title: Text(titleText),
-            actions: [action],
-          ),
-        ),
+        wrap(const AreaPaneHeader(title: Text(titleText), actions: [action])),
       );
 
       final row = tester.widget(find.byType(Row)) as Row;
-      expect(
-        row.children.length,
-        equals(2),
-      );
+      expect(row.children.length, equals(2));
       expect(find.text(actionText), findsOneWidget);
-      expect(
-        find.text(titleText),
-        findsOneWidget,
-      );
+      expect(find.text(titleText), findsOneWidget);
     });
   });
 }

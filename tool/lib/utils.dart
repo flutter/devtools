@@ -257,8 +257,8 @@ Future<String> findRemote(
   try {
     upstreamRemoteResult = remoteRegexpResults.firstWhere(
       (element) =>
-      // ignore: prefer_interpolation_to_compose_strings
-      RegExp(r'' + remoteId + '\$').hasMatch(element.namedGroup('path')!),
+          // ignore: prefer_interpolation_to_compose_strings
+          RegExp(r'' + remoteId + '\$').hasMatch(element.namedGroup('path')!),
     );
   } on StateError {
     throw StateError(

@@ -78,8 +78,9 @@ Future<String> packageRootFromFileUriString(
 
   // If we do not have access to DTD or if we failed to detect the package root
   // by walking the directory structure, default to using a regexp heuristic.
-  final directoryRegExp =
-      RegExp(r'\/(lib|bin|integration_test|test|benchmark|example)\/.+\.dart');
+  final directoryRegExp = RegExp(
+    r'\/(lib|bin|integration_test|test|benchmark|example)\/.+\.dart',
+  );
   final directoryIndex = fileUriString.lastIndexOf(directoryRegExp);
   if (directoryIndex != -1) {
     fileUriString = fileUriString.substring(0, directoryIndex);

@@ -22,8 +22,9 @@ IdeTheme getIdeTheme() {
   // If the environment has provided a background color, set it immediately
   // to avoid a white page until the first Flutter frame is rendered.
   if (overrides.backgroundColor != null) {
-    document.body!.style.backgroundColor =
-        toCssHexColor(overrides.backgroundColor!);
+    document.body!.style.backgroundColor = toCssHexColor(
+      overrides.backgroundColor!,
+    );
   }
 
   return overrides;

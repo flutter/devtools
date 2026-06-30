@@ -130,7 +130,8 @@ extension VmServiceHandler on Never {
         if (root == null) {
           return (
             success: false,
-            message: 'No root library found for main isolate '
+            message:
+                'No root library found for main isolate '
                 '($vmServiceUriAsString).',
             uri: null,
           );
@@ -168,8 +169,8 @@ extension VmServiceHandler on Never {
     required bool connected,
     required ServerApi api,
   }) async {
-    final currentRoots =
-        (await dtd.getIDEWorkspaceRoots()).ideWorkspaceRoots.toSet();
+    final currentRoots = (await dtd.getIDEWorkspaceRoots()).ideWorkspaceRoots
+        .toSet();
     // Add or remove [rootFromVmService] depending on whether this was a
     // connect or disconnect notification.
     final newRoots = connected
@@ -195,10 +196,9 @@ extension on VmService {
     final rootLib = mainIsolate.rootLib?.uri;
     if (rootLib == null) return null;
 
-    final fileUriAsString =
-        (await lookupResolvedPackageUris(mainIsolate.id!, [rootLib]))
-            .uris
-            ?.first;
+    final fileUriAsString = (await lookupResolvedPackageUris(mainIsolate.id!, [
+      rootLib,
+    ])).uris?.first;
     return fileUriAsString;
   }
 
@@ -218,8 +218,9 @@ extension on VmService {
 
     Isolate? mainIsolate;
     for (final isolate in isolateCandidates) {
-      final isFlutterIsolate = (isolate.isolate.extensionRPCs ?? [])
-          .any((ext) => ext.startsWith('ext.flutter'));
+      final isFlutterIsolate = (isolate.isolate.extensionRPCs ?? []).any(
+        (ext) => ext.startsWith('ext.flutter'),
+      );
       if (isFlutterIsolate) {
         mainIsolate = isolate.isolate;
         break;
@@ -237,8 +238,4 @@ extension on VmService {
 }
 
 @visibleForTesting
-typedef DetectRootPackageResponse = ({
-  bool success,
-  String? message,
-  Uri? uri,
-});
+typedef DetectRootPackageResponse = ({bool success, String? message, Uri? uri});

@@ -21,15 +21,9 @@ Widget wrap(Widget widget) {
     theme: themeFor(
       isDarkTheme: false,
       ideTheme: IdeTheme(),
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: lightColorScheme,
-      ),
+      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
     ),
-    home: Directionality(
-      textDirection: TextDirection.ltr,
-      child: widget,
-    ),
+    home: Directionality(textDirection: TextDirection.ltr, child: widget),
   );
 }
 
@@ -40,15 +34,11 @@ void testWidgetsWithWindowSize(
   WidgetTesterCallback test, {
   bool skip = false,
 }) {
-  testWidgets(
-    name,
-    (WidgetTester tester) async {
-      await _setWindowSize(tester, windowSize);
-      await test(tester);
-      await _resetWindowSize(tester);
-    },
-    skip: skip,
-  );
+  testWidgets(name, (WidgetTester tester) async {
+    await _setWindowSize(tester, windowSize);
+    await test(tester);
+    await _resetWindowSize(tester);
+  }, skip: skip);
 }
 
 Future<void> _setWindowSize(WidgetTester tester, Size windowSize) async {
