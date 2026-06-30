@@ -6,7 +6,7 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 # 14.0.0-wip
 * The minimum Dart SDK version is bumped to 3.11.0.
 * The minimum Flutter SDK version is bumped to 3.41.0.
-* **Braking changes**: `LocalFileSystem`, an extension which provided some handy
+* **Breaking changes**: `LocalFileSystem`, an extension which provided some handy
   helpers, has been refactored into an extension on the `file` package's
   `FileSystem` abstraction. In detail:
   * `fileSystem` is a new top-level constant which represents the local (real)
