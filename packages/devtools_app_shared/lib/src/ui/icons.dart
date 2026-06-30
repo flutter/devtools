@@ -9,13 +9,17 @@ import 'theme/theme.dart';
 /// A widget that renders either an [icon] from a font glyph or an [iconAsset]
 /// from the app bundle.
 final class DevToolsIcon extends StatelessWidget {
-  const DevToolsIcon(
-      {super.key, this.icon, this.iconAsset, this.color, double? size})
-      : assert(
-          (icon == null) != (iconAsset == null),
-          'Exactly one of icon and iconAsset must be specified.',
-        ),
-        size = size ?? defaultIconSize;
+  const DevToolsIcon({
+    super.key,
+    this.icon,
+    this.iconAsset,
+    this.color,
+    double? size,
+  }) : assert(
+         (icon == null) != (iconAsset == null),
+         'Exactly one of icon and iconAsset must be specified.',
+       ),
+       size = size ?? defaultIconSize;
 
   /// The icon to use for this screen's tab.
   ///
@@ -53,8 +57,8 @@ final class AssetImageIcon extends StatelessWidget {
     this.color,
     double? height,
     double? width,
-  })  : _width = width,
-        _height = height;
+  }) : _width = width,
+       _height = height;
 
   final String asset;
   final Color? color;

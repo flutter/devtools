@@ -59,15 +59,14 @@ class ReleaseHelperCommand extends Command {
         if (debug) {
           // Temporarily commit any local changes to this script to the current
           // branch. This commit will be reset at the end of the script.
-          final pathToReleaseHelperScript =
-              Uri.parse(
-                p.posix.join(
-                  DevToolsRepo.getInstance().toolDirectoryPath,
-                  'lib',
-                  'commands',
-                  'release_helper.dart',
-                ),
-              ).toFilePath();
+          final pathToReleaseHelperScript = Uri.parse(
+            p.posix.join(
+              DevToolsRepo.getInstance().toolDirectoryPath,
+              'lib',
+              'commands',
+              'release_helper.dart',
+            ),
+          ).toFilePath();
           await processManager.runProcess(
             CliCommand.git(['add', pathToReleaseHelperScript]),
           );

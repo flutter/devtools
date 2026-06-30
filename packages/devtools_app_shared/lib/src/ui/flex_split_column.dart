@@ -32,17 +32,17 @@ final class FlexSplitColumn extends StatelessWidget {
     required List<Widget> children,
     required List<double> initialFractions,
     required List<double> minSizes,
-  })  : assert(children.length >= 2),
-        assert(initialFractions.length >= 2),
-        assert(children.length == initialFractions.length),
-        assert(minSizes.length == children.length),
-        _children = buildChildrenWithFirstHeader(children, headers),
-        _initialFractions = modifyInitialFractionsToIncludeFirstHeader(
-          initialFractions,
-          headers,
-          totalHeight,
-        ),
-        _minSizes = modifyMinSizesToIncludeFirstHeader(minSizes, headers);
+  }) : assert(children.length >= 2),
+       assert(initialFractions.length >= 2),
+       assert(children.length == initialFractions.length),
+       assert(minSizes.length == children.length),
+       _children = buildChildrenWithFirstHeader(children, headers),
+       _initialFractions = modifyInitialFractionsToIncludeFirstHeader(
+         initialFractions,
+         headers,
+         totalHeight,
+       ),
+       _minSizes = modifyMinSizesToIncludeFirstHeader(minSizes, headers);
 
   /// The headers that will be laid out above each corresponding child in
   /// `children`.

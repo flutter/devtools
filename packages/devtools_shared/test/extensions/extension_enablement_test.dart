@@ -41,14 +41,11 @@ void main() {
         extensionName: 'foo',
       );
       final file = optionsFileFromTmp();
-      expect(
-        file.readAsStringSync(),
-        '''
+      expect(file.readAsStringSync(), '''
 description: This file stores settings for Dart & Flutter DevTools.
 documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
 extensions:
-''',
-      );
+''');
     });
 
     test('can write to options file', () {
@@ -58,14 +55,11 @@ extensions:
         enable: true,
       );
       final file = optionsFileFromTmp();
-      expect(
-        file.readAsStringSync(),
-        '''
+      expect(file.readAsStringSync(), '''
 description: This file stores settings for Dart & Flutter DevTools.
 documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
 extensions:
-  - foo: true''',
-      );
+  - foo: true''');
     });
 
     test('can read from options file', () {
@@ -80,15 +74,12 @@ extensions:
         enable: false,
       );
       final file = optionsFileFromTmp();
-      expect(
-        file.readAsStringSync(),
-        '''
+      expect(file.readAsStringSync(), '''
 description: This file stores settings for Dart & Flutter DevTools.
 documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
 extensions:
   - foo: true
-  - bar: false''',
-      );
+  - bar: false''');
 
       expect(
         options.lookupExtensionEnabledState(

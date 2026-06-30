@@ -8,11 +8,8 @@ typedef DTDConnectionInfo = ({String? uri, String? secret});
 
 /// Information about a Dart Tooling Daemon instance.
 class DtdInfo {
-  DtdInfo(
-    this.localUri, {
-    Uri? exposedUri,
-    this.secret,
-  }) : exposedUri = exposedUri ?? localUri;
+  DtdInfo(this.localUri, {Uri? exposedUri, this.secret})
+    : exposedUri = exposedUri ?? localUri;
 
   /// The URI for connecting to DTD from the backend.
   ///

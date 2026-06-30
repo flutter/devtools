@@ -113,144 +113,120 @@ void main() {
       }
 
       test('name', () {
-        expect(
-          () {
-            DevToolsExtensionConfig.parse({
-              'issueTracker': 'www.google.com',
-              'version': '1.0.0',
-              'materialIconCodePoint': 0xf012,
-              'extensionAssetsPath': '/absolute/path/to/foo/extension',
-              'devtoolsOptionsUri':
-                  'file:///path/to/package/devtools_options.yaml',
-              'isPubliclyHosted': 'false',
-              'detectedFromStaticContext': 'false',
-            });
-          },
-          throwsMissingRequiredFieldsError(),
-        );
+        expect(() {
+          DevToolsExtensionConfig.parse({
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsPath': '/absolute/path/to/foo/extension',
+            'devtoolsOptionsUri':
+                'file:///path/to/package/devtools_options.yaml',
+            'isPubliclyHosted': 'false',
+            'detectedFromStaticContext': 'false',
+          });
+        }, throwsMissingRequiredFieldsError());
       });
 
       test('issueTracker', () {
-        expect(
-          () {
-            DevToolsExtensionConfig.parse({
-              'name': 'foo',
-              'version': '1.0.0',
-              'materialIconCodePoint': 0xf012,
-              'extensionAssetsPath': '/absolute/path/to/foo/extension',
-              'devtoolsOptionsUri':
-                  'file:///path/to/package/devtools_options.yaml',
-              'isPubliclyHosted': 'false',
-              'detectedFromStaticContext': 'false',
-            });
-          },
-          throwsMissingRequiredFieldsError(),
-        );
+        expect(() {
+          DevToolsExtensionConfig.parse({
+            'name': 'foo',
+            'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsPath': '/absolute/path/to/foo/extension',
+            'devtoolsOptionsUri':
+                'file:///path/to/package/devtools_options.yaml',
+            'isPubliclyHosted': 'false',
+            'detectedFromStaticContext': 'false',
+          });
+        }, throwsMissingRequiredFieldsError());
       });
 
       test('version', () {
-        expect(
-          () {
-            DevToolsExtensionConfig.parse({
-              'name': 'foo',
-              'issueTracker': 'www.google.com',
-              'materialIconCodePoint': 0xf012,
-              'extensionAssetsPath': '/absolute/path/to/foo/extension',
-              'devtoolsOptionsUri':
-                  'file:///path/to/package/devtools_options.yaml',
-              'isPubliclyHosted': 'false',
-              'detectedFromStaticContext': 'false',
-            });
-          },
-          throwsMissingRequiredFieldsError(),
-        );
+        expect(() {
+          DevToolsExtensionConfig.parse({
+            'name': 'foo',
+            'issueTracker': 'www.google.com',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsPath': '/absolute/path/to/foo/extension',
+            'devtoolsOptionsUri':
+                'file:///path/to/package/devtools_options.yaml',
+            'isPubliclyHosted': 'false',
+            'detectedFromStaticContext': 'false',
+          });
+        }, throwsMissingRequiredFieldsError());
       });
 
       test('materialIconCodePoint', () {
-        expect(
-          () {
-            DevToolsExtensionConfig.parse({
-              'name': 'foo',
-              'issueTracker': 'www.google.com',
-              'version': '1.0.0',
-              'extensionAssetsPath': '/absolute/path/to/foo/extension',
-              'devtoolsOptionsUri':
-                  'file:///path/to/package/devtools_options.yaml',
-              'isPubliclyHosted': 'false',
-              'detectedFromStaticContext': 'false',
-            });
-          },
-          throwsMissingRequiredFieldsError(),
-        );
+        expect(() {
+          DevToolsExtensionConfig.parse({
+            'name': 'foo',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'extensionAssetsPath': '/absolute/path/to/foo/extension',
+            'devtoolsOptionsUri':
+                'file:///path/to/package/devtools_options.yaml',
+            'isPubliclyHosted': 'false',
+            'detectedFromStaticContext': 'false',
+          });
+        }, throwsMissingRequiredFieldsError());
       });
       test('extensionAssetsPath', () {
-        expect(
-          () {
-            DevToolsExtensionConfig.parse({
-              'name': 'foo',
-              'issueTracker': 'www.google.com',
-              'version': '1.0.0',
-              'materialIconCodePoint': 0xf012,
-              'devtoolsOptionsUri':
-                  'file:///path/to/package/devtools_options.yaml',
-              'isPubliclyHosted': 'false',
-              'detectedFromStaticContext': 'false',
-            });
-          },
-          throwsMissingGeneratedKeysError(),
-        );
+        expect(() {
+          DevToolsExtensionConfig.parse({
+            'name': 'foo',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'devtoolsOptionsUri':
+                'file:///path/to/package/devtools_options.yaml',
+            'isPubliclyHosted': 'false',
+            'detectedFromStaticContext': 'false',
+          });
+        }, throwsMissingGeneratedKeysError());
       });
 
       test('devtoolsOptionsUri', () {
-        expect(
-          () {
-            DevToolsExtensionConfig.parse({
-              'name': 'foo',
-              'issueTracker': 'www.google.com',
-              'version': '1.0.0',
-              'materialIconCodePoint': 0xf012,
-              'extensionAssetsPath': '/absolute/path/to/foo/extension',
-              'isPubliclyHosted': 'false',
-              'detectedFromStaticContext': 'false',
-            });
-          },
-          throwsMissingGeneratedKeysError(),
-        );
+        expect(() {
+          DevToolsExtensionConfig.parse({
+            'name': 'foo',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsPath': '/absolute/path/to/foo/extension',
+            'isPubliclyHosted': 'false',
+            'detectedFromStaticContext': 'false',
+          });
+        }, throwsMissingGeneratedKeysError());
       });
 
       test('isPubliclyHosted', () {
-        expect(
-          () {
-            DevToolsExtensionConfig.parse({
-              'name': 'foo',
-              'issueTracker': 'www.google.com',
-              'version': '1.0.0',
-              'materialIconCodePoint': 0xf012,
-              'extensionAssetsPath': '/absolute/path/to/foo/extension',
-              'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
-              'detectedFromStaticContext': 'false',
-            });
-          },
-          throwsMissingGeneratedKeysError(),
-        );
+        expect(() {
+          DevToolsExtensionConfig.parse({
+            'name': 'foo',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsPath': '/absolute/path/to/foo/extension',
+            'devtoolsOptionsUri': 'path/to/package/devtools_options.yaml',
+            'detectedFromStaticContext': 'false',
+          });
+        }, throwsMissingGeneratedKeysError());
       });
 
       test('detectedFromStaticContext', () {
-        expect(
-          () {
-            DevToolsExtensionConfig.parse({
-              'name': 'foo',
-              'issueTracker': 'www.google.com',
-              'version': '1.0.0',
-              'materialIconCodePoint': 0xf012,
-              'extensionAssetsPath': '/absolute/path/to/foo/extension',
-              'devtoolsOptionsUri':
-                  'file:///path/to/package/devtools_options.yaml',
-              'isPubliclyHosted': 'false',
-            });
-          },
-          throwsMissingGeneratedKeysError(),
-        );
+        expect(() {
+          DevToolsExtensionConfig.parse({
+            'name': 'foo',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsPath': '/absolute/path/to/foo/extension',
+            'devtoolsOptionsUri':
+                'file:///path/to/package/devtools_options.yaml',
+            'isPubliclyHosted': 'false',
+          });
+        }, throwsMissingGeneratedKeysError());
       });
     });
 
@@ -265,41 +241,33 @@ void main() {
         );
       }
 
-      expect(
-        () {
-          DevToolsExtensionConfig.parse({
-            // Expects a String here.
-            'name': 23,
-            'issueTracker': 'www.google.com',
-            'version': '1.0.0',
-            'materialIconCodePoint': 0xf012,
-            'extensionAssetsPath': '/absolute/path/to/foo/extension',
-            'devtoolsOptionsUri':
-                'file:///path/to/package/devtools_options.yaml',
-            'isPubliclyHosted': 'false',
-            'detectedFromStaticContext': 'false',
-          });
-        },
-        throwsUnexpectedValueTypesError(),
-      );
+      expect(() {
+        DevToolsExtensionConfig.parse({
+          // Expects a String here.
+          'name': 23,
+          'issueTracker': 'www.google.com',
+          'version': '1.0.0',
+          'materialIconCodePoint': 0xf012,
+          'extensionAssetsPath': '/absolute/path/to/foo/extension',
+          'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+          'isPubliclyHosted': 'false',
+          'detectedFromStaticContext': 'false',
+        });
+      }, throwsUnexpectedValueTypesError());
 
-      expect(
-        () {
-          DevToolsExtensionConfig.parse({
-            'name': 'foo',
-            'issueTracker': 'www.google.com',
-            'version': '1.0.0',
-            'materialIconCodePoint': 0xf012,
-            'extensionAssetsPath': '/absolute/path/to/foo/extension',
-            'devtoolsOptionsUri':
-                'file:///path/to/package/devtools_options.yaml',
-            // Expects a String here.
-            'isPubliclyHosted': false,
-            'detectedFromStaticContext': 'false',
-          });
-        },
-        throwsUnexpectedValueTypesError(),
-      );
+      expect(() {
+        DevToolsExtensionConfig.parse({
+          'name': 'foo',
+          'issueTracker': 'www.google.com',
+          'version': '1.0.0',
+          'materialIconCodePoint': 0xf012,
+          'extensionAssetsPath': '/absolute/path/to/foo/extension',
+          'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+          // Expects a String here.
+          'isPubliclyHosted': false,
+          'detectedFromStaticContext': 'false',
+        });
+      }, throwsUnexpectedValueTypesError());
     });
 
     test('parse throws for invalid name', () {
@@ -313,56 +281,44 @@ void main() {
         );
       }
 
-      expect(
-        () {
-          DevToolsExtensionConfig.parse({
-            'name': 'name with spaces',
-            'issueTracker': 'www.google.com',
-            'version': '1.0.0',
-            'materialIconCodePoint': 0xf012,
-            'extensionAssetsPath': '/absolute/path/to/foo/extension',
-            'devtoolsOptionsUri':
-                'file:///path/to/package/devtools_options.yaml',
-            'isPubliclyHosted': 'false',
-            'detectedFromStaticContext': 'false',
-          });
-        },
-        throwsInvalidNameError(),
-      );
+      expect(() {
+        DevToolsExtensionConfig.parse({
+          'name': 'name with spaces',
+          'issueTracker': 'www.google.com',
+          'version': '1.0.0',
+          'materialIconCodePoint': 0xf012,
+          'extensionAssetsPath': '/absolute/path/to/foo/extension',
+          'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+          'isPubliclyHosted': 'false',
+          'detectedFromStaticContext': 'false',
+        });
+      }, throwsInvalidNameError());
 
-      expect(
-        () {
-          DevToolsExtensionConfig.parse({
-            'name': 'Name_With_Capital_Letters',
-            'issueTracker': 'www.google.com',
-            'version': '1.0.0',
-            'materialIconCodePoint': 0xf012,
-            'extensionAssetsPath': '/absolute/path/to/foo/extension',
-            'devtoolsOptionsUri':
-                'file:///path/to/package/devtools_options.yaml',
-            'isPubliclyHosted': 'false',
-            'detectedFromStaticContext': 'false',
-          });
-        },
-        throwsInvalidNameError(),
-      );
+      expect(() {
+        DevToolsExtensionConfig.parse({
+          'name': 'Name_With_Capital_Letters',
+          'issueTracker': 'www.google.com',
+          'version': '1.0.0',
+          'materialIconCodePoint': 0xf012,
+          'extensionAssetsPath': '/absolute/path/to/foo/extension',
+          'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+          'isPubliclyHosted': 'false',
+          'detectedFromStaticContext': 'false',
+        });
+      }, throwsInvalidNameError());
 
-      expect(
-        () {
-          DevToolsExtensionConfig.parse({
-            'name': 'name.with\'specialchars/',
-            'issueTracker': 'www.google.com',
-            'version': '1.0.0',
-            'materialIconCodePoint': 0xf012,
-            'extensionAssetsPath': '/absolute/path/to/foo/extension',
-            'devtoolsOptionsUri':
-                'file:///path/to/package/devtools_options.yaml',
-            'isPubliclyHosted': 'false',
-            'detectedFromStaticContext': 'false',
-          });
-        },
-        throwsInvalidNameError(),
-      );
+      expect(() {
+        DevToolsExtensionConfig.parse({
+          'name': 'name.with\'specialchars/',
+          'issueTracker': 'www.google.com',
+          'version': '1.0.0',
+          'materialIconCodePoint': 0xf012,
+          'extensionAssetsPath': '/absolute/path/to/foo/extension',
+          'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+          'isPubliclyHosted': 'false',
+          'detectedFromStaticContext': 'false',
+        });
+      }, throwsInvalidNameError());
     });
   });
 }

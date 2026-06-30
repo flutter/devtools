@@ -28,8 +28,9 @@ extension _ExtensionsApiHandler on Never {
     /// Helper to return a success response with all available extensions
     /// detected by [extensionsManager].
     shelf.Response succeedWithAvailableExtensions({String? warning}) {
-      final extensions =
-          extensionsManager.devtoolsExtensions.map((p) => p.toJson()).toList();
+      final extensions = extensionsManager.devtoolsExtensions
+          .map((p) => p.toJson())
+          .toList();
       result[ExtensionsApi.extensionsResultPropertyName] = extensions;
       if (warning != null) {
         result[ExtensionsApi.extensionsResultWarningPropertyName] = warning;
@@ -91,11 +92,11 @@ extension _ExtensionsApiHandler on Never {
       );
       return ServerApi._encodeResponse(newState.name, api: api);
     }
-    final activationState =
-        ServerApi._devToolsOptions.lookupExtensionEnabledState(
-      devtoolsOptionsUri: devtoolsOptionsFileUri,
-      extensionName: extensionName,
-    );
+    final activationState = ServerApi._devToolsOptions
+        .lookupExtensionEnabledState(
+          devtoolsOptionsUri: devtoolsOptionsFileUri,
+          extensionName: extensionName,
+        );
     return ServerApi._encodeResponse(activationState.name, api: api);
   }
 }

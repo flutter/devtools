@@ -93,10 +93,7 @@ extension LocalFileSystem on Never {
 }
 
 class IOPersistentProperties {
-  IOPersistentProperties(
-    this.name, {
-    String? documentDirPath,
-  }) {
+  IOPersistentProperties(this.name, {String? documentDirPath}) {
     final fileName = name.replaceAll(' ', '_');
     documentDirPath ??= LocalFileSystem._userHomeDir();
     _file = File(path.join(documentDirPath, fileName));

@@ -25,9 +25,9 @@ class DevToolsButton extends StatelessWidget {
     this.outlined = true,
     this.tooltipPadding,
   }) : assert(
-          label != null || icon != null,
-          'Either icon or label must be specified.',
-        );
+         label != null || icon != null,
+         'Either icon or label must be specified.',
+       );
 
   factory DevToolsButton.iconOnly({
     required IconData icon,
@@ -92,8 +92,9 @@ class DevToolsButton extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     var textColor = color;
     if (textColor == null && elevated) {
-      textColor =
-          onPressed == null ? colorScheme.onSurface : colorScheme.onPrimary;
+      textColor = onPressed == null
+          ? colorScheme.onSurface
+          : colorScheme.onPrimary;
     }
     final iconLabel = MaterialIconLabel(
       label: label!,
@@ -116,10 +117,7 @@ class DevToolsButton extends StatelessWidget {
         child: maybeWrapWithTooltip(
           tooltip: tooltip,
           tooltipPadding: tooltipPadding,
-          child: ElevatedButton(
-            onPressed: onPressed,
-            child: iconLabel,
-          ),
+          child: ElevatedButton(onPressed: onPressed, child: iconLabel),
         ),
       );
     }
@@ -239,8 +237,9 @@ final class DevToolsToggleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return DevToolsToggleButtonGroup(
-      borderColor:
-          outlined || isSelected ? theme.focusColor : Colors.transparent,
+      borderColor: outlined || isSelected
+          ? theme.focusColor
+          : Colors.transparent,
       selectedStates: [isSelected],
       onPressed: (_) => onPressed(),
       fillColor: fillColor,
@@ -291,9 +290,7 @@ final class RoundedButtonGroup extends StatelessWidget {
         button = Container(
           decoration: BoxDecoration(
             border: Border(
-              left: BorderSide(
-                color: Theme.of(context).focusColor,
-              ),
+              left: BorderSide(color: Theme.of(context).focusColor),
             ),
           ),
           child: button,
@@ -306,9 +303,7 @@ final class RoundedButtonGroup extends StatelessWidget {
       height: defaultButtonHeight,
       child: RoundedOutlinedBorder(
         child: Row(
-          children: [
-            for (int i = 0; i < items.length; i++) buildButton(i),
-          ],
+          children: [for (int i = 0; i < items.length; i++) buildButton(i)],
         ),
       ),
     );
@@ -366,15 +361,15 @@ final class ButtonGroupItemData {
     String? tooltip,
     this.onPressed,
     this.autofocus = false,
-  })  : tooltip = tooltip ?? label,
-        assert(
-          label != null || icon != null || iconAsset != null,
-          'At least one of icon, iconAsset, or label must be specified.',
-        ),
-        assert(
-          icon == null || iconAsset == null,
-          'Only one of icon and iconAsset may be specified.',
-        );
+  }) : tooltip = tooltip ?? label,
+       assert(
+         label != null || icon != null || iconAsset != null,
+         'At least one of icon, iconAsset, or label must be specified.',
+       ),
+       assert(
+         icon == null || iconAsset == null,
+         'Only one of icon and iconAsset may be specified.',
+       );
 
   final String? label;
   final IconData? icon;

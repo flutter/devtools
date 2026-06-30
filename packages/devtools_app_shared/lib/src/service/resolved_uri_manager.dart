@@ -31,8 +31,10 @@ final class ResolvedUriManager {
   Future<void> fetchPackageUris(String isolateId, List<String> uris) async {
     if (uris.isEmpty) return;
     if (_packagePathMappings != null) {
-      final packageUris =
-          (await _service!.lookupPackageUris(isolateId, uris)).uris;
+      final packageUris = (await _service!.lookupPackageUris(
+        isolateId,
+        uris,
+      )).uris;
 
       if (packageUris != null) {
         _packagePathMappings!.addMappings(
@@ -54,9 +56,10 @@ final class ResolvedUriManager {
   /// * [packageUris] - List of URIs to fetch full file paths for.
   Future<void> fetchFileUris(String isolateId, List<String> packageUris) async {
     if (_packagePathMappings != null) {
-      final fileUris =
-          (await _service!.lookupResolvedPackageUris(isolateId, packageUris))
-              .uris;
+      final fileUris = (await _service!.lookupResolvedPackageUris(
+        isolateId,
+        packageUris,
+      )).uris;
 
       // [_packagePathMappings] could have been set to null during the async gap
       // so check that it is non-null again here.
@@ -95,15 +98,11 @@ class _PackagePathMappings {
   String? lookupPackageToFullPathMapping(
     String isolateId,
     String packagePath,
-  ) =>
-      _isolatePackageToFullPathMappings[isolateId]?[packagePath];
+  ) => _isolatePackageToFullPathMappings[isolateId]?[packagePath];
 
   /// Returns the full path to package path mapping if it has already
   /// been fetched.
-  String? lookupFullPathToPackageMapping(
-    String isolateId,
-    String fullPath,
-  ) =>
+  String? lookupFullPathToPackageMapping(String isolateId, String fullPath) =>
       _isolateFullPathToPackageMappings[isolateId]?[fullPath];
 
   /// Saves the mappings of [fullPaths] to [packagePaths].
@@ -118,16 +117,10 @@ class _PackagePathMappings {
     required List<String?> packagePaths,
   }) {
     assert(fullPaths.length == packagePaths.length);
-    final fullPathToPackageMappings =
-        _isolateFullPathToPackageMappings.putIfAbsent(
-      isolateId,
-      () => <String, String?>{},
-    );
-    final packageToFullPathMappings =
-        _isolatePackageToFullPathMappings.putIfAbsent(
-      isolateId,
-      () => <String, String?>{},
-    );
+    final fullPathToPackageMappings = _isolateFullPathToPackageMappings
+        .putIfAbsent(isolateId, () => <String, String?>{});
+    final packageToFullPathMappings = _isolatePackageToFullPathMappings
+        .putIfAbsent(isolateId, () => <String, String?>{});
 
     assert(fullPaths.length == packagePaths.length);
 

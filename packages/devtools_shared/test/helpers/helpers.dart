@@ -9,10 +9,7 @@ import 'dart:io';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:path/path.dart' as path;
 
-typedef TestDtdConnectionInfo = ({
-  DtdInfo? info,
-  Process? process,
-});
+typedef TestDtdConnectionInfo = ({DtdInfo? info, Process? process});
 
 /// Helper method to start DTD for the purpose of testing.
 Future<TestDtdConnectionInfo> startDtd() async {
@@ -25,28 +22,25 @@ Future<TestDtdConnectionInfo> startDtd() async {
   TestDtdConnectionInfo onFailure() => (info: null, process: dtdProcess);
 
   try {
-    dtdProcess = await Process.start(
-      Platform.resolvedExecutable,
-      ['tooling-daemon', '--machine'],
-    );
+    dtdProcess = await Process.start(Platform.resolvedExecutable, [
+      'tooling-daemon',
+      '--machine',
+    ]);
 
     dtdStoutSubscription = dtdProcess.stdout.listen((List<int> data) {
       try {
         final decoded = utf8.decode(data);
         final json = jsonDecode(decoded) as Map<String, Object?>;
-        if (json
-            case {
-              'tooling_daemon_details': {
-                'uri': final String uri,
-                'trusted_client_secret': final String secret,
-              }
-            }) {
-          completer.complete(
-            (
-              info: DtdInfo(Uri.parse(uri), secret: secret),
-              process: dtdProcess,
-            ),
-          );
+        if (json case {
+          'tooling_daemon_details': {
+            'uri': final String uri,
+            'trusted_client_secret': final String secret,
+          },
+        }) {
+          completer.complete((
+            info: DtdInfo(Uri.parse(uri), secret: secret),
+            process: dtdProcess,
+          ));
         } else {
           completer.complete(onFailure());
         }
@@ -58,9 +52,9 @@ Future<TestDtdConnectionInfo> startDtd() async {
     return await completer.future
         .timeout(dtdConnectTimeout, onTimeout: onFailure)
         .then((value) async {
-      await dtdStoutSubscription?.cancel();
-      return value;
-    });
+          await dtdStoutSubscription?.cancel();
+          return value;
+        });
   } catch (e) {
     await dtdStoutSubscription?.cancel();
     return onFailure();
@@ -78,11 +72,11 @@ class TestDartApp {
 
   Future<String> start() async {
     await _initTestApp();
-    process = await Process.start(
-      Platform.resolvedExecutable,
-      ['--observe=0', 'run', 'bin/main.dart'],
-      workingDirectory: directory.path,
-    );
+    process = await Process.start(Platform.resolvedExecutable, [
+      '--observe=0',
+      'run',
+      'bin/main.dart',
+    ], workingDirectory: directory.path);
 
     final serviceUriCompleter = Completer<String>();
     late StreamSubscription sub;
@@ -90,13 +84,13 @@ class TestDartApp {
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((line) async {
-      if (line.contains(dartVMServiceRegExp)) {
-        await sub.cancel();
-        serviceUriCompleter.complete(
-          dartVMServiceRegExp.firstMatch(line)!.group(1),
-        );
-      }
-    });
+          if (line.contains(dartVMServiceRegExp)) {
+            await sub.cancel();
+            serviceUriCompleter.complete(
+              dartVMServiceRegExp.firstMatch(line)!.group(1),
+            );
+          }
+        });
     return await serviceUriCompleter.future.timeout(
       const Duration(seconds: 5),
       onTimeout: () async {

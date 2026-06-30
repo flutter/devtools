@@ -75,11 +75,7 @@ class DeeplinkManager {
       'DASH__TOOL': ide != null ? _mapIdeToDashToolLabel(ide) : 'devtools',
     };
 
-    return Process.run(
-      executable,
-      arguments,
-      environment: environment,
-    );
+    return Process.run(executable, arguments, environment: environment);
   }
 
   String _mapIdeToDashToolLabel(String ide) {
@@ -147,28 +143,22 @@ class DeeplinkManager {
   Map<String, Object?> _handleRunFlutterError(
     covariant _FlutterProcessError error,
   ) {
-    return <String, String?>{
-      kErrorField: error.message,
-    };
+    return <String, String?>{kErrorField: error.message};
   }
 
   Future<Map<String, Object?>> _handleReadJsonFile(String filePath) {
-    return File(filePath)
-        .readAsString()
-        .then<Map<String, Object?>>(_handleJsonOutput);
+    return File(
+      filePath,
+    ).readAsString().then<Map<String, Object?>>(_handleJsonOutput);
   }
 
   Future<Map<String, Object?>> _handleJsonOutput(String jsonOutput) async {
     try {
       jsonEncode(jsonOutput);
     } on Error catch (e) {
-      return <String, String?>{
-        kErrorField: e.toString(),
-      };
+      return <String, String?>{kErrorField: e.toString()};
     }
-    return <String, String?>{
-      kOutputJsonField: jsonOutput,
-    };
+    return <String, String?>{kOutputJsonField: jsonOutput};
   }
 
   Future<Map<String, Object?>> getAndroidBuildVariants({
