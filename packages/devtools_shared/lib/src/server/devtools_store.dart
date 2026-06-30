@@ -21,6 +21,7 @@ enum DevToolsStoreKeys {
 /// Provides access to the local DevTools store (~/.flutter-devtools/.devtools).
 class DevToolsUsage {
   DevToolsUsage() {
+    // TODO(srawlins): Accept a FileSystem parameter during tests.
     fileSystem.maybeMoveLegacyDevToolsStore();
     properties = IOPersistentProperties(
       storeName,
