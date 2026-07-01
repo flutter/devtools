@@ -20,10 +20,7 @@ class SplitExample extends StatelessWidget {
       axis: Axis.horizontal,
       initialFractions: const [0.3, 0.7],
       minSizes: const [50.0, 100.0],
-      children: const [
-        Text('Left side'),
-        Text('Right side'),
-      ],
+      children: const [Text('Left side'), Text('Right side')],
     );
   }
 }
@@ -42,15 +39,8 @@ class MultiSplitExample extends StatelessWidget {
       axis: Axis.vertical,
       initialFractions: const [0.3, 0.3, 0.4],
       minSizes: const [50.0, 50.0, 100.0],
-      splitters: const [
-        CustomSplitter(),
-        CustomSplitter(),
-      ],
-      children: const [
-        Text('Top'),
-        Text('Middle'),
-        Text('Bottom'),
-      ],
+      splitters: const [CustomSplitter(), CustomSplitter()],
+      children: const [Text('Top'), Text('Middle'), Text('Bottom')],
     );
   }
 }
@@ -62,10 +52,7 @@ class CustomSplitter extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      height: _size,
-      child: Icon(Icons.front_hand),
-    );
+    return const SizedBox(height: _size, child: Icon(Icons.front_hand));
   }
 
   @override

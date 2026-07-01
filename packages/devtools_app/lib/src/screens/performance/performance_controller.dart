@@ -48,12 +48,16 @@ class PerformanceController extends DevToolsScreenController
   @override
   final screenId = ScreenMetaData.performance.id;
 
+  // ignore: dispose-class-fields, false positive. See `applyToFeatureControllers` in the dispose() method.
   late final FlutterFramesController flutterFramesController;
 
+  // ignore: dispose-class-fields, false positive. See `applyToFeatureControllers` in the dispose() method.
   late final TimelineEventsController timelineEventsController;
 
+  // ignore: dispose-class-fields, false positive. See `applyToFeatureControllers` in the dispose() method.
   late final RebuildStatsController rebuildStatsController;
 
+  // ignore: dispose-class-fields, false positive. See `applyToFeatureControllers` in the dispose() method.
   late List<PerformanceFeatureController> _featureControllers;
 
   // TODO(jacobr): add the recount controller to [_featureControllers] once your
@@ -185,6 +189,7 @@ class PerformanceController extends DevToolsScreenController
   Future<void> _loadOfflineData(OfflinePerformanceData data) async {
     await clearData();
     offlinePerformanceData = data;
+    selectedFeatureTabIndex = data.selectedTab;
     await _applyToFeatureControllersAsync(
       (c) => c.setOfflineData(offlinePerformanceData!),
     );
@@ -285,6 +290,7 @@ class PerformanceController extends DevToolsScreenController
       selectedFrame: flutterFramesController.selectedFrame.value,
       rebuildCountModel: rebuildCountModel,
       displayRefreshRate: flutterFramesController.displayRefreshRate.value,
+      selectedTab: selectedFeatureTabIndex,
     ).toJson(),
   );
 

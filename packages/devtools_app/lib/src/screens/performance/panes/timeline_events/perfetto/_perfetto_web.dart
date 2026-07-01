@@ -34,14 +34,14 @@ class Perfetto extends StatefulWidget {
 }
 
 class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
-  late final PerfettoControllerImpl _perfettoController;
+  PerfettoControllerImpl get _perfettoController =>
+      widget.perfettoController as PerfettoControllerImpl;
 
   late final _PerfettoViewController _viewController;
 
   @override
   void initState() {
     super.initState();
-    _perfettoController = widget.perfettoController as PerfettoControllerImpl;
     _viewController = _PerfettoViewController(_perfettoController)..init();
 
     // If [_perfettoController.activeTrace.trace] has a null value, the trace

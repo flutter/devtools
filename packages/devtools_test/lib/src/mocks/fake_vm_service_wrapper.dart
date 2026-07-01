@@ -45,17 +45,16 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     }
   }
 
-  static final _defaultProfile =
-      CpuSamples.parse({
-        'samplePeriod': 50,
-        'maxStackDepth': 12,
-        'sampleCount': 0,
-        'timeOriginMicros': 47377796685,
-        'timeExtentMicros': 3000,
-        'pid': 54321,
-        'functions': <Object?>[],
-        'samples': <Object?>[],
-      })!;
+  static final _defaultProfile = CpuSamples.parse({
+    'samplePeriod': 50,
+    'maxStackDepth': 12,
+    'sampleCount': 0,
+    'timeOriginMicros': 47377796685,
+    'timeExtentMicros': 3000,
+    'pid': 54321,
+    'functions': <Object?>[],
+    'samples': <Object?>[],
+  })!;
 
   CpuSamples cpuSamples;
 
@@ -132,10 +131,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Future<UriList> lookupPackageUris(String isolateId, List<String> uris) {
     return Future.value(
       UriList(
-        uris:
-            _resolvedUriMap != null
-                ? (uris.map((e) => _resolvedUriMap[e]).toList())
-                : null,
+        uris: _resolvedUriMap != null
+            ? (uris.map((e) => _resolvedUriMap[e]).toList())
+            : null,
       ),
     );
   }
@@ -148,10 +146,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }) {
     return Future.value(
       UriList(
-        uris:
-            _reverseResolvedUriMap != null
-                ? (uris.map((e) => _reverseResolvedUriMap[e]).toList())
-                : null,
+        uris: _reverseResolvedUriMap != null
+            ? (uris.map((e) => _reverseResolvedUriMap[e]).toList())
+            : null,
       ),
     );
   }
@@ -192,21 +189,21 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
     allocationProfile.json = allocationProfile.toJson();
     // Fake GC statistics
-    allocationProfile.json![AllocationProfilePrivateViewExtension
-        .heapsKey] = <String, dynamic>{
-      AllocationProfilePrivateViewExtension.newSpaceKey: <String, dynamic>{
-        GCStats.usedKey: 1234,
-        GCStats.capacityKey: 12345,
-        GCStats.collectionsKey: 42,
-        GCStats.timeKey: 69,
-      },
-      AllocationProfilePrivateViewExtension.oldSpaceKey: <String, dynamic>{
-        GCStats.usedKey: 4321,
-        GCStats.capacityKey: 54321,
-        GCStats.collectionsKey: 24,
-        GCStats.timeKey: 96,
-      },
-    };
+    allocationProfile.json![AllocationProfilePrivateViewExtension.heapsKey] =
+        <String, dynamic>{
+          AllocationProfilePrivateViewExtension.newSpaceKey: <String, dynamic>{
+            GCStats.usedKey: 1234,
+            GCStats.capacityKey: 12345,
+            GCStats.collectionsKey: 42,
+            GCStats.timeKey: 69,
+          },
+          AllocationProfilePrivateViewExtension.oldSpaceKey: <String, dynamic>{
+            GCStats.usedKey: 4321,
+            GCStats.capacityKey: 54321,
+            GCStats.collectionsKey: 24,
+            GCStats.timeKey: 96,
+          },
+        };
 
     return Future.value(allocationProfile);
   }

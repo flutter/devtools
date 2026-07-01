@@ -46,17 +46,11 @@ void main() {
     test('parses 8 digit hex colors', () {
       expect(parseCssHexColor('#000000ff'), equals(Colors.black));
       expect(parseCssHexColor('000000ff'), equals(Colors.black));
-      expect(
-        parseCssHexColor('#00000000'),
-        equals(Colors.black.withAlpha(0)),
-      );
+      expect(parseCssHexColor('#00000000'), equals(Colors.black.withAlpha(0)));
       expect(parseCssHexColor('00000000'), equals(Colors.black.withAlpha(0)));
       expect(parseCssHexColor('#ffffffff'), equals(Colors.white));
       expect(parseCssHexColor('ffffffff'), equals(Colors.white));
-      expect(
-        parseCssHexColor('#ffffff00'),
-        equals(Colors.white.withAlpha(0)),
-      );
+      expect(parseCssHexColor('#ffffff00'), equals(Colors.white.withAlpha(0)));
       expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
       expect(
         parseCssHexColor('#ff0000bb'),

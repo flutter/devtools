@@ -37,8 +37,9 @@ part 'extension_manager.dart';
 ///   "args": [
 ///     "--dart-define=use_simulated_environment=true"
 ///   ]
-const _simulatedEnvironmentEnabled =
-    bool.fromEnvironment('use_simulated_environment');
+const _simulatedEnvironmentEnabled = bool.fromEnvironment(
+  'use_simulated_environment',
+);
 
 bool get _useSimulatedEnvironment =>
     !kReleaseMode && _simulatedEnvironmentEnabled;

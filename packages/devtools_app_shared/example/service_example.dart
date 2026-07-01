@@ -40,10 +40,8 @@ void main() async {
   );
 
   /// Example: Get a service extension state.
-  final performanceOverlayEnabled =
-      serviceManager.serviceExtensionManager.getServiceExtensionState(
-    extensions.performanceOverlay.extension,
-  );
+  final performanceOverlayEnabled = serviceManager.serviceExtensionManager
+      .getServiceExtensionState(extensions.performanceOverlay.extension);
 
   // Example: Set a service extension state.
   await serviceManager.serviceExtensionManager.setServiceExtensionState(

@@ -16,7 +16,8 @@ import 'package:path/path.dart' as path;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
     hide ChromeTab;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
-    as wip show ChromeTab;
+    as wip
+    show ChromeTab;
 
 import 'io_utils.dart';
 
@@ -94,10 +95,7 @@ class Chrome {
       '--remote-debugging-port=$debugPort',
     ];
     if (useChromeHeadless && headlessModeIsSupported) {
-      args.addAll(<String>[
-        '--headless',
-        '--disable-gpu',
-      ]);
+      args.addAll(<String>['--headless', '--disable-gpu']);
     }
     if (url != null) {
       args.add(url);
@@ -153,12 +151,9 @@ class ChromeProcess {
     required bool Function(wip.ChromeTab) tabFound,
     required Duration timeout,
   }) async {
-    final wipTab = await connection.getTab(
-      (wip.ChromeTab tab) {
-        return tabFound(tab);
-      },
-      retryFor: timeout,
-    );
+    final wipTab = await connection.getTab((wip.ChromeTab tab) {
+      return tabFound(tab);
+    }, retryFor: timeout);
 
     unawaited(
       process.exitCode.then((_) {
@@ -214,8 +209,9 @@ class ChromeTab {
     });
 
     unawaited(
-      _exceptionThrownController
-          .addStream(wipConnection.runtime.onExceptionThrown),
+      _exceptionThrownController.addStream(
+        wipConnection.runtime.onExceptionThrown,
+      ),
     );
 
     unawaited(wipConnection.page.enable());

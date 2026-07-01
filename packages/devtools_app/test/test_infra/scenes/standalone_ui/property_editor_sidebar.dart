@@ -67,8 +67,9 @@ class _PropertyEditorState extends State<_PropertyEditorSidebar> {
   SimulatedEditor? editor;
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    unawaited(editor?.close());
+    super.dispose();
   }
 
   @override

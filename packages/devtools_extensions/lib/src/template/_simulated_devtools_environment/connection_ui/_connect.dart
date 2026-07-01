@@ -77,19 +77,11 @@ class _ConnectedDisplay extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: theme.regularTextStyle,
-            ),
-            Text(
-              currentConnection(),
-              style: theme.boldTextStyle,
-            ),
+            Text(label, style: theme.regularTextStyle),
+            Text(currentConnection(), style: theme.boldTextStyle),
           ],
         ),
-        const Expanded(
-          child: SizedBox(width: denseSpacing),
-        ),
+        const Expanded(child: SizedBox(width: denseSpacing)),
         DevToolsButton(
           elevated: true,
           label: 'Disconnect',
@@ -97,10 +89,7 @@ class _ConnectedDisplay extends StatelessWidget {
         ),
         if (help != null) ...[
           const SizedBox(width: denseSpacing),
-          _ConnectionHelpButton(
-            dialogTitle: '$label help',
-            child: help!,
-          ),
+          _ConnectionHelpButton(dialogTitle: '$label help', child: help!),
         ],
       ],
     );
@@ -189,10 +178,7 @@ class _DisconnectedDisplayState extends State<_DisconnectedDisplay> {
 }
 
 class _ConnectionHelpButton extends StatelessWidget {
-  const _ConnectionHelpButton({
-    required this.dialogTitle,
-    required this.child,
-  });
+  const _ConnectionHelpButton({required this.dialogTitle, required this.child});
 
   final String dialogTitle;
 
@@ -209,10 +195,7 @@ class _ConnectionHelpButton extends StatelessWidget {
         showDevToolsDialog(
           context: context,
           title: dialogTitle,
-          content: SizedBox(
-            width: helpContentWidth,
-            child: child,
-          ),
+          content: SizedBox(width: helpContentWidth, child: child),
         );
       },
     );

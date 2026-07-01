@@ -23,16 +23,16 @@ class AdbMemoryInfo with Serializable {
   /// then the data is in kilobytes. See the factory constructor
   /// [AdbMemoryInfo.fromJsonInKB].
   factory AdbMemoryInfo.fromJson(Map<String, Object?> json) => AdbMemoryInfo(
-        json[realTimeKey] as int,
-        json[javaHeapKey] as int,
-        json[nativeHeapKey] as int,
-        json[codeKey] as int,
-        json[stackKey] as int,
-        json[graphicsKey] as int,
-        json[otherKey] as int,
-        json[systemKey] as int,
-        json[totalKey] as int,
-      );
+    json[realTimeKey] as int,
+    json[javaHeapKey] as int,
+    json[nativeHeapKey] as int,
+    json[codeKey] as int,
+    json[stackKey] as int,
+    json[graphicsKey] as int,
+    json[otherKey] as int,
+    json[systemKey] as int,
+    json[totalKey] as int,
+  );
 
   /// Use when converting data received from the service extension,
   /// directly from ADB. All data received from ADB dumpsys meminfo is
@@ -85,16 +85,16 @@ class AdbMemoryInfo with Serializable {
 
   @override
   Map<String, dynamic> toJson() => <String, Object?>{
-        realTimeKey: realtime,
-        javaHeapKey: javaHeap,
-        nativeHeapKey: nativeHeap,
-        codeKey: code,
-        stackKey: stack,
-        graphicsKey: graphics,
-        otherKey: other,
-        systemKey: system,
-        totalKey: total,
-      };
+    realTimeKey: realtime,
+    javaHeapKey: javaHeap,
+    nativeHeapKey: nativeHeap,
+    codeKey: code,
+    stackKey: stack,
+    graphicsKey: graphics,
+    otherKey: other,
+    systemKey: system,
+    totalKey: total,
+  };
 
   /// Create an empty [AdbMemoryInfo], where all values are 0.
   static AdbMemoryInfo empty() => AdbMemoryInfo(0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -130,7 +130,8 @@ class AdbMemoryInfo with Serializable {
   Duration get bootDuration => Duration(milliseconds: realtime);
 
   @override
-  String toString() => '[AdbMemoryInfo '
+  String toString() =>
+      '[AdbMemoryInfo '
       '$realTimeKey: $realtime, '
       'realtimeDT: $realtimeDT, '
       'durationBoot: $bootDuration, '

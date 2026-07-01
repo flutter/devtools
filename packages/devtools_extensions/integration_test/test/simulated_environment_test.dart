@@ -21,9 +21,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('end to end simulated environment', (tester) async {
-    runApp(
-      const DevToolsExtension(child: TestDevToolsExtension()),
-    );
+    runApp(const DevToolsExtension(child: TestDevToolsExtension()));
     await tester.pump(safePumpDuration);
     expect(find.byType(DevToolsExtension), findsOneWidget);
     expect(find.byType(TestDevToolsExtension), findsOneWidget);
@@ -86,24 +84,22 @@ Future<void> _testRegisterEventHandler(
 
   // Register a handler and verify it was called.
   int eventHandlerCalledCount = 0;
-  extensionManager.registerEventHandler(
-    DevToolsExtensionEventType.ping,
-    (event) {
-      eventHandlerCalledCount++;
-    },
-  );
+  extensionManager.registerEventHandler(DevToolsExtensionEventType.ping, (
+    event,
+  ) {
+    eventHandlerCalledCount++;
+  });
   await tester.tap(pingButtonFinder);
   await tester.pumpAndSettle();
   expect(eventHandlerCalledCount, 1);
 
   // Register a different handler and verify it has replaced the original.
   int secondEventHandlerCalledCount = 0;
-  extensionManager.registerEventHandler(
-    DevToolsExtensionEventType.ping,
-    (event) {
-      secondEventHandlerCalledCount++;
-    },
-  );
+  extensionManager.registerEventHandler(DevToolsExtensionEventType.ping, (
+    event,
+  ) {
+    secondEventHandlerCalledCount++;
+  });
   await tester.tap(pingButtonFinder);
   await tester.pumpAndSettle();
 
@@ -205,8 +201,9 @@ Future<void> _testCollapseEnvironmentPanel(
     matching: find.byType(SizedBox),
   );
 
-  final environmentPanelSizedBoxWidth =
-      tester.firstWidget<SizedBox>(environmentPanelSizedBox).width!;
+  final environmentPanelSizedBoxWidth = tester
+      .firstWidget<SizedBox>(environmentPanelSizedBox)
+      .width!;
 
   // Check that the [environmentPanelSizedBoxWidth] is the expected width.
   expect(
@@ -215,17 +212,12 @@ Future<void> _testCollapseEnvironmentPanel(
   );
 
   // Drag the divider to the right by [environmentPanelSizedBoxWidth].
-  await tester.drag(
-    divider,
-    Offset(
-      environmentPanelSizedBoxWidth,
-      0,
-    ),
-  );
+  await tester.drag(divider, Offset(environmentPanelSizedBoxWidth, 0));
   await tester.pumpAndSettle();
 
-  final simulatedDevToolsWrapperRect =
-      tester.getRect(find.byType(SimulatedDevToolsWrapper));
+  final simulatedDevToolsWrapperRect = tester.getRect(
+    find.byType(SimulatedDevToolsWrapper),
+  );
   final environmentPanelRect = tester.getRect(find.byWidget(environmentPanel));
 
   // Verify that the environment panel is off screen to the right of the
@@ -238,13 +230,7 @@ Future<void> _testCollapseEnvironmentPanel(
   // Drag the divider to the left by [environmentPanelSizedBoxWidth].
   //
   // This is to bring the 'Clear logs' button into view so it can be tapped.
-  await tester.drag(
-    divider,
-    Offset(
-      -environmentPanelSizedBoxWidth,
-      0,
-    ),
-  );
+  await tester.drag(divider, Offset(-environmentPanelSizedBoxWidth, 0));
   await tester.pumpAndSettle();
   await _clearLogs(tester, simController);
 }
@@ -276,9 +262,7 @@ class TestDevToolsExtension extends StatelessWidget {
       ),
       body: const Column(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          CallingDevToolsExtensionsAPIsExample(),
-        ],
+        children: [CallingDevToolsExtensionsAPIsExample()],
       ),
     );
   }

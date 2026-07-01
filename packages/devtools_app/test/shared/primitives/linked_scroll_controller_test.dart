@@ -346,6 +346,13 @@ class TestState extends State<Test> {
   }
 
   @override
+  void dispose() {
+    _letters.dispose();
+    _numbers.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,

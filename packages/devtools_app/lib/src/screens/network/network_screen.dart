@@ -194,8 +194,6 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         _recording = controller.recordingNotifier.value;
       });
     });
-
-    addAutoDisposeListener(controller.filteredData);
   }
 
   @override
@@ -205,7 +203,6 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     }
 
     final screenWidth = ScreenSize(context).width;
-    final hasRequests = controller.filteredData.value.isNotEmpty;
     return Column(
       children: [
         Row(
@@ -233,7 +230,6 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
             Expanded(
               child: SearchField<NetworkController>(
                 searchController: controller,
-                searchFieldEnabled: hasRequests,
                 searchFieldWidth: screenWidth <= MediaSize.xs
                     ? defaultSearchFieldWidth
                     : wideSearchFieldWidth,

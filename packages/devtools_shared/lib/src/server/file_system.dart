@@ -45,14 +45,24 @@ extension LocalFileSystem on Never {
   ///
   /// Only files within ~/.flutter-devtools/ can be accessed.
   static File? devToolsFileFromPath(String pathFromDevToolsDir) {
-    if (pathFromDevToolsDir.contains('..')) {
+    if (pathFromDevToolsDir.contains('..') ||
+        path.isAbsolute(pathFromDevToolsDir)) {
       // The passed in path should not be able to walk up the directory tree
-      // outside of the ~/.flutter-devtools/ directory.
+      // outside of the ~/.flutter-devtools/ directory. It must also not be an
+      // absolute path: path.join() discards the base directory when its second
+      // argument is absolute, which would otherwise allow reading an arbitrary
+      // file on disk (e.g. an absolute path to a credentials .json file).
       return null;
     }
 
     ensureDevToolsDirectory();
-    final file = File(path.join(devToolsDir(), pathFromDevToolsDir));
+    final devToolsDirPath = devToolsDir();
+    final file = File(path.join(devToolsDirPath, pathFromDevToolsDir));
+    // Defense in depth: ensure the resolved path is actually contained within
+    // the DevTools directory.
+    if (!path.isWithin(devToolsDirPath, file.path)) {
+      return null;
+    }
     if (!file.existsSync()) {
       return null;
     }
@@ -83,10 +93,7 @@ extension LocalFileSystem on Never {
 }
 
 class IOPersistentProperties {
-  IOPersistentProperties(
-    this.name, {
-    String? documentDirPath,
-  }) {
+  IOPersistentProperties(this.name, {String? documentDirPath}) {
     final fileName = name.replaceAll(' ', '_');
     documentDirPath ??= LocalFileSystem._userHomeDir();
     _file = File(path.join(documentDirPath, fileName));

@@ -49,10 +49,9 @@ class UpdateFlutterSdkCommand extends Command {
     final versionStr = repo.readFile(Uri.parse('flutter-candidate.txt')).trim();
     // If the version string doesn't match the expected pattern for a
     // pre-release tag, then assume it's a commit hash:
-    flutterVersion =
-        _flutterPreReleaseTagRegExp.hasMatch(versionStr)
-            ? 'tags/$versionStr'
-            : versionStr;
+    flutterVersion = _flutterPreReleaseTagRegExp.hasMatch(versionStr)
+        ? 'tags/$versionStr'
+        : versionStr;
 
     log.stdout('Updating to Flutter version from cache: $flutterVersion');
 

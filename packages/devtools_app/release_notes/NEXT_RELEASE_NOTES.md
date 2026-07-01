@@ -15,6 +15,14 @@ To learn more about DevTools, check out the
 
 ## General updates
 
+* Resolve several memory leaks. - [#9857](https://github.com/flutter/devtools/pull/9857)
+* Fixed a bug where highlighted search matches in tables were unreadable in dark
+  mode because the highlight color had become fully opaque. -
+  [#9863](https://github.com/flutter/devtools/pull/9863)
+* Rejected absolute paths in DevTools server file reads so they stay within
+  the `~/.flutter-devtools/` directory and cannot resolve to arbitrary files
+  on disk. -
+  [#9844](https://github.com/flutter/devtools/pull/9844)
 * Validated the `devtoolsOptionsUri` parameter in the extension enabled-state
   handler so it must be a `file:` URI named `devtools_options.yaml`, preventing
   the DevTools server from writing to arbitrary file paths. -
@@ -22,11 +30,15 @@ To learn more about DevTools, check out the
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any updates.
+- Fixed an issue where the Inspector error badge count would improperly
+  increase or disappear during navigation.
+  [#9524](https://github.com/flutter/devtools/issues/9524)
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed a bug where the selected feature tab was not restored when loading
+  exported Performance data. -
+  [#9861](https://github.com/flutter/devtools/pull/9861)
 
 ## CPU profiler updates
 
@@ -42,7 +54,9 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed the Network tab search field becoming disabled after clearing all
+  requests, so the search query can now be edited at any time. -
+  [#9855](https://github.com/flutter/devtools/pull/9855)
 
 ## Logging updates
 
@@ -54,7 +68,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Deep links tool updates
 
-TODO: Remove this section if there are not any updates.
+- Only validate deep links when connected to a Flutter app.
+  [#8081](https://github.com/flutter/devtools/issues/8081)
 
 ## VS Code sidebar updates
 

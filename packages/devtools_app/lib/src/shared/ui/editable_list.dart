@@ -80,6 +80,7 @@ class _EditableListState extends State<EditableList> {
   @override
   void dispose() {
     textFieldController.dispose();
+    textFieldFocusNode.dispose();
     super.dispose();
   }
 

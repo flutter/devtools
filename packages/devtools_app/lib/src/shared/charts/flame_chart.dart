@@ -114,6 +114,7 @@ abstract class FlameChartState<
 
   final sections = <FlameChartSection>[];
 
+  // ignore: dispose-fields, false positive. Disposed via autoDisposeFocusNode.
   final focusNode = FocusNode(debugLabel: 'flame-chart');
 
   double? mouseHoverX;
@@ -277,6 +278,7 @@ abstract class FlameChartState<
   void dispose() {
     zoomController.dispose();
     _verticalFlameChartScrollController.dispose();
+    _hoveredNodeNotifier.dispose();
     super.dispose();
   }
 

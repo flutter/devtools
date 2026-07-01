@@ -48,6 +48,7 @@ class SimulatedDevToolsController extends DisposableController
   void dispose() {
     window.removeEventListener('message', _handleMessageListener);
     _handleMessageListener = null;
+    messageLogs.dispose();
     super.dispose();
   }
 
@@ -92,10 +93,7 @@ class SimulatedDevToolsController extends DisposableController
     void Function()? onUnknownEvent,
   }) {
     messageLogs.add(
-      MessageLogEntry(
-        source: MessageSource.extension,
-        data: event.toJson(),
-      ),
+      MessageLogEntry(source: MessageSource.extension, data: event.toJson()),
     );
   }
 
@@ -109,10 +107,7 @@ class SimulatedDevToolsController extends DisposableController
       window.origin.toJS,
     );
     messageLogs.add(
-      MessageLogEntry(
-        source: MessageSource.devtools,
-        data: eventJson,
-      ),
+      MessageLogEntry(source: MessageSource.devtools, data: eventJson),
     );
   }
 
@@ -152,7 +147,7 @@ class SimulatedDevToolsController extends DisposableController
 @visibleForTesting
 class MessageLogEntry {
   MessageLogEntry({required this.source, this.data, this.message})
-      : timestamp = DateTime.now();
+    : timestamp = DateTime.now();
 
   final MessageSource source;
   final Map<String, Object?>? data;

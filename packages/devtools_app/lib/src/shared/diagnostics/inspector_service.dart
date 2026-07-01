@@ -245,6 +245,7 @@ class InspectorService extends InspectorServiceBase {
   void dispose() {
     _cachedSelectionGroups?.clear(false);
     _cachedSelectionGroups = null;
+    _rootDirectories.dispose();
     super.dispose();
   }
 

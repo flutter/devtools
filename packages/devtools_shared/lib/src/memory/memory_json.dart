@@ -97,10 +97,10 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
     required String argJsonString,
     Map<String, Object?>? argDecodedMap,
   }) : super.decode(
-          _jsonMemoryPayloadField,
-          argJsonString: argJsonString,
-          argDecodedMap: argDecodedMap,
-        );
+         _jsonMemoryPayloadField,
+         argJsonString: argJsonString,
+         argDecodedMap: argDecodedMap,
+       );
 
   /// Exported JSON payload of collected memory statistics.
   static const _jsonMemoryPayloadField = 'samples';
@@ -180,10 +180,9 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
   Map<String, dynamic> upgradeToVersion(
     Map<String, Object?> payload,
     int oldVersion,
-  ) =>
-      throw UnimplementedError(
-        '${HeapSample.version} is the only valid HeapSample version',
-      );
+  ) => throw UnimplementedError(
+    '${HeapSample.version} is the only valid HeapSample version',
+  );
 
   /// Given a list of [HeapSample], encode as a Json string.
   static String encodeList(List<HeapSample> data) {
@@ -201,7 +200,8 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
     return '$header$result${MemoryJson.trailer}';
   }
 
-  static String get header => '{"$_jsonMemoryPayloadField": {'
+  static String get header =>
+      '{"$_jsonMemoryPayloadField": {'
       '"${MemoryJson.jsonVersionField}": ${HeapSample.version}, '
       '"${MemoryJson.jsonDevToolsScreenField}": "${MemoryJson.devToolsScreenValueMemory}", '
       '"${MemoryJson.jsonDataField}": [\n';
@@ -272,10 +272,10 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
     required String argJsonString,
     Map<String, Object?>? argDecodedMap,
   }) : super.decode(
-          _jsonAllocationPayloadField,
-          argJsonString: argJsonString,
-          argDecodedMap: argDecodedMap,
-        );
+         _jsonAllocationPayloadField,
+         argJsonString: argJsonString,
+         argDecodedMap: argDecodedMap,
+       );
 
   /// Exported JSON payload of collected memory statistics.
   static const _jsonAllocationPayloadField = 'allocations';
@@ -308,10 +308,7 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
       for (final data in oldData)
         {
           'type': 'ClassHeapStats',
-          'class': <String, Object?>{
-            'type': '@Class',
-            ...data.class_,
-          },
+          'class': <String, Object?>{'type': '@Class', ...data.class_},
           'bytesCurrent': data.bytesCurrent,
           'accumulatedSize': data.bytesDelta,
           'instancesCurrent': data.instancesCurrent,
@@ -355,7 +352,8 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
   }
 
   /// Allocations Header portion:
-  static String get header => '{"$_jsonAllocationPayloadField": {'
+  static String get header =>
+      '{"$_jsonAllocationPayloadField": {'
       '"${MemoryJson.jsonVersionField}": $allocationFormatVersion, '
       '"${MemoryJson.jsonDevToolsScreenField}": "${MemoryJson.devToolsScreenValueMemory}", '
       '"${MemoryJson.jsonDataField}": [\n';

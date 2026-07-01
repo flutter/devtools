@@ -142,14 +142,13 @@ void writeVersionToPubspec(File pubspec, String version) {
     }
     if (currentSection == pubspecVersionPrefix &&
         line.startsWith(pubspecVersionPrefix)) {
-      line =
-          [
-            line.substring(
-              0,
-              line.indexOf(pubspecVersionPrefix) + pubspecVersionPrefix.length,
-            ),
-            ' $version',
-          ].join();
+      line = [
+        line.substring(
+          0,
+          line.indexOf(pubspecVersionPrefix) + pubspecVersionPrefix.length,
+        ),
+        ' $version',
+      ].join();
     }
     revisedLines.add(line);
   }

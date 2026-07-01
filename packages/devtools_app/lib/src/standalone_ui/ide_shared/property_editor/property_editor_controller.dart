@@ -123,6 +123,7 @@ class PropertyEditorController extends DisposableController
   @override
   void dispose() {
     _requestDebouncer.dispose();
+    _editableWidgetData.dispose();
     super.dispose();
   }
 

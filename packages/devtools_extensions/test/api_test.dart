@@ -22,9 +22,7 @@ void main() {
       expect(event.type, DevToolsExtensionEventType.pong);
       expect(event.data, {'baz': 'bob'});
 
-      event = DevToolsExtensionEvent.parse({
-        'type': 'idk',
-      });
+      event = DevToolsExtensionEvent.parse({'type': 'idk'});
       expect(event.type, DevToolsExtensionEventType.unknown);
       expect(event.data, isNull);
     });
@@ -124,42 +122,51 @@ void main() {
     });
 
     test('supportedForDirection', () {
-      verifyEventDirection(
-        DevToolsExtensionEventType.ping,
-        (bidirectional: false, toDevTools: false, toExtension: true),
-      );
-      verifyEventDirection(
-        DevToolsExtensionEventType.pong,
-        (bidirectional: false, toDevTools: true, toExtension: false),
-      );
-      verifyEventDirection(
-        DevToolsExtensionEventType.forceReload,
-        (bidirectional: false, toDevTools: false, toExtension: true),
-      );
-      verifyEventDirection(
-        DevToolsExtensionEventType.vmServiceConnection,
-        (bidirectional: true, toDevTools: true, toExtension: true),
-      );
-      verifyEventDirection(
-        DevToolsExtensionEventType.themeUpdate,
-        (bidirectional: false, toDevTools: false, toExtension: true),
-      );
-      verifyEventDirection(
-        DevToolsExtensionEventType.showNotification,
-        (bidirectional: false, toDevTools: true, toExtension: false),
-      );
-      verifyEventDirection(
-        DevToolsExtensionEventType.showBannerMessage,
-        (bidirectional: false, toDevTools: true, toExtension: false),
-      );
-      verifyEventDirection(
-        DevToolsExtensionEventType.copyToClipboard,
-        (bidirectional: false, toDevTools: true, toExtension: false),
-      );
-      verifyEventDirection(
-        DevToolsExtensionEventType.unknown,
-        (bidirectional: true, toDevTools: true, toExtension: true),
-      );
+      verifyEventDirection(DevToolsExtensionEventType.ping, (
+        bidirectional: false,
+        toDevTools: false,
+        toExtension: true,
+      ));
+      verifyEventDirection(DevToolsExtensionEventType.pong, (
+        bidirectional: false,
+        toDevTools: true,
+        toExtension: false,
+      ));
+      verifyEventDirection(DevToolsExtensionEventType.forceReload, (
+        bidirectional: false,
+        toDevTools: false,
+        toExtension: true,
+      ));
+      verifyEventDirection(DevToolsExtensionEventType.vmServiceConnection, (
+        bidirectional: true,
+        toDevTools: true,
+        toExtension: true,
+      ));
+      verifyEventDirection(DevToolsExtensionEventType.themeUpdate, (
+        bidirectional: false,
+        toDevTools: false,
+        toExtension: true,
+      ));
+      verifyEventDirection(DevToolsExtensionEventType.showNotification, (
+        bidirectional: false,
+        toDevTools: true,
+        toExtension: false,
+      ));
+      verifyEventDirection(DevToolsExtensionEventType.showBannerMessage, (
+        bidirectional: false,
+        toDevTools: true,
+        toExtension: false,
+      ));
+      verifyEventDirection(DevToolsExtensionEventType.copyToClipboard, (
+        bidirectional: false,
+        toDevTools: true,
+        toExtension: false,
+      ));
+      verifyEventDirection(DevToolsExtensionEventType.unknown, (
+        bidirectional: true,
+        toDevTools: true,
+        toExtension: true,
+      ));
     });
   });
 
@@ -167,9 +174,7 @@ void main() {
     test('constructs for expected values', () {
       final event = DevToolsExtensionEvent.parse({
         'type': 'showNotification',
-        'data': {
-          'message': 'foo message',
-        },
+        'data': {'message': 'foo message'},
       });
       final showNotificationEvent = ShowNotificationExtensionEvent.from(event);
       expect(showNotificationEvent.message, 'foo message');
@@ -181,12 +186,9 @@ void main() {
           // Missing required fields.
         },
       });
-      expect(
-        () {
-          ShowNotificationExtensionEvent.from(event1);
-        },
-        throwsFormatException,
-      );
+      expect(() {
+        ShowNotificationExtensionEvent.from(event1);
+      }, throwsFormatException);
 
       final event2 = DevToolsExtensionEvent.parse({
         'type': 'showNotification',
@@ -195,12 +197,9 @@ void main() {
           'msg': 'foo message',
         },
       });
-      expect(
-        () {
-          ShowNotificationExtensionEvent.from(event2);
-        },
-        throwsFormatException,
-      );
+      expect(() {
+        ShowNotificationExtensionEvent.from(event2);
+      }, throwsFormatException);
 
       final event3 = DevToolsExtensionEvent.parse({
         'type': 'showNotification',
@@ -209,26 +208,18 @@ void main() {
           'message': false,
         },
       });
-      expect(
-        () {
-          ShowNotificationExtensionEvent.from(event3);
-        },
-        throwsFormatException,
-      );
+      expect(() {
+        ShowNotificationExtensionEvent.from(event3);
+      }, throwsFormatException);
 
       final event4 = DevToolsExtensionEvent.parse({
         // Wrong type.
         'type': 'showBannerMessage',
-        'data': {
-          'message': 'foo message',
-        },
+        'data': {'message': 'foo message'},
       });
-      expect(
-        () {
-          ShowNotificationExtensionEvent.from(event4);
-        },
-        throwsAssertionError,
-      );
+      expect(() {
+        ShowNotificationExtensionEvent.from(event4);
+      }, throwsAssertionError);
     });
   });
 
@@ -277,12 +268,9 @@ void main() {
           'extensionName': 'foo',
         },
       });
-      expect(
-        () {
-          ShowBannerMessageExtensionEvent.from(event1);
-        },
-        throwsFormatException,
-      );
+      expect(() {
+        ShowBannerMessageExtensionEvent.from(event1);
+      }, throwsFormatException);
 
       final event2 = DevToolsExtensionEvent.parse({
         'type': 'showBannerMessage',
@@ -294,12 +282,9 @@ void main() {
           'extension_name': 'foo',
         },
       });
-      expect(
-        () {
-          ShowBannerMessageExtensionEvent.from(event2);
-        },
-        throwsFormatException,
-      );
+      expect(() {
+        ShowBannerMessageExtensionEvent.from(event2);
+      }, throwsFormatException);
 
       final event3 = DevToolsExtensionEvent.parse({
         'type': 'showBannerMessage',
@@ -311,12 +296,9 @@ void main() {
           'extensionName': 'foo',
         },
       });
-      expect(
-        () {
-          ShowBannerMessageExtensionEvent.from(event3);
-        },
-        throwsFormatException,
-      );
+      expect(() {
+        ShowBannerMessageExtensionEvent.from(event3);
+      }, throwsFormatException);
 
       final event4 = DevToolsExtensionEvent.parse({
         // Wrong type.
@@ -328,12 +310,9 @@ void main() {
           'extensionName': 'foo',
         },
       });
-      expect(
-        () {
-          ShowBannerMessageExtensionEvent.from(event4);
-        },
-        throwsAssertionError,
-      );
+      expect(() {
+        ShowBannerMessageExtensionEvent.from(event4);
+      }, throwsAssertionError);
     });
   });
 
@@ -341,10 +320,7 @@ void main() {
     test('constructs for expected values', () {
       final event = DevToolsExtensionEvent.parse({
         'type': 'copyToClipboard',
-        'data': {
-          'content': 'foo content',
-          'successMessage': 'foo success',
-        },
+        'data': {'content': 'foo content', 'successMessage': 'foo success'},
       });
       final copyToClipboardEvent = CopyToClipboardExtensionEvent.from(event);
       expect(copyToClipboardEvent.content, 'foo content');
@@ -357,12 +333,9 @@ void main() {
           // Missing required fields.
         },
       });
-      expect(
-        () {
-          CopyToClipboardExtensionEvent.from(event1);
-        },
-        throwsFormatException,
-      );
+      expect(() {
+        CopyToClipboardExtensionEvent.from(event1);
+      }, throwsFormatException);
 
       final event2 = DevToolsExtensionEvent.parse({
         'type': 'copyToClipboard',
@@ -372,12 +345,9 @@ void main() {
           'successMessage': 'foo success',
         },
       });
-      expect(
-        () {
-          CopyToClipboardExtensionEvent.from(event2);
-        },
-        throwsFormatException,
-      );
+      expect(() {
+        CopyToClipboardExtensionEvent.from(event2);
+      }, throwsFormatException);
 
       final event3 = DevToolsExtensionEvent.parse({
         'type': 'copyToClipboard',
@@ -387,27 +357,18 @@ void main() {
           'successMessage': 'foo success',
         },
       });
-      expect(
-        () {
-          CopyToClipboardExtensionEvent.from(event3);
-        },
-        throwsFormatException,
-      );
+      expect(() {
+        CopyToClipboardExtensionEvent.from(event3);
+      }, throwsFormatException);
 
       final event4 = DevToolsExtensionEvent.parse({
         // Wrong type.
         'type': 'showBannerMessage',
-        'data': {
-          'content': 'foo content',
-          'successMessage': 'foo success',
-        },
+        'data': {'content': 'foo content', 'successMessage': 'foo success'},
       });
-      expect(
-        () {
-          CopyToClipboardExtensionEvent.from(event4);
-        },
-        throwsAssertionError,
-      );
+      expect(() {
+        CopyToClipboardExtensionEvent.from(event4);
+      }, throwsAssertionError);
     });
   });
 }

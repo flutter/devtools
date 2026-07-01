@@ -914,6 +914,8 @@ class _InspectorTreeState extends State<InspectorTree>
   Rect? _currentAnimateTarget;
 
   AnimationController? _constraintDisplayController;
+
+  // ignore: dispose-fields, false positive. Disposed via autoDisposeFocusNode.
   late FocusNode _focusNode;
 
   /// When autoscrolling, the number of rows to pad the target location with.

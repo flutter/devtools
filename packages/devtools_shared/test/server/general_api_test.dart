@@ -41,38 +41,32 @@ void main() {
         );
       }
 
-      test(
-        'succeeds when DTD is not available',
-        () async {
-          final response = await sendNotifyRequest(
-            dtd: null,
-            queryParameters: {
-              apiParameterValueKey: 'fake_uri',
-              apiParameterVmServiceConnected: 'true',
-            },
-          );
-          expect(response.statusCode, HttpStatus.ok);
-          expect(await response.readAsString(), isEmpty);
-        },
-      );
+      test('succeeds when DTD is not available', () async {
+        final response = await sendNotifyRequest(
+          dtd: null,
+          queryParameters: {
+            apiParameterValueKey: 'fake_uri',
+            apiParameterVmServiceConnected: 'true',
+          },
+        );
+        expect(response.statusCode, HttpStatus.ok);
+        expect(await response.readAsString(), isEmpty);
+      });
 
-      test(
-        'returns badRequest for invalid VM service argument',
-        () async {
-          final response = await sendNotifyRequest(
-            dtd: DtdInfo(Uri.parse('ws://dtd/uri'), secret: 'fake_secret'),
-            queryParameters: {
-              apiParameterValueKey: 'fake_uri',
-              apiParameterVmServiceConnected: 'true',
-            },
-          );
-          expect(response.statusCode, HttpStatus.badRequest);
-          expect(
-            await response.readAsString(),
-            contains('Cannot normalize VM service URI'),
-          );
-        },
-      );
+      test('returns badRequest for invalid VM service argument', () async {
+        final response = await sendNotifyRequest(
+          dtd: DtdInfo(Uri.parse('ws://dtd/uri'), secret: 'fake_secret'),
+          queryParameters: {
+            apiParameterValueKey: 'fake_uri',
+            apiParameterVmServiceConnected: 'true',
+          },
+        );
+        expect(response.statusCode, HttpStatus.badRequest);
+        expect(
+          await response.readAsString(),
+          contains('Cannot normalize VM service URI'),
+        );
+      });
       test(
         'returns badRequest for invalid $apiParameterVmServiceConnected argument',
         () async {
@@ -99,8 +93,9 @@ void main() {
       setUp(() async {
         dtd = await startDtd();
         expect(dtd!.info, isNotNull, reason: 'Error starting DTD for test');
-        testDtdConnection =
-            await DartToolingDaemon.connect(dtd!.info!.localUri);
+        testDtdConnection = await DartToolingDaemon.connect(
+          dtd!.info!.localUri,
+        );
       });
 
       tearDown(() async {
@@ -131,32 +126,28 @@ void main() {
           expect(currentRoots, containsAll(roots));
         }
 
-        test(
-          'adds and removes workspace roots',
-          () async {
-            await verifyWorkspaceRoots({});
-            final rootUri1 = Uri.parse('file:///Users/me/package_root_1');
-            final rootUri2 = Uri.parse('file:///Users/me/package_root_2');
+        test('adds and removes workspace roots', () async {
+          await verifyWorkspaceRoots({});
+          final rootUri1 = Uri.parse('file:///Users/me/package_root_1');
+          final rootUri2 = Uri.parse('file:///Users/me/package_root_2');
 
-            await updateWorkspaceRoots(root: rootUri1, connected: true);
-            await verifyWorkspaceRoots({rootUri1});
+          await updateWorkspaceRoots(root: rootUri1, connected: true);
+          await verifyWorkspaceRoots({rootUri1});
 
-            // Add a second root and verify the roots are unioned.
-            await updateWorkspaceRoots(root: rootUri2, connected: true);
-            await verifyWorkspaceRoots({rootUri1, rootUri2});
+          // Add a second root and verify the roots are unioned.
+          await updateWorkspaceRoots(root: rootUri2, connected: true);
+          await verifyWorkspaceRoots({rootUri1, rootUri2});
 
-            // Verify duplicates cannot be added.
-            await updateWorkspaceRoots(root: rootUri2, connected: true);
-            await verifyWorkspaceRoots({rootUri1, rootUri2});
+          // Verify duplicates cannot be added.
+          await updateWorkspaceRoots(root: rootUri2, connected: true);
+          await verifyWorkspaceRoots({rootUri1, rootUri2});
 
-            // Verify roots are removed for disconnect events.
-            await updateWorkspaceRoots(root: rootUri2, connected: false);
-            await verifyWorkspaceRoots({rootUri1});
-            await updateWorkspaceRoots(root: rootUri1, connected: false);
-            await verifyWorkspaceRoots({});
-          },
-          timeout: const Timeout.factor(4),
-        );
+          // Verify roots are removed for disconnect events.
+          await updateWorkspaceRoots(root: rootUri2, connected: false);
+          await verifyWorkspaceRoots({rootUri1});
+          await updateWorkspaceRoots(root: rootUri1, connected: false);
+          await verifyWorkspaceRoots({});
+        }, timeout: const Timeout.factor(4));
       });
 
       group('detectRootPackageForVmService', () {
@@ -182,11 +173,11 @@ void main() {
           expect(vmServiceUri, isNotNull);
           final response =
               await server.VmServiceHandler.detectRootPackageForVmService(
-            vmServiceUriAsString: vmServiceUriString!,
-            vmServiceUri: vmServiceUri!,
-            connected: true,
-            dtd: testDtdConnection!,
-          );
+                vmServiceUriAsString: vmServiceUriString!,
+                vmServiceUri: vmServiceUri!,
+                connected: true,
+                dtd: testDtdConnection!,
+              );
           expect(response.success, true);
           expect(response.message, isNull);
           expect(response.uri, isNotNull);
@@ -196,11 +187,11 @@ void main() {
         test('succeeds for a disconnect event when cache is empty', () async {
           final response =
               await server.VmServiceHandler.detectRootPackageForVmService(
-            vmServiceUriAsString: vmServiceUriString!,
-            vmServiceUri: Uri.parse('ws://127.0.0.1:63555/fake-uri=/ws'),
-            connected: false,
-            dtd: testDtdConnection!,
-          );
+                vmServiceUriAsString: vmServiceUriString!,
+                vmServiceUri: Uri.parse('ws://127.0.0.1:63555/fake-uri=/ws'),
+                connected: false,
+                dtd: testDtdConnection!,
+              );
           expect(response, (success: true, message: null, uri: null));
         });
 
@@ -211,11 +202,11 @@ void main() {
             expect(vmServiceUri, isNotNull);
             final response =
                 await server.VmServiceHandler.detectRootPackageForVmService(
-              vmServiceUriAsString: vmServiceUriString!,
-              vmServiceUri: vmServiceUri!,
-              connected: true,
-              dtd: testDtdConnection!,
-            );
+                  vmServiceUriAsString: vmServiceUriString!,
+                  vmServiceUri: vmServiceUri!,
+                  connected: true,
+                  dtd: testDtdConnection!,
+                );
             expect(response.success, true);
             expect(response.message, isNull);
             expect(response.uri, isNotNull);
@@ -223,11 +214,11 @@ void main() {
 
             final disconnectResponse =
                 await server.VmServiceHandler.detectRootPackageForVmService(
-              vmServiceUriAsString: vmServiceUriString!,
-              vmServiceUri: vmServiceUri,
-              connected: false,
-              dtd: testDtdConnection!,
-            );
+                  vmServiceUriAsString: vmServiceUriString!,
+                  vmServiceUri: vmServiceUri,
+                  connected: false,
+                  dtd: testDtdConnection!,
+                );
             expect(disconnectResponse.success, true);
             expect(disconnectResponse.message, isNull);
             expect(disconnectResponse.uri, isNotNull);

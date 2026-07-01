@@ -49,17 +49,15 @@ class ValidateExtensionCommand extends Command {
 
       // Try to parse the config.yaml file. This will throw an exception if there
       // are parsing errors.
-      DevToolsExtensionConfig.parse(
-        {
-          ..._configAsMap(packagePath),
-          // These are generated on the DevTools server, so pass in stubbed
-          // values for the sake of validation.
-          DevToolsExtensionConfig.extensionAssetsPathKey: '',
-          DevToolsExtensionConfig.devtoolsOptionsUriKey: '',
-          DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
-          DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
-        },
-      );
+      DevToolsExtensionConfig.parse({
+        ..._configAsMap(packagePath),
+        // These are generated on the DevTools server, so pass in stubbed
+        // values for the sake of validation.
+        DevToolsExtensionConfig.extensionAssetsPathKey: '',
+        DevToolsExtensionConfig.devtoolsOptionsUriKey: '',
+        DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+        DevToolsExtensionConfig.detectedFromStaticContextKey: 'false',
+      });
 
       // If there are no exceptions at this point, the extension has successfully
       // been validated.
@@ -84,40 +82,32 @@ void _validateDirectoryContents(String packagePath) {
     path.join(packageDirectory.path, 'extension', 'devtools'),
   );
   if (!devtoolsExtensionDir.existsSync()) {
-    throw const FileSystemException(
-      '''
+    throw const FileSystemException('''
 An extension/devtools directory is required, but none was found.
 See ${ValidateExtensionCommand.docUrl}.
-''',
-    );
+''');
   }
 
   final buildDir = Directory(path.join(devtoolsExtensionDir.path, 'build'));
   if (!buildDir.existsSync()) {
-    throw const FileSystemException(
-      '''
+    throw const FileSystemException('''
 An extension/devtools/build directory is required, but none was found.
 See ${ValidateExtensionCommand.docUrl}.
-''',
-    );
+''');
   }
   if (buildDir.listSync().isEmpty) {
-    throw const FileSystemException(
-      '''
+    throw const FileSystemException('''
 A non-empty extension/devtools/build directory is required, but the directory is empty.
 See ${ValidateExtensionCommand.docUrl}.
-''',
-    );
+''');
   }
 
   final configFile = _lookupConfigFile(packagePath);
   if (!configFile.existsSync()) {
-    throw const FileSystemException(
-      '''
+    throw const FileSystemException('''
 An extension/devtools/config.yaml file is required, but none was found.
 See ${ValidateExtensionCommand.docUrl}.
-''',
-    );
+''');
   }
 }
 
@@ -130,9 +120,7 @@ Map<String, Object?> _configAsMap(String packagePath) {
 }
 
 File _lookupConfigFile(String packagePath) {
-  return File(
-    path.join(packagePath, 'extension', 'devtools', 'config.yaml'),
-  );
+  return File(path.join(packagePath, 'extension', 'devtools', 'config.yaml'));
 }
 
 void _logError(String error) {

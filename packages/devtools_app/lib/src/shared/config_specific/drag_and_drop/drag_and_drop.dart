@@ -38,6 +38,7 @@ abstract class DragAndDropManager {
   @mustCallSuper
   void dispose() {
     _dragAndDropStates.clear();
+    activeState = null;
   }
 
   void registerDragAndDrop(DragAndDropState state) {
@@ -113,6 +114,7 @@ class DragAndDrop extends StatefulWidget {
 
 class DragAndDropState extends State<DragAndDrop> {
   final _dragging = ValueNotifier<bool>(false);
+
   DragAndDropManager? _dragAndDropManager;
 
   bool _isActive = false;
@@ -140,6 +142,8 @@ class DragAndDropState extends State<DragAndDrop> {
   @override
   void dispose() {
     _dragAndDropManager?.unregisterDragAndDrop(this);
+    _dragAndDropManager = null;
+    _dragging.dispose();
     super.dispose();
   }
 

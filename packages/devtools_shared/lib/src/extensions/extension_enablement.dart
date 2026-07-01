@@ -16,7 +16,8 @@ class DevToolsOptions {
   static const _extensionsKey = 'extensions';
   static const _descriptionKey = 'description';
   static const _documentationKey = 'documentation';
-  static const _defaultOptions = '''
+  static const _defaultOptions =
+      '''
 $_descriptionKey: This file stores settings for Dart & Flutter DevTools.
 $_documentationKey: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
 $_extensionsKey:
@@ -36,8 +37,8 @@ $_extensionsKey:
     final options = _optionsAsMap(optionsUri: devtoolsOptionsUri);
     if (options == null) return ExtensionEnabledState.error;
 
-    final extensions =
-        (options[_extensionsKey] as List?)?.cast<Map<String, Object?>>();
+    final extensions = (options[_extensionsKey] as List?)
+        ?.cast<Map<String, Object?>>();
     if (extensions == null) return ExtensionEnabledState.none;
 
     for (final e in extensions) {
@@ -65,8 +66,8 @@ $_extensionsKey:
     final options = _optionsAsMap(optionsUri: devtoolsOptionsUri);
     if (options == null) return ExtensionEnabledState.error;
 
-    var extensions =
-        (options[_extensionsKey] as List?)?.cast<Map<String, Object?>>();
+    var extensions = (options[_extensionsKey] as List?)
+        ?.cast<Map<String, Object?>>();
     if (extensions == null) {
       options[_extensionsKey] = <Map<String, Object?>>[];
       extensions = options[_extensionsKey] as List<Map<String, Object?>>;
@@ -111,10 +112,9 @@ $_extensionsKey:
   }) {
     final yamlEditor = YamlEditor('');
     yamlEditor.update([], options);
-    _lookupOptionsFile(optionsUri)?.writeAsStringSync(
-      yamlEditor.toString(),
-      flush: true,
-    );
+    _lookupOptionsFile(
+      optionsUri,
+    )?.writeAsStringSync(yamlEditor.toString(), flush: true);
   }
 
   /// Returns the `devtools_options.yaml` file at [optionsUri].

@@ -34,7 +34,8 @@ class IsolateState {
   void handleIsolateLoad(Isolate isolate) {
     _isolateNow = isolate;
 
-    _isPaused.value = isolate.pauseEvent != null &&
+    _isPaused.value =
+        isolate.pauseEvent != null &&
         isolate.pauseEvent!.kind != EventKind.kResume;
 
     rootInfo = RootInfo(_isolateNow!.rootLib?.uri);
@@ -48,6 +49,7 @@ class IsolateState {
       null,
       () => _isolateLoadCompleter = Completer()..complete(null),
     );
+    _isPaused.dispose();
   }
 
   void handleDebugEvent(String? kind) {
