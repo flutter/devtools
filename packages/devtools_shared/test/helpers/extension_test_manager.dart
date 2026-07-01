@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:devtools_shared/src/test/io_utils.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -104,7 +105,7 @@ class ExtensionTestManager {
 
       // Run `dart pub get` on this package to generate the
       // `.dart_tool/package_config.json` file.
-      final process = await Process.run(Platform.resolvedExecutable, [
+      final process = await Process.run(dartVMPath, [
         'pub',
         'get',
       ], workingDirectory: packageRoot.path);

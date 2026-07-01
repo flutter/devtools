@@ -106,3 +106,24 @@ mixin IOMixin {
     return process.exitCode;
   }
 }
+
+/// The path to the Dart VM executable.
+///
+/// If running under `flutter_tester`, this will attempt to find the Dart SDK
+/// binary bundled with the Flutter SDK.
+String get dartVMPath {
+  final resolved = Platform.resolvedExecutable;
+  if (resolved.contains('flutter_tester')) {
+    final binaryName = Platform.isWindows ? 'dart.exe' : 'dart';
+
+    final platformDir = path.dirname(resolved); // 'darwin-x64' or similar
+    final engineDir = path.dirname(platformDir); // 'engine'
+    final artifactsDir = path.dirname(engineDir); // 'artifacts'
+    final cacheDir = path.dirname(artifactsDir); // 'cache'
+    final dartPath = path.join(cacheDir, 'dart-sdk', 'bin', binaryName);
+    if (File(dartPath).existsSync()) {
+      return dartPath;
+    }
+  }
+  return resolved;
+}

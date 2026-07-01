@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:devtools_shared/src/test/io_utils.dart';
 import 'package:path/path.dart' as path;
 
 typedef TestDtdConnectionInfo = ({DtdInfo? info, Process? process});
@@ -22,7 +23,7 @@ Future<TestDtdConnectionInfo> startDtd() async {
   TestDtdConnectionInfo onFailure() => (info: null, process: dtdProcess);
 
   try {
-    dtdProcess = await Process.start(Platform.resolvedExecutable, [
+    dtdProcess = await Process.start(dartVMPath, [
       'tooling-daemon',
       '--machine',
     ]);
@@ -72,7 +73,7 @@ class TestDartApp {
 
   Future<String> start() async {
     await _initTestApp();
-    process = await Process.start(Platform.resolvedExecutable, [
+    process = await Process.start(dartVMPath, [
       '--observe=0',
       'run',
       'bin/main.dart',

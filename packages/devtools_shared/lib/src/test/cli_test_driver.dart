@@ -13,6 +13,7 @@ import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
+import 'io_utils.dart';
 import 'test_utils.dart';
 
 class AppFixture {
@@ -102,7 +103,7 @@ class CliAppFixture extends AppFixture {
       '(Observatory|The Dart VM service is) listening on ',
     );
 
-    final process = await Process.start(Platform.resolvedExecutable, <String>[
+    final process = await Process.start(dartVMPath, <String>[
       '--observe=0',
       '--pause-isolates-on-start',
       appScriptPath,
