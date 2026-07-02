@@ -196,6 +196,12 @@ extension FrameworkCore on Never {
   ///
   /// Returns true if reconnection was successful.
   static Future<bool> reconnectVmService() async {
+    if (vmServiceInitializationInProgress) {
+      _log.warning(
+        'Reconnection attempt ignored: initialization already in progress.',
+      );
+      return false;
+    }
     final lastUri = _lastServiceUriAsString;
     if (lastUri == null) return false;
 

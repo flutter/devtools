@@ -119,7 +119,11 @@ class DisconnectObserverState extends State<DisconnectObserver>
       if (success) {
         final uri = serviceConnection.serviceManager.serviceUri;
         if (uri != null) {
-          unawaited(widget.routerDelegate.updateArgsIfChanged({'uri': uri}));
+          unawaited(
+            widget.routerDelegate.updateArgsIfChanged({
+              DevToolsQueryParams.vmServiceUriKey: uri,
+            }),
+          );
         }
         hideDisconnectedOverlay();
       } else {
