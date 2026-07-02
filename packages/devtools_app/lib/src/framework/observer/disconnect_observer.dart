@@ -167,10 +167,7 @@ class DisconnectObserverState extends State<DisconnectObserver>
                     style: theme.textTheme.headlineMedium,
                   ),
                 ] else ...[
-                  Text(
-                    'Disconnected',
-                    style: theme.textTheme.headlineMedium,
-                  ),
+                  Text('Disconnected', style: theme.textTheme.headlineMedium),
                   const SizedBox(height: defaultSpacing),
                   ElevatedButton(
                     onPressed: _attemptReconnect,
