@@ -81,6 +81,27 @@ extension _ExtensionsApiHandler on Never {
     final devtoolsOptionsFileUriString =
         queryParams[ExtensionsApi.devtoolsOptionsUriPropertyName]!;
     final devtoolsOptionsFileUri = Uri.parse(devtoolsOptionsFileUriString);
+
+    // Validate that the URI is a local file URI whose file name is exactly
+    // 'devtools_options.yaml'. Accepting arbitrary URIs from the query string
+    // would allow an untrusted caller to create or overwrite any file writable
+    // by the DevTools server process. Resolving the name through
+    // `Uri.toFilePath()` + `p.basename` handles both '/' and '\' path
+    // separators, so the check holds for Windows file URIs as well. Requiring
+    // an empty host rejects UNC paths (e.g. `file://server/share/...`) and
+    // keeps `toFilePath()` from throwing on a non-local authority.
+    final isFileUri = devtoolsOptionsFileUri.scheme == 'file' &&
+        devtoolsOptionsFileUri.host.isEmpty;
+    final fileName = isFileUri
+        ? p.basename(devtoolsOptionsFileUri.toFilePath())
+        : '';
+    if (!isFileUri || fileName != 'devtools_options.yaml') {
+      return api.badRequest(
+        'Invalid devtoolsOptionsUri: must be a file: URI named '
+        "'devtools_options.yaml'.",
+      );
+    }
+
     final extensionName = queryParams[ExtensionsApi.extensionNamePropertyName]!;
 
     final activate = queryParams[ExtensionsApi.enabledStatePropertyName];

@@ -23,6 +23,10 @@ To learn more about DevTools, check out the
   the `~/.flutter-devtools/` directory and cannot resolve to arbitrary files
   on disk. -
   [#9844](https://github.com/flutter/devtools/pull/9844)
+* Validated the `devtoolsOptionsUri` parameter in the extension enabled-state
+  handler so it must be a `file:` URI named `devtools_options.yaml`, preventing
+  the DevTools server from writing to arbitrary file paths. -
+  [#9834](https://github.com/flutter/devtools/pull/9834)
 
 ## Inspector updates
 
