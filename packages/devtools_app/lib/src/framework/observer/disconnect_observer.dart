@@ -105,12 +105,10 @@ class DisconnectObserverState extends State<DisconnectObserver>
 
     bool success = false;
     try {
-      // Add a timeout so the UI doesn't spin forever if the connection hangs.
       success = await FrameworkCore.reconnectVmService().timeout(
         const Duration(seconds: 5),
       );
     } catch (_) {
-      // Catch TimeoutException or any other unhandled errors.
       success = false;
     }
 
