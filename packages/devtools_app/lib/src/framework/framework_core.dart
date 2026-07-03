@@ -206,9 +206,7 @@ extension FrameworkCore on Never {
     if (lastUri == null) return false;
 
     _log.info('Attempting to reconnect to VM service at: $lastUri');
-    final success = await initVmService(
-      serviceUriAsString: lastUri,
-    );
+    final success = await initVmService(serviceUriAsString: lastUri);
     if (success) {
       _log.info('VM service reconnection successful');
     } else {
