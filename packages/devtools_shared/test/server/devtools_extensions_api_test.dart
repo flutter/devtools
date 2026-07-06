@@ -144,19 +144,24 @@ void main() {
 
   group(ExtensionsApi.apiExtensionEnabledState, () {
     late File optionsFile;
-    late final optionsFileUriString = p.posix.join(
-      extensionTestManager.runtimeAppRoot,
-      devtoolsOptionsFileName,
-    );
+    late String optionsFileUriString;
 
     setUp(() async {
       await initializeTestDirectory();
+      // Recompute per test: each test gets a fresh temp directory, so this
+      // must not be cached across tests (otherwise it would point at a
+      // previous test's directory).
+      optionsFileUriString = p.posix.join(
+        extensionTestManager.runtimeAppRoot,
+        devtoolsOptionsFileName,
+      );
       optionsFile = File.fromUri(Uri.parse(optionsFileUriString));
     });
 
     Future<Response> sendEnabledStateRequest({
       required String extensionName,
       bool? enable,
+      String? optionsUriOverride,
     }) async {
       final request = Request(
         'post',
@@ -165,7 +170,8 @@ void main() {
           host: 'localhost',
           path: ExtensionsApi.apiExtensionEnabledState,
           queryParameters: {
-            ExtensionsApi.devtoolsOptionsUriPropertyName: optionsFileUriString,
+            ExtensionsApi.devtoolsOptionsUriPropertyName:
+                optionsUriOverride ?? optionsFileUriString,
             ExtensionsApi.extensionNamePropertyName: extensionName,
             if (enable != null)
               ExtensionsApi.enabledStatePropertyName: enable.toString(),
@@ -178,6 +184,37 @@ void main() {
         deeplinkManager: FakeDeeplinkManager(),
       );
     }
+
+    test('rejects a devtoolsOptionsUri that is not a devtools_options.yaml '
+        'file', () async {
+      await serveExtensions(extensionsManager);
+      const invalidUris = [
+        // Wrong file name.
+        'file:///tmp/evil.txt',
+        'file:///tmp/devtools_options.yaml.bak',
+        // Non-file scheme.
+        'https://evil.example.com/devtools_options.yaml',
+        // UNC path / non-empty host.
+        'file://remotehost/share/devtools_options.yaml',
+      ];
+      for (final invalidUri in invalidUris) {
+        final response = await sendEnabledStateRequest(
+          extensionName: 'drift',
+          optionsUriOverride: invalidUri,
+        );
+        expect(
+          response.statusCode,
+          HttpStatus.badRequest,
+          reason: 'expected $invalidUri to be rejected',
+        );
+      }
+    });
+
+    test('accepts a valid devtools_options.yaml file: URI', () async {
+      await serveExtensions(extensionsManager);
+      final response = await sendEnabledStateRequest(extensionName: 'drift');
+      expect(response.statusCode, HttpStatus.ok);
+    });
 
     test('options file does not exist until first acesss', () async {
       await serveExtensions(extensionsManager);
