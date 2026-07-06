@@ -15,6 +15,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
+* Fixed an issue where DevTools could get stuck in a disconnected state (e.g., after a Mac goes to sleep) by adding a manual "Reconnect" button to the disconnected screen. -
+  [#9838](https://github.com/flutter/devtools/issues/9838)
 * Resolve several memory leaks. - [#9857](https://github.com/flutter/devtools/pull/9857)
 * Fixed a bug where highlighted search matches in tables were unreadable in dark
   mode because the highlight color had become fully opaque. -
@@ -23,6 +25,10 @@ To learn more about DevTools, check out the
   the `~/.flutter-devtools/` directory and cannot resolve to arbitrary files
   on disk. -
   [#9844](https://github.com/flutter/devtools/pull/9844)
+* Validated the `devtoolsOptionsUri` parameter in the extension enabled-state
+  handler so it must be a `file:` URI named `devtools_options.yaml`, preventing
+  the DevTools server from writing to arbitrary file paths. -
+  [#9834](https://github.com/flutter/devtools/pull/9834)
 
 ## Inspector updates
 
