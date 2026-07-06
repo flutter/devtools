@@ -16,7 +16,7 @@ if [ "$PACKAGE" = "devtools_app_shared" ]; then
 
     echo "Checking formatting..."
     # Here, we use the dart instance from the flutter SDK.
-    $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
+    dart format --output=none --set-exit-if-changed .
 
     flutter test test/
     popd
@@ -28,7 +28,7 @@ elif [ "$PACKAGE" = "devtools_extensions" ]; then
 
     echo "Checking formatting..."
     # Here, we use the dart instance from the flutter SDK.
-    $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
+    dart format --output=none --set-exit-if-changed .
 
     # Note that this will _not_ test any tests in nested directories, if we add
     # any.
@@ -48,7 +48,7 @@ elif [ "$PACKAGE" = "devtools_shared" ]; then
 
     echo "Checking formatting..."
     # Here, we use the dart instance from the flutter SDK.
-    $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
+    dart format --output=none --set-exit-if-changed .
 
     dart test test/
     popd

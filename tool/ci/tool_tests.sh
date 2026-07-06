@@ -14,7 +14,7 @@ echo `pwd`
 
 echo "Checking formatting..."
 # Here, we use the dart instance from the flutter SDK.
-$(dirname $(which flutter))/dart format --output=none --set-exit-if-changed lib/ test/
+dart format --output=none --set-exit-if-changed lib/ test/
 
 flutter test test/
 popd
