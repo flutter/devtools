@@ -5,9 +5,6 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 -->
 # 14.0.0-wip
 
-* Validate the `devtoolsOptionsUri` query parameter in the extension enabled
-  state handler so it must be a `file:` URI named `devtools_options.yaml`,
-  preventing arbitrary file writes by the DevTools server process.
 * **Breaking changes**: `LocalFileSystem`, an extension which provided some handy
   helpers, has been refactored into an extension on the `file` package's
   `FileSystem` abstraction. In detail:
@@ -30,6 +27,12 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
     argument.
 * Update `LocalFileSystem` and `IOPersistentProperties` to use `package:file`
   instead of `dart:io` to allow mocking the file system.
+
+# 13.0.2
+
+* Validate the `devtoolsOptionsUri` query parameter in the extension enabled
+  state handler so it must be a `file:` URI named `devtools_options.yaml`,
+  preventing arbitrary file writes by the DevTools server process.
 * The minimum Dart SDK version is bumped to 3.11.0.
 * The minimum Flutter SDK version is bumped to 3.41.0.
 
