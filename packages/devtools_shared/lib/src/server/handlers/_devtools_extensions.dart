@@ -90,7 +90,8 @@ extension _ExtensionsApiHandler on Never {
     // separators, so the check holds for Windows file URIs as well. Requiring
     // an empty host rejects UNC paths (e.g. `file://server/share/...`) and
     // keeps `toFilePath()` from throwing on a non-local authority.
-    final isFileUri = devtoolsOptionsFileUri.scheme == 'file' &&
+    final isFileUri =
+        devtoolsOptionsFileUri.scheme == 'file' &&
         devtoolsOptionsFileUri.host.isEmpty;
     final fileName = isFileUri
         ? p.basename(devtoolsOptionsFileUri.toFilePath())
