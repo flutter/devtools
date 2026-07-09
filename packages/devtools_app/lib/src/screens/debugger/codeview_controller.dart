@@ -218,6 +218,9 @@ class CodeViewController extends DisposableController
     );
 
     if (succeeded) {
+      // The controller may have been disposed while awaiting the asynchronous
+      // location display setup.
+      if (disposed) return;
       // Update the scripts history (and make sure we don't react to the
       // subsequent event).
       scriptsHistory.current.removeListener(_scriptHistoryListener);
