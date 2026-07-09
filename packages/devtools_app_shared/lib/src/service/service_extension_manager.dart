@@ -148,7 +148,7 @@ final class ServiceExtensionManager with DisposerMixin {
     _pendingServiceExtensions.clear();
     await [
       for (final extension in extensionsToProcess)
-        _addServiceExtension(extension)
+        _addServiceExtension(extension),
     ].wait;
   }
 
@@ -184,11 +184,12 @@ final class ServiceExtensionManager with DisposerMixin {
         }
         await [
           for (final extension in extensionRpcs)
-            _maybeAddServiceExtension(extension)
+            _maybeAddServiceExtension(extension),
         ].wait;
       } else {
         await [
-          for (final extension in extensionRpcs) _addServiceExtension(extension)
+          for (final extension in extensionRpcs)
+            _addServiceExtension(extension),
         ].wait;
       }
     }
@@ -489,10 +490,8 @@ final class ServiceExtensionManager with DisposerMixin {
 
     _performActionAndClearMap(
       _serviceExtensionStates,
-      action: (state) => state.value = ServiceExtensionState(
-        enabled: false,
-        value: null,
-      ),
+      action: (state) =>
+          state.value = ServiceExtensionState(enabled: false, value: null),
     );
   }
 
@@ -572,21 +571,15 @@ final class ServiceExtensionManager with DisposerMixin {
   }
 
   ValueNotifier<ServiceExtensionState> _serviceExtensionState(String name) {
-    return _serviceExtensionStates.putIfAbsent(
-      name,
-      () {
-        final state = _enabledServiceExtensions[name];
-        return ValueNotifier(
-          state ?? ServiceExtensionState(enabled: false, value: null),
-        );
-      },
-    );
+    return _serviceExtensionStates.putIfAbsent(name, () {
+      final state = _enabledServiceExtensions[name];
+      return ValueNotifier(
+        state ?? ServiceExtensionState(enabled: false, value: null),
+      );
+    });
   }
 
-  void vmServiceOpened(
-    VmService service,
-    ConnectedApp connectedApp,
-  ) async {
+  void vmServiceOpened(VmService service, ConnectedApp connectedApp) async {
     _checkForFirstFrameStarted = false;
     cancelStreamSubscriptions();
     cancelListeners();
@@ -610,8 +603,9 @@ final class ServiceExtensionManager with DisposerMixin {
     final mainIsolateRef = _isolateManager.mainIsolate.value;
     if (mainIsolateRef != null) {
       _checkForFirstFrameStarted = false;
-      final mainIsolate =
-          await _isolateManager.isolateState(mainIsolateRef).isolate;
+      final mainIsolate = await _isolateManager
+          .isolateState(mainIsolateRef)
+          .isolate;
       if (mainIsolate != null) {
         await _registerMainIsolate(mainIsolate, mainIsolateRef);
       }
@@ -638,10 +632,7 @@ class ServiceExtensionState {
   }
 
   @override
-  int get hashCode => Object.hash(
-        enabled,
-        value,
-      );
+  int get hashCode => Object.hash(enabled, value);
 
   @override
   String toString() {

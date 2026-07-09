@@ -13,7 +13,6 @@ import '../../shared/globals.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/tab.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
-import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
 import 'panes/rebuild_stats/rebuild_stats.dart';
 import 'panes/timeline_events/timeline_events_view.dart';
@@ -32,20 +31,18 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
   late PerformanceController controller;
 
-  late FlutterFramesController _flutterFramesController;
-
   FlutterFrame? _selectedFlutterFrame;
 
   @override
   void initState() {
     super.initState();
     controller = screenControllers.lookup<PerformanceController>();
-    _flutterFramesController = controller.flutterFramesController;
+    final flutterFramesController = controller.flutterFramesController;
 
-    _selectedFlutterFrame = _flutterFramesController.selectedFrame.value;
-    addAutoDisposeListener(_flutterFramesController.selectedFrame, () {
+    _selectedFlutterFrame = flutterFramesController.selectedFrame.value;
+    addAutoDisposeListener(flutterFramesController.selectedFrame, () {
       setState(() {
-        _selectedFlutterFrame = _flutterFramesController.selectedFrame.value;
+        _selectedFlutterFrame = flutterFramesController.selectedFrame.value;
       });
     });
   }
@@ -80,17 +77,27 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         .map((t) => t.featureController)
         .toList();
 
-    // If there is not an active feature, activate the first.
+    // The set of visible tabs can differ between when offline data was exported
+    // and when it is loaded (e.g. the Frame Analysis and Rebuild Stats tabs are
+    // only shown for Flutter apps with the relevant data). Clamp the restored
+    // tab index to the tabs that are actually available to avoid an
+    // out-of-bounds selection.
+    final selectedTabIndex = controller.selectedFeatureTabIndex.clamp(
+      0,
+      tabs.length - 1,
+    );
+
+    // If there is not an active feature, activate the selected one.
     if (featureControllers.firstWhereOrNull(
           (controller) => controller?.isActiveFeature ?? false,
         ) ==
         null) {
-      _setActiveFeature(0, featureControllers[0]);
+      _setActiveFeature(selectedTabIndex, featureControllers[selectedTabIndex]);
     }
 
     return AnalyticsTabbedView(
       tabs: tabs,
-      initialSelectedIndex: controller.selectedFeatureTabIndex,
+      initialSelectedIndex: selectedTabIndex,
       gaScreen: gac.performance,
       onTabChanged: (int index) {
         _setActiveFeature(index, featureControllers[index]);

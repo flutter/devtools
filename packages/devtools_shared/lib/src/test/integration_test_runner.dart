@@ -67,7 +67,9 @@ class IntegrationTestRunner with IOMixin {
 
       debugLog('> flutter ${flutterDriveArgs.join(' ')}');
       final process = await Process.start(
-          Platform.isWindows ? 'flutter.bat' : 'flutter', flutterDriveArgs);
+        Platform.isWindows ? 'flutter.bat' : 'flutter',
+        flutterDriveArgs,
+      );
 
       bool stdOutWriteInProgress = false;
       bool stdErrWriteInProgress = false;
@@ -119,12 +121,15 @@ class IntegrationTestRunner with IOMixin {
       );
 
       bool testTimedOut = false;
-      await process.exitCode.timeout(const Duration(minutes: 8), onTimeout: () {
-        testTimedOut = true;
-        // TODO(srawlins): Refactor the retry situation to catch a
-        // TimeoutException, and not recursively call `runTest`.
-        return -1;
-      });
+      await process.exitCode.timeout(
+        const Duration(minutes: 8),
+        onTimeout: () {
+          testTimedOut = true;
+          // TODO(srawlins): Refactor the retry situation to catch a
+          // TimeoutException, and not recursively call `runTest`.
+          return -1;
+        },
+      );
 
       debugLog(
         'shutting down processes because '
@@ -172,7 +177,7 @@ class _IntegrationTestResult {
     final result = json[resultKey] == 'true';
     final failureDetails =
         (json[failureDetailsKey] as List<Object?>).cast<String>().firstOrNull ??
-            '{}';
+        '{}';
     final failureDetailsMap =
         jsonDecode(failureDetails) as Map<String, Object?>;
     final methodName = failureDetailsMap[methodNameKey] as String?;
@@ -204,8 +209,8 @@ class IntegrationTestRunnerArgs {
     List<String> args, {
     bool verifyValidTarget = true,
     void Function(ArgParser)? addExtraArgs,
-  })  : rawArgs = args,
-        argResults = buildArgParser(addExtraArgs: addExtraArgs).parse(args) {
+  }) : rawArgs = args,
+       argResults = buildArgParser(addExtraArgs: addExtraArgs).parse(args) {
     if (verifyValidTarget) {
       final target = argResults[testTargetArg];
       assert(
@@ -261,15 +266,9 @@ class IntegrationTestRunnerArgs {
   static const _shardArg = 'shard';
 
   /// Builds an arg parser for DevTools integration tests.
-  static ArgParser buildArgParser({
-    void Function(ArgParser)? addExtraArgs,
-  }) {
+  static ArgParser buildArgParser({void Function(ArgParser)? addExtraArgs}) {
     final argParser = ArgParser()
-      ..addFlag(
-        _helpArg,
-        abbr: 'h',
-        help: 'Prints help output.',
-      )
+      ..addFlag(_helpArg, abbr: 'h', help: 'Prints help output.')
       ..addOption(
         testTargetArg,
         abbr: 't',
@@ -293,7 +292,8 @@ class IntegrationTestRunnerArgs {
       ..addOption(
         _shardArg,
         valueHelp: '1/3',
-        help: 'The shard number for this run out of the total number of shards '
+        help:
+            'The shard number for this run out of the total number of shards '
             '(e.g. 1/3)',
       );
     addExtraArgs?.call(argParser);

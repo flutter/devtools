@@ -49,10 +49,9 @@ void main() {
       includeDependenciesWithExtensions: includeDependenciesWithExtensions,
       includeBadExtension: includeBadExtension,
     );
-    await testDtdConnection!.setIDEWorkspaceRoots(
-      dtd!.info!.secret!,
-      [extensionTestManager.packagesRootUri],
-    );
+    await testDtdConnection!.setIDEWorkspaceRoots(dtd!.info!.secret!, [
+      extensionTestManager.packagesRootUri,
+    ]);
   }
 
   Future<Response> serveExtensions(
@@ -66,8 +65,9 @@ void main() {
         host: 'localhost',
         path: ExtensionsApi.apiServeAvailableExtensions,
         queryParameters: {
-          ExtensionsApi.packageRootUriPropertyName:
-              includeRuntimeRoot ? extensionTestManager.runtimeAppRoot : null,
+          ExtensionsApi.packageRootUriPropertyName: includeRuntimeRoot
+              ? extensionTestManager.runtimeAppRoot
+              : null,
         },
       ),
     );
@@ -128,9 +128,7 @@ void main() {
     test(
       'fails when an exception is thrown and there are no valid extensions',
       () async {
-        await initializeTestDirectory(
-          includeDependenciesWithExtensions: false,
-        );
+        await initializeTestDirectory(includeDependenciesWithExtensions: false);
         extensionsManager = _TestExtensionsManager();
         final response = await serveExtensions(extensionsManager);
         expect(response.statusCode, HttpStatus.internalServerError);
@@ -146,19 +144,24 @@ void main() {
 
   group(ExtensionsApi.apiExtensionEnabledState, () {
     late File optionsFile;
-    late final optionsFileUriString = p.posix.join(
-      extensionTestManager.runtimeAppRoot,
-      devtoolsOptionsFileName,
-    );
+    late String optionsFileUriString;
 
     setUp(() async {
       await initializeTestDirectory();
+      // Recompute per test: each test gets a fresh temp directory, so this
+      // must not be cached across tests (otherwise it would point at a
+      // previous test's directory).
+      optionsFileUriString = p.posix.join(
+        extensionTestManager.runtimeAppRoot,
+        devtoolsOptionsFileName,
+      );
       optionsFile = File.fromUri(Uri.parse(optionsFileUriString));
     });
 
     Future<Response> sendEnabledStateRequest({
       required String extensionName,
       bool? enable,
+      String? optionsUriOverride,
     }) async {
       final request = Request(
         'post',
@@ -167,7 +170,8 @@ void main() {
           host: 'localhost',
           path: ExtensionsApi.apiExtensionEnabledState,
           queryParameters: {
-            ExtensionsApi.devtoolsOptionsUriPropertyName: optionsFileUriString,
+            ExtensionsApi.devtoolsOptionsUriPropertyName:
+                optionsUriOverride ?? optionsFileUriString,
             ExtensionsApi.extensionNamePropertyName: extensionName,
             if (enable != null)
               ExtensionsApi.enabledStatePropertyName: enable.toString(),
@@ -180,6 +184,37 @@ void main() {
         deeplinkManager: FakeDeeplinkManager(),
       );
     }
+
+    test('rejects a devtoolsOptionsUri that is not a devtools_options.yaml '
+        'file', () async {
+      await serveExtensions(extensionsManager);
+      const invalidUris = [
+        // Wrong file name.
+        'file:///tmp/evil.txt',
+        'file:///tmp/devtools_options.yaml.bak',
+        // Non-file scheme.
+        'https://evil.example.com/devtools_options.yaml',
+        // UNC path / non-empty host.
+        'file://remotehost/share/devtools_options.yaml',
+      ];
+      for (final invalidUri in invalidUris) {
+        final response = await sendEnabledStateRequest(
+          extensionName: 'drift',
+          optionsUriOverride: invalidUri,
+        );
+        expect(
+          response.statusCode,
+          HttpStatus.badRequest,
+          reason: 'expected $invalidUri to be rejected',
+        );
+      }
+    });
+
+    test('accepts a valid devtools_options.yaml file: URI', () async {
+      await serveExtensions(extensionsManager);
+      final response = await sendEnabledStateRequest(extensionName: 'drift');
+      expect(response.statusCode, HttpStatus.ok);
+    });
 
     test('options file does not exist until first acesss', () async {
       await serveExtensions(extensionsManager);
@@ -202,16 +237,16 @@ void main() {
         ExtensionEnabledState.none.name,
       );
 
-// TODO(kenz): why is existsSync() returning false when I can verify the file
-// contents on the file system at [optionsFileUriString]?
-//       expect(optionsFile.existsSync(), isTrue);
-//       expect(
-//         optionsFile.readAsStringSync(),
-//         '''
-// description: This file stores settings for Dart & Flutter DevTools.
-// documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
-// extensions:''',
-//       );
+      // TODO(kenz): why is existsSync() returning false when I can verify the file
+      // contents on the file system at [optionsFileUriString]?
+      //       expect(optionsFile.existsSync(), isTrue);
+      //       expect(
+      //         optionsFile.readAsStringSync(),
+      //         '''
+      // description: This file stores settings for Dart & Flutter DevTools.
+      // documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
+      // extensions:''',
+      //       );
 
       response = await sendEnabledStateRequest(
         extensionName: 'drift',
@@ -233,16 +268,16 @@ void main() {
         ExtensionEnabledState.disabled.name,
       );
 
-//       expect(optionsFile.existsSync(), isTrue);
-//       expect(
-//         optionsFile.readAsStringSync(),
-//         '''
-// description: This file stores settings for Dart & Flutter DevTools.
-// documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
-// extensions:
-//   - drift: true
-//   - provider: false''',
-//       );
+      //       expect(optionsFile.existsSync(), isTrue);
+      //       expect(
+      //         optionsFile.readAsStringSync(),
+      //         '''
+      // description: This file stores settings for Dart & Flutter DevTools.
+      // documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
+      // extensions:
+      //   - drift: true
+      //   - provider: false''',
+      //       );
     });
   });
 }

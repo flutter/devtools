@@ -114,21 +114,20 @@ class DevToolsRepo {
         // Do not include the top level devtools/packages directory in the results
         // even though it has a pubspec.yaml file. Also skip any directories
         // specified by [skip].
-        final reason =
-            isTopLevelPackagesDir
-                ? 'each DevTools package is analyzed individually'
-                : '${skip.toString()} directories are intentionally skipped';
+        final reason = isTopLevelPackagesDir
+            ? 'each DevTools package is analyzed individually'
+            : '${skip.toString()} directories are intentionally skipped';
         print('Skipping ${dir.path} in _collectPackages because $reason.');
       } else {
         final ancestor = result.firstWhereOrNull(
           (p) =>
-          // Remove the last segment of [dir]'s pathSegments to ensure we
-          // are only checking ancestors and not sibling directories with
-          // similar names.
-          (List.from(dir.uri.pathSegments)..safeRemoveLast())
-              // TODO(kenz): this may cause issues for Windows paths.
-              .join('/')
-              .startsWith(p.packagePath),
+              // Remove the last segment of [dir]'s pathSegments to ensure we
+              // are only checking ancestors and not sibling directories with
+              // similar names.
+              (List.from(dir.uri.pathSegments)..safeRemoveLast())
+                  // TODO(kenz): this may cause issues for Windows paths.
+                  .join('/')
+                  .startsWith(p.packagePath),
         );
         final ancestorDirectoryAdded = ancestor != null;
         if (!includeSubdirectories && ancestorDirectoryAdded) {

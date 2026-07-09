@@ -39,22 +39,12 @@ class AppLinkSettings {
   factory AppLinkSettings.fromErrorJson(String json) {
     final jsonObject = jsonDecode(json) as Map;
     final message = jsonObject[_kErrorKey]! as String;
-    return AppLinkSettings._(
-      '',
-      false,
-      <AndroidDeeplink>[],
-      message,
-    );
+    return AppLinkSettings._('', false, <AndroidDeeplink>[], message);
   }
 
   /// Used when the server can't retrieve app link settings.
   factory AppLinkSettings.error(String message) {
-    return AppLinkSettings._(
-      '',
-      false,
-      <AndroidDeeplink>[],
-      message,
-    );
+    return AppLinkSettings._('', false, <AndroidDeeplink>[], message);
   }
 
   static const _kApplicationIdKey = 'applicationId';

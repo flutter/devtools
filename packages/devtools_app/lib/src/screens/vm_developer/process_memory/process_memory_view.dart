@@ -88,6 +88,16 @@ class _VMProcessMemoryViewBodyState extends State<VMProcessMemoryViewBody>
   }
 
   @override
+  void dispose() {
+    if (_tabControllerInitialized) {
+      _tabController.removeListener(_onTabChanged);
+      _tabController.dispose();
+    }
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(VMProcessMemoryViewBody oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.tabs.length != oldWidget.tabs.length) {

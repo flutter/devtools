@@ -120,6 +120,15 @@ class EditorClient extends DisposableController
     }
   }
 
+  @override
+  void dispose() {
+    _editableArgumentsApiIsRegistered.dispose();
+    unawaited(_activeLocationChangedController.close());
+    unawaited(_eventController.close());
+    unawaited(_editorServiceChangedController.close());
+    super.dispose();
+  }
+
   void _handleServiceRegistration({
     required String service,
     required String method,

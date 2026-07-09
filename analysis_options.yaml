@@ -186,6 +186,8 @@ dart_code_metrics:
     - avoid-explicit-type-declaration
     # - ban-name # TODO(polina-c): add configuration
     # - binary-expression-operand-order Some nice catches but too many false positives to enable.
+    - dispose-class-fields
+    - dispose-fields
     - double-literal-format
     # - format-comment TODO(jacobr): enable this one after fixing violations.
     # TODO(jacobr): enable member-ordering. This catches a bunch of real style

@@ -212,6 +212,10 @@ class NetworkController extends DevToolsScreenController
     selectedRequest.dispose();
     _recordingNotifier.dispose();
     _currentNetworkRequests.dispose();
+    for (final r in _httpRequests ?? <DartIOHttpRequestData>[]) {
+      r.dispose();
+    }
+    _httpRequests?.clear();
     super.dispose();
   }
 

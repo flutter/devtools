@@ -3,10 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 class RegisteredService {
-  const RegisteredService({
-    required this.service,
-    required this.title,
-  });
+  const RegisteredService({required this.service, required this.title});
 
   final String service;
   final String title;

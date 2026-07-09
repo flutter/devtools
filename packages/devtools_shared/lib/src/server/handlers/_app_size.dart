@@ -19,7 +19,7 @@ extension _AppSizeHandler on Never {
     if (missingRequiredParams != null) return missingRequiredParams;
 
     final filePath = queryParams[AppSizeApi.baseAppSizeFilePropertyName]!;
-    final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
+    final fileJson = fileSystem.devToolsFileAsJson(filePath);
     if (fileJson == null) {
       return api.badRequest('No JSON file available at $filePath.');
     }
@@ -39,7 +39,7 @@ extension _AppSizeHandler on Never {
     if (missingRequiredParams != null) return missingRequiredParams;
 
     final filePath = queryParams[AppSizeApi.testAppSizeFilePropertyName]!;
-    final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
+    final fileJson = fileSystem.devToolsFileAsJson(filePath);
     if (fileJson == null) {
       return api.badRequest('No JSON file available at $filePath.');
     }

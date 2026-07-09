@@ -22,9 +22,11 @@ Future<void> runWithRetry({
   FutureOr<bool> Function()? stopCondition,
   FutureOr<void> Function(int attempt)? onRetry,
 }) async {
-  for (var attempt = 1;
-      attempt <= maxRetries && (await stopCondition?.call() != true);
-      attempt++) {
+  for (
+    var attempt = 1;
+    attempt <= maxRetries && (await stopCondition?.call() != true);
+    attempt++
+  ) {
     try {
       await callback();
       break;

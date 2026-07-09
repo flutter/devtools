@@ -8,40 +8,45 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('FlutterVersion', () {
     test('infers semantic version', () {
-      var flutterVersion =
-          FlutterVersion.parse({'frameworkVersion': '1.10.7-pre.42'});
+      var flutterVersion = FlutterVersion.parse({
+        'frameworkVersion': '1.10.7-pre.42',
+      });
       expect(flutterVersion.major, equals(1));
       expect(flutterVersion.minor, equals(10));
       expect(flutterVersion.patch, equals(7));
       expect(flutterVersion.preReleaseMajor, equals(42));
       expect(flutterVersion.preReleaseMinor, equals(0));
 
-      flutterVersion =
-          FlutterVersion.parse({'frameworkVersion': '1.10.7-pre42'});
+      flutterVersion = FlutterVersion.parse({
+        'frameworkVersion': '1.10.7-pre42',
+      });
       expect(flutterVersion.major, equals(1));
       expect(flutterVersion.minor, equals(10));
       expect(flutterVersion.patch, equals(7));
       expect(flutterVersion.preReleaseMajor, equals(42));
       expect(flutterVersion.preReleaseMinor, equals(0));
 
-      flutterVersion =
-          FlutterVersion.parse({'frameworkVersion': '1.10.11-pre42'});
+      flutterVersion = FlutterVersion.parse({
+        'frameworkVersion': '1.10.11-pre42',
+      });
       expect(flutterVersion.major, equals(1));
       expect(flutterVersion.minor, equals(10));
       expect(flutterVersion.patch, equals(11));
       expect(flutterVersion.preReleaseMajor, equals(42));
       expect(flutterVersion.preReleaseMinor, equals(0));
 
-      flutterVersion =
-          FlutterVersion.parse({'frameworkVersion': '2.3.0-17.0.pre.355'});
+      flutterVersion = FlutterVersion.parse({
+        'frameworkVersion': '2.3.0-17.0.pre.355',
+      });
       expect(flutterVersion.major, equals(2));
       expect(flutterVersion.minor, equals(3));
       expect(flutterVersion.patch, equals(0));
       expect(flutterVersion.preReleaseMajor, equals(17));
       expect(flutterVersion.preReleaseMinor, equals(0));
 
-      flutterVersion =
-          FlutterVersion.parse({'frameworkVersion': '2.3.0-17.0.pre'});
+      flutterVersion = FlutterVersion.parse({
+        'frameworkVersion': '2.3.0-17.0.pre',
+      });
       expect(flutterVersion.major, equals(2));
       expect(flutterVersion.minor, equals(3));
       expect(flutterVersion.patch, equals(0));
@@ -62,8 +67,9 @@ void main() {
       expect(flutterVersion.preReleaseMajor, isNull);
       expect(flutterVersion.preReleaseMinor, isNull);
 
-      flutterVersion =
-          FlutterVersion.parse({'frameworkVersion': 'bad-version'});
+      flutterVersion = FlutterVersion.parse({
+        'frameworkVersion': 'bad-version',
+      });
       expect(flutterVersion.major, equals(0));
       expect(flutterVersion.minor, equals(0));
       expect(flutterVersion.patch, equals(0));
@@ -72,33 +78,44 @@ void main() {
     group('identifies correct Flutter channel', () {
       test('uses channel string if it exists', () {
         expect(
-            FlutterVersion.identifyChannel('ignored-version',
-                channelStr: 'dev'),
-            equals(FlutterChannel.dev));
+          FlutterVersion.identifyChannel('ignored-version', channelStr: 'dev'),
+          equals(FlutterChannel.dev),
+        );
 
         expect(
-            FlutterVersion.identifyChannel('ignored-version',
-                channelStr: 'beta'),
-            equals(FlutterChannel.beta));
+          FlutterVersion.identifyChannel('ignored-version', channelStr: 'beta'),
+          equals(FlutterChannel.beta),
+        );
 
         expect(
-            FlutterVersion.identifyChannel('ignored-version',
-                channelStr: 'stable'),
-            equals(FlutterChannel.stable));
+          FlutterVersion.identifyChannel(
+            'ignored-version',
+            channelStr: 'stable',
+          ),
+          equals(FlutterChannel.stable),
+        );
       });
 
       test('identifies channel from version string', () {
-        expect(FlutterVersion.identifyChannel('2.3.0-17.0.pre.355'),
-            equals(FlutterChannel.dev));
+        expect(
+          FlutterVersion.identifyChannel('2.3.0-17.0.pre.355'),
+          equals(FlutterChannel.dev),
+        );
 
-        expect(FlutterVersion.identifyChannel('2.3.0-17.0.pre-355'),
-            equals(FlutterChannel.dev));
+        expect(
+          FlutterVersion.identifyChannel('2.3.0-17.0.pre-355'),
+          equals(FlutterChannel.dev),
+        );
 
-        expect(FlutterVersion.identifyChannel('2.3.0-17.0.pre'),
-            equals(FlutterChannel.beta));
+        expect(
+          FlutterVersion.identifyChannel('2.3.0-17.0.pre'),
+          equals(FlutterChannel.beta),
+        );
 
-        expect(FlutterVersion.identifyChannel('2.3.0'),
-            equals(FlutterChannel.stable));
+        expect(
+          FlutterVersion.identifyChannel('2.3.0'),
+          equals(FlutterChannel.stable),
+        );
 
         expect(FlutterVersion.identifyChannel('bad-version'), isNull);
 

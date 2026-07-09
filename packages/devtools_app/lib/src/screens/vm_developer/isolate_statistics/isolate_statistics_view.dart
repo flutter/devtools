@@ -341,6 +341,12 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
   final selectedPort = ValueNotifier<InstanceRef?>(null);
 
   @override
+  void dispose() {
+    selectedPort.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ports = widget.controller.ports;
     return OutlineDecoration(

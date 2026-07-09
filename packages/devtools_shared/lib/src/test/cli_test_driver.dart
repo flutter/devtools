@@ -28,8 +28,9 @@ class AppFixture {
     _onAppStarted = lines.first;
 
     unawaited(serviceConnection.streamListen(EventStreams.kIsolate));
-    _isolateEventStreamSubscription =
-        serviceConnection.onIsolateEvent.listen((Event event) {
+    _isolateEventStreamSubscription = serviceConnection.onIsolateEvent.listen((
+      Event event,
+    ) {
       if (event.kind == EventKind.kIsolateExit) {
         isolates.remove(event.isolate);
       } else {
@@ -86,27 +87,30 @@ class CliAppFixture extends AppFixture {
     List<IsolateRef> isolates,
     Future<void> Function()? onTeardown,
   ) : super._(
-          process,
-          lines,
-          serviceUri,
-          serviceConnection,
-          isolates,
-          onTeardown,
-        );
+        process,
+        lines,
+        serviceUri,
+        serviceConnection,
+        isolates,
+        onTeardown,
+      );
 
   final String appScriptPath;
 
   static Future<CliAppFixture> create(String appScriptPath) async {
-    final dartVmServicePrefix =
-        RegExp('(Observatory|The Dart VM service is) listening on ');
-
-    final process = await Process.start(
-      Platform.resolvedExecutable,
-      <String>['--observe=0', '--pause-isolates-on-start', appScriptPath],
+    final dartVmServicePrefix = RegExp(
+      '(Observatory|The Dart VM service is) listening on ',
     );
 
-    final Stream<String> lines =
-        process.stdout.transform(utf8.decoder).transform(const LineSplitter());
+    final process = await Process.start(Platform.resolvedExecutable, <String>[
+      '--observe=0',
+      '--pause-isolates-on-start',
+      appScriptPath,
+    ]);
+
+    final Stream<String> lines = process.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter());
     final lineController = StreamController<String>.broadcast();
     final completer = Completer<String>();
 
@@ -166,16 +170,18 @@ class CliAppFixture extends AppFixture {
       const skipId = 'skip';
       final vm = await serviceConnection.getVM();
       final isolates = await vm.isolates!
-          .map((ref) => serviceConnection
-                  .getIsolate(ref.id!)
-                  // Calling getIsolate() can sometimes return a collected sentinel
-                  // for an isolate that hasn't started yet. We can just ignore these
-                  // as on the next trip around the Isolate will be returned.
-                  // https://github.com/dart-lang/sdk/issues/33747
-                  .catchError((Object error) {
-                print('getIsolate(${ref.id}) failed, skipping\n$error');
-                return Future<Isolate>.value(Isolate(id: skipId));
-              }))
+          .map(
+            (ref) =>
+                serviceConnection.getIsolate(ref.id!)
+                // Calling getIsolate() can sometimes return a collected sentinel
+                // for an isolate that hasn't started yet. We can just ignore these
+                // as on the next trip around the Isolate will be returned.
+                // https://github.com/dart-lang/sdk/issues/33747
+                .catchError((Object error) {
+                  print('getIsolate(${ref.id}) failed, skipping\n$error');
+                  return Future<Isolate>.value(Isolate(id: skipId));
+                }),
+          )
           .wait;
       foundIsolate = isolates.firstWhereOrNull(
         (isolate) =>

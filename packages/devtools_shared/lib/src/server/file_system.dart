@@ -3,81 +3,92 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io show Platform, File;
 
+import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 import 'devtools_store.dart';
 
-/// A namespace local file system utlities.
-extension LocalFileSystem on Never {
-  static String _userHomeDir() {
-    final envKey = Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-    return Platform.environment[envKey] ?? '.';
+/// The real, local file system, which can be avoided in tests.
+const FileSystem fileSystem = LocalFileSystem();
+
+extension FileSystemExtension on FileSystem {
+  static String get _userHomeDir {
+    final envKey = io.Platform.operatingSystem == 'windows'
+        ? 'APPDATA'
+        : 'HOME';
+    return io.Platform.environment[envKey] ?? '.';
   }
 
-  /// Returns the path to the DevTools storage directory.
-  static String devToolsDir() {
-    return path.join(_userHomeDir(), '.flutter-devtools');
+  /// The path to the DevTools storage directory.
+  static String get devToolsDir {
+    return path.join(_userHomeDir, '.flutter-devtools');
   }
 
-  /// Moves the .devtools file to ~/.flutter-devtools/.devtools if the .devtools
-  /// file exists in the user's home directory.
-  static void maybeMoveLegacyDevToolsStore() {
-    final file = File(path.join(_userHomeDir(), DevToolsUsage.storeName));
-    if (file.existsSync()) {
-      ensureDevToolsDirectory();
-      file.copySync(devToolsStoreLocation());
-      file.deleteSync();
+  /// Moves the `.devtools` file to `~/.flutter-devtools/.devtools` if the
+  /// `.devtools` file exists in the user's home directory.
+  void maybeMoveLegacyDevToolsStore() {
+    final storeFile = file(path.join(_userHomeDir, DevToolsUsage.storeName));
+    if (storeFile.existsSync()) {
+      _ensureDevToolsDirectory();
+      storeFile.copySync(devToolsStoreLocation);
+      storeFile.deleteSync();
     }
   }
 
-  static String devToolsStoreLocation() {
-    return path.join(devToolsDir(), DevToolsUsage.storeName);
+  static String get devToolsStoreLocation {
+    return path.join(devToolsDir, DevToolsUsage.storeName);
   }
 
-  /// Creates the ~/.flutter-devtools directory if it does not already exist.
-  static void ensureDevToolsDirectory() {
-    Directory(devToolsDir()).createSync();
+  /// Creates the `~/.flutter-devtools` directory if it does not already exist.
+  void _ensureDevToolsDirectory() {
+    directory(devToolsDir).createSync();
   }
 
   /// Returns a DevTools file from the given path.
   ///
   /// Only files within ~/.flutter-devtools/ can be accessed.
-  static File? devToolsFileFromPath(String pathFromDevToolsDir) {
-    if (pathFromDevToolsDir.contains('..')) {
+  File? devToolsFileFromPath(String relativePath) {
+    if (relativePath.contains('..') || path.isAbsolute(relativePath)) {
       // The passed in path should not be able to walk up the directory tree
-      // outside of the ~/.flutter-devtools/ directory.
+      // outside of the `~/.flutter-devtools/` directory. It must also not be an
+      // absolute path: `path.join()` discards the base directory when its
+      // second argument is absolute, which would otherwise allow reading an
+      // arbitrary file on disk (e.g. an absolute path to a credentials `.json`
+      // file).
       return null;
     }
 
-    ensureDevToolsDirectory();
-    final file = File(path.join(devToolsDir(), pathFromDevToolsDir));
-    if (!file.existsSync()) {
-      return null;
-    }
-    return file;
+    _ensureDevToolsDirectory();
+    final targetFile = file(path.join(devToolsDir, relativePath));
+    // Defense in depth: ensure the resolved path is actually contained within
+    // the DevTools directory.
+    if (!path.isWithin(devToolsDir, targetFile.path)) return null;
+    if (!targetFile.existsSync()) return null;
+    return targetFile;
   }
 
-  /// Returns a DevTools file from the given path as encoded json.
+  /// Returns a DevTools file from the given path as encoded JSON.
   ///
-  /// Only files within ~/.flutter-devtools/ can be accessed.
-  static String? devToolsFileAsJson(String pathFromDevToolsDir) {
-    final file = devToolsFileFromPath(pathFromDevToolsDir);
-    if (file == null) return null;
+  /// Only files within `~/.flutter-devtools/` can be accessed.
+  String? devToolsFileAsJson(String relativePath) {
+    final targetFile = devToolsFileFromPath(relativePath);
+    if (targetFile == null) return null;
 
-    final fileName = path.basename(file.path);
+    final fileName = path.basename(targetFile.path);
     if (!fileName.endsWith('.json')) return null;
 
-    final content = file.readAsStringSync();
+    final content = targetFile.readAsStringSync();
     final json = jsonDecode(content) as Map;
-    json['lastModifiedTime'] = file.lastModifiedSync().toString();
+    json['lastModifiedTime'] = targetFile.lastModifiedSync().toString();
     return jsonEncode(json);
   }
 
   /// Whether the flutter store file exists.
-  static bool flutterStoreExists() {
-    final flutterStore = File(path.join(_userHomeDir(), '.flutter'));
+  bool get flutterStoreExists {
+    final flutterStore = file(path.join(_userHomeDir, '.flutter'));
     return flutterStore.existsSync();
   }
 }
@@ -86,18 +97,23 @@ class IOPersistentProperties {
   IOPersistentProperties(
     this.name, {
     String? documentDirPath,
-  }) {
+    FileSystem fs = fileSystem,
+  }) : _fs = fs {
     final fileName = name.replaceAll(' ', '_');
-    documentDirPath ??= LocalFileSystem._userHomeDir();
-    _file = File(path.join(documentDirPath, fileName));
+    documentDirPath ??= FileSystemExtension._userHomeDir;
+    _file = _fs.file(path.join(documentDirPath, fileName));
     if (!_file.existsSync()) {
       _file.createSync(recursive: true);
     }
     syncSettings();
   }
 
-  IOPersistentProperties.fromFile(File file) : name = path.basename(file.path) {
-    _file = file;
+  // TODO(srawlins): This is unused in any devtools code. Even in tests. Either
+  // test it, if it is needed by users, or remove it.
+  IOPersistentProperties.fromFile(io.File file)
+    : name = path.basename(file.path),
+      _fs = file is File ? file.fileSystem : fileSystem {
+    _file = file is File ? file : _fs.file(file.path);
     if (!_file.existsSync()) {
       _file.createSync(recursive: true);
     }
@@ -106,7 +122,9 @@ class IOPersistentProperties {
 
   final String name;
 
-  late File _file;
+  final FileSystem _fs;
+
+  late final File _file;
 
   late Map<String, Object?> _map;
 

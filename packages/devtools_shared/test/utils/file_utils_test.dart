@@ -46,10 +46,9 @@ void main() {
 
       _setupTestDirectoryStructure();
 
-      await testDtdConnection!.setIDEWorkspaceRoots(
-        dtd!.info!.secret!,
-        [Uri.parse(projectRootUriString)],
-      );
+      await testDtdConnection!.setIDEWorkspaceRoots(dtd!.info!.secret!, [
+        Uri.parse(projectRootUriString),
+      ]);
     });
 
     tearDown(() async {
@@ -78,12 +77,9 @@ void main() {
     }
 
     test('packageRootFromFileUriString throw exception for invalid input', () {
-      expect(
-        () async {
-          await packageRootFromFileUriString('/not/a/valid/file/uri');
-        },
-        throwsA(isA<AssertionError>()),
-      );
+      expect(() async {
+        await packageRootFromFileUriString('/not/a/valid/file/uri');
+      }, throwsA(isA<AssertionError>()));
     });
 
     for (final useDtd in const [true, false]) {
@@ -113,10 +109,7 @@ void main() {
           );
 
           // Dart file under 'benchmark'
-          await verifyPackageRoot(
-            benchmarkFile.uri.toString(),
-            useDtd: useDtd,
-          );
+          await verifyPackageRoot(benchmarkFile.uri.toString(), useDtd: useDtd);
           await verifyPackageRoot(
             benchmarkSubFile.uri.toString(),
             useDtd: useDtd,
@@ -132,14 +125,20 @@ void main() {
           // Dart file in a nested project.
           await verifyPackageRoot(
             nestedProjectLibFile.uri.toString(),
-            expected:
-                p.posix.join(projectRootUriString, 'example', 'nested_project'),
+            expected: p.posix.join(
+              projectRootUriString,
+              'example',
+              'nested_project',
+            ),
             useDtd: useDtd,
           );
           await verifyPackageRoot(
             nestedProjectTestFile.uri.toString(),
-            expected:
-                p.posix.join(projectRootUriString, 'example', 'nested_project'),
+            expected: p.posix.join(
+              projectRootUriString,
+              'example',
+              'nested_project',
+            ),
             useDtd: useDtd,
           );
 
@@ -201,19 +200,23 @@ void main() {
 ///       foo_test.dart
 void _setupTestDirectoryStructure() {
   testDirectory = Directory.systemTemp.createTempSync();
-  final projectRootDirectory =
-      Directory(p.joinAll([testDirectory.path, ...projectRootParts]))
-        ..createSync(recursive: true);
-  final projectRootDirectoryUriString =
-      Uri.file(projectRootDirectory.uri.toFilePath()).toString();
+  final projectRootDirectory = Directory(
+    p.joinAll([testDirectory.path, ...projectRootParts]),
+  )..createSync(recursive: true);
+  final projectRootDirectoryUriString = Uri.file(
+    projectRootDirectory.uri.toFilePath(),
+  ).toString();
 
   // Remove the trailing slash and set the value of [projectRoot].
   projectRootUriString = projectRootDirectoryUriString.substring(
-      0, projectRootDirectoryUriString.length - 1);
+    0,
+    projectRootDirectoryUriString.length - 1,
+  );
 
   // Set up the project root contents.
-  Directory(p.join(projectRootDirectory.path, '.dart_tool'))
-      .createSync(recursive: true);
+  Directory(
+    p.join(projectRootDirectory.path, '.dart_tool'),
+  ).createSync(recursive: true);
   libFile = File(p.join(projectRootDirectory.path, 'lib', 'foo.dart'))
     ..createSync(recursive: true);
   libSubFile = File(p.join(projectRootDirectory.path, 'lib', 'sub', 'foo.dart'))
@@ -238,17 +241,17 @@ void _setupTestDirectoryStructure() {
       'foo_test.dart',
     ),
   )..createSync(recursive: true);
-  benchmarkFile =
-      File(p.join(projectRootDirectory.path, 'benchmark', 'foo.dart'))
-        ..createSync(recursive: true);
+  benchmarkFile = File(
+    p.join(projectRootDirectory.path, 'benchmark', 'foo.dart'),
+  )..createSync(recursive: true);
   benchmarkSubFile = File(
     p.join(projectRootDirectory.path, 'benchmark', 'sub', 'foo.dart'),
   )..createSync(recursive: true);
   exampleFile = File(p.join(projectRootDirectory.path, 'example', 'foo.dart'))
     ..createSync(recursive: true);
-  exampleSubFile =
-      File(p.join(projectRootDirectory.path, 'example', 'sub', 'foo.dart'))
-        ..createSync(recursive: true);
+  exampleSubFile = File(
+    p.join(projectRootDirectory.path, 'example', 'sub', 'foo.dart'),
+  )..createSync(recursive: true);
   // Setup a nested Dart project under the 'example' directory.
   Directory(
     p.join(
@@ -278,7 +281,7 @@ void _setupTestDirectoryStructure() {
   )..createSync(recursive: true);
   anyFile = File(p.join(projectRootDirectory.path, 'any_name', 'foo.dart'))
     ..createSync(recursive: true);
-  anySubFile =
-      File(p.join(projectRootDirectory.path, 'any_name', 'sub', 'foo.dart'))
-        ..createSync(recursive: true);
+  anySubFile = File(
+    p.join(projectRootDirectory.path, 'any_name', 'sub', 'foo.dart'),
+  )..createSync(recursive: true);
 }

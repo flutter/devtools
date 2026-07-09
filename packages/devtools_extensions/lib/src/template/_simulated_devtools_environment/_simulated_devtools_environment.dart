@@ -193,10 +193,7 @@ class _SimulatedApi extends StatelessWidget {
         children: [
           Row(
             children: [
-              DevToolsButton(
-                label: 'PING',
-                onPressed: simController.ping,
-              ),
+              DevToolsButton(label: 'PING', onPressed: simController.ping),
               const SizedBox(width: denseSpacing),
               DevToolsButton(
                 label: 'TOGGLE THEME',
@@ -245,10 +242,7 @@ class _LogsView extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Logs:',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Logs:', style: Theme.of(context).textTheme.titleMedium),
             DevToolsButton.iconOnly(
               icon: Icons.clear,
               outlined: false,
@@ -258,11 +252,7 @@ class _LogsView extends StatelessWidget {
           ],
         ),
         const PaddedDivider.thin(),
-        Expanded(
-          child: _LogMessages(
-            simController: simController,
-          ),
-        ),
+        Expanded(child: _LogMessages(simController: simController)),
       ],
     );
   }
@@ -333,10 +323,7 @@ class LogListItem extends StatelessWidget {
             style: Theme.of(context).fixedFontStyle,
           ),
           if (log.message != null) Text(log.message!),
-          if (log.data != null)
-            FormattedJson(
-              json: log.data,
-            ),
+          if (log.data != null) FormattedJson(json: log.data),
         ],
       ),
     );

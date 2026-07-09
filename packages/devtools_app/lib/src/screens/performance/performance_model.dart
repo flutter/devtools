@@ -18,6 +18,7 @@ class OfflinePerformanceData {
     this.frames = const <FlutterFrame>[],
     this.selectedFrame,
     this.rebuildCountModel,
+    this.selectedTab = 0,
     double? displayRefreshRate,
   }) : displayRefreshRate = displayRefreshRate ?? defaultRefreshRate;
 
@@ -36,6 +37,7 @@ class OfflinePerformanceData {
       selectedFrame: selectedFrame,
       rebuildCountModel: json.rebuildCountModel,
       displayRefreshRate: json.displayRefreshRate,
+      selectedTab: json.selectedTab,
     );
   }
 
@@ -44,6 +46,7 @@ class OfflinePerformanceData {
   static const displayRefreshRateKey = 'displayRefreshRate';
   static const flutterFramesKey = 'flutterFrames';
   static const selectedFrameIdKey = 'selectedFrameId';
+  static const selectedTabKey = 'selectedTab';
 
   final Uint8List? perfettoTraceBinary;
 
@@ -56,6 +59,12 @@ class OfflinePerformanceData {
 
   final FlutterFrame? selectedFrame;
 
+  /// The index of the feature tab that was selected when the data was exported.
+  ///
+  /// This is restored when loading offline data so the user lands on the same
+  /// tab they exported from.
+  final int selectedTab;
+
   bool get isEmpty => perfettoTraceBinary == null;
 
   Map<String, Object?> toJson() => {
@@ -64,6 +73,7 @@ class OfflinePerformanceData {
     selectedFrameIdKey: selectedFrame?.id,
     displayRefreshRateKey: displayRefreshRate,
     rebuildCountModelKey: rebuildCountModel?.toJson(),
+    selectedTabKey: selectedTab,
   };
 }
 
@@ -76,6 +86,9 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
 
   int? get selectedFrameId =>
       json[OfflinePerformanceData.selectedFrameIdKey] as int?;
+
+  int get selectedTab =>
+      json[OfflinePerformanceData.selectedTabKey] as int? ?? 0;
 
   List<FlutterFrame> get frames =>
       (json[OfflinePerformanceData.flutterFramesKey] as List? ?? [])

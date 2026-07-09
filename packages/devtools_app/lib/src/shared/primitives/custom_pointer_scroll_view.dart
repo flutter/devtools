@@ -387,7 +387,11 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
   @override
   void dispose() {
     widget.controller?.detach(position!);
-    position!.dispose();
+    _position!.dispose();
+    _hold?.cancel();
+    _hold = null;
+    _drag?.cancel();
+    _drag = null;
     super.dispose();
   }
 

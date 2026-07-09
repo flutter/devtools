@@ -16,6 +16,7 @@ import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/framework/routing.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/query_parameters.dart';
+import '../framework_core.dart';
 
 class DisconnectObserver extends StatefulWidget {
   const DisconnectObserver({
@@ -34,8 +35,9 @@ class DisconnectObserver extends StatefulWidget {
 class DisconnectObserverState extends State<DisconnectObserver>
     with AutoDisposeMixin {
   OverlayEntry? currentDisconnectedOverlay;
-
   late ConnectedState currentConnectionState;
+
+  bool _isReconnecting = false;
 
   @override
   void initState() {
@@ -52,6 +54,7 @@ class DisconnectObserverState extends State<DisconnectObserver>
       if (currentConnectionState.connected &&
           currentDisconnectedOverlay != null) {
         setState(() {
+          _isReconnecting = false;
           hideDisconnectedOverlay();
         });
       } else if (!currentConnectionState.connected) {
@@ -95,6 +98,38 @@ class DisconnectObserverState extends State<DisconnectObserver>
     currentDisconnectedOverlay = null;
   }
 
+  Future<void> _attemptReconnect() async {
+    if (_isReconnecting) return;
+    _isReconnecting = true;
+    currentDisconnectedOverlay?.markNeedsBuild();
+
+    bool success = false;
+    try {
+      success = await FrameworkCore.reconnectVmService().timeout(
+        const Duration(seconds: 5),
+      );
+    } catch (_) {
+      success = false;
+    }
+
+    if (mounted) {
+      _isReconnecting = false;
+      if (success) {
+        final uri = serviceConnection.serviceManager.serviceUri;
+        if (uri != null) {
+          unawaited(
+            widget.routerDelegate.updateArgsIfChanged({
+              DevToolsQueryParams.vmServiceUriKey: uri,
+            }),
+          );
+        }
+        hideDisconnectedOverlay();
+      } else {
+        currentDisconnectedOverlay?.markNeedsBuild();
+      }
+    }
+  }
+
   Future<void> _reviewHistory() async {
     assert(offlineDataController.offlineDataJson.isNotEmpty);
 
@@ -124,16 +159,29 @@ class DisconnectObserverState extends State<DisconnectObserver>
             child: Column(
               children: [
                 const Spacer(),
-                Text('Disconnected', style: theme.textTheme.headlineMedium),
-                const SizedBox(height: defaultSpacing),
-                if (!isEmbedded())
-                  ConnectToNewAppButton(
-                    routerDelegate: widget.routerDelegate,
-                    onPressed: hideDisconnectedOverlay,
-                    gaScreen: gac.devToolsMain,
-                  )
-                else
-                  const Text('Run a new debug session to reconnect.'),
+                if (_isReconnecting) ...[
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: defaultSpacing),
+                  Text(
+                    'Reconnecting...',
+                    style: theme.textTheme.headlineMedium,
+                  ),
+                ] else ...[
+                  Text('Disconnected', style: theme.textTheme.headlineMedium),
+                  const SizedBox(height: defaultSpacing),
+                  ElevatedButton(
+                    onPressed: _attemptReconnect,
+                    child: const Text('Reconnect'),
+                  ),
+                  if (!isEmbedded()) ...[
+                    const SizedBox(height: denseSpacing),
+                    ConnectToNewAppButton(
+                      routerDelegate: widget.routerDelegate,
+                      onPressed: hideDisconnectedOverlay,
+                      gaScreen: gac.devToolsMain,
+                    ),
+                  ],
+                ],
                 const Spacer(),
                 if (offlineDataController.offlineDataJson.isNotEmpty) ...[
                   ElevatedButton(

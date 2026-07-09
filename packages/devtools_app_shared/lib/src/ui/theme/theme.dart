@@ -26,35 +26,23 @@ ThemeData themeFor({
       : _lightTheme(ideTheme: ideTheme, theme: theme);
 
   return colorTheme.copyWith(
-      primaryTextTheme:
-          theme.primaryTextTheme.merge(colorTheme.primaryTextTheme),
-      textTheme: theme.textTheme.merge(colorTheme.textTheme));
+    primaryTextTheme: theme.primaryTextTheme.merge(colorTheme.primaryTextTheme),
+    textTheme: theme.textTheme.merge(colorTheme.textTheme),
+  );
 }
 
-ThemeData _darkTheme({
-  required IdeTheme ideTheme,
-  required ThemeData theme,
-}) {
+ThemeData _darkTheme({required IdeTheme ideTheme, required ThemeData theme}) {
   final background = isValidDarkColor(ideTheme.backgroundColor)
       ? ideTheme.backgroundColor!
       : theme.colorScheme.surface;
-  return _baseTheme(
-    theme: theme,
-    backgroundColor: background,
-  );
+  return _baseTheme(theme: theme, backgroundColor: background);
 }
 
-ThemeData _lightTheme({
-  required IdeTheme ideTheme,
-  required ThemeData theme,
-}) {
+ThemeData _lightTheme({required IdeTheme ideTheme, required ThemeData theme}) {
   final background = isValidLightColor(ideTheme.backgroundColor)
       ? ideTheme.backgroundColor!
       : theme.colorScheme.surface;
-  return _baseTheme(
-    theme: theme,
-    backgroundColor: background,
-  );
+  return _baseTheme(theme: theme, backgroundColor: background);
 }
 
 ThemeData _baseTheme({
@@ -68,8 +56,9 @@ ThemeData _baseTheme({
       tabAlignment: TabAlignment.start,
       dividerColor: Colors.transparent,
       labelStyle: theme.regularTextStyle,
-      labelPadding:
-          const EdgeInsets.symmetric(horizontal: defaultTabBarPadding),
+      labelPadding: const EdgeInsets.symmetric(
+        horizontal: defaultTabBarPadding,
+      ),
     ),
     canvasColor: backgroundColor,
     scaffoldBackgroundColor: backgroundColor,
@@ -110,17 +99,13 @@ ThemeData _baseTheme({
         fixedSize: const WidgetStatePropertyAll<Size>(Size.fromHeight(24.0)),
       ),
     ),
-    dropdownMenuTheme: DropdownMenuThemeData(
-      textStyle: theme.regularTextStyle,
-    ),
+    dropdownMenuTheme: DropdownMenuThemeData(textStyle: theme.regularTextStyle),
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       linearMinHeight: defaultLinearProgressIndicatorHeight,
     ),
     primaryTextTheme: _devToolsTextTheme(theme, theme.primaryTextTheme),
     textTheme: _devToolsTextTheme(theme, theme.textTheme),
-    colorScheme: theme.colorScheme.copyWith(
-      surface: backgroundColor,
-    ),
+    colorScheme: theme.colorScheme.copyWith(surface: backgroundColor),
   );
 }
 
@@ -224,10 +209,11 @@ const darkColorScheme = ColorScheme(
 );
 
 const searchMatchColor = Colors.yellow;
-final searchMatchColorOpaque = Colors.yellow.withValues(alpha: 255 / 2);
+final searchMatchColorTranslucent = Colors.yellow.withValues(alpha: 0.5);
 const activeSearchMatchColor = Colors.orangeAccent;
-final activeSearchMatchColorOpaque =
-    Colors.orangeAccent.withValues(alpha: 255 / 2);
+final activeSearchMatchColorTranslucent = Colors.orangeAccent.withValues(
+  alpha: 0.5,
+);
 
 /// Gets an alternating color to use for indexed UI elements.
 Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
@@ -380,11 +366,8 @@ extension ThemeDataExtension on ThemeData {
   bool get isDarkTheme => brightness == Brightness.dark;
 
   TextStyle get regularTextStyle => fixBlurryText(
-        TextStyle(
-          color: colorScheme.onSurface,
-          fontSize: defaultFontSize,
-        ),
-      );
+    TextStyle(color: colorScheme.onSurface, fontSize: defaultFontSize),
+  );
 
   TextStyle regularTextStyleWithColor(Color? color, {Color? backgroundColor}) =>
       regularTextStyle.copyWith(color: color, backgroundColor: backgroundColor);
@@ -404,66 +387,58 @@ extension ThemeDataExtension on ThemeData {
       regularTextStyle.copyWith(color: colorScheme.subtleTextColor);
 
   TextStyle get fixedFontStyle => fixBlurryText(
-        regularTextStyle.copyWith(
-          fontFamily: 'RobotoMono',
-          // Slightly smaller for fixes font text since it will appear larger
-          // to begin with.
-          fontSize: defaultFontSize - 1,
-        ),
-      );
+    regularTextStyle.copyWith(
+      fontFamily: 'RobotoMono',
+      // Slightly smaller for fixes font text since it will appear larger
+      // to begin with.
+      fontSize: defaultFontSize - 1,
+    ),
+  );
 
-  TextStyle get subtleFixedFontStyle => fixedFontStyle.copyWith(
-        color: colorScheme.subtleTextColor,
-      );
+  TextStyle get subtleFixedFontStyle =>
+      fixedFontStyle.copyWith(color: colorScheme.subtleTextColor);
 
   TextStyle get selectedSubtleTextStyle =>
       subtleTextStyle.copyWith(color: colorScheme.onSurface);
 
-  TextStyle get tooltipFixedFontStyle => fixedFontStyle.copyWith(
-        color: colorScheme.tooltipTextColor,
-      );
+  TextStyle get tooltipFixedFontStyle =>
+      fixedFontStyle.copyWith(color: colorScheme.tooltipTextColor);
 
   TextStyle get fixedFontLinkStyle => fixedFontStyle.copyWith(
-        color: colorScheme._devtoolsLink,
-        decoration: TextDecoration.underline,
-      );
+    color: colorScheme._devtoolsLink,
+    decoration: TextDecoration.underline,
+  );
 
   TextStyle get linkTextStyle => fixBlurryText(
-        TextStyle(
-          color: colorScheme._devtoolsLink,
-          decoration: TextDecoration.underline,
-          fontSize: defaultFontSize,
-        ),
-      );
+    TextStyle(
+      color: colorScheme._devtoolsLink,
+      decoration: TextDecoration.underline,
+      fontSize: defaultFontSize,
+    ),
+  );
 
   TextStyle get subtleChartTextStyle => fixBlurryText(
-        TextStyle(
-          color: colorScheme._chartSubtleColor,
-          fontSize: smallFontSize,
-        ),
-      );
+    TextStyle(color: colorScheme._chartSubtleColor, fontSize: smallFontSize),
+  );
 
   TextStyle get searchMatchHighlightStyle => fixBlurryText(
-        const TextStyle(
-          color: Colors.black,
-          backgroundColor: activeSearchMatchColor,
-        ),
-      );
+    const TextStyle(
+      color: Colors.black,
+      backgroundColor: activeSearchMatchColor,
+    ),
+  );
 
   TextStyle get searchMatchHighlightStyleFocused => fixBlurryText(
-        const TextStyle(
-          color: Colors.black,
-          backgroundColor: searchMatchColor,
-        ),
-      );
+    const TextStyle(color: Colors.black, backgroundColor: searchMatchColor),
+  );
 
   TextStyle get legendTextStyle => fixBlurryText(
-        const TextStyle(
-          fontWeight: FontWeight.normal,
-          fontSize: smallFontSize,
-          decoration: TextDecoration.none,
-        ),
-      );
+    const TextStyle(
+      fontWeight: FontWeight.normal,
+      fontSize: smallFontSize,
+      decoration: TextDecoration.none,
+    ),
+  );
 }
 
 /// Returns a [TextStyle] with [FontFeature.proportionalFigures] applied to
@@ -540,10 +515,7 @@ CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
 
 /// Measures the screen size to determine whether it is strictly larger
 /// than [width], scaled to the current font factor.
-bool isScreenWiderThan(
-  BuildContext context,
-  double? width,
-) {
+bool isScreenWiderThan(BuildContext context, double? width) {
   return width == null || MediaQuery.of(context).size.width > width;
 }
 
