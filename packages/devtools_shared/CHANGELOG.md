@@ -27,6 +27,7 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
     argument.
 * Update `LocalFileSystem` and `IOPersistentProperties` to use `package:file`
   instead of `dart:io` to allow mocking the file system.
+* Increase ChromeDriver startup wait timeout to 30 seconds to support slower environments.
 
 # 13.0.2
 
