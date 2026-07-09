@@ -429,6 +429,20 @@ class EvalOnDartLibrary extends DisposableController
     await safeEval(
       '() async {'
       '  final reader = widgetInspectorService.toObject("$readerId", "$readerGroup") as List;'
+      '  // Keep a strong reference to `reader` in the target app to prevent it'
+      '  // from being garbage collected by Chrome/VM before the future resolves.'
+      '  // Without this, the reader is only weakly referenced by the inspector'
+      '  // service and is aggressively GCed, causing a TypeError/TimeoutException'
+      '  // or failing the assertion that the retrieved result length is 1 or 2.'
+      '  bool isDone = false;'
+      '  int ticks = 0;'
+      '  Timer.periodic(const Duration(milliseconds: 50), (timer) {'
+      '    final _ = reader;'
+      '    // Stop pinning after a 5-second buffer when the future has completed.'
+      '    if (isDone && ++ticks > 100) {'
+      '      timer.cancel();'
+      '    }'
+      '  });'
       '  try {'
       // Cast as dynamic so that it is possible to await Future<void>
       '    dynamic result = ($expression) as dynamic;'
@@ -437,6 +451,7 @@ class EvalOnDartLibrary extends DisposableController
       '    reader.add(err);'
       '    reader.add(stack);'
       '  } finally {'
+      '    isDone = true;'
       '    postEvent("future_completed", {"future_id": $futureId, "client_id": $_clientId});'
       '  }'
       '}()',
