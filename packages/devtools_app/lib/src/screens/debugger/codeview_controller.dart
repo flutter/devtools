@@ -237,6 +237,8 @@ class CodeViewController extends DisposableController
     final isolateRef =
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
     final processedReport = await _getSourceReport(isolateRef, current.script);
+    // The controller may have been disposed while awaiting the source report.
+    if (disposed) return;
 
     parsedScript.value = ParsedScript(
       script: current.script,
@@ -267,6 +269,8 @@ class CodeViewController extends DisposableController
     if (scriptRef.id != parsedScript.value?.script.id) {
       // Try to parse the script if it isn't the currently parsed script:
       final script = await _parseScript(scriptRef);
+      // The controller may have been disposed while awaiting the script parsing.
+      if (disposed) return false;
       if (script == null) {
         // Return early and indicate failure if parsing fails.
         reportError(
