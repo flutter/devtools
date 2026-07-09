@@ -55,7 +55,7 @@ class ChromeDriver with IOMixin {
 
   Future<void> _waitForPortOpen(
     int port, {
-    Duration timeout = const Duration(seconds: 10),
+    Duration timeout = const Duration(seconds: 30),
   }) async {
     final stopwatch = Stopwatch()..start();
 
