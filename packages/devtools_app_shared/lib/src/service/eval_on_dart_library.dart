@@ -5,15 +5,15 @@
 // This code is directly based on src/io/flutter/inspector/EvalOnDartLibrary.java
 // If you add a method to this class you should also add it to EvalOnDartLibrary.java
 import 'dart:async';
-import 'dart:core' hide Error;
 import 'dart:core' as core;
+import 'dart:core' hide Error;
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-import 'package:vm_service/vm_service.dart' hide Error;
 import 'package:vm_service/vm_service.dart' as vm_service;
+import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../utils/auto_dispose.dart';
 import 'service_manager.dart';
@@ -429,20 +429,23 @@ class EvalOnDartLibrary extends DisposableController
     await safeEval(
       '() async {'
       '  final reader = widgetInspectorService.toObject("$readerId", "$readerGroup") as List;'
-      '  // Keep a strong reference to `reader` in the target app to prevent it'
-      '  // from being garbage collected by Chrome/VM before the future resolves.'
-      '  // Without this, the reader is only weakly referenced by the inspector'
-      '  // service and is aggressively GCed, causing a TypeError/TimeoutException'
-      '  // or failing the assertion that the retrieved result length is 1 or 2.'
+      '  /* Keep a strong reference to `reader` in the target app to prevent it'
+      '     from being garbage collected by Chrome/VM before the future resolves.'
+      '     Without this, the reader is only weakly referenced by the inspector'
+      '     service and is aggressively GCed, causing a TypeError/TimeoutException'
+      '     or failing the assertion that the retrieved result length is 1 or 2.'
+      '     We use Future.delayed in a loop instead of Timer because Future is in'
+      '     dart:core and guaranteed to be resolved without requiring dart:async. */'
       '  bool isDone = false;'
-      '  int ticks = 0;'
-      '  Timer.periodic(const Duration(milliseconds: 50), (timer) {'
-      '    final _ = reader;'
-      '    // Stop pinning after a 5-second buffer when the future has completed.'
-      '    if (isDone && ++ticks > 100) {'
-      '      timer.cancel();'
+      '  () async {'
+      '    int bufferTicks = 0;'
+      '    for (int i = 0; i < 100; i++) {'
+      '      final _ = reader;'
+      '      await Future.delayed(const Duration(milliseconds: 50));'
+      '      /* Stop pinning after a 1-second buffer when the future has completed. */'
+      '      if (isDone || ++bufferTicks > 20) break;'
       '    }'
-      '  });'
+      '  }();'
       '  try {'
       // Cast as dynamic so that it is possible to await Future<void>
       '    dynamic result = ($expression) as dynamic;'
