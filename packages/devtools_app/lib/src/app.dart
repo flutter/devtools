@@ -23,6 +23,8 @@ import 'framework/notifications_view.dart';
 import 'framework/observer/disconnect_observer.dart';
 import 'framework/release_notes.dart';
 import 'framework/scaffold/scaffold.dart';
+import 'screens/accessibility/accessibility_controller.dart';
+import 'screens/accessibility/accessibility_screen.dart';
 import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
@@ -713,6 +715,11 @@ List<DevToolsScreen> defaultScreens({
       LoggingScreen(),
       createController: (_) => LoggingController(),
     ),
+    if (FeatureFlags.accessibility.isEnabled)
+      DevToolsScreen<AccessibilityController>(
+        AccessibilityScreen(),
+        createController: (_) => AccessibilityController(),
+      ),
     DevToolsScreen<DevToolsScreenController>(ProviderScreen()),
     DevToolsScreen<AppSizeController>(
       AppSizeScreen(),
