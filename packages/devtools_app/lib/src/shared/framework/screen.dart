@@ -94,6 +94,12 @@ enum ScreenMetaData {
     supportsWebServerDevice: true,
     tutorialVideoTimestamp: '?t=558',
   ),
+  accessibility(
+    'accessibility',
+    title: 'Accessibility',
+    icon: Icons.accessibility,
+    requiresConnection: false,
+  ),
   provider(
     'provider',
     title: 'Provider',

@@ -69,6 +69,12 @@ extension FeatureFlags on Never {
     enabled: enableExperiments,
   );
 
+  /// Flag to enable the Accessibility page.
+  static final accessibility = BooleanFeatureFlag(
+    name: 'accessibility',
+    enabled: enableExperiments,
+  );
+
   /// A set of all the boolean feature flags for debugging purposes.
   ///
   /// When adding a new boolean flag, you are responsible for adding it to this
@@ -77,6 +83,7 @@ extension FeatureFlags on Never {
     memorySaveLoad,
     devToolsExtensions,
     dapDebugging,
+    accessibility,
   };
 
   /// A set of all the Flutter channel feature flags for debugging purposes.
