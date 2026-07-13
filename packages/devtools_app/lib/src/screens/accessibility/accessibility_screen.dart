@@ -47,8 +47,8 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
       axis: splitAxis,
       initialFractions: const [0.6, 0.4],
       children: const [
-        _AccessibilitySemanticsTreePane(),
-        _AccessibilityOverridesPane(),
+        AccessibilitySemanticsTreePane(),
+        AccessibilityOverridesPane(),
       ],
     );
   }
@@ -59,8 +59,9 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
   }
 }
 
-class _AccessibilitySemanticsTreePane extends StatelessWidget {
-  const _AccessibilitySemanticsTreePane();
+/// A pane that displays the semantics tree of the connected app.
+class AccessibilitySemanticsTreePane extends StatelessWidget {
+  const AccessibilitySemanticsTreePane({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,8 +76,9 @@ class _AccessibilitySemanticsTreePane extends StatelessWidget {
   }
 }
 
-class _AccessibilityOverridesPane extends StatelessWidget {
-  const _AccessibilityOverridesPane();
+/// A pane that displays the accessibility overrides controls.
+class AccessibilityOverridesPane extends StatelessWidget {
+  const AccessibilityOverridesPane({super.key});
 
   @override
   Widget build(BuildContext context) {

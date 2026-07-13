@@ -70,19 +70,11 @@ void main() {
       expect(find.byType(AccessibilityScreenBody), findsOneWidget);
       expect(find.byType(SplitPane), findsAtLeastNWidgets(1));
 
-      // Overrides pane should be visible and contain placeholder text
-      expect(find.text('Accessibility Overrides'), findsOneWidget);
-      expect(
-        find.textContaining('Accessibility overrides placeholder.'),
-        findsOneWidget,
-      );
+      // Overrides pane should be visible
+      expect(find.byType(AccessibilityOverridesPane), findsOneWidget);
 
-      // Semantics Tree pane should be visible and contain placeholder text
-      expect(find.text('Semantics Tree'), findsOneWidget);
-      expect(
-        find.textContaining('Accessibility semantics tree placeholder.'),
-        findsOneWidget,
-      );
+      // Semantics Tree pane should be visible
+      expect(find.byType(AccessibilitySemanticsTreePane), findsOneWidget);
     });
   });
 }
