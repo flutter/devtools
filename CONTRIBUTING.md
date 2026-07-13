@@ -162,11 +162,11 @@ as the example Flutter app to connect to when working on DevTools.
 
 ## Running and debugging DevTools
 
-Please see [DEBUGGING.md]() for guidance on running and debugging DevTools.
+Please see [DEBUGGING.md](DEBUGGING.md) for guidance on running and debugging DevTools.
 
 ## Testing for DevTools
 
-Please see [TESTING.md]() for guidance on running and writing tests.
+Please see [TESTING.md](TESTING.md) for guidance on running and writing tests.
 
 ## Appendix
 
