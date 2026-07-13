@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
+import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/tab.dart';
 import 'accessibility_controller.dart';
 
@@ -46,28 +47,9 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
     return SplitPane(
       axis: splitAxis,
       initialFractions: const [0.6, 0.4],
-      children: [_buildMainContent(), _buildOverridesPane()],
-    );
-  }
-
-  Widget _buildMainContent() {
-    return AnalyticsTabbedView(
-      gaScreen: AccessibilityScreen.id,
-      tabs: [
-        (
-          tab: DevToolsTab.create(
-            tabName: 'Diagnostics',
-            gaPrefix: AccessibilityScreen.id,
-          ),
-          tabView: _buildDiagnosticsPane(),
-        ),
-        (
-          tab: DevToolsTab.create(
-            tabName: 'Semantics Tree',
-            gaPrefix: AccessibilityScreen.id,
-          ),
-          tabView: _buildSemanticsTreePane(),
-        ),
+      children: const [
+        _AccessibilityMainContent(),
+        _AccessibilityOverridesPane(),
       ],
     );
   }
@@ -76,42 +58,78 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
     final screenSize = MediaQuery.of(context).size;
     return screenSize.width > 1000 ? Axis.horizontal : Axis.vertical;
   }
+}
 
-  Widget _buildDiagnosticsPane() {
+class _AccessibilityMainContent extends StatelessWidget {
+  const _AccessibilityMainContent();
+
+  @override
+  Widget build(BuildContext context) {
+    return AnalyticsTabbedView(
+      gaScreen: AccessibilityScreen.id,
+      tabs: [
+        (
+          tab: DevToolsTab.create(
+            tabName: 'Diagnostics',
+            gaPrefix: AccessibilityScreen.id,
+          ),
+          tabView: const _AccessibilityDiagnosticsPane(),
+        ),
+        (
+          tab: DevToolsTab.create(
+            tabName: 'Semantics Tree',
+            gaPrefix: AccessibilityScreen.id,
+          ),
+          tabView: const _AccessibilitySemanticsTreePane(),
+        ),
+      ],
+    );
+  }
+}
+
+class _AccessibilityDiagnosticsPane extends StatelessWidget {
+  const _AccessibilityDiagnosticsPane();
+
+  @override
+  Widget build(BuildContext context) {
     return const DevToolsAreaPane(
       header: AreaPaneHeader(title: Text('Accessibility Diagnostics')),
-      child: Center(
-        child: Text(
-          'Accessibility diagnostics placeholder.\n'
-          '// TODO(a11y): Implement audit scanning and accessibility violations list.',
-          textAlign: TextAlign.center,
-        ),
+      child: CenteredMessage(
+        message:
+            'Accessibility diagnostics placeholder.\n'
+            '// TODO(hannah-hyj): Implement audit scanning and accessibility violations list.',
       ),
     );
   }
+}
 
-  Widget _buildSemanticsTreePane() {
+class _AccessibilitySemanticsTreePane extends StatelessWidget {
+  const _AccessibilitySemanticsTreePane();
+
+  @override
+  Widget build(BuildContext context) {
     return const DevToolsAreaPane(
       header: AreaPaneHeader(title: Text('Semantics Tree')),
-      child: Center(
-        child: Text(
-          'Accessibility semantics tree placeholder.\n'
-          '// TODO(a11y): Implement semantics tree view and details explorer.',
-          textAlign: TextAlign.center,
-        ),
+      child: CenteredMessage(
+        message:
+            'Accessibility semantics tree placeholder.\n'
+            '// TODO(hannah-hyj): Implement semantics tree view and details explorer.',
       ),
     );
   }
+}
 
-  Widget _buildOverridesPane() {
+class _AccessibilityOverridesPane extends StatelessWidget {
+  const _AccessibilityOverridesPane();
+
+  @override
+  Widget build(BuildContext context) {
     return const DevToolsAreaPane(
       header: AreaPaneHeader(title: Text('Accessibility Overrides')),
-      child: Center(
-        child: Text(
-          'Accessibility overrides placeholder.\n'
-          '// TODO(a11y): Implement setting overrides (brightness, text scale, bold text, screen reader, high contrast).',
-          textAlign: TextAlign.center,
-        ),
+      child: CenteredMessage(
+        message:
+            'Accessibility overrides placeholder.\n'
+            '// TODO(hannah-hyj): Implement setting overrides (brightness, text scale, bold text, screen reader, high contrast).',
       ),
     );
   }

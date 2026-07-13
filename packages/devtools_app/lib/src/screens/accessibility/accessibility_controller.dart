@@ -16,33 +16,33 @@ class AccessibilityController extends DevToolsScreenController
   }
 
   void _initListeners() {
-    brightness.addListener(_onBrightnessChanged);
-    textScale.addListener(_onTextScaleChanged);
-    boldText.addListener(_onBoldTextChanged);
-    screenReader.addListener(_onScreenReaderChanged);
-    highContrast.addListener(_onHighContrastChanged);
+    addAutoDisposeListener(brightness, _onBrightnessChanged);
+    addAutoDisposeListener(textScale, _onTextScaleChanged);
+    addAutoDisposeListener(boldText, _onBoldTextChanged);
+    addAutoDisposeListener(screenReader, _onScreenReaderChanged);
+    addAutoDisposeListener(highContrast, _onHighContrastChanged);
   }
 
   void _onBrightnessChanged() {
-    // TODO(a11y): Implement VM service extension call for brightness override.
+    // TODO(hannah-hyj): Implement VM service extension call for brightness override.
     // e.g. using 'ext.flutter.brightnessOverride'.
   }
 
   void _onTextScaleChanged() {
-    // TODO(a11y): Implement VM service extension call for text scale override.
+    // TODO(hannah-hyj): Implement VM service extension call for text scale override.
   }
 
   void _onBoldTextChanged() {
-    // TODO(a11y): Implement VM service extension call for bold text override.
+    // TODO(hannah-hyj): Implement VM service extension call for bold text override.
   }
 
   void _onScreenReaderChanged() {
-    // TODO(a11y): Implement VM service extension call for screen reader / semantics debugger.
+    // TODO(hannah-hyj): Implement VM service extension call for screen reader / semantics debugger.
     // e.g. using 'ext.flutter.showSemanticsDebugger'.
   }
 
   void _onHighContrastChanged() {
-    // TODO(a11y): Implement VM service extension call for high contrast override.
+    // TODO(hannah-hyj): Implement VM service extension call for high contrast override.
   }
 
   @override
