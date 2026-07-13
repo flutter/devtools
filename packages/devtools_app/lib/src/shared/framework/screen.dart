@@ -98,7 +98,7 @@ enum ScreenMetaData {
     'accessibility',
     title: 'Accessibility',
     icon: Icons.accessibility,
-    requiresConnection: false,
+    requiresFlutter: true,
   ),
   provider(
     'provider',
