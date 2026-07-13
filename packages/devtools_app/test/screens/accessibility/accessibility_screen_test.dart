@@ -77,10 +77,10 @@ void main() {
         findsOneWidget,
       );
 
-      // Diagnostics tab should be active by default and contain placeholder text
-      expect(find.text('Accessibility Diagnostics'), findsOneWidget);
+      // Semantics Tree pane should be visible and contain placeholder text
+      expect(find.text('Semantics Tree'), findsOneWidget);
       expect(
-        find.textContaining('Accessibility diagnostics placeholder.'),
+        find.textContaining('Accessibility semantics tree placeholder.'),
         findsOneWidget,
       );
     });

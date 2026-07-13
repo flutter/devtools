@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
 import '../../shared/ui/common_widgets.dart';
-import '../../shared/ui/tab.dart';
 import 'accessibility_controller.dart';
 
 /// A screen that displays accessibility information.
@@ -48,7 +47,7 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
       axis: splitAxis,
       initialFractions: const [0.6, 0.4],
       children: const [
-        _AccessibilityMainContent(),
+        _AccessibilitySemanticsTreePane(),
         _AccessibilityOverridesPane(),
       ],
     );
@@ -57,49 +56,6 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
   Axis _splitAxisFor(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     return screenSize.width > 1000 ? Axis.horizontal : Axis.vertical;
-  }
-}
-
-class _AccessibilityMainContent extends StatelessWidget {
-  const _AccessibilityMainContent();
-
-  @override
-  Widget build(BuildContext context) {
-    return AnalyticsTabbedView(
-      gaScreen: AccessibilityScreen.id,
-      tabs: [
-        (
-          tab: DevToolsTab.create(
-            tabName: 'Diagnostics',
-            gaPrefix: AccessibilityScreen.id,
-          ),
-          tabView: const _AccessibilityDiagnosticsPane(),
-        ),
-        (
-          tab: DevToolsTab.create(
-            tabName: 'Semantics Tree',
-            gaPrefix: AccessibilityScreen.id,
-          ),
-          tabView: const _AccessibilitySemanticsTreePane(),
-        ),
-      ],
-    );
-  }
-}
-
-class _AccessibilityDiagnosticsPane extends StatelessWidget {
-  const _AccessibilityDiagnosticsPane();
-
-  @override
-  Widget build(BuildContext context) {
-    return const DevToolsAreaPane(
-      header: AreaPaneHeader(title: Text('Accessibility Diagnostics')),
-      child: CenteredMessage(
-        message:
-            'Accessibility diagnostics placeholder.\n'
-            '// TODO(hannah-hyj): Implement audit scanning and accessibility violations list.',
-      ),
-    );
   }
 }
 
