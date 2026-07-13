@@ -471,7 +471,7 @@ class LoggingController extends DevToolsScreenController
     if (isolateId != null) {
       final previousGcTime = _previousGcTimesByIsolate[isolateId];
       _previousGcTimesByIsolate[isolateId] = newCumulativeTime;
-      if (previousGcTime != null) {
+      if (previousGcTime != null && newCumulativeTime >= previousGcTime) {
         // Multiply by 1000 to display in milliseconds.
         final durationMs = (newCumulativeTime - previousGcTime) * 1000;
         durationText = ' in ${durationMs.toStringAsFixed(1)} ms';

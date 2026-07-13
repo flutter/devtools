@@ -274,11 +274,37 @@ void main() {
         'main • idle collection • 0.0 MB used of 0.0 MB',
       );
 
+      // Fourth GC event: clock reset on isolates/123 (cumulative goes from 0.4s to 0.1s).
+      // Since newCumulativeTime (0.1s) < previousGcTime (0.4s), duration delta is skipped,
+      // and baseline is updated to 0.1s.
+      fakeService.emitGCEvent(
+        event: gcEvent(newTime: 0.05, oldTime: 0.05, isolateId: 'isolates/123'),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(controller.data, hasLength(4));
+      expect(
+        controller.data[3].summary,
+        'main • idle collection • 0.0 MB used of 0.0 MB',
+      );
+
+      // Fifth GC event: delta since reset baseline (0.1s) is (0.08 + 0.12) - 0.1 = 0.2 - 0.1 = 0.1s = 100ms.
+      fakeService.emitGCEvent(
+        event: gcEvent(newTime: 0.08, oldTime: 0.12, isolateId: 'isolates/123'),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(controller.data, hasLength(5));
+      expect(
+        controller.data[4].summary,
+        'main • idle collection in 100.0 ms • 0.0 MB used of 0.0 MB',
+      );
+
       // Clear logs: resets baselines.
       controller.clear();
       expect(controller.data, isEmpty);
 
-      // Fourth GC event (same isolate as first): baseline was cleared, so no
+      // Sixth GC event (same isolate as first): baseline was cleared, so no
       // duration printed.
       fakeService.emitGCEvent(
         event: gcEvent(newTime: 0.2, oldTime: 0.3, isolateId: 'isolates/123'),
