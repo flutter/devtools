@@ -101,6 +101,7 @@ class UpdateFlutterSdkCommand extends Command {
       await processManager.runProcess(
         CliCommand.git([
           'clone',
+          '--no-checkout',
           'https://github.com/flutter/flutter',
           flutterSdkDirName,
         ]),
@@ -108,6 +109,12 @@ class UpdateFlutterSdkCommand extends Command {
       );
       await processManager.runAll(
         commands: [
+          // On Windows LCUI trybots, some of the flutter repo paths cause
+          // "Filename too long" errors. Filenames such as:
+          //     engine/src/flutter/testing/ios_scenario_app/ios/Scenarios/
+          //     ScenariosUITests/
+          //     golden_platform_view_clippath_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_26.2_simulator.png'.
+          CliCommand.git(['config', 'core.longpaths', 'true']),
           CliCommand.git(['checkout', flutterVersion, '-f']),
           CliCommand.flutter(['--version']),
         ],

@@ -163,6 +163,7 @@ extension DevToolsProcessManagerExtension on ProcessManager {
     );
   }
 
+  /// Runs [commands] in serial, from [workingDirectory].
   Future<void> runAll({
     required List<CliCommand> commands,
     String? workingDirectory,
