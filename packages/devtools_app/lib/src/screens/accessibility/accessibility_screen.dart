@@ -46,11 +46,11 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
     return SplitPane(
       axis: splitAxis,
       initialFractions: const [0.6, 0.4],
-      children: [_buildMainContent(context), _buildOverridesPane(context)],
+      children: [_buildMainContent(), _buildOverridesPane()],
     );
   }
 
-  Widget _buildMainContent(BuildContext context) {
+  Widget _buildMainContent() {
     return AnalyticsTabbedView(
       gaScreen: AccessibilityScreen.id,
       tabs: [
@@ -59,14 +59,14 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
             tabName: 'Diagnostics',
             gaPrefix: AccessibilityScreen.id,
           ),
-          tabView: _buildDiagnosticsPane(context),
+          tabView: _buildDiagnosticsPane(),
         ),
         (
           tab: DevToolsTab.create(
             tabName: 'Semantics Tree',
             gaPrefix: AccessibilityScreen.id,
           ),
-          tabView: _buildSemanticsTreePane(context),
+          tabView: _buildSemanticsTreePane(),
         ),
       ],
     );
@@ -77,7 +77,7 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
     return screenSize.width > 1000 ? Axis.horizontal : Axis.vertical;
   }
 
-  Widget _buildDiagnosticsPane(BuildContext context) {
+  Widget _buildDiagnosticsPane() {
     return const DevToolsAreaPane(
       header: AreaPaneHeader(title: Text('Accessibility Diagnostics')),
       child: Center(
@@ -90,7 +90,7 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
     );
   }
 
-  Widget _buildSemanticsTreePane(BuildContext context) {
+  Widget _buildSemanticsTreePane() {
     return const DevToolsAreaPane(
       header: AreaPaneHeader(title: Text('Semantics Tree')),
       child: Center(
@@ -103,7 +103,7 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
     );
   }
 
-  Widget _buildOverridesPane(BuildContext context) {
+  Widget _buildOverridesPane() {
     return const DevToolsAreaPane(
       header: AreaPaneHeader(title: Text('Accessibility Overrides')),
       child: Center(
