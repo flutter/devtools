@@ -3,7 +3,7 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
-# 14.0.0-wip
+# 14.0.0
 
 * **Breaking changes**: `LocalFileSystem`, an extension which provided some handy
   helpers, has been refactored into an extension on the `file` package's
