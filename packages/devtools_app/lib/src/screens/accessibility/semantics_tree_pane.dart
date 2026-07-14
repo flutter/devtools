@@ -17,6 +17,7 @@ class AccessibilitySemanticsTreePane extends StatelessWidget {
       header: AreaPaneHeader(
         title: Text('Semantics Tree'),
         includeTopBorder: false,
+        roundedTopBorder: false,
       ),
       child: CenteredMessage(
         message:

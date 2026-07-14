@@ -19,6 +19,7 @@ class AccessibilityOverridesPane extends StatelessWidget {
     return DevToolsAreaPane(
       header: const AreaPaneHeader(
         title: Text('Accessibility Overrides'),
+        roundedTopBorder: false,
         includeTopBorder: false,
       ),
       child: Scrollbar(
