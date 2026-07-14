@@ -46,8 +46,7 @@ class AccessibilityOverridesPane extends StatelessWidget {
               const SizedBox(height: defaultSpacing),
               _SwitchOverride(
                 label: 'Screen Reader Debugger',
-                description:
-                    'Enables interactive screen reader simulation semantics.',
+                description: 'Debug and test screen reader layouts.',
                 notifier: controller.screenReader,
               ),
               const SizedBox(height: defaultSpacing),
@@ -79,15 +78,9 @@ class _AccessibilityPanelLabel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: theme.boldTextStyle,
-        ),
+        Text(label, style: theme.boldTextStyle),
         const SizedBox(height: densePadding),
-        Text(
-          description,
-          style: theme.subtleTextStyle,
-        ),
+        Text(description, style: theme.subtleTextStyle),
       ],
     );
   }
