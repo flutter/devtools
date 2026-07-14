@@ -195,13 +195,13 @@ class _TextScaleOverride extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ValueListenableBuilder<double>(
-          valueListenable: controller.textScale,
-          builder: (context, value, _) {
-            return Row(
+    return ValueListenableBuilder<double>(
+      valueListenable: controller.textScale,
+      builder: (context, value, _) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
@@ -223,14 +223,9 @@ class _TextScaleOverride extends StatelessWidget {
                   style: theme.boldTextStyle,
                 ),
               ],
-            );
-          },
-        ),
-        const SizedBox(height: densePadding),
-        ValueListenableBuilder<double>(
-          valueListenable: controller.textScale,
-          builder: (context, value, _) {
-            return Slider(
+            ),
+            const SizedBox(height: densePadding),
+            Slider(
               value: value,
               min: _minTextScale,
               max: _maxTextScale,
@@ -238,10 +233,10 @@ class _TextScaleOverride extends StatelessWidget {
               onChanged: (newValue) {
                 controller.textScale.value = newValue;
               },
-            );
-          },
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }

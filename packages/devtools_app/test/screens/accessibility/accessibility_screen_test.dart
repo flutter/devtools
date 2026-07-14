@@ -136,6 +136,16 @@ void main() {
         await pumpAccessibilityScreen(tester);
         await tester.pumpAndSettle();
 
+        Finder findSwitchFor(String label) {
+          return find.descendant(
+            of: find.ancestor(
+              of: find.text(label),
+              matching: find.byType(Row),
+            ),
+            matching: find.byType(Switch),
+          );
+        }
+
         // 1. Test Brightness Dropdown
         expect(controller.brightness.value, 'System');
         await tester.tap(find.byType(RoundedDropDownButton<String>));
@@ -146,7 +156,7 @@ void main() {
 
         // 2. Test Bold Text Switch
         expect(controller.boldText.value, isFalse);
-        final boldTextSwitch = find.byType(Switch).at(0);
+        final boldTextSwitch = findSwitchFor('Bold Text');
         await tester.ensureVisible(boldTextSwitch);
         await tester.pumpAndSettle();
         await tester.tap(boldTextSwitch);
@@ -155,7 +165,7 @@ void main() {
 
         // 3. Test Screen Reader Debugger Switch
         expect(controller.screenReader.value, isFalse);
-        final screenReaderSwitch = find.byType(Switch).at(1);
+        final screenReaderSwitch = findSwitchFor('Screen Reader Debugger');
         await tester.ensureVisible(screenReaderSwitch);
         await tester.pumpAndSettle();
         await tester.tap(screenReaderSwitch);
@@ -164,7 +174,7 @@ void main() {
 
         // 4. Test High Contrast Switch
         expect(controller.highContrast.value, isFalse);
-        final highContrastSwitch = find.byType(Switch).at(2);
+        final highContrastSwitch = findSwitchFor('High Contrast');
         await tester.ensureVisible(highContrastSwitch);
         await tester.pumpAndSettle();
         await tester.tap(highContrastSwitch);
