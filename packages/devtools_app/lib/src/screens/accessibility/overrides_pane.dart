@@ -6,6 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/globals.dart';
+import '../../shared/ui/common_widgets.dart';
 import 'accessibility_controller.dart';
 
 /// A pane that displays the accessibility overrides controls.
@@ -196,17 +197,7 @@ class _SwitchOverride extends StatelessWidget {
             description: description,
           ),
         ),
-        ValueListenableBuilder<bool>(
-          valueListenable: notifier,
-          builder: (context, enabled, _) {
-            return Switch(
-              value: enabled,
-              onChanged: (newValue) {
-                notifier.value = newValue;
-              },
-            );
-          },
-        ),
+        NotifierSwitch(notifier: notifier),
       ],
     );
   }

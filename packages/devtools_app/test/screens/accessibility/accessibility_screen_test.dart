@@ -117,7 +117,7 @@ void main() {
         );
         expect(find.text('Screen Reader Debugger'), findsOneWidget);
         expect(
-          find.text('Enables interactive screen reader simulation semantics.'),
+          find.text('Debug and test screen reader layouts.'),
           findsOneWidget,
         );
         expect(find.text('High Contrast'), findsOneWidget);
