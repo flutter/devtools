@@ -99,7 +99,7 @@ void main() {
           findsOneWidget,
         );
         expect(
-          find.byType(RoundedDropDownButton<String>),
+          find.byType(RoundedDropDownButton<BrightnessOverride>),
           findsOneWidget,
         );
 
@@ -147,12 +147,14 @@ void main() {
         }
 
         // 1. Test Brightness Dropdown
-        expect(controller.brightness.value, 'System');
-        await tester.tap(find.byType(RoundedDropDownButton<String>));
+        expect(controller.brightness.value, BrightnessOverride.system);
+        await tester.tap(
+          find.byType(RoundedDropDownButton<BrightnessOverride>),
+        );
         await tester.pumpAndSettle();
         await tester.tap(find.text('Light Mode').last);
         await tester.pumpAndSettle();
-        expect(controller.brightness.value, 'Light');
+        expect(controller.brightness.value, BrightnessOverride.light);
 
         // 2. Test Bold Text Switch
         expect(controller.boldText.value, isFalse);
