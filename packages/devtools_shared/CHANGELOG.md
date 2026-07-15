@@ -4,6 +4,26 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
 
+# 13.1.0
+* The `LocalFileSystem` extension APIs are deprecated in favor of a new
+  `FileSystemExtension` extension, which is based on the `FileSystem` class
+  from the `file` package. In detail:
+  * `fileSystem` is a new top-level constant which represents the local (real)
+    file system.
+  * `LocalFileSystem.devToolsDir()` is replaced by a static getter,
+    `FileSystemExtension.devToolsDir`.
+  * `LocalFileSystem.maybeMoveLegacyDevToolsStore()` is replaced by an instance
+    method, `FileSystemExtension.maybeMoveLegacyDevToolsStore()`.
+  * `LocalFileSystem.devToolsStoreLocation()` is replaced by a static getter,
+    `FileSystemExtension.devToolsStoreLocation`.
+  * `LocalFileSystem.ensureDevToolsDirectory()` will be removed.
+  * `LocalFileSystem.devToolsFileFromPath()` is replaced by an instance method,
+    `FileSystemExtension.devToolsFileFromPath()`.
+  * `LocalFileSystem.devToolsFileAsJson()` is replaced by an instance method,
+    `FileSystemExtension.devToolsFileAsJson()`.
+  * `LocalFileSystem.flutterStoreExists()` is replaced by an instance getter,
+    `FileSystemExtension.flutterStoreExists`.
+
 # 13.0.2
 * Validate the `devtoolsOptionsUri` query parameter in the extension enabled
   state handler so it must be a `file:` URI named `devtools_options.yaml`,
