@@ -76,5 +76,110 @@ void main() {
       // Semantics Tree pane should be visible
       expect(find.byType(AccessibilitySemanticsTreePane), findsOneWidget);
     });
+
+    testWidgetsWithWindowSize(
+      'renders all override controls in AccessibilityOverridesPane',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Accessibility Overrides'), findsOneWidget);
+        expect(
+          find.text(
+            'Simulate and test accessibility settings on the connected device in real-time.',
+          ),
+          findsOneWidget,
+        );
+
+        // Brightness controls
+        expect(find.text('Brightness'), findsOneWidget);
+        expect(
+          find.text('Override the color scheme mode of the app.'),
+          findsOneWidget,
+        );
+        expect(
+          find.byType(RoundedDropDownButton<BrightnessOverride>),
+          findsOneWidget,
+        );
+
+        // Text Scale controls
+        expect(find.text('Text Scale'), findsOneWidget);
+        expect(find.text('Scale the system font size.'), findsOneWidget);
+        expect(find.text('1.00x'), findsOneWidget);
+        expect(find.byType(Slider), findsOneWidget);
+
+        // Switches
+        expect(find.text('Bold Text'), findsOneWidget);
+        expect(
+          find.text('Forces all text in the application to be bold.'),
+          findsOneWidget,
+        );
+        expect(find.text('Screen Reader Debugger'), findsOneWidget);
+        expect(
+          find.text('Debug and test screen reader layouts.'),
+          findsOneWidget,
+        );
+        expect(find.text('High Contrast'), findsOneWidget);
+        expect(
+          find.text('Increases the contrast of text and icons.'),
+          findsOneWidget,
+        );
+        expect(find.byType(Switch), findsNWidgets(3));
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'interacting with override controls updates controller state',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        Finder findSwitchFor(String label) {
+          return find.descendant(
+            of: find.ancestor(of: find.text(label), matching: find.byType(Row)),
+            matching: find.byType(Switch),
+          );
+        }
+
+        // 1. Test Brightness Dropdown
+        expect(controller.brightness.value, BrightnessOverride.system);
+        await tester.tap(
+          find.byType(RoundedDropDownButton<BrightnessOverride>),
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Light Mode').last);
+        await tester.pumpAndSettle();
+        expect(controller.brightness.value, BrightnessOverride.light);
+
+        // 2. Test Bold Text Switch
+        expect(controller.boldText.value, isFalse);
+        final boldTextSwitch = findSwitchFor('Bold Text');
+        await tester.ensureVisible(boldTextSwitch);
+        await tester.pumpAndSettle();
+        await tester.tap(boldTextSwitch);
+        await tester.pumpAndSettle();
+        expect(controller.boldText.value, isTrue);
+
+        // 3. Test Screen Reader Debugger Switch
+        expect(controller.screenReader.value, isFalse);
+        final screenReaderSwitch = findSwitchFor('Screen Reader Debugger');
+        await tester.ensureVisible(screenReaderSwitch);
+        await tester.pumpAndSettle();
+        await tester.tap(screenReaderSwitch);
+        await tester.pumpAndSettle();
+        expect(controller.screenReader.value, isTrue);
+
+        // 4. Test High Contrast Switch
+        expect(controller.highContrast.value, isFalse);
+        final highContrastSwitch = findSwitchFor('High Contrast');
+        await tester.ensureVisible(highContrastSwitch);
+        await tester.pumpAndSettle();
+        await tester.tap(highContrastSwitch);
+        await tester.pumpAndSettle();
+        expect(controller.highContrast.value, isTrue);
+      },
+    );
   });
 }

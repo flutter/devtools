@@ -8,8 +8,12 @@ import 'package:flutter/material.dart';
 
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
-import '../../shared/ui/common_widgets.dart';
 import 'accessibility_controller.dart';
+import 'overrides_pane.dart';
+import 'semantics_tree_pane.dart';
+
+export 'overrides_pane.dart';
+export 'semantics_tree_pane.dart';
 
 /// A screen that displays accessibility information.
 class AccessibilityScreen extends Screen {
@@ -56,39 +60,5 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
   Axis _splitAxisFor(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     return screenSize.width > 1000 ? Axis.horizontal : Axis.vertical;
-  }
-}
-
-/// A pane that displays the semantics tree of the connected app.
-class AccessibilitySemanticsTreePane extends StatelessWidget {
-  const AccessibilitySemanticsTreePane({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const DevToolsAreaPane(
-      header: AreaPaneHeader(title: Text('Semantics Tree')),
-      child: CenteredMessage(
-        message:
-            'Accessibility semantics tree placeholder.\n'
-            '// TODO(hannah-hyj): Implement semantics tree view and details explorer.',
-      ),
-    );
-  }
-}
-
-/// A pane that displays the accessibility overrides controls.
-class AccessibilityOverridesPane extends StatelessWidget {
-  const AccessibilityOverridesPane({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const DevToolsAreaPane(
-      header: AreaPaneHeader(title: Text('Accessibility Overrides')),
-      child: CenteredMessage(
-        message:
-            'Accessibility overrides placeholder.\n'
-            '// TODO(hannah-hyj): Implement setting overrides (brightness, text scale, bold text, screen reader, high contrast).',
-      ),
-    );
   }
 }

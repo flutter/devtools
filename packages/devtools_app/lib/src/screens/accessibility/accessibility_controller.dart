@@ -8,6 +8,17 @@ import 'package:flutter/foundation.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 
+/// Modes for brightness override in the accessibility controls.
+enum BrightnessOverride {
+  system('System Default'),
+  light('Light Mode'),
+  dark('Dark Mode');
+
+  const BrightnessOverride(this.display);
+
+  final String display;
+}
+
 /// Controller for the Accessibility screen.
 class AccessibilityController extends DevToolsScreenController
     with AutoDisposeControllerMixin {
@@ -49,7 +60,9 @@ class AccessibilityController extends DevToolsScreenController
   final screenId = ScreenMetaData.accessibility.id;
 
   // --- Accessibility Overrides State ---
-  final brightness = ValueNotifier<String>('System');
+  final brightness = ValueNotifier<BrightnessOverride>(
+    BrightnessOverride.system,
+  );
   final textScale = ValueNotifier<double>(1.0);
   final boldText = ValueNotifier<bool>(false);
   final screenReader = ValueNotifier<bool>(false);
