@@ -3,7 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
-import 'dart:io' as io show Platform, File;
+import 'dart:io' as io show Platform, File, Directory;
 
 import 'package:file/file.dart' as file;
 import 'package:file/local.dart' as file;
@@ -49,7 +49,7 @@ extension LocalFileSystem on Never {
   /// Creates the ~/.flutter-devtools directory if it does not already exist.
   @Deprecated('To be removed')
   static void ensureDevToolsDirectory() {
-    Directory(devToolsDir()).createSync();
+    io.Directory(devToolsDir()).createSync();
   }
 
   /// Returns a DevTools file from the given path.
@@ -69,7 +69,7 @@ extension LocalFileSystem on Never {
 
     ensureDevToolsDirectory();
     final devToolsDirPath = devToolsDir();
-    final file = File(path.join(devToolsDirPath, pathFromDevToolsDir));
+    final file = io.File(path.join(devToolsDirPath, pathFromDevToolsDir));
     // Defense in depth: ensure the resolved path is actually contained within
     // the DevTools directory.
     if (!path.isWithin(devToolsDirPath, file.path)) {
@@ -101,7 +101,7 @@ extension LocalFileSystem on Never {
   /// Whether the flutter store file exists.
   @Deprecated("Replaced by 'FileSystemExtension.flutterStoreExists'")
   static bool flutterStoreExists() {
-    final flutterStore = File(path.join(_userHomeDir(), '.flutter'));
+    final flutterStore = io.File(path.join(_userHomeDir(), '.flutter'));
     return flutterStore.existsSync();
   }
 }
