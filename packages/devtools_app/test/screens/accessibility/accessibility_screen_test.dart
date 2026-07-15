@@ -138,10 +138,7 @@ void main() {
 
         Finder findSwitchFor(String label) {
           return find.descendant(
-            of: find.ancestor(
-              of: find.text(label),
-              matching: find.byType(Row),
-            ),
+            of: find.ancestor(of: find.text(label), matching: find.byType(Row)),
             matching: find.byType(Switch),
           );
         }
@@ -186,4 +183,3 @@ void main() {
     );
   });
 }
-
