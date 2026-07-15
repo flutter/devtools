@@ -33,7 +33,7 @@ extension LocalFileSystem on Never {
   /// file exists in the user's home directory.
   @Deprecated("Replaced by 'FileSystemExtension.maybeMoveLegacyDevToolsStore'")
   static void maybeMoveLegacyDevToolsStore() {
-    final file = File(path.join(_userHomeDir(), DevToolsUsage.storeName));
+    final file = io.File(path.join(_userHomeDir(), DevToolsUsage.storeName));
     if (file.existsSync()) {
       ensureDevToolsDirectory();
       file.copySync(devToolsStoreLocation());
