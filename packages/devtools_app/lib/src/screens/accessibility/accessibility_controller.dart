@@ -69,8 +69,6 @@ class AccessibilityController extends DevToolsScreenController
     );
   }
 
-
-
   void _onBrightnessChanged() {
     final value = brightness.value;
     // Values expected by Flutter framework's 'ext.flutter.brightnessOverride':

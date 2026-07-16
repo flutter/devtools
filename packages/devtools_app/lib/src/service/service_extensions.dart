@@ -384,11 +384,6 @@ final brightnessMode = ServiceExtensionDescription<String>.from(
   extensions.brightnessMode,
   title: 'Override brightness',
   iconData: Icons.brightness_6,
-  displayValues: [
-    'System Default',
-    'Light Mode',
-    'Dark Mode',
-  ],
   gaScreenName: gac.accessibility,
   gaItem: gac.brightnessOverride,
   tooltip: 'Override Brightness',
