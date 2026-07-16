@@ -36,6 +36,7 @@ TODO: Remove this section if there are not any updates.
 ## Debugger updates
 
 * Prevent values from being garbage-collected, while being evaluated.
+  [#9885](https://github.com/flutter/devtools/pull/9885)
 
 ## Network profiler updates
 
