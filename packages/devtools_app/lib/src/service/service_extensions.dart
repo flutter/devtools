@@ -382,7 +382,7 @@ final togglePlatformMode = ServiceExtensionDescription<String>.from(
 /// Service extension description for overriding brightness in accessibility controls.
 final brightnessMode = ServiceExtensionDescription<String>.from(
   extensions.brightnessMode,
-  title: 'Override brightness',
+  title: 'Override Brightness',
   iconData: Icons.brightness_6,
   gaScreenName: gac.accessibility,
   gaItem: gac.brightnessOverride,

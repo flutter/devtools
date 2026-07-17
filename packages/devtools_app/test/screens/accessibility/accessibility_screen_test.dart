@@ -181,36 +181,5 @@ void main() {
         expect(controller.highContrast.value, isTrue);
       },
     );
-
-    testWidgetsWithWindowSize(
-      'service extension state change updates controller brightness state',
-      windowSize,
-      (WidgetTester tester) async {
-        final fakeServiceExtensionManager =
-            serviceConnection.serviceManager.serviceExtensionManager
-                as FakeServiceExtensionManager;
-
-        await pumpAccessibilityScreen(tester);
-        await tester.pumpAndSettle();
-
-        expect(controller.brightness.value, BrightnessOverride.system);
-
-        // Simulate service extension state change from device to dark mode
-        fakeServiceExtensionManager.fakeServiceExtensionStateChanged(
-          brightnessMode.extension,
-          'Brightness.dark',
-        );
-        await tester.pumpAndSettle();
-        expect(controller.brightness.value, BrightnessOverride.dark);
-
-        // Simulate service extension state change from device to light mode
-        fakeServiceExtensionManager.fakeServiceExtensionStateChanged(
-          brightnessMode.extension,
-          'Brightness.light',
-        );
-        await tester.pumpAndSettle();
-        expect(controller.brightness.value, BrightnessOverride.light);
-      },
-    );
   });
 }

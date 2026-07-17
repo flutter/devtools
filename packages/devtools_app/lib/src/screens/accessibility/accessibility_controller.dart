@@ -15,13 +15,18 @@ import '../../shared/globals.dart';
 
 /// Modes for brightness override in the accessibility controls.
 enum BrightnessOverride {
-  system('System Default'),
-  light('Light Mode'),
-  dark('Dark Mode');
+  system('System Default', 'system'),
+  light('Light Mode', 'Brightness.light'),
+  dark('Dark Mode', 'Brightness.dark');
 
-  const BrightnessOverride(this.display);
+  const BrightnessOverride(this.display, this.value);
 
+  /// The user-facing display label for this override option.
   final String display;
+
+  /// The raw value associated with this override option sent to or received
+  /// from the VM service extension.
+  final String value;
 }
 
 /// Controller for the Accessibility screen.
@@ -49,45 +54,29 @@ class AccessibilityController extends DevToolsScreenController
     final state = serviceConnection.serviceManager.serviceExtensionManager
         .getServiceExtensionState(extensions.brightnessMode.extension);
 
-    void updateFromDeviceState(ServiceExtensionState s) {
-      final newBrightness = !s.enabled || s.value == null
+    void updateFromDeviceState(ServiceExtensionState state) {
+      final newBrightness = !state.enabled || state.value == null
           ? BrightnessOverride.system
-          : switch (s.value) {
-              'Brightness.light' => BrightnessOverride.light,
-              'Brightness.dark' => BrightnessOverride.dark,
-              _ => BrightnessOverride.system,
-            };
-      if (brightness.value != newBrightness) {
-        brightness.value = newBrightness;
-      }
+          : BrightnessOverride.values.firstWhere(
+              (b) => b.value == state.value,
+              orElse: () => BrightnessOverride.system,
+            );
+      brightness.value = newBrightness;
     }
 
     updateFromDeviceState(state.value);
-    addAutoDisposeListener(
-      state,
-      () => updateFromDeviceState(state.value),
-    );
+    addAutoDisposeListener(state, () => updateFromDeviceState(state.value));
   }
 
   void _onBrightnessChanged() {
     final value = brightness.value;
-    // Values expected by Flutter framework's 'ext.flutter.brightnessOverride':
-    // - 'Brightness.light': forces light mode
-    // - 'Brightness.dark': forces dark mode
-    // - '': any value other than 'Brightness.light' or 'Brightness.dark' clears
-    //   the override and resets to system default.
-    final paramValue = switch (value) {
-      BrightnessOverride.light => 'Brightness.light',
-      BrightnessOverride.dark => 'Brightness.dark',
-      BrightnessOverride.system => '',
-    };
     unawaited(
       serviceConnection.serviceManager.serviceExtensionManager
           .setServiceExtensionState(
-        extensions.brightnessMode.extension,
-        enabled: value != BrightnessOverride.system,
-        value: paramValue,
-      ),
+            extensions.brightnessMode.extension,
+            enabled: value != BrightnessOverride.system,
+            value: value.value,
+          ),
     );
   }
 
