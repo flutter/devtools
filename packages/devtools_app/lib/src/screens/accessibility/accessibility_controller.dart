@@ -2,21 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../service/service_extensions.dart' as extensions;
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
+import '../../shared/globals.dart';
 
 /// Modes for brightness override in the accessibility controls.
 enum BrightnessOverride {
-  system('System Default'),
-  light('Light Mode'),
-  dark('Dark Mode');
+  system('System Default', 'system'),
+  light('Light Mode', 'Brightness.light'),
+  dark('Dark Mode', 'Brightness.dark');
 
-  const BrightnessOverride(this.display);
+  const BrightnessOverride(this.display, this.value);
 
+  /// The user-facing display label for this override option.
   final String display;
+
+  /// The raw value associated with this override option sent to or received
+  /// from the VM service extension.
+  final String value;
 }
 
 /// Controller for the Accessibility screen.
@@ -24,6 +34,12 @@ class AccessibilityController extends DevToolsScreenController
     with AutoDisposeControllerMixin {
   AccessibilityController() {
     _initListeners();
+  }
+
+  @override
+  void init() {
+    super.init();
+    _initServiceExtensionStates();
   }
 
   void _initListeners() {
@@ -34,9 +50,34 @@ class AccessibilityController extends DevToolsScreenController
     addAutoDisposeListener(highContrast, _onHighContrastChanged);
   }
 
+  void _initServiceExtensionStates() {
+    final state = serviceConnection.serviceManager.serviceExtensionManager
+        .getServiceExtensionState(extensions.brightnessMode.extension);
+
+    void updateFromDeviceState(ServiceExtensionState state) {
+      final newBrightness = !state.enabled || state.value == null
+          ? BrightnessOverride.system
+          : BrightnessOverride.values.firstWhere(
+              (b) => b.value == state.value,
+              orElse: () => BrightnessOverride.system,
+            );
+      brightness.value = newBrightness;
+    }
+
+    updateFromDeviceState(state.value);
+    addAutoDisposeListener(state, () => updateFromDeviceState(state.value));
+  }
+
   void _onBrightnessChanged() {
-    // TODO(hannah-hyj): Implement VM service extension call for brightness override.
-    // e.g. using 'ext.flutter.brightnessOverride'.
+    final value = brightness.value;
+    unawaited(
+      serviceConnection.serviceManager.serviceExtensionManager
+          .setServiceExtensionState(
+            extensions.brightnessMode.extension,
+            enabled: value != BrightnessOverride.system,
+            value: value.value,
+          ),
+    );
   }
 
   void _onTextScaleChanged() {
