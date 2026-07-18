@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import '../../screens/network/utils/http_utils.dart';
+import '../../shared/http/constants.dart' as shared_http;
 import '../../shared/http/http_request_data.dart';
 import 'constants.dart';
 
@@ -44,6 +45,16 @@ class HarDataEntry {
     responseData[NetworkEventKeys.redirects.name] = <Map<String, Object?>>[];
     final requestPostData = responseData[NetworkEventKeys.postData.name];
     final responseContent = responseData[NetworkEventKeys.content.name];
+
+    final statusValue = responseData[NetworkEventKeys.status.name];
+    int? statusCode;
+    if (statusValue is int) {
+      statusCode = statusValue;
+    } else if (statusValue is String) {
+      statusCode = int.tryParse(statusValue);
+    }
+    responseData[shared_http.HttpRequestDataKeys.statusCode.name] =
+        statusCode ?? -1;
 
     return HarDataEntry(
       DartIOHttpRequestData.fromJson(
@@ -148,7 +159,7 @@ class HarDataEntry {
       },
       // Response
       NetworkEventKeys.response.name: <String, Object?>{
-        NetworkEventKeys.status.name: e.status,
+        NetworkEventKeys.status.name: int.tryParse(e.status ?? '') ?? -1,
         NetworkEventKeys.statusText.name:
             e.general[NetworkEventKeys.reasonPhrase.name] ?? '',
         NetworkEventKeys.httpVersion.name:

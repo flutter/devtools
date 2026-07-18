@@ -71,6 +71,7 @@ void main() {
       expect(harDataEntry.request.method, 'GET');
       expect(harDataEntry.request.requestHeaders, isNotEmpty);
       expect(harDataEntry.request.requestCookies, isEmpty);
+      expect(harDataEntry.request.status, '200');
     });
 
     test('toJson serializes correctly', () {
@@ -89,6 +90,11 @@ void main() {
       expect(request?['cookies'], isEmpty);
 
       expect(json['cache'], isEmpty);
+      final response = json['response'] as Map<String, Object?>?;
+      expect(response, isNotNull);
+      expect(response?['status'], 200);
+      expect(response?['statusText'], '');
+
       final timings = json['timings'] as Map<String, Object?>?;
       expect(timings?['blocked'], NetworkEventDefaults.blocked);
       expect(timings?['dns'], NetworkEventDefaults.dns);
