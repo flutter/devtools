@@ -40,7 +40,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-- Fixed exported response status in HAR files so that they parse as integers instead of strings. [TODO](https://github.com/flutter/devtools/pull/TODO)
+- Fixed exported response status in HAR files so that they parse as integers
+  instead of strings. [#9900](https://github.com/flutter/devtools/pull/9900)
 
 ## Logging updates
 
