@@ -47,12 +47,11 @@ class HarDataEntry {
     final responseContent = responseData[NetworkEventKeys.content.name];
 
     final statusValue = responseData[NetworkEventKeys.status.name];
-    int? statusCode;
-    if (statusValue is int) {
-      statusCode = statusValue;
-    } else if (statusValue is String) {
-      statusCode = int.tryParse(statusValue);
-    }
+    final statusCode = switch (statusValue) {
+      int() => statusValue,
+      String() => int.tryParse(statusValue),
+      _ => null,
+    };
     responseData[shared_http.HttpRequestDataKeys.statusCode.name] =
         statusCode ?? -1;
 
