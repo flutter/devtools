@@ -10,6 +10,8 @@ export 'src/framework/notifications_view.dart';
 export 'src/framework/release_notes.dart';
 export 'src/framework/scaffold/app_bar.dart';
 export 'src/framework/scaffold/status_line.dart';
+export 'src/screens/accessibility/accessibility_controller.dart';
+export 'src/screens/accessibility/accessibility_screen.dart';
 export 'src/screens/app_size/app_size_controller.dart';
 export 'src/screens/app_size/app_size_screen.dart';
 export 'src/screens/debugger/breakpoint_manager.dart';

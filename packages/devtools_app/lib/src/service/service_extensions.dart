@@ -379,6 +379,16 @@ final togglePlatformMode = ServiceExtensionDescription<String>.from(
   tooltip: 'Override Target Platform',
 );
 
+/// Service extension description for overriding brightness in accessibility controls.
+final brightnessMode = ServiceExtensionDescription<String>.from(
+  extensions.brightnessMode,
+  title: 'Override Brightness',
+  iconData: Icons.brightness_6,
+  gaScreenName: gac.accessibility,
+  gaItem: gac.brightnessOverride,
+  tooltip: 'Override Brightness',
+);
+
 final disableClipLayers = ToggleableServiceExtensionDescription<bool>.from(
   extensions.disableClipLayers,
   title: 'Render Clip layers',
