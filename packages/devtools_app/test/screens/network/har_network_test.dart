@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:devtools_app/src/screens/network/constants.dart';
 import 'package:devtools_app/src/screens/network/har_data_entry.dart';
 import 'package:devtools_app/src/screens/network/har_network_data.dart';
-
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -58,10 +57,25 @@ void main() {
   });
 
   group('HarDataEntry', () {
+    final entryJson =
+        ((jsonData['log'] as Map<String, Object?>)['entries'] as List).first
+            as Map<String, Object?>;
+
+    Map<String, Object?> copyWithStatus(Object? status) {
+      final copy = jsonDecode(jsonEncode(entryJson)) as Map<String, Object?>;
+      final response = copy['response'] as Map<String, Object?>;
+      response['status'] = status;
+      return copy;
+    }
+
+    Map<String, Object?> copyWithRequestError(String error) {
+      final copy = jsonDecode(jsonEncode(entryJson)) as Map<String, Object?>;
+      final request = copy['request'] as Map<String, Object?>;
+      request['error'] = error;
+      return copy;
+    }
+
     test('fromJson parses correctly', () {
-      final entryJson =
-          ((jsonData['log'] as Map<String, Object?>)['entries'] as List).first
-              as Map<String, Object?>;
       final harDataEntry = HarDataEntry.fromJson(entryJson);
 
       expect(
@@ -75,9 +89,6 @@ void main() {
     });
 
     test('toJson serializes correctly', () {
-      final entryJson =
-          ((jsonData['log'] as Map<String, Object?>)['entries'] as List).first
-              as Map<String, Object?>;
       final harDataEntry = HarDataEntry.fromJson(entryJson);
       final json = HarDataEntry.toJson(harDataEntry.request);
 
@@ -103,6 +114,69 @@ void main() {
       expect(timings?['receive'], 1);
       expect(timings?['ssl'], NetworkEventDefaults.ssl);
       expect(json['comment'], '');
+    });
+
+    test('handles "Error" status in JSON', () {
+      final errorJson = copyWithStatus('Error');
+      final harDataEntry = HarDataEntry.fromJson(errorJson);
+      expect(harDataEntry.request.status, '-1');
+
+      final serialized = HarDataEntry.toJson(harDataEntry.request);
+      expect((serialized['response'] as Map)['status'], -1);
+    });
+
+    test('handles "Cancelled" status in JSON', () {
+      final cancelledJson = copyWithStatus('Cancelled');
+      final harDataEntry = HarDataEntry.fromJson(cancelledJson);
+      expect(harDataEntry.request.status, '-1');
+
+      final serialized = HarDataEntry.toJson(harDataEntry.request);
+      expect((serialized['response'] as Map)['status'], -1);
+    });
+
+    test('handles -1 integer status in JSON', () {
+      final minusOneJson = copyWithStatus(-1);
+      final harDataEntry = HarDataEntry.fromJson(minusOneJson);
+      expect(harDataEntry.request.status, '-1');
+
+      final serialized = HarDataEntry.toJson(harDataEntry.request);
+      expect((serialized['response'] as Map)['status'], -1);
+    });
+
+    test('handles invalid string status in JSON', () {
+      final invalidJson = copyWithStatus('foo');
+      final harDataEntry = HarDataEntry.fromJson(invalidJson);
+      expect(harDataEntry.request.status, '-1');
+
+      final serialized = HarDataEntry.toJson(harDataEntry.request);
+      expect((serialized['response'] as Map)['status'], -1);
+    });
+
+    test('handles null status in JSON', () {
+      final nullJson = copyWithStatus(null);
+      final harDataEntry = HarDataEntry.fromJson(nullJson);
+      expect(harDataEntry.request.status, '-1');
+
+      final serialized = HarDataEntry.toJson(harDataEntry.request);
+      expect((serialized['response'] as Map)['status'], -1);
+    });
+
+    test('handles request connection error', () {
+      final errorJson = copyWithRequestError('connection failed');
+      final harDataEntry = HarDataEntry.fromJson(errorJson);
+      expect(harDataEntry.request.status, 'Error');
+
+      final serialized = HarDataEntry.toJson(harDataEntry.request);
+      expect((serialized['response'] as Map)['status'], -1);
+    });
+
+    test('handles request cancellation error', () {
+      final cancelledJson = copyWithRequestError('cancelled');
+      final harDataEntry = HarDataEntry.fromJson(cancelledJson);
+      expect(harDataEntry.request.status, 'Cancelled');
+
+      final serialized = HarDataEntry.toJson(harDataEntry.request);
+      expect((serialized['response'] as Map)['status'], -1);
     });
   });
 }
