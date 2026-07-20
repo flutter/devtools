@@ -230,6 +230,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
             Expanded(
               child: SearchField<NetworkController>(
                 searchController: controller,
+                searchFieldEnabled: _recording || hasRequests,
                 searchFieldWidth: screenWidth <= MediaSize.xs
                     ? defaultSearchFieldWidth
                     : wideSearchFieldWidth,

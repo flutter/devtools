@@ -192,6 +192,15 @@ class NetworkController extends DevToolsScreenController
       _currentNetworkRequests,
       _filterAndRefreshSearchMatches,
     );
+    autoDisposeStreamSubscription(
+      serviceConnection.serviceManager.isolateManager.onIsolateCreated.listen((
+        _,
+      ) async {
+        if (_recordingNotifier.value) {
+          await allowedError(_enableNetworkTrafficRecordingOnAllIsolates());
+        }
+      }),
+    );
   }
 
   @override
@@ -350,13 +359,16 @@ class NetworkController extends DevToolsScreenController
       ]),
     );
 
-    // TODO(kenz): only call these if http logging and socket profiling are not
-    // already enabled. Listen to service manager streams for this info.
+    await _enableNetworkTrafficRecordingOnAllIsolates();
+    await togglePolling(true);
+  }
+
+  /// Enables HTTP timeline logging and socket profiling on all isolates.
+  Future<void> _enableNetworkTrafficRecordingOnAllIsolates() async {
     await [
       http_service.toggleHttpRequestLogging(true),
       networkService.toggleSocketProfiling(true),
     ].wait;
-    await togglePolling(true);
   }
 
   Future<void> stopRecording() async {

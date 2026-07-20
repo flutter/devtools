@@ -40,7 +40,12 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed an issue where the Network tab would stop capturing HTTP requests after
+  a hot restart. -
+  [#9856](https://github.com/flutter/devtools/pull/9856)
+* Fixed an issue where the Network tab would stop capturing new HTTP requests
+  after pressing Clear while recording. -
+  [#9856](https://github.com/flutter/devtools/pull/9856)
 
 ## Logging updates
 
