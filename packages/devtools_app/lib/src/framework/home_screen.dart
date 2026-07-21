@@ -163,13 +163,9 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
   void initState() {
     super.initState();
     connectDialogController = TextEditingController();
-    assert(() {
-      _debugInitVmServiceCache();
-      return true;
-    }());
+    if (kDebugMode) _debugInitVmServiceCache();
   }
 
-  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907): false positive.
   void _debugInitVmServiceCache() async {
     // We only do this in debug mode as it speeds iteration for DevTools
     // developers who tend to repeatedly restart DevTools to debug the same
