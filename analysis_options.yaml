@@ -168,7 +168,7 @@ dart_code_metrics:
       - lib/src/screens/**
       - lib/src/shared/**
       - lib/src/standalone_ui/**
-      - test/
+      - test/**
   rules:
 #    - arguments-ordering Too strict
 #    - avoid-banned-imports # TODO(polina-c): add configuration
