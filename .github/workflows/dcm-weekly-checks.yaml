@@ -1,6 +1,7 @@
 name: Weekly DCM Checks
 
 on:
+  pull_request: # Temporary for testing. Remove before merging.
   schedule:
     - cron: '0 8 * * 1' # Every Monday at 8am
   workflow_dispatch:
