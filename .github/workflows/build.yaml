@@ -79,9 +79,13 @@ jobs:
           echo "$(dcm --version)"
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c
-      - name: Run DCM on root
+      - name: Run dcm analyze on root
         run: |
           dcm analyze packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test
+      - name: Run dcm checks on packages
+        # TODO(https://github.com/flutter/devtools/issues/9906): run on all packages.
+        run: |
+          dcm check-unused-code packages/devtools_app
 
   test-packages:
     name: ${{ matrix.os }} ${{ matrix.package }} test
