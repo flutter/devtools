@@ -166,6 +166,7 @@ dart_code_metrics:
       - lib/src/extensions/**
       - lib/src/framework/**
       - lib/src/screens/**
+      - lib/src/service/**
       - lib/src/shared/**
       - lib/src/standalone_ui/**
       - test/**
