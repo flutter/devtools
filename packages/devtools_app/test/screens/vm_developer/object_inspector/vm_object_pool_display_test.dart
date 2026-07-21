@@ -37,7 +37,6 @@ void main() {
       final objectPoolEntries = <ObjectPoolEntry>[
         ObjectPoolEntry(
           offset: 0,
-          kind: ObjectPoolEntryKind.object,
           value: InstanceRef(
             id: 'fake-inst',
             kind: InstanceKind.kList,
@@ -46,12 +45,10 @@ void main() {
         ),
         const ObjectPoolEntry(
           offset: 10,
-          kind: ObjectPoolEntryKind.immediate,
           value: 42,
         ),
         ObjectPoolEntry(
           offset: 20,
-          kind: ObjectPoolEntryKind.nativeFunction,
           value: FuncRef(id: 'func-id', name: 'Foo'),
         ),
       ];
