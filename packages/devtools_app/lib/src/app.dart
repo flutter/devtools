@@ -242,12 +242,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
       Widget widget = pages[page]!(context, page, params, state);
-      assert(() {
+      if (kDebugMode) {
         widget = _AlternateCheckedModeBanner(
           builder: (context) => pages[page]!(context, page, params, state),
         );
-        return true;
-      }());
+      }
       return MaterialPage(child: widget);
     }
 
