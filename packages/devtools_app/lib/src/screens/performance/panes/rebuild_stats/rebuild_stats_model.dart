@@ -211,8 +211,6 @@ class RebuildCountModel {
     return _rebuildsForFrame[frameNumber];
   }
 
-  bool get isNotEmpty => _rebuildsForFrame.isNotEmpty;
-
   Map<String, Object?>? toJson() {
     if (_rebuildsForFrame.isEmpty) {
       // No need to encode data unless there were actually rebuilds reported.

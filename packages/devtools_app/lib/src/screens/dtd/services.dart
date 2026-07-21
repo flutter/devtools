@@ -60,7 +60,6 @@ class ServicesController extends FeatureController {
           DtdServiceMethod(
             service: service.name,
             method: method.name,
-            capabilities: method.capabilities,
           ),
       ],
     ];

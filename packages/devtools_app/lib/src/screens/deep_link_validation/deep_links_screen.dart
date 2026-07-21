@@ -18,9 +18,8 @@ class DeepLinksScreen extends Screen {
 
   static final id = ScreenMetaData.deepLinks.id;
 
-  // TODO(https://github.com/flutter/devtools/issues/6013): write documentation.
-  // @override
-  // String get docPageId => id;
+  @override
+  String get docPageId => id;
 
   @override
   String get docsUrl => 'https://flutter.dev/to/deep-link-tool';

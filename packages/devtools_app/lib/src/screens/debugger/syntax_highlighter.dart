@@ -18,6 +18,7 @@ final _log = Logger('syntax_highlighter');
 class SyntaxHighlighter {
   SyntaxHighlighter({String? source}) : source = source ?? '';
 
+  @visibleForTesting
   SyntaxHighlighter.withGrammar({Grammar? grammar, String? source})
     : source = source ?? '' {
     _grammar = grammar;

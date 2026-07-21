@@ -27,8 +27,6 @@ import 'shared.dart';
 class DTDToolsScreen extends Screen {
   DTDToolsScreen() : super.fromMetaData(ScreenMetaData.dtdTools);
 
-  static final id = ScreenMetaData.dtdTools.id;
-
   @override
   Widget buildScreenBody(BuildContext _) => const DTDToolsScreenBody();
 }

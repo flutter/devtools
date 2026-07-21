@@ -159,6 +159,7 @@ class PerfettoControllerImpl extends PerfettoController {
 
   final perfettoPostEventStream = StreamController<String>.broadcast();
 
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907) false positive.
   bool _initialized = false;
 
   @override

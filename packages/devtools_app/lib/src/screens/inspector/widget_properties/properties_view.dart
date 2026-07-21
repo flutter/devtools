@@ -23,15 +23,11 @@ class DetailsTable extends StatefulWidget {
   const DetailsTable({
     super.key,
     required this.controller,
-    required this.node,
-    this.extraTabs,
   });
 
   static const gaPrefix = 'inspectorDetailsTable';
 
   final InspectorController controller;
-  final RemoteDiagnosticsNode node;
-  final List<TabAndView>? extraTabs;
 
   @override
   State<DetailsTable> createState() => _DetailsTableState();
@@ -43,9 +39,6 @@ class _DetailsTableState extends State<DetailsTable> {
 
   RemoteDiagnosticsNode? get selectedNode =>
       widget.controller.selectedDiagnostic;
-
-  LayoutProperties? get layoutProperties =>
-      widget.controller.selectedNodeProperties.value.layoutProperties;
 
   final _widgetPropertiesTab = DevToolsTab.create(
     tabName: 'Widget properties',
@@ -269,7 +262,6 @@ class _PropertiesViewState extends State<PropertiesView> {
                           height: PropertiesView.layoutExplorerHeight,
                           width: PropertiesView.layoutExplorerWidth,
                           child: BoxLayoutExplorerWidget(
-                            widget.controller,
                             selectedNode: selectedNode,
                             layoutProperties: widget.layoutProperties,
                           ),

@@ -212,7 +212,6 @@ class _AppSizeBodyState extends State<AppSizeBody>
                   if (currentTab.key == AppSizeScreen.diffTabKey) ...[
                     const SizedBox(width: defaultSpacing),
                     DiffTreeTypeDropdown(
-                      value: controller.activeDiffTreeType.value,
                       onChanged: (newDiffTreeType) {
                         controller.changeActiveDiffTreeType(newDiffTreeType!);
                       },
@@ -279,11 +278,9 @@ class AppUnitDropdown extends StatelessWidget {
 class DiffTreeTypeDropdown extends StatelessWidget {
   const DiffTreeTypeDropdown({
     super.key,
-    required this.value,
     required this.onChanged,
   });
 
-  final DiffTreeType value;
   final ValueChanged<DiffTreeType?>? onChanged;
 
   @override

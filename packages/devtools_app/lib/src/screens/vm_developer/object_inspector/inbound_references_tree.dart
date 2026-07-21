@@ -26,6 +26,7 @@ class InboundReferencesTreeNode extends TreeNode<InboundReferencesTreeNode> {
   @override
   bool get isExpandable => ref.source != null;
 
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9910) this seems like a bug.
   late final description = _inboundRefDescription(ref, null);
 
   /// Wrapper to get the name of an [ObjRef] depending on its type.

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import '../ui/free_space.dart';
 import '../ui/theme.dart';
@@ -15,14 +14,12 @@ import '../ui/widget_constraints.dart';
 import '../ui/widgets_theme.dart';
 
 class BoxLayoutExplorerWidget extends StatelessWidget {
-  const BoxLayoutExplorerWidget(
-    this.inspectorController, {
+  const BoxLayoutExplorerWidget({
     super.key,
     required this.layoutProperties,
     required this.selectedNode,
   });
 
-  final InspectorController inspectorController;
   final LayoutProperties? layoutProperties;
   final RemoteDiagnosticsNode? selectedNode;
 
@@ -229,56 +226,6 @@ class BoxLayoutExplorerWidget extends StatelessWidget {
 
 String _describeBoxName(LayoutProperties properties) =>
     properties.node.description ?? '';
-
-/// Represents a box widget and its surrounding padding.
-class BoxChildAndPaddingVisualizer extends StatelessWidget {
-  const BoxChildAndPaddingVisualizer({
-    super.key,
-    required this.layoutProperties,
-    required this.renderProperties,
-    required this.isSelected,
-  });
-
-  final bool isSelected;
-  final LayoutProperties layoutProperties;
-  final RenderProperties renderProperties;
-
-  LayoutProperties? get properties => renderProperties.layoutProperties;
-
-  @override
-  Widget build(BuildContext context) {
-    final renderSize = renderProperties.size;
-    final renderOffset = renderProperties.offset;
-
-    final propertiesLocal = properties!;
-
-    return Positioned(
-      top: renderOffset.dy,
-      left: renderOffset.dx,
-      child: SizedBox(
-        width: safePositiveDouble(renderSize.width),
-        height: safePositiveDouble(renderSize.height),
-        child: WidgetVisualizer(
-          isSelected: isSelected,
-          layoutProperties: layoutProperties,
-          title: _describeBoxName(propertiesLocal),
-          // TODO(jacobr): consider surfacing the overflow size information
-          // if we determine
-          // overflowSide: properties.overflowSide,
-
-          // We only show one child at a time so a large title is safe.
-          largeTitle: true,
-          child: VisualizeWidthAndHeightWithConstraints(
-            arrowHeadSize: arrowHeadSize,
-            properties: propertiesLocal,
-            warnIfUnconstrained: false,
-            child: const SizedBox.shrink(),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// Widget that represents and visualize a direct child of Flex widget.
 class BoxChildVisualizer extends StatelessWidget {
