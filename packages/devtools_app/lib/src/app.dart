@@ -618,7 +618,9 @@ typedef UrlParametersBuilder =
 ///
 /// This avoids issues with widgets in the appbar being hidden by the banner
 /// in a web or desktop app.
+// ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907): false positive.
 class _AlternateCheckedModeBanner extends StatelessWidget {
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907): false positive.
   const _AlternateCheckedModeBanner({required this.builder});
   final WidgetBuilder builder;
 
