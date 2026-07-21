@@ -6,6 +6,8 @@ on:
     - cron: '0 8 * * 1' # Every Monday at 8am
   workflow_dispatch:
 
+permissions: read-all
+
 jobs:
   flutter-prep:
     uses: ./.github/workflows/flutter-prep.yaml
