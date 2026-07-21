@@ -83,9 +83,9 @@ jobs:
         run: |
           dcm analyze packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test
       - name: Run dcm checks on packages
-        # TODO(https://github.com/flutter/devtools/issues/9906): run on all packages.
+        # TODO(https://github.com/flutter/devtools/issues/9906): run on all DevTools packages.
         run: |
-          dcm check-unused-code packages/devtools_app
+          dcm check-unused-code packages/devtools_app --exclude-public-api
 
   test-packages:
     name: ${{ matrix.os }} ${{ matrix.package }} test
