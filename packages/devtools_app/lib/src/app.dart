@@ -242,12 +242,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
       Widget widget = pages[page]!(context, page, params, state);
-      assert(() {
+      if (kDebugMode) {
         widget = _AlternateCheckedModeBanner(
           builder: (context) => pages[page]!(context, page, params, state),
         );
-        return true;
-      }());
+      }
       return MaterialPage(child: widget);
     }
 
@@ -618,7 +617,9 @@ typedef UrlParametersBuilder =
 ///
 /// This avoids issues with widgets in the appbar being hidden by the banner
 /// in a web or desktop app.
+// ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907): false positive.
 class _AlternateCheckedModeBanner extends StatelessWidget {
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907): false positive.
   const _AlternateCheckedModeBanner({required this.builder});
   final WidgetBuilder builder;
 

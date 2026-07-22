@@ -156,6 +156,21 @@ dart_code_metrics:
     maximum-nesting-level: 5
   metrics-exclude:
     - test/**
+  exclude:
+    unused-code:
+      # TODO(https://github.com/dart-lang/sdk/issues/63864): clean up these
+      # paths once this issue is fixed. These paths are currently relative to
+      # devtools_app/.
+      # TODO(https://github.com/flutter/devtools/issues/9906) remove these
+      # excludes as findings are resolved.
+      - integration_test/**
+      - lib/src/extensions/**
+      - lib/src/framework/**
+      - lib/src/screens/**
+      - lib/src/service/**
+      - lib/src/shared/**
+      - lib/src/standalone_ui/**
+      - test/**
   rules:
 #    - arguments-ordering Too strict
 #    - avoid-banned-imports # TODO(polina-c): add configuration
