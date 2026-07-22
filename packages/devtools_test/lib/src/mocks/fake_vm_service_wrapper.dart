@@ -128,30 +128,25 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<UriList> lookupPackageUris(String isolateId, List<String> uris) {
-    return Future.value(
-      UriList(
-        uris: _resolvedUriMap != null
-            ? (uris.map((e) => _resolvedUriMap[e]).toList())
-            : null,
-      ),
-    );
-  }
+  Future<UriList> lookupPackageUris(
+    String isolateId,
+    List<String> uris,
+  ) => Future.syncValue(UriList(
+    uris: _resolvedUriMap != null
+        ? (uris.map((e) => _resolvedUriMap[e]).toList())
+        : null
+  ));
 
   @override
   Future<UriList> lookupResolvedPackageUris(
     String isolateId,
     List<String> uris, {
     bool? local,
-  }) {
-    return Future.value(
-      UriList(
-        uris: _reverseResolvedUriMap != null
-            ? (uris.map((e) => _reverseResolvedUriMap[e]).toList())
-            : null,
-      ),
-    );
-  }
+  })  => Future.syncValue(UriList(
+    uris: _reverseResolvedUriMap != null
+        ? (uris.map((e) => _reverseResolvedUriMap[e]).toList())
+        : null,
+  ));
 
   @override
   String get wsUri => 'ws://127.0.0.1:56137/ISsyt6ki0no=/ws';
@@ -190,14 +185,14 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     allocationProfile.json = allocationProfile.toJson();
     // Fake GC statistics
     allocationProfile.json![AllocationProfilePrivateViewExtension.heapsKey] =
-        <String, dynamic>{
-          AllocationProfilePrivateViewExtension.newSpaceKey: <String, dynamic>{
+        <String, Object?>{
+          AllocationProfilePrivateViewExtension.newSpaceKey: <String, Object?>{
             GCStats.usedKey: 1234,
             GCStats.capacityKey: 12345,
             GCStats.collectionsKey: 42,
             GCStats.timeKey: 69,
           },
-          AllocationProfilePrivateViewExtension.oldSpaceKey: <String, dynamic>{
+          AllocationProfilePrivateViewExtension.oldSpaceKey: <String, Object?>{
             GCStats.usedKey: 4321,
             GCStats.capacityKey: 54321,
             GCStats.collectionsKey: 24,
@@ -522,8 +517,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   @override
   Stream<Event> get onGCEvent => _gcEventStream.stream;
 
-  void emitGCEvent() {
-    _gcEventStream.sink.add(Event(kind: EventKind.kGC));
+  void emitGCEvent({Event? event}) {
+    _gcEventStream.sink.add(event ?? Event(kind: EventKind.kGC));
   }
 
   @override

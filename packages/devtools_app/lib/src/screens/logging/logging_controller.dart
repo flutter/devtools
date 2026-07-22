@@ -240,6 +240,13 @@ class LoggingController extends DevToolsScreenController
 
   late final LogDetailsController logDetailsController;
 
+  /// Tracks the previous cumulative GC times (in seconds) for each active isolate.
+  ///
+  /// This is used to compute the actual duration of the current GC event (by taking
+  /// the delta between consecutive cumulative times), rather than displaying the
+  /// total cumulative GC time.
+  final _previousGcTimesByIsolate = <String, double>{};
+
   List<LogData> data = <LogData>[];
 
   final selectedLog = ValueNotifier<LogData?>(null);
@@ -288,6 +295,7 @@ class LoggingController extends DevToolsScreenController
 
   void clear() {
     _updateData([]);
+    _previousGcTimesByIsolate.clear();
     serviceConnection.errorBadgeManager.clearErrorCount(LoggingScreen.id);
   }
 
@@ -455,11 +463,24 @@ class LoggingController extends DevToolsScreenController
     final usedBytes = newSpace.used! + oldSpace.used!;
     final capacityBytes = newSpace.capacity! + oldSpace.capacity!;
 
-    final time = ((newSpace.time! + oldSpace.time!) * 1000).round();
+    final isolateId = e.isolate?.id;
+    // Cumulative time, in seconds.
+    final newCumulativeTime = newSpace.time! + oldSpace.time!;
+
+    String durationText = '';
+    if (isolateId != null) {
+      final previousGcTime = _previousGcTimesByIsolate[isolateId];
+      _previousGcTimesByIsolate[isolateId] = newCumulativeTime;
+      if (previousGcTime != null && newCumulativeTime >= previousGcTime) {
+        // Multiply by 1000 to display in milliseconds.
+        final durationMs = (newCumulativeTime - previousGcTime) * 1000;
+        durationText = ' in ${durationMs.toStringAsFixed(1)} ms';
+      }
+    }
 
     final summary =
         '${isolateRef['name']} • '
-        '${e.json!['reason']} collection in $time ms • '
+        '${e.json!['reason']} collection$durationText • '
         '${printBytes(usedBytes, unit: ByteUnit.mb, includeUnit: true)} used of '
         '${printBytes(capacityBytes, unit: ByteUnit.mb, includeUnit: true)}';
 
