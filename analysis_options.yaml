@@ -166,6 +166,8 @@ dart_code_metrics:
       - integration_test/**
       # Investigate internal usages of inspector_controller before removing.
       - lib/src/screens/inspector/**_controller.dart
+      - lib/src/extensions/**
+      - lib/src/framework/**
       - lib/src/service/**
       - lib/src/shared/**
       - lib/src/standalone_ui/**
