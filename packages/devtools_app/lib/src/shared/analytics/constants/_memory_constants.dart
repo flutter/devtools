@@ -53,6 +53,7 @@ enum MemoryEvents {
   profileHelp,
   profileRefreshManual,
   profileRefreshOnGc,
+  profilePinClass,
 
   // 'Tracing' tab events
   tracingClear,

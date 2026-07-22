@@ -11,20 +11,34 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/memory/class_name.dart';
 import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
 @visibleForTesting
-enum Json { profile, rootPackage }
+enum Json { profile, rootPackage, pinnedClasses }
 
 class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin, Serializable {
-  ProfilePaneController({required this.rootPackage, AdaptedProfile? profile}) {
+  ProfilePaneController({
+    required this.rootPackage,
+    AdaptedProfile? profile,
+    Set<String>? pinnedClassFullNames,
+  }) {
+    if (pinnedClassFullNames != null) {
+      _pinnedClassFullNames.addAll(pinnedClassFullNames);
+      _pinnedClassFullNamesListenable.value = pinnedClassFullNames;
+    }
+    _pinnedClassFullNamesListenable.value = Set.of(_pinnedClassFullNames);
     // [profile] should only be non-null when loading offline data.
     if (profile != null) {
-      _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
-        profile,
-        classFilter.value,
+      _currentAllocationProfile.value = AdaptedProfile.withPinnedClasses(
+        AdaptedProfile.withNewFilter(
+          profile,
+          classFilter.value,
+          rootPackage,
+        ),
+        _pinnedClassFullNames,
         rootPackage,
       );
     }
@@ -34,6 +48,9 @@ class ProfilePaneController extends DisposableController
     return ProfilePaneController(
       profile: deserialize(json[Json.profile.name], AdaptedProfile.fromJson),
       rootPackage: json[Json.rootPackage.name],
+      pinnedClassFullNames: (json[Json.pinnedClasses.name] as List?)
+          ?.cast<String>()
+          .toSet(),
     );
   }
 
@@ -42,10 +59,42 @@ class ProfilePaneController extends DisposableController
     return {
       Json.profile.name: _currentAllocationProfile.value,
       Json.rootPackage.name: rootPackage,
+      Json.pinnedClasses.name: _pinnedClassFullNames.toList(),
     };
   }
 
   bool _initialized = false;
+
+  final _pinnedClassFullNames = <String>{};
+
+  /// Classes pinned to the top of the Profile Memory table.
+  ValueListenable<Set<String>> get pinnedClassFullNames =>
+      _pinnedClassFullNamesListenable;
+  final _pinnedClassFullNamesListenable = ValueNotifier<Set<String>>({});
+
+  bool isPinned(HeapClassName heapClass) =>
+      _pinnedClassFullNames.contains(heapClass.fullName);
+
+  void togglePin(HeapClassName heapClass) {
+    final key = heapClass.fullName;
+    if (_pinnedClassFullNames.contains(key)) {
+      _pinnedClassFullNames.remove(key);
+    } else {
+      _pinnedClassFullNames.add(key);
+    }
+    _pinnedClassFullNamesListenable.value = Set.of(_pinnedClassFullNames);
+    _reapplyPinnedState();
+  }
+
+  void _reapplyPinnedState() {
+    final currentProfile = _currentAllocationProfile.value;
+    if (currentProfile == null) return;
+    _currentAllocationProfile.value = AdaptedProfile.withPinnedClasses(
+      currentProfile,
+      _pinnedClassFullNames,
+      rootPackage,
+    );
+  }
 
   /// Initializes the controller if it is not initialized yet.
   @override
@@ -84,6 +133,7 @@ class ProfilePaneController extends DisposableController
       profile,
       classFilter.value,
       rootPackage,
+      pinnedClassFullNames: _pinnedClassFullNames,
     );
     _initializeSelection();
   }
@@ -105,9 +155,13 @@ class ProfilePaneController extends DisposableController
     _classFilter.value = filter;
     final currentProfile = _currentAllocationProfile.value;
     if (currentProfile == null) return;
-    _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
-      currentProfile,
-      classFilter.value,
+    _currentAllocationProfile.value = AdaptedProfile.withPinnedClasses(
+      AdaptedProfile.withNewFilter(
+        currentProfile,
+        classFilter.value,
+        rootPackage,
+      ),
+      _pinnedClassFullNames,
       rootPackage,
     );
   }
@@ -210,6 +264,7 @@ class ProfilePaneController extends DisposableController
     _currentAllocationProfile.dispose();
     _classFilter.dispose();
     _refreshOnGc.dispose();
+    _pinnedClassFullNamesListenable.dispose();
     selection.dispose();
     super.dispose();
   }
