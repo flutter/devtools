@@ -219,14 +219,6 @@ class AASAfileFormatSubCheck extends CommonError {
     ),
   );
 
-  static final defaultsCaseSensitiveFormat = AASAfileFormatSubCheck(
-    'Applinks defaults case sensitive format',
-    propertyTypeMessage(
-      property: 'applinks.defaults.caseSensitive',
-      expectedType: 'boolean',
-    ),
-  );
-
   static const detailsFormat = AASAfileFormatSubCheck(
     'Applinks details format',
     'This test checks that the `applinks.details` property is formatted properly. Ref - '
@@ -402,6 +394,7 @@ class Path {
   final String path;
 
   // TODO(hangyujin): display queryParams in path table.
+  // ignore: unused-code, outstanding TODO.
   final Map<String, String> queryParams;
 
   /// A Boolean value that indicates whether to stop pattern matching and prevent the universal

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:meta/meta.dart';
+
 import '../../../../shared/primitives/trees.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../performance_model.dart';
@@ -128,6 +130,7 @@ class FrameAnalysis {
     return longest;
   }
 
+  @visibleForTesting
   bool get hasExpensiveOperations =>
       saveLayerCount + intrinsicOperationsCount > 0;
 

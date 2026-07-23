@@ -37,8 +37,6 @@ class StatusLine extends StatelessWidget {
   /// Whether to highlight the footer when DevTools is connected to an app.
   final bool highlightForConnection;
 
-  static const deviceInfoTooltip = 'Device Info';
-
   /// The padding around the footer in the DevTools UI.
   EdgeInsets get padding => const EdgeInsets.symmetric(
     horizontal: defaultSpacing,

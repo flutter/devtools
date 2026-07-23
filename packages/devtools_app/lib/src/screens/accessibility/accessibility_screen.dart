@@ -19,8 +19,6 @@ export 'semantics_tree_pane.dart';
 class AccessibilityScreen extends Screen {
   AccessibilityScreen() : super.fromMetaData(ScreenMetaData.accessibility);
 
-  static final id = ScreenMetaData.accessibility.id;
-
   @override
   Widget buildScreenBody(BuildContext context) =>
       const AccessibilityScreenBody();
@@ -36,11 +34,13 @@ class AccessibilityScreenBody extends StatefulWidget {
 
 class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
     with AutoDisposeMixin {
+  // ignore: unused-code, temporarily ignore since this screen is under active development.   
   late AccessibilityController controller;
 
   @override
   void initState() {
     super.initState();
+    // ignore: unused-code, temporarily ignore since this screen is under active development.
     controller = screenControllers.lookup<AccessibilityController>();
   }
 

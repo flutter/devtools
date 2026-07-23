@@ -49,7 +49,6 @@ class TimelineEventsController extends PerformanceFeatureController
 
   static const uiThreadSuffix = '.ui';
   static const rasterThreadSuffix = '.raster';
-  static const gpuThreadSuffix = '.gpu';
   static const platformThreadSuffix = '.platform';
   static const flutterTestThreadSuffix = '.flutter.test..ui';
   static final _refreshWorkTrackerDelay = const Duration(

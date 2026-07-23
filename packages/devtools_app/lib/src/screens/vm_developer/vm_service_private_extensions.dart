@@ -55,33 +55,7 @@ extension IsolatePrivateViewExtension on Isolate {
       (json!['_heaps'] as Map).cast<String, Object?>();
 }
 
-/// An extension on [Class] which allows for access to VM internal fields.
-extension ClassPrivateViewExtension on Class {
-  /// The internal name of the [Class].
-  String get vmName => json![_vmNameKey];
-}
-
-/// An extension on [InboundReferences] which allows for access to
-/// VM internal fields.
-extension InboundReferenceExtension on InboundReferences {
-  static const _referencesKey = 'references';
-  static const _parentWordOffsetKey = '_parentWordOffset';
-
-  int? parentWordOffset(int inboundReferenceIndex) {
-    final references = (json![_referencesKey] as List?)?.cast<Object?>();
-    final inboundReference = (references?[inboundReferenceIndex] as Map?)
-        ?.cast<String, Object?>();
-    return inboundReference?[_parentWordOffsetKey] as int?;
-  }
-}
-
 class HeapStats {
-  const HeapStats({
-    required this.count,
-    required this.size,
-    required this.externalSize,
-  });
-
   const HeapStats.empty() : count = 0, size = 0, externalSize = 0;
 
   HeapStats.parse(List<int> stats)
@@ -171,10 +145,6 @@ extension ObjRefPrivateViewExtension on ObjRef {
 
   /// `true` if this object is an instance of [SubtypeTestCacheRef].
   bool get isSubtypeTestCache => vmType == _subtypeTestCache;
-
-  /// Casts the current [ObjRef] into an instance of [SubtypeTestCacheRef].
-  SubtypeTestCacheRef get asSubtypeTestCache =>
-      SubtypeTestCacheRef.fromJson(json!);
 
   /// `true` if this object is an instance of [WeakArrayRef].
   bool get isWeakArray => vmType == _weakArrayType;
@@ -272,9 +242,6 @@ class WeakArray extends WeakArrayRef implements Obj {
 /// A partially-populated representation of the Dart VM's subtype test cache.
 class SubtypeTestCacheRef implements ObjRef {
   SubtypeTestCacheRef({required this.id, required this.json});
-
-  factory SubtypeTestCacheRef.fromJson(Map<String, dynamic> json) =>
-      SubtypeTestCacheRef(id: json['id'], json: json);
 
   @override
   bool? fixedId;
@@ -540,21 +507,14 @@ enum FunctionKind {
 /// An extension on [Code] which allows for access to VM internal fields.
 extension CodePrivateViewExtension on Code {
   static const _disassemblyKey = '_disassembly';
-  static const _kindKey = 'kind';
   static const _objectPoolKey = '_objectPool';
 
   /// Returns the disassembly of the [Code], which is the generated assembly
   /// instructions for the code's function.
   Disassembly get disassembly => Disassembly.parse(json![_disassemblyKey]);
+  @visibleForTesting
   set disassembly(Disassembly disassembly) =>
       json![_disassemblyKey] = disassembly.toJson();
-
-  /// The kind of code object represented by this instance.
-  ///
-  /// Can be one of:
-  ///   - Dart
-  ///   - Stub
-  String get kind => json![_kindKey];
 
   ObjectPoolRef get objectPool => ObjectPoolRef.parse(json![_objectPoolKey]);
 
@@ -676,20 +636,6 @@ enum ObjectPoolEntryKind {
 
   static const _kObject = 'Object';
   static const _kImm = 'Immediate';
-  static const _kNativeFunction = 'NativeFunction';
-
-  static ObjectPoolEntryKind fromString(String type) {
-    switch (type) {
-      case _kObject:
-        return object;
-      case _kImm:
-        return immediate;
-      case _kNativeFunction:
-        return nativeFunction;
-      default:
-        throw UnsupportedError('Unsupported ObjectPoolType: $type');
-    }
-  }
 
   @override
   String toString() {
@@ -707,23 +653,18 @@ enum ObjectPoolEntryKind {
 class ObjectPoolEntry {
   const ObjectPoolEntry({
     required this.offset,
-    required this.kind,
     required this.value,
   });
 
   static const _offsetKey = 'offset';
-  static const _kindKey = 'kind';
   static const _valueKey = 'value';
 
   static ObjectPoolEntry parse(Map<String, dynamic> json) => ObjectPoolEntry(
     offset: json[_offsetKey],
-    kind: ObjectPoolEntryKind.fromString(json[_kindKey]),
     value: createServiceObject(json[_valueKey], [])!,
   );
 
   final int offset;
-
-  final ObjectPoolEntryKind kind;
 
   final Object value;
 }
@@ -850,14 +791,6 @@ class ObjectStore {
 ///
 /// See [CpuSamples].
 class ProfileCode {
-  ProfileCode({
-    this.kind,
-    this.inclusiveTicks,
-    this.exclusiveTicks,
-    this.code,
-    this.ticks,
-  });
-
   ProfileCode._fromJson(Map<String, dynamic> json) {
     kind = json['kind'] ?? '';
     inclusiveTicks = json['inclusiveTicks'] ?? -1;
@@ -883,6 +816,7 @@ class ProfileCode {
 
   List? ticks;
 
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9910) seems like a bug.
   Map<String, Object?> toJson() {
     final json = <String, Object?>{};
     json.addAll({
@@ -915,10 +849,6 @@ extension CpuSamplesPrivateView on CpuSamples {
 
   static const _kCodesKey = '_codes';
 
-  bool get hasCodes {
-    return _expando[this] != null || json!.containsKey(_kCodesKey);
-  }
-
   List<ProfileCode> get codes {
     return _expando[this] ??= (json![_kCodesKey] as List)
         .cast<Map<String, dynamic>>()
@@ -936,13 +866,11 @@ extension ProfileDataRanges on SourceReport {
 class ProfileReportEntry {
   const ProfileReportEntry({
     required this.sampleCount,
-    required this.line,
     required this.inclusive,
     required this.exclusive,
   });
 
   final int sampleCount;
-  final int line;
   final int inclusive;
   final int exclusive;
 
@@ -970,7 +898,6 @@ class ProfileReportRange {
       final line = lines[i];
       entries[line] = ProfileReportEntry(
         sampleCount: json.sampleCount,
-        line: line,
         inclusive: inclusiveTicks[i],
         exclusive: exclusiveTicks[i],
       );

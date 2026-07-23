@@ -33,13 +33,12 @@ class DeepLinkListView extends StatefulWidget {
 }
 
 class _DeepLinkListViewState extends State<DeepLinkListView> {
-  late DeepLinksController controller;
-
   @override
   void initState() {
     super.initState();
-    controller = screenControllers.lookup<DeepLinksController>()
-      ..firstLoadWithDefaultConfigurations();
+    screenControllers
+        .lookup<DeepLinksController>()
+        .firstLoadWithDefaultConfigurations();
   }
 
   @override

@@ -68,11 +68,6 @@ const overflowBackgroundColorLight = Color(0xFFB00020);
 const overflowTextColorDark = Color(0xfff5846b);
 const overflowTextColorLight = Color(0xffdea089);
 
-const backgroundColorSelectedDark = Color(
-  0x4d474747,
-); // TODO(jacobr): we would like Color(0x4dedeeef) but that makes the background show through.
-const backgroundColorSelectedLight = Color(0x4dedeeef);
-
 extension LayoutExplorerColorScheme on ColorScheme {
   Color get mainAxisColor => isLight ? mainAxisLightColor : mainAxisDarkColor;
 
@@ -93,15 +88,9 @@ extension LayoutExplorerColorScheme on ColorScheme {
   Color get overflowTextColor =>
       isLight ? overflowTextColorLight : overflowTextColorDark;
 
-  Color get backgroundColorSelected =>
-      isLight ? backgroundColorSelectedLight : backgroundColorSelectedDark;
-
   Color get unconstrainedColor =>
       isLight ? unconstrainedLightColor : unconstrainedDarkColor;
 }
-
-const backgroundColorDark = Color(0xff30302f);
-const backgroundColorLight = Color(0xffffffff);
 
 const unconstrainedDarkColor = Color(0xffdea089);
 const unconstrainedLightColor = Color(0xfff5846b);

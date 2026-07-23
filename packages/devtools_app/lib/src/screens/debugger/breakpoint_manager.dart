@@ -23,7 +23,6 @@ class BreakpointManager with DisposerMixin {
 
   final _breakPositionsMap = <String, List<SourcePosition>>{};
 
-  ValueListenable<List<Breakpoint>> get breakpoints => _breakpoints;
   final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
   ValueListenable<List<BreakpointAndSourcePosition>>

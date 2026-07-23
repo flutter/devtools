@@ -589,19 +589,6 @@ class ScopeStack {
   /// Location where the next produced span should begin.
   ScopeStackLocation _nextLocation = ScopeStackLocation.zero;
 
-  /// Adds a scope for a given region.
-  ///
-  /// This method is the same as calling [push] and then [pop] with the same
-  /// args.
-  void add(
-    String? scope, {
-    required ScopeStackLocation start,
-    required ScopeStackLocation end,
-  }) {
-    push(scope, start);
-    pop(scope, end);
-  }
-
   /// Pushes a new scope onto the stack starting at [location].
   void push(String? scope, ScopeStackLocation location) {
     if (scope == null) return;
@@ -721,6 +708,8 @@ class ScopeStackItem {
   ScopeStackItem(this.scope, this.location);
 
   final String scope;
+
+  // ignore: unused-code, foundational to this data class.
   final ScopeStackLocation location;
 }
 

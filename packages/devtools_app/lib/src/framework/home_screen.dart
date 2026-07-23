@@ -32,8 +32,6 @@ class HomeScreen extends Screen {
         titleGenerator: () => devToolsTitle.value,
       );
 
-  static final id = ScreenMetaData.home.id;
-
   final List<DevToolsJsonFile> sampleData;
 
   @override
@@ -165,10 +163,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
   void initState() {
     super.initState();
     connectDialogController = TextEditingController();
-    assert(() {
-      _debugInitVmServiceCache();
-      return true;
-    }());
+    if (kDebugMode) _debugInitVmServiceCache();
   }
 
   void _debugInitVmServiceCache() async {

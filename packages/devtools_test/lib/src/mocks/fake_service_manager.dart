@@ -13,7 +13,6 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../helpers/utils.dart';
 import 'fake_isolate_manager.dart';
 import 'fake_service_extension_manager.dart';
 import 'fake_vm_service_wrapper.dart';
@@ -39,7 +38,8 @@ class FakeServiceConnectionManager extends Fake
       availableServices: availableServices,
       rootLibrary: rootLibrary,
     );
-    for (final screenId in screenIds) {
+    for (final screen in ScreenMetaData.values) {
+      final screenId = screen.id;
       when(errorBadgeManager.erroredItemsForPage(screenId)).thenReturn(
         FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
       );

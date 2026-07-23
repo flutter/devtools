@@ -21,12 +21,10 @@ class DtdServiceMethod implements Comparable<DtdServiceMethod> {
   const DtdServiceMethod({
     required this.service,
     required this.method,
-    this.capabilities,
   });
 
   final String? service;
   final String method;
-  final Map<String, Object?>? capabilities;
 
   String get displayName => [service, method].nonNulls.join('.');
 
