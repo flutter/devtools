@@ -118,9 +118,6 @@ class DevToolsAnalyticsEvent {
     this.rootSetCount, // metric10
     this.rowCount, // metric11
     this.inspectorTreeControllerId, // metric12
-    // Deep Link screen metrics. See [DeepLinkScreenMetrics].
-    this.androidAppId, //metric13
-    this.iosBundleId, //metric14
     // Inspector screen metrics. See [InspectorScreenMetrics].
     this.isV2Inspector, // metric15
   });
@@ -192,13 +189,6 @@ class DevToolsAnalyticsEvent {
       inspectorTreeControllerId: screenMetrics is InspectorScreenMetrics
           ? screenMetrics.inspectorTreeControllerId
           : null,
-      // [DeepLinkScreenMetrics]
-      androidAppId: screenMetrics is DeepLinkScreenMetrics
-          ? screenMetrics.androidAppId
-          : null,
-      iosBundleId: screenMetrics is DeepLinkScreenMetrics
-          ? screenMetrics.iosBundleId
-          : null,
       // [InspectorScreenMetrics]
       // TODO(https://github.com/flutter/devtools/issues/9563): Remove this
       // dimension after dashboards have been updated to not include it. The
@@ -244,8 +234,6 @@ class DevToolsAnalyticsEvent {
   int? rootSetCount;
   int? rowCount;
   int? inspectorTreeControllerId;
-  String? androidAppId;
-  String? iosBundleId;
   String? isV2Inspector;
 }
 
@@ -298,9 +286,6 @@ class DevToolsAnalyticsException {
     this.rootSetCount, // metric10
     this.rowCount, // metric11
     this.inspectorTreeControllerId, // metric12
-    // Deep Link screen metrics. See [DeepLinkScreenMetrics].
-    this.androidAppId, //metric13
-    this.iosBundleId, //metric14
     // Inspector screen metrics. See [InspectorScreenMetrics].
     this.isV2Inspector, // metric15
   });
@@ -366,13 +351,6 @@ class DevToolsAnalyticsException {
       inspectorTreeControllerId: screenMetrics is InspectorScreenMetrics
           ? screenMetrics.inspectorTreeControllerId
           : null,
-      // [DeepLinkScreenMetrics]
-      androidAppId: screenMetrics is DeepLinkScreenMetrics
-          ? screenMetrics.androidAppId
-          : null,
-      iosBundleId: screenMetrics is DeepLinkScreenMetrics
-          ? screenMetrics.iosBundleId
-          : null,
       // [InspectorScreenMetrics]
       isV2Inspector: screenMetrics is InspectorScreenMetrics
           ? true.toString()
@@ -411,8 +389,6 @@ class DevToolsAnalyticsException {
   int? rootSetCount;
   int? rowCount;
   int? inspectorTreeControllerId;
-  String? androidAppId;
-  String? iosBundleId;
   String? isV2Inspector;
 }
 
@@ -857,8 +833,6 @@ ua.Event _uaEventFromDevToolsEvent(DevToolsAnalyticsEvent event) {
       rowCount: event.rowCount,
       inspectorTreeControllerId: event.inspectorTreeControllerId,
       isV2Inspector: event.isV2Inspector,
-      androidAppId: event.androidAppId,
-      iosBundleId: event.iosBundleId,
     ),
   );
 }
@@ -909,8 +883,6 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
     required this.rowCount,
     required this.inspectorTreeControllerId,
     required this.isV2Inspector,
-    required this.androidAppId,
-    required this.iosBundleId,
     required this.uiDurationMicros,
   });
 
@@ -935,10 +907,6 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
   final int? inspectorTreeControllerId;
   final String? isV2Inspector;
 
-  // [DeepLinkScreenMetrics]
-  final String? androidAppId;
-  final String? iosBundleId;
-
   @override
   Map<String, Object> toMap() => (<String, Object?>{
     'uiDurationMicros': uiDurationMicros,
@@ -954,7 +922,5 @@ final class _DevToolsEventMetrics extends ua.CustomMetrics {
     'rowCount': rowCount,
     'inspectorTreeControllerId': inspectorTreeControllerId,
     'isV2Inspector': isV2Inspector,
-    'androidAppId': androidAppId,
-    'iosBundleId': iosBundleId,
   }..removeWhere((key, value) => value == null)).cast<String, Object>();
 }

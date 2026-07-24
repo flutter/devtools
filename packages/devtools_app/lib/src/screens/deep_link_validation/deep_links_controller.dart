@@ -12,7 +12,6 @@ import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/analytics/metrics.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
@@ -341,8 +340,6 @@ class DeepLinksController extends DevToolsScreenController
           ga.impression(
             gac.deeplink,
             gac.AnalyzeFlutterProject.androidAppLinksSettingsLoaded.name,
-            screenMetricsProvider: () =>
-                DeepLinkScreenMetrics(androidAppId: result.applicationId),
           );
         } catch (_) {
           ga.select(
@@ -378,8 +375,6 @@ class DeepLinksController extends DevToolsScreenController
           ga.impression(
             gac.deeplink,
             gac.AnalyzeFlutterProject.iosUniversalLinkSettingsLoaded.name,
-            screenMetricsProvider: () =>
-                DeepLinkScreenMetrics(iosBundleId: result.bundleIdentifier),
           );
         } catch (_) {
           pagePhase.value = PagePhase.validationErrorPage;
@@ -554,9 +549,6 @@ class DeepLinksController extends DevToolsScreenController
         ga.impression(
           gac.deeplink,
           gac.AnalyzeFlutterProject.androidValidateDomain.name,
-          screenMetricsProvider: () => DeepLinkScreenMetrics(
-            androidAppId: currentAppLinkSettings!.applicationId,
-          ),
         );
         final androidResult = await deepLinksService.validateAndroidDomain(
           domains: domains,
@@ -571,9 +563,6 @@ class DeepLinksController extends DevToolsScreenController
         ga.impression(
           gac.deeplink,
           gac.AnalyzeFlutterProject.iosValidateDomain.name,
-          screenMetricsProvider: () => DeepLinkScreenMetrics(
-            iosBundleId: currentUniversalLinkSettings!.bundleIdentifier,
-          ),
         );
         final iosResult = await deepLinksService.validateIosDomain(
           bundleId: bundleId,
