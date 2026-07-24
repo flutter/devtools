@@ -54,12 +54,22 @@ class DebuggerScreen extends Screen {
       searchInFileKeySet: SearchInFileIntent(controller),
       escapeKeySet: EscapeIntent(controller),
       openFileKeySet: OpenFileIntent(controller),
+      pauseResumeKeySet: PauseResumeIntent(controller),
+      nextStackFrameKeySet: NextStackFrameIntent(controller),
+      stepOverKeySet: StepOverIntent(controller),
+      stepInKeySet: StepInIntent(controller),
+      stepOutKeySet: StepOutIntent(controller),
     };
     final actions = <Type, Action<Intent>>{
       GoToLineNumberIntent: GoToLineNumberAction(),
       SearchInFileIntent: SearchInFileAction(),
       EscapeIntent: EscapeAction(),
       OpenFileIntent: OpenFileAction(),
+      PauseResumeIntent: PauseResumeAction(),
+      NextStackFrameIntent: NextStackFrameAction(),
+      StepOverIntent: StepOverAction(),
+      StepInIntent: StepInAction(),
+      StepOutIntent: StepOutAction(),
     };
     return ShortcutsConfiguration(shortcuts: shortcuts, actions: actions);
   }
@@ -409,6 +419,120 @@ class OpenFileAction extends Action<OpenFileIntent> {
     intent._controller.codeViewController
       ..toggleFileOpenerVisibility(true)
       ..toggleSearchInFileVisibility(false);
+  }
+}
+
+// ----- Stepping / pause keyboard intents (issue #3867) -----------------------
+//
+// Each Action delegates to `DebuggerController` for both the gating
+// (`isEnabled`) and the side-effecting call (`invoke`), so the keyboard
+// shortcuts stay in lock-step with the debugger buttons in `controls.dart`.
+
+class PauseResumeIntent extends Intent {
+  const PauseResumeIntent(this._controller);
+
+  final DebuggerController _controller;
+}
+
+class PauseResumeAction extends Action<PauseResumeIntent> {
+  @override
+  bool isEnabled(PauseResumeIntent intent) {
+    if (intent._controller.isSystemIsolate) {
+      return false;
+    }
+    final isPaused = serviceConnection.serviceManager.isMainIsolatePaused;
+    if (isPaused) {
+      // When paused, the button becomes "Resume" and is disabled while a
+      // resume is already in flight.
+      return !intent._controller.resuming.value;
+    }
+    return true;
+  }
+
+  @override
+  void invoke(PauseResumeIntent intent) {
+    final controller = intent._controller;
+    if (serviceConnection.serviceManager.isMainIsolatePaused) {
+      unawaited(controller.resume());
+    } else {
+      unawaited(controller.pause());
+    }
+  }
+}
+
+class NextStackFrameIntent extends Intent {
+  const NextStackFrameIntent(this._controller);
+
+  final DebuggerController _controller;
+}
+
+class NextStackFrameAction extends Action<NextStackFrameIntent> {
+  @override
+  bool isEnabled(NextStackFrameIntent intent) =>
+      intent._controller.stackFramesWithLocation.value.length > 1;
+
+  @override
+  void invoke(NextStackFrameIntent intent) {
+    final controller = intent._controller;
+    final frames = controller.stackFramesWithLocation.value;
+    final currentlySelected = controller.selectedStackFrame.value;
+    final currentIndex = currentlySelected == null
+        ? -1
+        : frames.indexWhere(
+            (frame) => frame.frame.index == currentlySelected.frame.index,
+          );
+    // Cycle through frames so repeated presses walk the call stack and wrap
+    // back to the top.
+    final nextIndex = (currentIndex + 1) % frames.length;
+    unawaited(controller.selectStackFrame(frames[nextIndex]));
+  }
+}
+
+class StepOverIntent extends Intent {
+  const StepOverIntent(this._controller);
+
+  final DebuggerController _controller;
+}
+
+class StepOverAction extends Action<StepOverIntent> {
+  @override
+  bool isEnabled(StepOverIntent intent) => intent._controller.canStep;
+
+  @override
+  void invoke(StepOverIntent intent) {
+    unawaited(intent._controller.stepOver());
+  }
+}
+
+class StepInIntent extends Intent {
+  const StepInIntent(this._controller);
+
+  final DebuggerController _controller;
+}
+
+class StepInAction extends Action<StepInIntent> {
+  @override
+  bool isEnabled(StepInIntent intent) => intent._controller.canStep;
+
+  @override
+  void invoke(StepInIntent intent) {
+    unawaited(intent._controller.stepIn());
+  }
+}
+
+class StepOutIntent extends Intent {
+  const StepOutIntent(this._controller);
+
+  final DebuggerController _controller;
+}
+
+class StepOutAction extends Action<StepOutIntent> {
+  @override
+  bool isEnabled(StepOutIntent intent) => intent._controller.canStep;
+
+  @override
+  void invoke(StepOutIntent intent) {
+    unawaited(intent._controller.stepOut());
   }
 }
 
