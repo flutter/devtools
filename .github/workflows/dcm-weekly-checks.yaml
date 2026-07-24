@@ -1,0 +1,93 @@
+name: Weekly DCM Checks
+
+on:
+  push: # Temporary for testing. Remove before merging.
+  schedule:
+    - cron: '0 8 * * 1' # Every Monday at 8am
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  flutter-prep:
+    uses: ./.github/workflows/flutter-prep.yaml
+
+  dcm_check:
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7
+        with:
+          path: |
+            ./tool/flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+
+      - name: Setup PATHs
+        run: |
+          echo "$(pwd)/tool/flutter-sdk/bin" >> $GITHUB_PATH
+          echo "$(pwd)/tool/flutter-sdk/bin/cache/dart-sdk/bin" >> $GITHUB_PATH
+
+      - name: Install DCM
+        run: |
+          sudo apt-get update
+          wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
+          echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
+          sudo apt-get update
+          sudo apt-get install dcm=1.38.1-1
+          sudo chmod +x /usr/bin/dcm
+          echo "$(dcm --version)"
+          
+      - name: Install dependencies
+        run: |
+          dart pub get
+          cd packages/devtools_app && flutter pub get
+          cd ../devtools_app_shared && flutter pub get
+          cd ../devtools_extensions && flutter pub get
+          cd ../devtools_shared && dart pub get
+          cd ../devtools_test && flutter pub get
+          
+      - name: Run DCM unused checks
+        run: |
+          echo "Running check-unused-code..."
+          dcm check-unused-code -c packages/devtools_app/lib/src/framework/scaffold/status_line.dart > raw_unused_code.txt || echo "found_code=true" >> $GITHUB_ENV
+          grep '^• ' raw_unused_code.txt | sed 's/^• /- [ ] /' > unused_code.txt || true
+          
+          echo "Running check-unused-files..."
+          dcm check-unused-files -c packages/devtools_app/lib/src/framework/scaffold/status_line.dart > raw_unused_files.txt || echo "found_files=true" >> $GITHUB_ENV
+          grep '^• ' raw_unused_files.txt | sed 's/^• /- [ ] /' > unused_files.txt || true
+
+      - name: Create Issue if findings
+        if: env.found_code == 'true' || env.found_files == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "The weekly DCM checks found unused code or files. Please review the findings below." > issue_body.md
+          echo "" >> issue_body.md
+          echo "### How to run locally" >> issue_body.md
+          echo "To run these checks locally, you can use the following commands from the root of the repository:" >> issue_body.md
+          echo "\`\`\`sh" >> issue_body.md
+          echo "dcm check-unused-code packages/devtools_app/" >> issue_body.md
+          echo "dcm check-unused-files packages/devtools_app/" >> issue_body.md
+          echo "\`\`\`" >> issue_body.md
+          echo "" >> issue_body.md
+          
+          if [ "$found_code" == "true" ]; then
+            echo "### Unused Code" >> issue_body.md
+            cat unused_code.txt >> issue_body.md
+          fi
+          
+          if [ "$found_files" == "true" ]; then
+            echo "### Unused Files" >> issue_body.md
+            cat unused_files.txt >> issue_body.md
+          fi
+          
+          gh issue create \
+            --title "Weekly DCM Checks: Unused code or files found" \
+            --body-file issue_body.md \
+            --label "cleanup"
