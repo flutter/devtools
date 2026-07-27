@@ -27,7 +27,7 @@ TODO: Remove this section if there are not any updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any updates.
+- Fixed a bug where resizing the CPU flame chart changes the timing values across the top of the chart. [TODO](https://github.com/flutter/devtools/pull/TODO)
 
 ## Memory updates
 
