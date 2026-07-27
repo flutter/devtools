@@ -162,8 +162,6 @@ class FlutterTestEnvironment {
       } finally {
         _setupInProgress!.complete(!_needsSetup);
       }
-
-      if (_afterNewSetup != null) await _afterNewSetup!();
     }
     if (_afterEverySetup != null) await _afterEverySetup!();
   }
@@ -180,8 +178,6 @@ class FlutterTestEnvironment {
       // Skip actually tearing down for better test performance.
       return;
     }
-
-    if (_beforeFinalTearDown != null) await _beforeFinalTearDown!();
 
     await serviceConnection.serviceManager.manuallyDisconnect();
 

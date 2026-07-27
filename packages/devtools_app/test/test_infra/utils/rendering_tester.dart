@@ -34,8 +34,7 @@ class TestRenderingFlutterBinding extends BindingBase
   ///
   /// If [onErrors] is not null, it is called if [FlutterError] caught any errors
   /// while drawing the frame. If [onErrors] is null and [FlutterError] caught at least
-  /// one error, this function fails the test. A test may override [onErrors] and
-  /// inspect errors using [takeFlutterErrorDetails].
+  /// one error, this function fails the test.
   ///
   /// Errors caught between frames will cause the test to fail unless
   /// [FlutterError.onError] has been overridden.
@@ -119,8 +118,7 @@ class TestRenderingFlutterBinding extends BindingBase
   /// A function called after drawing a frame if [FlutterError] caught any errors.
   ///
   /// This function is expected to inspect these errors and decide whether they
-  /// are expected or not. Use [takeFlutterErrorDetails] to take one error at a
-  /// time, or [takeAllFlutterErrorDetails] to iterate over all errors.
+  /// are expected or not.
   VoidCallback? onErrors;
 
   EnginePhase phase = EnginePhase.composite;
