@@ -185,8 +185,8 @@ class FlutterTestEnvironment {
       const Duration(seconds: 20),
       onTimeout: () {
         throw 'Timed out waiting for futures to complete during teardown. '
-            '${_service.activeFutures.length} futures remained:\n\n'
-            '  ${_service.activeFutures.map((tf) => tf.name).join('\n  ')}';
+            '${_service.activeFutureNames.length} futures remained:\n\n'
+            '  ${_service.activeFutureNames.join('\\n  ')}';
       },
     );
     await _flutter!.stop();
