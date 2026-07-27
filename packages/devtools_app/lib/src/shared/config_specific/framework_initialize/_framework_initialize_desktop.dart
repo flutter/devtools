@@ -37,7 +37,7 @@ class FlutterDesktopStorage implements Storage {
       File(_preferencesFile.path).createSync(recursive: true);
       _fileAndDirVerified = true;
     }
-    _preferencesFile.writeAsStringSync('${_values.prettyPrint()}\n');
+    _preferencesFile.writeAsStringSync('${prettyPrintJson(_values)}\n');
   }
 
   Map<String, Object?> _readValues() {

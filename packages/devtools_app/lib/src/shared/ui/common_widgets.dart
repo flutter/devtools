@@ -1044,13 +1044,14 @@ class _JsonViewerState extends State<JsonViewer> {
   String copyJsonData(DartObjectNode copiedVariable) {
     // Check if service connection is active
     if (serviceConnection.serviceManager.connectedState.value.connected) {
-      return serviceConnection.serviceManager.service!.fakeServiceCache
-          .instanceToJson(copiedVariable.value as Instance)
-          .prettyPrint();
+      return prettyPrintJson(
+        serviceConnection.serviceManager.service!.fakeServiceCache
+          .instanceToJson(copiedVariable.value as Instance),
+      );
     }
 
     // Directly convert object to JSON if not connected
-    return copiedVariable.value.prettyPrint();
+    return prettyPrintJson(copiedVariable.value);
   }
 }
 

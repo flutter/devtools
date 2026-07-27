@@ -92,7 +92,7 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
 
   stdout.writeln('Web benchmark tests finished.');
 
-  expect(taskResult.toJson().prettyPrint(), isA<String>());
+  expect(prettyPrintJson(taskResult.toJson()), isA<String>());
   expect(taskResult.scores.keys, hasLength(DevToolsBenchmark.values.length));
 
   for (final devToolsBenchmark in DevToolsBenchmark.values) {

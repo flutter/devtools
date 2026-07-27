@@ -212,10 +212,9 @@ class JsonUtils {
   }
 }
 
-/// Add pretty print for a JSON payload.
-extension JsonObjectExtension on Object? {
-  String prettyPrint() => const JsonEncoder.withIndent('  ').convert(this);
-}
+/// Returns a pretty-printed representation of a JSON payload.
+String prettyPrintJson(Object? json) =>
+    const JsonEncoder.withIndent('  ').convert(json);
 
 typedef RateLimiterCallback = Future<void> Function();
 

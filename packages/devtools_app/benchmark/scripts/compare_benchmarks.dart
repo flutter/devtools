@@ -62,6 +62,6 @@ void compareBenchmarks(
   stdout.writeln('Baseline comparison finished.');
   stdout
     ..writeln('==== Comparison with baseline $baselineSource ====')
-    ..writeln(delta.toJson().prettyPrint())
+    ..writeln(prettyPrintJson(delta.toJson()))
     ..writeln('==== End of baseline comparison ====');
 }

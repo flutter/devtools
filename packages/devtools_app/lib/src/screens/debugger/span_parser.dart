@@ -69,12 +69,12 @@ class Grammar {
 
   @override
   String toString() {
-    return {
+    return prettyPrintJson({
       'name': name,
       'scopeName': scopeName,
       'topLevelMatcher': topLevelMatcher.toJson(),
       'repository': repository.toJson(),
-    }.prettyPrint();
+    });
   }
 }
 
