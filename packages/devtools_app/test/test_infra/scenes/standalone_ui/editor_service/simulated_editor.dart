@@ -44,6 +44,7 @@ class SimulatedEditor {
   DartToolingDaemon? _dtd;
 
   /// A controller for emitting to [log].
+  // ignore: dispose-class-fields, only used in tests.
   final _logger = StreamController<String>();
 
   /// A stream of protocol traffic between the editor and DTD (or postMessage

@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 import 'devtools_store.dart';
 
 /// The real, local file system, which can be avoided in tests.
-const FileSystem fileSystem = LocalFileSystem();
+const fileSystem = LocalFileSystem();
 
 extension FileSystemExtension on FileSystem {
   static String get _userHomeDir {
