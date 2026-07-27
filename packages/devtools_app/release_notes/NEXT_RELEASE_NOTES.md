@@ -27,7 +27,9 @@ TODO: Remove this section if there are not any updates.
 
 ## CPU profiler updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed a bug where resizing the CPU flame chart changes the timing values
+  across the top of the chart.
+  [#9915](https://github.com/flutter/devtools/pull/9915)
 
 ## Memory updates
 
@@ -40,7 +42,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-- Fixed exported response status in HAR files so that they parse as integers
+* Fixed exported response status in HAR files so that they parse as integers
   instead of strings. [#9900](https://github.com/flutter/devtools/pull/9900)
 
 ## Logging updates

@@ -168,7 +168,6 @@ dart_code_metrics:
       - lib/src/screens/inspector/**_controller.dart
       - lib/src/service/**
       - lib/src/shared/**
-      - lib/src/standalone_ui/**
       # This fixture has unused code for testing the debugger.
       - test/test_infra/fixtures/flutter_app/**
   rules:

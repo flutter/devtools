@@ -47,8 +47,6 @@ class PropertyEditorController extends DisposableController
       _editableWidgetData;
   final _editableWidgetData = ValueNotifier<EditableWidgetData?>(null);
 
-  List<EditableProperty> get allProperties =>
-      _editableWidgetData.value?.properties ?? [];
   String? get widgetName => _editableWidgetData.value?.name;
   String? get widgetDocumentation => _editableWidgetData.value?.documentation;
   String? get fileUri => _editableWidgetData.value?.fileUri;
