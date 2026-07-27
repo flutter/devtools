@@ -78,7 +78,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
   final extensionPostEventStream =
       StreamController<DevToolsExtensionEvent>.broadcast();
 
-    // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907): false positive.
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907): false positive.
   bool _initialized = false;
 
   @override

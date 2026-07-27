@@ -45,7 +45,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any updates.
+* Correct time units and cumulative nature of GC events.
+  [#9890](https://github.com/flutter/devtools/pull/9890)
 
 ## App size tool updates
 

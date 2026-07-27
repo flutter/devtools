@@ -43,10 +43,7 @@ void main() {
             length: 0,
           ),
         ),
-        const ObjectPoolEntry(
-          offset: 10,
-          value: 42,
-        ),
+        const ObjectPoolEntry(offset: 10, value: 42),
         ObjectPoolEntry(
           offset: 20,
           value: FuncRef(id: 'func-id', name: 'Foo'),
