@@ -71,12 +71,6 @@ class FlutterTestEnvironment {
   /// test/my_test.dart`).
   final String _flutterExe;
 
-  // This function will be called after we have ran the Flutter app and the
-  // vmService is opened.
-  Future<void> Function()? _afterNewSetup;
-  // ignore: unused-code, part of this class's lifecycle.
-  set afterNewSetup(Future<void> Function() f) => _afterNewSetup = f;
-
   // This function will be called for every call to [setupEnvironment], even
   // when the setup is not forced or triggered by a new FlutterRunConfiguration.
   Future<void> Function()? _afterEverySetup;
@@ -89,13 +83,6 @@ class FlutterTestEnvironment {
   Future<void> Function()? _beforeEveryTearDown;
   set beforeEveryTearDown(Future<void> Function() f) =>
       _beforeEveryTearDown = f;
-
-  // The function will be called before the final forced teardown at the end
-  // of the test suite (which will then stop the Flutter app).
-  Future<void> Function()? _beforeFinalTearDown;
-  // ignore: unused-code, part of this class's lifecycle.
-  set beforeFinalTearDown(Future<void> Function() f) =>
-      _beforeFinalTearDown = f;
 
   bool _needsSetup = true;
 
