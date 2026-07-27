@@ -35,11 +35,6 @@ class SimulatedEditor {
     return editor;
   }
 
-  void dispose() {
-    unawaited(_logger.close());
-    unawaited(close());
-  }
-
   /// The URI of the DTD instance we are connecting/connected to.
   final Uri _dtdUri;
 
@@ -207,10 +202,6 @@ class SimulatedEditor {
 
   void sendDebugSessionStarted(EditorDebugSession debugSession) async {
     await _postEvent(DebugSessionStartedEvent(debugSession: debugSession));
-  }
-
-  void sendDebugSessionChanged(EditorDebugSession debugSession) async {
-    await _postEvent(DebugSessionChangedEvent(debugSession: debugSession));
   }
 
   void sendDebugSessionStopped(EditorDebugSession debugSession) async {

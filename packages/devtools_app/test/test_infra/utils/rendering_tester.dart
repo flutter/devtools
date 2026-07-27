@@ -123,78 +123,7 @@ class TestRenderingFlutterBinding extends BindingBase
   /// time, or [takeAllFlutterErrorDetails] to iterate over all errors.
   VoidCallback? onErrors;
 
-  /// Returns the error least recently caught by [FlutterError] and removes it
-  /// from the list of captured errors.
-  ///
-  /// Returns null if no errors were captures, or if the list was exhausted by
-  /// calling this method repeatedly.
-  FlutterErrorDetails? takeFlutterErrorDetails() {
-    if (_errors.isEmpty) {
-      return null;
-    }
-    return _errors.removeAt(0);
-  }
-
-  /// Returns all error details caught by [FlutterError] from least recently caught to
-  /// most recently caught, and removes them from the list of captured errors.
-  ///
-  /// The returned iterable takes errors lazily. If, for example, you iterate over 2
-  /// errors, but there are 5 errors total, this binding will still fail the test.
-  /// Tests are expected to take and inspect all errors.
-  Iterable<FlutterErrorDetails> takeAllFlutterErrorDetails() sync* {
-    // sync* and yield are used for lazy evaluation. Otherwise, the list would be
-    // drained eagerly and allow a test pass with unexpected errors.
-    while (_errors.isNotEmpty) {
-      yield _errors.removeAt(0);
-    }
-  }
-
-  /// Returns all exceptions caught by [FlutterError] from least recently caught to
-  /// most recently caught, and removes them from the list of captured errors.
-  ///
-  /// The returned iterable takes errors lazily. If, for example, you iterate over 2
-  /// errors, but there are 5 errors total, this binding will still fail the test.
-  /// Tests are expected to take and inspect all errors.
-  Iterable<Object?> takeAllFlutterExceptions() sync* {
-    // sync* and yield are used for lazy evaluation. Otherwise, the list would be
-    // drained eagerly and allow a test pass with unexpected errors.
-    while (_errors.isNotEmpty) {
-      yield _errors.removeAt(0).exception;
-    }
-  }
-
   EnginePhase phase = EnginePhase.composite;
-
-  /// Pumps a frame and runs its entire life cycle.
-  ///
-  /// This method runs all of the [SchedulerPhase]s in a frame, this is useful
-  /// to test [SchedulerPhase.postFrameCallbacks].
-  void pumpCompleteFrame() {
-    final FlutterExceptionHandler? oldErrorHandler = FlutterError.onError;
-    FlutterError.onError = _errors.add;
-    try {
-      TestRenderingFlutterBinding.instance.handleBeginFrame(null);
-      TestRenderingFlutterBinding.instance.handleDrawFrame();
-    } finally {
-      FlutterError.onError = oldErrorHandler;
-      if (_errors.isNotEmpty) {
-        if (onErrors != null) {
-          onErrors!();
-          if (_errors.isNotEmpty) {
-            _errors.forEach(FlutterError.dumpErrorToConsole);
-            fail(
-              'There are more errors than the test inspected using TestRenderingFlutterBinding.takeFlutterErrorDetails.',
-            );
-          }
-        } else {
-          _errors.forEach(FlutterError.dumpErrorToConsole);
-          fail(
-            'Caught error while rendering frame. See preceding logs for details.',
-          );
-        }
-      }
-    }
-  }
 
   @override
   void drawFrame() {
@@ -315,20 +244,6 @@ void pumpFrame({
   TestRenderingFlutterBinding.instance.drawFrame();
 }
 
-class TestCallbackPainter extends CustomPainter {
-  const TestCallbackPainter({required this.onPaint});
-
-  final VoidCallback onPaint;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    onPaint();
-  }
-
-  @override
-  bool shouldRepaint(TestCallbackPainter oldPainter) => true;
-}
-
 class RenderSizedBox extends RenderBox {
   RenderSizedBox(this._size);
 
@@ -368,70 +283,3 @@ class RenderSizedBox extends RenderBox {
   @override
   bool hitTestSelf(Offset position) => true;
 }
-
-class TestClipPaintingContext extends PaintingContext {
-  TestClipPaintingContext() : super(ContainerLayer(), Rect.zero);
-
-  @override
-  ClipRectLayer? pushClipRect(
-    bool needsCompositing,
-    Offset offset,
-    Rect clipRect,
-    PaintingContextCallback painter, {
-    Clip clipBehavior = Clip.hardEdge,
-    ClipRectLayer? oldLayer,
-  }) {
-    this.clipBehavior = clipBehavior;
-    return null;
-  }
-
-  Clip clipBehavior = Clip.none;
-}
-
-class TestPushLayerPaintingContext extends PaintingContext {
-  TestPushLayerPaintingContext() : super(ContainerLayer(), Rect.zero);
-
-  final pushedLayers = <ContainerLayer>[];
-
-  @override
-  void pushLayer(
-    ContainerLayer childLayer,
-    PaintingContextCallback painter,
-    Offset offset, {
-    Rect? childPaintBounds,
-  }) {
-    pushedLayers.add(childLayer);
-    super.pushLayer(
-      childLayer,
-      painter,
-      offset,
-      childPaintBounds: childPaintBounds,
-    );
-  }
-}
-
-// Absorbs errors that don't have "overflowed" in their error details.
-void absorbOverflowedErrors() {
-  final errorDetails = TestRenderingFlutterBinding.instance
-      .takeAllFlutterErrorDetails();
-  final filtered = errorDetails.where((FlutterErrorDetails details) {
-    return !details.toString().contains('overflowed');
-  });
-  if (filtered.isNotEmpty) {
-    filtered.forEach(FlutterError.reportError);
-  }
-}
-
-// Reports any FlutterErrors.
-void expectNoFlutterErrors() {
-  final errorDetails = TestRenderingFlutterBinding.instance
-      .takeAllFlutterErrorDetails();
-  errorDetails.forEach(FlutterError.reportError);
-}
-
-RenderConstrainedBox get box200x200 => RenderConstrainedBox(
-  additionalConstraints: const BoxConstraints.tightFor(
-    height: 200.0,
-    width: 200.0,
-  ),
-);

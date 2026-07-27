@@ -653,17 +653,6 @@ void verifyPropertyIsVisible({
   expect(propertyNameCenter.dy, equals(propertyValueCenter.dy));
 }
 
-bool areHorizontallyAligned(
-  Finder widgetAFinder,
-  Finder widgetBFinder, {
-  required WidgetTester tester,
-}) {
-  final widgetACenter = tester.getCenter(widgetAFinder);
-  final widgetBCenter = tester.getCenter(widgetBFinder);
-
-  return widgetACenter.dy == widgetBCenter.dy;
-}
-
 bool _treeRowsAreInOrder({
   required List<String> treeRowDescriptions,
   required int startingAtIndex,
