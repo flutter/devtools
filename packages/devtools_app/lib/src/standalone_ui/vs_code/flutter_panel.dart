@@ -174,10 +174,7 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              DebugSessions(
-                editor: widget.editor,
-                sessions: debugSessions,
-              ),
+              DebugSessions(editor: widget.editor, sessions: debugSessions),
               const SizedBox(height: defaultSpacing),
               if (widget.editor.supportsSelectDevice) ...[
                 Devices(

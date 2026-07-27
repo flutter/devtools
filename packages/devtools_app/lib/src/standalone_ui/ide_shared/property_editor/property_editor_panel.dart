@@ -39,9 +39,11 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
 
     final editor = EditorClient(widget.dtdManager);
     ga.screen(gac.PropertyEditorSidebar.id);
-    unawaited(editor.initialized.then((_) {
-      _propertyEditorController = PropertyEditorController(editor);
-    }));
+    unawaited(
+      editor.initialized.then((_) {
+        _propertyEditorController = PropertyEditorController(editor);
+      }),
+    );
   }
 
   @override
