@@ -142,7 +142,6 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
               controller: controller,
               recording: recording,
               processing: profilerBusy,
-              offline: offlineDataController.showingOfflineData.value,
             ),
             const SizedBox(height: intermediateSpacing),
             Expanded(

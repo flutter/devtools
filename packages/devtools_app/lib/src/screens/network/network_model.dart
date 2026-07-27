@@ -192,8 +192,6 @@ class Socket extends NetworkRequest {
   @override
   int get hashCode => id.hashCode;
 
-  SocketStatistic get socketData => _socket;
-
   @override
   Map<String, Object?> toJson() {
     return {

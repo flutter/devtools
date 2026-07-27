@@ -30,8 +30,6 @@ class MemoryTimeline extends Disposable with Serializable {
 
   static const _jsonData = 'data';
 
-  int get endingIndex => data.isNotEmpty ? data.length - 1 : -1;
-
   /// Raw Heap sampling data from the VM.
   late final List<HeapSample> data;
 

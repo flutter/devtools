@@ -27,7 +27,6 @@ import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
-import '../inspector/inspector_tree_controller.dart';
 import 'log_details_controller.dart';
 import 'logging_screen.dart';
 import 'metadata.dart';
@@ -39,12 +38,6 @@ final timeFormat = DateFormat('HH:mm:ss.SSS');
 final dateTimeFormat = DateFormat('HH:mm:ss.SSS (MM/dd/yy)');
 
 bool _verboseDebugging = false;
-
-typedef OnShowDetails =
-    void Function({String? text, InspectorTreeController? tree});
-
-typedef CreateLoggingTree =
-    InspectorTreeController Function({VoidCallback? onSelectionChange});
 
 typedef ZoneDescription = ({String? name, int? identityHashCode});
 
@@ -841,8 +834,6 @@ class LoggingController extends DevToolsScreenController
 }
 
 extension type _LogRecord(Map<String, dynamic> json) {
-  int? get sequenceNumber => json['sequenceNumber'];
-
   int? get level => json['level'];
 
   Map<String, Object?> get loggerName => json['loggerName'];
@@ -955,12 +946,6 @@ class StdoutEventHandler {
       }
     });
   }
-
-  @visibleForTesting
-  LogData? get buffer => _buffer;
-
-  @visibleForTesting
-  Timer? get timer => _timer;
 }
 
 bool _isNotNull(InstanceRef? serviceRef) {
@@ -998,7 +983,6 @@ class LogData with SearchableDataMixin {
     int? level,
     this.isError = false,
     this.detailsComputer,
-    this.node,
     this.isolateRef,
     this.zone,
   }) : level = level ?? (isError ? Level.SEVERE.value : Level.INFO.value) {
@@ -1029,7 +1013,6 @@ class LogData with SearchableDataMixin {
       _levelName ??= LogLevelMetadataChip.generateLogLevel(level).name;
   String? _levelName;
 
-  final RemoteDiagnosticsNode? node;
   String? _details;
   Future<String> Function()? detailsComputer;
 

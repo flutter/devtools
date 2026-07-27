@@ -61,11 +61,6 @@ class FlutterFramesController extends PerformanceFeatureController {
   /// frame id in the corresponding [FlutterTimelineEvent]s.
   final _unassignedFlutterFrames = <int, FlutterFrame>{};
 
-  /// Tracks the current frame undergoing selection so that we can equality
-  /// check after async operations and bail out early if another frame has been
-  /// selected during awaits.
-  FlutterFrame? currentFrameBeingSelected;
-
   @override
   Future<void> init() async {
     if (!offlineDataController.showingOfflineData.value) {
@@ -184,8 +179,6 @@ class FlutterFramesController extends PerformanceFeatureController {
 
   @override
   void handleSelectedFrame(FlutterFrame frame) {
-    currentFrameBeingSelected = frame;
-
     // Unselect [frame] if is already selected.
     if (_selectedFrameNotifier.value == frame) {
       _selectedFrameNotifier.value = null;

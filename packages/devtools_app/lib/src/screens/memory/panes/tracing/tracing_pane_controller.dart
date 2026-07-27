@@ -68,6 +68,7 @@ class TracePaneController extends DisposableController
   );
 
   /// A Future tracking whether the controller has been initialized.
+  @visibleForTesting
   Future<void> get initialized => _initialized.future;
   final _initialized = Completer<void>();
 

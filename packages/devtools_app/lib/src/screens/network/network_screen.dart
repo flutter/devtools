@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -320,11 +319,7 @@ class _NetworkProfilerBody extends StatelessWidget {
         ValueListenableBuilder<List<NetworkRequest>>(
           valueListenable: controller.filteredData,
           builder: (context, filteredRequests, _) {
-            return NetworkRequestsTable(
-              requests: filteredRequests,
-              searchMatchesNotifier: controller.searchMatches,
-              activeSearchMatchNotifier: controller.activeSearchMatch,
-            );
+            return NetworkRequestsTable(requests: filteredRequests);
           },
         ),
         const NetworkRequestInspector(),
@@ -334,12 +329,7 @@ class _NetworkProfilerBody extends StatelessWidget {
 }
 
 class NetworkRequestsTable extends StatelessWidget {
-  const NetworkRequestsTable({
-    super.key,
-    required this.requests,
-    required this.searchMatchesNotifier,
-    required this.activeSearchMatchNotifier,
-  });
+  const NetworkRequestsTable({super.key, required this.requests});
 
   static const methodColumn = MethodColumn();
   static final addressColumn = AddressColumn();
@@ -361,8 +351,6 @@ class NetworkRequestsTable extends StatelessWidget {
   ];
 
   final List<NetworkRequest> requests;
-  final ValueListenable<List<NetworkRequest>> searchMatchesNotifier;
-  final ValueListenable<NetworkRequest?> activeSearchMatchNotifier;
 
   @override
   Widget build(BuildContext context) {

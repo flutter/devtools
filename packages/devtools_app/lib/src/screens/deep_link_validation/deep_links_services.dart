@@ -109,6 +109,7 @@ final aasaFileFormatSubCheck = {
 
 class ValidateIosDomainResult {
   ValidateIosDomainResult(this.errorCode, this.domainErrors, this.paths);
+  // ignore: unused-code, this is addressed in a TODO below.
   final String errorCode;
   final Map<String, List<DomainError>> domainErrors;
   final Map<String, List<Path>> paths;

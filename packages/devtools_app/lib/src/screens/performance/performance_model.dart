@@ -163,16 +163,6 @@ class FlutterTimelineEvent extends TreeNode<FlutterTimelineEvent> {
     timeBuilder: _timeBuilder.copy(),
   );
 
-  @visibleForTesting
-  FlutterTimelineEvent deepCopy() {
-    final copy = shallowCopy();
-    copy.parent = parent;
-    for (final child in children) {
-      copy.addChild(child.deepCopy());
-    }
-    return copy;
-  }
-
   @override
   String toString() {
     final buf = StringBuffer();

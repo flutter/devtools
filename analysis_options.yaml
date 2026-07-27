@@ -164,7 +164,8 @@ dart_code_metrics:
       # TODO(https://github.com/flutter/devtools/issues/9906) remove these
       # excludes as findings are resolved.
       - integration_test/**
-      - lib/src/screens/**
+      # Investigate internal usages of inspector_controller before removing.
+      - lib/src/screens/inspector/**_controller.dart
       - lib/src/service/**
       - lib/src/shared/**
       - lib/src/standalone_ui/**

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/utils.dart';
@@ -17,8 +16,6 @@ class LogsTable extends StatelessWidget {
     required this.controller,
     required this.data,
     required this.selectionNotifier,
-    required this.searchMatchesNotifier,
-    required this.activeSearchMatchNotifier,
   });
 
   static const _logRowHeight = 45.0;
@@ -26,8 +23,6 @@ class LogsTable extends StatelessWidget {
   final LoggingController controller;
   final List<LogData> data;
   final ValueNotifier<LogData?> selectionNotifier;
-  final ValueListenable<List<LogData>> searchMatchesNotifier;
-  final ValueListenable<LogData?> activeSearchMatchNotifier;
 
   static const whenColumn = WhenColumn();
   static const messageColumn = MessageColumn();
