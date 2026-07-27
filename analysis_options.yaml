@@ -169,7 +169,6 @@ dart_code_metrics:
       - lib/src/shared/diagnostics/diagnostics_node.dart
       
       - lib/src/service/**
-      - lib/src/standalone_ui/**
       - test/**
   rules:
 #    - arguments-ordering Too strict

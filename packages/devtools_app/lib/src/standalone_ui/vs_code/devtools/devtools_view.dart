@@ -118,7 +118,6 @@ class SidebarDevToolsScreens extends StatelessWidget {
             (s) => createDevToolsScreenRow(
               dataLeft: _buttonDataFromScreen(s),
               dataRight: null,
-              editor: editor,
               singleColumn: singleColumn,
               hasDebugSessions: debugSessions.isNotEmpty,
               onPressed: (data) => openDevToolsScreen(
@@ -140,7 +139,6 @@ class SidebarDevToolsScreens extends StatelessWidget {
         createDevToolsScreenRow(
           dataLeft: _buttonDataFromScreen(first),
           dataRight: second != null ? _buttonDataFromScreen(second) : null,
-          editor: editor,
           singleColumn: singleColumn,
           hasDebugSessions: debugSessions.isNotEmpty,
           onPressed: (data) => openDevToolsScreen(
