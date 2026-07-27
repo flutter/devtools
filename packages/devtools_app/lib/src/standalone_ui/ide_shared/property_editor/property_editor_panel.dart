@@ -31,6 +31,7 @@ class PropertyEditorPanel extends StatefulWidget {
 class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
   _PropertyEditorPanelState();
 
+  Future<EditorClient>? _editor;
   PropertyEditorController? _propertyEditorController;
 
   @override
@@ -40,8 +41,9 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
     final editor = EditorClient(widget.dtdManager);
     ga.screen(gac.PropertyEditorSidebar.id);
     unawaited(
-      editor.initialized.then((_) {
+      _editor = editor.initialized.then((_) {
         _propertyEditorController = PropertyEditorController(editor);
+        return editor;
       }),
     );
   }
@@ -56,8 +58,16 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topCenter,
-      child: _PropertyEditorConnectedPanel(
-        controller: _propertyEditorController!,
+      child: FutureBuilder(
+        future: _editor,
+        builder: (context, snapshot) =>
+            switch ((snapshot.connectionState, snapshot.data)) {
+              (ConnectionState.done, final editor?) =>
+                _PropertyEditorConnectedPanel(
+                  controller: _propertyEditorController!,
+                ),
+              _ => const CenteredCircularProgressIndicator(),
+            },
       ),
     );
   }
