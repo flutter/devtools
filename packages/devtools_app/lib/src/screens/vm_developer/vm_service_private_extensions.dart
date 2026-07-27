@@ -651,10 +651,7 @@ enum ObjectPoolEntryKind {
 }
 
 class ObjectPoolEntry {
-  const ObjectPoolEntry({
-    required this.offset,
-    required this.value,
-  });
+  const ObjectPoolEntry({required this.offset, required this.value});
 
   static const _offsetKey = 'offset';
   static const _valueKey = 'value';

@@ -319,9 +319,7 @@ class _NetworkProfilerBody extends StatelessWidget {
         ValueListenableBuilder<List<NetworkRequest>>(
           valueListenable: controller.filteredData,
           builder: (context, filteredRequests, _) {
-            return NetworkRequestsTable(
-              requests: filteredRequests
-            );
+            return NetworkRequestsTable(requests: filteredRequests);
           },
         ),
         const NetworkRequestInspector(),
@@ -331,10 +329,7 @@ class _NetworkProfilerBody extends StatelessWidget {
 }
 
 class NetworkRequestsTable extends StatelessWidget {
-  const NetworkRequestsTable({
-    super.key,
-    required this.requests,
-  });
+  const NetworkRequestsTable({super.key, required this.requests});
 
   static const methodColumn = MethodColumn();
   static final addressColumn = AddressColumn();

@@ -34,7 +34,7 @@ class AccessibilityScreenBody extends StatefulWidget {
 
 class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
     with AutoDisposeMixin {
-  // ignore: unused-code, temporarily ignore since this screen is under active development.   
+  // ignore: unused-code, temporarily ignore since this screen is under active development.
   late AccessibilityController controller;
 
   @override

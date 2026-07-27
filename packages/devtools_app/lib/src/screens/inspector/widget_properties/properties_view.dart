@@ -20,10 +20,7 @@ import '../layout_explorer/flex/flex.dart';
 /// Table for the widget's properties, along with its render object and a
 /// flex layout explorer if the widget is part of a flex layout.
 class DetailsTable extends StatefulWidget {
-  const DetailsTable({
-    super.key,
-    required this.controller,
-  });
+  const DetailsTable({super.key, required this.controller});
 
   static const gaPrefix = 'inspectorDetailsTable';
 
