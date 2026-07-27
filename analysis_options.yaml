@@ -164,8 +164,6 @@ dart_code_metrics:
       # TODO(https://github.com/flutter/devtools/issues/9906) remove these
       # excludes as findings are resolved.
       - integration_test/**
-      - lib/src/extensions/**
-      - lib/src/framework/**
       - lib/src/screens/**
       - lib/src/service/**
       - lib/src/shared/**
