@@ -76,7 +76,7 @@ class DevToolsRouteInformationParser
     params.removeWhere((key, value) => value == null);
     return RouteInformation(
       uri: Uri(path: path, queryParameters: params),
-      state: configuration.state?.state,
+      state: configuration.state,
     );
   }
 
@@ -383,6 +383,9 @@ class DevToolsNavigationState {
 
   @override
   String toString() => _state.toString();
+
+  // ignore: unused-code, implicit method used in JSON serialization.
+  Map<String, Object?> toJson() => _state;
 }
 
 /// Mixin that gives controllers the ability to respond to changes in router
