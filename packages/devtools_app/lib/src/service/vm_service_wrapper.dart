@@ -94,8 +94,9 @@ class VmServiceWrapper extends VmService {
 
   final _activeStreams = <String, Future<Success>>{};
 
-  final activeFutures = <TrackedFuture<Object>>{};
+  final activeFutureNames = <String>[];
 
+  @visibleForTesting
   Future<void> get allFuturesCompleted => _allFuturesCompleter.future;
 
   Completer<bool> _allFuturesCompleter = Completer<bool>()
@@ -326,20 +327,6 @@ class VmServiceWrapper extends VmService {
 
   // End Dart IO extension method wrappers.
 
-  /// Testing only method to indicate that we don't really need to await all
-  /// currently pending futures.
-  ///
-  /// If you use this method be sure to indicate why you believe all pending
-  /// futures are safe to ignore. Currently the theory is this method should be
-  /// used after a hot restart to avoid bugs where we have zombie futures lying
-  /// around causing tests to flake.
-  @visibleForTesting
-  void doNotWaitForPendingFuturesBeforeExit() {
-    _allFuturesCompleter = Completer<bool>();
-    _allFuturesCompleter.complete(true);
-    activeFutures.clear();
-  }
-
   @visibleForTesting
   int vmServiceCallCount = 0;
 
@@ -383,15 +370,14 @@ class VmServiceWrapper extends VmService {
     vmServiceCallCount++;
     vmServiceCalls.add(name);
 
-    final trackedFuture = TrackedFuture(name, localFuture as Future<Object>);
     if (_allFuturesCompleter.isCompleted) {
       _allFuturesCompleter = Completer<bool>();
     }
-    activeFutures.add(trackedFuture);
+    activeFutureNames.add(name);
 
     void futureComplete() {
-      activeFutures.remove(trackedFuture);
-      if (activeFutures.isEmpty) {
+      activeFutureNames.remove(name);
+      if (activeFutureNames.isEmpty) {
         _allFuturesCompleter.safeComplete(true);
       }
     }
@@ -427,10 +413,6 @@ class VmServiceWrapper extends VmService {
     );
     return parser(result.json);
   }
-
-  /// Forces the VM to perform a full garbage collection.
-  Future<Success?> collectAllGarbage() =>
-      _privateRpcInvoke('collectAllGarbage', parser: Success.parse);
 
   Future<InstanceRef?> getReachableSize(String isolateId, String targetId) =>
       _privateRpcInvoke(
@@ -511,11 +493,4 @@ class VmServiceWrapper extends VmService {
 
     return response.dapResponse.body;
   }
-}
-
-class TrackedFuture<T> {
-  TrackedFuture(this.name, this.future);
-
-  final String name;
-  final Future<T> future;
 }

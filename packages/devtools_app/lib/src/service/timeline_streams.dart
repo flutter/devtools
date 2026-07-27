@@ -63,6 +63,7 @@ class TimelineStreamManager with DisposerMixin {
   List<TimelineStream> get advancedStreams =>
       _streamsWhere((stream) => stream.advanced);
 
+  @visibleForTesting
   List<TimelineStream> get recordedStreams =>
       _streamsWhere((stream) => stream.recorded.value);
 
