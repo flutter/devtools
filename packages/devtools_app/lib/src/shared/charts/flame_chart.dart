@@ -269,6 +269,10 @@ abstract class FlameChartState<
       verticalControllerGroup.resetScroll();
       zoomController.reset();
       verticalExtentDelegate.recompute();
+    } else if (widget.containerWidth != oldWidget.containerWidth ||
+        widget.containerHeight != oldWidget.containerHeight) {
+      initFlameChartElements();
+      verticalExtentDelegate.recompute();
     }
     FocusScope.of(context).requestFocus(focusNode);
     super.didUpdateWidget(oldWidget);
