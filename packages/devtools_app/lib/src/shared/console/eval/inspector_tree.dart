@@ -33,11 +33,9 @@ const inspectorRowHeight = 20.0;
 /// specific as that is the only case we care about.
 // TODO(kenz): extend TreeNode class to share tree logic.
 class InspectorTreeNode {
-  InspectorTreeNode({
-    this.parent,
-    bool expandChildren = true,
-  }) : _children = <InspectorTreeNode>[],
-       _isExpanded = expandChildren;
+  InspectorTreeNode({this.parent, bool expandChildren = true})
+    : _children = <InspectorTreeNode>[],
+      _isExpanded = expandChildren;
 
   bool get showLinesToChildren {
     return _children.length > 1 && !_children.last.isProperty;

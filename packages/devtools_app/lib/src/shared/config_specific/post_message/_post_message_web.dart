@@ -12,8 +12,7 @@ import 'post_message.dart';
 
 Stream<PostMessageEvent> get onPostMessage {
   return window.onMessage.map(
-    (message) =>
-        PostMessageEvent(data: message.data.dartify()),
+    (message) => PostMessageEvent(data: message.data.dartify()),
   );
 }
 

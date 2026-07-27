@@ -1038,9 +1038,9 @@ class LogData with SearchableDataMixin {
     }
 
     try {
-      return prettyPrintJson(jsonDecode(details!) as Object?)
-          .replaceAll(r'\n', '\n')
-          .trim();
+      return prettyPrintJson(
+        jsonDecode(details!) as Object?,
+      ).replaceAll(r'\n', '\n').trim();
     } catch (_) {
       return details?.trim();
     }

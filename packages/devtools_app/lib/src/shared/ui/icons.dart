@@ -87,7 +87,7 @@ class CustomIconMaker {
   }
 }
 
-const infoIcon =  AssetImageIcon(asset: 'icons/custom/info.png');
+const infoIcon = AssetImageIcon(asset: 'icons/custom/info.png');
 
 class ColorIcon extends StatelessWidget {
   const ColorIcon(this.color, {super.key});

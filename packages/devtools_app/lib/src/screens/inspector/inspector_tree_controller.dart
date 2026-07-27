@@ -120,8 +120,7 @@ class InspectorTreeController extends DisposableController
   /// [InspectorTreeController].
   final int? gaId;
 
-  InspectorTreeNode createNode() =>
-      InspectorTreeNode();
+  InspectorTreeNode createNode() => InspectorTreeNode();
 
   SearchTargetType _searchTarget = SearchTargetType.widget;
   int _rootSetCount = 0;

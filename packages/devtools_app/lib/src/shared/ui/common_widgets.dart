@@ -1046,7 +1046,7 @@ class _JsonViewerState extends State<JsonViewer> {
     if (serviceConnection.serviceManager.connectedState.value.connected) {
       return prettyPrintJson(
         serviceConnection.serviceManager.service!.fakeServiceCache
-          .instanceToJson(copiedVariable.value as Instance),
+            .instanceToJson(copiedVariable.value as Instance),
       );
     }
 
