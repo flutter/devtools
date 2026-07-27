@@ -34,6 +34,7 @@ class PaintCharacteristics {
     this.concentricCenterDiameter = 1,
     this.width = 1,
     this.height = 1,
+    this.fixedMinY,
     this.fixedMaxY,
   });
 
@@ -47,8 +48,14 @@ class PaintCharacteristics {
     this.concentricCenterDiameter = 1,
     this.width = 1,
     this.height = 1,
+    this.fixedMinY,
     this.fixedMaxY,
   });
+
+  /// If specified Y scale is computed and min value is fixed.
+  /// Will assert if new data point is less than min specified.
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9910) seems like a bug.
+  double? fixedMinY;
 
   /// If specified Y scale is computed and max value is fixed.
   /// Will assert if new data point is more than max specified.
