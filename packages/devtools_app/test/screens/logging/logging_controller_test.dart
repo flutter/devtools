@@ -19,6 +19,42 @@ import 'package:vm_service/vm_service.dart';
 void main() {
   var timestampCounter = 0;
 
+  Event gcEvent({
+    required double newTime,
+    required double oldTime,
+    required String isolateId,
+  }) => Event.parse({
+    'kind': EventKind.kGC,
+    'timestamp': ++timestampCounter,
+    'isolate': {
+      'type': '@Isolate',
+      'id': isolateId,
+      'name': 'main',
+      'number': '1',
+    },
+    'reason': 'idle',
+    'new': {
+      'type': 'HeapSpace',
+      'name': 'new',
+      'collections': 1,
+      'avgCollectionPeriodMillis': 100.0,
+      'used': 1024,
+      'capacity': 2048,
+      'external': 0,
+      'time': newTime,
+    },
+    'old': {
+      'type': 'HeapSpace',
+      'name': 'old',
+      'collections': 1,
+      'avgCollectionPeriodMillis': 100.0,
+      'used': 4096,
+      'capacity': 8192,
+      'external': 0,
+      'time': oldTime,
+    },
+  })!;
+
   group('LoggingController', () {
     late LoggingController controller;
 
@@ -192,6 +228,94 @@ void main() {
 
       expect(controller.data, isEmpty);
       expect(controller.filteredData.value, isEmpty);
+    });
+
+    test('GC events track duration delta', () async {
+      final fakeService =
+          serviceConnection.serviceManager.service as FakeVmServiceWrapper;
+
+      expect(controller.data, isEmpty);
+
+      // First GC event: baseline established, no duration printed.
+      fakeService.emitGCEvent(
+        event: gcEvent(newTime: 0.1, oldTime: 0.2, isolateId: 'isolates/123'),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(controller.data, hasLength(1));
+      expect(
+        controller.data.first.summary,
+        'main • idle collection • 0.0 MB used of 0.0 MB',
+      );
+
+      // Second GC event: delta is
+      // (0.15 + 0.25) - (0.1 + 0.2) = 0.4 - 0.3 = 0.1s = 100ms.
+      fakeService.emitGCEvent(
+        event: gcEvent(newTime: 0.15, oldTime: 0.25, isolateId: 'isolates/123'),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(controller.data, hasLength(2));
+      expect(
+        controller.data[1].summary,
+        'main • idle collection in 100.0 ms • 0.0 MB used of 0.0 MB',
+      );
+
+      // Third GC event on a different isolate: no baseline yet, so no duration
+      // printed.
+      fakeService.emitGCEvent(
+        event: gcEvent(newTime: 0.05, oldTime: 0.05, isolateId: 'isolates/456'),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(controller.data, hasLength(3));
+      expect(
+        controller.data[2].summary,
+        'main • idle collection • 0.0 MB used of 0.0 MB',
+      );
+
+      // Fourth GC event: clock reset on isolates/123 (cumulative goes from 0.4s to 0.1s).
+      // Since newCumulativeTime (0.1s) < previousGcTime (0.4s), duration delta is skipped,
+      // and baseline is updated to 0.1s.
+      fakeService.emitGCEvent(
+        event: gcEvent(newTime: 0.05, oldTime: 0.05, isolateId: 'isolates/123'),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(controller.data, hasLength(4));
+      expect(
+        controller.data[3].summary,
+        'main • idle collection • 0.0 MB used of 0.0 MB',
+      );
+
+      // Fifth GC event: delta since reset baseline (0.1s) is (0.08 + 0.12) - 0.1 = 0.2 - 0.1 = 0.1s = 100ms.
+      fakeService.emitGCEvent(
+        event: gcEvent(newTime: 0.08, oldTime: 0.12, isolateId: 'isolates/123'),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(controller.data, hasLength(5));
+      expect(
+        controller.data[4].summary,
+        'main • idle collection in 100.0 ms • 0.0 MB used of 0.0 MB',
+      );
+
+      // Clear logs: resets baselines.
+      controller.clear();
+      expect(controller.data, isEmpty);
+
+      // Sixth GC event (same isolate as first): baseline was cleared, so no
+      // duration printed.
+      fakeService.emitGCEvent(
+        event: gcEvent(newTime: 0.2, oldTime: 0.3, isolateId: 'isolates/123'),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+
+      expect(controller.data, hasLength(1));
+      expect(
+        controller.data.first.summary,
+        'main • idle collection • 0.0 MB used of 0.0 MB',
+      );
     });
 
     test('matchesForSearch - default filters', () {
