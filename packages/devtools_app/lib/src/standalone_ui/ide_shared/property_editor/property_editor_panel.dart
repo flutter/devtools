@@ -62,7 +62,7 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
         future: _editor,
         builder: (context, snapshot) =>
             switch ((snapshot.connectionState, snapshot.data)) {
-              (ConnectionState.done, final editor?) =>
+              (ConnectionState.done, final _) =>
                 _PropertyEditorConnectedPanel(
                   controller: _propertyEditorController!,
                 ),
