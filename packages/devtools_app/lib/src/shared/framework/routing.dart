@@ -76,7 +76,7 @@ class DevToolsRouteInformationParser
     params.removeWhere((key, value) => value == null);
     return RouteInformation(
       uri: Uri(path: path, queryParameters: params),
-      state: configuration.state,
+      state: configuration.state?.state,
     );
   }
 
