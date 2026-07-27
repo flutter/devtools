@@ -7,5 +7,6 @@ import 'post_message.dart';
 Stream<PostMessageEvent> get onPostMessage =>
     throw UnsupportedError('unsupported platform');
 
+// ignore: unused-code, currently unused but an important helper to keep.
 void postMessage(Object? _, String _) =>
     throw UnsupportedError('unsupported platform');

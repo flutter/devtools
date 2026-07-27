@@ -16,40 +16,6 @@ import 'package:flutter/material.dart';
 import '../../screens/inspector/layout_explorer/ui/widgets_theme.dart';
 import 'colors.dart';
 
-class CustomIcon extends StatelessWidget {
-  const CustomIcon({
-    super.key,
-    required this.kind,
-    required this.text,
-    this.isAbstract = false,
-  });
-
-  final IconKind kind;
-  final String text;
-  final bool isAbstract;
-
-  AssetImageIcon get baseIcon => kind.icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: baseIcon.width,
-      height: baseIcon.height,
-      child: Stack(
-        alignment: AlignmentDirectional.center,
-        children: <Widget>[
-          baseIcon,
-          Text(
-            text,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 9.0, color: Color(0xFF231F20)),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// An icon with one character
 class CircleIcon extends StatelessWidget {
   const CircleIcon({
@@ -87,23 +53,6 @@ class CircleIcon extends StatelessWidget {
 class CustomIconMaker {
   final iconCache = <String, Widget>{};
 
-  Widget? getCustomIcon(
-    String fromText, {
-    IconKind? kind,
-    bool isAbstract = false,
-  }) {
-    final theKind = kind ?? IconKind.classIcon;
-    if (fromText.isEmpty) {
-      return null;
-    }
-
-    final text = fromText[0].toUpperCase();
-    final mapKey = '${text}_${theKind.name}_$isAbstract';
-    return iconCache.putIfAbsent(mapKey, () {
-      return CustomIcon(kind: theKind, text: text, isAbstract: isAbstract);
-    });
-  }
-
   Widget? fromWidgetName(String? name) {
     if (name == null) {
       return null;
@@ -131,10 +80,6 @@ class CustomIconMaker {
     });
   }
 
-  CustomIcon fromInfo(String name) {
-    return getCustomIcon(name, kind: IconKind.info) as CustomIcon;
-  }
-
   bool isAlphabetic(int char) {
     return (char < '0'.codeUnitAt(0) || char > '9'.codeUnitAt(0)) &&
         char != '_'.codeUnitAt(0) &&
@@ -142,41 +87,7 @@ class CustomIconMaker {
   }
 }
 
-class IconKind {
-  const IconKind(this.name, this.icon, [AssetImageIcon? abstractIcon])
-    : abstractIcon = abstractIcon ?? icon;
-
-  static IconKind classIcon = const IconKind(
-    'class',
-    AssetImageIcon(asset: 'icons/custom/class.png'),
-    AssetImageIcon(asset: 'icons/custom/class_abstract.png'),
-  );
-  static IconKind field = const IconKind(
-    'fields',
-    AssetImageIcon(asset: 'icons/custom/fields.png'),
-  );
-  static IconKind interface = const IconKind(
-    'interface',
-    AssetImageIcon(asset: 'icons/custom/interface.png'),
-  );
-  static IconKind method = const IconKind(
-    'method',
-    AssetImageIcon(asset: 'icons/custom/method.png'),
-    AssetImageIcon(asset: 'icons/custom/method_abstract.png'),
-  );
-  static IconKind property = const IconKind(
-    'property',
-    AssetImageIcon(asset: 'icons/custom/property.png'),
-  );
-  static IconKind info = const IconKind(
-    'info',
-    AssetImageIcon(asset: 'icons/custom/info.png'),
-  );
-
-  final String name;
-  final AssetImageIcon icon;
-  final AssetImageIcon abstractIcon;
-}
+const infoIcon =  AssetImageIcon(asset: 'icons/custom/info.png');
 
 class ColorIcon extends StatelessWidget {
   const ColorIcon(this.color, {super.key});
@@ -281,11 +192,4 @@ class FlutterMaterialIcons {
 
 class Octicons {
   static const bug = IconData(61714, fontFamily: 'Octicons');
-  static const info = IconData(61778, fontFamily: 'Octicons');
-  static const deviceMobile = IconData(61739, fontFamily: 'Octicons');
-  static const fileZip = IconData(61757, fontFamily: 'Octicons');
-  static const clippy = IconData(61724, fontFamily: 'Octicons');
-  static const package = IconData(61812, fontFamily: 'Octicons');
-  static const dashboard = IconData(61733, fontFamily: 'Octicons');
-  static const pulse = IconData(61823, fontFamily: 'Octicons');
 }

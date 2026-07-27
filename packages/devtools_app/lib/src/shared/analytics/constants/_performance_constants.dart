@@ -20,9 +20,6 @@ enum PerformanceEvents {
   disableOpacityLayers,
   disablePhysicalShapeLayers,
   countWidgetBuilds('trackRebuildWidgets'),
-  collectRasterStats,
-  clearRasterStats,
-  fullScreenLayerImage,
   clearRebuildStats,
   perfettoLoadTrace,
   perfettoScrollToTimeRange,
@@ -55,6 +52,5 @@ enum PerformanceDocs {
   shaderCompilationDocs,
   shaderCompilationDocsTooltipLink,
   impellerDocsLink,
-  impellerDocsLinkFromRasterStats,
   platformChannelsDocs,
 }

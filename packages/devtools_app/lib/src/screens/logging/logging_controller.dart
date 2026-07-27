@@ -1016,8 +1016,6 @@ class LogData with SearchableDataMixin {
   String? _details;
   Future<String> Function()? detailsComputer;
 
-  static const prettyPrinter = JsonEncoder.withIndent('  ');
-
   String? get details => _details;
 
   bool get needsComputing => !detailsComputed.isCompleted;
@@ -1040,8 +1038,8 @@ class LogData with SearchableDataMixin {
     }
 
     try {
-      return prettyPrinter
-          .convert(jsonDecode(details!))
+      return (jsonDecode(details!) as Object?)
+          .prettyPrint()
           .replaceAll(r'\n', '\n')
           .trim();
     } catch (_) {

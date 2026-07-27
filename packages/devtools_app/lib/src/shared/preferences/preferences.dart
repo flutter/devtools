@@ -36,9 +36,6 @@ const _thirdPartyPathSegment = 'third_party';
 
 /// DevTools preferences for experimental features.
 enum _ExperimentPreferences {
-  /// Deprecated, we ignore this key in favor of [wasmOptOut].
-  wasm,
-
   /// Whether a user has opted out of the dart2wasm experiment.
   wasmOptOut;
 
@@ -138,13 +135,6 @@ class PreferencesController extends DisposableController
     await performance.init();
 
     setGlobal(PreferencesController, this);
-  }
-
-  /// Enables the wasm experiment in storage.
-  ///
-  /// This is used to persist the preference across reloads.
-  Future<void> enableWasmInStorage() async {
-    await storage.setValue(_ExperimentPreferences.wasm.storageKey, 'true');
   }
 
   Future<void> _initDarkMode() async {

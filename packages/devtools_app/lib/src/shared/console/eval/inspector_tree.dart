@@ -34,34 +34,13 @@ const inspectorRowHeight = 20.0;
 // TODO(kenz): extend TreeNode class to share tree logic.
 class InspectorTreeNode {
   InspectorTreeNode({
-    InspectorTreeNode? parent,
+    this.parent,
     bool expandChildren = true,
-    this.whenDirty,
   }) : _children = <InspectorTreeNode>[],
-       _parent = parent,
        _isExpanded = expandChildren;
-
-  /// Callback that is called when the node is marked as dirty.
-  void Function(InspectorTreeNode node)? whenDirty;
 
   bool get showLinesToChildren {
     return _children.length > 1 && !_children.last.isProperty;
-  }
-
-  bool get isDirty => _isDirty;
-  bool _isDirty = true;
-
-  set isDirty(bool dirty) {
-    if (dirty) {
-      _isDirty = true;
-      _shouldShow = null;
-      if (parent != null) {
-        parent!.isDirty = true;
-      }
-      whenDirty?.call(this);
-    } else {
-      _isDirty = false;
-    }
   }
 
   /// Returns whether the node is currently visible in the tree.
@@ -108,7 +87,6 @@ class InspectorTreeNode {
   set isExpanded(bool value) {
     if (value != _isExpanded) {
       _isExpanded = value;
-      isDirty = true;
       if (_shouldShow ?? false) {
         for (final child in children) {
           child.updateShouldShow(value);
@@ -117,13 +95,7 @@ class InspectorTreeNode {
     }
   }
 
-  InspectorTreeNode? get parent => _parent;
-  InspectorTreeNode? _parent;
-
-  set parent(InspectorTreeNode? value) {
-    _parent = value;
-    _parent?.isDirty = true;
-  }
+  InspectorTreeNode? parent;
 
   RemoteDiagnosticsNode? get diagnostic => _diagnostic;
 
@@ -131,7 +103,6 @@ class InspectorTreeNode {
     final value = v!;
     _diagnostic = value;
     _isExpanded = value.childrenReady;
-    isDirty = true;
   }
 
   bool get hasPlaceholderChildren {
@@ -142,18 +113,15 @@ class InspectorTreeNode {
     child.parent = null;
     final removed = _children.remove(child);
     assert(removed);
-    isDirty = true;
   }
 
   void appendChild(InspectorTreeNode child) {
     _children.add(child);
     child.parent = this;
-    isDirty = true;
   }
 
   void clearChildren() {
     _children.clear();
-    isDirty = true;
   }
 }
 

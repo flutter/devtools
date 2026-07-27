@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../../primitives/storage.dart';
+import '../../primitives/utils.dart';
 
 final _log = Logger('_framework_initialize_desktop');
 
@@ -32,12 +33,11 @@ class FlutterDesktopStorage implements Storage {
   Future<void> setValue(String key, String value) async {
     _values[key] = value;
 
-    const encoder = JsonEncoder.withIndent('  ');
     if (!_fileAndDirVerified) {
       File(_preferencesFile.path).createSync(recursive: true);
       _fileAndDirVerified = true;
     }
-    _preferencesFile.writeAsStringSync('${encoder.convert(_values)}\n');
+    _preferencesFile.writeAsStringSync('${_values.prettyPrint()}\n');
   }
 
   Map<String, Object?> _readValues() {

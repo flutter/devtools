@@ -109,7 +109,10 @@ Future<void> _reportError(
   }
 }
 
+// ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9910) seems like a bug.
 SingleMapping? _cachedJsSourceMapping;
+
+// ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9910) seems like a bug.
 SingleMapping? _cachedWasmSourceMapping;
 
 Future<SingleMapping?> _fetchSourceMapping() async {

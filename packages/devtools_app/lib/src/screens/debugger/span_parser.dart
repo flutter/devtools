@@ -3,10 +3,11 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:collection';
-import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:string_scanner/string_scanner.dart';
+
+import '../../shared/primitives/utils.dart';
 
 //TODO(jacobr): cleanup.
 /// A namespace for [SpanParser] utilities.
@@ -68,12 +69,12 @@ class Grammar {
 
   @override
   String toString() {
-    return const JsonEncoder.withIndent('  ').convert({
+    return {
       'name': name,
       'scopeName': scopeName,
       'topLevelMatcher': topLevelMatcher.toJson(),
       'repository': repository.toJson(),
-    });
+    }.prettyPrint();
   }
 }
 

@@ -99,13 +99,6 @@ const inspectorSettings = 'inspectorSettings';
 const loggingSettings = 'loggingSettings';
 const refreshPubRoots = 'refreshPubRoots';
 
-enum InspectorDetailsViewType { layoutExplorer, widgetDetailsTree }
-
-final defaultDetailsViewToLayoutExplorer =
-    InspectorDetailsViewType.layoutExplorer.name;
-final defaultDetailsViewToWidgetDetails =
-    InspectorDetailsViewType.widgetDetailsTree.name;
-
 enum HomeScreenEvents { connectToApp, connectToNewApp, viewVmFlags }
 
 // Logging UX actions:

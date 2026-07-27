@@ -255,6 +255,7 @@ class DapDisplayProvider extends StatelessWidget {
   });
 
   final DapObjectNode node;
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/6056) implement onTap.
   final VoidCallback onTap;
 
   @override

@@ -163,10 +163,12 @@ dart_code_metrics:
       # devtools_app/.
       # TODO(https://github.com/flutter/devtools/issues/9906) remove these
       # excludes as findings are resolved.
-      # Investigate internal usages of inspector_controller before removing.
+      # Investigate internal usages of inspector logic before removing.
       - lib/src/screens/inspector/**_controller.dart
+      - lib/src/shared/diagnostics/inspector_service.dart
+      - lib/src/shared/diagnostics/diagnostics_node.dart
+      
       - lib/src/service/**
-      - lib/src/shared/**
       - lib/src/standalone_ui/**
       - test/**
   rules:

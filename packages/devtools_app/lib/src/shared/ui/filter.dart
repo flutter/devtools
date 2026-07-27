@@ -169,6 +169,7 @@ mixin FilterControllerMixin<T> on DisposableController
     queryFilterArgs.forEach((key, value) => value.reset());
   }
 
+  @visibleForTesting
   void resetFilter() {
     _resetToDefaultFilter();
     _activeFilter.value = Filter(

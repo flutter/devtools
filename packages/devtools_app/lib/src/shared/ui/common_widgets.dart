@@ -21,7 +21,6 @@ import '../diagnostics/dart_object_node.dart';
 import '../diagnostics/tree_builder.dart';
 import '../framework/routing.dart';
 import '../globals.dart';
-import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/utils.dart';
 import '../utils/utils.dart';
 
@@ -31,36 +30,6 @@ double _assumedMonospaceCharacterWidth = 9.0;
 @visibleForTesting
 void setAssumedMonospaceCharacterWidth(double width) {
   _assumedMonospaceCharacterWidth = width;
-}
-
-/// Creates a semibold version of [style].
-TextStyle semibold(TextStyle style) =>
-    style.copyWith(fontWeight: FontWeight.w600);
-
-/// Creates a version of [style] that uses the primary color of [context].
-///
-/// When the app is in dark mode, it instead uses the accent color.
-TextStyle primaryColor(TextStyle style, BuildContext context) {
-  final theme = Theme.of(context);
-  return style.copyWith(
-    color: (theme.brightness == Brightness.light)
-        ? theme.primaryColor
-        : theme.colorScheme.secondary,
-    fontWeight: FontWeight.w400,
-  );
-}
-
-/// Creates a version of [style] that uses the lighter primary color of
-/// [context].
-///
-/// In dark mode, the light primary color still has enough contrast to be
-/// visible, so we continue to use it.
-TextStyle primaryColorLight(TextStyle style, BuildContext context) {
-  final theme = Theme.of(context);
-  return style.copyWith(
-    color: theme.primaryColorLight,
-    fontWeight: FontWeight.w300,
-  );
 }
 
 class GaDevToolsButton extends DevToolsButton {
@@ -257,52 +226,6 @@ class StartStopRecordingButton extends GaDevToolsButton {
   final bool recording;
 }
 
-/// Button to start recording data.
-///
-/// * `recording`: Whether recording is in progress.
-/// * `minScreenWidthForText`: The minimum width the button can be before the text is
-///    omitted.
-/// * `labelOverride`: Optional alternative text to use for the button.
-/// * `onPressed`: The callback to be called upon pressing the button.
-class RecordButton extends GaDevToolsButton {
-  RecordButton({
-    super.key,
-    required bool recording,
-    required VoidCallback onPressed,
-    required super.gaScreen,
-    required super.gaSelection,
-    super.minScreenWidthForText,
-    super.tooltip = 'Start recording',
-    String? labelOverride,
-  }) : super(
-         onPressed: recording ? null : onPressed,
-         icon: Icons.fiber_manual_record,
-         label: labelOverride ?? 'Record',
-       );
-}
-
-/// Button to stop recording data.
-///
-/// * `recording`: Whether recording is in progress.
-/// * `minScreenWidthForText`: The minimum width the button can be before the text is
-///    omitted.
-/// * `onPressed`: The callback to be called upon pressing the button.
-class StopRecordingButton extends GaDevToolsButton {
-  StopRecordingButton({
-    super.key,
-    required bool recording,
-    required VoidCallback? onPressed,
-    required super.gaScreen,
-    required super.gaSelection,
-    super.minScreenWidthForText,
-    super.tooltip = 'Stop recording',
-  }) : super(
-         onPressed: !recording ? null : onPressed,
-         icon: Icons.stop,
-         label: 'Stop',
-       );
-}
-
 class SettingsOutlinedButton extends GaDevToolsButton {
   SettingsOutlinedButton({
     super.key,
@@ -469,38 +392,6 @@ class DevToolsSwitch extends StatelessWidget {
           value: value,
           onChanged: onChanged,
         ),
-      ),
-    );
-  }
-}
-
-class ProcessingInfo extends StatelessWidget {
-  const ProcessingInfo({
-    super.key,
-    required this.progressValue,
-    required this.processedObject,
-  });
-
-  final double? progressValue;
-
-  final String processedObject;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'Processing $processedObject',
-            style: Theme.of(context).regularTextStyle,
-          ),
-          const SizedBox(height: defaultSpacing),
-          SizedBox(
-            width: 200.0,
-            child: LinearProgressIndicator(value: progressValue),
-          ),
-        ],
       ),
     );
   }
@@ -741,33 +632,6 @@ abstract class ScaffoldAction extends StatelessWidget {
   }
 }
 
-/// Button to open related information / documentation.
-///
-/// [tooltip] specifies the hover text for the button.
-/// [link] is the link that should be opened when the button is clicked.
-class InformationButton extends StatelessWidget {
-  const InformationButton({
-    super.key,
-    required this.tooltip,
-    required this.link,
-  });
-
-  final String tooltip;
-
-  final String link;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: IconButton(
-        icon: const Icon(Icons.help_outline),
-        onPressed: () async => await launchUrlWithErrorHandling(link),
-      ),
-    );
-  }
-}
-
 class OutlinedRowGroup extends StatelessWidget {
   const OutlinedRowGroup({super.key, required this.children, this.borderColor});
 
@@ -808,29 +672,6 @@ class ThickDivider extends StatelessWidget {
     return const Divider(
       thickness: thickDividerHeight,
       height: thickDividerHeight,
-    );
-  }
-}
-
-BoxDecoration roundedBorderDecoration(BuildContext context) => BoxDecoration(
-  border: Border.all(color: Theme.of(context).focusColor),
-  borderRadius: defaultBorderRadius,
-);
-
-class LeftBorder extends StatelessWidget {
-  const LeftBorder({super.key, this.child});
-
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    final leftBorder = Border(
-      left: BorderSide(color: Theme.of(context).focusColor),
-    );
-
-    return Container(
-      decoration: BoxDecoration(border: leftBorder),
-      child: child,
     );
   }
 }
@@ -879,39 +720,6 @@ class CenteredCircularProgressIndicator extends StatelessWidget {
     if (size == null) return indicator;
 
     return SizedBox(width: size, height: size, child: indicator);
-  }
-}
-
-/// An extension on [LinkedScrollControllerGroup] to facilitate having the
-/// scrolling widgets auto scroll to the bottom on new content.
-///
-/// This extension serves the same function as the [ScrollControllerAutoScroll]
-/// extension above, but we need to implement these methods again as an
-/// extension on [LinkedScrollControllerGroup] because individual
-/// [ScrollController]s are intentionally inaccessible from
-/// [LinkedScrollControllerGroup].
-extension LinkedScrollControllerGroupExtension on LinkedScrollControllerGroup {
-  bool get atScrollBottom {
-    final pos = position;
-    return pos.pixels == pos.maxScrollExtent;
-  }
-
-  /// Scroll the content to the bottom using the app's default animation
-  /// duration and curve..
-  void autoScrollToBottom() async {
-    await animateTo(
-      position.maxScrollExtent,
-      duration: rapidDuration,
-      curve: defaultCurve,
-    );
-
-    // Scroll again if we've received new content in the interim.
-    if (hasAttachedControllers) {
-      final pos = position;
-      if (pos.pixels != pos.maxScrollExtent) {
-        jumpTo(pos.maxScrollExtent);
-      }
-    }
   }
 }
 
@@ -1101,7 +909,6 @@ class JsonViewer extends StatefulWidget {
 class _JsonViewerState extends State<JsonViewer> {
   late Future<void> _initializeTree;
   late DartObjectNode variable;
-  static const jsonEncoder = JsonEncoder.withIndent('  ');
 
   Future<void> _buildAndExpand(DartObjectNode variable) async {
     // Build the root node
@@ -1237,14 +1044,13 @@ class _JsonViewerState extends State<JsonViewer> {
   String copyJsonData(DartObjectNode copiedVariable) {
     // Check if service connection is active
     if (serviceConnection.serviceManager.connectedState.value.connected) {
-      return jsonEncoder.convert(
-        serviceConnection.serviceManager.service!.fakeServiceCache
-            .instanceToJson(copiedVariable.value as Instance),
-      );
+      return serviceConnection.serviceManager.service!.fakeServiceCache
+          .instanceToJson(copiedVariable.value as Instance)
+          .prettyPrint();
     }
 
     // Directly convert object to JSON if not connected
-    return const JsonEncoder.withIndent('  ').convert(copiedVariable.value);
+    return copiedVariable.value.prettyPrint();
   }
 }
 
@@ -1684,117 +1490,6 @@ class CheckboxSetting extends StatelessWidget {
             ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-/// A widget that represents a switch setting and automatically updates for
-/// value changes to [notifier].
-class SwitchSetting extends StatelessWidget {
-  const SwitchSetting({
-    super.key,
-    required this.notifier,
-    required this.title,
-    this.tooltip,
-    this.onChanged,
-    this.gaScreen,
-    this.gaItem,
-    this.activeColor,
-    this.inactiveColor,
-    this.minScreenWidthForText,
-  });
-
-  final ValueNotifier<bool> notifier;
-
-  final String title;
-
-  final String? tooltip;
-
-  final void Function(bool newValue)? onChanged;
-
-  final String? gaScreen;
-
-  final String? gaItem;
-
-  final Color? activeColor;
-
-  final Color? inactiveColor;
-
-  final double? minScreenWidthForText;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return maybeWrapWithTooltip(
-      tooltip: tooltip,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (isScreenWiderThan(context, minScreenWidthForText))
-            Flexible(
-              child: RichText(
-                overflow: TextOverflow.visible,
-                maxLines: 3,
-                text: TextSpan(text: title, style: theme.regularTextStyle),
-              ),
-            ),
-          NotifierSwitch(
-            padding: const EdgeInsets.only(left: borderPadding),
-            activeColor: activeColor,
-            inactiveColor: inactiveColor,
-            notifier: notifier,
-            onChanged: (bool? value) {
-              final gaScreen = this.gaScreen;
-              final gaItem = this.gaItem;
-              if (gaScreen != null && gaItem != null) {
-                ga.select(gaScreen, '$gaItem-$value');
-              }
-              final onChanged = this.onChanged;
-              if (value != null) {
-                onChanged?.call(value);
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class PubWarningText extends StatelessWidget {
-  const PubWarningText({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isFlutterApp =
-        serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == true;
-    final sdkName = isFlutterApp ? 'Flutter' : 'Dart';
-    final minSdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
-    return SelectionArea(
-      child: Text.rich(
-        TextSpan(
-          text:
-              'Warning: you should no longer be launching DevTools from'
-              ' pub.\n\n',
-          style: theme.subtleTextStyle.copyWith(color: theme.colorScheme.error),
-          children: [
-            TextSpan(
-              text:
-                  'DevTools version 2.8.0 will be the last version to '
-                  'be shipped on pub. As of $sdkName\nversion >= '
-                  '$minSdkVersion, DevTools should be launched by running '
-                  'the ',
-              style: theme.subtleTextStyle,
-            ),
-            TextSpan(
-              text: '`dart devtools`',
-              style: theme.subtleFixedFontStyle,
-            ),
-            TextSpan(text: '\ncommand.', style: theme.subtleTextStyle),
-          ],
-        ),
       ),
     );
   }

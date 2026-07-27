@@ -158,20 +158,6 @@ void main() {
       });
     });
 
-    test('nullSafeMin', () {
-      expect(nullSafeMin<int>(1, 2), equals(1));
-      expect(nullSafeMin<int>(1, null), equals(1));
-      expect(nullSafeMin<int>(null, 2), equals(2));
-      expect(nullSafeMin<int>(null, null), equals(null));
-    });
-
-    test('nullSafeMin', () {
-      expect(nullSafeMax<int>(1, 2), equals(2));
-      expect(nullSafeMax<int>(1, null), equals(1));
-      expect(nullSafeMax<int>(null, 2), equals(2));
-      expect(nullSafeMax<int>(null, null), equals(null));
-    });
-
     test('log2', () {
       expect(log2(1), equals(0));
       expect(log2(1.5), equals(0));
@@ -187,47 +173,6 @@ void main() {
       expect(roundToNearestPow10(11), equals(100));
       expect(roundToNearestPow10(189), equals(1000));
       expect(roundToNearestPow10(6581), equals(10000));
-    });
-
-    test('executeWithDelay', () async {
-      const delayMs = 500;
-      int n = 1;
-      int start = DateTime.now().millisecondsSinceEpoch;
-      int? end;
-
-      // Condition n >= 2 is false, so we should execute with a delay.
-      executeWithDelay(const Duration(milliseconds: 500), () {
-        n++;
-        end = DateTime.now().millisecondsSinceEpoch;
-      }, executeNow: n >= 2);
-
-      expect(n, equals(1));
-      expect(end, isNull);
-      await Future.delayed(const Duration(milliseconds: 250));
-      expect(n, equals(1));
-      expect(end, isNull);
-      await Future.delayed(const Duration(milliseconds: 250));
-      expect(n, equals(2));
-      expect(end, isNotNull);
-
-      // 1000ms is arbitrary. We want to ensure it doesn't run in less time than
-      // we requested (checked above), but we don't want to be too strict because
-      // shared CI CPUs can be slow.
-      const epsilonMs = 1000;
-      expect((end! - start - delayMs).abs(), lessThan(epsilonMs));
-
-      // Condition n >= 2 is true, so we should not execute with a delay.
-      end = null;
-      start = DateTime.now().millisecondsSinceEpoch;
-      executeWithDelay(const Duration(milliseconds: 500), () {
-        n++;
-        end = DateTime.now().millisecondsSinceEpoch;
-      }, executeNow: true);
-      expect(n, equals(3));
-      expect(end, isNotNull);
-      // 400ms is arbitrary. It is less than 500, which is what matters. This
-      // can be increased if this test starts to flake.
-      expect(end! - start, lessThan(400));
     });
 
     test('timeout', () async {
@@ -337,107 +282,6 @@ void main() {
       expect(formatDateTime(DateTime(2020, 1, 16, 13)), '13:00:00.000');
     });
 
-    test('longestFittingSubstring', () {
-      const asciiStr = 'ComponentElement.performRebuild';
-      const nonAsciiStr = 'ԪElement.updateChildԪ';
-      num slowMeasureCallback(_) => 100;
-
-      expect(
-        longestFittingSubstring(
-          asciiStr,
-          0,
-          asciiMeasurements,
-          slowMeasureCallback,
-        ),
-        equals(''),
-      );
-      expect(
-        longestFittingSubstring(
-          asciiStr,
-          50,
-          asciiMeasurements,
-          slowMeasureCallback,
-        ),
-        equals('Compo'),
-      );
-      expect(
-        longestFittingSubstring(
-          asciiStr,
-          224,
-          asciiMeasurements,
-          slowMeasureCallback,
-        ),
-        equals('ComponentElement.performRebuild'),
-      );
-      expect(
-        longestFittingSubstring(
-          asciiStr,
-          300,
-          asciiMeasurements,
-          slowMeasureCallback,
-        ),
-        equals('ComponentElement.performRebuild'),
-      );
-
-      expect(nonAsciiStr.codeUnitAt(0), greaterThanOrEqualTo(128));
-      expect(
-        longestFittingSubstring(
-          nonAsciiStr,
-          99,
-          asciiMeasurements,
-          slowMeasureCallback,
-        ),
-        equals(''),
-      );
-      expect(
-        longestFittingSubstring(
-          nonAsciiStr,
-          100,
-          asciiMeasurements,
-          slowMeasureCallback,
-        ),
-        equals('Ԫ'),
-      );
-      expect(
-        longestFittingSubstring(
-          nonAsciiStr,
-          230,
-          asciiMeasurements,
-          slowMeasureCallback,
-        ),
-        equals('ԪElement.updateChild'),
-      );
-      expect(
-        longestFittingSubstring(
-          nonAsciiStr,
-          329,
-          asciiMeasurements,
-          slowMeasureCallback,
-        ),
-        equals('ԪElement.updateChild'),
-      );
-      expect(
-        longestFittingSubstring(
-          nonAsciiStr,
-          330,
-          asciiMeasurements,
-          slowMeasureCallback,
-        ),
-        equals('ԪElement.updateChildԪ'),
-      );
-    });
-
-    test('isLetter', () {
-      expect(isLetter('@'.codeUnitAt(0)), isFalse);
-      expect(isLetter('['.codeUnitAt(0)), isFalse);
-      expect(isLetter('`'.codeUnitAt(0)), isFalse);
-      expect(isLetter('{'.codeUnitAt(0)), isFalse);
-      expect(isLetter('A'.codeUnitAt(0)), isTrue);
-      expect(isLetter('Z'.codeUnitAt(0)), isTrue);
-      expect(isLetter('a'.codeUnitAt(0)), isTrue);
-      expect(isLetter('z'.codeUnitAt(0)), isTrue);
-    });
-
     test('getSimpleStackFrameName', () {
       String name =
           '_WidgetsFlutterBinding&BindingBase&GestureBinding&ServicesBinding&'
@@ -506,89 +350,6 @@ void main() {
       test('produces the safe value on division by zero', () {
         expect(safeDivide(1.0, 0.0), 0.0);
         expect(safeDivide(-50.0, 0.0, ifNotFinite: 10.0), 10.0);
-      });
-    });
-
-    group('Reporter', () {
-      int called = 0;
-      late Reporter reporter;
-      void call() {
-        called++;
-      }
-
-      setUp(() {
-        called = 0;
-        reporter = Reporter();
-      });
-      test('notifies listeners', () {
-        expect(reporter.hasListeners, false);
-        reporter.addListener(call);
-        expect(called, 0);
-        expect(reporter.hasListeners, true);
-        reporter.notify();
-        expect(called, 1);
-        reporter.notify();
-        reporter.notify();
-        expect(called, 3);
-        reporter.removeListener(call);
-        expect(called, 3);
-      });
-
-      test('notifies multiple listeners', () {
-        reporter.addListener(() => called++);
-        reporter.addListener(() => called++);
-        reporter.addListener(() => called++);
-        reporter.notify();
-        expect(called, 3);
-        // Note that because we passed in anonymous callbacks, there's no way
-        // to remove them.
-      });
-
-      test('deduplicates listeners', () {
-        reporter.addListener(call);
-        reporter.addListener(call);
-        reporter.notify();
-        expect(called, 1);
-        reporter.removeListener(call);
-        reporter.notify();
-        expect(called, 1);
-      });
-
-      test('safely removes multiple times', () {
-        reporter.removeListener(call);
-        reporter.addListener(call);
-        reporter.notify();
-        expect(called, 1);
-        reporter.removeListener(call);
-        reporter.removeListener(call);
-        reporter.notify();
-        expect(called, 1);
-      });
-    });
-
-    group('ValueReporter', () {
-      int called = 0;
-      void call() {
-        called++;
-      }
-
-      late ValueReporter<String?> reporter;
-      setUp(() {
-        reporter = ValueReporter(null);
-      });
-      test('notifies listeners', () {
-        expect(reporter.hasListeners, false);
-        reporter.addListener(call);
-        expect(called, 0);
-        expect(reporter.hasListeners, true);
-        reporter.value = 'first call';
-        expect(called, 1);
-        reporter.value = 'second call';
-        reporter.value = 'third call';
-        expect(called, 3);
-        reporter.removeListener(call);
-        reporter.value = 'fourth call';
-        expect(called, 3);
       });
     });
 
@@ -667,506 +428,207 @@ void main() {
     });
   });
 
-  group('MovingAverage', () {
-    const simpleDataSet = [
-      100,
-      200,
-      300,
-      500,
-      1000,
-      2000,
-      3000,
-      4000,
-      10000,
-      100000,
-    ];
+  group('ListExtension', () {
+    test('joinWith generates correct list', () {
+      expect([1, 2, 3, 4].joinWith(0), equals([1, 0, 2, 0, 3, 0, 4]));
+      expect([1].joinWith(0), equals([1]));
+      expect(['a', 'b'].joinWith('z'), equals(['a', 'z', 'b']));
+    });
+  });
 
-    /// Data only has spikes.
-    const memorySizeDataSet = [
-      190432640,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      201045160,
-      198200392,
-      200144872,
-      210110632,
-      234077984,
-      229029504,
-      229029544,
-      231396416,
-      240465152,
-      303434344, // Spike @ [25] (clear)
-      302925712,
-      356093472,
-      354292096,
-      400654120,
-      400538848,
-      402336872,
-      444325760,
-      444933104,
-      341888120,
-      406070376,
-      343798216,
-      392421072,
-      392441080,
-      481891656,
-      481447920,
-      433271776,
-      464727280,
-      494727280,
-      564727280,
-      524727280,
-      534727280,
-      564727280,
-      764727280, // Spike @ [48]
-      964727280, // Spike @ [49]
-      1064727280, // Spike @ [50]
-      1464727280, // Spike @ [51]
-      2264727280, // Spike @ [52]
-      2500000000, // Spike @ [53]
-    ];
+  group('NullableListExtension', () {
+    test('isNullOrEmpty', () {
+      List<int>? nullableList;
+      expect(nullableList.isNullOrEmpty, true);
+      nullableList = [];
+      expect(nullableList.isNullOrEmpty, true);
+      nullableList.add(1);
+      expect(nullableList.isNullOrEmpty, false);
+    });
+  });
 
-    /// Data has 5 spikes and 3 dips.
-    const dipsSpikesDataSet = [
-      190432640,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      190443808,
-      5500000, // Dips @ [12]
-      5600000,
-      7443808,
-      9043808,
-      11045160,
-      49800392, // Spikes @ [17]
-      60144872,
-      210110632, // Spikes @ [19]
-      234077984,
-      229029504,
-      229029544,
-      194000000,
-      80000000, // Dips @ [24]
-      100000000,
-      150000000,
-      240465152, // Spike @ [27]
-      303434344,
-      302925712,
-      356093472,
-      354292096,
-      400654120,
-      400538848,
-      402336872,
-      444325760,
-      444933104,
-      341888120,
-      406070376,
-      343798216,
-      392421072,
-      392441080,
-      481891656,
-      3000000, // Dips @ [43]
-      3100000,
-      3200000,
-      330000000, // Spike @ [46]
-      330000000,
-      330000000,
-      340000000,
-      340000000,
-      340000000,
-      964727280,
-      1064727280,
-      1464727280,
-      2264727280, // Spike @ [52]
-      2500000000,
-    ];
+  group('SetExtension', () {
+    test('containsAny', () {
+      final test = {1, 2, 3, 4};
+      final subSet = {1, 2};
+      final disjointSet = {5, 6, 7};
+      expect(test.containsAny(test), true);
+      expect(test.containsAny(subSet), true);
+      expect(test.containsAny(disjointSet), false);
+    });
+  });
 
-    void checkNewItemsAddedToDataSet(MovingAverage mA) {
-      mA.add(1000000);
-      mA.add(2000000);
-      mA.add(3000000);
-      expect(mA.dataSet.length, lessThan(mA.averagePeriod));
-      expect(mA.mean.toInt(), equals(470853));
-      expect(mA.hasSpike(), isTrue);
-      expect(mA.isDipping(), isFalse);
-    }
+  group('NullableStringExtension', () {
+    test('isNullOrEmpty', () {
+      String? str;
+      expect(str.isNullOrEmpty, isTrue);
+      str = '';
+      expect(str.isNullOrEmpty, isTrue);
+      str = 'hello';
+      expect(str.isNullOrEmpty, isFalse);
+      str = null;
+      expect(str.isNullOrEmpty, isTrue);
+    });
+  });
 
-    test('basic MA', () {
-      // Creation of MovingAverage statically.
-      final simpleMA = MovingAverage(newDataSet: simpleDataSet);
-      expect(simpleMA.dataSet.length, lessThan(simpleMA.averagePeriod));
-      expect(simpleMA.mean.toInt(), equals(12110));
-      checkNewItemsAddedToDataSet(simpleMA);
-
-      simpleMA.clear();
-      expect(simpleMA.mean, equals(0));
-
-      // Dynamically add data to MovingAverage data set.
-      for (int i = 0; i < simpleDataSet.length; i++) {
-        simpleMA.add(simpleDataSet[i]);
-      }
-      // Should be identical to static one from above.
-      expect(simpleMA.mean.toInt(), equals(12110));
-      checkNewItemsAddedToDataSet(simpleMA);
+  group('StringExtension', () {
+    test('caseInsensitiveContains', () {
+      const str = 'This is a test string with a path/to/uri';
+      expect(str.caseInsensitiveContains('test'), isTrue);
+      expect(str.caseInsensitiveContains('with a PATH/'), isTrue);
+      expect(str.caseInsensitiveContains('THIS IS A'), isTrue);
+      expect(str.caseInsensitiveContains('not a match'), isFalse);
+      expect(str.caseInsensitiveContains('test bool'), isFalse);
+      expect(
+        str.caseInsensitiveContains(RegExp('is.*path', caseSensitive: false)),
+        isTrue,
+      );
+      expect(
+        () => str.caseInsensitiveContains(RegExp('is.*path')),
+        throwsAssertionError,
+      );
+      expect(
+        str.caseInsensitiveContains(
+          RegExp('THIS IS.*TO/uri', caseSensitive: false),
+        ),
+        isTrue,
+      );
+      expect(
+        str.caseInsensitiveContains(
+          RegExp('this.*does not match', caseSensitive: false),
+        ),
+        isFalse,
+      );
     });
 
-    test('normal static MA', () {
-      // Creation of MovingAverage statically.
-      final mA = MovingAverage(newDataSet: memorySizeDataSet);
-      // Mean only calculated on last averagePeriod entries (50 default).
-      expect(mA.mean.toInt(), equals(462271799));
-      expect(mA.dataSet.length, equals(mA.averagePeriod));
-      expect(mA.hasSpike(), isTrue);
-      expect(mA.isDipping(), isFalse);
+    test('caseInsensitiveEquals', () {
+      const str = 'hello, world!';
+      expect(str.caseInsensitiveEquals(str), isTrue);
+      expect(str.caseInsensitiveEquals('HELLO, WORLD!'), isTrue);
+      expect(str.caseInsensitiveEquals('hElLo, WoRlD!'), isTrue);
+      expect(str.caseInsensitiveEquals('hello'), isFalse);
+      expect(str.caseInsensitiveEquals(''), isFalse);
+      expect(str.caseInsensitiveEquals(null), isFalse);
+      expect(''.caseInsensitiveEquals(''), isTrue);
+      expect(''.caseInsensitiveEquals(null), isFalse);
 
-      mA.clear();
-      expect(mA.mean, equals(0));
-      expect(mA.dataSet.length, equals(0));
+      // Complete match.
+      expect(
+        str.caseInsensitiveEquals(RegExp('h.*o.*', caseSensitive: false)),
+        isTrue,
+      );
+      // Incomplete match.
+      expect(
+        str.caseInsensitiveEquals(RegExp('h.*o', caseSensitive: false)),
+        isFalse,
+      );
+      // No match.
+      expect(
+        str.caseInsensitiveEquals(
+          RegExp('hello.* this does not match', caseSensitive: false),
+        ),
+        isFalse,
+      );
     });
 
-    test('dynamic spikes MA', () {
-      final mA = MovingAverage();
+    test('caseInsensitiveAllMatches', () {
+      const str = 'This is a TEST. Test string is "test"';
+      final matches = 'test'.caseInsensitiveAllMatches(str).toList();
+      expect(matches.length, equals(3));
 
-      // Dynamically add data to MovingAverage data set.
-      for (int i = 0; i < 20; i++) {
-        mA.add(memorySizeDataSet[i]);
-        expect(mA.hasSpike(), isFalse);
-        expect(mA.isDipping(), isFalse);
-      }
-      expect(mA.mean.toInt(), equals(192829540));
+      // First match: 'TEST'
+      expect(matches[0].start, equals(10));
+      expect(matches[0].end, equals(14));
 
-      for (int i = 20; i < 50; i++) {
-        mA.add(memorySizeDataSet[i]);
-        switch (i) {
-          case 25:
-            expect(mA.hasSpike(), isTrue);
-            expect(mA.isDipping(), isFalse);
-            mA.clear();
-            expect(mA.dataSet.length, 0);
-            break;
-          case 48:
-          case 49:
-            expect(mA.hasSpike(), isTrue);
-            expect(mA.isDipping(), isFalse);
-            break;
-          default:
-            expect(mA.dataSet.length, i < 25 ? i + 1 : i - 25);
-            expect(mA.hasSpike(), isFalse);
-            expect(mA.isDipping(), isFalse);
-        }
-      }
-      expect(mA.mean.toInt(), equals(469047851));
+      // Second match: 'Test'
+      expect(matches[1].start, equals(16));
+      expect(matches[1].end, equals(20));
 
-      expect(mA.dataSet.length, 24);
+      // Third match: 'test'
+      expect(matches[2].start, equals(32));
+      expect(matches[2].end, equals(36));
 
-      for (int i = 50; i < memorySizeDataSet.length; i++) {
-        mA.add(memorySizeDataSet[i]);
-        switch (i) {
-          case 50:
-            expect(mA.mean.toInt(), equals(492875028));
-            expect(mA.hasSpike(), isTrue);
-            expect(mA.isDipping(), isFalse);
-            expect(mA.dataSet.length, equals(25));
-            break;
-          case 51:
-            expect(mA.mean.toInt(), equals(530253961));
-            expect(mA.hasSpike(), isTrue);
-            expect(mA.isDipping(), isFalse);
-            expect(mA.dataSet.length, equals(26));
-            break;
-          case 52:
-            expect(mA.mean.toInt(), equals(594493714));
-            expect(mA.hasSpike(), isTrue);
-            expect(mA.isDipping(), isFalse);
-            expect(mA.dataSet.length, equals(27));
-            break;
-          case 53:
-            expect(mA.mean.toInt(), equals(662547510));
-            expect(mA.hasSpike(), isTrue);
-            expect(mA.isDipping(), isFalse);
-            expect(mA.dataSet.length, equals(28));
-            break;
-          default:
-            expect(false, isTrue);
-        }
-      }
+      // Dart's allMatches returns 1 char matches when pattern is an empty string
+      expect(
+        ''.caseInsensitiveAllMatches('hello world').length,
+        equals('hello world'.length + 1),
+      );
+      expect('*'.caseInsensitiveAllMatches('hello world'), isEmpty);
+      expect('test'.caseInsensitiveAllMatches(''), isEmpty);
+      expect('test'.caseInsensitiveAllMatches(null), isEmpty);
+    });
+  });
 
-      // dataSet was cleared on first spike @ item 25 so
-      // dataSet only has the remaining 28 entries.
-      expect(mA.dataSet.length, 28);
-      expect(mA.mean.toInt(), equals(662547510));
+  group('BoolExtension', () {
+    test('boolCompare', () {
+      expect(true.boolCompare(true), equals(0));
+      expect(false.boolCompare(false), equals(0));
+      expect(true.boolCompare(false), equals(-1));
+      expect(false.boolCompare(true), equals(1));
+    });
+  });
 
-      mA.clear();
-      expect(mA.mean, equals(0));
-      expect(mA.dataSet.length, equals(0));
+  group('subtractMaps', () {
+    test('subtracts non-null maps', () {
+      final subtract = {1: 'subtract'};
+      final from = {1: 1.0, 2: 2.0};
+      _SubtractionResult? elementSubtractor({
+        required String? subtract,
+        required double? from,
+      }) => _SubtractionResult(subtract: subtract, from: from);
+
+      final result = subtractMaps<int, double, String, _SubtractionResult>(
+        subtract: subtract,
+        from: from,
+        subtractor: elementSubtractor,
+      );
+
+      expect(
+        const SetEquality<int>().equals(result.keys.toSet(), {1, 2}),
+        true,
+      );
+      expect(
+        result[1],
+        equals(_SubtractionResult(subtract: 'subtract', from: 1.0)),
+      );
+      expect(result[2], equals(_SubtractionResult(subtract: null, from: 2.0)));
     });
 
-    test('dips and spikes MA', () {
-      final mA = MovingAverage();
+    test('subtracts null', () {
+      final from = {1: 1.0};
+      _SubtractionResult? elementSubtractor({
+        required String? subtract,
+        required double? from,
+      }) => _SubtractionResult(subtract: subtract, from: from);
 
-      // Dynamically add data to MovingAverage data set.
-      for (int i = 0; i < memorySizeDataSet.length; i++) {
-        mA.add(dipsSpikesDataSet[i]);
-        switch (i) {
-          case 12:
-          case 24:
-          case 43:
-            expect(mA.hasSpike(), isFalse);
-            expect(mA.isDipping(), isTrue);
-            break;
-          case 17:
-          case 19:
-          case 27:
-          case 46:
-          case 52:
-            expect(mA.hasSpike(), isTrue);
-            expect(mA.isDipping(), isFalse);
-            break;
-          default:
-            expect(mA.hasSpike(), isFalse);
-            expect(mA.isDipping(), isFalse);
-        }
-        if (mA.hasSpike() || mA.isDipping()) {
-          mA.clear();
-          expect(mA.dataSet.length, 0);
-        }
-      }
+      final result = subtractMaps<int, double, String, _SubtractionResult>(
+        subtract: null,
+        from: from,
+        subtractor: elementSubtractor,
+      );
+
+      expect(const SetEquality<int>().equals(result.keys.toSet(), {1}), true);
+      expect(result[1], equals(_SubtractionResult(subtract: null, from: 1.0)));
     });
 
-    group('ListExtension', () {
-      test('joinWith generates correct list', () {
-        expect([1, 2, 3, 4].joinWith(0), equals([1, 0, 2, 0, 3, 0, 4]));
-        expect([1].joinWith(0), equals([1]));
-        expect(['a', 'b'].joinWith('z'), equals(['a', 'z', 'b']));
-      });
+    test('subtracts from null', () {
+      final subtract = {1: 'subtract'};
+      _SubtractionResult? elementSubtractor({
+        required String? subtract,
+        required double? from,
+      }) => _SubtractionResult(subtract: subtract, from: from);
 
-      test('allIndicesWhere', () {
-        final list = [1, 2, 1, 2, 3, 4];
-        expect(list.allIndicesWhere((element) => element.isEven), [1, 3, 5]);
-        expect(list.allIndicesWhere((element) => element.isOdd), [0, 2, 4]);
-        expect(list.allIndicesWhere((element) => element + 2 == 3), [0, 2]);
-      });
-    });
+      final result = subtractMaps<int, double, String, _SubtractionResult>(
+        subtract: subtract,
+        from: null,
+        subtractor: elementSubtractor,
+      );
 
-    group('NullableListExtension', () {
-      test('isNullOrEmpty', () {
-        List<int>? nullableList;
-        expect(nullableList.isNullOrEmpty, true);
-        nullableList = [];
-        expect(nullableList.isNullOrEmpty, true);
-        nullableList.add(1);
-        expect(nullableList.isNullOrEmpty, false);
-      });
-    });
-
-    group('SetExtension', () {
-      test('containsAny', () {
-        final test = {1, 2, 3, 4};
-        final subSet = {1, 2};
-        final disjointSet = {5, 6, 7};
-        expect(test.containsAny(test), true);
-        expect(test.containsAny(subSet), true);
-        expect(test.containsAny(disjointSet), false);
-      });
-    });
-
-    group('NullableStringExtension', () {
-      test('isNullOrEmpty', () {
-        String? str;
-        expect(str.isNullOrEmpty, isTrue);
-        str = '';
-        expect(str.isNullOrEmpty, isTrue);
-        str = 'hello';
-        expect(str.isNullOrEmpty, isFalse);
-        str = null;
-        expect(str.isNullOrEmpty, isTrue);
-      });
-    });
-
-    group('StringExtension', () {
-      test('caseInsensitiveContains', () {
-        const str = 'This is a test string with a path/to/uri';
-        expect(str.caseInsensitiveContains('test'), isTrue);
-        expect(str.caseInsensitiveContains('with a PATH/'), isTrue);
-        expect(str.caseInsensitiveContains('THIS IS A'), isTrue);
-        expect(str.caseInsensitiveContains('not a match'), isFalse);
-        expect(str.caseInsensitiveContains('test bool'), isFalse);
-        expect(
-          str.caseInsensitiveContains(RegExp('is.*path', caseSensitive: false)),
-          isTrue,
-        );
-        expect(
-          () => str.caseInsensitiveContains(RegExp('is.*path')),
-          throwsAssertionError,
-        );
-        expect(
-          str.caseInsensitiveContains(
-            RegExp('THIS IS.*TO/uri', caseSensitive: false),
-          ),
-          isTrue,
-        );
-        expect(
-          str.caseInsensitiveContains(
-            RegExp('this.*does not match', caseSensitive: false),
-          ),
-          isFalse,
-        );
-      });
-
-      test('caseInsensitiveEquals', () {
-        const str = 'hello, world!';
-        expect(str.caseInsensitiveEquals(str), isTrue);
-        expect(str.caseInsensitiveEquals('HELLO, WORLD!'), isTrue);
-        expect(str.caseInsensitiveEquals('hElLo, WoRlD!'), isTrue);
-        expect(str.caseInsensitiveEquals('hello'), isFalse);
-        expect(str.caseInsensitiveEquals(''), isFalse);
-        expect(str.caseInsensitiveEquals(null), isFalse);
-        expect(''.caseInsensitiveEquals(''), isTrue);
-        expect(''.caseInsensitiveEquals(null), isFalse);
-
-        // Complete match.
-        expect(
-          str.caseInsensitiveEquals(RegExp('h.*o.*', caseSensitive: false)),
-          isTrue,
-        );
-        // Incomplete match.
-        expect(
-          str.caseInsensitiveEquals(RegExp('h.*o', caseSensitive: false)),
-          isFalse,
-        );
-        // No match.
-        expect(
-          str.caseInsensitiveEquals(
-            RegExp('hello.* this does not match', caseSensitive: false),
-          ),
-          isFalse,
-        );
-      });
-
-      test('caseInsensitiveAllMatches', () {
-        const str = 'This is a TEST. Test string is "test"';
-        final matches = 'test'.caseInsensitiveAllMatches(str).toList();
-        expect(matches.length, equals(3));
-
-        // First match: 'TEST'
-        expect(matches[0].start, equals(10));
-        expect(matches[0].end, equals(14));
-
-        // Second match: 'Test'
-        expect(matches[1].start, equals(16));
-        expect(matches[1].end, equals(20));
-
-        // Third match: 'test'
-        expect(matches[2].start, equals(32));
-        expect(matches[2].end, equals(36));
-
-        // Dart's allMatches returns 1 char matches when pattern is an empty string
-        expect(
-          ''.caseInsensitiveAllMatches('hello world').length,
-          equals('hello world'.length + 1),
-        );
-        expect('*'.caseInsensitiveAllMatches('hello world'), isEmpty);
-        expect('test'.caseInsensitiveAllMatches(''), isEmpty);
-        expect('test'.caseInsensitiveAllMatches(null), isEmpty);
-      });
-    });
-
-    group('BoolExtension', () {
-      test('boolCompare', () {
-        expect(true.boolCompare(true), equals(0));
-        expect(false.boolCompare(false), equals(0));
-        expect(true.boolCompare(false), equals(-1));
-        expect(false.boolCompare(true), equals(1));
-      });
-    });
-
-    group('subtractMaps', () {
-      test('subtracts non-null maps', () {
-        final subtract = {1: 'subtract'};
-        final from = {1: 1.0, 2: 2.0};
-        _SubtractionResult? elementSubtractor({
-          required String? subtract,
-          required double? from,
-        }) => _SubtractionResult(subtract: subtract, from: from);
-
-        final result = subtractMaps<int, double, String, _SubtractionResult>(
-          subtract: subtract,
-          from: from,
-          subtractor: elementSubtractor,
-        );
-
-        expect(
-          const SetEquality<int>().equals(result.keys.toSet(), {1, 2}),
-          true,
-        );
-        expect(
-          result[1],
-          equals(_SubtractionResult(subtract: 'subtract', from: 1.0)),
-        );
-        expect(
-          result[2],
-          equals(_SubtractionResult(subtract: null, from: 2.0)),
-        );
-      });
-
-      test('subtracts null', () {
-        final from = {1: 1.0};
-        _SubtractionResult? elementSubtractor({
-          required String? subtract,
-          required double? from,
-        }) => _SubtractionResult(subtract: subtract, from: from);
-
-        final result = subtractMaps<int, double, String, _SubtractionResult>(
-          subtract: null,
-          from: from,
-          subtractor: elementSubtractor,
-        );
-
-        expect(const SetEquality<int>().equals(result.keys.toSet(), {1}), true);
-        expect(
-          result[1],
-          equals(_SubtractionResult(subtract: null, from: 1.0)),
-        );
-      });
-
-      test('subtracts from null', () {
-        final subtract = {1: 'subtract'};
-        _SubtractionResult? elementSubtractor({
-          required String? subtract,
-          required double? from,
-        }) => _SubtractionResult(subtract: subtract, from: from);
-
-        final result = subtractMaps<int, double, String, _SubtractionResult>(
-          subtract: subtract,
-          from: null,
-          subtractor: elementSubtractor,
-        );
-
-        expect(const SetEquality<int>().equals(result.keys.toSet(), {1}), true);
-        expect(
-          result[1],
-          equals(_SubtractionResult(subtract: 'subtract', from: null)),
-        );
-      });
+      expect(const SetEquality<int>().equals(result.keys.toSet(), {1}), true);
+      expect(
+        result[1],
+        equals(_SubtractionResult(subtract: 'subtract', from: null)),
+      );
     });
   });
 

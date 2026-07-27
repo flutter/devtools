@@ -30,7 +30,6 @@ const closureName = '<closure>';
 const anonymousClosureName = '<anonymous closure>';
 
 const _memoryDocUrl = 'https://docs.flutter.dev/tools/devtools/memory';
-const _consoleDocUrl = 'https://docs.flutter.dev/tools/devtools/console';
 const _inspectorDocUrl = 'https://docs.flutter.dev/tools/devtools/inspector';
 
 /// Some links to documentation.
@@ -41,7 +40,6 @@ enum DocLinks {
   profile(_memoryDocUrl, 'profile-memory-tab'),
   diff(_memoryDocUrl, 'diff-snapshots-tab'),
   trace(_memoryDocUrl, 'trace-instances-tab'),
-  console(_consoleDocUrl, null),
   inspectorPackageDirectories(_inspectorDocUrl, 'package-directories');
 
   const DocLinks(this.url, this.hash);

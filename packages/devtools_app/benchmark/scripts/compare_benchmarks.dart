@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:web_benchmarks/analysis.dart';
 
 import 'utils.dart';
@@ -61,6 +62,6 @@ void compareBenchmarks(
   stdout.writeln('Baseline comparison finished.');
   stdout
     ..writeln('==== Comparison with baseline $baselineSource ====')
-    ..writeln(const JsonEncoder.withIndent('  ').convert(delta.toJson()))
+    ..writeln(delta.toJson().prettyPrint())
     ..writeln('==== End of baseline comparison ====');
 }

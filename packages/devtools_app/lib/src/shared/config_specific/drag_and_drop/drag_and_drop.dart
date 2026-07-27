@@ -24,8 +24,6 @@ abstract class DragAndDropManager {
   int get viewId => _viewId;
   final int _viewId;
 
-  final _dragAndDropStates = <DragAndDropState>{};
-
   DragAndDropState? activeState;
 
   /// The method is abstract, because we want to force descendants to define it.
@@ -37,16 +35,7 @@ abstract class DragAndDropManager {
 
   @mustCallSuper
   void dispose() {
-    _dragAndDropStates.clear();
     activeState = null;
-  }
-
-  void registerDragAndDrop(DragAndDropState state) {
-    _dragAndDropStates.add(state);
-  }
-
-  void unregisterDragAndDrop(DragAndDropState state) {
-    _dragAndDropStates.remove(state);
   }
 
   void dragOver(double x, double y) {
@@ -126,12 +115,10 @@ class DragAndDropState extends State<DragAndDrop> {
       // Already registered to the right drag and drop manager, so do nothing.
       if (oldViewId == viewId) return;
 
-      _dragAndDropManager?.unregisterDragAndDrop(this);
       _dragAndDropManager = null;
     }
 
     _dragAndDropManager = DragAndDropManager.getInstance(viewId);
-    _dragAndDropManager!.registerDragAndDrop(this);
   }
 
   @override
@@ -141,7 +128,6 @@ class DragAndDropState extends State<DragAndDrop> {
 
   @override
   void dispose() {
-    _dragAndDropManager?.unregisterDragAndDrop(this);
     _dragAndDropManager = null;
     _dragging.dispose();
     super.dispose();
