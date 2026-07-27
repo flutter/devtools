@@ -94,7 +94,7 @@ class VmServiceWrapper extends VmService {
 
   final _activeStreams = <String, Future<Success>>{};
 
-  final activeFutureNames = <String>{};
+  final activeFutureNames = <String>[];
 
   @visibleForTesting
   Future<void> get allFuturesCompleted => _allFuturesCompleter.future;
