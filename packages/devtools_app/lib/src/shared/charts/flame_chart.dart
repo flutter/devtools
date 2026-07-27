@@ -269,8 +269,7 @@ abstract class FlameChartState<
       verticalControllerGroup.resetScroll();
       zoomController.reset();
       verticalExtentDelegate.recompute();
-    } else if (widget.containerWidth != oldWidget.containerWidth ||
-        widget.containerHeight != oldWidget.containerHeight) {
+    } else if (widget.containerWidth != oldWidget.containerWidth) {
       initFlameChartElements();
       verticalExtentDelegate.recompute();
     }
