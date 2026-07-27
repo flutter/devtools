@@ -31,7 +31,6 @@ class PropertyEditorPanel extends StatefulWidget {
 class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
   _PropertyEditorPanelState();
 
-  Future<EditorClient>? _editor;
   PropertyEditorController? _propertyEditorController;
 
   @override
@@ -40,12 +39,9 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
 
     final editor = EditorClient(widget.dtdManager);
     ga.screen(gac.PropertyEditorSidebar.id);
-    unawaited(
-      _editor = editor.initialized.then((_) {
-        _propertyEditorController = PropertyEditorController(editor);
-        return editor;
-      }),
-    );
+    unawaited(editor.initialized.then((_) {
+      _propertyEditorController = PropertyEditorController(editor);
+    }));
   }
 
   @override
@@ -58,17 +54,8 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.topCenter,
-      child: FutureBuilder(
-        future: _editor,
-        builder: (context, snapshot) =>
-            switch ((snapshot.connectionState, snapshot.data)) {
-              (ConnectionState.done, final editor?) =>
-                _PropertyEditorConnectedPanel(
-                  editor,
-                  controller: _propertyEditorController!,
-                ),
-              _ => const CenteredCircularProgressIndicator(),
-            },
+      child: _PropertyEditorConnectedPanel(
+        controller: _propertyEditorController!,
       ),
     );
   }
@@ -76,9 +63,8 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
 
 /// The property editor panel shown once we know an editor is available.
 class _PropertyEditorConnectedPanel extends StatefulWidget {
-  const _PropertyEditorConnectedPanel(this.editor, {required this.controller});
+  const _PropertyEditorConnectedPanel({required this.controller});
 
-  final EditorClient editor;
   final PropertyEditorController controller;
 
   @override

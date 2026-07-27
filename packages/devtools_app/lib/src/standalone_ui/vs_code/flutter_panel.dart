@@ -177,7 +177,6 @@ class _EditorConnectedPanelState extends State<_EditorConnectedPanel>
               DebugSessions(
                 editor: widget.editor,
                 sessions: debugSessions,
-                devices: devices,
               ),
               const SizedBox(height: defaultSpacing),
               if (widget.editor.supportsSelectDevice) ...[

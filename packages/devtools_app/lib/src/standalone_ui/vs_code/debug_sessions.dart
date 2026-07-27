@@ -17,7 +17,6 @@ class DebugSessions extends StatelessWidget {
   const DebugSessions({
     required this.editor,
     required this.sessions,
-    required this.devices,
     super.key,
   });
 
@@ -25,9 +24,6 @@ class DebugSessions extends StatelessWidget {
 
   /// A map of debug session IDs to their debug sessions.
   final Map<String, EditorDebugSession> sessions;
-
-  /// A map of device IDs to their devices.
-  final Map<String, EditorDevice> devices;
 
   @override
   Widget build(BuildContext context) {
