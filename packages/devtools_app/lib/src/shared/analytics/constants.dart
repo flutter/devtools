@@ -85,7 +85,6 @@ const slowAnimation = 'slowAnimation';
 const slowAnimationDocs = 'slowAnimationDocs';
 const repaintRainbow = 'repaintRainbow';
 const repaintRainbowDocs = 'repaintRainbowDocs';
-const debugBanner = 'debugBanner';
 const togglePlatform = 'togglePlatform';
 const brightnessOverride = 'brightnessOverride';
 const highlightOversizedImages = 'highlightOversizedImages';
