@@ -29,11 +29,13 @@ void main() {
     });
 
     test('resolves symbolic links to find actual SDK root', () {
-      final sdkDir = Directory(path.join(tempDir.path, 'real_sdk'))..createSync();
+      final sdkDir = Directory(path.join(tempDir.path, 'real_sdk'))
+        ..createSync();
       final binDir = Directory(path.join(sdkDir.path, 'bin'))..createSync();
       final flutterExe = File(path.join(binDir.path, 'flutter'))..createSync();
 
-      final linkDir = Directory(path.join(tempDir.path, 'symlink_bin'))..createSync();
+      final linkDir = Directory(path.join(tempDir.path, 'symlink_bin'))
+        ..createSync();
       final symlink = Link(path.join(linkDir.path, 'flutter'));
       symlink.createSync(flutterExe.path);
 
