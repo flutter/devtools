@@ -315,6 +315,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   Map<String, dynamic>? get responseHeaders => _request.response?.headers;
 
   /// The query parameters for the request.
+  @visibleForTesting
   Map<String, dynamic>? get queryParameters => _request.uri.queryParameters;
 
   @override

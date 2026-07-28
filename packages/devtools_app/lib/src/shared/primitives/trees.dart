@@ -2,25 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+// ignore_for_file: unused-code, retain methods for completeness of TreeNode model class.
+
 import 'dart:collection';
 import 'dart:math';
 
-/// Non-UI specific tree code should live in this file.
-///
-/// This file does not have direct dependencies on dart:html and therefore
-/// allows for testing to be done on the VM.
-
-// TODO(kenz): look into consolidating logic between this file and
-// ui/trees.dart, which houses generic tree types vs the base classes in this
-// file.
+// Non-UI specific tree code should live in this file.
+//
+// This file does not have direct dependencies on dart:html and therefore
+// allows for testing to be done on the VM.
 
 abstract class TreeNode<T extends TreeNode<T>> {
   T? parent;
 
   final children = <T>[];
-
-  // TODO(jacobr) should impact depth.
-  bool indentChildren = true;
 
   /// Index in `parent.children`.
   int index = -1;

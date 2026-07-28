@@ -73,6 +73,8 @@ enum ScreenMetaData {
   debugger(
     'debugger',
     title: 'Debugger',
+    // TODO(kenz): see if we can use a meterial icon or an asset icon so that
+    // we can remove the Octicons font family.
     icon: Octicons.bug,
     requiresDebugBuild: true,
     tutorialVideoTimestamp: '?t=513',

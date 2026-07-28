@@ -5,7 +5,6 @@
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
@@ -26,6 +25,8 @@ import 'primitives/storage.dart';
 /// Whether this DevTools build is external.
 bool get isExternalBuild => _isExternalBuild;
 bool _isExternalBuild = true;
+
+// ignore: unused-code, used in g3.
 void setInternalBuild() => _isExternalBuild = false;
 
 ScreenControllers get screenControllers =>
@@ -70,9 +71,6 @@ EvalService get evalService => globals[EvalService] as EvalService;
 ExtensionService get extensionService =>
     globals[ExtensionService] as ExtensionService;
 
-GlobalKey<NavigatorState> get navigatorKey =>
-    globals[GlobalKey<NavigatorState>] as GlobalKey<NavigatorState>;
-
 /// Whether DevTools is being run in integration test mode.
 bool get integrationTestMode => _integrationTestMode;
 bool _integrationTestMode = false;
@@ -83,6 +81,7 @@ void setIntegrationTestMode() {
 /// Whether DevTools is being run in a test environment.
 bool get testMode => _testMode;
 bool _testMode = false;
+@visibleForTesting
 void setTestMode() {
   _testMode = true;
 }
@@ -90,6 +89,7 @@ void setTestMode() {
 /// Whether DevTools is being run as a stager app.
 bool get stagerMode => _stagerMode;
 bool _stagerMode = false;
+@visibleForTesting
 void setStagerMode() {
   if (!kReleaseMode) {
     _stagerMode = true;

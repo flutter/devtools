@@ -83,8 +83,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// This node's parent (if it's been set).
   RemoteDiagnosticsNode? parent;
 
-  Future<String>? propertyDocFuture;
-
   List<RemoteDiagnosticsNode>? cachedProperties;
 
   /// Service used to retrieve more detailed information about the value of
@@ -100,8 +98,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   // TODO(albertusangga): Refactor to cleaner/more robust solution
   bool get isFlex => ['Row', 'Column', 'Flex'].contains(widgetRuntimeType);
-
-  bool get isBox => json['isBox'] == true;
 
   int? get flexFactor => json['flexFactor'] as int?;
 

@@ -6,7 +6,6 @@
 // libraries in this package.
 
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
 
@@ -122,20 +121,6 @@ String durationText(
   return '$durationStr${includeUnit ? ' ${unit.display}' : ''}';
 }
 
-T? nullSafeMin<T extends num>(T? a, T? b) {
-  if (a == null || b == null) {
-    return a ?? b;
-  }
-  return min<T>(a, b);
-}
-
-T? nullSafeMax<T extends num>(T? a, T? b) {
-  if (a == null || b == null) {
-    return a ?? b;
-  }
-  return max<T>(a, b);
-}
-
 double logBase({required int x, required int base}) {
   return log(x) / log(base);
 }
@@ -144,20 +129,6 @@ int log2(num x) => logBase(x: x.floor(), base: 2).floor();
 
 int roundToNearestPow10(int x) =>
     pow(10, logBase(x: x, base: 10).ceil()).floor();
-
-void executeWithDelay(
-  Duration delay,
-  void Function() callback, {
-  bool executeNow = false,
-}) {
-  if (executeNow || delay.inMilliseconds <= 0) {
-    callback();
-  } else {
-    Timer(delay, () {
-      callback();
-    });
-  }
-}
 
 Future<void> delayToReleaseUiThread({int micros = 0}) async {
   // Even with a delay of 0 microseconds, awaiting this delay is enough to free
@@ -201,39 +172,6 @@ Future<T?> timeout<T>(Future<T> operation, int timeoutMillis) =>
       ),
     ]);
 
-String longestFittingSubstring(
-  String originalText,
-  num maxWidth,
-  List<num> asciiMeasurements,
-  num Function(int value) slowMeasureFallback,
-) {
-  if (originalText.isEmpty) return originalText;
-
-  final runes = originalText.runes.toList();
-
-  num currentWidth = 0;
-
-  int i = 0;
-  while (i < runes.length) {
-    final rune = runes[i];
-    final charWidth = rune < 128
-        ? asciiMeasurements[rune]
-        : slowMeasureFallback(rune);
-    if (currentWidth + charWidth > maxWidth) {
-      break;
-    }
-    // [currentWidth] is approximate due to ignoring kerning.
-    currentWidth += charWidth;
-    i++;
-  }
-
-  return originalText.substring(0, i);
-}
-
-/// Whether a given code unit is a letter (A-Z or a-z).
-bool isLetter(int codeUnit) =>
-    (codeUnit >= 65 && codeUnit <= 90) || (codeUnit >= 97 && codeUnit <= 122);
-
 /// Returns a simplified version of a StackFrame name.
 ///
 /// Given an input such as
@@ -256,87 +194,6 @@ String getSimpleStackFrameName(String? name) {
   return newName.split('&').last;
 }
 
-/// Return a Stream that fires events whenever any of the three given parameter
-/// streams fire.
-Stream combineStreams(Stream a, Stream b, Stream c) {
-  late StreamController controller;
-
-  StreamSubscription? asub;
-  StreamSubscription? bsub;
-  StreamSubscription? csub;
-
-  controller = StreamController(
-    onListen: () {
-      asub = a.listen(controller.add);
-      bsub = b.listen(controller.add);
-      csub = c.listen(controller.add);
-    },
-    onCancel: () {
-      unawaited(asub?.cancel());
-      unawaited(bsub?.cancel());
-      unawaited(csub?.cancel());
-    },
-  );
-
-  return controller.stream;
-}
-
-class Property<T> {
-  Property(this._value);
-
-  final _changeController = StreamController<T>.broadcast();
-  T _value;
-
-  T get value => _value;
-
-  set value(T newValue) {
-    if (newValue != _value) {
-      _value = newValue;
-      _changeController.add(newValue);
-    }
-  }
-
-  Stream<T> get onValueChange => _changeController.stream;
-}
-
-/// Batch up calls to the given closure. Repeated calls to [invoke] will
-/// overwrite the closure to be called. We'll delay at least [minDelay] before
-/// calling the closure, but will not delay more than [maxDelay].
-class DelayedTimer {
-  DelayedTimer(this.minDelay, this.maxDelay);
-
-  final Duration minDelay;
-  final Duration maxDelay;
-
-  VoidCallback? _closure;
-
-  Timer? _minTimer;
-  Timer? _maxTimer;
-
-  void invoke(VoidCallback closure) {
-    _closure = closure;
-
-    if (_minTimer == null) {
-      _minTimer = Timer(minDelay, _fire);
-      _maxTimer = Timer(maxDelay, _fire);
-    } else {
-      _minTimer!.cancel();
-      _minTimer = Timer(minDelay, _fire);
-    }
-  }
-
-  void _fire() {
-    _minTimer?.cancel();
-    _minTimer = null;
-
-    _maxTimer?.cancel();
-    _maxTimer = null;
-
-    _closure!();
-    _closure = null;
-  }
-}
-
 /// These utilities are ported from the Flutter IntelliJ plugin.
 ///
 /// With Dart's terser JSON support, these methods don't provide much value so
@@ -355,10 +212,9 @@ class JsonUtils {
   }
 }
 
-/// Add pretty print for a JSON payload.
-extension JsonMap on Map<String, Object?> {
-  String prettyPrint() => const JsonEncoder.withIndent('  ').convert(this);
-}
+/// Returns a pretty-printed representation of a JSON payload.
+String prettyPrintJson(Object? json) =>
+    const JsonEncoder.withIndent('  ').convert(json);
 
 typedef RateLimiterCallback = Future<void> Function();
 
@@ -574,80 +430,6 @@ double safeDivide(
   return ifNotFinite;
 }
 
-/// A change reporter that can be listened to.
-///
-/// Unlike [ChangeNotifier], [Reporter] stores listeners in a set.  This allows
-/// O(1) addition/removal of listeners and O(N) listener dispatch.
-///
-/// For small N (~ &lt;20), [ChangeNotifier] implementations can be faster because
-/// array access is more efficient than set access. Use [Reporter] instead in
-/// cases where N is larger.
-///
-/// When disposing, any object with a registered listener should `unregister`
-/// itself.
-///
-/// Only the object that created this reporter should call [notify].
-class Reporter implements Listenable {
-  final _listeners = <VoidCallback>{};
-
-  /// Adds [callback] to this reporter.
-  ///
-  /// If [callback] is already registered to this reporter, nothing will happen.
-  @override
-  void addListener(VoidCallback callback) {
-    _listeners.add(callback);
-  }
-
-  /// Removes the listener [callback].
-  @override
-  void removeListener(VoidCallback callback) {
-    _listeners.remove(callback);
-  }
-
-  /// Whether or not this object has any listeners registered.
-  bool get hasListeners => _listeners.isNotEmpty;
-
-  /// Notifies all listeners of a change.
-  ///
-  /// This does not do any change propagation, so if
-  /// a notification callback leads to a change in the listeners,
-  /// only the original listeners will be called.
-  void notify() {
-    for (final callback in _listeners.toList()) {
-      callback();
-    }
-  }
-
-  @override
-  String toString() => describeIdentity(this);
-}
-
-/// A [Reporter] that notifies when its [value] changes.
-///
-/// Similar to [ValueNotifier], but with the same performance
-/// benefits as [Reporter].
-///
-/// For small N (~ <20), [ValueNotifier] implementations can be faster because
-/// array access is more efficient than set access. Use [ValueReporter] instead
-/// in cases where N is larger.
-class ValueReporter<T> extends Reporter implements ValueListenable<T> {
-  ValueReporter(this._value);
-
-  @override
-  T get value => _value;
-
-  set value(T value) {
-    if (_value == value) return;
-    _value = value;
-    notify();
-  }
-
-  T _value;
-
-  @override
-  String toString() => '${describeIdentity(this)}($value)';
-}
-
 String toStringAsFixed(double num, [int fractionDigit = 1]) {
   return num.toStringAsFixed(fractionDigit);
 }
@@ -664,8 +446,10 @@ extension SafeListOperations<T> on List<T> {
 }
 
 extension SafeAccess<T> on Iterable<T> {
+  // ignore: unused-code, false positive "this getter is used but never assigned a value"
   T? get safeFirst => isNotEmpty ? first : null;
 
+  // ignore: unused-code, false positive "this getter is used but never assigned a value"
   T? get safeLast => isNotEmpty ? last : null;
 }
 
@@ -706,8 +490,6 @@ class LineRange {
   final int end;
 
   int get size => end - begin + 1;
-
-  bool contains(num target) => target >= begin && target <= end;
 
   @override
   String toString() => 'LineRange($begin, $end)';
@@ -760,80 +542,6 @@ class DebugTimingLogger {
     _timer!.start();
 
     _log.fine('[$name] $message');
-  }
-}
-
-/// Compute a simple moving average.
-/// [averagePeriod] default period is 50 units collected.
-/// [ratio] default percentage is 50% range is 0..1
-class MovingAverage {
-  MovingAverage({
-    this.averagePeriod = 50,
-    this.ratio = 0.5,
-    List<int>? newDataSet,
-  }) : assert(ratio >= 0 && ratio <= 1, 'Value ratio $ratio is not 0 to 1.') {
-    if (newDataSet != null) {
-      var initialDataSet = newDataSet;
-      final count = newDataSet.length;
-      if (count > averagePeriod) {
-        initialDataSet = newDataSet.sublist(count - averagePeriod);
-      }
-
-      dataSet.addAll(initialDataSet);
-      for (final value in dataSet) {
-        averageSum += value;
-      }
-    }
-  }
-
-  final dataSet = Queue<int>();
-
-  /// Total collected items in the X axis (time) used to compute moving average.
-  /// Default 100 periods for memory profiler 1-2 periods / seconds.
-  final int averagePeriod;
-
-  /// Ratio of first item in dataSet when comparing to last - mean
-  /// e.g., 2 is 50% (dataSet.first ~/ ratioSpike).
-  final double ratio;
-
-  /// Sum of total heap used and external heap for unitPeriod.
-  int averageSum = 0;
-
-  /// Reset moving average data.
-  void clear() {
-    dataSet.clear();
-    averageSum = 0;
-  }
-
-  // Update the sum to get a new mean.
-  void add(int value) {
-    averageSum += value;
-    dataSet.add(value);
-
-    // Update dataSet of values to not exceede the period of the moving average
-    // to compute the normal mean.
-    if (dataSet.length > averagePeriod) {
-      averageSum -= dataSet.removeFirst();
-    }
-  }
-
-  double get mean {
-    final periodRange = min(averagePeriod, dataSet.length);
-    return periodRange > 0 ? averageSum / periodRange : 0;
-  }
-
-  /// If the last - mean > ratioSpike% of first value in period we're spiking.
-  bool hasSpike() {
-    final first = dataSet.safeFirst ?? 0;
-    final last = dataSet.safeLast ?? 0;
-
-    return last - mean > (first * ratio);
-  }
-
-  /// If the mean @ ratioSpike% > last value in period we're dipping.
-  bool isDipping() {
-    final last = dataSet.safeLast ?? 0;
-    return (mean * ratio) > last;
   }
 }
 
@@ -1024,20 +732,6 @@ extension ListExtension<T> on List<T> {
   T get second => this[1];
 
   T get third => this[2];
-
-  T get fourth => this[3];
-
-  T get fifth => this[4];
-
-  List<int> allIndicesWhere(bool Function(T element) test) {
-    final indices = <int>[];
-    for (var i = 0; i < length; i++) {
-      if (test(this[i])) {
-        indices.add(i);
-      }
-    }
-    return indices;
-  }
 }
 
 extension NullableListExtension<T> on List<T>? {

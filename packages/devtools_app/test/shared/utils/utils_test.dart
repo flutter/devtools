@@ -212,6 +212,10 @@ void main() {
       );
     });
 
+    tearDown(() {
+      worker.dispose();
+    });
+
     test('0 length', () async {
       final result = await worker.doWork(0);
       expect(result, true);
