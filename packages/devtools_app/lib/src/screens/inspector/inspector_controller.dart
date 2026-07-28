@@ -31,6 +31,7 @@ import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
+import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/managers/notifications.dart';
 import '../../shared/primitives/query_parameters.dart';
@@ -38,6 +39,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/utils/utils.dart';
 import 'inspector_data_models.dart';
 import 'inspector_screen.dart';
+import 'inspector_screen_controller.dart';
 import 'inspector_tree_controller.dart';
 
 final _log = Logger('inspector_controller');
@@ -149,6 +151,21 @@ class InspectorController extends DisposableController
     }
   }
 
+  /// Returns the [InspectorScreenController] when it is registered.
+  ///
+  /// [InspectorController] is sometimes constructed in unit tests without an
+  /// [InspectorScreenController] registered, so callers that only need to clear
+  /// errors on connect/reload should use this nullable accessor.
+  InspectorScreenController? get _inspectorScreenControllerOrNull {
+    final controllers = globals[ScreenControllers] as ScreenControllers?;
+    if (controllers == null) return null;
+    if (!controllers.isRegistered<InspectorScreenController>()) return null;
+    return controllers.lookup<InspectorScreenController>();
+  }
+
+  InspectorScreenController get _inspectorScreenController =>
+      screenControllers.lookup<InspectorScreenController>();
+
   void _handleConnectionStart() {
     // Clear any existing badge/errors for older errors that were collected.
     // Do this in a post frame callback so that we are not trying to clear the
@@ -157,7 +174,7 @@ class InspectorController extends DisposableController
     // TODO(kenz): When this method is called outside  createState(), this post
     // frame callback can be removed.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      serviceConnection.errorBadgeManager.clearErrors(InspectorScreen.id);
+      _inspectorScreenControllerOrNull?.clearErrors();
     });
   }
 
@@ -467,7 +484,7 @@ class InspectorController extends DisposableController
     }
 
     if (event.kind == EventKind.kIsolateReload) {
-      serviceConnection.errorBadgeManager.clearErrors(InspectorScreen.id);
+      _inspectorScreenControllerOrNull?.clearErrors();
       _receivedIsolateReloadEvent = true;
     }
   }
@@ -952,9 +969,7 @@ class InspectorController extends DisposableController
   void _updateSelectedErrorFromNode(InspectorTreeNode? node) {
     final inspectorRef = node?.diagnostic?.valueRef.id;
 
-    final errors = serviceConnection.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
+    final errors = _inspectorScreenController.inspectorErrors.value;
 
     // Check whether the node that was just selected has any errors associated
     // with it.
@@ -970,10 +985,7 @@ class InspectorController extends DisposableController
     if (errorIndex != null) {
       // Marking an error as read will automatically update the badge count to
       // reflect the remaining unread errors.
-      serviceConnection.errorBadgeManager.markErrorAsRead(
-        InspectorScreen.id,
-        errors[inspectorRef!]!,
-      );
+      _inspectorScreenController.markErrorAsRead(errors[inspectorRef!]!);
     }
   }
 
@@ -981,9 +993,7 @@ class InspectorController extends DisposableController
   void selectErrorByIndex(int index) {
     _selectedErrorIndex.value = index;
 
-    final errors = serviceConnection.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
+    final errors = _inspectorScreenController.inspectorErrors.value;
 
     unawaited(
       updateSelectionFromService(inspectorRef: errors.keys.elementAt(index)),
