@@ -39,6 +39,8 @@ TODO: Remove this section if there are not any updates.
 
 * Prevent values from being garbage-collected, while being evaluated.
   [#9885](https://github.com/flutter/devtools/pull/9885)
+* Update to latest version of the Dart syntax highlighting grammar
+  [#9920](https://github.com/flutter/devtools/pull/9920).
 
 ## Network profiler updates
 
