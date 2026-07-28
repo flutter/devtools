@@ -124,7 +124,7 @@ enum ScreenMetaData {
     requiresConnection: false,
     requiresDartVm: true,
     requiresFlutter: true,
-    tutorialVideoUrl: 'https://www.youtube.com/watch?v=d7sZL6h1Elw',
+    tutorialVideoUrl: 'https://youtu.be/d7sZL6h1Elw',
   ),
   vmTools(
     'vm-tools',
