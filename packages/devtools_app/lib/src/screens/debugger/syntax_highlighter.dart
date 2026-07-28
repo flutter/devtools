@@ -247,9 +247,7 @@ class SyntaxHighlighter {
       'keyword.control.catch-exception.dart',
       'keyword.control.dart',
       'keyword.control.return.dart',
-      // While 'new' is not a control flow keyword, it uses the control flow
-      // color scheme so we include it here.
-      'keyword.control.new.dart',
+      'keyword.new.dart',
     ];
 
     const stringScopes = <String>[
