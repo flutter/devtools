@@ -65,9 +65,26 @@ class CustomContainer extends StatelessWidget {
   }
 }
 
-class CustomCenter extends Align {
-  const CustomCenter(
-      {super.key, super.widthFactor, super.heightFactor, super.child});
+class CustomCenter extends StatelessWidget {
+  const CustomCenter({
+    super.key,
+    this.widthFactor,
+    this.heightFactor,
+    this.child,
+  });
+
+  final double? widthFactor;
+  final double? heightFactor;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      widthFactor: widthFactor,
+      heightFactor: heightFactor,
+      child: child,
+    );
+  }
 }
 
 class CustomText extends StatelessWidget {
