@@ -18,6 +18,13 @@ analyzer:
     - '**/build/**'
     - '**.freezed.dart'
     - tool/flutter-sdk/
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:
@@ -167,8 +174,7 @@ dart_code_metrics:
       - lib/src/screens/inspector/**_controller.dart
       - lib/src/shared/diagnostics/inspector_service.dart
       - lib/src/shared/diagnostics/diagnostics_node.dart
-      
-      - lib/src/service/**
+
       - test/**
   rules:
 #    - arguments-ordering Too strict
