@@ -239,12 +239,15 @@ class DocumentationLink extends StatelessWidget {
 /// A widget that links to the "Dive in to DevTools" YouTube video at the
 /// chapter for the given [screenMetaData].
 class VideoTutorialLink extends StatelessWidget {
-  const VideoTutorialLink({
+  VideoTutorialLink({
     super.key,
     required this.screenMetaData,
     required this.screenWidth,
     required this.highlightForConnection,
-  });
+  }) : assert(
+         screenMetaData.tutorialVideoTimestamp != null ||
+             screenMetaData.tutorialVideoUrl != null,
+       );
 
   final ScreenMetaData screenMetaData;
 
@@ -263,7 +266,8 @@ class VideoTutorialLink extends StatelessWidget {
       icon: Icons.ondemand_video_rounded,
       link: GaLink(
         display: screenWidth <= MediaSize.xs ? 'Tutorial' : 'Watch tutorial',
-        url: screenMetaData.tutorialVideoUrl ??
+        url:
+            screenMetaData.tutorialVideoUrl ??
             '$_devToolsYouTubeVideoUrl${screenMetaData.tutorialVideoTimestamp}',
         gaScreenName: screenMetaData.id,
         gaSelectedItemDescription:
