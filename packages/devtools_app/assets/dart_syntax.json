@@ -1,6 +1,6 @@
 {
 	"name": "Dart",
-	"version": "1.4.1",
+	"version": "1.5.0",
 	"fileTypes": [
 		"dart"
 	],
@@ -59,6 +59,12 @@
 		},
 		{
 			"include": "#constants-and-special-vars"
+		},
+		{
+			"include": "#class-identifier-with-optional-factory-method"
+		},
+		{
+			"include": "#function-identifier"
 		},
 		{
 			"include": "#operators"
@@ -227,14 +233,50 @@
 				{
 					"name": "constant.numeric.dart",
 					"match": "(?<!\\$)\\b((0(x|X)[0-9a-fA-F][0-9a-fA-F_]*)|(([0-9][0-9_]*\\.?[0-9_]*)|(\\.[0-9][0-9_]*))((e|E)(\\+|-)?[0-9][0-9_]*)?)\\b(?!\\$)"
-				},
-				{
-					"include": "#class-identifier"
-				},
-				{
-					"include": "#function-identifier"
 				}
-
+			]
+		},
+		"class-identifier-with-optional-factory-method": {
+			"patterns": [
+				{
+					"match": "(?<!\\$)\\b(bool|num|int|double|dynamic)\\b(?!\\$)\\s*(factory\\b)?",
+					"captures": {
+						"1": {
+							"name": "support.class.dart"
+						},
+						"2": {
+							"name": "entity.name.function.dart"
+						}
+					}
+				},
+				{
+					"match": "(?<!\\$)\\b(void)\\b(?!\\$)\\s*(factory\\b)?",
+					"captures": {
+						"1": {
+							"name": "storage.type.primitive.dart"
+						},
+						"2": {
+							"name": "entity.name.function.dart"
+						}
+					}
+				},
+				{
+					"begin": "(?<![a-zA-Z0-9_$])([_$]*[A-Z][a-zA-Z0-9_$]*)\\b\\s*(factory\\b)?",
+					"end": "(?!<)",
+					"beginCaptures": {
+						"1": {
+							"name": "support.class.dart"
+						},
+						"2": {
+							"name": "entity.name.function.dart"
+						}
+					},
+					"patterns": [
+						{
+							"include": "#type-args"
+						}
+					]
+				}
 			]
 		},
 		"class-identifier": {
@@ -279,6 +321,10 @@
 							]
 						}
 					}
+				},
+				{
+					"match": "(?<=\\.)new\\b",
+					"name": "entity.name.function.dart"
 				}
 			]
 		},
@@ -334,8 +380,8 @@
 					"match": "(?<!\\$)\\bassert\\b(?!\\$)"
 				},
 				{
-					"name": "keyword.control.new.dart",
-					"match": "(?<!\\$)\\b(new)\\b(?!\\$)"
+					"name": "keyword.new.dart",
+					"match": "(?<![\\$\\.])\\b(new)\\b(?!\\$)"
 				},
 				{
 					"name": "keyword.control.return.dart",
@@ -351,7 +397,7 @@
 				},
 				{
 					"name": "storage.type.primitive.dart",
-					"match": "(?<!\\$)\\b(?:void|var)\\b(?!\\$)"
+					"match": "(?<!\\$)\\b(?:var)\\b(?!\\$)"
 				}
 			]
 		},
@@ -407,6 +453,12 @@
 			"patterns": [
 				{
 					"include": "#constants-and-special-vars"
+				},
+				{
+					"include": "#class-identifier-with-optional-factory-method"
+				},
+				{
+					"include": "#function-identifier"
 				},
 				{
 					"include": "#strings"

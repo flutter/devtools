@@ -410,7 +410,7 @@
 >  var a = new String.fromCharCode(1);
 #  ^^^ storage.type.primitive.dart
 #        ^ keyword.operator.assignment.dart
-#          ^^^ keyword.control.new.dart
+#          ^^^ keyword.new.dart
 #              ^^^^^^ support.class.dart
 #                    ^ punctuation.dot.dart
 #                     ^^^^^^^^^^^^ entity.name.function.dart
