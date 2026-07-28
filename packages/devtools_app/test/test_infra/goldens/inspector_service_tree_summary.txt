@@ -7,11 +7,10 @@
            └─Padding
              └─Container
                └─CustomCenter
-                 └─Align
-                   └─CustomButton
-                     └─GestureDetector
-                       └─CustomContainer
-                         └─Padding
-                           └─Container
-                             └─CustomText
-                               └─Text
+                 └─CustomButton
+                   └─GestureDetector
+                     └─CustomContainer
+                       └─Padding
+                         └─Container
+                           └─CustomText
+                             └─Text
