@@ -15,7 +15,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed an issue with `dt sync` when Flutter on PATH is a symlink. [#9924](https://github.com/flutter/devtools/pull/9924)
 
 ## Inspector updates
 
