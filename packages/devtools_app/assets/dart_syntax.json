@@ -1,6 +1,6 @@
 {
 	"name": "Dart",
-	"version": "1.5.0",
+	"version": "1.6.0",
 	"fileTypes": [
 		"dart"
 	],
@@ -77,12 +77,12 @@
 	"repository": {
 		"dartdoc-codeblock-triple": {
 			"begin": "^\\s*///\\s*(?!\\s*```)",
-			"end": "\n",
+			"end": "$",
 			"contentName": "variable.other.source.dart"
 		},
 		"dartdoc-codeblock-block": {
 			"begin": "^\\s*\\*\\s*(?!(\\s*```|\/))",
-			"end": "\n",
+			"end": "$",
 			"contentName": "variable.other.source.dart"
 		},
 		"dartdoc": {
