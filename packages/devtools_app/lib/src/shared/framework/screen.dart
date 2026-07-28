@@ -27,6 +27,8 @@ const _kNetworkDisconnectExperience = bool.fromEnvironment(
   defaultValue: true,
 );
 
+const _deepLinksTutorialVideoUrl = 'https://youtu.be/d7sZL6h1Elw';
+
 enum ScreenMetaData {
   home(
     'home',
@@ -124,7 +126,7 @@ enum ScreenMetaData {
     requiresConnection: false,
     requiresDartVm: true,
     requiresFlutter: true,
-    tutorialVideoUrl: 'https://youtu.be/d7sZL6h1Elw',
+    tutorialVideoUrl: _deepLinksTutorialVideoUrl,
   ),
   vmTools(
     'vm-tools',
