@@ -35,7 +35,7 @@ void _copyDirectorySync(Directory source, Directory destination) {
   if (!destination.existsSync()) {
     destination.createSync(recursive: true);
   }
-  for (final entity in source.listSync(recursive: false)) {
+  for (final entity in source.listSync()) {
     final newPath = p.join(destination.path, p.basename(entity.path));
     if (entity is Directory) {
       _copyDirectorySync(entity, Directory(newPath));
