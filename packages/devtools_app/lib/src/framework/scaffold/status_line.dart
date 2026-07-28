@@ -90,7 +90,9 @@ class StatusLine extends StatelessWidget {
     final pageStatus = currentScreen.buildStatus(context);
     final widerThanXxs = screenWidth > MediaSize.xxs;
     final screenMetaData = ScreenMetaData.lookup(currentScreen.screenId);
-    final showVideoTutorial = screenMetaData?.tutorialVideoTimestamp != null;
+    final showVideoTutorial =
+        screenMetaData?.tutorialVideoTimestamp != null ||
+        screenMetaData?.tutorialVideoUrl != null;
     return [
       Row(
         mainAxisSize: MainAxisSize.min,
@@ -261,7 +263,7 @@ class VideoTutorialLink extends StatelessWidget {
       icon: Icons.ondemand_video_rounded,
       link: GaLink(
         display: screenWidth <= MediaSize.xs ? 'Tutorial' : 'Watch tutorial',
-        url:
+        url: screenMetaData.tutorialVideoUrl ??
             '$_devToolsYouTubeVideoUrl${screenMetaData.tutorialVideoTimestamp}',
         gaScreenName: screenMetaData.id,
         gaSelectedItemDescription:
