@@ -54,6 +54,7 @@ class PaintCharacteristics {
 
   /// If specified Y scale is computed and min value is fixed.
   /// Will assert if new data point is less than min specified.
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9910) seems like a bug.
   double? fixedMinY;
 
   /// If specified Y scale is computed and max value is fixed.
@@ -88,11 +89,7 @@ class PaintCharacteristics {
 }
 
 class Trace {
-  Trace(this.controller, this._chartType, this.characteristics) {
-    final minY = characteristics.fixedMinY ?? 0.0;
-    final maxY = characteristics.fixedMaxY ?? 0.0;
-    yAxis = AxisScale(minY, maxY, 30);
-  }
+  Trace(this.controller, this._chartType, this.characteristics);
 
   final ChartController controller;
 
@@ -113,6 +110,7 @@ class Trace {
   /// -------------------------------
   late bool stacked;
 
+  // ignore: unused-code, false positive used in asserts.
   String? name;
 
   double dataYMax = 0;
@@ -155,8 +153,6 @@ class Trace {
 
   ChartType get chartType => _chartType;
 
-  AxisScale? yAxis;
-
   void clearData() {
     _data.clear();
     controller.dirty = true;
@@ -173,7 +169,6 @@ class Trace {
       );
     } else if (datum.y > dataYMax) {
       dataYMax = datum.y.toDouble();
-      yAxis = AxisScale(0, dataYMax, 30);
     }
 
     if (datum.y > controller.yMaxValue) {
@@ -298,7 +293,6 @@ class AxisScale {
       fraction = 0;
     }
     return AxisScale._(
-      minPoint: minPoint,
       maxPoint: maxPoint,
       maxTicks: maxTicks,
       tickSpacing: tickSpacing,
@@ -308,7 +302,6 @@ class AxisScale {
   }
 
   AxisScale._({
-    required this.minPoint,
     required this.maxPoint,
     required this.maxTicks,
     required this.tickSpacing,
@@ -316,8 +309,10 @@ class AxisScale {
     required this.labelTicks,
   });
 
-  final double minPoint, maxPoint;
+  @visibleForTesting
+  final double maxPoint;
 
+  @visibleForTesting
   final double maxTicks;
 
   final double tickSpacing;

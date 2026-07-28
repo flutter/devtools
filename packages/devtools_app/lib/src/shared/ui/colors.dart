@@ -12,18 +12,7 @@ import 'utils.dart';
 
 const mainUiColor = Color(0xFF88B1DE);
 const mainRasterColor = Color(0xFF2C5DAA);
-const mainUnknownColor = Color(0xFFCAB8E9);
 const mainAsyncColor = Color(0xFF80CBC4);
-
-final uiColorPalette = [
-  const ColorPair(background: mainUiColor, foreground: Colors.black),
-  const ColorPair(background: Color(0xFF6793CD), foreground: Colors.black),
-];
-
-final rasterColorPalette = [
-  const ColorPair(background: mainRasterColor, foreground: Colors.white),
-  const ColorPair(background: Color(0xFF386EB6), foreground: Colors.white),
-];
 
 // TODO(jacobr): merge this with other color scheme extensions.
 extension FlameChartColorScheme on ColorScheme {
@@ -33,18 +22,6 @@ extension FlameChartColorScheme on ColorScheme {
   Color get treeGuidelineColor =>
       isLight ? Colors.black54 : const Color.fromARGB(255, 200, 200, 200);
 }
-
-// Teal 200, 400 - see https://material.io/design/color/#tools-for-picking-colors.
-const asyncColorPalette = [
-  ColorPair(background: mainAsyncColor, foreground: Colors.black),
-  ColorPair(background: Color(0xFF26A69A), foreground: Colors.black),
-];
-
-// Slight variation on Deep purple 100, 300 - see https://material.io/design/color/#tools-for-picking-colors.
-const unknownColorPalette = [
-  ColorPair(background: mainUnknownColor, foreground: Colors.black),
-  ColorPair(background: Color(0xFF9D84CA), foreground: Colors.black),
-];
 
 const uiJankColor = Color(0xFFF5846B);
 const rasterJankColor = Color(0xFFC3595A);
@@ -111,7 +88,6 @@ extension DevToolsColorExtension on ColorScheme {
   Color get grey => const Color.fromARGB(255, 128, 128, 128);
   Color get green =>
       isLight ? const Color(0xFF006B5F) : const Color(0xFF54DBC8);
-  Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
   // Deep link header is slightly darker than the default surface color. See
   // comment at: https://github.com/flutter/devtools/pull/7443/files#r1538361768
   Color get deeplinkTableHeaderColor => surface.darken();

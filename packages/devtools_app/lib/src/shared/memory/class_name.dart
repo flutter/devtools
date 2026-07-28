@@ -143,6 +143,7 @@ class HeapClassName with Serializable {
 
   /// Whether a class can hold a reference to an object
   /// without preventing garbage collection.
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907) false positive.
   late final isWeak = _isWeak(className, library);
 
   /// See [isWeak].

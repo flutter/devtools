@@ -93,6 +93,7 @@ extension FeatureFlags on Never {
   static final _flutterChannelFlags = <FlutterChannelFeatureFlag>{};
 
   /// A helper to print the status of all the feature flags.
+  // ignore: unused-code, debug only method to be used as needed.
   static void debugPrintFeatureFlags({ConnectedApp? connectedApp}) {
     for (final entry in _booleanFlags) {
       _log.config(entry.toString());
@@ -141,6 +142,7 @@ class BooleanFeatureFlag {
 /// TODO(https://github.com/flutter/devtools/issues/9439): Restrict features
 /// based on the user's Dart version instead of Flutter version to allow for
 /// shared experiments across Dart and Flutter.
+// ignore: unused-code, we want to support this type of feature flag.
 class FlutterChannelFeatureFlag {
   const FlutterChannelFeatureFlag({
     required this.name,

@@ -8,7 +8,6 @@ library;
 import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
@@ -33,9 +32,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     this.artificialValue = false,
     this.isRerootable = false,
   }) : _offset = offset,
-       _childCount = childCount {
-    indentChildren = ref?.diagnostic?.style != DiagnosticsTreeStyle.flat;
-  }
+       _childCount = childCount;
 
   /// Creates a variable from a value that must be an VM service type or a
   /// primitive type.

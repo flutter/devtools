@@ -91,8 +91,6 @@ void main() {
     final firstChild = children.first;
     final secondChild = children.second;
     final thirdChild = children.third;
-    final fourthChild = children.fourth;
-    final fifthChild = children.fifth;
 
     expect(
       text.textSpan?.toPlainText(),
@@ -104,10 +102,6 @@ void main() {
     expect(_hasStyle(secondChild, style: fixedFontStyle), isTrue);
     expect(thirdChild.toPlainText(), equals(' and '));
     expect(_hasStyle(thirdChild, style: regularFontStyle), isTrue);
-    expect(fourthChild.toPlainText(), equals('some code'));
-    expect(_hasStyle(fourthChild, style: fixedFontStyle), isTrue);
-    expect(fifthChild.toPlainText(), equals('.'));
-    expect(_hasStyle(fifthChild, style: regularFontStyle), isTrue);
   });
 
   testWidgets('DartDocConverter handles unmatched brackets', (

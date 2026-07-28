@@ -139,7 +139,6 @@ abstract class Field {
   static const isEditable = 'isEditable';
   static const isNullable = 'isNullable';
   static const isRequired = 'isRequired';
-  static const kind = 'kind';
   static const line = 'line';
   static const name = 'name';
   static const options = 'options';

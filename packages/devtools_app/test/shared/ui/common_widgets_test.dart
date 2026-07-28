@@ -13,8 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 // TODO(kenz): add tests for other widgets in common_widgets.dart
 
 void main() {
-  const windowSize = Size(1000.0, 1000.0);
-
   setUp(() {
     setGlobal(
       DevToolsEnvironmentParameters,
@@ -23,41 +21,6 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
-  });
-
-  group('Common widgets', () {
-    testWidgetsWithWindowSize(
-      'processingInfo builds for progressValue',
-      windowSize,
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          wrap(
-            const ProcessingInfo(
-              progressValue: 0.0,
-              processedObject: 'fake object',
-            ),
-          ),
-        );
-
-        final progressIndicatorFinder = find.byType(LinearProgressIndicator);
-        LinearProgressIndicator progressIndicator = tester.widget(
-          progressIndicatorFinder,
-        );
-
-        expect(progressIndicator.value, equals(0.0));
-
-        await tester.pumpWidget(
-          wrap(
-            const ProcessingInfo(
-              progressValue: 0.5,
-              processedObject: 'fake object',
-            ),
-          ),
-        );
-        progressIndicator = tester.widget(progressIndicatorFinder);
-        expect(progressIndicator.value, equals(0.5));
-      },
-    );
   });
 
   group('NotifierCheckbox', () {

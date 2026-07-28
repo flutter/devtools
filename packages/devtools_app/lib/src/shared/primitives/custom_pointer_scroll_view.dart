@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 // ignore_for_file: avoid-explicit-type-declaration, forked code from Flutter framework.
+// ignore_for_file: unused-code, forked code from Flutter framework.
 
 import 'dart:async';
 import 'dart:math' as math;

@@ -283,6 +283,7 @@ final class ScreenSize {
 
   ScreenSize._({required this.height, required this.width});
 
+  // ignore: unused-code, fundamental part of this class.
   final MediaSize height;
   final MediaSize width;
 

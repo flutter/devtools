@@ -43,8 +43,6 @@ bool get isAnalyticsEnabled =>
 /// Whether the analytics controller has been initialized.
 bool get isAnalyticsControllerInitialized => _analyticsController != null;
 
-typedef AsyncAnalyticsCallback = FutureOr<void> Function();
-
 class AnalyticsController {
   AnalyticsController({
     required bool enabled,
@@ -67,6 +65,7 @@ class AnalyticsController {
   ValueListenable<bool> get shouldPrompt => _shouldPrompt;
   final ValueNotifier<bool> _shouldPrompt;
 
+  @visibleForTesting
   bool get analyticsInitialized => _analyticsInitialized;
   bool _analyticsInitialized = false;
 

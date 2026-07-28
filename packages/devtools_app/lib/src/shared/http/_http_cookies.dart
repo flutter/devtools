@@ -21,7 +21,6 @@ class Cookie {
   String? _name;
   String? _value;
   DateTime? expires;
-  int? maxAge;
   String? domain;
   String? path;
   bool httpOnly = false;
@@ -29,16 +28,6 @@ class Cookie {
 
   String? get name => _name;
   String? get value => _value;
-
-  set name(String? newName) {
-    _validateName(newName);
-    _name = newName;
-  }
-
-  set value(String? newValue) {
-    _validateValue(newValue);
-    _value = newValue;
-  }
 
   Cookie.fromSetCookieValue(String value) {
     // Parse the 'set-cookie' header value.
@@ -105,8 +94,6 @@ class Cookie {
         }
         if (name == "expires") {
           expires = HttpDate._parseCookieDate(value);
-        } else if (name == "max-age") {
-          maxAge = int.parse(value);
         } else if (name == "domain") {
           domain = value;
         } else if (name == "path") {

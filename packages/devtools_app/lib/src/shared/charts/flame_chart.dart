@@ -17,7 +17,6 @@ import '../primitives/extent_delegate_list.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../ui/colors.dart';
 import '../ui/common_widgets.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
@@ -60,16 +59,8 @@ abstract class FlameChart<T, V> extends StatefulWidget {
   });
 
   static const minZoomLevel = 1.0;
-  static const zoomMultiplier = 0.01;
   static const minScrollOffset = 0.0;
   static const rowOffsetForBottomPadding = 1;
-  static const rowOffsetForSectionSpacer = 1;
-
-  /// Maximum scroll delta allowed for scroll wheel based zooming.
-  ///
-  /// This isn't really needed but is a reasonable for safety in case we
-  /// aren't handling some mouse based scroll wheel behavior well, etc.
-  static const maxScrollWheelDelta = 20.0;
 
   final T data;
 
@@ -103,7 +94,7 @@ abstract class FlameChartState<
   V extends FlameChartDataMixin<V>
 >
     extends State<T>
-    with AutoDisposeMixin, FlameChartColorMixin, TickerProviderStateMixin {
+    with AutoDisposeMixin, TickerProviderStateMixin {
   int get rowOffsetForTopPadding => 2;
 
   // The "top" positional value for each flame chart node will be 0.0 because
@@ -111,8 +102,6 @@ abstract class FlameChartState<
   final flameChartNodeTop = 0.0;
 
   final rows = <FlameChartRow<V>>[];
-
-  final sections = <FlameChartSection>[];
 
   // ignore: dispose-fields, false positive. Disposed via autoDisposeFocusNode.
   final focusNode = FocusNode(debugLabel: 'flame-chart');
@@ -157,31 +146,6 @@ abstract class FlameChartState<
 
   double get widthWithZoom =>
       contentWidthWithZoom + widget.startInset + widget.endInset;
-
-  TimeRange get visibleTimeRange {
-    final horizontalScrollOffset = horizontalControllerGroup.offset;
-    final startMicros = horizontalScrollOffset < widget.startInset
-        ? startTimeOffset
-        : startTimeOffset +
-              (horizontalScrollOffset - widget.startInset) /
-                  currentZoom /
-                  startingPxPerMicro;
-
-    final endMicros =
-        startTimeOffset +
-        (horizontalScrollOffset - widget.startInset + widget.containerWidth) /
-            currentZoom /
-            startingPxPerMicro;
-
-    return TimeRange(start: startMicros.round(), end: endMicros.round());
-  }
-
-  /// Starting pixels per microsecond in order to fit all the data in view at
-  /// start.
-  double get startingPxPerMicro =>
-      widget.startingContentWidth / widget.time.duration.inMicroseconds;
-
-  int get startTimeOffset => widget.time.start;
 
   double get maxZoomLevel {
     // The max zoom level is hit when 1 microsecond is the width of each grid
@@ -371,13 +335,12 @@ abstract class FlameChartState<
   @mustCallSuper
   void initFlameChartElements() {
     rows.clear();
-    sections.clear();
   }
 
   void expandRows(int newRowLength) {
     final currentLength = rows.length;
     for (int i = currentLength; i < newRowLength; i++) {
-      rows.add(FlameChartRow<V>(i));
+      rows.add(FlameChartRow<V>());
     }
   }
 
@@ -583,46 +546,6 @@ abstract class FlameChartState<
     await scrollToX(offset);
   }
 
-  Future<void> zoomAndScrollToData({
-    required int startMicros,
-    required int durationMicros,
-    required V data,
-    bool scrollVertically = true,
-    bool jumpZoom = false,
-  }) async {
-    await zoomToTimeRange(
-      startMicros: startMicros,
-      durationMicros: durationMicros,
-      jump: jumpZoom,
-    );
-    // Call these in a post frame callback so that the scroll controllers have
-    // had time to update their scroll extents. Otherwise, we can hit a race
-    // where are trying to scroll to an offset that is beyond what the scroll
-    // controller thinks its max scroll extent is.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        unawaited(scrollHorizontallyToData(data));
-        if (scrollVertically) unawaited(scrollVerticallyToData(data));
-      }
-    });
-  }
-
-  Future<void> zoomToTimeRange({
-    required int startMicros,
-    required int durationMicros,
-    double? targetWidth,
-    bool jump = false,
-  }) async {
-    targetWidth ??= widget.containerWidth * 0.8;
-    final startingWidth = durationMicros * startingPxPerMicro;
-    final zoom = targetWidth / startingWidth;
-    final mouseXForZoom =
-        (startMicros - startTimeOffset + durationMicros / 2) *
-            startingPxPerMicro +
-        widget.startInset;
-    await zoomTo(zoom, forceMouseX: mouseXForZoom, jump: jump);
-  }
-
   bool isDataVerticallyInView(V data);
 
   bool isDataHorizontallyInView(V data);
@@ -699,9 +622,6 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
         chartStartInset: widget.startInset,
         chartWidth: widget.width,
       ),
-      zoom: widget.zoom,
-      chartStartInset: widget.startInset,
-      chartWidth: widget.width,
     );
 
     _initNodeDataList();
@@ -751,9 +671,6 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
           chartStartInset: widget.startInset,
           chartWidth: widget.width,
         ),
-        zoom: widget.zoom,
-        chartStartInset: widget.startInset,
-        chartWidth: widget.width,
       );
     }
     _resetHovered();
@@ -979,24 +896,8 @@ extension FlameChartUtils on Never {
   }
 }
 
-class FlameChartSection {
-  FlameChartSection(this.index, {required this.startRow, required this.endRow});
-
-  final int index;
-
-  /// Start row (inclusive) for this section.
-  final int startRow;
-
-  /// End row (exclusive) for this section.
-  final int endRow;
-}
-
 class FlameChartRow<T extends FlameChartDataMixin<T>> {
-  FlameChartRow(this.index);
-
   final nodes = <FlameChartNode<T>>[];
-
-  final int index;
 
   /// Adds a node to [nodes] and assigns `this` to the node's `row` property.
   ///
@@ -1008,7 +909,6 @@ class FlameChartRow<T extends FlameChartDataMixin<T>> {
     } else {
       nodes.add(node);
     }
-    node.row = this;
   }
 }
 
@@ -1045,8 +945,6 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
   final T data;
   final void Function(T) onSelected;
   final bool selectable;
-
-  late FlameChartRow row;
 
   int sectionIndex;
 
@@ -1150,54 +1048,17 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
   }
 }
 
-mixin FlameChartColorMixin {
-  ColorPair nextUiColor(int row) {
-    return uiColorPalette[row % uiColorPalette.length];
-  }
-
-  ColorPair nextRasterColor(int row) {
-    return rasterColorPalette[row % rasterColorPalette.length];
-  }
-
-  ColorPair nextAsyncColor(int row) {
-    return asyncColorPalette[row % asyncColorPalette.length];
-  }
-
-  ColorPair nextUnknownColor(int row) {
-    return unknownColorPalette[row % unknownColorPalette.length];
-  }
-}
-
 /// [ExtentDelegate] implementation for the case where size and position is
 /// known for each list item.
 class _ScrollingFlameChartRowExtentDelegate extends ExtentDelegate {
-  _ScrollingFlameChartRowExtentDelegate({
-    required this.nodeIntervals,
-    required this.zoom,
-    required this.chartStartInset,
-    required this.chartWidth,
-  }) {
+  _ScrollingFlameChartRowExtentDelegate({required this.nodeIntervals}) {
     recompute();
   }
 
   List<Range> nodeIntervals = [];
 
-  double zoom;
-
-  double chartStartInset;
-
-  double chartWidth;
-
-  void recomputeWith({
-    required List<Range> nodeIntervals,
-    required double zoom,
-    required double chartStartInset,
-    required double chartWidth,
-  }) {
+  void recomputeWith({required List<Range> nodeIntervals}) {
     this.nodeIntervals = nodeIntervals;
-    this.zoom = zoom;
-    this.chartStartInset = chartStartInset;
-    this.chartWidth = chartWidth;
     recompute();
   }
 
