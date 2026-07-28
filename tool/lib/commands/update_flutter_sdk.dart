@@ -65,7 +65,7 @@ class UpdateFlutterSdkCommand extends Command {
       log.stdout('Updating Flutter from PATH at ${pathSdk.sdkPath}');
 
       // Verify we have an upstream remote to pull from.
-      final remote = await findRemote(
+      await findRemote(
         processManager,
         remoteId: 'flutter/flutter.git',
         workingDirectory: pathSdk.sdkPath,
@@ -74,9 +74,9 @@ class UpdateFlutterSdkCommand extends Command {
       await processManager.runAll(
         commands: [
           CliCommand.git(['stash']),
-          CliCommand.git(['fetch', remote]),
-          CliCommand.git(['checkout', '$remote/master']),
-          CliCommand.git(['reset', '--hard', '$remote/master']),
+          CliCommand.git(['fetch', 'upstream']),
+          CliCommand.git(['checkout', 'upstream/master']),
+          CliCommand.git(['reset', '--hard', 'upstream/master']),
           CliCommand.git(['checkout', flutterVersion, '-f']),
           CliCommand.flutter(['--version']),
         ],
