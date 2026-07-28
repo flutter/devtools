@@ -243,10 +243,10 @@ class FlutterSdk {
 
   static FlutterSdk findFromPath(String sdkPath) {
     var resolvedPath = sdkPath;
-    if (File(sdkPath).existsSync() ||
-        Link(sdkPath).existsSync() ||
-        Directory(sdkPath).existsSync()) {
+    try {
       resolvedPath = File(sdkPath).resolveSymbolicLinksSync();
+    } catch (_) {
+      // Fallback to the unresolved path if resolution fails.
     }
 
     if (path.basename(path.dirname(resolvedPath)) == 'bin') {

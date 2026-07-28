@@ -48,5 +48,12 @@ void main() {
       final sdk = FlutterSdk.findFromPath(tempDir.path);
       expect(sdk.sdkPath, equals(tempDir.resolveSymbolicLinksSync()));
     });
+
+    test('throws Exception when unable to locate Flutter SDK', () {
+      expect(
+        () => FlutterSdk.findFromPath('/non/existent/path/to/flutter'),
+        throwsA(isA<Exception>()),
+      );
+    });
   });
 }
