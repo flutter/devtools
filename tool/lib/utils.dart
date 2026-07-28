@@ -268,7 +268,7 @@ Future<String> findRemote(
     );
   }
   final remoteUpstream = upstreamRemoteResult.namedGroup('remote')!;
-  print('Found remote "$remoteUpstream".');
+  print('Found upstream remote.');
   return remoteUpstream;
 }
 
