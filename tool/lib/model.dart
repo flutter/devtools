@@ -242,8 +242,19 @@ class FlutterSdk {
   }
 
   static FlutterSdk findFromPath(String sdkPath) {
-    if (path.basename(path.dirname(sdkPath)) == 'bin') {
-      return FlutterSdk._(path.dirname(path.dirname(sdkPath)));
+    var resolvedPath = sdkPath;
+    if (File(sdkPath).existsSync() ||
+        Link(sdkPath).existsSync() ||
+        Directory(sdkPath).existsSync()) {
+      resolvedPath = File(sdkPath).resolveSymbolicLinksSync();
+    }
+
+    if (path.basename(path.dirname(resolvedPath)) == 'bin') {
+      return FlutterSdk._(path.dirname(path.dirname(resolvedPath)));
+    } else if (path.basename(resolvedPath) == 'bin') {
+      return FlutterSdk._(path.dirname(resolvedPath));
+    } else if (Directory(path.join(resolvedPath, 'bin')).existsSync()) {
+      return FlutterSdk._(resolvedPath);
     }
 
     throw Exception('Unable to locate the Flutter SDK at "$sdkPath"');
@@ -258,10 +269,7 @@ class FlutterSdk {
     final result = Process.runSync(whichCommand, ['flutter']);
     if (result.exitCode == 0) {
       final sdkPath = result.stdout.toString().split('\n').first.trim();
-      // 'flutter/bin'
-      if (path.basename(path.dirname(sdkPath)) == 'bin') {
-        return FlutterSdk._(path.dirname(path.dirname(sdkPath)));
-      }
+      return findFromPath(sdkPath);
     }
 
     throw Exception('Unable to locate the Flutter SDK on PATH');
