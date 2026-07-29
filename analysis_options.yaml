@@ -172,7 +172,6 @@ dart_code_metrics:
       # excludes as findings are resolved.
       # Investigate internal usages of inspector logic before removing.
       - lib/src/screens/inspector/**_controller.dart
-      - lib/src/shared/diagnostics/inspector_service.dart
       - lib/src/shared/diagnostics/diagnostics_node.dart
       # This fixture has unused code for testing the debugger.
       - test/test_infra/fixtures/flutter_app/**
