@@ -31,39 +31,19 @@ import '../../test_infra/matchers/matchers.dart';
 // reduced to under 1 second without introducing flakes.
 const inspectorChangeSettleTime = Duration(seconds: 2);
 
-void _copyDirectorySync(Directory source, Directory destination) {
-  if (!destination.existsSync()) {
-    destination.createSync(recursive: true);
-  }
-  for (final entity in source.listSync()) {
-    final newPath = p.join(destination.path, p.basename(entity.path));
-    if (entity is Directory) {
-      _copyDirectorySync(entity, Directory(newPath));
-    } else if (entity is File) {
-      entity.copySync(newPath);
-    }
-  }
-}
-
 void main() {
   // We need to use real async in this test so we need to use this binding.
   initializeLiveTestWidgetsFlutterBindingWithAssets();
   const windowSize = Size(2600.0, 1200.0);
 
-  // We copy the fixture app to a temporary directory because the
-  // auto-refresh tests modify lib/main.dart in-place. If this used the shared
-  // 'inspector_app' fixture, it could cause flaky test failures in other tests
-  // (like inspector_service_test.dart) that run in parallel.
-  final tempAppDir =
-      'test/test_infra/fixtures/inspector_app_temp_${DateTime.now().millisecondsSinceEpoch}';
-  _copyDirectorySync(
-    Directory('test/test_infra/fixtures/inspector_app'),
-    Directory(tempAppDir),
-  );
-
+  // The auto-refresh tests modify lib/main.dart in-place.
+  // We use `useTempDirectory: true` to copy the fixture app to a temporary
+  // directory. This prevents flaky test failures in other tests (like
+  // inspector_service_test.dart) that run in parallel.
   final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
-    testAppDirectory: tempAppDir,
+    testAppDirectory: 'test/test_infra/fixtures/inspector_app',
+    useTempDirectory: true,
   );
 
   env.afterEverySetup = () async {
@@ -92,10 +72,6 @@ void main() {
 
   tearDownAll(() {
     env.finalTeardown();
-    final dir = Directory(tempAppDir);
-    if (dir.existsSync()) {
-      dir.deleteSync(recursive: true);
-    }
   });
 
   group('screenshot tests', () {

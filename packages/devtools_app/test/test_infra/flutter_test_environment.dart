@@ -34,9 +34,10 @@ class FlutterTestEnvironment {
        _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
        _flutterExe = _parseFlutterExeFromEnv() {
     if (useTempDirectory) {
-      final tempDirectory = Directory.systemTemp.createTempSync(
-        'flutter_test_temp',
-      );
+      final parentDir = p.dirname(testAppDirectory);
+      final tempDirectory = Directory(
+        parentDir,
+      ).createTempSync('flutter_test_temp_');
       _tempTestAppDirectory = tempDirectory.path;
       _copyToTempDirectory(testAppDirectory, tempDirectory);
     }
