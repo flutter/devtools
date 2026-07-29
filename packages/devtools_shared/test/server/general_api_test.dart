@@ -157,8 +157,6 @@ void main() {
         setUp(() async {
           app = TestDartApp();
           vmServiceUriString = await app!.start();
-          // Await a short delay to give the VM a chance to initialize.
-          await delay(duration: const Duration(milliseconds: 2500));
           expect(vmServiceUriString, isNotEmpty);
         });
 
@@ -171,13 +169,21 @@ void main() {
         test('succeeds for a connect event', () async {
           final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
           expect(vmServiceUri, isNotNull);
-          final response =
-              await server.VmServiceHandler.detectRootPackageForVmService(
-                vmServiceUriAsString: vmServiceUriString!,
-                vmServiceUri: vmServiceUri!,
-                connected: true,
-                dtd: testDtdConnection!,
-              );
+          late server.DetectRootPackageResponse response;
+          await runWithRetry(
+            callback: () async {
+              response =
+                  await server.VmServiceHandler.detectRootPackageForVmService(
+                    vmServiceUriAsString: vmServiceUriString!,
+                    vmServiceUri: vmServiceUri!,
+                    connected: true,
+                    dtd: testDtdConnection!,
+                  );
+              if (!response.success) throw Exception('VM not ready');
+            },
+            maxRetries: 20,
+            retryDelay: const Duration(milliseconds: 500),
+          );
           expect(response.success, true);
           expect(response.message, isNull);
           expect(response.uri, isNotNull);
@@ -200,13 +206,21 @@ void main() {
           () async {
             final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
             expect(vmServiceUri, isNotNull);
-            final response =
-                await server.VmServiceHandler.detectRootPackageForVmService(
-                  vmServiceUriAsString: vmServiceUriString!,
-                  vmServiceUri: vmServiceUri!,
-                  connected: true,
-                  dtd: testDtdConnection!,
-                );
+            late server.DetectRootPackageResponse response;
+            await runWithRetry(
+              callback: () async {
+                response =
+                    await server.VmServiceHandler.detectRootPackageForVmService(
+                      vmServiceUriAsString: vmServiceUriString!,
+                      vmServiceUri: vmServiceUri!,
+                      connected: true,
+                      dtd: testDtdConnection!,
+                    );
+                if (!response.success) throw Exception('VM not ready');
+              },
+              maxRetries: 20,
+              retryDelay: const Duration(milliseconds: 500),
+            );
             expect(response.success, true);
             expect(response.message, isNull);
             expect(response.uri, isNotNull);
@@ -215,7 +229,7 @@ void main() {
             final disconnectResponse =
                 await server.VmServiceHandler.detectRootPackageForVmService(
                   vmServiceUriAsString: vmServiceUriString!,
-                  vmServiceUri: vmServiceUri,
+                  vmServiceUri: vmServiceUri!,
                   connected: false,
                   dtd: testDtdConnection!,
                 );
