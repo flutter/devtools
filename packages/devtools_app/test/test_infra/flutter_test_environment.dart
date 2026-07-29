@@ -35,9 +35,9 @@ class FlutterTestEnvironment {
        _flutterExe = _parseFlutterExeFromEnv() {
     if (useTempDirectory) {
       final parentDir = p.dirname(testAppDirectory);
-      final tempDirectory = Directory(parentDir).createTempSync(
-        'flutter_test_temp_',
-      );
+      final tempDirectory = Directory(
+        parentDir,
+      ).createTempSync('flutter_test_temp_');
       _tempTestAppDirectory = tempDirectory.path;
       _copyToTempDirectory(testAppDirectory, tempDirectory);
     }

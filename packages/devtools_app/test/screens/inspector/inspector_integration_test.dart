@@ -31,15 +31,14 @@ import '../../test_infra/matchers/matchers.dart';
 // reduced to under 1 second without introducing flakes.
 const inspectorChangeSettleTime = Duration(seconds: 2);
 
-
 void main() {
   // We need to use real async in this test so we need to use this binding.
   initializeLiveTestWidgetsFlutterBindingWithAssets();
   const windowSize = Size(2600.0, 1200.0);
 
   // The auto-refresh tests modify lib/main.dart in-place.
-  // We use `useTempDirectory: true` to copy the fixture app to a temporary 
-  // directory. This prevents flaky test failures in other tests (like 
+  // We use `useTempDirectory: true` to copy the fixture app to a temporary
+  // directory. This prevents flaky test failures in other tests (like
   // inspector_service_test.dart) that run in parallel.
   final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
