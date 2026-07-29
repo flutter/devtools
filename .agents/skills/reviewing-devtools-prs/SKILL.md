@@ -10,9 +10,9 @@ Extends [reviewing-prs](../reviewing-prs/SKILL.md) for pull requests in `flutter
 ## References & Style Guidelines
 
 Read and enforce:
-- **Style Guide**: [styleguide.md](../../.gemini/styleguide.md) (severity tags `[MUST-FIX]`, `[CONCERN]`, `[NIT]`, zero-formatting policy, copyright headers, DRY rules, magic values)
-- **Repository Constraints**: [AGENTS.md](../../AGENTS.md)
-- **Code Style**: [STYLE.md](../../STYLE.md)
+- **Style Guide**: [styleguide.md](../../../.gemini/styleguide.md) (severity tags `[MUST-FIX]`, `[CONCERN]`, `[NIT]`, zero-formatting policy, copyright headers, DRY rules, magic values)
+- **Repository Constraints**: [AGENTS.md](../../../AGENTS.md)
+- **Code Style**: [STYLE.md](../../../STYLE.md)
 
 ## Common Review Patterns
 

@@ -5,7 +5,7 @@ description: General workflow for fetching, inspecting, reviewing GitHub Pull Re
 
 # Reviewing Pull Requests
 
-This skill outlines the workflow for inspecting GitHub Pull Requests using the `gh` CLI, drafting review feedback, and securing user approval before posting.
+This skill outlines the workflow for inspecting GitHub Pull Requests using the `gh` CLI, drafting review feedback, and securing user approval before posting review comments.
 
 ## Approval Safeguard (Strict Requirement)
 
