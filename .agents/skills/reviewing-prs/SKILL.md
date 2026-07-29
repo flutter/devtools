@@ -17,11 +17,11 @@ This skill outlines the workflow for inspecting GitHub Pull Requests using the `
 
 ### 1. Request Information via GitHub CLI
 
-- **PR Metadata & Description**:
+- **PR Details**:
   ```bash
   gh pr view <pr-number> --repo <owner/repo> --json title,body,author,state,headRefName,baseRefName,comments,reviews,files
   ```
-- **PR Code Diff**:
+- **Code Diff**:
   ```bash
   gh pr diff <pr-number> --repo <owner/repo>
   ```
@@ -36,20 +36,23 @@ This skill outlines the workflow for inspecting GitHub Pull Requests using the `
 
 ### 2. Inspect Context & Prior Feedback
 
-1. Read the PR description, linked issues, and full diff.
-2. Check existing bot or reviewer comments to verify whether previous feedback was already addressed.
+- Read the PR description, linked issues, and full diff.
+- Verify whether existing bot or human comments have already been addressed in subsequent commits.
 
 ### 3. Draft Review Comments
 
 - Keep comments direct, concise, and focused on code quality and correctness.
-- **Approvals**: For approving reviews with no blocking issues, keep comments concise (`LGTM` or `A couple comments but lgtm.`). Avoid fluffy praise or re-summarizing the PR author's changes.
-- **Specific Feedback**: Clearly reference specific files, line numbers, and rationale when leaving actionable feedback.
+- **Approvals**: Keep comments concise (`LGTM` or `A couple comments but lgtm.`). Avoid fluffy praise or re-summarizing the PR.
+- **Actionable Feedback**: Reference specific files, line numbers, and rationale when leaving suggestions.
 
-### 4. Present Draft & Post Upon Approval
+### 4. Present Draft & Post Only Upon User Approval
 
-1. Present the draft review comments to the user in your response window.
-2. Ask for the user's feedback and confirmation: *"Would you like me to submit this review to GitHub?"*
-3. Once explicitly approved, submit the review:
+> [!IMPORTANT]
+> **NEVER post comments or reviews to GitHub without explicit prior user approval.**
+
+1. Present the drafted review comments to the user in your response window.
+2. Ask for confirmation: *"Would you like me to submit this review to GitHub?"*
+3. Once explicitly approved by the user, post the review:
    ```bash
    gh pr review <pr-number> --repo <owner/repo> --comment --body "<approved review text>"
    ```
