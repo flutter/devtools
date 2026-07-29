@@ -6,7 +6,6 @@ import 'dart:io';
 
 import 'package:devtools_shared/devtools_server.dart';
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_shared/src/extensions/extension_manager.dart';
 import 'package:devtools_shared/src/server/server_api.dart' as server;
 import 'package:dtd/dtd.dart';
