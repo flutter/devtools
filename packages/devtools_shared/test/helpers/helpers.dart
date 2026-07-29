@@ -89,19 +89,20 @@ class TestDartApp {
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((line) {
-          if (!serviceUriCompleter.isCompleted && line.contains(dartVMServiceRegExp)) {
+          if (!serviceUriCompleter.isCompleted &&
+              line.contains(dartVMServiceRegExp)) {
             serviceUriCompleter.complete(
               dartVMServiceRegExp.firstMatch(line)!.group(1),
             );
           }
         });
-        
+
     _stderrSub = process!.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen((line) {
-           // ignore: avoid_print, deliberate print to monitor errors.
-           print('TestDartApp stderr: $line');
+          // ignore: avoid_print, deliberate print to monitor errors.
+          print('TestDartApp stderr: $line');
         });
 
     return await serviceUriCompleter.future.timeout(
