@@ -249,10 +249,11 @@ class FlutterSdk {
       // Fallback to the unresolved path if resolution fails.
     }
 
-    if (path.basename(path.dirname(resolvedPath)) == 'bin') {
-      return FlutterSdk._(path.dirname(path.dirname(resolvedPath)));
+    final resolvedPathParent = path.dirname(resolvedPath);
+    if (path.basename(resolvedPathParent) == 'bin') {
+      return FlutterSdk._(path.dirname(resolvedPathParent));
     } else if (path.basename(resolvedPath) == 'bin') {
-      return FlutterSdk._(path.dirname(resolvedPath));
+      return FlutterSdk._(resolvedPathParent);
     } else if (Directory(path.join(resolvedPath, 'bin')).existsSync()) {
       return FlutterSdk._(resolvedPath);
     }
