@@ -38,12 +38,13 @@ void main() {
   const windowSize = Size(2600.0, 1200.0);
 
   // The auto-refresh tests modify lib/main.dart in-place.
-  // We use `useTempDirectory: true` (default in FlutterTestEnvironment) to
-  // copy the fixture app to a temporary directory. This prevents flaky test
-  // failures in other tests (like inspector_service_test.dart) that run in parallel.
+  // We use `useTempDirectory: true` to copy the fixture app to a temporary 
+  // directory. This prevents flaky test failures in other tests (like 
+  // inspector_service_test.dart) that run in parallel.
   final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
     testAppDirectory: 'test/test_infra/fixtures/inspector_app',
+    useTempDirectory: true,
   );
 
   env.afterEverySetup = () async {

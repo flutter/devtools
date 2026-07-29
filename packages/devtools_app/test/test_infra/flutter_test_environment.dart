@@ -28,7 +28,7 @@ class FlutterTestEnvironment {
   FlutterTestEnvironment(
     this._runConfig, {
     String testAppDirectory = 'test/test_infra/fixtures/flutter_app',
-    bool useTempDirectory = true,
+    bool useTempDirectory = false,
     FlutterDriverFactory? flutterDriverFactory,
   }) : _testAppDirectory = testAppDirectory,
        _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
