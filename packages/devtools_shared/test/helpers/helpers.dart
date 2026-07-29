@@ -114,6 +114,7 @@ class TestDartApp {
   Future<void> _initTestApp() async {
     await deleteDirectoryWithRetry(directory);
     directory.createSync(recursive: true);
+    Directory(path.join(directory.path, '.dart_tool')).createSync();
 
     final mainFile = File(path.join(directory.path, 'bin', 'main.dart'))
       ..createSync(recursive: true);
