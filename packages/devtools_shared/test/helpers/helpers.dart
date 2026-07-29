@@ -62,11 +62,16 @@ Future<TestDtdConnectionInfo> startDtd() async {
 }
 
 class TestDartApp {
+  TestDartApp() {
+    directory = Directory(
+      'tmp/test_app_${DateTime.now().millisecondsSinceEpoch}',
+    );
+  }
   static final dartVMServiceRegExp = RegExp(
     r'The Dart VM service is listening on (http://127.0.0.1:.*)',
   );
 
-  final directory = Directory('tmp/test_app');
+  late final Directory directory;
 
   Process? process;
 
@@ -74,7 +79,6 @@ class TestDartApp {
     await _initTestApp();
     process = await Process.start(Platform.resolvedExecutable, [
       '--observe=0',
-      'run',
       'bin/main.dart',
     ], workingDirectory: directory.path);
 
