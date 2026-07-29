@@ -74,6 +74,8 @@ class TestDartApp {
   late final Directory directory;
 
   Process? process;
+  StreamSubscription<String>? _stdoutSub;
+  StreamSubscription<String>? _stderrSub;
 
   Future<String> start() async {
     await _initTestApp();
@@ -83,28 +85,36 @@ class TestDartApp {
     ], workingDirectory: directory.path);
 
     final serviceUriCompleter = Completer<String>();
-    late StreamSubscription sub;
-    sub = process!.stdout
+    _stdoutSub = process!.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen((line) async {
-          if (line.contains(dartVMServiceRegExp)) {
-            await sub.cancel();
+        .listen((line) {
+          if (!serviceUriCompleter.isCompleted && line.contains(dartVMServiceRegExp)) {
             serviceUriCompleter.complete(
               dartVMServiceRegExp.firstMatch(line)!.group(1),
             );
           }
         });
+        
+    _stderrSub = process!.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((line) {
+           // ignore: avoid_print, deliberate print to monitor errors.
+           print('TestDartApp stderr: $line');
+        });
+
     return await serviceUriCompleter.future.timeout(
       const Duration(seconds: 5),
-      onTimeout: () async {
-        await sub.cancel();
+      onTimeout: () {
         return '';
       },
     );
   }
 
   Future<void> kill() async {
+    await _stdoutSub?.cancel();
+    await _stderrSub?.cancel();
     process?.kill();
     await process?.exitCode;
     process = null;
