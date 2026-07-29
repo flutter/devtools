@@ -27,7 +27,8 @@ and the CI testing ensures that the code is formatted correctly.
 * **Readability**: Code should be easy to understand for all contributors.
 * **Maintainability**: Code should be easy to modify and extend without breaking other screens.
 * **Consistency**: Adhering to consistent style across all DevTools packages improves collaboration and reduces errors.
-* **Code Reuse**: Use shared primitives and components rather than recreating them from scratch.
+* **Code Reuse & DRY**: Use shared primitives and components rather than recreating them from scratch. Flag duplicated code blocks (90%+ identical) and repeated sub-expressions or function calls within the same method as `[CONCERN]` or `[NIT]`, and suggest extracting them into local variables or constants.
+* **Constants & Magic Values**: Avoid using raw/magic strings or numbers. Extract them into descriptive named constants so the intent and meaning of the values are clear.
 * **Testing**: All changes should include automated tests to ensure correctness and prevent regressions.
 
 ## 3. Guidelines from Existing Documentation
