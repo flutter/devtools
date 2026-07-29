@@ -32,15 +32,6 @@ class GoldenHeapTest extends HeapTest {
   }
 }
 
-class MockedHeapTest extends HeapTest {
-  MockedHeapTest({required super.appClassName});
-
-  @override
-  Future<HeapSnapshotGraph> loadHeap() {
-    throw UnimplementedError();
-  }
-}
-
 /// Provides test snapshots from pre-saved goldens.
 class HeapGraphLoaderGoldens implements HeapGraphLoader {
   int _nextIndex = 0;

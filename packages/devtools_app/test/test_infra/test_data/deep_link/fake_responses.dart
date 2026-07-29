@@ -429,18 +429,6 @@ const iosValidationResponseWithError = '''
 }
 ''';
 
-const androidDeepLinkWithPathErrors = '''{
-      "host": "example.com",
-      "path": "/path",
-      "intentFilterCheck": {
-        "hasBrowsableCategory": false,
-        "hasActionView": true,
-        "hasDefaultCategory": true,
-        "hasAutoVerify": true
-      }
-    }
-''';
-
 const defaultDomain = 'example.com';
 
 String androidDeepLinkJson(

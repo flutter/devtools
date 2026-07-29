@@ -26,10 +26,10 @@ void main(List<String> arguments) async {
 
   final List<int> deltas = [];
   for (int i = 0; i < cpuSampleTraceEvents.length - 1; i++) {
-    final Map<String, dynamic> current =
-        (cpuSampleTraceEvents[i] as Map).cast<String, dynamic>();
-    final Map<String, dynamic> next =
-        (cpuSampleTraceEvents[i + 1] as Map).cast<String, dynamic>();
+    final Map<String, dynamic> current = (cpuSampleTraceEvents[i] as Map)
+        .cast<String, dynamic>();
+    final Map<String, dynamic> next = (cpuSampleTraceEvents[i + 1] as Map)
+        .cast<String, dynamic>();
     deltas.add((next['ts'] as int) - (current['ts'] as int));
   }
   print(deltas);

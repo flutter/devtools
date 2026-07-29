@@ -174,8 +174,8 @@ dart_code_metrics:
       - lib/src/screens/inspector/**_controller.dart
       - lib/src/shared/diagnostics/inspector_service.dart
       - lib/src/shared/diagnostics/diagnostics_node.dart
-
-      - test/**
+      # This fixture has unused code for testing the debugger.
+      - test/test_infra/fixtures/flutter_app/**
   rules:
 #    - arguments-ordering Too strict
 #    - avoid-banned-imports # TODO(polina-c): add configuration

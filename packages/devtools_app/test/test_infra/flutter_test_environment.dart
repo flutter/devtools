@@ -71,11 +71,6 @@ class FlutterTestEnvironment {
   /// test/my_test.dart`).
   final String _flutterExe;
 
-  // This function will be called after we have ran the Flutter app and the
-  // vmService is opened.
-  Future<void> Function()? _afterNewSetup;
-  set afterNewSetup(Future<void> Function() f) => _afterNewSetup = f;
-
   // This function will be called for every call to [setupEnvironment], even
   // when the setup is not forced or triggered by a new FlutterRunConfiguration.
   Future<void> Function()? _afterEverySetup;
@@ -88,12 +83,6 @@ class FlutterTestEnvironment {
   Future<void> Function()? _beforeEveryTearDown;
   set beforeEveryTearDown(Future<void> Function() f) =>
       _beforeEveryTearDown = f;
-
-  // The function will be called before the final forced teardown at the end
-  // of the test suite (which will then stop the Flutter app).
-  Future<void> Function()? _beforeFinalTearDown;
-  set beforeFinalTearDown(Future<void> Function() f) =>
-      _beforeFinalTearDown = f;
 
   bool _needsSetup = true;
 
@@ -173,8 +162,6 @@ class FlutterTestEnvironment {
       } finally {
         _setupInProgress!.complete(!_needsSetup);
       }
-
-      if (_afterNewSetup != null) await _afterNewSetup!();
     }
     if (_afterEverySetup != null) await _afterEverySetup!();
   }
@@ -191,8 +178,6 @@ class FlutterTestEnvironment {
       // Skip actually tearing down for better test performance.
       return;
     }
-
-    if (_beforeFinalTearDown != null) await _beforeFinalTearDown!();
 
     await serviceConnection.serviceManager.manuallyDisconnect();
 
