@@ -223,16 +223,11 @@ class InspectorController extends DisposableController
 
   InspectorObjectGroupManager? _layoutGroups;
 
-  /// Node being highlighted due to the current hover.
-  InspectorTreeNode? get currentShowNode => inspectorTree.hover;
-
   set currentShowNode(InspectorTreeNode? node) => inspectorTree.hover = node;
 
   bool flutterAppFrameReady = false;
 
   bool treeLoadStarted = false;
-
-  RemoteDiagnosticsNode? subtreeRoot;
 
   bool programmaticSelectionChangeInProgress = false;
 
@@ -252,8 +247,6 @@ class InspectorController extends DisposableController
       _implementationWidgetsHidden;
   final _implementationWidgetsHidden = ValueNotifier<bool>(true);
 
-  InspectorTreeNode? lastExpanded;
-
   bool isActive = false;
 
   final valueToInspectorTreeNode = <InspectorInstanceRef, InspectorTreeNode>{};
@@ -261,8 +254,6 @@ class InspectorController extends DisposableController
   /// When visibleToUser is false we should dispose all allocated objects and
   /// not perform any actions.
   bool visibleToUser = false;
-
-  bool highlightNodesShownInBothTrees = false;
 
   RemoteDiagnosticsNode? get selectedDiagnostic =>
       selectedNode.value?.diagnostic;
@@ -275,10 +266,6 @@ class InspectorController extends DisposableController
   /// This field is used to prevent sending multiple analytics events for
   /// inspector tree load timing.
   bool firstInspectorTreeLoadCompleted = false;
-
-  FlutterTreeType getTreeType() {
-    return treeType;
-  }
 
   Future<void> setVisibleToUser(bool visible) async {
     if (visibleToUser == visible) {
@@ -293,20 +280,8 @@ class InspectorController extends DisposableController
     }
   }
 
-  bool hasDiagnosticsValue(InspectorInstanceRef ref) {
-    return valueToInspectorTreeNode.containsKey(ref);
-  }
-
-  RemoteDiagnosticsNode? findDiagnosticsValue(InspectorInstanceRef ref) {
-    return valueToInspectorTreeNode[ref]?.diagnostic;
-  }
-
   void endShowNode() {
     highlightShowNode(null);
-  }
-
-  bool highlightShowFromNodeInstanceRef(InspectorInstanceRef ref) {
-    return highlightShowNode(valueToInspectorTreeNode[ref]);
   }
 
   bool highlightShowNode(InspectorTreeNode? node) {
@@ -352,9 +327,6 @@ class InspectorController extends DisposableController
 
     currentShowNode = null;
     _selectedNode.value = null;
-    lastExpanded = null;
-
-    subtreeRoot = null;
 
     inspectorTree.root = inspectorTree.createNode();
     programmaticSelectionChangeInProgress = false;
@@ -622,35 +594,6 @@ class InspectorController extends DisposableController
     valueToInspectorTreeNode.clear();
   }
 
-  void setSubtreeRoot(
-    RemoteDiagnosticsNode? node,
-    RemoteDiagnosticsNode? selection,
-  ) {
-    selection ??= node;
-    if (node != null && node == subtreeRoot) {
-      //  Select the new node in the existing subtree.
-      applyNewSelection(selection);
-      return;
-    }
-    subtreeRoot = node;
-    if (node == null) {
-      // Passing in a null node indicates we should clear the subtree and free any memory allocated.
-      shutdownTree(false);
-      return;
-    }
-
-    // Clear now to eliminate frame of highlighted nodes flicker.
-    _clearValueToInspectorTreeNodeMapping();
-    unawaited(_recomputeTreeRoot(selection));
-  }
-
-  InspectorTreeNode? getSubtreeRootNode() {
-    if (subtreeRoot == null) {
-      return null;
-    }
-    return valueToInspectorTreeNode[subtreeRoot!.valueRef];
-  }
-
   void refreshSelection(RemoteDiagnosticsNode? newSelection) {
     newSelection ??= selectedDiagnostic;
     final matchingNode = findMatchingInspectorTreeNode(newSelection);
@@ -674,26 +617,6 @@ class InspectorController extends DisposableController
     );
     programmaticSelectionChangeInProgress = false;
     animateTo(selectedNode.value);
-  }
-
-  void selectAndShowNode(RemoteDiagnosticsNode? node) {
-    if (node == null) {
-      return;
-    }
-    selectAndShowInspectorInstanceRef(node.valueRef);
-  }
-
-  void selectAndShowInspectorInstanceRef(InspectorInstanceRef ref) {
-    final node = valueToInspectorTreeNode[ref];
-    if (node == null) {
-      return;
-    }
-    setSelectedNode(node);
-    syncTreeSelection();
-  }
-
-  InspectorTreeNode? getTreeNode(RemoteDiagnosticsNode node) {
-    return valueToInspectorTreeNode[node.valueRef];
   }
 
   @override
@@ -754,8 +677,6 @@ class InspectorController extends DisposableController
 
       selectionGroups.promoteNext();
 
-      subtreeRoot = newSelection;
-
       applyNewSelection(newSelection);
 
       await _maybeShowNotificationForSelectedNode(
@@ -804,7 +725,6 @@ class InspectorController extends DisposableController
 
     _selectedNode.value = newSelection;
 
-    lastExpanded = null; // New selected node takes precedence.
     endShowNode();
 
     _updateSelectedErrorFromNode(_selectedNode.value);
