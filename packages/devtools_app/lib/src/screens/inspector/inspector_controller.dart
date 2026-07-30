@@ -223,8 +223,6 @@ class InspectorController extends DisposableController
 
   InspectorObjectGroupManager? _layoutGroups;
 
-  set currentShowNode(InspectorTreeNode? node) => inspectorTree.hover = node;
-
   bool flutterAppFrameReady = false;
 
   bool treeLoadStarted = false;
@@ -285,7 +283,7 @@ class InspectorController extends DisposableController
   }
 
   bool highlightShowNode(InspectorTreeNode? node) {
-    currentShowNode = node;
+    inspectorTree.hover = node;
     return true;
   }
 
@@ -325,7 +323,7 @@ class InspectorController extends DisposableController
     _treeGroups?.clear(isolateStopped);
     _selectionGroups?.clear(isolateStopped);
 
-    currentShowNode = null;
+    inspectorTree.hover = null;
     _selectedNode.value = null;
 
     inspectorTree.root = inspectorTree.createNode();
