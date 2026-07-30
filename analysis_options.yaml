@@ -167,10 +167,6 @@ dart_code_metrics:
     unused-code:
       # TODO(https://github.com/flutter/devtools/issues/9906) remove these
       # excludes as findings are resolved.
-      # Investigate internal usages of inspector logic before removing.
-      - lib/src/screens/inspector/**_controller.dart
-      - lib/src/shared/diagnostics/inspector_service.dart
-      - lib/src/shared/diagnostics/diagnostics_node.dart
       # This fixture has unused code for testing the debugger.
       - packages/devtools_app/test/test_infra/fixtures/flutter_app/**
       # Ignore unused code in package examples.
