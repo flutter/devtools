@@ -170,8 +170,6 @@ dart_code_metrics:
       # devtools_app/.
       # TODO(https://github.com/flutter/devtools/issues/9906) remove these
       # excludes as findings are resolved.
-      # Investigate internal usages of inspector logic before removing.
-      - lib/src/shared/diagnostics/diagnostics_node.dart
       # This fixture has unused code for testing the debugger.
       - test/test_infra/fixtures/flutter_app/**
   rules:
