@@ -220,12 +220,9 @@ class InspectorTreeController extends DisposableController
     return true;
   }
 
-  InspectorTreeNode? get hover => _hover;
   InspectorTreeNode? _hover;
 
   double? lastContentWidth;
-
-  InspectorTreeRow? _cachedSelectedRow;
 
   /// All cached rows of the tree.
   ///
@@ -290,21 +287,9 @@ class InspectorTreeController extends DisposableController
 
   InspectorTreeRow? rowAtIndex(int index) => _rowsInTree.value.safeGet(index);
 
+  @visibleForTesting
   double rowOffset(int index) {
     return (rowAtIndex(index)?.depth ?? 0) * inspectorColumnIndent;
-  }
-
-  List<InspectorTreeNode> getPathFromSelectedRowToRoot() {
-    final selectedItem = _cachedSelectedRow?.node;
-    if (selectedItem == null) return [];
-
-    final pathToRoot = <InspectorTreeNode>[selectedItem];
-    InspectorTreeNode? nextParentNode = selectedItem.parent;
-    while (nextParentNode != null) {
-      pathToRoot.add(nextParentNode);
-      nextParentNode = nextParentNode.parent;
-    }
-    return pathToRoot.reversed.toList();
   }
 
   set hover(InspectorTreeNode? node) {
@@ -527,6 +512,7 @@ class InspectorTreeController extends DisposableController
     return rowAtIndex(_rowIndexFromNode(node));
   }
 
+  @visibleForTesting
   InspectorTreeRow? rowForOffset(Offset offset) {
     final rootLocal = root;
     if (rootLocal == null) return null;
