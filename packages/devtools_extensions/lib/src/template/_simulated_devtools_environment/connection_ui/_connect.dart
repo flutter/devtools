@@ -6,7 +6,6 @@ part of '../_simulated_devtools_environment.dart';
 
 class _UriConnectionDisplay extends StatelessWidget {
   const _UriConnectionDisplay({
-    required this.simController,
     required this.connected,
     required this.connectedLabel,
     required this.disconnectedLabel,
@@ -20,7 +19,6 @@ class _UriConnectionDisplay extends StatelessWidget {
   @visibleForTesting
   static const totalControlsHeight = 45.0;
 
-  final SimulatedDevToolsController simController;
   final bool connected;
   final String connectedLabel;
   final String disconnectedLabel;
@@ -36,14 +34,12 @@ class _UriConnectionDisplay extends StatelessWidget {
       height: totalControlsHeight,
       child: connected
           ? _ConnectedDisplay(
-              simController: simController,
               label: connectedLabel,
               onDisconnect: onDisconnect,
               currentConnection: currentConnection,
               help: help,
             )
           : _DisconnectedDisplay(
-              simController: simController,
               label: disconnectedLabel,
               hint: disconnectedHint,
               onConnect: onConnect,
@@ -55,14 +51,12 @@ class _UriConnectionDisplay extends StatelessWidget {
 
 class _ConnectedDisplay extends StatelessWidget {
   const _ConnectedDisplay({
-    required this.simController,
     required this.label,
     required this.currentConnection,
     required this.onDisconnect,
     this.help,
   });
 
-  final SimulatedDevToolsController simController;
   final String label;
   final String Function() currentConnection;
   final VoidCallback onDisconnect;
@@ -98,14 +92,12 @@ class _ConnectedDisplay extends StatelessWidget {
 
 class _DisconnectedDisplay extends StatefulWidget {
   const _DisconnectedDisplay({
-    required this.simController,
     required this.label,
     required this.hint,
     required this.onConnect,
     this.help,
   });
 
-  final SimulatedDevToolsController simController;
   final String label;
   final String hint;
   final void Function(String) onConnect;
