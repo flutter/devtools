@@ -5,6 +5,7 @@
 import 'package:dtd/dtd.dart';
 import 'package:meta/meta.dart';
 
+// ignore: unused-code, false positive.
 const _fileUriPrefix = 'file://';
 
 /// Attempts to detect the package root of [fileUriString], which is expected to
