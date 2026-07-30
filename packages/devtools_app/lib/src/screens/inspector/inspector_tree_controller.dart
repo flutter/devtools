@@ -220,7 +220,6 @@ class InspectorTreeController extends DisposableController
     return true;
   }
 
-  InspectorTreeNode? get hover => _hover;
   InspectorTreeNode? _hover;
 
   double? lastContentWidth;
