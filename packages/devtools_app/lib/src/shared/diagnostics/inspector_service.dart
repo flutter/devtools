@@ -1115,7 +1115,6 @@ class ObjectGroup extends InspectorObjectGroupBase {
     );
   }
 
-
   Future<void> invokeSetFlexProperties(
     InspectorInstanceRef ref,
     MainAxisAlignment? mainAxisAlignment,

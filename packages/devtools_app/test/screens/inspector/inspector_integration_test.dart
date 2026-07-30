@@ -727,4 +727,3 @@ extension _ObjectGroupTestExtension on ObjectGroup {
     return parseDiagnosticsNodeHelper(json as Map<String, Object?>?);
   }
 }
-
