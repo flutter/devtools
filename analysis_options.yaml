@@ -165,15 +165,8 @@ dart_code_metrics:
     - test/**
   exclude:
     unused-code:
-      # TODO(https://github.com/dart-lang/sdk/issues/63864): clean up these
-      # paths once this issue is fixed. These paths are currently relative to
-      # devtools_app/.
-      # Investigate internal usages of inspector logic before removing.
-      - lib/src/screens/inspector/**_controller.dart
-      - lib/src/shared/diagnostics/inspector_service.dart
-      - lib/src/shared/diagnostics/diagnostics_node.dart
       # This fixture has unused code for testing the debugger.
-      - test/test_infra/fixtures/flutter_app/**
+      - packages/devtools_app/test/test_infra/fixtures/flutter_app/**
   rules:
 #    - arguments-ordering Too strict
 #    - avoid-banned-imports # TODO(polina-c): add configuration
