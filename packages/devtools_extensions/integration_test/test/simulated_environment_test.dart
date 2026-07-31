@@ -15,7 +15,6 @@ import 'package:integration_test/integration_test.dart';
 // dart run integration_test/run_tests.dart --target=integration_test/test/simulated_environment_test.dart
 
 const safePumpDuration = Duration(seconds: 3);
-const longPumpDuration = Duration(seconds: 6);
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
