@@ -13,8 +13,6 @@ class VmServiceConnectionDisplay extends StatelessWidget {
   });
 
   @visibleForTesting
-  static const totalControlsHeight = 45.0;
-  @visibleForTesting
   static const totalControlsWidth = 415.0;
 
   final SimulatedDevToolsController simController;
@@ -23,7 +21,6 @@ class VmServiceConnectionDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _UriConnectionDisplay(
-      simController: simController,
       connected: connected,
       connectedLabel: 'Debugging: ',
       disconnectedLabel: 'Dart VM Service Connection',

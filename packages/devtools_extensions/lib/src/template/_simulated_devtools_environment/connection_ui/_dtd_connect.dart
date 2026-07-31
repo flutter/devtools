@@ -13,11 +13,6 @@ class DTDConnectionDisplay extends StatelessWidget {
     required this.onConnectionChange,
   });
 
-  @visibleForTesting
-  static const totalControlsHeight = 45.0;
-  @visibleForTesting
-  static const totalControlsWidth = 415.0;
-
   final SimulatedDevToolsController simController;
   final bool connected;
   final Future<void> Function(String?) onConnectionChange;
@@ -25,7 +20,6 @@ class DTDConnectionDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _UriConnectionDisplay(
-      simController: simController,
       connected: connected,
       connectedLabel: 'Dart Tooling Daemon connection: ',
       disconnectedLabel: 'Dart Tooling Daemon Connection',
