@@ -179,6 +179,7 @@ dcm:
 #    - avoid-banned-imports # TODO(polina-c): add configuration
     - avoid-importing-entrypoint-exports:
         only-in-src: true
+    - avoid-accessing-collections-by-constant-index
     - avoid-async-call-in-sync-function # This does catch findings that unawaited_futures misses.
     - avoid-cascade-after-if-null
     - avoid-collapsible-if
