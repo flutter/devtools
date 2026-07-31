@@ -181,6 +181,7 @@ dcm:
         only-in-src: true
     - avoid-async-call-in-sync-function # This does catch findings that unawaited_futures misses.
     - avoid-cascade-after-if-null
+    - avoid-collapsible-if
     - avoid-collection-methods-with-unrelated-types
     - avoid-duplicate-exports
     - avoid-dynamic

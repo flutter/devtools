@@ -344,9 +344,7 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);
-    }
 
-    if (firstChild == null) {
       if (!addInitialChild(
         index: firstIndex,
         layoutOffset: _extentDelegate!.layoutOffset(firstIndex),
