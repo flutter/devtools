@@ -167,7 +167,7 @@ class HeapClassName with Serializable {
     // or detect weak references automatically, without hard coding
     // class names.
     if (kDebugMode) {
-      throw Exception('Unexpected library for $className: $library.');
+      throw StateError('Unexpected library for $className: $library.');
     }
     return false;
   }

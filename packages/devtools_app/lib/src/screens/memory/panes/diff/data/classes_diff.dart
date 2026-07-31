@@ -45,7 +45,7 @@ class ObjectSetDiff {
       }
 
       if (kDebugMode) {
-        throw Exception(
+        throw StateError(
           'Unexpected state for code $code: before=$before, after=$after',
         );
       }

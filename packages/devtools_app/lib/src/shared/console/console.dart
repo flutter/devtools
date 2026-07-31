@@ -206,7 +206,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
                       );
                     } else {
                       if (kDebugMode) {
-                        throw Exception(
+                        throw UnsupportedError(
                           'ConsoleLine of unsupported type ${line.runtimeType} encountered',
                         );
                       }

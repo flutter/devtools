@@ -317,7 +317,7 @@ class ChartController extends DisposableController
           break;
         default:
           if (kDebugMode) {
-            throw Exception('Unexpected Duration $rangeInMinutes');
+            throw ArgumentError('Unexpected Duration $rangeInMinutes');
           }
       }
     }
