@@ -344,22 +344,23 @@ class RenderSliverExtentDelegateBoxAdaptor extends RenderSliverMultiBoxAdaptor {
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);
+    }
 
-      if (!addInitialChild(
-        index: firstIndex,
-        layoutOffset: _extentDelegate!.layoutOffset(firstIndex),
-      )) {
-        // There are either no children, or we are past the end of all our children.
-        // If it is the latter, we will need to find the first available child.
-        final max = _extentDelegate!.layoutOffset(childManager.childCount);
-        assert(max >= 0.0);
-        geometry = SliverGeometry(
-          scrollExtent: _extentDelegate!.layoutOffset(_extentDelegate!.length),
-          maxPaintExtent: max,
-        );
-        childManager.didFinishLayout();
-        return;
-      }
+    if (firstChild == null &&
+        !addInitialChild(
+          index: firstIndex,
+          layoutOffset: _extentDelegate!.layoutOffset(firstIndex),
+        )) {
+      // There are either no children, or we are past the end of all our children.
+      // If it is the latter, we will need to find the first available child.
+      final max = _extentDelegate!.layoutOffset(childManager.childCount);
+      assert(max >= 0.0);
+      geometry = SliverGeometry(
+        scrollExtent: _extentDelegate!.layoutOffset(_extentDelegate!.length),
+        maxPaintExtent: max,
+      );
+      childManager.didFinishLayout();
+      return;
     }
 
     RenderBox? trailingChildWithLayout;
