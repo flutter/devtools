@@ -193,7 +193,7 @@ class _DtdNotConnectedViewState extends State<DtdNotConnectedView> {
             Expanded(
               child: DevToolsClearableTextField(
                 controller: textEditingController,
-                onSubmitted: (_) => _connect(),
+                onSubmitted: (_) => unawaited(_connect()),
               ),
             ),
             const SizedBox(width: defaultSpacing),
