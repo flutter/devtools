@@ -511,6 +511,7 @@ void main() {
         });
       }
 
+      // ignore: avoid-empty-test-groups, false positive.
       group('single span highlighting:', () {
         for (final spanText in modifierSpans) {
           testSingleSpan('modifier', spanText, modifierSyntaxColor);
