@@ -187,6 +187,7 @@ dcm:
     - avoid-collapsible-if
     - avoid-collection-methods-with-unrelated-types
     - avoid-constant-assert-conditions
+    - avoid-duplicate-named-imports
     - avoid-importing-entrypoint-exports:
         only-in-src: true
     - avoid-duplicate-exports
