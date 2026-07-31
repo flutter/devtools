@@ -18,13 +18,18 @@ analyzer:
     - '**/build/**'
     - '**.freezed.dart'
     - tool/flutter-sdk/
-    - build/**
-    - android/**
-    - ios/**
-    - web/**
-    - windows/**
-    - macos/**
-    - linux/**
+    - '**/lib/generated_plugin_registrant.dart'
+    - '**/android/**'
+    - '**/ios/**'
+    - '**/web/**'
+    - '**/windows/**'
+    - '**/macos/**'
+    - '**/linux/**'
+    # Syntax highlighting test files may include or lint-violating code
+    # for testing so should be ignored. Uncomment this while modifying
+    # these files if you want to ensure code is not invalid except where
+    # expected.
+    - packages/devtools_app/test/test_infra/test_data/syntax_highlighting/**
 
 linter:
   rules:
@@ -156,17 +161,19 @@ linter:
     - valid_regexps
     # - void_checks # not yet tested
 
-dart_code_metrics:
+dcm:
   metrics:
     cyclomatic-complexity: 20
     number-of-parameters: 4
     maximum-nesting-level: 5
   metrics-exclude:
-    - test/**
+    - packages/devtools_app/test/test_infra/test_data/**
   exclude:
     unused-code:
       # This fixture has unused code for testing the debugger.
       - packages/devtools_app/test/test_infra/fixtures/flutter_app/**
+      # Ignore unused code in package examples.
+      - packages/devtools_app_shared/example/**
   rules:
 #    - arguments-ordering Too strict
 #    - avoid-banned-imports # TODO(polina-c): add configuration
