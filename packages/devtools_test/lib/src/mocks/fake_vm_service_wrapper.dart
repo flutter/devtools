@@ -128,25 +128,27 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   }
 
   @override
-  Future<UriList> lookupPackageUris(
-    String isolateId,
-    List<String> uris,
-  ) => Future.syncValue(UriList(
-    uris: _resolvedUriMap != null
-        ? (uris.map((e) => _resolvedUriMap[e]).toList())
-        : null
-  ));
+  Future<UriList> lookupPackageUris(String isolateId, List<String> uris) =>
+      Future.syncValue(
+        UriList(
+          uris: _resolvedUriMap != null
+              ? (uris.map((e) => _resolvedUriMap[e]).toList())
+              : null,
+        ),
+      );
 
   @override
   Future<UriList> lookupResolvedPackageUris(
     String isolateId,
     List<String> uris, {
     bool? local,
-  })  => Future.syncValue(UriList(
-    uris: _reverseResolvedUriMap != null
-        ? (uris.map((e) => _reverseResolvedUriMap[e]).toList())
-        : null,
-  ));
+  }) => Future.syncValue(
+    UriList(
+      uris: _reverseResolvedUriMap != null
+          ? (uris.map((e) => _reverseResolvedUriMap[e]).toList())
+          : null,
+    ),
+  );
 
   @override
   String get wsUri => 'ws://127.0.0.1:56137/ISsyt6ki0no=/ws';

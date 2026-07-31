@@ -9,7 +9,6 @@ import 'package:devtools_app/src/standalone_ui/standalone_screen.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:dtd/dtd.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
@@ -24,7 +23,6 @@ import 'shared/utils.dart';
 /// flutter run -t test/test_infra/scenes/standalone_ui/editor_sidebar.stager_app.g.dart -d chrome
 class EditorSidebarScene extends Scene {
   late Stream<String> clientLog;
-  late DartToolingDaemon clientDtd;
   late SimulatedEditor editor;
 
   @override

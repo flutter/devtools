@@ -41,6 +41,9 @@ TODO: Remove this section if there are not any updates.
   [#9885](https://github.com/flutter/devtools/pull/9885)
 * Update to latest version of the Dart syntax highlighting grammar
   [#9920](https://github.com/flutter/devtools/pull/9920).
+* Fix a bug in the TextMate grammar parser that could result in code after
+  comments being classified as comments.
+  [#9921](https://github.com/flutter/devtools/pull/9921).
 
 ## Network profiler updates
 

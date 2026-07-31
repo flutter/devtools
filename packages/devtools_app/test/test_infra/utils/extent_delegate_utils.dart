@@ -16,6 +16,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   });
 
   late RenderSliverExtentDelegateBoxAdaptor _renderObject;
+  // ignore: unused-code, used in asserts.
   bool _renderObjectInitialized = false;
   List<RenderBox> children;
 

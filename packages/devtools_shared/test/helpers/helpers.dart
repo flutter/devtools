@@ -62,45 +62,60 @@ Future<TestDtdConnectionInfo> startDtd() async {
 }
 
 class TestDartApp {
+  TestDartApp() {
+    directory = Directory(
+      'tmp/test_app_${DateTime.now().millisecondsSinceEpoch}',
+    );
+  }
   static final dartVMServiceRegExp = RegExp(
     r'The Dart VM service is listening on (http://127.0.0.1:.*)',
   );
 
-  final directory = Directory('tmp/test_app');
+  late final Directory directory;
 
   Process? process;
+  StreamSubscription<String>? _stdoutSub;
+  StreamSubscription<String>? _stderrSub;
 
   Future<String> start() async {
     await _initTestApp();
     process = await Process.start(Platform.resolvedExecutable, [
       '--observe=0',
-      'run',
       'bin/main.dart',
     ], workingDirectory: directory.path);
 
     final serviceUriCompleter = Completer<String>();
-    late StreamSubscription sub;
-    sub = process!.stdout
+    _stdoutSub = process!.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen((line) async {
-          if (line.contains(dartVMServiceRegExp)) {
-            await sub.cancel();
+        .listen((line) {
+          if (!serviceUriCompleter.isCompleted &&
+              line.contains(dartVMServiceRegExp)) {
             serviceUriCompleter.complete(
               dartVMServiceRegExp.firstMatch(line)!.group(1),
             );
           }
         });
+
+    _stderrSub = process!.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen((line) {
+          // ignore: avoid_print, deliberate print to monitor errors.
+          print('TestDartApp stderr: $line');
+        });
+
     return await serviceUriCompleter.future.timeout(
       const Duration(seconds: 5),
-      onTimeout: () async {
-        await sub.cancel();
+      onTimeout: () {
         return '';
       },
     );
   }
 
   Future<void> kill() async {
+    await _stdoutSub?.cancel();
+    await _stderrSub?.cancel();
     process?.kill();
     await process?.exitCode;
     process = null;
@@ -110,6 +125,7 @@ class TestDartApp {
   Future<void> _initTestApp() async {
     await deleteDirectoryWithRetry(directory);
     directory.createSync(recursive: true);
+    Directory(path.join(directory.path, '.dart_tool')).createSync();
 
     final mainFile = File(path.join(directory.path, 'bin', 'main.dart'))
       ..createSync(recursive: true);

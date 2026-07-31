@@ -100,11 +100,6 @@ class _HttpClient {
 
   final _dio = Dio();
 
-  void close() {
-    _client.close(force: true);
-    _dio.close(force: true);
-  }
-
   void get() async {
     print('Sending GET...');
     final request = await _client.getUrl(_uri);
