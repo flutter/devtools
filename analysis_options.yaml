@@ -168,6 +168,9 @@ dcm:
     maximum-nesting-level: 5
   exclude:
     dependencies:
+      - "**/packages/devtools_extensions/example/**"
+    metrics:
+      - packages/devtools_app/test/test_infra/test_data/**
     unused-code:
       # This fixture has unused code for testing the debugger.
       - packages/devtools_app/test/test_infra/fixtures/flutter_app/**
