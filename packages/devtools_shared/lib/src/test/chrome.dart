@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, avoid-duplicate-named-imports, fix after moving file to package:dds.
 
 // DO NOT DELETE THIS FILE. It is imported by DDS and used in the
 // devtools_server tests.
