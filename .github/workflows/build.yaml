@@ -86,6 +86,7 @@ jobs:
       - name: Run dcm checks on packages
         run: |
           dcm check-unused-code packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test --exclude-public-api
+          dcm check-dependencies packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test
 
   test-packages:
     name: ${{ matrix.os }} ${{ matrix.package }} test
