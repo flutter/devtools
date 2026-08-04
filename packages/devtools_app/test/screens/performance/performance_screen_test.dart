@@ -362,13 +362,7 @@ void main() {
 
       setUp(() {
         fakeServiceConnection = FakeServiceConnectionManager();
-        final app = fakeServiceConnection.serviceManager.connectedApp!;
-        when(app.initialized).thenReturn(Completer()..complete(true));
-        when(app.isDartWebAppNow).thenReturn(false);
-        when(app.isFlutterAppNow).thenReturn(true);
-        when(app.isDartCliAppNow).thenReturn(false);
-        when(app.isDartWebApp).thenAnswer((_) async => false);
-        when(app.isProfileBuild).thenAnswer((_) async => false);
+        mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
         setGlobal(ServiceConnectionManager, fakeServiceConnection);
         setGlobal(IdeTheme, IdeTheme());
         setGlobal(NotificationService, NotificationService());
@@ -382,8 +376,10 @@ void main() {
       testWidgets('shows message when running in profile mode', (
         WidgetTester tester,
       ) async {
-        final app = fakeServiceConnection.serviceManager.connectedApp!;
-        when(app.isProfileBuildNow).thenReturn(true);
+        mockConnectedApp(
+          fakeServiceConnection.serviceManager.connectedApp!,
+          isProfileBuild: true,
+        );
 
         await tester.pumpWidget(
           wrapWithControllers(
@@ -401,8 +397,7 @@ void main() {
       testWidgets('shows normal UI when running in debug mode', (
         WidgetTester tester,
       ) async {
-        final app = fakeServiceConnection.serviceManager.connectedApp!;
-        when(app.isProfileBuildNow).thenReturn(false);
+        mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
 
         await tester.pumpWidget(
           wrapWithControllers(
