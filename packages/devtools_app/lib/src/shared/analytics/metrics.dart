@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-/// @docImport '../../screens/inspector_v2/inspector_tree_controller.dart';
+/// @docImport '../../screens/inspector/inspector_tree_controller.dart';
 /// @docImport '../../screens/performance/panes/flutter_frames/flutter_frame_model.dart';
 library;
 
@@ -67,17 +67,14 @@ class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
 }
 
 class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
-  InspectorScreenMetrics.v2({
+  InspectorScreenMetrics({
     this.rootSetCount,
     this.rowCount,
     this.inspectorTreeControllerId,
-  }) : isV2 = true;
+  });
 
   static const summaryTreeGaId = 0;
   static const detailsTreeGaId = 1;
-
-  /// Whether these metrics are for the V2 inspector.
-  final bool isV2;
 
   /// The number of times the root has been set, since the
   /// [InspectorTreeController] with id [inspectorTreeControllerId], has been

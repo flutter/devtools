@@ -34,12 +34,11 @@ enum DevToolsStoreKeys {
 class DevToolsUsage {
   DevToolsUsage() {
     LocalFileSystem.maybeMoveLegacyDevToolsStore();
-    _removeLegacyKeys();
-
     properties = IOPersistentProperties(
       storeName,
       documentDirPath: LocalFileSystem.devToolsDir(),
     );
+    _removeLegacyKeys();
   }
 
   static const storeName = '.devtools';

@@ -50,14 +50,14 @@ If the issue is actively being worked on or if it needs immediate / almost-immed
 to a product area owner.
 
 Here are some suggested owners by product area:
-* **Flutter Inspector**: @elliette
+* **Flutter Inspector**: @kenzieschmoll or @srawlins
 * **Performance**: @kenzieschmoll
 * **CPU Profiler**: @kenzieschmoll or @bkonyi
 * **Memory**: @kenzieschmoll or @bkonyi
-* **Network**: @elliette or @bkonyi
-* **Logging**: @elliette or @bkonyi
+* **Network**: @srawlins or @bkonyi
+* **Logging**: @kenzieschmoll or @bkonyi
 * **VM Tools**: @bkonyi
-* **Debugger**: @elliette
+* **Debugger**: @srawlins
 * **DevTools extensions**: @kenzieschmoll
 * **Tooling integrations with VS Code**: @DanTup
 * **Tooling integrations with IntelliJ or Android Studio**: @helin24 or @jwren
@@ -73,6 +73,10 @@ about issues marked “severe: …” or “P0”.**
 This step is to ensure the health of the [DevTools issue backlog](https://github.com/flutter/devtools/issues) over time.
 There are a couple of things to do as part of the backlog clean up work:
 - Close any obsolete issues. Recommendation: start with the oldest issues first since these are the most likely to be stale.
+  - **Tip**: You can use an AI assistant (agent) to help with this. Try a prompt like:
+    ```
+    Identify and close obsolete issues in the backlog.
+    ```
 - Add good candidates for product excellence / quality work to the 
 [DevTools Product Excellence project](https://github.com/orgs/flutter/projects/157). This project feeds monthly milestone
 planning for ongoing P.E. work.

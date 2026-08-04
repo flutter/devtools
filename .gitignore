@@ -52,3 +52,5 @@ DEPENDENCIES.md
 # macOS generated Flutter files
 **/macos/Flutter/ephemeral/
 **/macos/Flutter/GeneratedPluginRegistrant.swift
+
+build/

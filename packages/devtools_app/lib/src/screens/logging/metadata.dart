@@ -97,8 +97,8 @@ class MetadataChips extends StatelessWidget {
           FrameElapsedMetaDataChip(
             elapsedTimeDisplay: elapsedFrameTimeAsString,
           ),
-        if (isolateChip != null) isolateChip,
-        if (zoneChip != null) zoneChip,
+        ?isolateChip,
+        ?zoneChip,
       ],
     );
   }

@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../screens/inspector_v2/inspector_data_models.dart';
+import '../../screens/inspector/inspector_data_models.dart';
 import '../primitives/utils.dart';
 import '../ui/icons.dart';
 import 'object_group_api.dart';

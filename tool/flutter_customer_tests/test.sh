@@ -22,5 +22,4 @@ cd ../devtools_app
 flutter pub get
 flutter test --tags=include-for-flutter-customer-tests test/
 flutter test --exclude-tags=skip-for-flutter-customer-tests test/screens/inspector/
-flutter test --exclude-tags=skip-for-flutter-customer-tests test/screens/inspector_v2/
 flutter test --exclude-tags=skip-for-flutter-customer-tests test/shared/

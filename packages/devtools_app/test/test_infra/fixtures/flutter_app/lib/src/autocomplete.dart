@@ -56,15 +56,14 @@ class AnotherClass {
   var someField = 3;
   static var someStaticField = 2;
   int get someProperty => 42;
-  // ignore: avoid-dynamic, gets in the way of testing.
-  set someSomeProperty(v) {}
+  set someSomeProperty(int v) {}
 }
 
 var someTopLevelField = 9;
 
 int get someTopLevelGetter => 42;
 
-set someTopLevelSetter(v) {}
+set someTopLevelSetter(int v) {}
 
 void someTopLevelMember() {}
 

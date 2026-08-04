@@ -65,7 +65,10 @@ class PresubmitCommand extends Command {
         final pathsToFormat = _getPathsToFormat(p);
 
         final formatProcess = await pm.runProcess(
-          CliCommand.dart(['format', ...pathsToFormat], throwOnException: false),
+          CliCommand.dart([
+            'format',
+            ...pathsToFormat,
+          ], throwOnException: false),
           workingDirectory: p.packagePath,
         );
 
@@ -108,10 +111,12 @@ class PresubmitCommand extends Command {
         final pathsToFormat = _getPathsToFormat(p);
 
         final formatProcess = await pm.runProcess(
-          CliCommand.dart(
-            ['format', '--output=none', '--set-exit-if-changed', ...pathsToFormat],
-            throwOnException: false,
-          ),
+          CliCommand.dart([
+            'format',
+            '--output=none',
+            '--set-exit-if-changed',
+            ...pathsToFormat,
+          ], throwOnException: false),
           workingDirectory: p.packagePath,
         );
 
