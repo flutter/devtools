@@ -44,6 +44,10 @@ TODO: Remove this section if there are not any updates.
 * Fix a bug in the TextMate grammar parser that could result in code after
   comments being classified as comments.
   [#9921](https://github.com/flutter/devtools/pull/9921).
+* Fixed an overflow in the debugging controls when the Debugger screen is
+  narrow, such as when DevTools is embedded in an IDE side panel. The controls
+  now scroll horizontally instead of overflowing.
+  [#9942](https://github.com/flutter/devtools/pull/9942)
 
 ## Network profiler updates
 
