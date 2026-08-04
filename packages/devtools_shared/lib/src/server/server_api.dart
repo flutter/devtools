@@ -11,6 +11,7 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:dtd/dtd.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:vm_service/vm_service.dart';
 
@@ -30,11 +31,11 @@ part 'handlers/_app_size.dart';
 part 'handlers/_deeplink.dart';
 part 'handlers/_devtools_extensions.dart';
 part 'handlers/_dtd.dart';
-part 'handlers/_vm_service.dart';
 part 'handlers/_preferences.dart';
 part 'handlers/_release_notes.dart';
 part 'handlers/_storage.dart';
 part 'handlers/_survey.dart';
+part 'handlers/_vm_service.dart';
 
 /// The DevTools server API.
 ///
@@ -68,29 +69,12 @@ class ServerApi {
           dtd,
         );
 
-      // TODO(kenz): remove legacy analytics once the unified analytics rollout
-      // is complete and verified for robustness (est. Fall 2025).
-
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAClientId:
-        // Flutter Tool GA clientId - ONLY get Flutter's clientId if enabled is
-        // true.
         return _encodeResponse(
-          LocalFileSystem.flutterStoreExists()
-              ? _flutterStore.flutterClientId
-              : '',
+          fileSystem.flutterStoreExists ? _flutterStore.flutterClientId : '',
           api: api,
         );
-
-      // ----- DevTools Store. -----
-
-      case apiResetDevTools:
-        _devToolsStore.reset();
-        return _encodeResponse(true, api: api);
-      case apiGetDevToolsFirstRun:
-        // Has DevTools been run first time? To bring up analytics dialog.
-        final isFirstRun = _devToolsStore.isFirstRun;
-        return _encodeResponse(isFirstRun, api: api);
 
       // ----- Preferences api. -----
       case PreferencesApi.getPreferenceValue:
@@ -237,16 +221,16 @@ class ServerApi {
         : null;
   }
 
-  /// Accessing DevTools store file e.g., ~/.flutter-devtools/.devtools
+  /// Accessing DevTools store file e.g., `~/.flutter-devtools/.devtools`.
   static final _devToolsStore = DevToolsUsage();
 
-  /// Accessing Flutter store file e.g., ~/.flutter
+  /// Accessing Flutter store file e.g., `~/.flutter`.
   static final _flutterStore = FlutterStore();
 
   static DevToolsUsage get devToolsPreferences => _devToolsStore;
 
   /// Provides read and write access to DevTools options files
-  /// (e.g. path/to/app/root/devtools_options.yaml).
+  /// (e.g. `path/to/app/root/devtools_options.yaml`).
   static final _devToolsOptions = DevToolsOptions();
 
   /// Logs a page view in the DevTools server.
@@ -283,10 +267,7 @@ class ServerApi {
     return shelf.Response(
       HttpStatus.internalServerError,
       body: error != null || logs != null
-          ? jsonEncode(<String, Object?>{
-              if (error != null) errorKey: error,
-              if (logs != null) logsKey: logs,
-            })
+          ? jsonEncode({errorKey: ?error, logsKey: ?logs})
           : null,
     );
   }

@@ -577,7 +577,6 @@ class CpuProfileData with Serializable {
     final stackFrames =
         await _CpuStackFrameGenerator(
           isolateId: isolateId,
-          cpuSamples: cpuSamples,
           profileMetaData: profileMetaData,
         ).generate(
           treeRoot: _CpuProfileTimelineTree.fromCpuSamples(
@@ -1175,11 +1174,6 @@ class CpuProfileStore {
     _profilesByTime.clear();
     _profilesByLabel.clear();
   }
-
-  void debugPrintKeys() {
-    _log.info('_profilesByLabel: ${_profilesByLabel.keys}');
-    _log.info('_profilesByTime: ${_profilesByTime.keys}');
-  }
 }
 
 class _CpuProfileTimelineTree {
@@ -1329,7 +1323,7 @@ class _CpuProfileTimelineTree {
 }
 
 /// A generator class for creating a set of [CpuStackFrame]s from a
-/// [vm_service.CpuSamples] object.
+/// [_CpuProfileTimelineTree] object.
 ///
 /// This class is responsible for traversing the call stacks of a CPU profile,
 /// creating a [CpuStackFrame] for each unique frame, and assigning a unique
@@ -1339,12 +1333,10 @@ class _CpuProfileTimelineTree {
 class _CpuStackFrameGenerator {
   _CpuStackFrameGenerator({
     required this.isolateId,
-    required this.cpuSamples,
     required this.profileMetaData,
   });
 
   final String isolateId;
-  final vm_service.CpuSamples cpuSamples;
   final CpuProfileMetaData profileMetaData;
 
   final _stackFrames = <String, CpuStackFrame>{};

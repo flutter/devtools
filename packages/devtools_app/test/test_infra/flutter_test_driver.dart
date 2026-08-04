@@ -43,16 +43,8 @@ abstract class FlutterTestDriver {
   final errorBuffer = StringBuffer();
   late String lastResponse;
   late Uri _vmServiceWsUri;
-  bool hasExited = false;
 
   VmServiceWrapper? vmService;
-
-  String get lastErrorInfo => errorBuffer.toString();
-
-  Stream<String> get stderr => stderrController.stream;
-  Stream<String> get stdout => stdoutController.stream;
-
-  Uri get vmServiceUri => _vmServiceWsUri;
 
   String _debugPrint(String msg) {
     const maxLength = 500;
@@ -94,7 +86,6 @@ abstract class FlutterTestDriver {
     unawaited(
       proc.exitCode.then((int code) {
         _debugPrint('Process exited ($code)');
-        hasExited = true;
       }),
     );
     transformToLines(

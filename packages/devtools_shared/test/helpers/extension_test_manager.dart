@@ -94,8 +94,9 @@ class ExtensionTestManager {
     // Generate the .dart_tool/package_config.json file for each Dart package.
     final testDirectoryContents = testDirectory.listSync();
     expect(testDirectoryContents.length, 2);
-    final packageRoots =
-        Directory.fromUri(packagesRootUri).listSync().whereType<Directory>();
+    final packageRoots = Directory.fromUri(
+      packagesRootUri,
+    ).listSync().whereType<Directory>();
     expect(packageRoots.length, 4);
 
     for (final packageRoot in packageRoots) {
@@ -103,11 +104,10 @@ class ExtensionTestManager {
 
       // Run `dart pub get` on this package to generate the
       // `.dart_tool/package_config.json` file.
-      final process = await Process.run(
-        Platform.resolvedExecutable,
-        ['pub', 'get'],
-        workingDirectory: packageRoot.path,
-      );
+      final process = await Process.run(Platform.resolvedExecutable, [
+        'pub',
+        'get',
+      ], workingDirectory: packageRoot.path);
       if (process.exitCode != 0) {
         throw Exception(
           'Encountered error while running pub get. Exit code: '
@@ -174,13 +174,13 @@ class ExtensionTestManager {
 
   void setupWorkspace(TestPackage package) {
     File(
-      p.join(
-        testDirectory.path,
-        'packages',
-        'workspace_root',
-        'pubspec.yaml',
-      ),
-    )
+        p.join(
+          testDirectory.path,
+          'packages',
+          'workspace_root',
+          'pubspec.yaml',
+        ),
+      )
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 name: _
@@ -190,14 +190,14 @@ workspace:
   - ${package.name}
 ''');
     File(
-      p.join(
-        testDirectory.path,
-        'packages',
-        'workspace_root',
-        package.name,
-        'pubspec.yaml',
-      ),
-    )
+        p.join(
+          testDirectory.path,
+          'packages',
+          'workspace_root',
+          package.name,
+          'pubspec.yaml',
+        ),
+      )
       ..createSync(recursive: true)
       ..writeAsStringSync('''
 ${package.pubspecContent}
@@ -244,12 +244,13 @@ resolution: workspace
       ..createSync(recursive: true);
     _packagesRootUri = Uri.file(packagesDirectory.uri.toFilePath());
 
-    final projectRootDirectory =
-        Directory(p.join(packagesDirectory.path, package.name))
-          ..createSync(recursive: true);
+    final projectRootDirectory = Directory(
+      p.join(packagesDirectory.path, package.name),
+    )..createSync(recursive: true);
     if (isRuntimeRoot) {
-      final directoryPath =
-          Uri.file(projectRootDirectory.uri.toFilePath()).toString();
+      final directoryPath = Uri.file(
+        projectRootDirectory.uri.toFilePath(),
+      ).toString();
       // Remove the trailing slash and set the value of [packagesRoot].
       _runtimeAppRoot = directoryPath.substring(0, directoryPath.length - 1);
     }
@@ -267,9 +268,9 @@ resolution: workspace
         package.relativePathFromExtensions,
       ),
     )..createSync(recursive: true);
-    final extensionDir =
-        Directory(p.join(extensionDirectory.path, 'extension', 'devtools'))
-          ..createSync(recursive: true);
+    final extensionDir = Directory(
+      p.join(extensionDirectory.path, 'extension', 'devtools'),
+    )..createSync(recursive: true);
     Directory(p.join(extensionDir.path, 'build')).createSync(recursive: true);
 
     File(p.join(extensionDir.path, 'config.yaml'))
@@ -288,8 +289,9 @@ TestPackage createTestPackageFrom(
 }) {
   return TestPackage(
     name: originalPackage.name,
-    dependencies:
-        includeDependenciesWithExtensions ? originalPackage.dependencies : [],
+    dependencies: includeDependenciesWithExtensions
+        ? originalPackage.dependencies
+        : [],
     pathToExtensions: originalPackage.pathToExtensions,
   );
 }
@@ -383,9 +385,9 @@ class TestPackageWithExtension {
     required this.isPubliclyHosted,
     required this.packageVersion,
     String? relativePathFromExtensions,
-  })  : assert(isPubliclyHosted == (packageVersion != null)),
-        relativePathFromExtensions =
-            relativePathFromExtensions ?? name.toLowerCase();
+  }) : assert(isPubliclyHosted == (packageVersion != null)),
+       relativePathFromExtensions =
+           relativePathFromExtensions ?? name.toLowerCase();
 
   final String name;
   final String issueTracker;
@@ -400,7 +402,8 @@ class TestPackageWithExtension {
   /// Uses the paths separator for the current platform.
   final String relativePathFromExtensions;
 
-  String get configYamlContent => '''
+  String get configYamlContent =>
+      '''
 name: $name
 issueTracker: $issueTracker
 version: $version
@@ -408,7 +411,8 @@ materialIconCodePoint: $materialIconCodePoint
 ${!requiresConnection ? 'requiresConnection: false' : ''}
 ''';
 
-  String get pubspecContent => '''
+  String get pubspecContent =>
+      '''
 name: ${name.toLowerCase()}
 environment:
   sdk: ">=3.4.0-282.1.beta <4.0.0"
@@ -426,7 +430,8 @@ class TestPackage {
   final List<TestPackageWithExtension> dependencies;
   final String pathToExtensions;
 
-  String get pubspecContent => '''
+  String get pubspecContent =>
+      '''
 name: $name
 environment:
   sdk: "^3.5.0"

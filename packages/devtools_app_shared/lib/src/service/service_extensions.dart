@@ -201,6 +201,13 @@ final togglePlatformMode = ServiceExtension<String>(
   values: ['iOS', 'android', 'fuchsia', 'macOS', 'linux'],
 );
 
+/// Override the platform brightness (light mode, dark mode, or system default).
+final brightnessMode = ServiceExtension<String>(
+  extension:
+      '$flutterExtensionPrefix${FoundationServiceExtensions.brightnessOverride.name}',
+  values: ['system', 'Brightness.light', 'Brightness.dark'],
+);
+
 /// Toggle whether interacting with the device selects widgets or triggers
 /// normal interactions.
 final toggleSelectWidgetMode = ToggleableServiceExtension<bool>(
@@ -259,6 +266,7 @@ final _extensionDescriptions = <ServiceExtension<Object>>[
   toggleSelectWidgetMode,
   countWidgetBuilds,
   profilePlatformChannels,
+  brightnessMode,
 ];
 
 /// Service extensions that are not safe to call unless a frame has already
@@ -281,6 +289,7 @@ final _unsafeBeforeFirstFrameFlutterExtensions = Set.of(
     enableOnDeviceInspector,
     togglePlatformMode,
     slowAnimations,
+    brightnessMode,
   ].map((extension) => extension.extension),
 );
 

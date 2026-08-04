@@ -206,6 +206,7 @@ class _TextInputState<T> extends State<_TextInput<T>>
     with _PropertyInputMixin<_TextInput<T>, T>, AutoDisposeMixin {
   static const _paddingDiffComparedToDropdown = 1.0;
 
+  // ignore: dispose-fields, false positive. Disposed via autoDisposeFocusNode.
   late final FocusNode _focusNode;
 
   late final TextEditingController _controller;
@@ -224,6 +225,13 @@ class _TextInputState<T> extends State<_TextInput<T>>
       // Edit property when clicking or tabbing away from input.
       await _editProperty();
     });
+    autoDisposeFocusNode(_focusNode);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override

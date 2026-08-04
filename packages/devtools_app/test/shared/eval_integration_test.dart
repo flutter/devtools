@@ -14,6 +14,7 @@ import '../test_infra/flutter_test_environment.dart';
 void main() {
   final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
+    useTempDirectory: true,
   );
 
   late Disposable isAlive;
@@ -70,7 +71,7 @@ void main() {
           expect(instance2.classRef!.name, '_Future');
         },
         timeout: const Timeout.factor(2),
-        // TODO(https://github.com/flutter/devtools/issues/6998): if this flake
+        // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
         // is addressed, we can unskip this for the Flutter customer tests.
         tags: skipForCustomerTestsTag,
       );
@@ -99,7 +100,7 @@ void main() {
           expect(instance.valueAsString, '42');
         },
         timeout: const Timeout.factor(2),
-        // TODO(https://github.com/flutter/devtools/issues/6998): if this flake
+        // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
         // is addressed, we can unskip this for the Flutter customer tests.
         tags: skipForCustomerTestsTag,
       );
@@ -151,10 +152,12 @@ void main() {
           expect(error.valueAsString, 'foo');
         },
         timeout: const Timeout.factor(2),
-        // TODO(https://github.com/flutter/devtools/issues/6998): if this flake
+        // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
         // is addressed, we can unskip this for the Flutter customer tests.
         tags: skipForCustomerTestsTag,
       );
-    });
+      // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
+      // is addressed, we can remove the retry.
+    }, retry: 3);
   });
 }

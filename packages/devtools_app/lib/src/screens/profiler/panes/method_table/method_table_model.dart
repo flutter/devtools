@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 
 import '../../../../shared/primitives/graph.dart';
 import '../../../../shared/primitives/utils.dart';
@@ -136,6 +137,7 @@ $display ($totalCount samples)
 ''';
   }
 
+  @visibleForTesting
   MethodTableGraphNode copy() {
     return MethodTableGraphNode(
       name: name,

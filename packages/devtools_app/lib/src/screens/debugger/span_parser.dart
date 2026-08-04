@@ -3,10 +3,11 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:collection';
-import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:string_scanner/string_scanner.dart';
+
+import '../../shared/primitives/utils.dart';
 
 //TODO(jacobr): cleanup.
 /// A namespace for [SpanParser] utilities.
@@ -68,7 +69,7 @@ class Grammar {
 
   @override
   String toString() {
-    return const JsonEncoder.withIndent('  ').convert({
+    return prettyPrintJson({
       'name': name,
       'scopeName': scopeName,
       'topLevelMatcher': topLevelMatcher.toJson(),
@@ -127,13 +128,13 @@ class ScopeSpan {
     );
 
     while (!splitScanner.isDone) {
-      if (splitScanner.matches(cond)) {
+      if (splitScanner.matchesOnCurrentLine(cond)) {
         // Update the end position for this span as it's been fully processed.
         current._endLocation = splitScanner.location;
         splitSpans.add(current);
 
         // Move the scanner position past the matched condition.
-        splitScanner.scan(cond);
+        splitScanner.scanOnCurrentLine(cond);
 
         // Create a new span based on the current position.
         current = ScopeSpan(
@@ -273,7 +274,7 @@ class _SimpleMatcher extends GrammarMatcher {
   @override
   bool scan(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
     final location = scanner.location;
-    if (scanner.scan(match)) {
+    if (scanner.scanOnCurrentLine(match)) {
       scopeStack.push(name, location);
       _applyCapture(grammar, scanner, scopeStack, captures, location);
       scopeStack.pop(name, scanner.location);
@@ -307,7 +308,7 @@ class _MultilineMatcher extends GrammarMatcher {
           : RegExp(json['while'] as String, multiLine: true),
       patterns = (json['patterns'] as List<Object?>?)
           ?.cast<Map<String, Object?>>()
-          .map((e) => GrammarMatcher.fromJson(e))
+          .map(GrammarMatcher.fromJson)
           .toList(),
       super._();
 
@@ -361,7 +362,7 @@ class _MultilineMatcher extends GrammarMatcher {
 
   void _scanBegin(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
     final location = scanner.location;
-    if (!scanner.scan(begin)) {
+    if (!scanner.scanOnCurrentLine(begin)) {
       // This shouldn't happen since we've already checked that `begin` matches
       // the beginning of the string.
       throw StateError('Expected ${begin.pattern} to match.');
@@ -403,7 +404,9 @@ class _MultilineMatcher extends GrammarMatcher {
     LineScanner scanner,
     ScopeStack scopeStack,
   ) {
-    while (!scanner.isDone && end != null && !scanner.matches(end!)) {
+    while (!scanner.isDone &&
+        end != null &&
+        !scanner.matchesOnCurrentLine(end!)) {
       bool foundMatch = false;
       for (final pattern in patterns ?? <GrammarMatcher>[]) {
         if (pattern.scan(grammar, scanner, scopeStack)) {
@@ -420,7 +423,7 @@ class _MultilineMatcher extends GrammarMatcher {
 
   void _scanEnd(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
     final location = scanner.location;
-    if (end != null && !scanner.scan(end!)) {
+    if (end != null && !scanner.scanOnCurrentLine(end!)) {
       return;
     }
     _processCaptureHelper(grammar, scanner, scopeStack, endCaptures, location);
@@ -446,7 +449,7 @@ class _MultilineMatcher extends GrammarMatcher {
 
   @override
   bool scan(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
-    if (!scanner.matches(begin)) {
+    if (!scanner.matchesOnCurrentLine(begin)) {
       return false;
     }
 
@@ -461,7 +464,9 @@ class _MultilineMatcher extends GrammarMatcher {
       // Find the range of the string that is matched by the while condition.
       final start = scanner.position;
       _skipLine(scanner);
-      while (!scanner.isDone && whileCond != null && scanner.scan(whileCond!)) {
+      while (!scanner.isDone &&
+          whileCond != null &&
+          scanner.scanOnCurrentLine(whileCond!)) {
         _skipLine(scanner);
       }
       final end = scanner.position;
@@ -482,7 +487,7 @@ class _MultilineMatcher extends GrammarMatcher {
       // Process each line until the `while` condition fails.
       while (!contentScanner.isDone &&
           whileCond != null &&
-          contentScanner.scan(whileCond!)) {
+          contentScanner.scanOnCurrentLine(whileCond!)) {
         _scanToEndOfLine(grammar, contentScanner, scopeStack);
       }
 
@@ -520,7 +525,7 @@ class _PatternMatcher extends GrammarMatcher {
   _PatternMatcher(super.json)
     : patterns = (json['patterns'] as List<Object?>?)
           ?.cast<Map<String, Object?>>()
-          .map((e) => GrammarMatcher.fromJson(e))
+          .map(GrammarMatcher.fromJson)
           .toList(),
       super._();
 
@@ -588,19 +593,6 @@ class ScopeStack {
 
   /// Location where the next produced span should begin.
   ScopeStackLocation _nextLocation = ScopeStackLocation.zero;
-
-  /// Adds a scope for a given region.
-  ///
-  /// This method is the same as calling [push] and then [pop] with the same
-  /// args.
-  void add(
-    String? scope, {
-    required ScopeStackLocation start,
-    required ScopeStackLocation end,
-  }) {
-    push(scope, start);
-    pop(scope, end);
-  }
 
   /// Pushes a new scope onto the stack starting at [location].
   void push(String? scope, ScopeStackLocation location) {
@@ -721,6 +713,8 @@ class ScopeStackItem {
   ScopeStackItem(this.scope, this.location);
 
   final String scope;
+
+  // ignore: unused-code, foundational to this data class.
   final ScopeStackLocation location;
 }
 
@@ -769,4 +763,32 @@ class ScopeStackLocation {
 extension LineScannerExtension on LineScanner {
   ScopeStackLocation get location =>
       ScopeStackLocation(position: position, line: line, column: column);
+
+  /// Returns whether [pattern] matches at the scanner's current position
+  /// without consuming a line break.
+  ///
+  /// Use this for all TextMate grammar regular expressions. The TextMate
+  /// [Language Rules documentation](https://macromates.com/manual/en/language_grammars#language_rules)
+  /// specifies that regular expressions are matched against one document line
+  /// at a time, while [LineScanner] searches the remaining source text. Without
+  /// this check, a pattern containing whitespace such as `\s*` can consume text
+  /// from the next line and produce scopes that TextMate would not.
+  bool matchesOnCurrentLine(RegExp pattern) {
+    if (!matches(pattern)) return false;
+
+    final match = lastMatch![0]!;
+    return !match.contains('\n') && !match.contains('\r');
+  }
+
+  /// Scans [pattern] only when it matches without consuming a line break.
+  ///
+  /// Use this instead of [LineScanner.scan] when consuming a TextMate grammar
+  /// regular expression. See [matchesOnCurrentLine] for the rule requiring
+  /// line-local matching. Use the scanner directly only for parser operations
+  /// that intentionally move across lines, such as skipping a physical line.
+  bool scanOnCurrentLine(RegExp pattern) {
+    if (!matchesOnCurrentLine(pattern)) return false;
+
+    return scan(pattern);
+  }
 }

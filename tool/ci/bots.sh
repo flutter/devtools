@@ -15,10 +15,9 @@ echo `pwd`
 
 if [ "$BOT" = "main" ]; then
 
-    # Verify that dart format has been run.
     echo "Checking formatting..."
-    # Here, we use the dart instance from the flutter sdk.
-    $(dirname $(which flutter))/dart format --output=none --set-exit-if-changed .
+    # Here, we use the dart instance from the flutter SDK.
+    dart format --output=none --set-exit-if-changed .
 
     # Make sure the app versions are in sync.
     dt repo-check

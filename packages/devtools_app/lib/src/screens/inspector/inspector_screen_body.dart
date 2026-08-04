@@ -53,7 +53,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   SearchTargetType searchTarget = SearchTargetType.widget;
 
   static const inspectorTreeKey = Key('Inspector Tree');
-  static const minScreenWidthForText = 900.0;
 
   @override
   void initState() {

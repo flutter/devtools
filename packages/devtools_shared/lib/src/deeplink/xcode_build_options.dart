@@ -10,8 +10,10 @@ extension type const XcodeBuildOptions._(Map<String, Object?> _json) {
       XcodeBuildOptions._(jsonDecode(json));
 
   /// Used when the the server can't retrieve ios build options.
-  static const empty =
-      XcodeBuildOptions._({_kConfigurationsKey: [], _kTargetsKey: []});
+  static const empty = XcodeBuildOptions._({
+    _kConfigurationsKey: [],
+    _kTargetsKey: [],
+  });
 
   static const _kConfigurationsKey = 'configurations';
   static const _kTargetsKey = 'targets';

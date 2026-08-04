@@ -6,7 +6,7 @@ description: A repo management tool for DevTools.
 publish_to: none
 
 environment:
-  sdk: ">=3.7.0-160.0.dev <4.0.0"
+  sdk: ^3.11.0
 
 resolution: workspace
 
@@ -28,6 +28,6 @@ dev_dependencies:
     git:
       url: https://github.com/flutter/skills
       path: tool/dart_skills_lint
-      ref: 2420128e11101002e2eac98eb90512103a388714
+      ref: 05e5a45fa412ddbdd1d694eee0c71f4bbaea2617
   logging: ^1.1.1
   test: ^1.25.8

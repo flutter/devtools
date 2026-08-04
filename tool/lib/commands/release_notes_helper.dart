@@ -91,6 +91,8 @@ class ReleaseNotesCommand extends Command {
     final websiteReleaseNotesDir = Directory(
       p.join(
         websiteRepoPath,
+        'sites',
+        'docs',
         'src',
         'content',
         'tools',
@@ -141,7 +143,8 @@ class ReleaseNotesCommand extends Command {
       }
     }
 
-    final metadataHeader = '''---
+    final metadataHeader =
+        '''---
 title: DevTools $releaseNotesVersion release notes
 shortTitle: $releaseNotesVersion release notes
 breadcrumb: $releaseNotesVersion

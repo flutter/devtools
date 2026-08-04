@@ -56,7 +56,6 @@ class TestDeepLinksController extends DeepLinksController {
 
   List<String> fakeAndroidDeepLinks = [];
   bool hasAndroidDomainErrors = false;
-  bool hasAndroidPathErrors = false;
   String iosValidationResponse = '';
   List<String> fakeIosDomains = [];
 

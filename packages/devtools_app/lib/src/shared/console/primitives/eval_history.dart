@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:meta/meta.dart';
+
 /// Store and manipulate the expression evaluation history.
 class EvalHistory {
   var _historyPosition = -1;
 
   /// Get the expression evaluation history.
+  @visibleForTesting
   List<String> get evalHistory => _evalHistory.toList();
 
   final _evalHistory = <String>[];

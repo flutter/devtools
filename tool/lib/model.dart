@@ -114,21 +114,20 @@ class DevToolsRepo {
         // Do not include the top level devtools/packages directory in the results
         // even though it has a pubspec.yaml file. Also skip any directories
         // specified by [skip].
-        final reason =
-            isTopLevelPackagesDir
-                ? 'each DevTools package is analyzed individually'
-                : '${skip.toString()} directories are intentionally skipped';
+        final reason = isTopLevelPackagesDir
+            ? 'each DevTools package is analyzed individually'
+            : '${skip.toString()} directories are intentionally skipped';
         print('Skipping ${dir.path} in _collectPackages because $reason.');
       } else {
         final ancestor = result.firstWhereOrNull(
           (p) =>
-          // Remove the last segment of [dir]'s pathSegments to ensure we
-          // are only checking ancestors and not sibling directories with
-          // similar names.
-          (List.from(dir.uri.pathSegments)..safeRemoveLast())
-              // TODO(kenz): this may cause issues for Windows paths.
-              .join('/')
-              .startsWith(p.packagePath),
+              // Remove the last segment of [dir]'s pathSegments to ensure we
+              // are only checking ancestors and not sibling directories with
+              // similar names.
+              (List.from(dir.uri.pathSegments)..safeRemoveLast())
+                  // TODO(kenz): this may cause issues for Windows paths.
+                  .join('/')
+                  .startsWith(p.packagePath),
         );
         final ancestorDirectoryAdded = ancestor != null;
         if (!includeSubdirectories && ancestorDirectoryAdded) {
@@ -243,8 +242,20 @@ class FlutterSdk {
   }
 
   static FlutterSdk findFromPath(String sdkPath) {
-    if (path.basename(path.dirname(sdkPath)) == 'bin') {
-      return FlutterSdk._(path.dirname(path.dirname(sdkPath)));
+    var resolvedPath = sdkPath;
+    try {
+      resolvedPath = File(sdkPath).resolveSymbolicLinksSync();
+    } catch (_) {
+      // Fallback to the unresolved path if resolution fails.
+    }
+
+    final resolvedPathParent = path.dirname(resolvedPath);
+    if (path.basename(resolvedPathParent) == 'bin') {
+      return FlutterSdk._(path.dirname(resolvedPathParent));
+    } else if (path.basename(resolvedPath) == 'bin') {
+      return FlutterSdk._(resolvedPathParent);
+    } else if (Directory(path.join(resolvedPath, 'bin')).existsSync()) {
+      return FlutterSdk._(resolvedPath);
     }
 
     throw Exception('Unable to locate the Flutter SDK at "$sdkPath"');
@@ -259,10 +270,7 @@ class FlutterSdk {
     final result = Process.runSync(whichCommand, ['flutter']);
     if (result.exitCode == 0) {
       final sdkPath = result.stdout.toString().split('\n').first.trim();
-      // 'flutter/bin'
-      if (path.basename(path.dirname(sdkPath)) == 'bin') {
-        return FlutterSdk._(path.dirname(path.dirname(sdkPath)));
-      }
+      return findFromPath(sdkPath);
     }
 
     throw Exception('Unable to locate the Flutter SDK on PATH');

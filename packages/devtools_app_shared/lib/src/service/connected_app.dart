@@ -52,8 +52,8 @@ class ConnectedApp {
   String? _operatingSystem;
 
   // TODO(kenz): investigate if we can use `libraryUriAvailableNow` instead.
-  Future<bool> get isFlutterApp async => _isFlutterApp ??=
-      await serviceManager!.libraryUriAvailable(flutterLibraryUri);
+  Future<bool> get isFlutterApp async => _isFlutterApp ??= await serviceManager!
+      .libraryUriAvailable(flutterLibraryUri);
 
   bool? get isFlutterAppNow {
     assert(_isFlutterApp != null);
@@ -85,8 +85,8 @@ class ConnectedApp {
   bool? _isProfileBuild;
 
   // TODO(kenz): investigate if we can use `libraryUriAvailableNow` instead.
-  Future<bool> get isDartWebApp async => _isDartWebApp ??=
-      await serviceManager!.libraryUriAvailable(dartHtmlLibraryUri);
+  Future<bool> get isDartWebApp async => _isDartWebApp ??= await serviceManager!
+      .libraryUriAvailable(dartHtmlLibraryUri);
 
   bool? get isDartWebAppNow {
     assert(_isDartWebApp != null);
@@ -189,14 +189,14 @@ class ConnectedApp {
   }
 
   Map<String, Object?> toJson() => {
-        isFlutterAppKey: isFlutterAppNow,
-        isProfileBuildKey: isProfileBuildNow,
-        isDartWebAppKey: isDartWebAppNow,
-        isRunningOnDartVMKey: isRunningOnDartVM,
-        operatingSystemKey: operatingSystem,
-        if (flutterVersionNow != null && !flutterVersionNow!.unknown)
-          flutterVersionKey: flutterVersionNow!.version,
-      };
+    isFlutterAppKey: isFlutterAppNow,
+    isProfileBuildKey: isProfileBuildNow,
+    isDartWebAppKey: isDartWebAppNow,
+    isRunningOnDartVMKey: isRunningOnDartVM,
+    operatingSystemKey: operatingSystem,
+    if (flutterVersionNow != null && !flutterVersionNow!.unknown)
+      flutterVersionKey: flutterVersionNow!.version,
+  };
 }
 
 final class OfflineConnectedApp extends ConnectedApp {
@@ -215,7 +215,8 @@ final class OfflineConnectedApp extends ConnectedApp {
       isProfileBuildNow: json[ConnectedApp.isProfileBuildKey] as bool?,
       isDartWebAppNow: json[ConnectedApp.isDartWebAppKey] as bool?,
       isRunningOnDartVM: json[ConnectedApp.isRunningOnDartVMKey] as bool?,
-      operatingSystem: (json[ConnectedApp.operatingSystemKey] as String?) ??
+      operatingSystem:
+          (json[ConnectedApp.operatingSystemKey] as String?) ??
           ConnectedApp.unknownOS,
     );
   }

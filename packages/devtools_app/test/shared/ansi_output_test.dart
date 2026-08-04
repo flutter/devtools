@@ -315,3 +315,37 @@ void main() {
     );
   });
 }
+
+extension on StyledText {
+  bool get dim => (textStyle & StyledText.kDim) == StyledText.kDim;
+  bool get italic => (textStyle & StyledText.kItalic) == StyledText.kItalic;
+  bool get underline =>
+      (textStyle & StyledText.kUnderline) == StyledText.kUnderline;
+  bool get strikethrough =>
+      (textStyle & StyledText.kStrikethrough) == StyledText.kStrikethrough;
+  bool get blink => (textStyle & StyledText.kBlink) == StyledText.kBlink;
+  bool get reverse => (textStyle & StyledText.kReverse) == StyledText.kReverse;
+  bool get invisible =>
+      (textStyle & StyledText.kInvisible) == StyledText.kInvisible;
+
+  bool get hasStyling => textStyle != 0 || fgColor != null || bgColor != null;
+
+  @visibleForTesting
+  String get describeStyle {
+    String hex(int value) => value.toRadixString(16).padLeft(2, '0');
+    String color(List<int> rgb) => '${hex(rgb[0])}${hex(rgb[2])}${hex(rgb[2])}';
+
+    return [
+      if (bgColor != null) 'background #${color(bgColor!)}',
+      if (fgColor != null) 'color #${color(fgColor!)}',
+      if (bold) 'bold',
+      if (dim) 'dim',
+      if (italic) 'italic',
+      if (underline) 'underline',
+      if (strikethrough) 'strikethrough',
+      if (blink) 'blink',
+      if (reverse) 'reverse',
+      if (invisible) 'invisible',
+    ].join(', ');
+  }
+}

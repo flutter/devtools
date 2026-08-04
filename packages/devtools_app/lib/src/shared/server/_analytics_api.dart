@@ -4,21 +4,6 @@
 
 part of 'server.dart';
 
-/// Request DevTools property value 'firstRun' (GA dialog) stored in the file
-/// '~/flutter-devtools/.devtools'.
-Future<bool> isFirstRun() async {
-  bool firstRun = false;
-  if (isDevToolsServerAvailable) {
-    final resp = await request(apiGetDevToolsFirstRun);
-    if (resp?.statusCode == 200) {
-      firstRun = json.decode(resp!.body);
-    } else {
-      logWarning(resp, apiGetDevToolsFirstRun);
-    }
-  }
-  return firstRun;
-}
-
 /// Requests the Flutter client id from the Flutter store file ~\.flutter.
 ///
 /// If an empty String is returned, this means that Flutter Tool has never been

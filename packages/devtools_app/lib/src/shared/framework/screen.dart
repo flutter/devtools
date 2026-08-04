@@ -73,6 +73,8 @@ enum ScreenMetaData {
   debugger(
     'debugger',
     title: 'Debugger',
+    // TODO(kenz): see if we can use a meterial icon or an asset icon so that
+    // we can remove the Octicons font family.
     icon: Octicons.bug,
     requiresDebugBuild: true,
     tutorialVideoTimestamp: '?t=513',
@@ -93,6 +95,12 @@ enum ScreenMetaData {
     iconAsset: 'icons/app_bar/logging.png',
     supportsWebServerDevice: true,
     tutorialVideoTimestamp: '?t=558',
+  ),
+  accessibility(
+    'accessibility',
+    title: 'Accessibility',
+    icon: Icons.accessibility,
+    requiresFlutter: true,
   ),
   provider(
     'provider',
@@ -115,6 +123,7 @@ enum ScreenMetaData {
     iconAsset: 'icons/app_bar/deep_links.png',
     requiresConnection: false,
     requiresDartVm: true,
+    requiresFlutter: true,
   ),
   vmTools(
     'vm-tools',

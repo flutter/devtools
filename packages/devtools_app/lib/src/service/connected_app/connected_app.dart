@@ -87,6 +87,7 @@ class AppState extends DisposableController with AutoDisposeControllerMixin {
   void dispose() {
     _variables.dispose();
     _currentFrame.dispose();
+    _dapVariables.dispose();
     super.dispose();
   }
 }

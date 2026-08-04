@@ -46,8 +46,6 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
   final _autoCompleteController = AutoCompleteController(evalTextFieldKey);
 
-  int historyPosition = -1;
-
   String _activeWord = '';
 
   List<String> _matches = [];
@@ -318,7 +316,6 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     serviceConnection.consoleService.appendStdio('> $expressionText\n');
     setState(() {
-      historyPosition = -1;
       serviceConnection.appState.evalHistory.pushEvalHistory(expressionText);
     });
 

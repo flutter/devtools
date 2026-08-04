@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+// ignore_for_file: unused-code, this file is exported via config specific exports.
+
 import 'package:web/web.dart';
 
 Map<String, String> loadQueryParams({String Function(String)? urlModifier}) {
@@ -27,13 +29,10 @@ void updateQueryParameter(String key, String? value, {bool reload = false}) {
   } else {
     newQueryParams[key] = value;
   }
-  final newUri = Uri.parse(window.location.toString())
-      .replace(queryParameters: newQueryParams);
-  window.history.replaceState(
-    window.history.state,
-    '',
-    newUri.toString(),
-  );
+  final newUri = Uri.parse(
+    window.location.toString(),
+  ).replace(queryParameters: newQueryParams);
+  window.history.replaceState(window.history.state, '', newUri.toString());
 
   if (reload) {
     window.location.reload();

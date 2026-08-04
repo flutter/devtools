@@ -62,11 +62,9 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
         future: _editor,
         builder: (context, snapshot) =>
             switch ((snapshot.connectionState, snapshot.data)) {
-              (ConnectionState.done, final editor?) =>
-                _PropertyEditorConnectedPanel(
-                  editor,
-                  controller: _propertyEditorController!,
-                ),
+              (ConnectionState.done, final _) => _PropertyEditorConnectedPanel(
+                controller: _propertyEditorController!,
+              ),
               _ => const CenteredCircularProgressIndicator(),
             },
       ),
@@ -76,9 +74,8 @@ class _PropertyEditorPanelState extends State<PropertyEditorPanel> {
 
 /// The property editor panel shown once we know an editor is available.
 class _PropertyEditorConnectedPanel extends StatefulWidget {
-  const _PropertyEditorConnectedPanel(this.editor, {required this.controller});
+  const _PropertyEditorConnectedPanel({required this.controller});
 
-  final EditorClient editor;
   final PropertyEditorController controller;
 
   @override

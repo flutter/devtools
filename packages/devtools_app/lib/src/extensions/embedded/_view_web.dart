@@ -46,6 +46,7 @@ class _EmbeddedExtensionState extends State<EmbeddedExtension>
 
   @override
   void dispose() {
+    _embeddedExtensionController.dispose();
     iFrameController.dispose();
     super.dispose();
   }

@@ -66,7 +66,6 @@ class ErrorBadgeManager extends DisposableController
 
       final inspectableError = _extractInspectableError(e);
       if (inspectableError != null) {
-        incrementBadgeCount(InspectorScreen.id);
         appendError(InspectorScreen.id, inspectableError);
       }
     }
@@ -113,6 +112,10 @@ class ErrorBadgeManager extends DisposableController
   }
 
   void incrementBadgeCount(String screenId) {
+    if (_activeErrors.containsKey(screenId)) {
+      return;
+    }
+
     final notifier = _errorCountNotifier(screenId);
     if (notifier == null) return;
 
@@ -124,12 +127,40 @@ class ErrorBadgeManager extends DisposableController
     final errors = _activeErrors[screenId];
     if (errors == null) return;
 
+    final previousError = errors.value[error.id];
+
     // Build a new map with the new error. Adding to the existing map
     // won't cause the ValueNotifier to fire (and it's not permitted to call
     // notifyListeners() directly).
     final newValue = LinkedHashMap<String, DevToolsError>.of(errors.value);
     newValue[error.id] = error;
     errors.value = newValue;
+
+    if (previousError == null) {
+      if (!error.read) {
+        _incrementUnreadCount(screenId);
+      }
+      return;
+    }
+
+    if (previousError.read && !error.read) {
+      _incrementUnreadCount(screenId);
+    } else if (!previousError.read && error.read) {
+      _decrementUnreadCount(screenId);
+    }
+  }
+
+  void _incrementUnreadCount(String screenId) {
+    final notifier = _errorCountNotifier(screenId);
+    if (notifier == null) return;
+    notifier.value = notifier.value + 1;
+  }
+
+  void _decrementUnreadCount(String screenId) {
+    final notifier = _errorCountNotifier(screenId);
+    if (notifier == null) return;
+    if (notifier.value == 0) return;
+    notifier.value = notifier.value - 1;
   }
 
   ValueListenable<int> errorCountNotifier(String screenId) {
@@ -150,25 +181,20 @@ class ErrorBadgeManager extends DisposableController
   }
 
   void clearErrorCount(String screenId) {
+    if (_activeErrors.containsKey(screenId)) {
+      return;
+    }
     _activeErrorCounts[screenId]?.value = 0;
   }
 
   void clearErrors(String screenId) {
-    clearErrorCount(screenId);
-    _activeErrors[screenId]?.value = LinkedHashMap<String, DevToolsError>();
-  }
-
-  void filterErrors(String screenId, bool Function(String id) isValid) {
-    final errors = _activeErrors[screenId];
-    if (errors == null) return;
-
-    final oldCount = errors.value.length;
-    final newValue = Map.fromEntries(
-      errors.value.entries.where((e) => isValid(e.key)),
-    );
-    if (newValue.length != oldCount) {
-      errors.value = newValue as LinkedHashMap<String, DevToolsError>;
+    if (!_activeErrors.containsKey(screenId)) {
+      clearErrorCount(screenId);
+      return;
     }
+
+    _activeErrors[screenId]?.value = LinkedHashMap<String, DevToolsError>();
+    _activeErrorCounts[screenId]?.value = 0;
   }
 
   void markErrorAsRead(String screenId, DevToolsError error) {
@@ -188,6 +214,7 @@ class ErrorBadgeManager extends DisposableController
         return MapEntry(e.key, e.value.asRead());
       }),
     );
+    _decrementUnreadCount(screenId);
   }
 }
 

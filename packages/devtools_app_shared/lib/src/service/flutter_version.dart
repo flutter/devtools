@@ -94,14 +94,14 @@ final class FlutterVersion extends SemanticVersion {
 
   @override
   int get hashCode => Object.hash(
-        version,
-        channel,
-        repositoryUrl,
-        frameworkRevision,
-        frameworkCommitDate,
-        engineRevision,
-        dartSdkVersion,
-      );
+    version,
+    channel,
+    repositoryUrl,
+    frameworkRevision,
+    frameworkCommitDate,
+    engineRevision,
+    dartSdkVersion,
+  );
 
   static final _stableVersionRegex = RegExp(r'^\d+\.\d+\.\d+$');
   static final _isNumericRegex = RegExp(r'\d');

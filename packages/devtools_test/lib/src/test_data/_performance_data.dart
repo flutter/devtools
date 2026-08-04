@@ -108244,7 +108244,8 @@ final Map<String, Object?> samplePerformanceData = json.decode('''
       }
     ],
     "displayRefreshRate": 60,
-    "rebuildCountModel": null
+    "rebuildCountModel": null,
+    "selectedTab": 0
   }
 }
 ''');

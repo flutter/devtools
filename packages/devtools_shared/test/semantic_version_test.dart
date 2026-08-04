@@ -44,16 +44,10 @@ void main() {
         preReleaseMajor: 1,
         preReleaseMinor: 2,
       );
-      expect(
-        version.downgrade().toString(),
-        equals('3.2.1'),
-      );
+      expect(version.downgrade().toString(), equals('3.2.1'));
 
       version = SemanticVersion(major: 3, minor: 2, patch: 1);
-      expect(
-        version.downgrade().toString(),
-        equals('3.2.1'),
-      );
+      expect(version.downgrade().toString(), equals('3.2.1'));
       expect(
         version.downgrade(downgradeMajor: true).toString(),
         equals('2.2.1'),
@@ -87,18 +81,27 @@ void main() {
         isTrue,
       );
       expect(
-        SemanticVersion(major: 1, minor: 1, patch: 2)
-            .isSupported(minSupportedVersion: supportedVersion),
+        SemanticVersion(
+          major: 1,
+          minor: 1,
+          patch: 2,
+        ).isSupported(minSupportedVersion: supportedVersion),
         isTrue,
       );
       expect(
-        SemanticVersion(major: 1, minor: 2, patch: 1)
-            .isSupported(minSupportedVersion: supportedVersion),
+        SemanticVersion(
+          major: 1,
+          minor: 2,
+          patch: 1,
+        ).isSupported(minSupportedVersion: supportedVersion),
         isTrue,
       );
       expect(
-        SemanticVersion(major: 2, minor: 1, patch: 1)
-            .isSupported(minSupportedVersion: supportedVersion),
+        SemanticVersion(
+          major: 2,
+          minor: 1,
+          patch: 1,
+        ).isSupported(minSupportedVersion: supportedVersion),
         isTrue,
       );
       expect(
@@ -123,10 +126,7 @@ void main() {
         version.compareTo(SemanticVersion(major: 2, minor: 1, patch: 1)),
         equals(-1),
       );
-      expect(
-        version.compareTo(SemanticVersion(major: 1, minor: 1)),
-        equals(1),
-      );
+      expect(version.compareTo(SemanticVersion(major: 1, minor: 1)), equals(1));
       expect(
         version.compareTo(SemanticVersion(major: 1, minor: 1, patch: 1)),
         equals(0),
@@ -184,8 +184,12 @@ void main() {
         equals('1.1.1'),
       );
       expect(
-        SemanticVersion(major: 1, minor: 1, patch: 1, preReleaseMajor: 17)
-            .toString(),
+        SemanticVersion(
+          major: 1,
+          minor: 1,
+          patch: 1,
+          preReleaseMajor: 17,
+        ).toString(),
         equals('1.1.1-17'),
       );
       expect(

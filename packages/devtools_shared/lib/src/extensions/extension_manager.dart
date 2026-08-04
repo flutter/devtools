@@ -150,9 +150,10 @@ class ExtensionsManager {
       final config = extension.config;
       // TODO(https://github.com/dart-lang/pub/issues/4042): make this check
       // more robust.
-      final isPubliclyHosted = (extension.rootUri.path.contains('pub.dev') ||
-              extension.rootUri.path.contains('pub.flutter-io.cn'))
-          .toString();
+      final isPubliclyHosted =
+          (extension.rootUri.path.contains('pub.dev') ||
+                  extension.rootUri.path.contains('pub.flutter-io.cn'))
+              .toString();
 
       // This should be relative to the 'extension/devtools/' directory and
       // defaults to 'build';
@@ -179,8 +180,8 @@ class ExtensionsManager {
             devtoolsOptionsFileName,
           ),
           DevToolsExtensionConfig.isPubliclyHostedKey: isPubliclyHosted,
-          DevToolsExtensionConfig.detectedFromStaticContextKey:
-              staticContext.toString(),
+          DevToolsExtensionConfig.detectedFromStaticContextKey: staticContext
+              .toString(),
         });
         devtoolsExtensions.add(extensionConfig);
       } on StateError catch (e) {

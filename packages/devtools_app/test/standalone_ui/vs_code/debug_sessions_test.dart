@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/constants.dart';
-import 'package:devtools_app/src/shared/editor/api_classes.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/debug_sessions.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -14,22 +13,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../test_infra/scenes/standalone_ui/editor_service/simulated_editor.dart';
 import '../../test_infra/utils/sidebar_utils.dart';
 
 void main() {
   const windowSize = Size(2000.0, 2000.0);
 
   late MockEditorClient mockEditorClient;
-  late final Map<String, EditorDevice> deviceMap;
 
   setUpAll(() {
     // Set test mode so that the debug list of extensions will be used.
     setTestMode();
     setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
-
-    final devices = stubbedDevices.map((d) => MapEntry(d.id, d));
-    deviceMap = {for (final d in devices) d.key: d.value};
   });
 
   setUp(() {
@@ -52,7 +46,6 @@ void main() {
           sessions: Map.fromEntries(
             _debugSessions.map((s) => MapEntry(s.id, s)),
           ),
-          devices: deviceMap,
         ),
       ),
     );

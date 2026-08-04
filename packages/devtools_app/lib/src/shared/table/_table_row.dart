@@ -324,8 +324,8 @@ class _TableRowState<T> extends State<TableRow<T>>
     final searchAwareBackgroundColor = isSearchMatch
         ? Color.alphaBlend(
             isActiveSearchMatch
-                ? activeSearchMatchColorOpaque
-                : searchMatchColorOpaque,
+                ? activeSearchMatchColorTranslucent
+                : searchMatchColorTranslucent,
             backgroundColor,
           )
         : backgroundColor;

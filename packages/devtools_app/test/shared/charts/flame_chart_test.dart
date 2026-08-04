@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler_controller.dart';
 import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
@@ -623,6 +624,56 @@ void main() {
           isNull,
         );
       });
+    });
+
+    testWidgets('re-lays out elements when container width changes', (
+      WidgetTester tester,
+    ) async {
+      final transformer = CpuProfileTransformer();
+      final cpuProfileData = CpuProfileData.fromJson(cpuProfileResponseJson);
+      await tester.runAsync(() async {
+        await transformer.processData(cpuProfileData, processId: 'test');
+      });
+
+      flameChart = CpuProfileFlameChart(
+        data: cpuProfileData,
+        width: 1000.0,
+        height: 1000.0,
+        selectionNotifier: ValueNotifier<CpuStackFrame?>(null),
+        searchMatchesNotifier: controller.searchMatches,
+        activeSearchMatchNotifier: controller.activeSearchMatch,
+        onDataSelected: (_) {},
+      );
+
+      await pumpFlameChart(tester);
+      expect(find.byWidget(flameChart), findsOneWidget);
+      final FlameChartState state = tester.state(find.byWidget(flameChart));
+
+      // Find first row that has nodes.
+      final rowWithNodes = state.rows.firstWhere((row) => row.nodes.isNotEmpty);
+      final node = rowWithNodes.nodes[0];
+      final initialNodeWidth = node.rect.width;
+      expect(initialNodeWidth, greaterThan(0.0));
+
+      // Update the flame chart with a new width.
+      flameChart = CpuProfileFlameChart(
+        data: cpuProfileData,
+        width: 2000.0,
+        height: 1000.0,
+        selectionNotifier: ValueNotifier<CpuStackFrame?>(null),
+        searchMatchesNotifier: controller.searchMatches,
+        activeSearchMatchNotifier: controller.activeSearchMatch,
+        onDataSelected: (_) {},
+      );
+      await pumpFlameChart(tester);
+      await tester.pumpAndSettle();
+
+      final updatedRowWithNodes = state.rows.firstWhere(
+        (row) => row.nodes.isNotEmpty,
+      );
+      final updatedNode = updatedRowWithNodes.nodes[0];
+      expect(updatedNode.rect.width, isNot(equals(initialNodeWidth)));
+      expect(updatedNode.rect.width, greaterThan(initialNodeWidth));
     });
   });
 

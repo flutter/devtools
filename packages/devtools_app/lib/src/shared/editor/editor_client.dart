@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+// ignore_for_file: unused-code, this file represents the full editor API.
+
 import 'dart:async';
 
 import 'package:devtools_app_shared/service.dart';
@@ -118,6 +120,15 @@ class EditorClient extends DisposableController
     } catch (e) {
       _log.warning('Failed to fetch registered services: $e');
     }
+  }
+
+  @override
+  void dispose() {
+    _editableArgumentsApiIsRegistered.dispose();
+    unawaited(_activeLocationChangedController.close());
+    unawaited(_eventController.close());
+    unawaited(_editorServiceChangedController.close());
+    super.dispose();
   }
 
   void _handleServiceRegistration({

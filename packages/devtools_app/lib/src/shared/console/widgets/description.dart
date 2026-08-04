@@ -111,7 +111,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         TextSpan(text: name, style: textStyle),
       );
     } else {
-      final approximateIconWidth = IconKind.info.icon.width + iconPadding;
+      final approximateIconWidth = infoIcon.width + iconPadding;
 
       // When there is no name, an icon will be shown with the text spans.
       spanWidth += approximateIconWidth;

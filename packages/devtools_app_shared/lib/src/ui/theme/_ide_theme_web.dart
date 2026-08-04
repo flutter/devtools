@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+// ignore_for_file: unused-code, this file is exported via config specific exports.
+
 import 'package:web/web.dart';
 
 import '../../utils/url/url.dart';
@@ -22,8 +24,9 @@ IdeTheme getIdeTheme() {
   // If the environment has provided a background color, set it immediately
   // to avoid a white page until the first Flutter frame is rendered.
   if (overrides.backgroundColor != null) {
-    document.body!.style.backgroundColor =
-        toCssHexColor(overrides.backgroundColor!);
+    document.body!.style.backgroundColor = toCssHexColor(
+      overrides.backgroundColor!,
+    );
   }
 
   return overrides;

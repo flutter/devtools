@@ -67,9 +67,10 @@ void main() {
         find.byType(ConnectToNewAppButton),
         showingOverlay && !isEmbedded() ? findsOneWidget : findsNothing,
       );
+      // The Reconnect button should be shown in all modes when disconnected.
       expect(
-        find.text('Run a new debug session to reconnect.'),
-        showingOverlay && isEmbedded() ? findsOneWidget : findsNothing,
+        find.text('Reconnect'),
+        showingOverlay ? findsOneWidget : findsNothing,
       );
       expect(
         find.text('Review recent data (offline)'),
@@ -170,5 +171,58 @@ void main() {
     // TODO(kenz): test navigation that occurs by clicking on buttons. This will
     // require either modifying the test wrappers to take a set of routes or
     // writing an integration test for this user journey.
+
+    group('reconnect button', () {
+      testWidgets('shows Reconnect button in embedded mode', (
+        WidgetTester tester,
+      ) async {
+        setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
+        await pumpDisconnectObserver(tester);
+        verifyObserverState(tester, connected: true, showingOverlay: false);
+
+        // Trigger a disconnect.
+        fakeServiceConnectionManager.serviceManager.setConnectedState(false);
+        await tester.pumpAndSettle();
+        verifyObserverState(tester, connected: false, showingOverlay: true);
+
+        // Verify the Reconnect button is present in embedded mode.
+        expect(find.text('Reconnect'), findsOneWidget);
+        // ConnectToNewAppButton should NOT be shown in embedded mode.
+        expect(find.byType(ConnectToNewAppButton), findsNothing);
+      });
+
+      testWidgets('shows Reconnect button in non-embedded mode', (
+        WidgetTester tester,
+      ) async {
+        await pumpDisconnectObserver(tester);
+        verifyObserverState(tester, connected: true, showingOverlay: false);
+
+        // Trigger a disconnect.
+        fakeServiceConnectionManager.serviceManager.setConnectedState(false);
+        await tester.pumpAndSettle();
+        verifyObserverState(tester, connected: false, showingOverlay: true);
+
+        // Both Reconnect and ConnectToNewAppButton should be shown.
+        expect(find.text('Reconnect'), findsOneWidget);
+        expect(find.byType(ConnectToNewAppButton), findsOneWidget);
+      });
+
+      testWidgets('hides overlay when reconnection succeeds', (
+        WidgetTester tester,
+      ) async {
+        await pumpDisconnectObserver(tester);
+        verifyObserverState(tester, connected: true, showingOverlay: false);
+
+        // Trigger a disconnect.
+        fakeServiceConnectionManager.serviceManager.setConnectedState(false);
+        await tester.pumpAndSettle();
+        verifyObserverState(tester, connected: false, showingOverlay: true);
+
+        // Simulate a successful reconnection by setting connected state.
+        fakeServiceConnectionManager.serviceManager.setConnectedState(true);
+        await tester.pumpAndSettle();
+        verifyObserverState(tester, connected: true, showingOverlay: false);
+      });
+    });
   });
 }

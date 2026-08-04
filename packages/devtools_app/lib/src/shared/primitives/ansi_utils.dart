@@ -292,7 +292,6 @@ class _TextPacket {
 
   _PacketKind kind;
   String text = '';
-  String url = '';
 }
 
 /// Chunk of styled text stored in a Dart friendly format.
@@ -327,31 +326,4 @@ class StyledText {
   final List<int>? bgColor;
 
   bool get bold => (textStyle & kBold) == kBold;
-  bool get dim => (textStyle & kDim) == kDim;
-  bool get italic => (textStyle & kItalic) == kItalic;
-  bool get underline => (textStyle & kUnderline) == kUnderline;
-  bool get strikethrough => (textStyle & kStrikethrough) == kStrikethrough;
-  bool get blink => (textStyle & kBlink) == kBlink;
-  bool get reverse => (textStyle & kReverse) == kReverse;
-  bool get invisible => (textStyle & kInvisible) == kInvisible;
-
-  bool get hasStyling => textStyle != 0 || fgColor != null || bgColor != null;
-
-  String get describeStyle {
-    String hex(int value) => value.toRadixString(16).padLeft(2, '0');
-    String color(List<int> rgb) => '${hex(rgb[0])}${hex(rgb[2])}${hex(rgb[2])}';
-
-    return [
-      if (bgColor != null) 'background #${color(bgColor!)}',
-      if (fgColor != null) 'color #${color(fgColor!)}',
-      if (bold) 'bold',
-      if (dim) 'dim',
-      if (italic) 'italic',
-      if (underline) 'underline',
-      if (strikethrough) 'strikethrough',
-      if (blink) 'blink',
-      if (reverse) 'reverse',
-      if (invisible) 'invisible',
-    ].join(', ');
-  }
 }

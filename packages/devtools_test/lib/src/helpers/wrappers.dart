@@ -96,6 +96,7 @@ Widget wrapWithControllers(
   ReleaseNotesController? releaseNotes,
   VMDeveloperToolsController? vmDeveloperTools,
   DTDToolsController? dtdTools,
+  AccessibilityController? accessibility,
   bool includeRouter = true,
   DevToolsQueryParams? queryParams,
 }) {
@@ -170,6 +171,12 @@ Widget wrapWithControllers(
   if (dtdTools != null) {
     screenControllers.register<DTDToolsController>(
       () => dtdTools,
+      offline: offline,
+    );
+  }
+  if (accessibility != null) {
+    screenControllers.register<AccessibilityController>(
+      () => accessibility,
       offline: offline,
     );
   }

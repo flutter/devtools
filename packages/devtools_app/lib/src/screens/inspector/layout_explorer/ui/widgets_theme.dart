@@ -198,7 +198,6 @@ class WidgetTheme {
 class WidgetIcons {
   static const root = 'icons/inspector/widget_icons/root.png';
   static const text = 'icons/inspector/widget_icons/text.png';
-  static const icon = 'icons/inspector/widget_icons/icon.png';
   static const image = 'icons/inspector/widget_icons/image.png';
   static const floatingActionButton =
       'icons/inspector/widget_icons/floatingab.png';

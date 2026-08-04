@@ -6,6 +6,13 @@ include: package:lints/recommended.yaml
 analyzer:
   exclude:
     - flutter-sdk/
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:

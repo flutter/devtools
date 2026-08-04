@@ -65,7 +65,8 @@ extension type _UserAgentSpecificMemoryBreakdownAttributionElement._(JSObject _)
 @JS()
 extension type _UserAgentSpecificMemoryBreakdownAttributionContainerElement._(
   JSObject _
-) implements JSObject {
+)
+    implements JSObject {
   external String get id;
 
   external String get url;

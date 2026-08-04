@@ -13,11 +13,6 @@ class DTDConnectionDisplay extends StatelessWidget {
     required this.onConnectionChange,
   });
 
-  @visibleForTesting
-  static const totalControlsHeight = 45.0;
-  @visibleForTesting
-  static const totalControlsWidth = 415.0;
-
   final SimulatedDevToolsController simController;
   final bool connected;
   final Future<void> Function(String?) onConnectionChange;
@@ -25,7 +20,6 @@ class DTDConnectionDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _UriConnectionDisplay(
-      simController: simController,
       connected: connected,
       connectedLabel: 'Dart Tooling Daemon connection: ',
       disconnectedLabel: 'Dart Tooling Daemon Connection',
@@ -75,24 +69,20 @@ class DtdHelp extends StatelessWidget {
                   'If your DevTools extension interacts with the Dart Tooling '
                   'Daemon (DTD) through ',
               children: [
-                TextSpan(
-                  text: 'dtdManager',
-                  style: theme.boldTextStyle,
-                ),
+                TextSpan(text: 'dtdManager', style: theme.boldTextStyle),
                 const TextSpan(
-                  text: ', then you will need to connect to a local instance '
+                  text:
+                      ', then you will need to connect to a local instance '
                       'of DTD to debug these features in the simulated '
                       'environment. There are multiple ways to access a local '
                       'instance of DTD:\n\n'
                       '1. If you are running a Dart or Flutter application '
                       'from command line, add the ',
                 ),
-                TextSpan(
-                  text: printDtdFlag,
-                  style: theme.boldTextStyle,
-                ),
+                TextSpan(text: printDtdFlag, style: theme.boldTextStyle),
                 const TextSpan(
-                  text: ' flag. This will output a Dart Tooling Daemon URI to '
+                  text:
+                      ' flag. This will output a Dart Tooling Daemon URI to '
                       'the command line that you can copy.',
                 ),
               ],
@@ -119,7 +109,8 @@ class DtdHelp extends StatelessWidget {
           RichText(
             text: TextSpan(
               style: theme.regularTextStyle,
-              text: '2. If you have a Dart or Flutter project open in your IDE '
+              text:
+                  '2. If you have a Dart or Flutter project open in your IDE '
                   '(VS Code, IntelliJ, or Android Studio), the IDE will have '
                   'a running instance of DTD that you can use. Use the '
                   'IDE\'s affordance to find an action (Command Pallette '
@@ -131,7 +122,8 @@ class DtdHelp extends StatelessWidget {
                   style: theme.boldTextStyle,
                 ),
                 const TextSpan(
-                  text: ' action.\n\n'
+                  text:
+                      ' action.\n\n'
                       'Now, you should have a DTD URI in your clipboard. Paste '
                       'this into the "Dart Tooling Daemon Connection" text '
                       'field to connect.',

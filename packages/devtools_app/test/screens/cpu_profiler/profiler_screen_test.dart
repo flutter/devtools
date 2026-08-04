@@ -125,8 +125,7 @@ void main() {
 
       expect(find.byType(CpuProfilerDisabled), findsOneWidget);
       expect(find.byType(ProfileRecordingInstructions), findsNothing);
-      expect(find.byType(RecordButton), findsNothing);
-      expect(find.byType(StopRecordingButton), findsNothing);
+      expect(find.byType(StartStopRecordingButton), findsNothing);
       expect(find.byType(ClearButton), findsNothing);
       expect(find.byType(CpuSamplingRateDropdown), findsNothing);
       expect(find.byType(OpenSaveButtonGroup), findsNothing);

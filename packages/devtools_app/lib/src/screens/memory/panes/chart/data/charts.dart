@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/charts/chart_trace.dart';
 import '../../../../../shared/primitives/byte_utils.dart';
-import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/primitives/memory_timeline.dart';
 
 /// Name of each trace being charted, index order is the trace index
@@ -47,13 +46,6 @@ const eventData = 'data';
 const customEvent = 'custom';
 const customEventName = 'name';
 const customEventData = 'data';
-
-const indexPayloadJson = 'index';
-const timestampPayloadJson = 'timestamp';
-const prettyTimestampPayloadJson = 'prettyTimestamp';
-const eventPayloadJson = 'event';
-const vmPayloadJson = 'vm';
-const androidPayloadJson = 'android';
 
 /// VM Data
 const rssJsonName = 'rss';
@@ -155,17 +147,6 @@ class ChartsValues {
   Map<String, Object> get androidData => _android;
 
   final _android = <String, Object>{};
-
-  Map<String, Object?> toJson() {
-    return {
-      indexPayloadJson: index,
-      timestampPayloadJson: timestamp,
-      prettyTimestampPayloadJson: prettyTimestamp(timestamp),
-      eventPayloadJson: _event,
-      vmPayloadJson: _vm,
-      androidPayloadJson: _android,
-    };
-  }
 
   int get eventCount =>
       _event.entries.length -

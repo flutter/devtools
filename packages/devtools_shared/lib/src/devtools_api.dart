@@ -17,10 +17,6 @@ const apiParameterVmServiceConnected = 'connected';
 /// Flutter GA properties APIs:
 const apiGetFlutterGAClientId = '${apiPrefix}getFlutterGAClientId';
 
-/// DevTools GA properties APIs:
-const apiResetDevTools = '${apiPrefix}resetDevTools';
-const apiGetDevToolsFirstRun = '${apiPrefix}getDevToolsFirstRun';
-
 abstract class PreferencesApi {
   /// Returns the preference value in the DevTools store file for the key
   /// specified by the [preferenceKeyProperty] query parameter.

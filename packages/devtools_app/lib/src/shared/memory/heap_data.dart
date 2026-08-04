@@ -25,7 +25,6 @@ class HeapData {
 
   Future<void> get calculate => _calculated.future;
   final _calculated = Completer<void>();
-  bool get isCalculated => _calculated.isCompleted;
 
   ClassDataList<SingleClassData>? classes;
 

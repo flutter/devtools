@@ -37,8 +37,6 @@ abstract class VMDeveloperView {
 class VMDeveloperToolsScreen extends Screen {
   VMDeveloperToolsScreen() : super.fromMetaData(ScreenMetaData.vmTools);
 
-  static final id = ScreenMetaData.vmTools.id;
-
   @override
   ValueListenable<bool> get showIsolateSelector =>
       VMDeveloperToolsController.showIsolateSelector;

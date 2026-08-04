@@ -18,15 +18,10 @@ abstract class FeatureController extends DisposableController
 /// [service] may be null if this service method is a first party service
 /// method registered by DTD or by a DTD-internal service.
 class DtdServiceMethod implements Comparable<DtdServiceMethod> {
-  const DtdServiceMethod({
-    required this.service,
-    required this.method,
-    this.capabilities,
-  });
+  const DtdServiceMethod({required this.service, required this.method});
 
   final String? service;
   final String method;
-  final Map<String, Object?>? capabilities;
 
   String get displayName => [service, method].nonNulls.join('.');
 

@@ -189,10 +189,7 @@ final class DialogHelpText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      helpText,
-      style: textStyle(context),
-    );
+    return Text(helpText, style: textStyle(context));
   }
 }
 
@@ -260,10 +257,7 @@ final class DialogTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onPressed,
-      child: child,
-    );
+    return TextButton(onPressed: onPressed, child: child);
   }
 }
 
@@ -280,12 +274,10 @@ void showDevToolsDialog({
         title: DialogTitleText(title),
         includeDivider: false,
         content: content,
-        actionsAlignment:
-            actions.isNotEmpty ? MainAxisAlignment.spaceBetween : null,
-        actions: [
-          ...actions,
-          const DialogCloseButton(),
-        ],
+        actionsAlignment: actions.isNotEmpty
+            ? MainAxisAlignment.spaceBetween
+            : null,
+        actions: [...actions, const DialogCloseButton()],
       ),
     ),
   );

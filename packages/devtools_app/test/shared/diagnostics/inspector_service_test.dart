@@ -26,6 +26,7 @@ void main() {
   final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
     testAppDirectory: 'test/test_infra/fixtures/inspector_app',
+    useTempDirectory: true,
   );
 
   InspectorService? inspectorService;

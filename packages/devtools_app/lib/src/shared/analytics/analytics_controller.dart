@@ -34,7 +34,14 @@ Future<AnalyticsController> get analyticsController async {
 
 AnalyticsController? _analyticsController;
 
-typedef AsyncAnalyticsCallback = FutureOr<void> Function();
+/// A synchronous check to see if analytics are enabled.
+///
+/// Returns `false` if analytics are disabled or not yet initialized.
+bool get isAnalyticsEnabled =>
+    _analyticsController?.analyticsEnabled.value ?? false;
+
+/// Whether the analytics controller has been initialized.
+bool get isAnalyticsControllerInitialized => _analyticsController != null;
 
 class AnalyticsController {
   AnalyticsController({
@@ -58,6 +65,7 @@ class AnalyticsController {
   ValueListenable<bool> get shouldPrompt => _shouldPrompt;
   final ValueNotifier<bool> _shouldPrompt;
 
+  @visibleForTesting
   bool get analyticsInitialized => _analyticsInitialized;
   bool _analyticsInitialized = false;
 

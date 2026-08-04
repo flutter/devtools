@@ -19,11 +19,7 @@ void main() {
       final dtdUri = Uri.parse('ws://dtd/uri');
       final request = Request(
         'get',
-        Uri(
-          scheme: 'https',
-          host: 'localhost',
-          path: DtdApi.apiGetDtdUri,
-        ),
+        Uri(scheme: 'https', host: 'localhost', path: DtdApi.apiGetDtdUri),
       );
       final response = await ServerApi.handle(
         request,
