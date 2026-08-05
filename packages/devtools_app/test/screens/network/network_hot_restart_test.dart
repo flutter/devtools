@@ -386,7 +386,7 @@ void main() {
         );
 
         final postRestartIsolateId = localVmService.simulateHotRestart();
-        localController.networkService.updateLastHttpDataRefreshTime();
+        await localController.networkService.updateLastHttpDataRefreshTime();
 
         expect(
           localController.networkService.lastHttpDataRefreshTimePerIsolate
@@ -395,6 +395,60 @@ void main() {
           reason:
               'updateLastHttpDataRefreshTime only updates existing isolate '
               'entries; new isolates are registered on the first profile fetch.',
+        );
+      },
+    );
+
+    test(
+      'pause then resume uses VM timeline for HTTP refresh timestamps',
+      () async {
+        final localVmService = HotRestartNetworkVmService();
+        final localConnection = FakeServiceConnectionManager(
+          service: localVmService,
+        );
+        final isolateId = localVmService.currentIsolateId;
+        final controller = await initNetworkLifecycleController(
+          vmService: localVmService,
+          fakeServiceConnection: localConnection,
+          initialProfile: [
+            createTestHttpRequest(id: 'before-pause', method: 'GET'),
+          ],
+        );
+        await controller.networkService.refreshNetworkData();
+        expect(
+          controller.networkService.lastHttpDataRefreshTimePerIsolate
+              .containsKey(isolateId),
+          isTrue,
+        );
+
+        await controller.togglePolling(false);
+        await controller.togglePolling(true);
+
+        final timelineMicros =
+            (await localVmService.getVMTimelineMicros()).timestamp!;
+        expect(
+          controller
+              .networkService
+              .lastHttpDataRefreshTimePerIsolate[isolateId],
+          timelineMicros,
+          reason:
+              'Resuming recording must stamp HTTP refresh times with the VM '
+              'timeline clock, not wall-clock time.',
+        );
+        expect(controller.lastSocketDataRefreshMicros, timelineMicros);
+
+        localVmService.appendHttpRequest(
+          isolateId,
+          createTestHttpRequest(
+            id: 'after-resume',
+            method: 'POST',
+            startTime: timelineMicros + 1_000,
+          ),
+        );
+        await controller.networkService.refreshNetworkData();
+        expect(
+          controller.requests.value.map((r) => r.id),
+          contains('after-resume'),
         );
       },
     );

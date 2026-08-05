@@ -336,7 +336,7 @@ class NetworkController extends DevToolsScreenController
     // Cancel existing polling timer before starting recording.
     _updatePollingState(false);
 
-    networkService.updateLastHttpDataRefreshTime(
+    await networkService.updateLastHttpDataRefreshTime(
       alreadyRecordingHttp: alreadyRecordingHttp,
     );
     final timestamp = await networkService.updateLastSocketDataRefreshTime(
@@ -359,6 +359,8 @@ class NetworkController extends DevToolsScreenController
       ]),
     );
 
+    // TODO(kenz): only call these if http logging and socket profiling are not
+    // already enabled. Listen to service manager streams for this info.
     await _enableNetworkTrafficRecordingOnAllIsolates();
     await togglePolling(true);
   }
@@ -394,7 +396,7 @@ class NetworkController extends DevToolsScreenController
   /// This will ensure that future fetches for http and socket requests will at
   /// most fetch requests since [updateLastRefreshTime] was called.
   Future<void> updateLastRefreshTime() async {
-    networkService.updateLastHttpDataRefreshTime();
+    await networkService.updateLastHttpDataRefreshTime();
     await networkService.updateLastSocketDataRefreshTime();
   }
 

@@ -133,6 +133,7 @@ void main() {
                 .lastHttpDataRefreshTimePerIsolate[isolateId],
             timelineMicros,
           );
+          expect(controller.lastSocketDataRefreshMicros, timelineMicros);
         },
       );
 
