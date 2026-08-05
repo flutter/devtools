@@ -32,8 +32,6 @@ class HomeScreen extends Screen {
         titleGenerator: () => devToolsTitle.value,
       );
 
-  static final id = ScreenMetaData.home.id;
-
   final List<DevToolsJsonFile> sampleData;
 
   @override
@@ -165,10 +163,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
   void initState() {
     super.initState();
     connectDialogController = TextEditingController();
-    assert(() {
-      _debugInitVmServiceCache();
-      return true;
-    }());
+    if (kDebugMode) _debugInitVmServiceCache();
   }
 
   void _debugInitVmServiceCache() async {
@@ -176,7 +171,7 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
     // developers who tend to repeatedly restart DevTools to debug the same
     // test application.
     final uri = await storage.getValue(_debugVmServiceUriKey);
-    if (uri != null) {
+    if (uri != null && mounted) {
       setState(() {
         connectDialogController.text = uri;
       });
@@ -258,10 +253,9 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
       return;
     }
 
-    assert(() {
+    if (kDebugMode) {
       safeUnawaited(storage.setValue(_debugVmServiceUriKey, uri));
-      return true;
-    }());
+    }
 
     // Cache the routerDelegate and notifications providers before the async
     // gap as the landing screen may not be displayed by the time the async gap

@@ -57,11 +57,7 @@ class ServicesController extends FeatureController {
       }),
       for (final service in response.clientServices) ...[
         for (final method in service.methods.values)
-          DtdServiceMethod(
-            service: service.name,
-            method: method.name,
-            capabilities: method.capabilities,
-          ),
+          DtdServiceMethod(service: service.name, method: method.name),
       ],
     ];
   }

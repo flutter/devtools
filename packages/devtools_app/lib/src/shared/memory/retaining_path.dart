@@ -3,7 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
@@ -17,12 +17,15 @@ bool Function(List<dynamic>? list1, List<dynamic>? list2) _listEquality =
 @visibleForTesting
 class DebugRetainingPathUsage {
   /// Path is expected to be constructed for each object.
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907) false positive.
   int constructed = 0;
 
   /// Only unique paths are stored.
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907) false positive.
   int stored = 0;
 
   /// Only displayed paths are stringified.
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907) false positive.
   int stringified = 0;
 }
 
@@ -42,12 +45,10 @@ class PathFromRoot {
   PathFromRoot._(
     this.path, {
     @visibleForTesting bool debugOmitClassesInRetainingPath = false,
-  }) : assert(() {
-         debugUsage.constructed++;
-         return true;
-       }()),
-       hashCode = path.isEmpty ? _hashOfEmptyPath : Object.hashAll(path),
-       classes = debugOmitClassesInRetainingPath ? const {} : path.toSet();
+  }) : hashCode = path.isEmpty ? _hashOfEmptyPath : Object.hashAll(path),
+       classes = debugOmitClassesInRetainingPath ? const {} : path.toSet() {
+    if (kDebugMode) debugUsage.constructed++;
+  }
 
   /// For objects directly referenced from root.
   const PathFromRoot._empty()
@@ -100,11 +101,10 @@ class PathFromRoot {
     );
 
     instances.add(newInstance);
-    assert(() {
+    if (kDebugMode) {
       debugUsage.stored++;
       assert(instances.length == debugUsage.stored);
-      return true;
-    }());
+    }
     return newInstance;
   }
 
@@ -208,10 +208,7 @@ class PathFromRoot {
     required String delimiter,
     required bool inverted,
   }) {
-    assert(() {
-      debugUsage.stringified++;
-      return true;
-    }());
+    if (kDebugMode) debugUsage.stringified++;
     // Trailing separator is here to show object is referenced by root.
     data = data.joinWith(
       delimiter,

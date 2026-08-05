@@ -12,6 +12,7 @@ import 'dart:math';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -31,10 +32,7 @@ final _log = Logger('lib/src/shared/utils');
 
 /// Logging to debug console only in debug runs.
 void debugLogger(String message) {
-  assert(() {
-    _log.info(message);
-    return true;
-  }());
+  if (kDebugMode) _log.info(message);
 }
 
 /// Whether DevTools is using a dark theme.
@@ -288,6 +286,7 @@ Future<void> launchUrlWithErrorHandling(String url) async {
 ///
 /// This class may be helpful when sets of work need to be done over a list,
 /// while avoiding blocking the UI thread.
+// ignore: unused-code, this is a helpful utility, use it where we need it next.
 class InterruptableChunkWorker {
   InterruptableChunkWorker({
     int chunkSize = _defaultChunkSize,

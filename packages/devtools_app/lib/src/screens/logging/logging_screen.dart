@@ -80,8 +80,6 @@ class _LoggingScreenState extends State<LoggingScreenBody>
                   controller: controller,
                   data: controller.filteredData.value,
                   selectionNotifier: controller.selectedLog,
-                  searchMatchesNotifier: controller.searchMatches,
-                  activeSearchMatchNotifier: controller.activeSearchMatch,
                 ),
               ),
               ValueListenableBuilder<LogData?>(

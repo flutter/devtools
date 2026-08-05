@@ -70,6 +70,7 @@ class ExtensionService extends DisposableController
   ///
   /// This set of extensions will include one version of a DevTools extension
   /// per package.
+  @visibleForTesting
   List<DevToolsExtensionConfig> get availableExtensions =>
       _currentExtensions.value.availableExtensions;
 

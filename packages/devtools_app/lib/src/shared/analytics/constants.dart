@@ -85,7 +85,6 @@ const slowAnimation = 'slowAnimation';
 const slowAnimationDocs = 'slowAnimationDocs';
 const repaintRainbow = 'repaintRainbow';
 const repaintRainbowDocs = 'repaintRainbowDocs';
-const debugBanner = 'debugBanner';
 const togglePlatform = 'togglePlatform';
 const brightnessOverride = 'brightnessOverride';
 const highlightOversizedImages = 'highlightOversizedImages';
@@ -98,13 +97,6 @@ const onDeviceSelection = 'onDeviceSelection';
 const inspectorSettings = 'inspectorSettings';
 const loggingSettings = 'loggingSettings';
 const refreshPubRoots = 'refreshPubRoots';
-
-enum InspectorDetailsViewType { layoutExplorer, widgetDetailsTree }
-
-final defaultDetailsViewToLayoutExplorer =
-    InspectorDetailsViewType.layoutExplorer.name;
-final defaultDetailsViewToWidgetDetails =
-    InspectorDetailsViewType.widgetDetailsTree.name;
 
 enum HomeScreenEvents { connectToApp, connectToNewApp, viewVmFlags }
 

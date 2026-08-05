@@ -411,6 +411,7 @@ class CpuProfilerController extends DisposableController
     return '$label${filterTag.isNotEmpty ? '-$filterTag' : ''}';
   }
 
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9910) seems like a bug.
   Future<void> loadAppStartUpProfile() async {
     Future<void> loadAppStartUpProfileHelper() async {
       // Look up the stored app start up profiles before calling [reset]. This

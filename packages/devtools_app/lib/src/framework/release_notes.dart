@@ -28,6 +28,7 @@ bool debugTestReleaseNotes = false;
 // from the flutter/website PR, which has a GitHub action that automatically
 // stages commits to firebase. Example:
 // https://flutter-docs-prod--pr12652-devtools-release-notes-2-52-3bbb8c0u.web.app/tools/devtools/release-notes/release-notes-2.52.0.md.
+// ignore: unused-code, debug-only feature.
 String? _debugReleaseNotesUrl;
 
 const releaseNotesKey = Key('release_notes');

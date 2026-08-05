@@ -533,6 +533,7 @@ class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
     DevToolsNavigationState state,
   ) : super(kind: type, state: state.state);
 
+  @visibleForTesting
   static CodeViewSourceLocationNavigationState? fromState(
     DevToolsNavigationState? state,
   ) {

@@ -14,6 +14,7 @@ import '../test_infra/flutter_test_environment.dart';
 void main() {
   final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
+    useTempDirectory: true,
   );
 
   late Disposable isAlive;

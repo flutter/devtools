@@ -165,10 +165,6 @@ class FlutterFrame {
     timelineEventData.rasterEvent?.writeTrackEventsToBuffer(buf);
     return buf.toString();
   }
-
-  FlutterFrame shallowCopy() {
-    return FlutterFrame.fromJson(json);
-  }
 }
 
 class FrameTimelineEventData {

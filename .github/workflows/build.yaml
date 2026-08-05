@@ -11,7 +11,8 @@ on:
       - master
 
 # Declare default permissions as read only.
-permissions: read-all
+permissions:
+  contents: read
 
 defaults:
   run:
@@ -74,14 +75,18 @@ jobs:
           wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
           echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
           sudo apt-get update
-          sudo apt-get install dcm=1.38.1-1 # To avoid errors add `-1` (build number) to the version
+          sudo apt-get install dcm=1.38.3-1 # To avoid errors add `-1` (build number) to the version
           sudo chmod +x /usr/bin/dcm
           echo "$(dcm --version)"
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2123f0ab2c02c
-      - name: Run DCM on root
+      - name: Run dcm analyze on root
         run: |
           dcm analyze packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test
+      - name: Run dcm checks on packages
+        run: |
+          dcm check-unused-code packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test --exclude-public-api
+          dcm check-dependencies packages/devtools_app packages/devtools_app_shared packages/devtools_extensions packages/devtools_shared packages/devtools_test
 
   test-packages:
     name: ${{ matrix.os }} ${{ matrix.package }} test
@@ -186,7 +191,7 @@ jobs:
         run: ./tool/ci/bots.sh
 
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: failure()
         with:
           name: golden_image_failures.${{ matrix.bot }}
@@ -259,7 +264,7 @@ jobs:
         run: ./tool/ci/bots.sh
 
       - name: Upload Golden Failure Artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: failure()
         with:
           name: golden_image_failures.${{ matrix.bot }}

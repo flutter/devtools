@@ -7,15 +7,8 @@ enum NetworkEventKeys {
   version,
   creator,
   name,
-  pages,
   startedDateTime,
-  id,
-  title,
-  pageTimings,
-  onContentLoad,
-  onLoad,
   entries,
-  pageref,
   time,
   request,
   method,
@@ -44,7 +37,6 @@ enum NetworkEventKeys {
   wait,
   receive,
   ssl,
-  serverIPAddress,
   connection,
   comment,
   value,
@@ -62,8 +54,6 @@ enum NetworkEventKeys {
 class NetworkEventDefaults {
   static const logVersion = '1.2';
   static const creatorName = 'devtools';
-  static const onContentLoad = -1;
-  static const onLoad = -1;
   static const httpVersion = 'HTTP/1.1';
   static const responseHttpVersion = 'http/2.0';
   static const blocked = -1;

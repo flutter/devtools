@@ -25,7 +25,6 @@ TableRow createDevToolsScreenRow({
   required DevToolsButtonData? dataRight,
   required bool singleColumn,
   required bool hasDebugSessions,
-  required EditorClient editor,
   required void Function(DevToolsButtonData data) onPressed,
 }) {
   assert(
@@ -35,7 +34,6 @@ TableRow createDevToolsScreenRow({
   final cellRight = dataRight != null
       ? _DevToolsScreenButton(
           data: dataRight,
-          editor: editor,
           hasDebugSessions: hasDebugSessions,
           onPressed: onPressed,
         )
@@ -44,7 +42,6 @@ TableRow createDevToolsScreenRow({
     children: [
       _DevToolsScreenButton(
         data: dataLeft,
-        editor: editor,
         hasDebugSessions: hasDebugSessions,
         onPressed: onPressed,
       ),
@@ -56,13 +53,11 @@ TableRow createDevToolsScreenRow({
 class _DevToolsScreenButton extends StatelessWidget {
   const _DevToolsScreenButton({
     required this.data,
-    required this.editor,
     required this.hasDebugSessions,
     required this.onPressed,
   });
 
   final DevToolsButtonData data;
-  final EditorClient editor;
   final bool hasDebugSessions;
   final void Function(DevToolsButtonData data) onPressed;
 

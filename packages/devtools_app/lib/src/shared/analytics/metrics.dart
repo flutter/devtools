@@ -74,7 +74,6 @@ class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
   });
 
   static const summaryTreeGaId = 0;
-  static const detailsTreeGaId = 1;
 
   /// The number of times the root has been set, since the
   /// [InspectorTreeController] with id [inspectorTreeControllerId], has been

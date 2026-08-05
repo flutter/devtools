@@ -9,10 +9,6 @@ import 'package:dtd/dtd.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-/// A record of a [StreamChannel] and a [Stream] of logs of protocol traffic
-/// in both directions across it.
-typedef LoggedChannel = ({StreamChannel<String> channel, Stream<String> log});
-
 /// Connects to the websocket at [wsUri] and returns a [StreamSink<String>].
 ///
 /// All traffic is logged into [sink].

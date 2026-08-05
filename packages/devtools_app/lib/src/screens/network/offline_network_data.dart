@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:meta/meta.dart';
 
 import '../../shared/http/http_request_data.dart';
 import '../network/network_controller.dart';
@@ -65,6 +66,7 @@ class OfflineNetworkData with Serializable {
     );
   }
 
+  @visibleForTesting
   bool get isEmpty => httpRequestData.isEmpty && socketData.isEmpty;
 
   /// List of current [DartIOHttpRequestData] network requests.

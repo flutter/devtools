@@ -60,6 +60,4 @@ class DiffSnapshotScene extends Scene {
       ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''),
     );
   }
-
-  void tearDown() {}
 }

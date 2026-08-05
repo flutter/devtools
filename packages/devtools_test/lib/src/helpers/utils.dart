@@ -35,21 +35,6 @@ const safePumpDuration = Duration(seconds: 3);
 const longPumpDuration = Duration(seconds: 6);
 const veryLongPumpDuration = Duration(seconds: 9);
 
-final screenIds = <String>[
-  AppSizeScreen.id,
-  DebuggerScreen.id,
-  DeepLinksScreen.id,
-  InspectorScreen.id,
-  LoggingScreen.id,
-  MemoryScreen.id,
-  NetworkScreen.id,
-  PerformanceScreen.id,
-  ProfilerScreen.id,
-  ProviderScreen.id,
-  VMDeveloperToolsScreen.id,
-  DTDToolsScreen.id,
-];
-
 /// Scoping method which registers `listener` as a listener for `listenable`,
 /// invokes `callback`, and then removes the `listener`.
 ///

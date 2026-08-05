@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file_selector/file_selector.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/memory/shared/primitives/memory_timeline.dart';
@@ -34,6 +35,7 @@ class HeapGraphLoaderRuntime extends HeapGraphLoader {
 class HeapGraphLoaderFile implements HeapGraphLoader {
   HeapGraphLoaderFile(this.file);
 
+  @visibleForTesting
   HeapGraphLoaderFile.fromPath(String path) : file = XFile(path);
 
   final XFile file;

@@ -1,0 +1,23 @@
+{
+  "skill-linter-and-review-hook": {
+    "PostToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.agents/scripts/validate_skills_hook.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostInvocation": [
+      {
+        "type": "command",
+        "command": "./.agents/scripts/skill_post_invocation_hook.sh",
+        "timeout": 30
+      }
+    ]
+  }
+}

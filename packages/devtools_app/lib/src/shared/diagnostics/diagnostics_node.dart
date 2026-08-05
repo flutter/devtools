@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+// ignore_for_file: unused-code, contains the full model class for DiagnosticsNode.
+
 /// @docImport '../console/widgets/description.dart';
 library;
 
@@ -83,8 +85,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// This node's parent (if it's been set).
   RemoteDiagnosticsNode? parent;
 
-  Future<String>? propertyDocFuture;
-
   List<RemoteDiagnosticsNode>? cachedProperties;
 
   /// Service used to retrieve more detailed information about the value of
@@ -100,8 +100,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   // TODO(albertusangga): Refactor to cleaner/more robust solution
   bool get isFlex => ['Row', 'Column', 'Flex'].contains(widgetRuntimeType);
-
-  bool get isBox => json['isBox'] == true;
 
   int? get flexFactor => json['flexFactor'] as int?;
 

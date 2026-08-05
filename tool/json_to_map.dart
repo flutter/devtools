@@ -30,8 +30,9 @@ void main(List<String> args) {
   }
 
   final jsonFileName = jsonFilePath.split('/').last;
-  final fileNameWithoutExtension = (jsonFileName.split('.')
-    ..removeLast()).join('.');
+  final fileNameWithoutExtension = (jsonFileName.split(
+    '.',
+  )..removeLast()).join('.');
   final jsonFileDirectoryPath = Uri.parse(
     (jsonFilePath.split('/')..removeLast()).join('/'),
   );
@@ -45,10 +46,9 @@ void main(List<String> args) {
   // String interpolation.
   jsonFormattedString = jsonFormattedString.replaceAll('\$', '\\\$');
 
-  final dartFile =
-      File('$jsonFileDirectoryPath/$fileNameWithoutExtension.dart')
-        ..createSync()
-        ..writeAsStringSync('''
+  final dartFile = File('$jsonFileDirectoryPath/$fileNameWithoutExtension.dart')
+    ..createSync()
+    ..writeAsStringSync('''
 // Copyright 2023 The Flutter Authors
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.

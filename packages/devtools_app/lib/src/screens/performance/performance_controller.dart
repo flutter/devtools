@@ -48,13 +48,10 @@ class PerformanceController extends DevToolsScreenController
   @override
   final screenId = ScreenMetaData.performance.id;
 
-  // ignore: dispose-class-fields, false positive. See `applyToFeatureControllers` in the dispose() method.
   late final FlutterFramesController flutterFramesController;
 
-  // ignore: dispose-class-fields, false positive. See `applyToFeatureControllers` in the dispose() method.
   late final TimelineEventsController timelineEventsController;
 
-  // ignore: dispose-class-fields, false positive. See `applyToFeatureControllers` in the dispose() method.
   late final RebuildStatsController rebuildStatsController;
 
   // ignore: dispose-class-fields, false positive. See `applyToFeatureControllers` in the dispose() method.
