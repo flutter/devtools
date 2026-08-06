@@ -72,7 +72,7 @@ class LoggingPreferencesController extends DisposableController
     filterTag.value = await storage.getValue(filterStorageId) ?? '';
     addAutoDisposeListener(
       filterTag,
-      () => storage.setValue(filterStorageId, filterTag.value),
+      () => unawaited(storage.setValue(filterStorageId, filterTag.value)),
     );
   }
 }

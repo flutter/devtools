@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../shared/charts/chart_controller.dart';
 import '../../../../../../shared/charts/chart_trace.dart' as chart_trace;
-import '../../../../../../shared/charts/chart_trace.dart'
-    show ChartType, PaintCharacteristics, ChartSymbol;
 import '../../../../shared/primitives/memory_timeline.dart';
 
 class _Sizes {
@@ -132,11 +130,11 @@ class EventChartController extends ChartController {
     }
 
     final extensionEventsIndex = createTrace(
-      ChartType.symbol,
-      PaintCharacteristics(
+      chart_trace.ChartType.symbol,
+      chart_trace.PaintCharacteristics(
         color: Colors.purpleAccent[100]!,
         colorAggregate: Colors.purpleAccent[400],
-        symbol: ChartSymbol.filledTriangle,
+        symbol: chart_trace.ChartSymbol.filledTriangle,
         height: 20,
         width: 20,
         fixedMinY: _Sizes.visibleVm,
@@ -151,8 +149,8 @@ class EventChartController extends ChartController {
     );
 
     final snapshotIndex = createTrace(
-      ChartType.symbol,
-      PaintCharacteristics(
+      chart_trace.ChartType.symbol,
+      chart_trace.PaintCharacteristics(
         color: Colors.green,
         strokeWidth: 3,
         diameter: 6,
@@ -169,8 +167,8 @@ class EventChartController extends ChartController {
 
     // Auto-snapshot
     final autoSnapshotIndex = createTrace(
-      ChartType.symbol,
-      PaintCharacteristics(
+      chart_trace.ChartType.symbol,
+      chart_trace.PaintCharacteristics(
         color: Colors.red,
         strokeWidth: 3,
         diameter: 6,
@@ -187,8 +185,8 @@ class EventChartController extends ChartController {
 
     // Manual GC
     final manualGCIndex = createTrace(
-      ChartType.symbol,
-      PaintCharacteristics(
+      chart_trace.ChartType.symbol,
+      chart_trace.PaintCharacteristics(
         color: Colors.blue,
         strokeWidth: 3,
         diameter: 6,
@@ -207,8 +205,8 @@ class EventChartController extends ChartController {
 
     // Monitor
     final monitorIndex = createTrace(
-      ChartType.symbol,
-      PaintCharacteristics(
+      chart_trace.ChartType.symbol,
+      chart_trace.PaintCharacteristics(
         color: mainMonitorColor,
         strokeWidth: 3,
         diameter: 6,
@@ -224,8 +222,8 @@ class EventChartController extends ChartController {
     );
 
     final monitorResetIndex = createTrace(
-      ChartType.symbol,
-      PaintCharacteristics.concentric(
+      chart_trace.ChartType.symbol,
+      chart_trace.PaintCharacteristics.concentric(
         color: Colors.grey[600]!,
         strokeWidth: 4,
         diameter: 6,
@@ -244,10 +242,10 @@ class EventChartController extends ChartController {
 
     // VM GC
     final gcIndex = createTrace(
-      ChartType.symbol,
-      PaintCharacteristics(
+      chart_trace.ChartType.symbol,
+      chart_trace.PaintCharacteristics(
         color: Colors.blue,
-        symbol: ChartSymbol.disc,
+        symbol: chart_trace.ChartSymbol.disc,
         diameter: 4,
         fixedMinY: _Sizes.visibleVm,
         fixedMaxY: _Sizes.extensions,

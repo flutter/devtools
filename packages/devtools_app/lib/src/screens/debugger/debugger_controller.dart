@@ -402,6 +402,7 @@ class DebuggerController extends DevToolsScreenController
   /// cache, in order to reduce flashing in the editor view.
   void _populateScriptAndShowLocation(ScriptRef scriptRef) {
     safeUnawaited(
+      // ignore: avoid-async-call-in-sync-function, safeUnawaited handles this.
       scriptManager.getScript(scriptRef).then((script) async {
         await codeViewController.showScriptLocation(ScriptLocation(scriptRef));
       }),

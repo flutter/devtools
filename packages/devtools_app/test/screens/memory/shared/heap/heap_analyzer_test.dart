@@ -15,6 +15,7 @@ void main() {
       final heap = HeapData(t.heap, created: DateTime.now());
       await heap.calculate;
 
+      // ignore: avoid-accessing-collections-by-constant-index, intentional use of special index.
       expect(heap.retainedSizes![heapRootIndex], equals(t.rootRetainedSize));
 
       var actualUnreachableSize = 0;

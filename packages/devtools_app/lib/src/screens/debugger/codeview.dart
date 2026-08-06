@@ -1380,8 +1380,10 @@ final defaultScriptPopupMenuOptions = [
 final copyPackagePathOption = ScriptPopupMenuOption(
   label: 'Copy package path',
   icon: Icons.content_copy,
-  onSelected: (_, controller) => Clipboard.setData(
-    ClipboardData(text: controller.scriptLocation.value?.scriptRef.uri ?? ''),
+  onSelected: (_, controller) => unawaited(
+    Clipboard.setData(
+      ClipboardData(text: controller.scriptLocation.value?.scriptRef.uri ?? ''),
+    ),
   ),
 );
 
