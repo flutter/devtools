@@ -34,13 +34,19 @@ class AdaptedProfile with Serializable {
   factory AdaptedProfile.fromAllocationProfile(
     AllocationProfile profile,
     ClassFilter filter,
-    String? rootPackage,
-  ) {
+    String? rootPackage, {
+    Set<String> pinnedClassFullNames = const {},
+  }) {
     final adaptedProfile = AdaptedProfile._(
       total: ProfileRecord.total(profile),
       items: (profile.members ?? [])
           .where((e) => (e.instancesCurrent ?? 0) > 0)
-          .map((e) => ProfileRecord.fromClassHeapStats(e))
+          .map((e) => ProfileRecord.fromClassHeapStats(
+                e,
+                userPinned: pinnedClassFullNames.contains(
+                  HeapClassName.fromClassRef(e.classRef).fullName,
+                ),
+              ))
           .toList(),
       newSpaceGCStats: profile.newSpaceGCStats,
       oldSpaceGCStats: profile.oldSpaceGCStats,
@@ -68,6 +74,29 @@ class AdaptedProfile with Serializable {
       extractClass: (s) => s.heapClass,
       rootPackage: rootPackage,
     );
+  }
+
+  /// Returns a copy of [profile] with [pinnedClassFullNames] applied to items.
+  factory AdaptedProfile.withPinnedClasses(
+    AdaptedProfile profile,
+    Set<String> pinnedClassFullNames,
+    String? rootPackage,
+  ) {
+    final itemsWithPins = profile._items
+        .map(
+          (record) => record.copyWith(
+            userPinned: pinnedClassFullNames.contains(record.heapClass.fullName),
+          ),
+        )
+        .toList();
+    final updated = AdaptedProfile._(
+      total: profile._total,
+      items: itemsWithPins,
+      newSpaceGCStats: profile.newSpaceGCStats,
+      oldSpaceGCStats: profile.oldSpaceGCStats,
+      totalGCStats: profile.totalGCStats,
+    );
+    return AdaptedProfile.withNewFilter(updated, profile.filter, rootPackage);
   }
 
   factory AdaptedProfile.fromJson(Map<String, dynamic> json) {
@@ -117,6 +146,7 @@ class AdaptedProfile with Serializable {
 class _RecordJson {
   static const isTotal = 'it';
   static const heapClass = 'c';
+  static const userPinned = 'p';
   static const totalInstances = 'ti';
   static const totalSize = 'ts';
   static const totalDartHeapSize = 'tds';
@@ -135,6 +165,7 @@ class ProfileRecord with PinnableListEntry, Serializable {
   ProfileRecord._({
     required this.isTotal,
     required this.heapClass,
+    this.userPinned = false,
     required this.totalInstances,
     required this.totalSize,
     required this.totalDartHeapSize,
@@ -151,7 +182,10 @@ class ProfileRecord with PinnableListEntry, Serializable {
     _verifyIntegrity();
   }
 
-  factory ProfileRecord.fromClassHeapStats(ClassHeapStats stats) {
+  factory ProfileRecord.fromClassHeapStats(
+    ClassHeapStats stats, {
+    bool userPinned = false,
+  }) {
     assert(
       stats.bytesCurrent! == stats.newSpace.size + stats.oldSpace.size,
       '${stats.bytesCurrent}, ${stats.newSpace.size}, ${stats.oldSpace.size}',
@@ -159,6 +193,7 @@ class ProfileRecord with PinnableListEntry, Serializable {
     return ProfileRecord._(
       isTotal: false,
       heapClass: HeapClassName.fromClassRef(stats.classRef),
+      userPinned: userPinned,
       totalInstances: stats.instancesCurrent ?? 0,
       totalSize:
           stats.bytesCurrent! +
@@ -180,6 +215,7 @@ class ProfileRecord with PinnableListEntry, Serializable {
 
   ProfileRecord.total(AllocationProfile profile)
     : isTotal = true,
+      userPinned = false,
       heapClass = HeapClassName.fromPath(className: 'All Classes', library: ''),
       totalInstances = null,
       totalSize =
@@ -202,6 +238,7 @@ class ProfileRecord with PinnableListEntry, Serializable {
     return ProfileRecord._(
       isTotal: json[_RecordJson.isTotal] as bool,
       heapClass: HeapClassName.fromJson(json[_RecordJson.heapClass]),
+      userPinned: json[_RecordJson.userPinned] as bool? ?? false,
       totalInstances: json[_RecordJson.totalInstances] as int?,
       totalSize: json[_RecordJson.totalSize] as int,
       totalDartHeapSize: json[_RecordJson.totalDartHeapSize] as int,
@@ -217,11 +254,32 @@ class ProfileRecord with PinnableListEntry, Serializable {
     );
   }
 
+  ProfileRecord copyWith({bool? userPinned}) {
+    return ProfileRecord._(
+      isTotal: isTotal,
+      heapClass: heapClass,
+      userPinned: userPinned ?? this.userPinned,
+      totalInstances: totalInstances,
+      totalSize: totalSize,
+      totalDartHeapSize: totalDartHeapSize,
+      totalExternalSize: totalExternalSize,
+      newSpaceInstances: newSpaceInstances,
+      newSpaceSize: newSpaceSize,
+      newSpaceDartHeapSize: newSpaceDartHeapSize,
+      newSpaceExternalSize: newSpaceExternalSize,
+      oldSpaceInstances: oldSpaceInstances,
+      oldSpaceSize: oldSpaceSize,
+      oldSpaceDartHeapSize: oldSpaceDartHeapSize,
+      oldSpaceExternalSize: oldSpaceExternalSize,
+    );
+  }
+
   @override
   Map<String, dynamic> toJson() {
     return {
       _RecordJson.isTotal: isTotal,
       _RecordJson.heapClass: heapClass,
+      _RecordJson.userPinned: userPinned,
       _RecordJson.totalInstances: totalInstances,
       _RecordJson.totalSize: totalSize,
       _RecordJson.totalDartHeapSize: totalDartHeapSize,
@@ -238,6 +296,8 @@ class ProfileRecord with PinnableListEntry, Serializable {
   }
 
   final bool isTotal;
+
+  final bool userPinned;
 
   final HeapClassName heapClass;
 
@@ -257,7 +317,7 @@ class ProfileRecord with PinnableListEntry, Serializable {
   final int? oldSpaceExternalSize;
 
   @override
-  bool get pinToTop => isTotal;
+  bool get pinToTop => isTotal || userPinned;
 
   void _verifyIntegrity() {
     assert(() {

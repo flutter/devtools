@@ -32,6 +32,56 @@ import 'profile_pane_controller.dart';
 /// instances, memory).
 const _defaultNumberFieldWidth = 80.0;
 
+class _PinColumn extends ColumnData<ProfileRecord>
+    implements ColumnRenderer<ProfileRecord> {
+  _PinColumn({required this.controller})
+    : super(
+        'Pin',
+        titleTooltip: 'Pin class to the top of the table',
+        fixedWidthPx: 40.0,
+        alignment: ColumnAlignment.left,
+      );
+
+  final ProfilePaneController controller;
+
+  @override
+  bool get supportsSorting => false;
+
+  @override
+  Widget build(
+    BuildContext context,
+    ProfileRecord item, {
+    bool isRowSelected = false,
+    bool isRowHovered = false,
+  }) {
+    if (item.isTotal) return const SizedBox.shrink();
+
+    final pinned = item.userPinned;
+    return IconButton(
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+      iconSize: 18,
+      icon: Icon(pinned ? Icons.push_pin : Icons.push_pin_outlined),
+      tooltip: pinned ? 'Unpin class' : 'Pin class to top',
+      onPressed: () {
+        ga.select(
+          gac.memory,
+          '${gac.MemoryEvents.profilePinClass.name}-$pinned',
+        );
+        controller.togglePin(item.heapClass);
+      },
+    );
+  }
+
+  @override
+  bool? getValue(ProfileRecord _) => null;
+
+  @override
+  int compare(ProfileRecord a, ProfileRecord b) =>
+      a.userPinned.boolCompare(b.userPinned);
+}
+
 class _FieldClassNameColumn extends ColumnData<ProfileRecord>
     implements
         ColumnRenderer<ProfileRecord>,
@@ -473,46 +523,47 @@ class AllocationProfileTableViewState
             );
           },
         ),
-        Expanded(child: _AllocationProfileTable(controller: widget.controller)),
+        Expanded(
+          child: _AllocationProfileTable(controller: widget.controller),
+        ),
       ],
     );
   }
 }
 
-class _AllocationProfileTable extends StatelessWidget {
-  _AllocationProfileTable({required this.controller});
+class _AllocationProfileTable extends StatefulWidget {
+  const _AllocationProfileTable({required this.controller});
 
+  final ProfilePaneController controller;
+
+  @override
+  State<_AllocationProfileTable> createState() =>
+      _AllocationProfileTableState();
+}
+
+class _AllocationProfileTableState extends State<_AllocationProfileTable> {
   /// List of columns displayed in advanced developer mode state.
   static final _vmModeColumnGroups = [
     ColumnGroup.fromText(title: '', range: const Range(0, 1)),
+    ColumnGroup.fromText(title: '', range: const Range(1, 2)),
     ColumnGroup.fromText(
       title: HeapGeneration.total.toString(),
-      range: const Range(1, 5),
+      range: const Range(2, 6),
     ),
     ColumnGroup.fromText(
       title: HeapGeneration.newSpace.toString(),
-      range: const Range(5, 9),
+      range: const Range(6, 10),
     ),
     ColumnGroup.fromText(
       title: HeapGeneration.oldSpace.toString(),
-      range: const Range(9, 13),
+      range: const Range(10, 14),
     ),
   ];
 
   static const _fieldSizeColumn = _FieldSizeColumn(heap: HeapGeneration.total);
 
-  late final _columns = <ColumnData<ProfileRecord>>[
-    _FieldClassNameColumn(
-      ClassFilterData(
-        filter: controller.classFilter,
-        onChanged: controller.setFilter,
-        rootPackage: controller.rootPackage,
-      ),
-    ),
-    const _FieldInstanceCountColumn(heap: HeapGeneration.total),
-    _fieldSizeColumn,
-    _FieldDartHeapSizeColumn(heap: HeapGeneration.total),
-  ];
+  late _PinColumn _pinColumn;
+  late List<ColumnData<ProfileRecord>> _columns;
 
   late final _advancedDeveloperModeColumns = [
     const _FieldExternalSizeColumn(heap: HeapGeneration.total),
@@ -526,12 +577,41 @@ class _AllocationProfileTable extends StatelessWidget {
     const _FieldExternalSizeColumn(heap: HeapGeneration.oldSpace),
   ];
 
-  final ProfilePaneController controller;
+  @override
+  void initState() {
+    super.initState();
+    _initColumns();
+  }
+
+  @override
+  void didUpdateWidget(covariant _AllocationProfileTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      _initColumns();
+    }
+  }
+
+  void _initColumns() {
+    _pinColumn = _PinColumn(controller: widget.controller);
+    _columns = <ColumnData<ProfileRecord>>[
+      _pinColumn,
+      _FieldClassNameColumn(
+        ClassFilterData(
+          filter: widget.controller.classFilter,
+          onChanged: widget.controller.setFilter,
+          rootPackage: widget.controller.rootPackage,
+        ),
+      ),
+      const _FieldInstanceCountColumn(heap: HeapGeneration.total),
+      _fieldSizeColumn,
+      _FieldDartHeapSizeColumn(heap: HeapGeneration.total),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<AdaptedProfile?>(
-      valueListenable: controller.currentAllocationProfile,
+      valueListenable: widget.controller.currentAllocationProfile,
       builder: (context, profile, _) {
         // TODO(bkonyi): make this an overlay so the table doesn't
         // disappear when we're retrieving new data, especially since the
@@ -547,18 +627,18 @@ class _AllocationProfileTable extends StatelessWidget {
               data: profile.records,
               dataKey: 'allocation-profile',
               columnGroups: advancedDeveloperModeEnabled
-                  ? _AllocationProfileTable._vmModeColumnGroups
+                  ? _AllocationProfileTableState._vmModeColumnGroups
                   : null,
               columns: [
                 ..._columns,
                 if (advancedDeveloperModeEnabled)
                   ..._advancedDeveloperModeColumns,
               ],
-              defaultSortColumn: _AllocationProfileTable._fieldSizeColumn,
+              defaultSortColumn: _AllocationProfileTableState._fieldSizeColumn,
               defaultSortDirection: SortDirection.descending,
               pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
               includeColumnGroupHeaders: false,
-              selectionNotifier: controller.selection,
+              selectionNotifier: widget.controller.selection,
             );
           },
         );

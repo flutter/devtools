@@ -319,5 +319,49 @@ void main() {
         lastValue = internalSize;
       }
     });
+
+    testWidgetsWithWindowSize('pins class to top of table', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await scene.pump(tester);
+
+      final allocationProfileController = scene.controller.profile!;
+      await navigateToAllocationProfile(tester, allocationProfileController);
+
+      final table = find.byType(FlatTable<ProfileRecord>);
+      expect(table, findsOneWidget);
+
+      final state = tester.state<FlatTableState<ProfileRecord>>(table.first);
+
+      // "All Classes" is always pinned via [ProfileRecord.isTotal].
+      expect(state.tableController.pinnedData, isNotEmpty);
+      expect(
+        state.tableController.pinnedData.every((record) => !record.userPinned),
+        isTrue,
+      );
+
+      final pinButtons = find.byIcon(Icons.push_pin_outlined);
+      expect(pinButtons, findsWidgets);
+
+      await tester.tap(pinButtons.first);
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.push_pin), findsWidgets);
+      expect(
+        state.tableController.pinnedData.any((record) => record.userPinned),
+        isTrue,
+      );
+      expect(
+        allocationProfileController.pinnedClassFullNames.value,
+        isNotEmpty,
+      );
+
+      // Pinned class stays at the top after sorting by class name.
+      await tester.tap(find.text('Class'));
+      await tester.pumpAndSettle();
+
+      final pinnedData = state.tableController.pinnedData;
+      expect(pinnedData.any((record) => record.userPinned), isTrue);
+    });
   });
 }
