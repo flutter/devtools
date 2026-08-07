@@ -18,25 +18,6 @@ analyzer:
     - '**/build/**'
     - '**.freezed.dart'
     - tool/flutter-sdk/
-    - '**/lib/generated_plugin_registrant.dart'
-    - '**/android/**'
-    - '**/ios/**'
-    - '**/web/**'
-    - '**/windows/**'
-    - '**/macos/**'
-    - '**/linux/**'
-    # Syntax highlighting test files may include or lint-violating code
-    # for testing so should be ignored. Uncomment this while modifying
-    # these files if you want to ensure code is not invalid except where
-    # expected.
-    - packages/devtools_app/test/test_infra/test_data/syntax_highlighting/**
-    - build/**
-    - android/**
-    - ios/**
-    - web/**
-    - windows/**
-    - macos/**
-    - linux/**
 
 linter:
   rules:
@@ -168,21 +149,13 @@ linter:
     - valid_regexps
     # - void_checks # not yet tested
 
-dcm:
+dart_code_metrics:
   metrics:
     cyclomatic-complexity: 20
     number-of-parameters: 4
     maximum-nesting-level: 5
-  exclude:
-    dependencies:
-      - "**/packages/devtools_extensions/example/**"
-    metrics:
-      - packages/devtools_app/test/test_infra/test_data/**
-    unused-code:
-      # This fixture has unused code for testing the debugger.
-      - packages/devtools_app/test/test_infra/fixtures/flutter_app/**
-      # Ignore unused code in package examples.
-      - packages/devtools_app_shared/example/**
+  metrics-exclude:
+    - test/**
   rules:
 #    - arguments-ordering Too strict
 #    - avoid-banned-imports # TODO(polina-c): add configuration
@@ -213,8 +186,6 @@ dcm:
     - avoid-explicit-type-declaration
     # - ban-name # TODO(polina-c): add configuration
     # - binary-expression-operand-order Some nice catches but too many false positives to enable.
-    - dispose-class-fields
-    - dispose-fields
     - double-literal-format
     # - format-comment TODO(jacobr): enable this one after fixing violations.
     # TODO(jacobr): enable member-ordering. This catches a bunch of real style
