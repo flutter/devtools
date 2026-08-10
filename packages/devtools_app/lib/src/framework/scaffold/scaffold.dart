@@ -57,10 +57,16 @@ class DevToolsScaffold extends StatefulWidget {
          embedMode: embedMode,
        );
 
+  /// Returns the list of ScaffoldAction widgets.
+  ///
+  /// The button to display the extensions dialog ([ExtensionSettingsAction]) is
+  /// omitted if DevTools extensions are disabled, hidden via query parameters,
+  /// or if the DevTools is running in an IDE (EmbedMode.embedOne).
   static List<Widget> defaultActions({Color? color}) => [
     OpenSettingsAction(color: color),
     if (FeatureFlags.devToolsExtensions.isEnabled &&
-        !DevToolsQueryParams.load().hideExtensions)
+        !DevToolsQueryParams.load().hideExtensions &&
+        ideTheme.embedMode != EmbedMode.embedOne)
       ExtensionSettingsAction(color: color),
     ReportFeedbackButton(color: color),
     OpenAboutAction(color: color),

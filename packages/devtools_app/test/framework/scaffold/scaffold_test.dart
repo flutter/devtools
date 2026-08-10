@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/extensions/extension_settings.dart';
 import 'package:devtools_app/src/framework/scaffold/scaffold.dart';
 import 'package:devtools_app/src/shared/framework/framework_controller.dart';
 import 'package:devtools_app/src/shared/managers/survey.dart';
@@ -288,6 +289,49 @@ void main() {
     );
     expect(scaffold.actions, isEmpty);
   });
+
+  test('defaultActions includes ExtensionSettingsAction based on EmbedMode', () {
+    setGlobal(IdeTheme, IdeTheme());
+    expect(
+      DevToolsScaffold.defaultActions().any(
+        (w) => w is ExtensionSettingsAction,
+      ),
+      isTrue,
+    );
+
+    setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedMany));
+    expect(
+      DevToolsScaffold.defaultActions().any(
+        (w) => w is ExtensionSettingsAction,
+      ),
+      isTrue,
+    );
+
+    setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
+    expect(
+      DevToolsScaffold.defaultActions().any(
+        (w) => w is ExtensionSettingsAction,
+      ),
+      isFalse,
+    );
+  });
+
+  testWidgets(
+    'hides ExtensionSettingsAction in StatusLine for EmbedMode.embedOne',
+    (WidgetTester tester) async {
+      setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
+      await tester.pumpWidget(
+        wrapScaffold(
+          DevToolsScaffold(
+            screens: const [_screen1],
+            page: _screen1.screenId,
+            embedMode: EmbedMode.embedOne,
+          ),
+        ),
+      );
+      expect(find.byType(ExtensionSettingsAction), findsNothing);
+    },
+  );
 }
 
 class _TestScreen extends Screen {
