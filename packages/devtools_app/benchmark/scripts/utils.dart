@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:web_benchmarks/analysis.dart';
+
+/// Returns a pretty-printed representation of a JSON payload.
+String prettyPrintJson(Object? json) =>
+    const JsonEncoder.withIndent('  ').convert(json);
 
 File? checkFileExists(String path) {
   final testFile = File.fromUri(Uri.parse(path));
