@@ -3,8 +3,10 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/extensions/extension_screen.dart';
 import 'package:devtools_app/src/extensions/extension_settings.dart';
 import 'package:devtools_app/src/framework/scaffold/scaffold.dart';
+import 'package:devtools_app/src/shared/development_helpers.dart';
 import 'package:devtools_app/src/shared/framework/framework_controller.dart';
 import 'package:devtools_app/src/shared/managers/survey.dart';
 import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
@@ -290,7 +292,7 @@ void main() {
     expect(scaffold.actions, isEmpty);
   });
 
-  test('defaultActions includes ExtensionSettingsAction based on EmbedMode', () {
+  test('defaultActions includes ExtensionSettingsAction based on EmbedMode and screen type', () {
     setGlobal(IdeTheme, IdeTheme());
     expect(
       DevToolsScaffold.defaultActions().any(
@@ -308,11 +310,23 @@ void main() {
     );
 
     setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
+    // Standard screen in embedOne mode hides ExtensionSettingsAction
     expect(
-      DevToolsScaffold.defaultActions().any(
+      DevToolsScaffold.defaultActions(currentScreen: _screen1).any(
         (w) => w is ExtensionSettingsAction,
       ),
       isFalse,
+    );
+
+    // ExtensionScreen in embedOne mode shows ExtensionSettingsAction
+    final extensionScreen = ExtensionScreen(
+      StubDevToolsExtensions.fooExtension,
+    );
+    expect(
+      DevToolsScaffold.defaultActions(currentScreen: extensionScreen).any(
+        (w) => w is ExtensionSettingsAction,
+      ),
+      isTrue,
     );
   });
 

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../app.dart';
+import '../../extensions/extension_screen.dart';
 import '../../extensions/extension_settings.dart';
 import '../../screens/debugger/debugger_screen.dart';
 import '../../shared/analytics/prompt.dart';
@@ -58,19 +59,28 @@ class DevToolsScaffold extends StatefulWidget {
        );
 
   /// Returns the list of ScaffoldAction widgets.
-  ///
-  /// The button to display the extensions dialog ([ExtensionSettingsAction]) is
-  /// omitted if DevTools extensions are disabled, hidden via query parameters,
-  /// or if the DevTools is running in an IDE (EmbedMode.embedOne).
-  static List<Widget> defaultActions({Color? color}) => [
-    OpenSettingsAction(color: color),
-    if (FeatureFlags.devToolsExtensions.isEnabled &&
-        !DevToolsQueryParams.load().hideExtensions &&
-        ideTheme.embedMode != EmbedMode.embedOne)
-      ExtensionSettingsAction(color: color),
-    ReportFeedbackButton(color: color),
-    OpenAboutAction(color: color),
-  ];
+  static List<Widget> defaultActions({
+    Color? color,
+    Screen? currentScreen,
+  }) {
+    final queryParams = DevToolsQueryParams.load();
+
+    // If DevTools is running in an IDE (EmbedMode.embedOne), then hide
+    // [ExtensionSettingsAction], unless this screen is showing an extension.
+    final showExtensionSettings =
+        FeatureFlags.devToolsExtensions.isEnabled &&
+        !queryParams.hideExtensions &&
+        (ideTheme.embedMode != EmbedMode.embedOne ||
+            currentScreen is ExtensionScreen ||
+            queryParams.hideAllExceptExtensions);
+
+    return [
+      OpenSettingsAction(color: color),
+      if (showExtensionSettings) ExtensionSettingsAction(color: color),
+      ReportFeedbackButton(color: color),
+      OpenAboutAction(color: color),
+    ];
+  }
 
   /// The padding around the content in the DevTools UI.
   EdgeInsets get appPadding => EdgeInsets.fromLTRB(
