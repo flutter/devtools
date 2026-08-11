@@ -42,7 +42,30 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
 
   String get extensionUrl {
     if (debugDevToolsExtensions && !isDevToolsServerAvailable) {
-      return 'https://flutter.dev/';
+      return 'data:text/html;charset=utf-8,${Uri.encodeComponent('''
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #202124;
+      color: #e8eaed;
+    }
+  </style>
+</head>
+<body>
+  <h3>DevTools Extension Placeholder (${extensionConfig.name})</h3>
+  <p>Local debugging placeholder view.</p>
+</body>
+</html>
+''')}';
     }
 
     final basePath = devtoolsAssetsBasePath(
