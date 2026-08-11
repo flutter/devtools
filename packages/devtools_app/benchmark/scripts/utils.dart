@@ -45,14 +45,22 @@ extension BenchmarkResultsExtension on BenchmarkResults {
 
 extension BenchmarkScoreExtension on BenchmarkScore {
   List<String> toCsvLine() {
+    final deltaValue = delta;
+    final baselineValue = deltaValue != null ? value - deltaValue : null;
+    final String deltaPercent;
+    if (baselineValue == null) {
+      deltaPercent = '';
+    } else if (baselineValue == 0) {
+      deltaPercent = 'N/A';
+    } else {
+      deltaPercent = (deltaValue! / baselineValue).toString();
+    }
     return [
       metric, // Metric name
-      value.toString(), // Value
-      delta?.toString() ?? '', // Delta value
-      // value - delta represents the baseline score.
-      delta != null
-          ? (delta! / (value - delta!)).toString()
-          : '', // Delta % value
+      baselineValue?.toString() ?? '', // Baseline value
+      value.toString(), // Test value
+      deltaValue?.toString() ?? '', // Delta value
+      deltaPercent, // Delta % value
     ];
   }
 }
