@@ -47,10 +47,14 @@ extension BenchmarkScoreExtension on BenchmarkScore {
   List<String> toCsvLine() {
     final deltaValue = delta;
     final baselineValue = deltaValue != null ? value - deltaValue : null;
-    final deltaPercent =
-        (deltaValue != null && baselineValue != null && baselineValue != 0)
-        ? (deltaValue / baselineValue).toString()
-        : (deltaValue != null && baselineValue == 0 ? 'N/A' : '');
+    final String deltaPercent;
+    if (baselineValue == null) {
+      deltaPercent = '';
+    } else if (baselineValue == 0) {
+      deltaPercent = 'N/A';
+    } else {
+      deltaPercent = (deltaValue! / baselineValue).toString();
+    }
     return [
       metric, // Metric name
       baselineValue?.toString() ?? '', // Baseline value

@@ -181,7 +181,10 @@ class CsvBuilder {
 
   String _detectFlutterVersion() {
     try {
-      final result = Process.runSync('flutter', ['--version', '--machine']);
+      final result = Process.runSync('flutter', [
+        '--version',
+        '--machine',
+      ], runInShell: true);
       if (result.exitCode == 0) {
         final json =
             jsonDecode(result.stdout.toString()) as Map<String, Object?>;
@@ -195,7 +198,9 @@ class CsvBuilder {
     } catch (_) {}
 
     try {
-      final result = Process.runSync('flutter', ['--version']);
+      final result = Process.runSync('flutter', [
+        '--version',
+      ], runInShell: true);
       if (result.exitCode == 0) {
         return result.stdout.toString().trim().split('\n').first;
       }
@@ -206,7 +211,10 @@ class CsvBuilder {
 
   String _detectDevToolsCommit() {
     try {
-      final result = Process.runSync('git', ['rev-parse', 'HEAD']);
+      final result = Process.runSync('git', [
+        'rev-parse',
+        'HEAD',
+      ], runInShell: true);
       if (result.exitCode == 0) {
         return result.stdout.toString().trim();
       }
