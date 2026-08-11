@@ -61,7 +61,9 @@ TODO: Remove this section if there are not any updates.
 
 ## Deep links tool updates
 
-TODO: Remove this section if there are not any updates.
+* Added a "Watch tutorial" link to the status line that points to the
+  [deep links video tutorial](https://youtu.be/d7sZL6h1Elw).
+  [#9925](https://github.com/flutter/devtools/pull/9925)
 
 ## VS Code sidebar updates
 

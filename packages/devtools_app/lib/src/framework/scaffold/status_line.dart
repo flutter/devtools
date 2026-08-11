@@ -90,7 +90,9 @@ class StatusLine extends StatelessWidget {
     final pageStatus = currentScreen.buildStatus(context);
     final widerThanXxs = screenWidth > MediaSize.xxs;
     final screenMetaData = ScreenMetaData.lookup(currentScreen.screenId);
-    final showVideoTutorial = screenMetaData?.tutorialVideoTimestamp != null;
+    final showVideoTutorial =
+        screenMetaData?.tutorialVideoTimestamp != null ||
+        screenMetaData?.tutorialVideoUrl != null;
     return [
       Row(
         mainAxisSize: MainAxisSize.min,
@@ -237,12 +239,15 @@ class DocumentationLink extends StatelessWidget {
 /// A widget that links to the "Dive in to DevTools" YouTube video at the
 /// chapter for the given [screenMetaData].
 class VideoTutorialLink extends StatelessWidget {
-  const VideoTutorialLink({
+  VideoTutorialLink({
     super.key,
     required this.screenMetaData,
     required this.screenWidth,
     required this.highlightForConnection,
-  });
+  }) : assert(
+         screenMetaData.tutorialVideoTimestamp != null ||
+             screenMetaData.tutorialVideoUrl != null,
+       );
 
   final ScreenMetaData screenMetaData;
 
@@ -262,6 +267,7 @@ class VideoTutorialLink extends StatelessWidget {
       link: GaLink(
         display: screenWidth <= MediaSize.xs ? 'Tutorial' : 'Watch tutorial',
         url:
+            screenMetaData.tutorialVideoUrl ??
             '$_devToolsYouTubeVideoUrl${screenMetaData.tutorialVideoTimestamp}',
         gaScreenName: screenMetaData.id,
         gaSelectedItemDescription:
