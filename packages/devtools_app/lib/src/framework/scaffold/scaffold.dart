@@ -59,10 +59,7 @@ class DevToolsScaffold extends StatefulWidget {
        );
 
   /// Returns the list of ScaffoldAction widgets.
-  static List<Widget> defaultActions({
-    Color? color,
-    Screen? currentScreen,
-  }) {
+  static List<Widget> defaultActions({Color? color, Screen? currentScreen}) {
     final queryParams = DevToolsQueryParams.load();
 
     // If DevTools is running in an IDE (EmbedMode.embedOne), then hide

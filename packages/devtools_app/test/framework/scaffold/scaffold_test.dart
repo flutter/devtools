@@ -292,43 +292,46 @@ void main() {
     expect(scaffold.actions, isEmpty);
   });
 
-  test('defaultActions includes ExtensionSettingsAction based on EmbedMode and screen type', () {
-    setGlobal(IdeTheme, IdeTheme());
-    expect(
-      DevToolsScaffold.defaultActions().any(
-        (w) => w is ExtensionSettingsAction,
-      ),
-      isTrue,
-    );
+  test(
+    'defaultActions includes ExtensionSettingsAction based on EmbedMode and screen type',
+    () {
+      setGlobal(IdeTheme, IdeTheme());
+      expect(
+        DevToolsScaffold.defaultActions().any(
+          (w) => w is ExtensionSettingsAction,
+        ),
+        isTrue,
+      );
 
-    setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedMany));
-    expect(
-      DevToolsScaffold.defaultActions().any(
-        (w) => w is ExtensionSettingsAction,
-      ),
-      isTrue,
-    );
+      setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedMany));
+      expect(
+        DevToolsScaffold.defaultActions().any(
+          (w) => w is ExtensionSettingsAction,
+        ),
+        isTrue,
+      );
 
-    setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
-    // Standard screen in embedOne mode hides ExtensionSettingsAction
-    expect(
-      DevToolsScaffold.defaultActions(currentScreen: _screen1).any(
-        (w) => w is ExtensionSettingsAction,
-      ),
-      isFalse,
-    );
+      setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
+      // Standard screen in embedOne mode hides ExtensionSettingsAction
+      expect(
+        DevToolsScaffold.defaultActions(
+          currentScreen: _screen1,
+        ).any((w) => w is ExtensionSettingsAction),
+        isFalse,
+      );
 
-    // ExtensionScreen in embedOne mode shows ExtensionSettingsAction
-    final extensionScreen = ExtensionScreen(
-      StubDevToolsExtensions.fooExtension,
-    );
-    expect(
-      DevToolsScaffold.defaultActions(currentScreen: extensionScreen).any(
-        (w) => w is ExtensionSettingsAction,
-      ),
-      isTrue,
-    );
-  });
+      // ExtensionScreen in embedOne mode shows ExtensionSettingsAction
+      final extensionScreen = ExtensionScreen(
+        StubDevToolsExtensions.fooExtension,
+      );
+      expect(
+        DevToolsScaffold.defaultActions(
+          currentScreen: extensionScreen,
+        ).any((w) => w is ExtensionSettingsAction),
+        isTrue,
+      );
+    },
+  );
 
   testWidgets(
     'hides ExtensionSettingsAction in StatusLine for EmbedMode.embedOne',
