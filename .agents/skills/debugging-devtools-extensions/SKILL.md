@@ -39,23 +39,7 @@ Use the system OS open command to launch Chrome/browser directly to the desired 
 - **Linux**: `xdg-open "http://localhost:52941/foo_ext?embedMode=one"`
 - **Windows**: `start "http://localhost:52941/foo_ext?embedMode=one"`
 
-## 3. Testing Extension URLs & Embed Modes
-
-Navigating to specific query parameters tests different extension UI states:
-
-- **Single Extension Screen (`embedOne`)**:
-  `http://localhost:52941/foo_ext?embedMode=one`
-  *(Renders single extension view like extensions are rendered inside VS Code. In this mode, the extensions settings button, a puzzle piece icon, IS visible in the bottom status bar)*
-
-- **Extensions-Only View (`embedMany`)**:
-  `http://localhost:52941/?hide=all-except-extensions&embedMode=many`
-  *(Renders only extension tabs like extensions are rendered inside IntelliJ/Android Studio. In this mode, the extensions settings button, a puzzle piece icon, IS visible in the top tab bar)*
-
-- **Standard Core Screen (`embedOne`)**:
-  `http://localhost:52941/inspector?embedMode=one`
-  *(Renders standard tool panel like they are rendered in VS Code. In this mode, the extensions settings button, a puzzle piece icon, IS HIDDEN)*
-
-## 4. Connecting to an End-User Target App
+## 3. Connecting to an End-User Target App
 
 To test against real pub package extensions:
 
@@ -70,7 +54,7 @@ To test against real pub package extensions:
    - **Linux**: `xdg-open "http://localhost:52941/foo_ext?embedMode=one&uri=<VM_SERVICE_URI>"`
    - **Windows**: `start "http://localhost:52941/foo_ext?embedMode=one&uri=<VM_SERVICE_URI>"`
 
-## 5. Human Interaction & User Prompting Steps
+## 4. Human Interaction & User Prompting Steps
 
 When an AI agent is performing this workflow:
 
