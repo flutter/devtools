@@ -21,7 +21,9 @@ import '../../shared/ui/search.dart';
 import '../../shared/utils/utils.dart';
 import 'inspector_controller.dart';
 import 'inspector_controls.dart';
+import 'inspector_errors.dart';
 import 'inspector_screen.dart';
+import 'inspector_screen_controller.dart';
 import 'inspector_tree_controller.dart';
 import 'widget_details.dart';
 
@@ -149,8 +151,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
               ),
               Expanded(
                 child: ValueListenableBuilder(
-                  valueListenable: serviceConnection.errorBadgeManager
-                      .erroredItemsForPage(InspectorScreen.id),
+                  valueListenable: screenControllers
+                      .lookup<InspectorScreenController>()
+                      .inspectorErrors,
                   builder: (_, LinkedHashMap<String, DevToolsError> errors, _) {
                     final inspectableErrors =
                         errors.map(

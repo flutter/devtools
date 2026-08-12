@@ -31,6 +31,14 @@ TODO: Remove this section if there are not any updates.
 * Fix a bug in the TextMate grammar parser that could result in code after
   comments being classified as comments.
   [#9921](https://github.com/flutter/devtools/pull/9921).
+<<<<<<< HEAD
+=======
+* Fixed an overflow in the debugging controls when the Debugger screen is
+  narrow, such as when DevTools is embedded in an IDE side panel. The controls
+  now scroll horizontally instead of overflowing.
+  [#9949](https://github.com/flutter/devtools/pull/9949)
+
+>>>>>>> upstream/master
 ## Network profiler updates
 * Fixed exported response status in HAR files so that they parse as integers
   instead of strings. [#9900](https://github.com/flutter/devtools/pull/9900)
@@ -40,7 +48,12 @@ TODO: Remove this section if there are not any updates.
 ## App size tool updates
 TODO: Remove this section if there are not any updates.
 ## Deep links tool updates
-TODO: Remove this section if there are not any updates.
+
+* Added a "Watch tutorial" link to the status line that points to the
+  [deep links video tutorial](https://youtu.be/d7sZL6h1Elw).
+  [#9925](https://github.com/flutter/devtools/pull/9925)
+
+>>>>>>> upstream/master
 ## VS Code sidebar updates
 TODO: Remove this section if there are not any updates.
 ## DevTools extension updates

@@ -30,6 +30,7 @@ import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
 import '../../shared/utils/utils.dart';
 import 'inspector_controller.dart';
+import 'inspector_errors.dart';
 
 final _log = Logger('inspector_tree_controller');
 

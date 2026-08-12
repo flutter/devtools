@@ -3,7 +3,6 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/service.dart';
@@ -40,9 +39,6 @@ class FakeServiceConnectionManager extends Fake
     );
     for (final screen in ScreenMetaData.values) {
       final screenId = screen.id;
-      when(errorBadgeManager.erroredItemsForPage(screenId)).thenReturn(
-        FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
-      );
       when(
         errorBadgeManager.errorCountNotifier(screenId),
       ).thenReturn(ValueNotifier<int>(0));
