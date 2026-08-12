@@ -17,7 +17,7 @@ To learn more about DevTools, check out the
 
 * Fixed unreadable text in the release notes panel, where blockquotes were
   drawn on a hard coded light blue background in the dark theme.
-  [#9945](https://github.com/flutter/devtools/issues/9945)
+  [#9957](https://github.com/flutter/devtools/pull/9957)
 
 ## Inspector updates
 
