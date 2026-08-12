@@ -45,15 +45,15 @@ Navigating to specific query parameters tests different extension UI states:
 
 - **Single Extension Screen (`embedOne`)**:
   `http://localhost:52941/foo_ext?embedMode=one`
-  *(Renders single extension view; puzzle piece icon IS visible in status bar)*
+  *(Renders single extension view like extensions are rendered inside VS Code. In this mode, the extensions settings button, a puzzle piece icon, IS visible in the bottom status bar)*
 
-- **Extensions-Only View**:
+- **Extensions-Only View (`embedMany`)**:
   `http://localhost:52941/?hide=all-except-extensions&embedMode=many`
-  *(Renders only extension tabs; puzzle piece icon IS visible)*
+  *(Renders only extension tabs like extensions are rendered inside IntelliJ/Android Studio. In this mode, the extensions settings button, a puzzle piece icon, IS visible in the top tab bar)*
 
 - **Standard Core Screen (`embedOne`)**:
   `http://localhost:52941/inspector?embedMode=one`
-  *(Renders standard tool panel; puzzle piece icon IS HIDDEN)*
+  *(Renders standard tool panel like they are rendered in VS Code. In this mode, the extensions settings button, a puzzle piece icon, IS HIDDEN)*
 
 ## 4. Connecting to an End-User Target App
 
