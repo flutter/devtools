@@ -25,24 +25,30 @@ void main() {
 
   const windowHeight = 800.0;
 
-  final fakeServiceConnection = FakeServiceConnectionManager();
-  final scriptManager = MockScriptManager();
-  mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
-  setGlobal(ServiceConnectionManager, fakeServiceConnection);
-  setGlobal(IdeTheme, IdeTheme());
-  setGlobal(ScriptManager, scriptManager);
-  setGlobal(NotificationService, NotificationService());
-  setGlobal(BreakpointManager, BreakpointManager());
-  setGlobal(
-    DevToolsEnvironmentParameters,
-    ExternalDevToolsEnvironmentParameters(),
-  );
-  setGlobal(PreferencesController, PreferencesController());
-  fakeServiceConnection.consoleService.ensureServiceInitialized();
-  when(
-    fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'),
-  ).thenReturn(ValueNotifier<int>(0));
-  final debuggerController = createMockDebuggerControllerWithDefaults();
+  late FakeServiceConnectionManager fakeServiceConnection;
+  late MockScriptManager scriptManager;
+  late MockDebuggerController debuggerController;
+
+  setUp(() {
+    fakeServiceConnection = FakeServiceConnectionManager();
+    scriptManager = MockScriptManager();
+    mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(ScriptManager, scriptManager);
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(BreakpointManager, BreakpointManager());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
+    setGlobal(PreferencesController, PreferencesController());
+    fakeServiceConnection.consoleService.ensureServiceInitialized();
+    when(
+      fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'),
+    ).thenReturn(ValueNotifier<int>(0));
+    debuggerController = createMockDebuggerControllerWithDefaults();
+  });
 
   Future<void> pumpControls(WidgetTester tester) async {
     await tester.pumpWidget(
