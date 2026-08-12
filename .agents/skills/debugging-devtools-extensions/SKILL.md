@@ -65,15 +65,15 @@ To test against real pub package extensions:
    flutter run -d chrome
    ```
 2. Ask the user to copy/paste the VM Service URI from the terminal output (e.g. `ws://127.0.0.1:8181/xxx=/ws`).
-3. Open the browser automatically with the `uri` parameter:
-   ```bash
-   open "http://localhost:52941/foo_ext?embedMode=one&uri=<VM_SERVICE_URI>"
-   ```
+3. Open the browser automatically with the `uri` parameter using the appropriate OS command (as described in Step 2b):
+   - **macOS**: `open "http://localhost:52941/foo_ext?embedMode=one&uri=<VM_SERVICE_URI>"`
+   - **Linux**: `xdg-open "http://localhost:52941/foo_ext?embedMode=one&uri=<VM_SERVICE_URI>"`
+   - **Windows**: `start "http://localhost:52941/foo_ext?embedMode=one&uri=<VM_SERVICE_URI>"`
 
 ## 5. Human Interaction & User Prompting Steps
 
 When an AI agent is performing this workflow:
 
 - **Obtaining VM Service URI**: When connecting to a target app, ask the user to provide the VM Service URI printed in the target app's console output (using `ask_question` or a direct prompt).
-- **Automated Browser Opening**: The agent should launch DevTools and execute `open <url>` to launch the browser automatically.
-- **Manual Visual Verification**: Ask the user to inspect the opened browser window and confirm whether the expected extension UI or status bar button appears.
+- **Automated Browser Opening**: The agent should launch DevTools and execute the appropriate OS command (`open`, `xdg-open`, or `start` as described in Step 2b) to launch the browser automatically.
+- **Manual Visual Verification**: Ask the user to inspect the opened browser window and confirm whether the expected extension UI or behavior is visible.
