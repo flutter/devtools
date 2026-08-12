@@ -15,7 +15,9 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed unreadable text in the release notes panel, where blockquotes were
+  drawn on a hard coded light blue background in the dark theme.
+  [#9957](https://github.com/flutter/devtools/pull/9957)
 
 ## Inspector updates
 
