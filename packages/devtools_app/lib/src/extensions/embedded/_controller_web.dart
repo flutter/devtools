@@ -30,19 +30,10 @@ import 'controller.dart';
 /// [ui_web.PlatformViewRegistry], which [_viewIdIncrementer] is used to create.
 var _viewIdIncrementer = 0;
 
-class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
-    with AutoDisposeControllerMixin {
-  EmbeddedExtensionControllerImpl(super.extensionConfig);
-
-  /// The view id for the extension iFrame.
-  ///
-  /// See [_viewIdIncrementer] for an explanation of why we use an incrementer
-  /// in the id.
-  late final viewId = 'ext-${extensionConfig.name}-${_viewIdIncrementer++}';
-
-  String get extensionUrl {
-    if (debugDevToolsExtensions && !isDevToolsServerAvailable) {
-      return 'data:text/html;charset=utf-8,${Uri.encodeComponent('''
+/// HTML template for the placeholder view used when debugging extensions without
+/// a running DevTools server.
+String _debugExtensionPlaceholderHtml(String name) {
+  return '''
 <!DOCTYPE html>
 <html>
 <head>
@@ -61,11 +52,27 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
   </style>
 </head>
 <body>
-  <h3>DevTools Extension Placeholder (${extensionConfig.name})</h3>
+  <h3>DevTools Extension Placeholder ($name)</h3>
   <p>Local debugging placeholder view.</p>
 </body>
 </html>
-''')}';
+''';
+}
+
+class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
+    with AutoDisposeControllerMixin {
+  EmbeddedExtensionControllerImpl(super.extensionConfig);
+
+  /// The view id for the extension iFrame.
+  ///
+  /// See [_viewIdIncrementer] for an explanation of why we use an incrementer
+  /// in the id.
+  late final viewId = 'ext-${extensionConfig.name}-${_viewIdIncrementer++}';
+
+  String get extensionUrl {
+    if (debugDevToolsExtensions && !isDevToolsServerAvailable) {
+      final html = _debugExtensionPlaceholderHtml(extensionConfig.name);
+      return 'data:text/html;charset=utf-8,${Uri.encodeComponent(html)}';
     }
 
     final basePath = devtoolsAssetsBasePath(
