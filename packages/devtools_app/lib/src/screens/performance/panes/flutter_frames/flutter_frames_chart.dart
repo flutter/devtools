@@ -270,7 +270,7 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
 
   double _calculateInitialHorizontalScrollOffset() {
     final chartWidthWithoutAxisLabels =
-        widget.constraints.maxWidth - _yAxisUnitsSpace;
+        math.max(0.0, widget.constraints.maxWidth - _yAxisUnitsSpace);
     final totalFramesInView =
         chartWidthWithoutAxisLabels ~/ _defaultFrameWidthWithPadding;
 
