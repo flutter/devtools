@@ -52,11 +52,6 @@ class InspectorScreenController extends DevToolsScreenController
   ValueListenable<LinkedHashMap<String, DevToolsError>> get inspectorErrors =>
       _activeInspectorErrors;
 
-  /// The count of unread inspector errors (used for the badge).
-  ValueListenable<int> get inspectorErrorCount => serviceConnection
-      .errorBadgeManager
-      .errorCountNotifier(InspectorScreen.id);
-
   @override
   void init() {
     super.init();
