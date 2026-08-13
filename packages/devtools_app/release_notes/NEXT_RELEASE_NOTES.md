@@ -5,40 +5,28 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 -->
 This is a draft for future release notes that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
-
 # DevTools 2.61.0 release notes
-
 The 2.61.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](/tools/devtools).
-
 ## General updates
 
 * Fixed unreadable text in the release notes panel, where blockquotes were
   drawn on a hard coded light blue background in the dark theme.
   [#9957](https://github.com/flutter/devtools/pull/9957)
-
 ## Inspector updates
-
 TODO: Remove this section if there are not any updates.
-
 ## Performance updates
-
-TODO: Remove this section if there are not any updates.
-
+- Added a message in the Performance panel when widget rebuild tracking is
+  unavailable because the app is running in profile mode. [#9755](https://github.com/flutter/devtools/pull/9755)
 ## CPU profiler updates
-
 * Fixed a bug where resizing the CPU flame chart changes the timing values
   across the top of the chart.
   [#9915](https://github.com/flutter/devtools/pull/9915)
-
 ## Memory updates
-
 TODO: Remove this section if there are not any updates.
-
 ## Debugger updates
-
 * Prevent values from being garbage-collected, while being evaluated.
   [#9885](https://github.com/flutter/devtools/pull/9885)
 * Update to latest version of the Dart syntax highlighting grammar
@@ -50,40 +38,25 @@ TODO: Remove this section if there are not any updates.
   narrow, such as when DevTools is embedded in an IDE side panel. The controls
   now scroll horizontally instead of overflowing.
   [#9949](https://github.com/flutter/devtools/pull/9949)
-
 ## Network profiler updates
-
 * Fixed exported response status in HAR files so that they parse as integers
   instead of strings. [#9900](https://github.com/flutter/devtools/pull/9900)
-
 ## Logging updates
-
 * Correct time units and cumulative nature of GC events.
   [#9890](https://github.com/flutter/devtools/pull/9890)
-
 ## App size tool updates
-
 TODO: Remove this section if there are not any updates.
-
 ## Deep links tool updates
 
 * Added a "Watch tutorial" link to the status line that points to the
-  [deep links video tutorial](https://youtu.be/d7sZL6h1Elw).
+  [deep links video tutorial](https://youtu.be/d7sZL6hIElw).
   [#9925](https://github.com/flutter/devtools/pull/9925)
-
 ## VS Code sidebar updates
-
 TODO: Remove this section if there are not any updates.
-
 ## DevTools extension updates
-
 TODO: Remove this section if there are not any updates.
-
 ## Advanced developer mode updates
-
 TODO: Remove this section if there are not any updates.
-
 ## Full commit history
-
 To find a complete list of changes in this release, check out the
 [DevTools git log](https://github.com/flutter/devtools/tree/v2.61.0).
