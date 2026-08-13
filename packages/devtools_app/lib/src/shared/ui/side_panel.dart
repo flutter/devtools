@@ -182,6 +182,17 @@ class SidePanel extends AnimatedWidget {
                 : Expanded(
                     child: Markdown(
                       data: markdownData!,
+                      styleSheet: MarkdownStyleSheet(
+                        // [MarkdownStyleSheet.fromTheme], which supplies the
+                        // rest of the style sheet, hard codes
+                        // `Colors.blue.shade100` as the blockquote fill while
+                        // taking the text color from the theme. In the dark
+                        // theme that draws light gray text on light blue.
+                        blockquoteDecoration: BoxDecoration(
+                          color: theme.colorScheme.secondaryContainer,
+                          borderRadius: defaultBorderRadius,
+                        ),
+                      ),
                       onTapLink: (text, url, title) =>
                           unawaited(launchUrlWithErrorHandling(url!)),
                     ),
