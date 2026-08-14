@@ -64,12 +64,14 @@ class DevToolsScaffold extends StatefulWidget {
 
     // If DevTools is running in an IDE (EmbedMode.embedOne), then hide
     // [ExtensionSettingsAction], unless this screen is showing an extension.
+    final showForEmbedMode =
+        ideTheme.embedMode != EmbedMode.embedOne ||
+        currentScreen is ExtensionScreen ||
+        queryParams.hideAllExceptExtensions;
     final showExtensionSettings =
         FeatureFlags.devToolsExtensions.isEnabled &&
         !queryParams.hideExtensions &&
-        (ideTheme.embedMode != EmbedMode.embedOne ||
-            currentScreen is ExtensionScreen ||
-            queryParams.hideAllExceptExtensions);
+        showForEmbedMode;
 
     return [
       OpenSettingsAction(color: color),
