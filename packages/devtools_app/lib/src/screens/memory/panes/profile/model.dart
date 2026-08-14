@@ -41,12 +41,14 @@ class AdaptedProfile with Serializable {
       total: ProfileRecord.total(profile),
       items: (profile.members ?? [])
           .where((e) => (e.instancesCurrent ?? 0) > 0)
-          .map((e) => ProfileRecord.fromClassHeapStats(
-                e,
-                userPinned: pinnedClassFullNames.contains(
-                  HeapClassName.fromClassRef(e.classRef).fullName,
-                ),
-              ))
+          .map(
+            (e) => ProfileRecord.fromClassHeapStats(
+              e,
+              userPinned: pinnedClassFullNames.contains(
+                HeapClassName.fromClassRef(e.classRef).fullName,
+              ),
+            ),
+          )
           .toList(),
       newSpaceGCStats: profile.newSpaceGCStats,
       oldSpaceGCStats: profile.oldSpaceGCStats,
@@ -85,7 +87,9 @@ class AdaptedProfile with Serializable {
     final itemsWithPins = profile._items
         .map(
           (record) => record.copyWith(
-            userPinned: pinnedClassFullNames.contains(record.heapClass.fullName),
+            userPinned: pinnedClassFullNames.contains(
+              record.heapClass.fullName,
+            ),
           ),
         )
         .toList();

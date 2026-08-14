@@ -33,11 +33,7 @@ class ProfilePaneController extends DisposableController
     // [profile] should only be non-null when loading offline data.
     if (profile != null) {
       _currentAllocationProfile.value = AdaptedProfile.withPinnedClasses(
-        AdaptedProfile.withNewFilter(
-          profile,
-          classFilter.value,
-          rootPackage,
-        ),
+        AdaptedProfile.withNewFilter(profile, classFilter.value, rootPackage),
         _pinnedClassFullNames,
         rootPackage,
       );

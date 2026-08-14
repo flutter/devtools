@@ -32,6 +32,9 @@ import 'profile_pane_controller.dart';
 /// instances, memory).
 const _defaultNumberFieldWidth = 80.0;
 
+@visibleForTesting
+const allocationProfilePinButtonKey = Key('allocation-profile-pin-button');
+
 class _PinColumn extends ColumnData<ProfileRecord>
     implements ColumnRenderer<ProfileRecord> {
   _PinColumn({required this.controller})
@@ -78,10 +81,7 @@ class _PinColumn extends ColumnData<ProfileRecord>
 }
 
 class _HoverPinButton extends StatefulWidget {
-  const _HoverPinButton({
-    required this.pinned,
-    required this.onPressed,
-  });
+  const _HoverPinButton({required this.pinned, required this.onPressed});
 
   final bool pinned;
   final VoidCallback onPressed;
@@ -98,6 +98,7 @@ class _HoverPinButtonState extends State<_HoverPinButton> {
     final showIcon = widget.pinned || _hovering;
 
     return MouseRegion(
+      key: allocationProfilePinButtonKey,
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
       child: showIcon
@@ -121,8 +122,7 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
     implements
         ColumnRenderer<ProfileRecord>,
         ColumnHeaderRenderer<ProfileRecord> {
-  const _FieldClassNameColumn(this.classFilterData)
-    : super.wide('Class');
+  const _FieldClassNameColumn(this.classFilterData) : super.wide('Class');
 
   @override
   String? getValue(ProfileRecord dataObject) => dataObject.heapClass.className;
@@ -558,9 +558,7 @@ class AllocationProfileTableViewState
             );
           },
         ),
-        Expanded(
-          child: _AllocationProfileTable(controller: widget.controller),
-        ),
+        Expanded(child: _AllocationProfileTable(controller: widget.controller)),
       ],
     );
   }
