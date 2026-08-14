@@ -38,7 +38,7 @@ class _PinColumn extends ColumnData<ProfileRecord>
     : super(
         '',
         titleTooltip: 'Pin class to the top of the table',
-        fixedWidthPx: 32.0,
+        fixedWidthPx: 10.0,
         alignment: ColumnAlignment.center,
       );
 
