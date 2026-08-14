@@ -36,10 +36,10 @@ class _PinColumn extends ColumnData<ProfileRecord>
     implements ColumnRenderer<ProfileRecord> {
   _PinColumn({required this.controller})
     : super(
-        'Pin',
+        '',
         titleTooltip: 'Pin class to the top of the table',
-        fixedWidthPx: 40.0,
-        alignment: ColumnAlignment.left,
+        fixedWidthPx: 32.0,
+        alignment: ColumnAlignment.center,
       );
 
   final ProfilePaneController controller;
@@ -57,13 +57,8 @@ class _PinColumn extends ColumnData<ProfileRecord>
     if (item.isTotal) return const SizedBox.shrink();
 
     final pinned = item.userPinned;
-    return IconButton(
-      visualDensity: VisualDensity.compact,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-      iconSize: 18,
-      icon: Icon(pinned ? Icons.push_pin : Icons.push_pin_outlined),
-      tooltip: pinned ? 'Unpin class' : 'Pin class to top',
+    return _HoverPinButton(
+      pinned: pinned,
       onPressed: () {
         ga.select(
           gac.memory,
@@ -82,12 +77,52 @@ class _PinColumn extends ColumnData<ProfileRecord>
       a.userPinned.boolCompare(b.userPinned);
 }
 
+class _HoverPinButton extends StatefulWidget {
+  const _HoverPinButton({
+    required this.pinned,
+    required this.onPressed,
+  });
+
+  final bool pinned;
+  final VoidCallback onPressed;
+
+  @override
+  State<_HoverPinButton> createState() => _HoverPinButtonState();
+}
+
+class _HoverPinButtonState extends State<_HoverPinButton> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final showIcon = widget.pinned || _hovering;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: showIcon
+          ? IconButton(
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              iconSize: 18,
+              icon: Icon(
+                widget.pinned ? Icons.push_pin : Icons.push_pin_outlined,
+              ),
+              tooltip: widget.pinned ? 'Unpin class' : 'Pin class to top',
+              onPressed: widget.onPressed,
+            )
+          : const SizedBox(width: 32, height: 32),
+    );
+  }
+}
+
 class _FieldClassNameColumn extends ColumnData<ProfileRecord>
     implements
         ColumnRenderer<ProfileRecord>,
         ColumnHeaderRenderer<ProfileRecord> {
   const _FieldClassNameColumn(this.classFilterData)
-    : super('Class', fixedWidthPx: 200);
+    : super.wide('Class');
 
   @override
   String? getValue(ProfileRecord dataObject) => dataObject.heapClass.className;
