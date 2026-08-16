@@ -27,9 +27,7 @@ class ProfilePaneController extends DisposableController
   }) {
     if (pinnedClassFullNames != null) {
       _pinnedClassFullNames.addAll(pinnedClassFullNames);
-      _pinnedClassFullNamesListenable.value = pinnedClassFullNames;
     }
-    _pinnedClassFullNamesListenable.value = Set.of(_pinnedClassFullNames);
     // [profile] should only be non-null when loading offline data.
     if (profile != null) {
       _currentAllocationProfile.value = AdaptedProfile.withPinnedClasses(
@@ -61,15 +59,8 @@ class ProfilePaneController extends DisposableController
 
   bool _initialized = false;
 
-  final _pinnedClassFullNames = <String>{};
-
   /// Classes pinned to the top of the Profile Memory table.
-  ValueListenable<Set<String>> get pinnedClassFullNames =>
-      _pinnedClassFullNamesListenable;
-  final _pinnedClassFullNamesListenable = ValueNotifier<Set<String>>({});
-
-  bool isPinned(HeapClassName heapClass) =>
-      _pinnedClassFullNames.contains(heapClass.fullName);
+  final _pinnedClassFullNames = <String>{};
 
   void togglePin(HeapClassName heapClass) {
     final key = heapClass.fullName;
@@ -78,7 +69,6 @@ class ProfilePaneController extends DisposableController
     } else {
       _pinnedClassFullNames.add(key);
     }
-    _pinnedClassFullNamesListenable.value = Set.of(_pinnedClassFullNames);
     _reapplyPinnedState();
   }
 
@@ -260,7 +250,6 @@ class ProfilePaneController extends DisposableController
     _currentAllocationProfile.dispose();
     _classFilter.dispose();
     _refreshOnGc.dispose();
-    _pinnedClassFullNamesListenable.dispose();
     selection.dispose();
     super.dispose();
   }

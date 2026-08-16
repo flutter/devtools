@@ -365,10 +365,6 @@ void main() {
         state.tableController.pinnedData.any((record) => record.userPinned),
         isTrue,
       );
-      expect(
-        allocationProfileController.pinnedClassFullNames.value,
-        isNotEmpty,
-      );
 
       // Pinned class stays at the top after sorting by class name.
       await tester.tap(find.text('Class'));
