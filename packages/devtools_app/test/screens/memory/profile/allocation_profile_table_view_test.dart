@@ -5,6 +5,7 @@
 import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
+import 'package:devtools_app/src/screens/memory/panes/profile/profile_view.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/memory/gc_stats.dart';
 import 'package:devtools_app/src/shared/primitives/byte_utils.dart';
@@ -12,6 +13,7 @@ import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -318,6 +320,58 @@ void main() {
         expect(internalSize >= lastValue, isTrue);
         lastValue = internalSize;
       }
+    });
+
+    testWidgetsWithWindowSize('pins class to top of table', windowSize, (
+      WidgetTester tester,
+    ) async {
+      await scene.pump(tester);
+
+      final allocationProfileController = scene.controller.profile!;
+      await navigateToAllocationProfile(tester, allocationProfileController);
+
+      final table = find.byType(FlatTable<ProfileRecord>);
+      expect(table, findsOneWidget);
+
+      final state = tester.state<FlatTableState<ProfileRecord>>(table.first);
+
+      // "All Classes" is always pinned via [ProfileRecord.isTotal].
+      expect(state.tableController.pinnedData, isNotEmpty);
+      expect(
+        state.tableController.pinnedData.every((record) => !record.userPinned),
+        isTrue,
+      );
+
+      // Pin icons are hidden until the cell is hovered.
+      final pinTargets = find.byKey(allocationProfilePinButtonKey);
+      expect(pinTargets, findsWidgets);
+
+      final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      await gesture.moveTo(tester.getCenter(pinTargets.first));
+      await tester.pumpAndSettle();
+
+      final pinButtons = find.byIcon(Icons.push_pin_outlined);
+      expect(pinButtons, findsWidgets);
+
+      await tester.tap(pinButtons.first);
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.push_pin), findsWidgets);
+      expect(
+        state.tableController.pinnedData.any((record) => record.userPinned),
+        isTrue,
+      );
+
+      // Pinned class stays at the top after sorting by class name.
+      await tester.tap(find.text('Class'));
+      await tester.pumpAndSettle();
+
+      final pinnedData = state.tableController.pinnedData;
+      expect(pinnedData.any((record) => record.userPinned), isTrue);
     });
   });
 }
