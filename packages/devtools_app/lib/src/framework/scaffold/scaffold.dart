@@ -59,20 +59,24 @@ class DevToolsScaffold extends StatefulWidget {
        );
 
   /// Returns the list of ScaffoldAction widgets.
-  static List<Widget> defaultActions({Color? color, Screen? currentScreen}) {
-    final queryParams = DevToolsQueryParams.load();
-
-    // If DevTools is running in an IDE (EmbedMode.embedOne), then hide
-    // [ExtensionSettingsAction], unless this screen is showing an extension.
-    final showForEmbedMode =
-        ideTheme.embedMode != EmbedMode.embedOne ||
-        currentScreen is ExtensionScreen ||
-        queryParams.hideAllExceptExtensions;
+  static List<Widget> defaultActions({
+    Color? color,
+    Screen? currentScreen,
+    DevToolsQueryParams? queryParams,
+  }) {
+    queryParams ??= DevToolsQueryParams.load();
+    // Whether DevTools is embedded in an IDE displaying extension(s).
+    final isEmbeddedExtensionScreen =
+        isEmbedded() &&
+        (currentScreen is ExtensionScreen ||
+            queryParams.hideAllExceptExtensions);
+    // Show extension settings if extensions are enabled and not hidden, AND:
+    // - DevTools is running standalone in the browser (!isEmbedded), OR
+    // - DevTools is embedded in an IDE, but specifically showing an extension.
     final showExtensionSettings =
         FeatureFlags.devToolsExtensions.isEnabled &&
         !queryParams.hideExtensions &&
-        showForEmbedMode;
-
+        (!isEmbedded() || isEmbeddedExtensionScreen);
     return [
       OpenSettingsAction(color: color),
       if (showExtensionSettings) ExtensionSettingsAction(color: color),

@@ -294,33 +294,38 @@ void main() {
 
   test(
     'defaultActions includes ExtensionSettingsAction based on EmbedMode and screen type',
-    () {
+        () {
       setGlobal(IdeTheme, IdeTheme());
       expect(
         DevToolsScaffold.defaultActions().any(
-          (w) => w is ExtensionSettingsAction,
+              (w) => w is ExtensionSettingsAction,
         ),
         isTrue,
       );
-
+      // In embedMany without extension query params or screen, it is hidden:
       setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedMany));
       expect(
         DevToolsScaffold.defaultActions().any(
-          (w) => w is ExtensionSettingsAction,
+              (w) => w is ExtensionSettingsAction,
         ),
+        isFalse,
+      );
+      // In embedMany with hideAllExceptExtensions, it is visible:
+      expect(
+        DevToolsScaffold.defaultActions(
+          queryParams: DevToolsQueryParams({'hide': 'all-except-extensions'}),
+        ).any((w) => w is ExtensionSettingsAction),
         isTrue,
       );
-
+      // In embedOne mode with standard screen, it is hidden:
       setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
-      // Standard screen in embedOne mode hides ExtensionSettingsAction
       expect(
         DevToolsScaffold.defaultActions(
           currentScreen: _screen1,
         ).any((w) => w is ExtensionSettingsAction),
         isFalse,
       );
-
-      // ExtensionScreen in embedOne mode shows ExtensionSettingsAction
+      // In embedOne mode with ExtensionScreen, it is visible:
       final extensionScreen = ExtensionScreen(
         StubDevToolsExtensions.fooExtension,
       );
