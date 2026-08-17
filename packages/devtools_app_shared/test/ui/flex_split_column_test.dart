@@ -40,33 +40,31 @@ void main() {
     test('modifyInitialFractionsToIncludeFirstHeader', () {
       final adjustedFractions =
           FlexSplitColumn.modifyInitialFractionsToIncludeFirstHeader(
-        initialFractions,
-        headers,
-        totalHeight,
-      );
+            initialFractions,
+            headers,
+            totalHeight,
+          );
       expect(
-        const DeepCollectionEquality().equals(
-          adjustedFractions,
-          [
-            0.2857142857142857,
-            0.23809523809523808,
-            0.23809523809523808,
-            0.23809523809523808,
-          ],
-        ),
+        const DeepCollectionEquality().equals(adjustedFractions, [
+          0.2857142857142857,
+          0.23809523809523808,
+          0.23809523809523808,
+          0.23809523809523808,
+        ]),
         isTrue,
       );
     });
 
     test('modifyMinSizesToIncludeFirstHeader', () {
       final adjustedFractions =
-          FlexSplitColumn.modifyMinSizesToIncludeFirstHeader(
-        minSizes,
-        headers,
-      );
+          FlexSplitColumn.modifyMinSizesToIncludeFirstHeader(minSizes, headers);
       expect(
-        const DeepCollectionEquality()
-            .equals(adjustedFractions, [60.0, 10.0, 10.0, 10.0]),
+        const DeepCollectionEquality().equals(adjustedFractions, [
+          60.0,
+          10.0,
+          10.0,
+          10.0,
+        ]),
         isTrue,
       );
     });
@@ -77,10 +75,10 @@ void main() {
 
       // Wrap each child in a container so we can build the elements in a
       // arbitrary column to check for [firstHeaderKey].
-      final adjustedChildren =
-          FlexSplitColumn.buildChildrenWithFirstHeader(children, headers)
-              .map((child) => SizedBox(height: 100.0, child: child))
-              .toList();
+      final adjustedChildren = FlexSplitColumn.buildChildrenWithFirstHeader(
+        children,
+        headers,
+      ).map((child) => SizedBox(height: 100.0, child: child)).toList();
       await tester.pumpWidget(Column(children: adjustedChildren));
       expect(find.byKey(firstHeaderKey), findsOneWidget);
     });

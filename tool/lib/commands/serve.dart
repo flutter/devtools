@@ -174,29 +174,27 @@ class ServeCommand extends Command {
     }
 
     // Any flag that we aren't removing here is intended to be passed through.
-    final remainingArguments =
-        List.of(results.arguments)
-          ..remove(SharedCommandArgs.updateFlutter.asArg())
-          ..remove(SharedCommandArgs.updateFlutter.asArg(negated: true))
-          ..remove(SharedCommandArgs.updatePerfetto.asArg())
-          ..remove(SharedCommandArgs.wasm.asArg())
-          ..remove(SharedCommandArgs.noStripWasm.asArg())
-          ..remove(SharedCommandArgs.noMinifyWasm.asArg())
-          ..remove(valueAsArg(_buildAppFlag))
-          ..remove(valueAsArg(_buildAppFlag, negated: true))
-          ..remove(SharedCommandArgs.runApp.asArg())
-          ..remove(SharedCommandArgs.debugServer.asArg())
-          ..remove(SharedCommandArgs.pubGet.asArg())
-          ..remove(SharedCommandArgs.pubGet.asArg(negated: true))
-          ..removeWhere(
-            (element) =>
-                element.startsWith(SharedCommandArgs.buildMode.asArg()),
-          )
-          ..removeWhere(
-            (element) => element.startsWith(
-              valueAsArg(SharedCommandArgs.serveWithDartSdk.flagName),
-            ),
-          );
+    final remainingArguments = List.of(results.arguments)
+      ..remove(SharedCommandArgs.updateFlutter.asArg())
+      ..remove(SharedCommandArgs.updateFlutter.asArg(negated: true))
+      ..remove(SharedCommandArgs.updatePerfetto.asArg())
+      ..remove(SharedCommandArgs.wasm.asArg())
+      ..remove(SharedCommandArgs.noStripWasm.asArg())
+      ..remove(SharedCommandArgs.noMinifyWasm.asArg())
+      ..remove(valueAsArg(_buildAppFlag))
+      ..remove(valueAsArg(_buildAppFlag, negated: true))
+      ..remove(SharedCommandArgs.runApp.asArg())
+      ..remove(SharedCommandArgs.debugServer.asArg())
+      ..remove(SharedCommandArgs.pubGet.asArg())
+      ..remove(SharedCommandArgs.pubGet.asArg(negated: true))
+      ..removeWhere(
+        (element) => element.startsWith(SharedCommandArgs.buildMode.asArg()),
+      )
+      ..removeWhere(
+        (element) => element.startsWith(
+          valueAsArg(SharedCommandArgs.serveWithDartSdk.flagName),
+        ),
+      );
 
     final localDartSdkLocation = Platform.environment['LOCAL_DART_SDK'];
     if (localDartSdkLocation == null) {
@@ -271,11 +269,13 @@ class ServeCommand extends Command {
 
     void processServeLocalOutput(String line) {
       if (line.startsWith(_debugServerVmServiceLine)) {
-        debugServerVmServiceUri =
-            line.substring(_debugServerVmServiceLine.length).trim();
+        debugServerVmServiceUri = line
+            .substring(_debugServerVmServiceLine.length)
+            .trim();
       } else if (line.startsWith(_debugServerDartDevToolsLine)) {
-        debugServerDevToolsConnection =
-            line.substring(_debugServerDartDevToolsLine.length).trim();
+        debugServerDevToolsConnection = line
+            .substring(_debugServerDartDevToolsLine.length)
+            .trim();
       } else if (line.startsWith(_devToolsServerAddressLine)) {
         // This will pull the server address from a String like:
         // "Serving DevTools at http://127.0.0.1:9104.".
@@ -344,12 +344,14 @@ class ServeCommand extends Command {
       void processFlutterRunOutput(String line) {
         if (line.contains(_runAppVmServiceLine)) {
           final index = line.indexOf(_runAppVmServiceLine);
-          devToolsWebAppVmServiceUri =
-              line.substring(index + _runAppVmServiceLine.length).trim();
+          devToolsWebAppVmServiceUri = line
+              .substring(index + _runAppVmServiceLine.length)
+              .trim();
         } else if (line.contains(_runAppFlutterDevToolsLine)) {
           final index = line.indexOf(_runAppFlutterDevToolsLine);
-          devToolsWebAppDevToolsConnection =
-              line.substring(index + _runAppFlutterDevToolsLine.length).trim();
+          devToolsWebAppDevToolsConnection = line
+              .substring(index + _runAppFlutterDevToolsLine.length)
+              .trim();
         }
       }
 
@@ -371,13 +373,12 @@ class ServeCommand extends Command {
       );
 
       // Consolidate important stdout content for easy access.
-      final debugServerContent =
-          debugServer
-              ? '''
+      final debugServerContent = debugServer
+          ? '''
 - VM Service URI: $debugServerVmServiceUri
 - DevTools URI for debugging the DevTools server: $debugServerDevToolsConnection
 '''
-              : '';
+          : '';
 
       print('''
 -------------------------------------------------------------------

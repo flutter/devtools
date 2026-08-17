@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:meta/meta.dart';
 import '../../shared/http/http_request_data.dart';
 import 'constants.dart';
 import 'har_builder.dart';
@@ -28,6 +29,7 @@ class HarNetworkData with Serializable {
   /// ```dart
   /// final harData = HarNetworkData.fromJson(json);
   /// ```
+  @visibleForTesting
   factory HarNetworkData.fromJson(Map<String, Object?> json) {
     final entries =
         ((json[NetworkEventKeys.log.name]

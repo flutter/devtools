@@ -52,15 +52,12 @@ void main() {
 
     test('throws after max retries reached', () async {
       expect(counter, 0);
-      await expectLater(
-        () async {
-          await runWithRetry(
-            callback: () => callback(succeedOnAttempt: 11),
-            maxRetries: 10,
-          );
-        },
-        throwsException,
-      );
+      await expectLater(() async {
+        await runWithRetry(
+          callback: () => callback(succeedOnAttempt: 11),
+          maxRetries: 10,
+        );
+      }, throwsException);
       expect(counter, 10);
     });
 

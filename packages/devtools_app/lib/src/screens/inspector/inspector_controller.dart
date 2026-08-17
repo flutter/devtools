@@ -31,6 +31,7 @@ import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
+import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/managers/notifications.dart';
 import '../../shared/primitives/query_parameters.dart';
@@ -38,6 +39,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/utils/utils.dart';
 import 'inspector_data_models.dart';
 import 'inspector_screen.dart';
+import 'inspector_screen_controller.dart';
 import 'inspector_tree_controller.dart';
 
 final _log = Logger('inspector_controller');
@@ -149,6 +151,21 @@ class InspectorController extends DisposableController
     }
   }
 
+  /// Returns the [InspectorScreenController] when it is registered.
+  ///
+  /// [InspectorController] is sometimes constructed in unit tests without an
+  /// [InspectorScreenController] registered, so callers that only need to clear
+  /// errors on connect/reload should use this nullable accessor.
+  InspectorScreenController? get _inspectorScreenControllerOrNull {
+    final controllers = globals[ScreenControllers] as ScreenControllers?;
+    if (controllers == null) return null;
+    if (!controllers.isRegistered<InspectorScreenController>()) return null;
+    return controllers.lookup<InspectorScreenController>();
+  }
+
+  InspectorScreenController get _inspectorScreenController =>
+      screenControllers.lookup<InspectorScreenController>();
+
   void _handleConnectionStart() {
     // Clear any existing badge/errors for older errors that were collected.
     // Do this in a post frame callback so that we are not trying to clear the
@@ -157,9 +174,8 @@ class InspectorController extends DisposableController
     // TODO(kenz): When this method is called outside  createState(), this post
     // frame callback can be removed.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      serviceConnection.errorBadgeManager.clearErrorCount(InspectorScreen.id);
+      _inspectorScreenControllerOrNull?.clearErrors();
     });
-    filterErrors();
   }
 
   void _handleConnectionStop() {
@@ -201,7 +217,8 @@ class InspectorController extends DisposableController
   /// for now mainly to minimize risk.
   static const refreshFramesPerSecond = 5.0;
 
-  InspectorTreeController inspectorTree;
+  final InspectorTreeController inspectorTree;
+
   final FlutterTreeType treeType;
 
   late RateLimiter _refreshRateLimiter;
@@ -223,16 +240,9 @@ class InspectorController extends DisposableController
 
   InspectorObjectGroupManager? _layoutGroups;
 
-  /// Node being highlighted due to the current hover.
-  InspectorTreeNode? get currentShowNode => inspectorTree.hover;
-
-  set currentShowNode(InspectorTreeNode? node) => inspectorTree.hover = node;
-
   bool flutterAppFrameReady = false;
 
   bool treeLoadStarted = false;
-
-  RemoteDiagnosticsNode? subtreeRoot;
 
   bool programmaticSelectionChangeInProgress = false;
 
@@ -252,8 +262,6 @@ class InspectorController extends DisposableController
       _implementationWidgetsHidden;
   final _implementationWidgetsHidden = ValueNotifier<bool>(true);
 
-  InspectorTreeNode? lastExpanded;
-
   bool isActive = false;
 
   final valueToInspectorTreeNode = <InspectorInstanceRef, InspectorTreeNode>{};
@@ -261,8 +269,6 @@ class InspectorController extends DisposableController
   /// When visibleToUser is false we should dispose all allocated objects and
   /// not perform any actions.
   bool visibleToUser = false;
-
-  bool highlightNodesShownInBothTrees = false;
 
   RemoteDiagnosticsNode? get selectedDiagnostic =>
       selectedNode.value?.diagnostic;
@@ -275,10 +281,6 @@ class InspectorController extends DisposableController
   /// This field is used to prevent sending multiple analytics events for
   /// inspector tree load timing.
   bool firstInspectorTreeLoadCompleted = false;
-
-  FlutterTreeType getTreeType() {
-    return treeType;
-  }
 
   Future<void> setVisibleToUser(bool visible) async {
     if (visibleToUser == visible) {
@@ -293,24 +295,12 @@ class InspectorController extends DisposableController
     }
   }
 
-  bool hasDiagnosticsValue(InspectorInstanceRef ref) {
-    return valueToInspectorTreeNode.containsKey(ref);
-  }
-
-  RemoteDiagnosticsNode? findDiagnosticsValue(InspectorInstanceRef ref) {
-    return valueToInspectorTreeNode[ref]?.diagnostic;
-  }
-
   void endShowNode() {
     highlightShowNode(null);
   }
 
-  bool highlightShowFromNodeInstanceRef(InspectorInstanceRef ref) {
-    return highlightShowNode(valueToInspectorTreeNode[ref]);
-  }
-
   bool highlightShowNode(InspectorTreeNode? node) {
-    currentShowNode = node;
+    inspectorTree.hover = node;
     return true;
   }
 
@@ -350,11 +340,8 @@ class InspectorController extends DisposableController
     _treeGroups?.clear(isolateStopped);
     _selectionGroups?.clear(isolateStopped);
 
-    currentShowNode = null;
+    inspectorTree.hover = null;
     _selectedNode.value = null;
-    lastExpanded = null;
-
-    subtreeRoot = null;
 
     inspectorTree.root = inspectorTree.createNode();
     programmaticSelectionChangeInProgress = false;
@@ -381,8 +368,6 @@ class InspectorController extends DisposableController
       return;
     }
 
-    filterErrors();
-
     return _waitForPendingUpdateDone();
   }
 
@@ -402,13 +387,6 @@ class InspectorController extends DisposableController
       firstInspectorTreeLoadCompleted = true;
     }
     await onForceRefresh();
-  }
-
-  void filterErrors() {
-    serviceConnection.errorBadgeManager.filterErrors(
-      InspectorScreen.id,
-      (id) => hasDiagnosticsValue(InspectorInstanceRef(id)),
-    );
   }
 
   void setActivate(bool enabled) {
@@ -476,7 +454,7 @@ class InspectorController extends DisposableController
     }
 
     if (event.kind == EventKind.kIsolateReload) {
-      serviceConnection.errorBadgeManager.clearErrors(InspectorScreen.id);
+      _inspectorScreenControllerOrNull?.clearErrors();
       _receivedIsolateReloadEvent = true;
     }
   }
@@ -631,35 +609,6 @@ class InspectorController extends DisposableController
     valueToInspectorTreeNode.clear();
   }
 
-  void setSubtreeRoot(
-    RemoteDiagnosticsNode? node,
-    RemoteDiagnosticsNode? selection,
-  ) {
-    selection ??= node;
-    if (node != null && node == subtreeRoot) {
-      //  Select the new node in the existing subtree.
-      applyNewSelection(selection);
-      return;
-    }
-    subtreeRoot = node;
-    if (node == null) {
-      // Passing in a null node indicates we should clear the subtree and free any memory allocated.
-      shutdownTree(false);
-      return;
-    }
-
-    // Clear now to eliminate frame of highlighted nodes flicker.
-    _clearValueToInspectorTreeNodeMapping();
-    unawaited(_recomputeTreeRoot(selection));
-  }
-
-  InspectorTreeNode? getSubtreeRootNode() {
-    if (subtreeRoot == null) {
-      return null;
-    }
-    return valueToInspectorTreeNode[subtreeRoot!.valueRef];
-  }
-
   void refreshSelection(RemoteDiagnosticsNode? newSelection) {
     newSelection ??= selectedDiagnostic;
     final matchingNode = findMatchingInspectorTreeNode(newSelection);
@@ -683,26 +632,6 @@ class InspectorController extends DisposableController
     );
     programmaticSelectionChangeInProgress = false;
     animateTo(selectedNode.value);
-  }
-
-  void selectAndShowNode(RemoteDiagnosticsNode? node) {
-    if (node == null) {
-      return;
-    }
-    selectAndShowInspectorInstanceRef(node.valueRef);
-  }
-
-  void selectAndShowInspectorInstanceRef(InspectorInstanceRef ref) {
-    final node = valueToInspectorTreeNode[ref];
-    if (node == null) {
-      return;
-    }
-    setSelectedNode(node);
-    syncTreeSelection();
-  }
-
-  InspectorTreeNode? getTreeNode(RemoteDiagnosticsNode node) {
-    return valueToInspectorTreeNode[node.valueRef];
   }
 
   @override
@@ -763,8 +692,6 @@ class InspectorController extends DisposableController
 
       selectionGroups.promoteNext();
 
-      subtreeRoot = newSelection;
-
       applyNewSelection(newSelection);
 
       await _maybeShowNotificationForSelectedNode(
@@ -813,7 +740,6 @@ class InspectorController extends DisposableController
 
     _selectedNode.value = newSelection;
 
-    lastExpanded = null; // New selected node takes precedence.
     endShowNode();
 
     _updateSelectedErrorFromNode(_selectedNode.value);
@@ -961,9 +887,7 @@ class InspectorController extends DisposableController
   void _updateSelectedErrorFromNode(InspectorTreeNode? node) {
     final inspectorRef = node?.diagnostic?.valueRef.id;
 
-    final errors = serviceConnection.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
+    final errors = _inspectorScreenController.inspectorErrors.value;
 
     // Check whether the node that was just selected has any errors associated
     // with it.
@@ -977,17 +901,9 @@ class InspectorController extends DisposableController
     _selectedErrorIndex.value = errorIndex;
 
     if (errorIndex != null) {
-      // Mark the error as "seen" as this will render slightly differently
-      // so the user can track which errored nodes they've viewed.
-      serviceConnection.errorBadgeManager.markErrorAsRead(
-        InspectorScreen.id,
-        errors[inspectorRef!]!,
-      );
-      // Also clear the error badge since new errors may have arrived while
-      // the inspector was visible (normally they're cleared when visiting
-      // the screen) and visiting an errored node seems an appropriate
-      // acknowledgement of the errors.
-      serviceConnection.errorBadgeManager.clearErrorCount(InspectorScreen.id);
+      // Marking an error as read will automatically update the badge count to
+      // reflect the remaining unread errors.
+      _inspectorScreenController.markErrorAsRead(errors[inspectorRef!]!);
     }
   }
 
@@ -995,9 +911,7 @@ class InspectorController extends DisposableController
   void selectErrorByIndex(int index) {
     _selectedErrorIndex.value = index;
 
-    final errors = serviceConnection.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
+    final errors = _inspectorScreenController.inspectorErrors.value;
 
     unawaited(
       updateSelectionFromService(inspectorRef: errors.keys.elementAt(index)),

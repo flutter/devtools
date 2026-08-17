@@ -6,7 +6,6 @@ part of '../_simulated_devtools_environment.dart';
 
 class _UriConnectionDisplay extends StatelessWidget {
   const _UriConnectionDisplay({
-    required this.simController,
     required this.connected,
     required this.connectedLabel,
     required this.disconnectedLabel,
@@ -20,7 +19,6 @@ class _UriConnectionDisplay extends StatelessWidget {
   @visibleForTesting
   static const totalControlsHeight = 45.0;
 
-  final SimulatedDevToolsController simController;
   final bool connected;
   final String connectedLabel;
   final String disconnectedLabel;
@@ -36,14 +34,12 @@ class _UriConnectionDisplay extends StatelessWidget {
       height: totalControlsHeight,
       child: connected
           ? _ConnectedDisplay(
-              simController: simController,
               label: connectedLabel,
               onDisconnect: onDisconnect,
               currentConnection: currentConnection,
               help: help,
             )
           : _DisconnectedDisplay(
-              simController: simController,
               label: disconnectedLabel,
               hint: disconnectedHint,
               onConnect: onConnect,
@@ -55,14 +51,12 @@ class _UriConnectionDisplay extends StatelessWidget {
 
 class _ConnectedDisplay extends StatelessWidget {
   const _ConnectedDisplay({
-    required this.simController,
     required this.label,
     required this.currentConnection,
     required this.onDisconnect,
     this.help,
   });
 
-  final SimulatedDevToolsController simController;
   final String label;
   final String Function() currentConnection;
   final VoidCallback onDisconnect;
@@ -77,19 +71,11 @@ class _ConnectedDisplay extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: theme.regularTextStyle,
-            ),
-            Text(
-              currentConnection(),
-              style: theme.boldTextStyle,
-            ),
+            Text(label, style: theme.regularTextStyle),
+            Text(currentConnection(), style: theme.boldTextStyle),
           ],
         ),
-        const Expanded(
-          child: SizedBox(width: denseSpacing),
-        ),
+        const Expanded(child: SizedBox(width: denseSpacing)),
         DevToolsButton(
           elevated: true,
           label: 'Disconnect',
@@ -97,10 +83,7 @@ class _ConnectedDisplay extends StatelessWidget {
         ),
         if (help != null) ...[
           const SizedBox(width: denseSpacing),
-          _ConnectionHelpButton(
-            dialogTitle: '$label help',
-            child: help!,
-          ),
+          _ConnectionHelpButton(dialogTitle: '$label help', child: help!),
         ],
       ],
     );
@@ -109,14 +92,12 @@ class _ConnectedDisplay extends StatelessWidget {
 
 class _DisconnectedDisplay extends StatefulWidget {
   const _DisconnectedDisplay({
-    required this.simController,
     required this.label,
     required this.hint,
     required this.onConnect,
     this.help,
   });
 
-  final SimulatedDevToolsController simController;
   final String label;
   final String hint;
   final void Function(String) onConnect;
@@ -189,10 +170,7 @@ class _DisconnectedDisplayState extends State<_DisconnectedDisplay> {
 }
 
 class _ConnectionHelpButton extends StatelessWidget {
-  const _ConnectionHelpButton({
-    required this.dialogTitle,
-    required this.child,
-  });
+  const _ConnectionHelpButton({required this.dialogTitle, required this.child});
 
   final String dialogTitle;
 
@@ -209,10 +187,7 @@ class _ConnectionHelpButton extends StatelessWidget {
         showDevToolsDialog(
           context: context,
           title: dialogTitle,
-          content: SizedBox(
-            width: helpContentWidth,
-            child: child,
-          ),
+          content: SizedBox(width: helpContentWidth, child: child),
         );
       },
     );

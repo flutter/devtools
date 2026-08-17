@@ -41,9 +41,9 @@ class HeapSample with Serializable {
     AdbMemoryInfo? adbMemoryInfo,
     EventSample? memoryEventInfo,
     RasterCache? rasterCache,
-  )   : adbMemoryInfo = adbMemoryInfo ?? AdbMemoryInfo.empty(),
-        memoryEventInfo = memoryEventInfo ?? EventSample.empty(),
-        rasterCache = rasterCache ?? RasterCache.empty();
+  ) : adbMemoryInfo = adbMemoryInfo ?? AdbMemoryInfo.empty(),
+      memoryEventInfo = memoryEventInfo ?? EventSample.empty(),
+      rasterCache = rasterCache ?? RasterCache.empty();
 
   factory HeapSample.fromJson(Map<String, Object?> json) {
     return HeapSample(
@@ -72,16 +72,16 @@ class HeapSample with Serializable {
 
   @override
   Map<String, dynamic> toJson() => <String, Object?>{
-        Json.timestamp.key: timestamp,
-        Json.rss.key: rss,
-        Json.capacity.key: capacity,
-        Json.used.key: used,
-        Json.external.key: external,
-        Json.gc.key: isGC,
-        Json.adbMemoryInfo.key: adbMemoryInfo,
-        Json.memoryEventInfo.key: memoryEventInfo,
-        Json.rasterCache.key: rasterCache,
-      };
+    Json.timestamp.key: timestamp,
+    Json.rss.key: rss,
+    Json.capacity.key: capacity,
+    Json.used.key: used,
+    Json.external.key: external,
+    Json.gc.key: isGC,
+    Json.adbMemoryInfo.key: adbMemoryInfo,
+    Json.memoryEventInfo.key: memoryEventInfo,
+    Json.rasterCache.key: rasterCache,
+  };
 
   /// Version of HeapSample JSON payload.
   static const version = 1;
@@ -105,6 +105,7 @@ class HeapSample with Serializable {
   RasterCache rasterCache;
 
   @override
-  String toString() => '[HeapSample timestamp: $timestamp, '
+  String toString() =>
+      '[HeapSample timestamp: $timestamp, '
       '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }

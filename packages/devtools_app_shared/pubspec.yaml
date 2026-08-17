@@ -7,15 +7,15 @@ version: 0.5.2-wip
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app_shared
 
 environment:
-  sdk: ">=3.6.0 <4.0.0"
-  flutter: ">=3.27.1"
+  sdk: ^3.11.0
+  flutter: ^3.41.0
 
 resolution: workspace
 
 dependencies:
   collection: ^1.15.0
   dds_service_extensions: ^2.0.0
-  devtools_shared: ^13.0.0
+  devtools_shared: ^14.0.0
   dtd: ^4.0.0
   flutter:
     sdk: flutter
@@ -28,6 +28,7 @@ dependencies:
   web: ^1.0.0
 
 dev_dependencies:
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
   test: ^1.21.0

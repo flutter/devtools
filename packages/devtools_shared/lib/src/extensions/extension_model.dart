@@ -32,24 +32,23 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
     final requiresConnection =
         requiresConnectionValue != false && requiresConnectionValue != 'false';
 
-    if (json
-        case {
-          // The exptected keys below are required fields in the extension's
-          // config.yaml file.
-          nameKey: final String name,
-          issueTrackerKey: final String issueTracker,
-          versionKey: final String version,
-          materialIconCodePointKey: final Object codePointFromJson,
-          // The expected keys below are not from the extension's config.yaml
-          // file; they are generated during the extension detection mechanism
-          // in the DevTools server.
-          extensionAssetsPathKey: final String extensionAssetsPath,
-          devtoolsOptionsUriKey: final String devtoolsOptionsUri,
-          isPubliclyHostedKey: final String isPubliclyHosted,
-          detectedFromStaticContextKey: final String detectedFromStaticContext,
-          // Note that the field [requiresConnectionKey] is not required for
-          // this check because it is optional.
-        }) {
+    if (json case {
+      // The exptected keys below are required fields in the extension's
+      // config.yaml file.
+      nameKey: final String name,
+      issueTrackerKey: final String issueTracker,
+      versionKey: final String version,
+      materialIconCodePointKey: final Object codePointFromJson,
+      // The expected keys below are not from the extension's config.yaml
+      // file; they are generated during the extension detection mechanism
+      // in the DevTools server.
+      extensionAssetsPathKey: final String extensionAssetsPath,
+      devtoolsOptionsUriKey: final String devtoolsOptionsUri,
+      isPubliclyHostedKey: final String isPubliclyHosted,
+      detectedFromStaticContextKey: final String detectedFromStaticContext,
+      // Note that the field [requiresConnectionKey] is not required for
+      // this check because it is optional.
+    }) {
       final underscoresAndLetters = RegExp(r'^[a-z0-9_]*$');
       if (!underscoresAndLetters.hasMatch(name)) {
         throw StateError(
@@ -88,13 +87,8 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
     } else {
       _assertGeneratedKeysPresent(json);
       final jsonKeysFromConfigFile = Set.of(json.keys.toSet())
-        ..removeAll([
-          ..._serverGeneratedKeys,
-          ..._optionalKeys,
-        ]);
-      final diff = _requiredKeys.toSet().difference(
-            jsonKeysFromConfigFile,
-          );
+        ..removeAll([..._serverGeneratedKeys, ..._optionalKeys]);
+      final diff = _requiredKeys.toSet().difference(jsonKeysFromConfigFile);
       if (diff.isNotEmpty) {
         throw StateError(
           'Missing required fields ${diff.toString()} in the extension '
@@ -241,16 +235,16 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
   String get analyticsSafeName => isPubliclyHosted ? name : 'private';
 
   Map<String, Object?> toJson() => {
-        nameKey: name,
-        issueTrackerKey: issueTrackerLink,
-        versionKey: version,
-        materialIconCodePointKey: materialIconCodePoint,
-        requiresConnectionKey: requiresConnection.toString(),
-        extensionAssetsPathKey: extensionAssetsPath,
-        devtoolsOptionsUriKey: devtoolsOptionsUri,
-        isPubliclyHostedKey: isPubliclyHosted.toString(),
-        detectedFromStaticContextKey: detectedFromStaticContext.toString(),
-      };
+    nameKey: name,
+    issueTrackerKey: issueTrackerLink,
+    versionKey: version,
+    materialIconCodePointKey: materialIconCodePoint,
+    requiresConnectionKey: requiresConnection.toString(),
+    extensionAssetsPathKey: extensionAssetsPath,
+    devtoolsOptionsUriKey: devtoolsOptionsUri,
+    isPubliclyHostedKey: isPubliclyHosted.toString(),
+    detectedFromStaticContextKey: detectedFromStaticContext.toString(),
+  };
 
   @override
   int compareTo(DevToolsExtensionConfig other) {
@@ -280,16 +274,16 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
 
   @override
   int get hashCode => Object.hash(
-        name,
-        issueTrackerLink,
-        version,
-        materialIconCodePoint,
-        requiresConnection,
-        extensionAssetsPath,
-        devtoolsOptionsUri,
-        isPubliclyHosted,
-        detectedFromStaticContext,
-      );
+    name,
+    issueTrackerLink,
+    version,
+    materialIconCodePoint,
+    requiresConnection,
+    extensionAssetsPath,
+    devtoolsOptionsUri,
+    isPubliclyHosted,
+    detectedFromStaticContext,
+  );
 
   static void _assertGeneratedKeysPresent(Map<String, Object?> json) {
     final missingKeys = <String>[];
@@ -325,8 +319,9 @@ enum ExtensionEnabledState {
 
   /// Parses [value] and returns the matching [ExtensionEnabledState] if found.
   static ExtensionEnabledState from(String? value) {
-    return ExtensionEnabledState.values
-            .firstWhereOrNull((e) => e.name == value) ??
+    return ExtensionEnabledState.values.firstWhereOrNull(
+          (e) => e.name == value,
+        ) ??
         ExtensionEnabledState.none;
   }
 }

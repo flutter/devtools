@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:web_benchmarks/analysis.dart';
+
+/// Returns a pretty-printed representation of a JSON payload.
+String prettyPrintJson(Object? json) =>
+    const JsonEncoder.withIndent('  ').convert(json);
 
 File? checkFileExists(String path) {
   final testFile = File.fromUri(Uri.parse(path));
@@ -40,14 +45,22 @@ extension BenchmarkResultsExtension on BenchmarkResults {
 
 extension BenchmarkScoreExtension on BenchmarkScore {
   List<String> toCsvLine() {
+    final deltaValue = delta;
+    final baselineValue = deltaValue != null ? value - deltaValue : null;
+    final String deltaPercent;
+    if (baselineValue == null) {
+      deltaPercent = '';
+    } else if (baselineValue == 0) {
+      deltaPercent = 'N/A';
+    } else {
+      deltaPercent = (deltaValue! / baselineValue).toString();
+    }
     return [
       metric, // Metric name
-      value.toString(), // Value
-      delta?.toString() ?? '', // Delta value
-      // value - delta represents the baseline score.
-      delta != null
-          ? (delta! / (value - delta!)).toString()
-          : '', // Delta % value
+      baselineValue?.toString() ?? '', // Baseline value
+      value.toString(), // Test value
+      deltaValue?.toString() ?? '', // Delta value
+      deltaPercent, // Delta % value
     ];
   }
 }

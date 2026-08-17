@@ -29,7 +29,6 @@ import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
-import 'primitives/source_location.dart';
 
 const _inspectorLibraryUri =
     'package:flutter/src/widgets/widget_inspector.dart';
@@ -245,6 +244,7 @@ class InspectorService extends InspectorServiceBase {
   void dispose() {
     _cachedSelectionGroups?.clear(false);
     _cachedSelectionGroups = null;
+    _rootDirectories.dispose();
     super.dispose();
   }
 
@@ -465,6 +465,7 @@ class InspectorService extends InspectorServiceBase {
     );
   }
 
+  @visibleForTesting
   Future<bool> isWidgetCreationTracked() {
     return invokeBoolServiceMethodNoArgs(
       WidgetInspectorServiceExtensions.isWidgetCreationTracked.name,
@@ -535,6 +536,7 @@ abstract class InspectorObjectGroupBase
           );
   }
 
+  // ignore: unused-code, this is used in g3.
   Future<RemoteDiagnosticsNode?> invokeServiceMethodWithArgReturningNode(
     String methodName,
     String arg,
@@ -833,27 +835,6 @@ abstract class InspectorObjectGroupBase
     return properties;
   }
 
-  Future<SourcePosition?> getPropertyLocationHelper(
-    ClassRef classRef,
-    String name,
-  ) async {
-    final clazz = await inspectorLibrary.getClass(classRef, this) as Class;
-    for (final f in clazz.functions!) {
-      // TODO(pq): check for properties that match name.
-      if (f.name == name) {
-        final func = await inspectorLibrary.getFunc(f, this) as Func;
-        final location = func.location;
-        throw UnimplementedError(
-          'getSourcePosition not implemented. $location',
-        );
-      }
-    }
-    final superClass = clazz.superClass;
-    return superClass == null
-        ? null
-        : getPropertyLocationHelper(superClass, name);
-  }
-
   Future<List<RemoteDiagnosticsNode>> getListHelper(
     InspectorInstanceRef? instanceRef,
     String methodName,
@@ -1134,23 +1115,6 @@ class ObjectGroup extends InspectorObjectGroupBase {
     );
   }
 
-  Future<RemoteDiagnosticsNode?> getDetailsSubtree(
-    RemoteDiagnosticsNode? node, {
-    int subtreeDepth = 2,
-  }) async {
-    if (node == null) return null;
-    final args = {
-      'objectGroup': groupName,
-      'arg': node.valueRef.id,
-      'subtreeDepth': subtreeDepth.toString(),
-    };
-    final json = await invokeServiceMethodDaemonParams(
-      WidgetInspectorServiceExtensions.getDetailsSubtree.name,
-      args,
-    );
-    return parseDiagnosticsNodeHelper(json as Map<String, Object?>?);
-  }
-
   Future<void> invokeSetFlexProperties(
     InspectorInstanceRef ref,
     MainAxisAlignment? mainAxisAlignment,
@@ -1201,15 +1165,6 @@ class ObjectGroup extends InspectorObjectGroupBase {
         },
       ),
     );
-  }
-
-  Future<List<String>> getPubRootDirectories() async {
-    final invocationResult = await invokeServiceMethodDaemonParams(
-      WidgetInspectorServiceExtensions.getPubRootDirectories.name,
-      {},
-    );
-    final directories = (invocationResult as List?)?.cast<Object>();
-    return List.from(directories ?? []);
   }
 }
 

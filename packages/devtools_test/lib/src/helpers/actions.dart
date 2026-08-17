@@ -36,8 +36,9 @@ Future<void> navigateThroughDevToolsScreens(
       findsOneWidget,
       shouldExpect: runWithExpectations,
     );
-    final menuChildren =
-        controller.widget<MenuAnchor>(tabOverflowMenuFinder).menuChildren;
+    final menuChildren = controller
+        .widget<MenuAnchor>(tabOverflowMenuFinder)
+        .menuChildren;
     numTabs += menuChildren.length;
   }
 
@@ -47,12 +48,12 @@ Future<void> navigateThroughDevToolsScreens(
     shouldExpect: runWithExpectations,
   );
 
-  final expectedConnectedControllersCount =
-      devtoolsScreens!.where((s) => s.providesController).length;
-  final expectedDisconnectedControllersCount =
-      devtoolsScreens!
-          .where((s) => s.providesController && !s.screen.requiresConnection)
-          .length;
+  final expectedConnectedControllersCount = devtoolsScreens!
+      .where((s) => s.providesController)
+      .length;
+  final expectedDisconnectedControllersCount = devtoolsScreens!
+      .where((s) => s.providesController && !s.screen.requiresConnection)
+      .length;
   _maybeExpect(
     screenControllers.controllers.length,
     connectedToApp
@@ -66,9 +67,8 @@ Future<void> navigateThroughDevToolsScreens(
     shouldExpect: runWithExpectations,
   );
 
-  final screens =
-      (ScreenMetaData.values.toList()
-        ..removeWhere((data) => !visibleScreenIds.contains(data.id)));
+  final screens = (ScreenMetaData.values.toList()
+    ..removeWhere((data) => !visibleScreenIds.contains(data.id)));
   for (final screen in screens) {
     await switchToScreen(
       controller,

@@ -34,6 +34,7 @@ class DevToolsRouteInformationParser
   DevToolsRouteInformationParser() : _testQueryParams = null;
 
   @visibleForTesting
+  // ignore: unused-code, used in packages/devtools_test
   DevToolsRouteInformationParser.test(this._testQueryParams);
 
   /// Query parameters that can be set on DevTools routes for testing purposes.
@@ -103,6 +104,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       _isTestMode = false;
 
   @visibleForTesting
+  // ignore: unused-code, used in packages/devtools_test
   DevToolsRouterDelegate.test(this._getPage, [GlobalKey<NavigatorState>? key])
     : navigatorKey = key ?? GlobalKey<NavigatorState>(),
       _isTestMode = true;
@@ -273,6 +275,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     await updateArgsIfChanged({'uri': null});
   }
 
+  @visibleForTesting
   Future<void> replaceState(DevToolsNavigationState state) async {
     final currentConfig = currentConfiguration!;
     await _replaceStack(
@@ -381,6 +384,7 @@ class DevToolsNavigationState {
   @override
   String toString() => _state.toString();
 
+  // ignore: unused-code, implicit method used in JSON serialization.
   Map<String, Object?> toJson() => _state;
 }
 

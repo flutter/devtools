@@ -420,8 +420,10 @@ text that should be added to the file. */''',
         true,
         reason: '$checkedDirectory does not exist.',
       );
-      final files =
-          checkedDirectory.listSync(recursive: true).whereType<File>().toList();
+      final files = checkedDirectory
+          .listSync(recursive: true)
+          .whereType<File>()
+          .toList();
       final header = LicenseHeader();
       const goodReplacementLicenseText =
           '''// Copyright <copyright_date> The Flutter Authors
@@ -480,7 +482,8 @@ Future<void> _setupTestConfigFile() async {
   configFile = File(p.join(testDirectory.path, 'test_config.yaml'))
     ..createSync(recursive: true);
 
-  final contents = '''---
+  final contents =
+      '''---
 # sequence of license text strings that should be matched against at the top of a file and removed. <value>, which normally represents a date, will be stored.
 remove_licenses:
   - |

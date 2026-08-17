@@ -36,8 +36,9 @@ final class DevToolsTextField extends StatelessWidget {
 
   /// This is the default border radius used by the [OutlineInputBorder]
   /// constructor.
-  static const _defaultInputBorderRadius =
-      BorderRadius.all(Radius.circular(4.0));
+  static const _defaultInputBorderRadius = BorderRadius.all(
+    Radius.circular(4.0),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -151,30 +152,27 @@ final class InputDecorationSuffixButton extends StatelessWidget {
 
   factory InputDecorationSuffixButton.clear({
     required VoidCallback? onPressed,
-  }) =>
-      InputDecorationSuffixButton(
-        icon: Icons.clear,
-        onPressed: onPressed,
-        tooltip: 'Clear',
-      );
+  }) => InputDecorationSuffixButton(
+    icon: Icons.clear,
+    onPressed: onPressed,
+    tooltip: 'Clear',
+  );
 
   factory InputDecorationSuffixButton.close({
     required VoidCallback? onPressed,
-  }) =>
-      InputDecorationSuffixButton(
-        icon: Icons.close,
-        onPressed: onPressed,
-        tooltip: 'Close',
-      );
+  }) => InputDecorationSuffixButton(
+    icon: Icons.close,
+    onPressed: onPressed,
+    tooltip: 'Close',
+  );
 
   factory InputDecorationSuffixButton.help({
     required VoidCallback? onPressed,
-  }) =>
-      InputDecorationSuffixButton(
-        icon: Icons.question_mark,
-        onPressed: onPressed,
-        tooltip: 'Help',
-      );
+  }) => InputDecorationSuffixButton(
+    icon: Icons.question_mark,
+    onPressed: onPressed,
+    tooltip: 'Help',
+  );
 
   final IconData icon;
   final VoidCallback? onPressed;

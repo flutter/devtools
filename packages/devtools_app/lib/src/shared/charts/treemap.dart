@@ -6,7 +6,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 
 import '../primitives/byte_utils.dart';
 import '../primitives/trees.dart';
@@ -14,8 +13,6 @@ import '../ui/colors.dart';
 import '../ui/common_widgets.dart';
 
 enum PivotType { pivotByMiddle, pivotBySize }
-
-final _log = Logger('charts/treemap');
 
 class Treemap extends StatefulWidget {
   // TODO(peterdjlee): Consider auto-expanding rootNode named 'src'.
@@ -683,7 +680,10 @@ class TreemapNode extends TreeNode<TreemapNode> {
   });
 
   final String name;
+
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9910) seems like a bug.
   final Map<String, TreemapNode> childrenMap;
+
   int byteSize;
 
   final bool showDiff;
@@ -792,17 +792,6 @@ class TreemapNode extends TreeNode<TreemapNode> {
       current = current.parent;
     }
     return [];
-  }
-
-  void printTree() {
-    printTreeHelper(this, '');
-  }
-
-  void printTreeHelper(TreemapNode root, String tabs) {
-    _log.info('$tabs$root');
-    for (final child in root.children) {
-      printTreeHelper(child, '$tabs\t');
-    }
   }
 
   @override

@@ -11,8 +11,6 @@ import '../../shared/ui/common_widgets.dart';
 class ProviderScreen extends Screen {
   ProviderScreen() : super.fromMetaData(ScreenMetaData.provider);
 
-  static final id = ScreenMetaData.provider.id;
-
   @override
   Widget buildScreenBody(BuildContext context) {
     return CenteredMessage(

@@ -113,9 +113,7 @@ extension _DeeplinkApiHandler on Never {
     if (error != null) {
       return api.serverError(error);
     }
-    return api.success(
-      result[DeeplinkManager.kOutputJsonField]! as String,
-    );
+    return api.success(result[DeeplinkManager.kOutputJsonField]! as String);
   }
 }
 

@@ -83,6 +83,13 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   }
 
   @override
+  void dispose() {
+    _except.dispose();
+    _only.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(covariant ClassFilterDialog oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.classFilter != widget.classFilter) {

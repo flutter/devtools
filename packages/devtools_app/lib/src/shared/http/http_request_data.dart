@@ -46,7 +46,11 @@ class DartIOHttpRequestData extends NetworkRequest {
         (_request.isResponseComplete ||
             _request.isRequestComplete ||
             (_request.request?.hasError ?? false))) {
-      unawaited(getFullRequestData());
+      unawaited(
+        getFullRequestData().catchError((Object e, StackTrace st) {
+          _log.warning('Failed to fetch full request data: $e', e, st);
+        }),
+      );
     }
   }
 
@@ -123,6 +127,8 @@ class DartIOHttpRequestData extends NetworkRequest {
         }
         notifyListeners();
       }
+    } catch (e, st) {
+      _log.warning('Failed to fetch full request data: $e', e, st);
     } finally {
       isFetchingFullData = false;
     }
@@ -327,6 +333,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   Map<String, dynamic>? get responseHeaders => _request.response?.headers;
 
   /// The query parameters for the request.
+  @visibleForTesting
   Map<String, dynamic>? get queryParameters => _request.uri.queryParameters;
 
   @override

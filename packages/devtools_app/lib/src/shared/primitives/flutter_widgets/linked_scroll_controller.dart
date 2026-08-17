@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+// ignore_for_file: unused-code, this is forked file, leave untouched.
+
 // This file was originally forked from package:flutter_widgets. Note that the
 // source may diverge over time.
 

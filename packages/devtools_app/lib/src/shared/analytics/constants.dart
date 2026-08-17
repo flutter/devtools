@@ -44,6 +44,7 @@ final vmTools = ScreenMetaData.vmTools.id;
 const console = 'console';
 final simple = ScreenMetaData.simple.id;
 final deeplink = ScreenMetaData.deepLinks.id;
+final accessibility = ScreenMetaData.accessibility.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const devToolsMain = 'main';
@@ -84,8 +85,8 @@ const slowAnimation = 'slowAnimation';
 const slowAnimationDocs = 'slowAnimationDocs';
 const repaintRainbow = 'repaintRainbow';
 const repaintRainbowDocs = 'repaintRainbowDocs';
-const debugBanner = 'debugBanner';
 const togglePlatform = 'togglePlatform';
+const brightnessOverride = 'brightnessOverride';
 const highlightOversizedImages = 'highlightOversizedImages';
 const highlightOversizedImagesDocs = 'highlightOversizedImagesDocs';
 const selectWidgetMode = 'selectWidgetMode';
@@ -96,13 +97,6 @@ const onDeviceSelection = 'onDeviceSelection';
 const inspectorSettings = 'inspectorSettings';
 const loggingSettings = 'loggingSettings';
 const refreshPubRoots = 'refreshPubRoots';
-
-enum InspectorDetailsViewType { layoutExplorer, widgetDetailsTree }
-
-final defaultDetailsViewToLayoutExplorer =
-    InspectorDetailsViewType.layoutExplorer.name;
-final defaultDetailsViewToWidgetDetails =
-    InspectorDetailsViewType.widgetDetailsTree.name;
 
 enum HomeScreenEvents { connectToApp, connectToNewApp, viewVmFlags }
 

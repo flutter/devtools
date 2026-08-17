@@ -13,11 +13,11 @@ class ClassHeapDetailStats {
     required int instances,
     int deltaInstances = 0,
     bool traceAllocations = false,
-  })  : bytesCurrent = bytes,
-        bytesDelta = deltaBytes,
-        instancesCurrent = instances,
-        instancesDelta = deltaInstances,
-        isStacktraced = traceAllocations;
+  }) : bytesCurrent = bytes,
+       bytesDelta = deltaBytes,
+       instancesCurrent = instances,
+       instancesDelta = deltaInstances,
+       isStacktraced = traceAllocations;
 
   factory ClassHeapDetailStats.fromJson(Map<String, Object?> json) {
     final {'id': classId, 'name': className} = json['class'] as Map;
@@ -33,16 +33,13 @@ class ClassHeapDetailStats {
   }
 
   Map<String, dynamic> toJson() => {
-        'class': {
-          'id': classRef.id,
-          'name': classRef.name,
-        },
-        'bytesCurrent': bytesCurrent,
-        'bytesDelta': bytesDelta,
-        'instancesCurrent': instancesCurrent,
-        'instancesDelta': instancesDelta,
-        'isStackedTraced': isStacktraced,
-      };
+    'class': {'id': classRef.id, 'name': classRef.name},
+    'bytesCurrent': bytesCurrent,
+    'bytesDelta': bytesDelta,
+    'instancesCurrent': instancesCurrent,
+    'instancesDelta': instancesDelta,
+    'isStackedTraced': isStacktraced,
+  };
 
   /// Version of [ClassHeapDetailStats] payload.
   static const version = 1;
@@ -60,6 +57,7 @@ class ClassHeapDetailStats {
   bool isStacktraced;
 
   @override
-  String toString() => '[ClassHeapDetailStats class: ${classRef.name}, '
+  String toString() =>
+      '[ClassHeapDetailStats class: ${classRef.name}, '
       'count: $instancesCurrent, bytes: $bytesCurrent]';
 }

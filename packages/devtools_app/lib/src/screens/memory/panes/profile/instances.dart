@@ -25,8 +25,7 @@ class ProfileInstanceTableCell extends StatelessWidget {
     required this.count,
   }) : _shouldShowMenu = isSelected && count > 0;
 
-  // TODO(https://github.com/flutter/devtools/issues/7905): this is a bug that
-  // this is unused.
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/7905): this is a bug that this is unused.
   final MemoryAreas gaContext;
   final int count;
   final bool _shouldShowMenu;

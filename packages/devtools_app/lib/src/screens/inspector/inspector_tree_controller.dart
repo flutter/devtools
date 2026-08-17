@@ -30,6 +30,7 @@ import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
 import '../../shared/utils/utils.dart';
 import 'inspector_controller.dart';
+import 'inspector_errors.dart';
 
 final _log = Logger('inspector_tree_controller');
 
@@ -120,8 +121,7 @@ class InspectorTreeController extends DisposableController
   /// [InspectorTreeController].
   final int? gaId;
 
-  InspectorTreeNode createNode() =>
-      InspectorTreeNode(whenDirty: _handleDirtyNode);
+  InspectorTreeNode createNode() => InspectorTreeNode();
 
   SearchTargetType _searchTarget = SearchTargetType.widget;
   int _rootSetCount = 0;
@@ -221,12 +221,9 @@ class InspectorTreeController extends DisposableController
     return true;
   }
 
-  InspectorTreeNode? get hover => _hover;
   InspectorTreeNode? _hover;
 
   double? lastContentWidth;
-
-  InspectorTreeRow? _cachedSelectedRow;
 
   /// All cached rows of the tree.
   ///
@@ -284,15 +281,6 @@ class InspectorTreeController extends DisposableController
     }
   }
 
-  /// Resets the state if the root has been marked as dirty.
-  void _handleDirtyNode(InspectorTreeNode node) {
-    if (node == root) {
-      _cachedSelectedRow = null;
-      lastContentWidth = null;
-      _updateRows();
-    }
-  }
-
   void setSearchTarget(SearchTargetType searchTarget) {
     _searchTarget = searchTarget;
     refreshSearchMatches();
@@ -300,21 +288,9 @@ class InspectorTreeController extends DisposableController
 
   InspectorTreeRow? rowAtIndex(int index) => _rowsInTree.value.safeGet(index);
 
+  @visibleForTesting
   double rowOffset(int index) {
     return (rowAtIndex(index)?.depth ?? 0) * inspectorColumnIndent;
-  }
-
-  List<InspectorTreeNode> getPathFromSelectedRowToRoot() {
-    final selectedItem = _cachedSelectedRow?.node;
-    if (selectedItem == null) return [];
-
-    final pathToRoot = <InspectorTreeNode>[selectedItem];
-    InspectorTreeNode? nextParentNode = selectedItem.parent;
-    while (nextParentNode != null) {
-      pathToRoot.add(nextParentNode);
-      nextParentNode = nextParentNode.parent;
-    }
-    return pathToRoot.reversed.toList();
   }
 
   set hover(InspectorTreeNode? node) {
@@ -448,10 +424,6 @@ class InspectorTreeController extends DisposableController
     return inspectorRowHeight * index;
   }
 
-  void nodeChanged(InspectorTreeNode node) {
-    node.isDirty = true;
-  }
-
   void removeNodeFromParent(InspectorTreeNode node) {
     node.parent?.removeChild(node);
   }
@@ -541,6 +513,7 @@ class InspectorTreeController extends DisposableController
     return rowAtIndex(_rowIndexFromNode(node));
   }
 
+  @visibleForTesting
   InspectorTreeRow? rowForOffset(Offset offset) {
     final rootLocal = root;
     if (rootLocal == null) return null;
@@ -767,7 +740,6 @@ class InspectorTreeController extends DisposableController
           setupChildren(diagnostic, treeNode, children, expandChildren: true);
           refreshTree(
             updateTreeAction: () {
-              nodeChanged(treeNode);
               if (treeNode == selection) {
                 expandPath(treeNode);
               }
@@ -914,6 +886,8 @@ class _InspectorTreeState extends State<InspectorTree>
   Rect? _currentAnimateTarget;
 
   AnimationController? _constraintDisplayController;
+
+  // ignore: dispose-fields, false positive. Disposed via autoDisposeFocusNode.
   late FocusNode _focusNode;
 
   /// When autoscrolling, the number of rows to pad the target location with.

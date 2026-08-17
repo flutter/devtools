@@ -4,47 +4,20 @@
 
 enum HttpRequestDataKeys {
   connectionInfo,
-  remoteAddress,
-  localPort,
   contentLength,
-  startedDateTime,
-  time,
   request,
   method,
-  url,
-  httpVersion,
   cookies,
   headers,
-  queryString,
-  postData,
-  mimeType,
   text,
-  headersSize,
-  bodySize,
   followRedirects,
   maxRedirects,
   persistentConnection,
   proxyDetails,
-  proxy,
-  type,
   error,
   response,
-  status,
   statusCode,
-  statusText,
   redirects,
-  redirectURL,
-  cache,
-  timings,
-  blocked,
-  dns,
-  connect,
-  send,
-  wait,
-  receive,
-  ssl,
-  connection,
-  comment,
   isolateId,
   uri,
   id,
@@ -55,10 +28,6 @@ enum HttpRequestDataKeys {
   compressionState,
   isRedirect,
   reasonPhrase,
-  queryParameters,
-  content,
-  size,
-  connectionId,
   requestBody,
   responseBody,
   endTime,
@@ -66,14 +35,4 @@ enum HttpRequestDataKeys {
   host,
   username,
   isDirect,
-}
-
-enum HttpRequestDataValues { json }
-
-class HttpRequestDataDefaults {
-  static const none = 'None';
-  static const error = 'Error';
-  static const httpVersion = 'HTTP/2.0';
-  static const json = 'json';
-  static const httpProfileRequest = '@HttpProfileRequest';
 }

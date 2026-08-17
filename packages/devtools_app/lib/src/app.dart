@@ -23,6 +23,8 @@ import 'framework/notifications_view.dart';
 import 'framework/observer/disconnect_observer.dart';
 import 'framework/release_notes.dart';
 import 'framework/scaffold/scaffold.dart';
+import 'screens/accessibility/accessibility_controller.dart';
+import 'screens/accessibility/accessibility_screen.dart';
 import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
@@ -202,6 +204,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     FrameworkCore.dispose();
     // Workaround for https://github.com/flutter/flutter/issues/155265.
     removeTextFieldFocusFixHandler();
+    routerDelegate.dispose();
     super.dispose();
   }
 
@@ -239,12 +242,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
       Widget widget = pages[page]!(context, page, params, state);
-      assert(() {
+      if (kDebugMode) {
         widget = _AlternateCheckedModeBanner(
           builder: (context) => pages[page]!(context, page, params, state),
         );
-        return true;
-      }());
+      }
       return MaterialPage(child: widget);
     }
 
@@ -615,7 +617,9 @@ typedef UrlParametersBuilder =
 ///
 /// This avoids issues with widgets in the appbar being hidden by the banner
 /// in a web or desktop app.
+// ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907): false positive.
 class _AlternateCheckedModeBanner extends StatelessWidget {
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9907): false positive.
   const _AlternateCheckedModeBanner({required this.builder});
   final WidgetBuilder builder;
 
@@ -712,6 +716,11 @@ List<DevToolsScreen> defaultScreens({
       LoggingScreen(),
       createController: (_) => LoggingController(),
     ),
+    if (FeatureFlags.accessibility.isEnabled)
+      DevToolsScreen<AccessibilityController>(
+        AccessibilityScreen(),
+        createController: (_) => AccessibilityController(),
+      ),
     DevToolsScreen<DevToolsScreenController>(ProviderScreen()),
     DevToolsScreen<AppSizeController>(
       AppSizeScreen(),

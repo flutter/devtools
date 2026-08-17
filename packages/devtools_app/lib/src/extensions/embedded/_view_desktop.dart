@@ -7,9 +7,10 @@ import 'package:flutter/material.dart';
 import 'controller.dart';
 
 class EmbeddedExtension extends StatelessWidget {
-  const EmbeddedExtension({super.key, required this.controller});
-
-  final EmbeddedExtensionController controller;
+  const EmbeddedExtension({
+    super.key,
+    required EmbeddedExtensionController controller,
+  });
 
   @override
   Widget build(BuildContext context) {

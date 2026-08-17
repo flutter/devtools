@@ -13,7 +13,7 @@ import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/shared/managers/error_badge_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final supportedScreenIds = [
+final screensWithBadgeCounts = [
   InspectorScreen.id,
   PerformanceScreen.id,
   NetworkScreen.id,
@@ -34,9 +34,6 @@ void main() {
   late ErrorBadgeManager errorBadgeManager;
 
   group('ErrorBadgeManager', () {
-    int getActiveErrorCount(screenId) =>
-        errorBadgeManager.erroredItemsForPage(screenId).value.entries.length;
-
     setUp(() {
       errorBadgeManager = ErrorBadgeManager();
     });
@@ -55,7 +52,7 @@ void main() {
       allScreenIds.forEach(errorBadgeManager.incrementBadgeCount);
 
       for (final id in allScreenIds) {
-        if (supportedScreenIds.contains(id)) {
+        if (screensWithBadgeCounts.contains(id)) {
           expect(errorBadgeManager.errorCountNotifier(id).value, equals(1));
         } else {
           expect(errorBadgeManager.errorCountNotifier(id).value, equals(0));
@@ -63,11 +60,36 @@ void main() {
       }
     });
 
+    test('decrementBadgeCount decrements supported tabs', () {
+      // First increment
+      allScreenIds.forEach(errorBadgeManager.incrementBadgeCount);
+
+      for (final id in screensWithBadgeCounts) {
+        expect(errorBadgeManager.errorCountNotifier(id).value, equals(1));
+      }
+
+      // Then decrement
+      allScreenIds.forEach(errorBadgeManager.decrementBadgeCount);
+
+      for (final id in screensWithBadgeCounts) {
+        expect(errorBadgeManager.errorCountNotifier(id).value, equals(0));
+      }
+    });
+
+    test('decrementBadgeCount does not go below zero', () {
+      // Decrement without any prior increment
+      errorBadgeManager.decrementBadgeCount(InspectorScreen.id);
+      expect(
+        errorBadgeManager.errorCountNotifier(InspectorScreen.id).value,
+        equals(0),
+      );
+    });
+
     test('clearErrorCount resets counts', () {
       allScreenIds.forEach(errorBadgeManager.incrementBadgeCount);
 
       for (final id in allScreenIds) {
-        if (supportedScreenIds.contains(id)) {
+        if (screensWithBadgeCounts.contains(id)) {
           expect(errorBadgeManager.errorCountNotifier(id).value, equals(1));
         } else {
           expect(errorBadgeManager.errorCountNotifier(id).value, equals(0));
@@ -81,44 +103,23 @@ void main() {
       }
     });
 
-    // TODO(https://github.com/flutter/devtools/issues/9105): This logic should
-    // be moved to the inspector.
-    test('appendError works for inspector screen only', () {
-      for (final id in allScreenIds) {
-        errorBadgeManager.appendError(id, DevToolsError('An error', id));
-      }
-
-      for (final id in allScreenIds) {
-        if (id == InspectorScreen.id) {
-          expect(getActiveErrorCount(id), equals(1));
-        } else {
-          expect(getActiveErrorCount(id), equals(0));
-        }
-      }
-    });
-
-    test('clearErrors resets counts and removes errors', () {
-      expect(getActiveErrorCount(InspectorScreen.id), equals(0));
-      expect(
-        errorBadgeManager.errorCountNotifier(InspectorScreen.id).value,
-        equals(0),
-      );
-
-      errorBadgeManager.appendError(
-        InspectorScreen.id,
-        DevToolsError('An error', InspectorScreen.id),
-      );
+    test('clearErrorCount is a no-op for manageErrorCount screens', () {
+      errorBadgeManager.manageErrorCount(InspectorScreen.id);
       errorBadgeManager.incrementBadgeCount(InspectorScreen.id);
-
-      expect(getActiveErrorCount(InspectorScreen.id), equals(1));
       expect(
         errorBadgeManager.errorCountNotifier(InspectorScreen.id).value,
         equals(1),
       );
 
-      errorBadgeManager.clearErrors(InspectorScreen.id);
+      // Simulates scaffold clearing the badge on tab navigation.
+      errorBadgeManager.clearErrorCount(InspectorScreen.id);
+      expect(
+        errorBadgeManager.errorCountNotifier(InspectorScreen.id).value,
+        equals(1),
+      );
 
-      expect(getActiveErrorCount(InspectorScreen.id), equals(0));
+      // Controllers that own unread state can still reset explicitly.
+      errorBadgeManager.resetErrorCount(InspectorScreen.id);
       expect(
         errorBadgeManager.errorCountNotifier(InspectorScreen.id).value,
         equals(0),

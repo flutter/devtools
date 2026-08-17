@@ -17,14 +17,13 @@ void main() {
       expect(() => dtdManager, throwsStateError);
     });
 
-    testWidgets(
-      'building $DevToolsExtension initializes globals',
-      (tester) async {
-        await tester.pumpWidget(const DevToolsExtension(child: SizedBox()));
-        expect(serviceManager, isNotNull);
-        expect(extensionManager, isNotNull);
-        expect(dtdManager, isNotNull);
-      },
-    );
+    testWidgets('building $DevToolsExtension initializes globals', (
+      tester,
+    ) async {
+      await tester.pumpWidget(const DevToolsExtension(child: SizedBox()));
+      expect(serviceManager, isNotNull);
+      expect(extensionManager, isNotNull);
+      expect(dtdManager, isNotNull);
+    });
   });
 }

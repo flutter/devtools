@@ -36,9 +36,14 @@ void main() {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
   const windowSize = Size(2600.0, 1200.0);
 
+  // The auto-refresh tests modify lib/main.dart in-place.
+  // We use `useTempDirectory: true` to copy the fixture app to a temporary
+  // directory. This prevents flaky test failures in other tests (like
+  // inspector_service_test.dart) that run in parallel.
   final env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
     testAppDirectory: 'test/test_infra/fixtures/inspector_app',
+    useTempDirectory: true,
   );
 
   env.afterEverySetup = () async {
@@ -653,17 +658,6 @@ void verifyPropertyIsVisible({
   expect(propertyNameCenter.dy, equals(propertyValueCenter.dy));
 }
 
-bool areHorizontallyAligned(
-  Finder widgetAFinder,
-  Finder widgetBFinder, {
-  required WidgetTester tester,
-}) {
-  final widgetACenter = tester.getCenter(widgetAFinder);
-  final widgetBCenter = tester.getCenter(widgetBFinder);
-
-  return widgetACenter.dy == widgetBCenter.dy;
-}
-
 bool _treeRowsAreInOrder({
   required List<String> treeRowDescriptions,
   required int startingAtIndex,
@@ -712,5 +706,24 @@ Future<void> _resetPubRootDirectories(InspectorService inspectorService) async {
       .mainIsolateRootLibraryUriAsString();
   if (rootLibrary != null) {
     await inspectorService.addPubRootDirectories([rootLibrary]);
+  }
+}
+
+extension _ObjectGroupTestExtension on ObjectGroup {
+  Future<RemoteDiagnosticsNode?> getDetailsSubtree(
+    RemoteDiagnosticsNode? node, {
+    int subtreeDepth = 2,
+  }) async {
+    if (node == null) return null;
+    final args = {
+      'objectGroup': groupName,
+      'arg': node.valueRef.id,
+      'subtreeDepth': subtreeDepth.toString(),
+    };
+    final json = await invokeServiceMethodDaemonParams(
+      WidgetInspectorServiceExtensions.getDetailsSubtree.name,
+      args,
+    );
+    return parseDiagnosticsNodeHelper(json as Map<String, Object?>?);
   }
 }

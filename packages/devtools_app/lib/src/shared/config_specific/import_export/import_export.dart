@@ -113,7 +113,6 @@ extension type _DevToolsOfflineData(Map<String, Object?> json) {
 enum ExportFileType {
   json,
   csv,
-  yaml,
   data,
   har;
 

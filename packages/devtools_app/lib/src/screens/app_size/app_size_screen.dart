@@ -292,6 +292,7 @@ class DiffTreeTypeDropdown extends StatelessWidget {
       height: defaultButtonHeight,
       child: RoundedDropDownButton<DiffTreeType>(
         key: AppSizeScreen.diffTypeDropdownKey,
+        value: value,
         isDense: true,
         items: [
           _buildDiffTreeTypeMenuItem(DiffTreeType.combined),

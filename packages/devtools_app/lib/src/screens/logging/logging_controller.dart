@@ -27,7 +27,6 @@ import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
-import '../inspector/inspector_tree_controller.dart';
 import 'log_details_controller.dart';
 import 'logging_screen.dart';
 import 'metadata.dart';
@@ -39,12 +38,6 @@ final timeFormat = DateFormat('HH:mm:ss.SSS');
 final dateTimeFormat = DateFormat('HH:mm:ss.SSS (MM/dd/yy)');
 
 bool _verboseDebugging = false;
-
-typedef OnShowDetails =
-    void Function({String? text, InspectorTreeController? tree});
-
-typedef CreateLoggingTree =
-    InspectorTreeController Function({VoidCallback? onSelectionChange});
 
 typedef ZoneDescription = ({String? name, int? identityHashCode});
 
@@ -240,6 +233,13 @@ class LoggingController extends DevToolsScreenController
 
   late final LogDetailsController logDetailsController;
 
+  /// Tracks the previous cumulative GC times (in seconds) for each active isolate.
+  ///
+  /// This is used to compute the actual duration of the current GC event (by taking
+  /// the delta between consecutive cumulative times), rather than displaying the
+  /// total cumulative GC time.
+  final _previousGcTimesByIsolate = <String, double>{};
+
   List<LogData> data = <LogData>[];
 
   final selectedLog = ValueNotifier<LogData?>(null);
@@ -288,6 +288,7 @@ class LoggingController extends DevToolsScreenController
 
   void clear() {
     _updateData([]);
+    _previousGcTimesByIsolate.clear();
     serviceConnection.errorBadgeManager.clearErrorCount(LoggingScreen.id);
   }
 
@@ -455,11 +456,24 @@ class LoggingController extends DevToolsScreenController
     final usedBytes = newSpace.used! + oldSpace.used!;
     final capacityBytes = newSpace.capacity! + oldSpace.capacity!;
 
-    final time = ((newSpace.time! + oldSpace.time!) * 1000).round();
+    final isolateId = e.isolate?.id;
+    // Cumulative time, in seconds.
+    final newCumulativeTime = newSpace.time! + oldSpace.time!;
+
+    String durationText = '';
+    if (isolateId != null) {
+      final previousGcTime = _previousGcTimesByIsolate[isolateId];
+      _previousGcTimesByIsolate[isolateId] = newCumulativeTime;
+      if (previousGcTime != null && newCumulativeTime >= previousGcTime) {
+        // Multiply by 1000 to display in milliseconds.
+        final durationMs = (newCumulativeTime - previousGcTime) * 1000;
+        durationText = ' in ${durationMs.toStringAsFixed(1)} ms';
+      }
+    }
 
     final summary =
         '${isolateRef['name']} • '
-        '${e.json!['reason']} collection in $time ms • '
+        '${e.json!['reason']} collection$durationText • '
         '${printBytes(usedBytes, unit: ByteUnit.mb, includeUnit: true)} used of '
         '${printBytes(capacityBytes, unit: ByteUnit.mb, includeUnit: true)}';
 
@@ -820,8 +834,6 @@ class LoggingController extends DevToolsScreenController
 }
 
 extension type _LogRecord(Map<String, dynamic> json) {
-  int? get sequenceNumber => json['sequenceNumber'];
-
   int? get level => json['level'];
 
   Map<String, Object?> get loggerName => json['loggerName'];
@@ -934,12 +946,6 @@ class StdoutEventHandler {
       }
     });
   }
-
-  @visibleForTesting
-  LogData? get buffer => _buffer;
-
-  @visibleForTesting
-  Timer? get timer => _timer;
 }
 
 bool _isNotNull(InstanceRef? serviceRef) {
@@ -977,7 +983,6 @@ class LogData with SearchableDataMixin {
     int? level,
     this.isError = false,
     this.detailsComputer,
-    this.node,
     this.isolateRef,
     this.zone,
   }) : level = level ?? (isError ? Level.SEVERE.value : Level.INFO.value) {
@@ -1008,11 +1013,8 @@ class LogData with SearchableDataMixin {
       _levelName ??= LogLevelMetadataChip.generateLogLevel(level).name;
   String? _levelName;
 
-  final RemoteDiagnosticsNode? node;
   String? _details;
   Future<String> Function()? detailsComputer;
-
-  static const prettyPrinter = JsonEncoder.withIndent('  ');
 
   String? get details => _details;
 
@@ -1036,10 +1038,9 @@ class LogData with SearchableDataMixin {
     }
 
     try {
-      return prettyPrinter
-          .convert(jsonDecode(details!))
-          .replaceAll(r'\n', '\n')
-          .trim();
+      return prettyPrintJson(
+        jsonDecode(details!) as Object?,
+      ).replaceAll(r'\n', '\n').trim();
     } catch (_) {
       return details?.trim();
     }

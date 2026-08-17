@@ -21,14 +21,16 @@ class BuildExtensionCommand extends Command {
     argParser
       ..addOption(
         _sourceKey,
-        help: 'The source location for the extension flutter web app (can  be '
+        help:
+            'The source location for the extension flutter web app (can  be '
             'relative or absolute)',
         valueHelp: 'path/to/foo/packages/foo_devtools_extension',
         mandatory: true,
       )
       ..addOption(
         _destinationKey,
-        help: 'The destination location for the extension build output (can be '
+        help:
+            'The destination location for the extension build output (can be '
             'relative or absolute)',
         valueHelp: 'path/to/foo/packages/foo/extension/devtools',
         mandatory: true,
@@ -71,17 +73,12 @@ class BuildExtensionCommand extends Command {
     // `chmod` or if we even need to perform `chmod` for linux / mac anymore.
     if (!Platform.isWindows) {
       _log('Setting canvaskit permissions...');
-      await _runProcess(
-        processManager,
-        'chmod',
-        [
-          '0755',
-          // Note: using a wildcard `canvaskit.*` throws.
-          'build/web/canvaskit/canvaskit.js',
-          'build/web/canvaskit/canvaskit.wasm',
-        ],
-        workingDirectory: source,
-      );
+      await _runProcess(processManager, 'chmod', [
+        '0755',
+        // Note: using a wildcard `canvaskit.*` throws.
+        'build/web/canvaskit/canvaskit.js',
+        'build/web/canvaskit/canvaskit.wasm',
+      ], workingDirectory: source);
     }
 
     _log('Copying built output to the extension destination...');
@@ -102,10 +99,7 @@ class BuildExtensionCommand extends Command {
     }
     Directory(destinationBuildPath).createSync(recursive: true);
 
-    await copyPath(
-      sourceBuildPath,
-      destinationBuildPath,
-    );
+    await copyPath(sourceBuildPath, destinationBuildPath);
 
     _log(
       'Successfully copied extension assets from '

@@ -389,11 +389,9 @@ final class FlutterDaemonConstants {
   static const paramsKey = 'params';
   static const traceKey = 'trace';
   static const wsUriKey = 'wsUri';
-  static const pidKey = 'pid';
   static const appStopKey = 'app.stop';
   static const appStartedKey = 'app.started';
   static const appDebugPortKey = 'app.debugPort';
-  static const daemonConnectedKey = 'daemon.connected';
 }
 
 enum TestAppDevice {

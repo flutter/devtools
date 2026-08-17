@@ -44,6 +44,12 @@ class _LogDetailsState extends State<LogDetails>
   }
 
   @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(LogDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.log != oldWidget.log) {

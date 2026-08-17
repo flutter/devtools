@@ -101,6 +101,7 @@ class PerfettoTrackEvent extends _PerfettoTracePacket
     ].nonNulls,
   );
 
+  @visibleForTesting
   List<String> get categories => event.categories;
 
   /// The id of the Perfetto track that this event is included in.

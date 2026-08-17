@@ -66,8 +66,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
 
   final SnapshotClassSampler sampler;
 
-  // TODO(https://github.com/flutter/devtools/issues/7905): this is a bug that
-  // this is unused.
+  // ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/7905) this is a bug that this is unused.
   final bool liveItemsEnabled;
 
   @override

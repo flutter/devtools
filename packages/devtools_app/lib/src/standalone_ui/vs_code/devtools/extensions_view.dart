@@ -107,7 +107,6 @@ class _SidebarDevToolsExtensionsState extends State<SidebarDevToolsExtensions>
           // because we do not have control over how long the names
           // will be and we want to avoid ugly text wrapping.
           singleColumn: true,
-          editor: widget.editor,
           hasDebugSessions: widget.debugSessions.isNotEmpty,
           onPressed: (data) {
             ga.select(

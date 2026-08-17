@@ -6,16 +6,10 @@ part of '../server_api.dart';
 
 /// A namespace for Dart Tooling Daemon (DTD) server request handlers.
 extension _DtdApiHandler on Never {
-  static shelf.Response handleGetDtdUri(
-    ServerApi api,
-    DtdInfo? dtd,
-  ) {
-    return ServerApi._encodeResponse(
-      {
-        // Always provide the exposed URI to callers of the web API.
-        DtdApi.uriPropertyName: dtd?.exposedUri.toString(),
-      },
-      api: api,
-    );
+  static shelf.Response handleGetDtdUri(ServerApi api, DtdInfo? dtd) {
+    return ServerApi._encodeResponse({
+      // Always provide the exposed URI to callers of the web API.
+      DtdApi.uriPropertyName: dtd?.exposedUri.toString(),
+    }, api: api);
   }
 }

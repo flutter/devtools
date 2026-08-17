@@ -140,32 +140,6 @@ extension FlutterFrame2 on Never {
         ..setEventFlow(uiEvent)
         ..setEventFlow(rasterEvent);
 
-  static const uiEventAsString =
-      '''  Animator::BeginFrame [713834379092 μs - 713834379102 μs]
-''';
-
-  static const rasterEventAsString =
-      '''  Rasterizer::DoDraw [713836088591 μs - 713836108931 μs]
-    Rasterizer::DrawToSurfaces [713836088592 μs - 713836108917 μs]
-      GPUSurfaceMetalImpeller::AcquireFrame [713836088607 μs - 713836093553 μs]
-        SurfaceMTL::WrapCurrentMetalLayerDrawable [713836088654 μs - 713836093545 μs]
-          WaitForNextDrawable [713836088655 μs - 713836093541 μs]
-      CompositorContext::ScopedFrame::Raster [713836093557 μs - 713836093615 μs]
-        LayerTree::Preroll [713836093580 μs - 713836093597 μs]
-        IOSExternalViewEmbedder::PostPrerollAction [713836093598 μs - 713836093598 μs]
-        LayerTree::Paint [713836093599 μs - 713836093615 μs]
-      SurfaceFrame::Submit [713836093616 μs - 713836108864 μs]
-        SurfaceFrame::BuildDisplayList [713836093616 μs - 713836093621 μs]
-        DisplayListDispatcher::EndRecordingAsPicture [713836094185 μs - 713836094188 μs]
-        Renderer::Render [713836094188 μs - 713836108846 μs]
-          EntityPass::OnRender [713836094556 μs - 713836108700 μs]
-            CreateGlyphAtlas [713836099800 μs - 713836108025 μs]
-              CanAppendToExistingAtlas [713836099807 μs - 713836099810 μs]
-              OptimumAtlasSizeForFontGlyphPairs [713836099811 μs - 713836099835 μs]
-              CreateAtlasBitmap [713836099845 μs - 713836103975 μs]
-              UploadGlyphTextureAtlas [713836103979 μs - 713836108020 μs]
-''';
-
   static final uiEvent = animatorBeginFrameEvent;
   static final animatorBeginFrameEvent = testTimelineEvent(
     name: 'Animator::BeginFrame',
@@ -384,40 +358,6 @@ extension FlutterFrame4 on Never {
     'raster': 4386,
     'vsyncOverhead': 12625,
   };
-
-  static const uiEventAsString =
-      '''  Animator::BeginFrame [713836200161 μs - 713836206957 μs]
-    LAYOUT (root) [713836202351 μs - 713836202383 μs]
-      LAYOUT [713836202373 μs - 713836202380 μs]
-    UPDATING COMPOSITING BITS (root) [713836202387 μs - 713836202402 μs]
-      UPDATING COMPOSITING BITS [713836202397 μs - 713836202400 μs]
-    PAINT (root) [713836202408 μs - 713836202429 μs]
-      PAINT [713836202422 μs - 713836202427 μs]
-    COMPOSITING [713836202440 μs - 713836206727 μs]
-      Animator::Render [713836206671 μs - 713836206714 μs]
-    SEMANTICS (root) [713836206752 μs - 713836206828 μs]
-      SEMANTICS [713836206785 μs - 713836206825 μs]
-    FINALIZE TREE [713836206834 μs - 713836206878 μs]
-    POST_FRAME [713836206903 μs - 713836206925 μs]
-''';
-
-  static const rasterEventAsString =
-      '''  Rasterizer::DoDraw [713836206748 μs - 713836211160 μs]
-    Rasterizer::DrawToSurfaces [713836206750 μs - 713836211143 μs]
-      GPUSurfaceMetalImpeller::AcquireFrame [713836206755 μs - 713836210203 μs]
-        SurfaceMTL::WrapCurrentMetalLayerDrawable [713836206763 μs - 713836210196 μs]
-          WaitForNextDrawable [713836206764 μs - 713836210193 μs]
-      CompositorContext::ScopedFrame::Raster [713836210206 μs - 713836210251 μs]
-        LayerTree::Preroll [713836210219 μs - 713836210225 μs]
-        IOSExternalViewEmbedder::PostPrerollAction [713836210226 μs - 713836210226 μs]
-        LayerTree::Paint [713836210240 μs - 713836210250 μs]
-      SurfaceFrame::Submit [713836210251 μs - 713836211118 μs]
-        SurfaceFrame::BuildDisplayList [713836210251 μs - 713836210254 μs]
-        DisplayListDispatcher::EndRecordingAsPicture [713836210613 μs - 713836210616 μs]
-        Renderer::Render [713836210616 μs - 713836211105 μs]
-          EntityPass::OnRender [713836210642 μs - 713836211061 μs]
-            CreateGlyphAtlas [713836210893 μs - 713836210899 μs]
-''';
 
   static final uiEvent = animatorBeginFrameEvent
     ..addAllChildren([
@@ -942,40 +882,6 @@ extension FlutterFrame6 on Never {
     'raster': 883,
     'vsyncOverhead': 1108,
   };
-
-  static const uiEventAsString =
-      '''  Animator::BeginFrame [713836329948 μs - 713836331003 μs]
-    LAYOUT (root) [713836330239 μs - 713836330280 μs]
-      LAYOUT [713836330262 μs - 713836330277 μs]
-    UPDATING COMPOSITING BITS (root) [713836330284 μs - 713836330307 μs]
-      UPDATING COMPOSITING BITS [713836330302 μs - 713836330306 μs]
-    PAINT (root) [713836330324 μs - 713836330348 μs]
-      PAINT [713836330337 μs - 713836330346 μs]
-    COMPOSITING [713836330357 μs - 713836330723 μs]
-      Animator::Render [713836330691 μs - 713836330716 μs]
-    SEMANTICS (root) [713836330738 μs - 713836330844 μs]
-      SEMANTICS [713836330783 μs - 713836330842 μs]
-    FINALIZE TREE [713836330848 μs - 713836330920 μs]
-    POST_FRAME [713836330964 μs - 713836330989 μs]
-''';
-
-  static const rasterEventAsString =
-      '''  Rasterizer::DoDraw [713836330790 μs - 713836331692 μs]
-    Rasterizer::DrawToSurfaces [713836330791 μs - 713836331684 μs]
-      GPUSurfaceMetalImpeller::AcquireFrame [713836330801 μs - 713836330844 μs]
-        SurfaceMTL::WrapCurrentMetalLayerDrawable [713836330814 μs - 713836330839 μs]
-          WaitForNextDrawable [713836330817 μs - 713836330836 μs]
-      CompositorContext::ScopedFrame::Raster [713836330846 μs - 713836330888 μs]
-        LayerTree::Preroll [713836330862 μs - 713836330870 μs]
-        IOSExternalViewEmbedder::PostPrerollAction [713836330870 μs - 713836330870 μs]
-        LayerTree::Paint [713836330870 μs - 713836330888 μs]
-      SurfaceFrame::Submit [713836330888 μs - 713836331669 μs]
-        SurfaceFrame::BuildDisplayList [713836330889 μs - 713836330894 μs]
-        DisplayListDispatcher::EndRecordingAsPicture [713836331274 μs - 713836331276 μs]
-        Renderer::Render [713836331277 μs - 713836331661 μs]
-          EntityPass::OnRender [713836331302 μs - 713836331633 μs]
-            CreateGlyphAtlas [713836331499 μs - 713836331505 μs]
-''';
 
   static final uiEvent = animatorBeginFrameEvent
     ..addAllChildren([

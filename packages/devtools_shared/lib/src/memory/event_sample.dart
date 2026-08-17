@@ -19,17 +19,17 @@ class AllocationAccumulator {
   AllocationAccumulator(this._start, this._continues, this._reset);
 
   AllocationAccumulator.start()
-      : _start = true,
-        _continues = false,
-        _reset = false;
+    : _start = true,
+      _continues = false,
+      _reset = false;
   AllocationAccumulator.continues()
-      : _start = false,
-        _continues = true,
-        _reset = false;
+    : _start = false,
+      _continues = true,
+      _reset = false;
   AllocationAccumulator.reset()
-      : _start = false,
-        _continues = false,
-        _reset = true;
+    : _start = false,
+      _continues = false,
+      _reset = true;
 
   factory AllocationAccumulator.fromJson(Map<String, Object?> json) =>
       AllocationAccumulator(
@@ -39,10 +39,10 @@ class AllocationAccumulator {
       );
 
   Map<String, dynamic> toJson() => <String, Object?>{
-        'start': _start,
-        'continues': _continues,
-        'reset': _reset,
-      };
+    'start': _start,
+    'continues': _continues,
+    'reset': _reset,
+  };
 
   static AllocationAccumulator empty() =>
       AllocationAccumulator(false, false, false);
@@ -64,13 +64,14 @@ class AllocationAccumulator {
   bool get isReset => _reset;
 
   @override
-  String toString() => '[AllocationAccumulator '
+  String toString() =>
+      '[AllocationAccumulator '
       '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }
 
 class ExtensionEvent {
   ExtensionEvent(this.timestamp, this.eventKind, this.data)
-      : customEventName = null;
+    : customEventName = null;
 
   ExtensionEvent.custom(
     this.timestamp,
@@ -88,11 +89,11 @@ class ExtensionEvent {
       );
 
   Map<String, dynamic> toJson() => <String, Object?>{
-        'timestamp': timestamp,
-        'eventKind': eventKind,
-        'data': data,
-        'customEventName': customEventName,
-      };
+    'timestamp': timestamp,
+    'eventKind': eventKind,
+    'data': data,
+    'customEventName': customEventName,
+  };
 
   static ExtensionEvent empty() =>
       ExtensionEvent.custom(null, null, null, null);
@@ -112,7 +113,8 @@ class ExtensionEvent {
   final String? customEventName;
 
   @override
-  String toString() => '[ExtensionEvent '
+  String toString() =>
+      '[ExtensionEvent '
       '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }
 
@@ -152,7 +154,8 @@ class ExtensionEvents {
   void clear() => events.clear();
 
   @override
-  String toString() => '[ExtensionEvents = '
+  String toString() =>
+      '[ExtensionEvents = '
       '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }
 
@@ -167,58 +170,52 @@ class EventSample with Serializable {
   );
 
   EventSample.gcEvent(this.timestamp, {ExtensionEvents? events})
-      : isEventGC = true,
-        isEventSnapshot = false,
-        isEventSnapshotAuto = false,
-        allocationAccumulator = null,
-        extensionEvents = events;
+    : isEventGC = true,
+      isEventSnapshot = false,
+      isEventSnapshotAuto = false,
+      allocationAccumulator = null,
+      extensionEvents = events;
 
   EventSample.snapshotEvent(
     this.timestamp, {
     bool snapshotAuto = false,
     ExtensionEvents? events,
-  })  : isEventGC = false,
-        isEventSnapshot = !snapshotAuto,
-        isEventSnapshotAuto = snapshotAuto,
-        allocationAccumulator = null,
-        extensionEvents = events;
+  }) : isEventGC = false,
+       isEventSnapshot = !snapshotAuto,
+       isEventSnapshotAuto = snapshotAuto,
+       allocationAccumulator = null,
+       extensionEvents = events;
 
-  EventSample.accumulatorStart(
-    this.timestamp, {
-    ExtensionEvents? events,
-  })  : isEventGC = false,
-        isEventSnapshot = false,
-        isEventSnapshotAuto = false,
-        allocationAccumulator = AllocationAccumulator.start(),
-        extensionEvents = events;
+  EventSample.accumulatorStart(this.timestamp, {ExtensionEvents? events})
+    : isEventGC = false,
+      isEventSnapshot = false,
+      isEventSnapshotAuto = false,
+      allocationAccumulator = AllocationAccumulator.start(),
+      extensionEvents = events;
 
-  EventSample.accumulatorContinues(
-    this.timestamp, {
-    ExtensionEvents? events,
-  })  : isEventGC = false,
-        isEventSnapshot = false,
-        isEventSnapshotAuto = false,
-        allocationAccumulator = AllocationAccumulator.continues(),
-        extensionEvents = events;
+  EventSample.accumulatorContinues(this.timestamp, {ExtensionEvents? events})
+    : isEventGC = false,
+      isEventSnapshot = false,
+      isEventSnapshotAuto = false,
+      allocationAccumulator = AllocationAccumulator.continues(),
+      extensionEvents = events;
 
-  EventSample.accumulatorReset(
-    this.timestamp, {
-    ExtensionEvents? events,
-  })  : isEventGC = false,
-        isEventSnapshot = false,
-        isEventSnapshotAuto = false,
-        allocationAccumulator = AllocationAccumulator.reset(),
-        extensionEvents = events;
+  EventSample.accumulatorReset(this.timestamp, {ExtensionEvents? events})
+    : isEventGC = false,
+      isEventSnapshot = false,
+      isEventSnapshotAuto = false,
+      allocationAccumulator = AllocationAccumulator.reset(),
+      extensionEvents = events;
 
   EventSample.extensionEvent(this.timestamp, this.extensionEvents)
-      : isEventGC = false,
-        isEventSnapshot = false,
-        isEventSnapshotAuto = false,
-        allocationAccumulator = null;
+    : isEventGC = false,
+      isEventSnapshot = false,
+      isEventSnapshotAuto = false,
+      allocationAccumulator = null;
 
   factory EventSample.fromJson(Map<String, Object?> json) {
-    final extensionEvents =
-        (json['extensionEvents'] as Map?)?.cast<String, Object>();
+    final extensionEvents = (json['extensionEvents'] as Map?)
+        ?.cast<String, Object>();
 
     return EventSample(
       json['timestamp'] as int,
@@ -238,13 +235,13 @@ class EventSample with Serializable {
 
   @override
   Map<String, dynamic> toJson() => <String, Object?>{
-        'timestamp': timestamp,
-        'gcEvent': isEventGC,
-        'snapshotEvent': isEventSnapshot,
-        'snapshotAutoEvent': isEventSnapshotAuto,
-        'allocationAccumulatorEvent': allocationAccumulator?.toJson(),
-        'extensionEvents': extensionEvents?.toJson(),
-      };
+    'timestamp': timestamp,
+    'gcEvent': isEventGC,
+    'snapshotEvent': isEventSnapshot,
+    'snapshotAutoEvent': isEventSnapshotAuto,
+    'allocationAccumulatorEvent': allocationAccumulator?.toJson(),
+    'extensionEvents': extensionEvents?.toJson(),
+  };
 
   EventSample clone(int timestamp, {ExtensionEvents? extensionEvents}) =>
       EventSample(
@@ -257,14 +254,8 @@ class EventSample with Serializable {
       );
 
   /// Create an empty event (all values are nothing).
-  static EventSample empty() => EventSample(
-        -1,
-        false,
-        false,
-        false,
-        AllocationAccumulator.empty(),
-        null,
-      );
+  static EventSample empty() =>
+      EventSample(-1, false, false, false, AllocationAccumulator.empty(), null);
 
   bool get isEmpty => timestamp == -1;
 
@@ -288,7 +279,8 @@ class EventSample with Serializable {
   final ExtensionEvents? extensionEvents;
 
   @override
-  String toString() => '[EventSample timestamp: $timestamp = '
+  String toString() =>
+      '[EventSample timestamp: $timestamp = '
       '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }
 
@@ -314,11 +306,12 @@ class RasterCache with Serializable {
 
   @override
   Map<String, dynamic> toJson() => <String, Object?>{
-        'layerBytes': layerBytes,
-        'pictureBytes': pictureBytes,
-      };
+    'layerBytes': layerBytes,
+    'pictureBytes': pictureBytes,
+  };
 
   @override
-  String toString() => '[RasterCache '
+  String toString() =>
+      '[RasterCache '
       '${const JsonEncoder.withIndent('  ').convert(toJson())}]';
 }

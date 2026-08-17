@@ -78,6 +78,7 @@ class ObjectInspectorSelector extends StatefulWidget {
 
 class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
   String value = ObjectInspectorSelector.kProgramExplorer;
+
   late ObjectInspectorViewController controller;
 
   @override

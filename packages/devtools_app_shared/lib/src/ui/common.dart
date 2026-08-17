@@ -34,9 +34,7 @@ class DevToolsAreaPane extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           header,
-          Expanded(
-            child: child,
-          ),
+          Expanded(child: child),
         ],
       ),
     );
@@ -94,7 +92,8 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final borderSide = defaultBorderSide(theme);
-    final decoration = !roundedTopBorder &&
+    final decoration =
+        !roundedTopBorder &&
             (includeTopBorder ||
                 includeBottomBorder ||
                 includeLeftBorder ||
@@ -130,10 +129,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     if (roundedTopBorder) {
       container = RoundedOutlinedBorder.onlyTop(child: container);
     }
-    return SizedBox.fromSize(
-      size: preferredSize,
-      child: container,
-    );
+    return SizedBox.fromSize(size: preferredSize, child: container);
   }
 
   @override
@@ -183,24 +179,22 @@ final class RoundedOutlinedBorder extends StatelessWidget {
   factory RoundedOutlinedBorder.onlyTop({
     required Widget? child,
     bool clip = false,
-  }) =>
-      RoundedOutlinedBorder(
-        showBottomLeft: false,
-        showBottomRight: false,
-        clip: clip,
-        child: child,
-      );
+  }) => RoundedOutlinedBorder(
+    showBottomLeft: false,
+    showBottomRight: false,
+    clip: clip,
+    child: child,
+  );
 
   factory RoundedOutlinedBorder.onlyBottom({
     required Widget? child,
     bool clip = false,
-  }) =>
-      RoundedOutlinedBorder(
-        showTopLeft: false,
-        showTopRight: false,
-        clip: clip,
-        child: child,
-      );
+  }) => RoundedOutlinedBorder(
+    showTopLeft: false,
+    showTopRight: false,
+    clip: clip,
+    child: child,
+  );
 
   final bool showTopLeft;
   final bool showTopRight;
@@ -326,22 +320,19 @@ final class PaddedDivider extends StatelessWidget {
   });
 
   const PaddedDivider.thin({super.key})
-      : padding = const EdgeInsets.only(bottom: 4.0);
+    : padding = const EdgeInsets.only(bottom: 4.0);
 
   const PaddedDivider.noPadding({super.key}) : padding = EdgeInsets.zero;
 
   PaddedDivider.vertical({super.key, double padding = densePadding})
-      : padding = EdgeInsets.symmetric(vertical: padding);
+    : padding = EdgeInsets.symmetric(vertical: padding);
 
   /// The padding to place around the divider.
   final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: padding,
-      child: const Divider(thickness: 1.0),
-    );
+    return Padding(padding: padding, child: const Divider(thickness: 1.0));
   }
 }
 
@@ -416,10 +407,7 @@ final class ImageIconLabel extends StatelessWidget {
         icon,
         // TODO(jacobr): animate showing and hiding the text.
         if (isScreenWiderThan(context, unscaledMinIncludeTextWidth))
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(text),
-          ),
+          Padding(padding: const EdgeInsets.only(left: 8.0), child: Text(text)),
       ],
     );
   }
@@ -434,14 +422,14 @@ final class MaterialIconLabel extends StatelessWidget {
     this.iconSize,
     this.color,
     this.minScreenWidthForText,
-  })  : assert(
-          label != null || iconData != null || iconAsset != null,
-          'At least one of iconData, iconAsset, or label must be specified.',
-        ),
-        assert(
-          iconData == null || iconAsset == null,
-          'Only one of iconData and iconAsset may be specified.',
-        );
+  }) : assert(
+         label != null || iconData != null || iconAsset != null,
+         'At least one of iconData, iconAsset, or label must be specified.',
+       ),
+       assert(
+         iconData == null || iconAsset == null,
+         'Only one of iconData and iconAsset may be specified.',
+       );
 
   final IconData? iconData;
   final String? iconAsset;
@@ -520,8 +508,9 @@ final class FormattedJson extends StatelessWidget {
     return SelectionArea(
       child: Text(
         json != null ? encoder.convert(json) : formattedString!,
-        style:
-            useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
+        style: useSubtleStyle
+            ? theme.subtleFixedFontStyle
+            : theme.fixedFontStyle,
       ),
     );
   }
@@ -530,8 +519,8 @@ final class FormattedJson extends StatelessWidget {
 /// An extension on [ScrollController] to facilitate having the scrolling widget
 /// auto scroll to the bottom on new content.
 extension ScrollControllerAutoScroll on ScrollController {
-// TODO(devoncarew): We lose dock-to-bottom when we receive content when we're
-// off screen.
+  // TODO(devoncarew): We lose dock-to-bottom when we receive content when we're
+  // off screen.
 
   /// Return whether the view is currently scrolled to the bottom.
   bool get atScrollBottom {
@@ -575,14 +564,14 @@ class LinkTextSpan extends TextSpan {
     VoidCallback? onLaunchUrlError,
     TextStyle? style,
   }) : super(
-          text: link.display,
-          style: style ?? Theme.of(context).linkTextStyle,
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              onTap?.call();
-              await launchUrl(link.url, onError: onLaunchUrlError);
-            },
-        );
+         text: link.display,
+         style: style ?? Theme.of(context).linkTextStyle,
+         recognizer: TapGestureRecognizer()
+           ..onTap = () async {
+             onTap?.call();
+             await launchUrl(link.url, onError: onLaunchUrlError);
+           },
+       );
 }
 
 /// A data model for a clickable link in a UI.
@@ -647,9 +636,10 @@ class RoundedLabel extends StatelessWidget {
         overflow: TextOverflow.clip,
         softWrap: false,
         style: theme.regularTextStyle.copyWith(
-            color: textColor ?? colorScheme.onSecondary,
-            backgroundColor: backgroundColor ?? colorScheme.secondary,
-            fontSize: fontSize ?? defaultFontSize),
+          color: textColor ?? colorScheme.onSecondary,
+          backgroundColor: backgroundColor ?? colorScheme.secondary,
+          fontSize: fontSize ?? defaultFontSize,
+        ),
       ),
     );
     return tooltipText != null

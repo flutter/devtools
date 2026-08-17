@@ -5,10 +5,10 @@
 // Note: this test was modeled after the example test from Flutter Gallery:
 // https://github.com/flutter/gallery/blob/master/test_benchmarks/benchmarks_test.dart
 
-import 'dart:convert' show JsonEncoder;
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:test/test.dart';
 import 'package:web_benchmarks/metrics.dart';
@@ -92,10 +92,7 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
 
   stdout.writeln('Web benchmark tests finished.');
 
-  expect(
-    const JsonEncoder.withIndent('  ').convert(taskResult.toJson()),
-    isA<String>(),
-  );
+  expect(prettyPrintJson(taskResult.toJson()), isA<String>());
   expect(taskResult.scores.keys, hasLength(DevToolsBenchmark.values.length));
 
   for (final devToolsBenchmark in DevToolsBenchmark.values) {

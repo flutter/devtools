@@ -25,22 +25,26 @@ class SemanticVersion with CompareMixin<SemanticVersion> {
 
     final semVersion = splitOnDash.first;
     final versionParts = semVersion.split('.');
-    final major =
-        versionParts.isNotEmpty ? int.tryParse(versionParts.first) ?? 0 : 0;
-    final minor =
-        versionParts.length > 1 ? int.tryParse(versionParts[1]) ?? 0 : 0;
-    final patch =
-        versionParts.length > 2 ? int.tryParse(versionParts[2]) ?? 0 : 0;
+    final major = versionParts.isNotEmpty
+        ? int.tryParse(versionParts.first) ?? 0
+        : 0;
+    final minor = versionParts.length > 1
+        ? int.tryParse(versionParts[1]) ?? 0
+        : 0;
+    final patch = versionParts.length > 2
+        ? int.tryParse(versionParts[2]) ?? 0
+        : 0;
 
     int? preReleaseMajor;
     int? preReleaseMinor;
     if (splitOnDash.length == 2) {
       final preRelease = splitOnDash.last;
-      final preReleaseParts = preRelease
-          .split('.')
-          .map((part) => RegExp(r'\d+').stringMatch(part) ?? '')
-          .toList()
-        ..removeWhere((part) => part.isEmpty);
+      final preReleaseParts =
+          preRelease
+              .split('.')
+              .map((part) => RegExp(r'\d+').stringMatch(part) ?? '')
+              .toList()
+            ..removeWhere((part) => part.isEmpty);
       preReleaseMajor = preReleaseParts.isNotEmpty
           ? int.tryParse(preReleaseParts.first) ?? 0
           : 0;
@@ -83,11 +87,7 @@ class SemanticVersion with CompareMixin<SemanticVersion> {
     if (downgradePatch) {
       patch = math.max(0, patch - 1);
     }
-    return SemanticVersion(
-      major: major,
-      minor: minor,
-      patch: patch,
-    );
+    return SemanticVersion(major: major, minor: minor, patch: patch);
   }
 
   int major;
@@ -134,8 +134,10 @@ class SemanticVersion with CompareMixin<SemanticVersion> {
   ///
   /// e.g. 2.6.0-12.0.pre-443 -> 2.6.0-12.0.pre.443
   static String _canonicalizeVersion(String semanticVersion) =>
-      semanticVersion.replaceFirstMapped(_nonStandardPreReleaseVersionRegex,
-          (match) => '${match[1]}.${match[2]}');
+      semanticVersion.replaceFirstMapped(
+        _nonStandardPreReleaseVersionRegex,
+        (match) => '${match[1]}.${match[2]}',
+      );
 
   bool get isPreRelease => preReleaseMajor != null || preReleaseMinor != null;
 

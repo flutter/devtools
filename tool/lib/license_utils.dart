@@ -202,10 +202,9 @@ class LicenseHeader {
         .openRead(0, byteCount)
         .transform(utf8.decoder)
         .handleError(
-          (e) =>
-              throw StateError(
-                'License header expected, but error reading file - $e',
-              ),
+          (e) => throw StateError(
+            'License header expected, but error reading file - $e',
+          ),
         );
     await for (final content in stream) {
       // Return just the license headers for the simple case with no stored
@@ -270,8 +269,10 @@ class LicenseHeader {
   }) async {
     final includedPathsList = <String>[];
     final updatedPathsList = <String>[];
-    final files =
-        directory.listSync(recursive: true).whereType<File>().toList();
+    final files = directory
+        .listSync(recursive: true)
+        .whereType<File>()
+        .toList();
     for (final file in files) {
       if (!config.shouldExclude(file)) {
         includedPathsList.add(file.path);
@@ -332,10 +333,9 @@ class LicenseHeader {
     final storedNameIndex = matchStr.indexOf('<$storedName>');
     if (storedNameIndex != -1) {
       final beforeStoredName = matchStr.substring(0, storedNameIndex);
-      final afterStoredName =
-          matchStr
-              .substring(storedNameIndex + storedName.length + 2)
-              .trimRight();
+      final afterStoredName = matchStr
+          .substring(storedNameIndex + storedName.length + 2)
+          .trimRight();
       final storedMatcher = RegExp(
         r'' +
             beforeStoredName +

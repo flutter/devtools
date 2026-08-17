@@ -237,6 +237,7 @@ Script? _loadScript(String scriptName) {
   return Script.parse(jsonDecode(script.readAsStringSync()));
 }
 
+// ignore: invalid_use_of_visible_for_testing_member, devtools_test is only used in tests.
 final mockSyntaxHighlighter = SyntaxHighlighter.withGrammar(
   grammar: mockGrammar,
   source: mockScript!.source,
@@ -249,10 +250,10 @@ const coverageMissLines = <int>{2, 5};
 const executableLines = <int>{...coverageHitLines, ...coverageMissLines};
 
 const profilerEntries = <int, ProfileReportEntry>{
-  1: ProfileReportEntry(sampleCount: 5, line: 1, inclusive: 2, exclusive: 2),
-  3: ProfileReportEntry(sampleCount: 5, line: 3, inclusive: 1, exclusive: 1),
-  4: ProfileReportEntry(sampleCount: 5, line: 4, inclusive: 1, exclusive: 1),
-  7: ProfileReportEntry(sampleCount: 5, line: 7, inclusive: 1, exclusive: 1),
+  1: ProfileReportEntry(sampleCount: 5, inclusive: 2, exclusive: 2),
+  3: ProfileReportEntry(sampleCount: 5, inclusive: 1, exclusive: 1),
+  4: ProfileReportEntry(sampleCount: 5, inclusive: 1, exclusive: 1),
+  7: ProfileReportEntry(sampleCount: 5, inclusive: 1, exclusive: 1),
 };
 
 final mockParsedScript = ParsedScript(

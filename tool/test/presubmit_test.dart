@@ -39,18 +39,19 @@ void main() {
 
       final capturedArgs = <List<String>>[];
       final mockPm = MockProcessManager(
-        onSpawn: (
-          executable,
-          arguments, {
-          workingDirectory,
-          environment,
-          includeParentEnvironment = true,
-          runInShell = false,
-          mode = ProcessStartMode.normal,
-        }) async {
-          capturedArgs.add(arguments.toList());
-          return MockProcess();
-        },
+        onSpawn:
+            (
+              executable,
+              arguments, {
+              workingDirectory,
+              environment,
+              includeParentEnvironment = true,
+              runInShell = false,
+              mode = ProcessStartMode.normal,
+            }) async {
+              capturedArgs.add(arguments.toList());
+              return MockProcess();
+            },
       );
 
       runner.addCommand(PresubmitCommand(processManager: mockPm));
@@ -110,21 +111,22 @@ void main() {
       runner.addDummyCommand('analyze');
 
       final mockPm = MockProcessManager(
-        onSpawn: (
-          executable,
-          arguments, {
-          workingDirectory,
-          environment,
-          includeParentEnvironment = true,
-          runInShell = false,
-          mode = ProcessStartMode.normal,
-        }) async {
-          if (arguments.contains('format') &&
-              arguments.contains('--set-exit-if-changed')) {
-            return MockProcess(exitCodeValue: 1);
-          }
-          return MockProcess();
-        },
+        onSpawn:
+            (
+              executable,
+              arguments, {
+              workingDirectory,
+              environment,
+              includeParentEnvironment = true,
+              runInShell = false,
+              mode = ProcessStartMode.normal,
+            }) async {
+              if (arguments.contains('format') &&
+                  arguments.contains('--set-exit-if-changed')) {
+                return MockProcess(exitCodeValue: 1);
+              }
+              return MockProcess();
+            },
       );
 
       runner.addCommand(PresubmitCommand(processManager: mockPm));
@@ -141,18 +143,19 @@ void main() {
 
       final capturedArgs = <List<String>>[];
       final mockPm = MockProcessManager(
-        onSpawn: (
-          executable,
-          arguments, {
-          workingDirectory,
-          environment,
-          includeParentEnvironment = true,
-          runInShell = false,
-          mode = ProcessStartMode.normal,
-        }) async {
-          capturedArgs.add(arguments.toList());
-          return MockProcess();
-        },
+        onSpawn:
+            (
+              executable,
+              arguments, {
+              workingDirectory,
+              environment,
+              includeParentEnvironment = true,
+              runInShell = false,
+              mode = ProcessStartMode.normal,
+            }) async {
+              capturedArgs.add(arguments.toList());
+              return MockProcess();
+            },
       );
 
       runner.addCommand(PresubmitCommand(processManager: mockPm));

@@ -27,14 +27,14 @@ class RollbackCommand extends Command {
     final repo = DevToolsRepo.getInstance();
     print('DevTools repo at ${repo.repoPath}.');
 
-    final tempDir =
-        (await io.Directory.systemTemp.createTemp(
-          'devtools-rollback',
-        )).absolute;
+    final tempDir = (await io.Directory.systemTemp.createTemp(
+      'devtools-rollback',
+    )).absolute;
     print('file://${tempDir.path}');
     final tarball = io.File('${tempDir.path}/devtools.tar.gz');
-    final extractDir =
-        await io.Directory('${tempDir.path}/extract/').absolute.create();
+    final extractDir = await io.Directory(
+      '${tempDir.path}/extract/',
+    ).absolute.create();
     final client = io.HttpClient();
     final version = argResults![_toVersionArg] as String;
     print('downloading tarball to ${tarball.path}');

@@ -49,10 +49,9 @@ class UpdateFlutterSdkCommand extends Command {
     final versionStr = repo.readFile(Uri.parse('flutter-candidate.txt')).trim();
     // If the version string doesn't match the expected pattern for a
     // pre-release tag, then assume it's a commit hash:
-    flutterVersion =
-        _flutterPreReleaseTagRegExp.hasMatch(versionStr)
-            ? 'tags/$versionStr'
-            : versionStr;
+    flutterVersion = _flutterPreReleaseTagRegExp.hasMatch(versionStr)
+        ? 'tags/$versionStr'
+        : versionStr;
 
     log.stdout('Updating to Flutter version from cache: $flutterVersion');
 
@@ -87,10 +86,23 @@ class UpdateFlutterSdkCommand extends Command {
     }
 
     // Next, update (or clone) the tool/flutter-sdk copy.
+
+    // On Windows LCUI trybots, some of the flutter repo paths cause
+    // "Filename too long" errors. Filenames such as:
+    //     engine/src/flutter/testing/ios_scenario_app/ios/Scenarios/
+    //     ScenariosUITests/
+    //     golden_platform_view_clippath_with_transform_multiple_clips_impeller_iPhone SE (3rd generation)_26.2_simulator.png'.
+    final gitLongFilesCommand = CliCommand.git([
+      'config',
+      'core.longpaths',
+      'true',
+    ]);
+
     if (Directory(toolSdkPath).existsSync()) {
       log.stdout('Updating Flutter at $toolSdkPath');
       await processManager.runAll(
         commands: [
+          gitLongFilesCommand,
           CliCommand.git(['fetch']),
           CliCommand.git(['checkout', flutterVersion, '-f']),
           CliCommand.flutter(['--version']),
@@ -102,6 +114,7 @@ class UpdateFlutterSdkCommand extends Command {
       await processManager.runProcess(
         CliCommand.git([
           'clone',
+          '--no-checkout',
           'https://github.com/flutter/flutter',
           flutterSdkDirName,
         ]),
@@ -109,6 +122,7 @@ class UpdateFlutterSdkCommand extends Command {
       );
       await processManager.runAll(
         commands: [
+          gitLongFilesCommand,
           CliCommand.git(['checkout', flutterVersion, '-f']),
           CliCommand.flutter(['--version']),
         ],

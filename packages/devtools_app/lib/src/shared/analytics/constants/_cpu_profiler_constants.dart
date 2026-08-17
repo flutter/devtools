@@ -7,7 +7,6 @@ part of '../constants.dart';
 enum CpuProfilerEvents {
   profileGranularity,
   loadAllCpuSamples,
-  profileAppStartUp,
   cpuProfileFlameChartHelp,
   cpuProfileProcessingTime,
   openDataFile,

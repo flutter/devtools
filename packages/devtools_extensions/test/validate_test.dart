@@ -10,10 +10,7 @@ import 'package:test/test.dart';
 void main() {
   final examplesWithExtensions = [
     (
-      relativePublishLocation: p.join(
-        '..',
-        'dart_foo',
-      ),
+      relativePublishLocation: p.join('..', 'dart_foo'),
       sourceCodeLocation: p.join(
         'example',
         'packages_with_extensions',
@@ -23,10 +20,7 @@ void main() {
       ),
     ),
     (
-      relativePublishLocation: p.join(
-        '..',
-        'foo',
-      ),
+      relativePublishLocation: p.join('..', 'foo'),
       sourceCodeLocation: p.join(
         'example',
         'packages_with_extensions',
@@ -48,17 +42,13 @@ void main() {
   group('devtools_extensions validate command succeeds', () {
     for (final example in examplesWithExtensions) {
       test(example.relativePublishLocation, () async {
-        final p = await Process.run(
-          'dart',
-          [
-            'run',
-            'devtools_extensions',
-            'validate',
-            '-p',
-            example.relativePublishLocation,
-          ],
-          workingDirectory: example.sourceCodeLocation,
-        );
+        final p = await Process.run('dart', [
+          'run',
+          'devtools_extensions',
+          'validate',
+          '-p',
+          example.relativePublishLocation,
+        ], workingDirectory: example.sourceCodeLocation);
         expect(p.stderr, isEmpty);
       });
     }

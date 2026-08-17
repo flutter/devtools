@@ -26,10 +26,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
         run: |
-          FILES_RESPONSE=$(gh api /repos/$GITHUB_REPOSITORY/pulls/$PULL_NUMBER/files)
-          echo "FILES_RESPONSE: $FILES_RESPONSE"
+          FILES_RESPONSE=$(gh api --paginate /repos/$GITHUB_REPOSITORY/pulls/$PULL_NUMBER/files)
 
-          HAS_CHANGED_RELEASE_NOTES=$(echo $FILES_RESPONSE | jq '.[].filename' | jq -s '. | any(. == env.CURRENT_RELEASE_FILE_PATH)')
+          HAS_CHANGED_RELEASE_NOTES=$(echo "$FILES_RESPONSE" | jq -r --arg path "$CURRENT_RELEASE_FILE_PATH" '[.[].filename == $path] | any')
           echo "HAS_CHANGED_RELEASE_NOTES=$HAS_CHANGED_RELEASE_NOTES" >> $GITHUB_OUTPUT
 
       - name: Check Release Preparedness requirements

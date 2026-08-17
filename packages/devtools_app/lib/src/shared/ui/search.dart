@@ -25,7 +25,6 @@ import 'common_widgets.dart';
 
 /// Top 10 matches to display in auto-complete overlay.
 const defaultTopMatchesLimit = 10;
-int topMatchesLimit = defaultTopMatchesLimit;
 
 final _log = Logger('packages/devtools_app/lib/src/shared/ui/search');
 
@@ -59,6 +58,7 @@ mixin SearchControllerMixin<T extends SearchableDataMixin>
   }
 
   String get search => _searchNotifier.value;
+  @visibleForTesting
   bool get isSearchInProgress => _searchInProgress.value;
 
   final _searchMatches = ValueNotifier<List<T>>([]);
@@ -378,12 +378,6 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
 
     final areaHeight = offset.dy;
     final maxAreaForPopup = areaHeight - tileEntryHeight;
-    // TODO(terry): Scrolling doesn't work so max popup height is also total
-    //              matches to use.
-    topMatchesLimit = min(
-      defaultTopMatchesLimit,
-      (maxAreaForPopup / tileEntryHeight) - 1, // zero based.
-    ).truncate();
 
     // Total tiles visible.
     final totalTiles = bottom
@@ -533,7 +527,6 @@ class EditingParts {
 
 /// Parsing characters looking for valid names e.g.,
 ///    [ _ | a..z | A..Z ] [ _ | a..z | A..Z | 0..9 ]+
-const asciiSpace = 32;
 const ascii0 = 48;
 const ascii9 = 57;
 const asciiUnderscore = 95;

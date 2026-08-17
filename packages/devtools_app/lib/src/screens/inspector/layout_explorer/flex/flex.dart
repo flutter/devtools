@@ -394,6 +394,12 @@ class FlexLayoutExplorerWidgetState
       ),
     );
   }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
 }
 
 class VisualizeFlexChildren extends StatefulWidget {

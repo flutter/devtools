@@ -18,7 +18,6 @@ class ProfilerScreenControls extends StatelessWidget {
     required this.controller,
     required this.recording,
     required this.processing,
-    required this.offline,
   });
 
   final ProfilerScreenController controller;
@@ -26,8 +25,6 @@ class ProfilerScreenControls extends StatelessWidget {
   final bool recording;
 
   final bool processing;
-
-  final bool offline;
 
   @override
   Widget build(BuildContext context) {

@@ -226,15 +226,6 @@ class ServiceExtensionDescription<T> extends extensions.ServiceExtension<T>
   String get gaItemTooltipLink => '${gaItem}TooltipLink';
 }
 
-final debugAllowBanner = ToggleableServiceExtensionDescription<bool>.from(
-  extensions.debugAllowBanner,
-  title: 'Debug Banner',
-  iconAsset: 'icons/debug_banner@2x.png',
-  gaScreenName: gac.inspector,
-  gaItem: gac.debugBanner,
-  tooltip: 'Toggle Debug Banner',
-);
-
 final invertOversizedImages = ToggleableServiceExtensionDescription<bool>.from(
   extensions.invertOversizedImages,
   title: 'Highlight Oversized Images',
@@ -363,6 +354,8 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>.from(
   gaDocsItem: gac.slowAnimationDocs,
 );
 
+// TODO(https://github.com/flutter/devtools/issues/2780): hook this up in the UI.
+// ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/2780).
 final togglePlatformMode = ServiceExtensionDescription<String>.from(
   extensions.togglePlatformMode,
   title: 'Override target platform',
@@ -377,6 +370,16 @@ final togglePlatformMode = ServiceExtensionDescription<String>.from(
   gaScreenName: gac.inspector,
   gaItem: gac.togglePlatform,
   tooltip: 'Override Target Platform',
+);
+
+/// Service extension description for overriding brightness in accessibility controls.
+final brightnessMode = ServiceExtensionDescription<String>.from(
+  extensions.brightnessMode,
+  title: 'Override Brightness',
+  iconData: Icons.brightness_6,
+  gaScreenName: gac.accessibility,
+  gaItem: gac.brightnessOverride,
+  tooltip: 'Override Brightness',
 );
 
 final disableClipLayers = ToggleableServiceExtensionDescription<bool>.from(

@@ -66,9 +66,7 @@ class ExtensionManager {
       // respond with a [DevToolsPluginEventType.connectedVmService] event
       // containing the currently connected app's vm service URI.
       postMessageToDevTools(
-        DevToolsExtensionEvent(
-          DevToolsExtensionEventType.vmServiceConnection,
-        ),
+        DevToolsExtensionEvent(DevToolsExtensionEventType.vmServiceConnection),
       );
     } else {
       unawaited(_connectToVmService(vmServiceUri));
@@ -97,8 +95,9 @@ class ExtensionManager {
 
     // Ignore events that are not supported for the DevTools => Extension
     // direction.
-    if (!extensionEvent.type
-        .supportedForDirection(ExtensionEventDirection.toExtension)) {
+    if (!extensionEvent.type.supportedForDirection(
+      ExtensionEventDirection.toExtension,
+    )) {
       return;
     }
 
@@ -110,8 +109,10 @@ class ExtensionManager {
         );
         break;
       case DevToolsExtensionEventType.vmServiceConnection:
-        final vmServiceUri = extensionEvent
-            .data?[ExtensionEventParameters.vmServiceConnectionUri] as String?;
+        final vmServiceUri =
+            extensionEvent.data?[ExtensionEventParameters
+                    .vmServiceConnectionUri]
+                as String?;
         unawaited(_connectToVmService(vmServiceUri));
         break;
       case DevToolsExtensionEventType.themeUpdate:
@@ -206,10 +207,7 @@ class ExtensionManager {
 
     try {
       await dtdManager.connect(Uri.parse(dtdUri));
-      updateQueryParameter(
-        _dtdQueryParameter,
-        dtdManager.uri.toString(),
-      );
+      updateQueryParameter(_dtdQueryParameter, dtdManager.uri.toString());
     } catch (e) {
       final errorMessage =
           'Unable to connect extension to the Dart Tooling Daemon at $dtdUri: $e';
@@ -219,7 +217,8 @@ class ExtensionManager {
   }
 
   void _setThemeForValue(String? themeValue) {
-    final useDarkTheme = (themeValue == null && useDarkThemeAsDefault) ||
+    final useDarkTheme =
+        (themeValue == null && useDarkThemeAsDefault) ||
         themeValue == ExtensionEventParameters.themeValueDark;
     darkThemeEnabled.value = useDarkTheme;
     // Use a post frame callback so that we do not try to update this while a
@@ -244,9 +243,7 @@ class ExtensionManager {
   ///
   /// See also [ShowNotificationExtensionEvent].
   void showNotification(String message) {
-    postMessageToDevTools(
-      ShowNotificationExtensionEvent(message: message),
-    );
+    postMessageToDevTools(ShowNotificationExtensionEvent(message: message));
   }
 
   /// Show a banner message in DevTools.

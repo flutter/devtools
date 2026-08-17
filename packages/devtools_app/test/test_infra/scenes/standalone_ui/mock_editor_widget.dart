@@ -88,6 +88,13 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
   }
 
   @override
+  void dispose() {
+    clientLogRing.dispose();
+    editorLogRing.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final editorTheme = VsCodeTheme.of(context);
     final theme = Theme.of(context);

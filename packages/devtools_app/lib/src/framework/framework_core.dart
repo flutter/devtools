@@ -136,6 +136,7 @@ extension FrameworkCore on Never {
     final uri = normalizeVmServiceUri(serviceUriAsString);
     if (uri != null) {
       vmServiceInitializationInProgress = true;
+      _lastServiceUriAsString = serviceUriAsString;
       final finishedCompleter = Completer<void>();
 
       try {
@@ -186,6 +187,32 @@ extension FrameworkCore on Never {
 
   static void _defaultErrorReporter(String title, Object error) {
     notificationService.pushError('$title, $error', isReportable: false);
+  }
+
+  /// The URI of the last VM service connection, used for reconnection.
+  static String? _lastServiceUriAsString;
+
+  /// Attempts to reconnect to the last known VM service.
+  ///
+  /// Returns true if reconnection was successful.
+  static Future<bool> reconnectVmService() async {
+    if (vmServiceInitializationInProgress) {
+      _log.warning(
+        'Reconnection attempt ignored: initialization already in progress.',
+      );
+      return false;
+    }
+    final lastUri = _lastServiceUriAsString;
+    if (lastUri == null) return false;
+
+    _log.info('Attempting to reconnect to VM service at: $lastUri');
+    final success = await initVmService(serviceUriAsString: lastUri);
+    if (success) {
+      _log.info('VM service reconnection successful');
+    } else {
+      _log.warning('VM service reconnection failed');
+    }
+    return success;
   }
 }
 

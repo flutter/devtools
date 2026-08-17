@@ -169,6 +169,12 @@ class _ReadWriteTmpFileState extends State<_ReadWriteTmpFile> {
     textEditingController = TextEditingController();
   }
 
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    super.dispose();
+  }
+
   Future<void> _writeFilesAndUpdate() async {
     await dtdManager.writeFile(tmpFileUri, textEditingController.text);
     await _readTmpFile();

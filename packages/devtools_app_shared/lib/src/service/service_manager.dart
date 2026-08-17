@@ -49,9 +49,7 @@ enum ServiceManagerLifecycle {
   afterCloseVmService,
 }
 
-enum ServiceManagerOverride {
-  initIsolates,
-}
+enum ServiceManagerOverride { initIsolates }
 
 // TODO(kenz): add an offline service manager implementation.
 // TODO(https://github.com/flutter/devtools/issues/6239): try to remove this.
@@ -149,8 +147,9 @@ class ServiceManager<T extends VmService> {
 
   ValueListenable<ConnectedState> get connectedState => _connectedState;
 
-  final _connectedState =
-      ValueNotifier<ConnectedState>(const ConnectedState(false));
+  final _connectedState = ValueNotifier<ConnectedState>(
+    const ConnectedState(false),
+  );
 
   final _deviceBusy = ValueNotifier<bool>(false);
 
@@ -210,10 +209,7 @@ class ServiceManager<T extends VmService> {
     ServiceManagerCallback<T> callback,
   ) {
     _lifecycleCallbacks
-        .putIfAbsent(
-          lifecycle,
-          () => <ServiceManagerCallback<T>>[],
-        )
+        .putIfAbsent(lifecycle, () => <ServiceManagerCallback<T>>[])
         .add(callback);
   }
 
@@ -319,9 +315,7 @@ class ServiceManager<T extends VmService> {
 
     try {
       await vmService.setFlag('pause_isolates_on_start', 'true');
-      await vmService.requirePermissionToResume(
-        onPauseStart: true,
-      );
+      await vmService.requirePermissionToResume(onPauseStart: true);
     } catch (error) {
       _log.warning('$error');
     }
@@ -433,8 +427,10 @@ class ServiceManager<T extends VmService> {
   Future<void> manuallyDisconnect() async {
     if (connectedState.value.connected) {
       await vmServiceClosed(
-        connectionState:
-            const ConnectedState(false, userInitiatedConnectionState: true),
+        connectionState: const ConnectedState(
+          false,
+          userInitiatedConnectionState: true,
+        ),
       );
     }
   }
@@ -475,9 +471,7 @@ class ServiceManager<T extends VmService> {
   }
 
   Future<Response> get flutterVersion async {
-    return await callServiceOnMainIsolate(
-      flutterVersionService.service,
-    );
+    return await callServiceOnMainIsolate(flutterVersionService.service);
   }
 
   /// This can throw an [RPCError].
@@ -513,8 +507,9 @@ class ServiceManager<T extends VmService> {
   /// running the test runner, and not the test library itself, so we have to do
   /// some extra work to find the package root of the test target.
   Future<Uri?> connectedAppPackageRoot(DTDManager dtdManager) async {
-    var packageRootUriString =
-        await rootPackageDirectoryForMainIsolate(dtdManager);
+    var packageRootUriString = await rootPackageDirectoryForMainIsolate(
+      dtdManager,
+    );
     _log.fine(
       '[connectedAppPackageRoot] root package directory for main isolate: '
       '$packageRootUriString',
@@ -525,14 +520,12 @@ class ServiceManager<T extends VmService> {
     if (packageRootUriString?.endsWith('.dart') ?? false) {
       final rootLibrary = await _mainIsolateRootLibrary();
       if (rootLibrary != null) {
-        packageRootUriString = (await _lookupPackageRootByEval(rootLibrary)) ??
+        packageRootUriString =
+            (await _lookupPackageRootByEval(rootLibrary)) ??
             // TODO(kenz): remove this fallback once all test bootstrap
             // generators include the `packageConfigLocation` constant we
             // can evaluate.
-            await _lookupPackageRootByImportPrefix(
-              rootLibrary,
-              dtdManager,
-            );
+            await _lookupPackageRootByImportPrefix(rootLibrary, dtdManager);
       }
     }
     _log.fine(
@@ -559,14 +552,15 @@ class ServiceManager<T extends VmService> {
       final packageConfig = (await eval.evalInstance(
         'packageConfigLocation',
         isAlive: evalDisposable,
-      ))
-          .valueAsString;
+      )).valueAsString;
 
       // TODO(https://github.com/flutter/devtools/issues/7944): return the
       // unmodified package config location. For this case, be sure to handle
       // invalid values like the empty String or 'null'.
-      final packageConfigIdentifier =
-          path.join('.dart_tool', 'package_config.json');
+      final packageConfigIdentifier = path.join(
+        '.dart_tool',
+        'package_config.json',
+      );
       if (packageConfig?.endsWith(packageConfigIdentifier) ?? false) {
         _log.fine(
           '[connectedAppPackageRoot] detected test package config from root '
