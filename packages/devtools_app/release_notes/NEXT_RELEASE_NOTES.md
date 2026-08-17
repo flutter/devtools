@@ -42,7 +42,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any updates.
+- Fixed Copy as cURL omitting request headers and body for failed or timed-out requests. [TODO](https://github.com/flutter/devtools/pull/TODO)
 
 ## Logging updates
 

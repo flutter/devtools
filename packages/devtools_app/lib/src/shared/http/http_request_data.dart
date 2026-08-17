@@ -42,7 +42,10 @@ class DartIOHttpRequestData extends NetworkRequest {
     this._request, {
     bool requestFullDataFromVmService = true,
   }) {
-    if (requestFullDataFromVmService && _request.isResponseComplete) {
+    if (requestFullDataFromVmService &&
+        (_request.isResponseComplete ||
+            _request.isRequestComplete ||
+            (_request.request?.hasError ?? false))) {
       unawaited(getFullRequestData());
     }
   }
@@ -308,8 +311,17 @@ class DartIOHttpRequestData extends NetworkRequest {
       DartIOHttpRequestData._parseCookies(_request.response?.cookies);
 
   /// The request headers for the HTTP request.
-  Map<String, dynamic>? get requestHeaders =>
-      _hasError ? null : _request.request?.headers;
+  ///
+  /// Returned even when the request failed, so failed / timed-out requests can
+  /// still be replayed (e.g. Copy as cURL). Accessing headers on some error
+  /// profiles throws, so failures fall back to `null`.
+  Map<String, dynamic>? get requestHeaders {
+    try {
+      return _request.request?.headers;
+    } catch (_) {
+      return null;
+    }
+  }
 
   /// The response headers for the HTTP request.
   Map<String, dynamic>? get responseHeaders => _request.response?.headers;
@@ -400,7 +412,8 @@ class DartIOHttpRequestData extends NetworkRequest {
     }
     final fullRequest = _request as HttpProfileRequest;
     try {
-      if (!_request.isResponseComplete) return null;
+      // Request body is independent of whether a response arrived. Timed-out
+      // and cancelled POSTs should still expose the body for Copy as cURL.
       final acceptedMethods = {'POST', 'PUT', 'PATCH'};
       if (!acceptedMethods.contains(_request.method)) return null;
       if (_requestBody != null) return _requestBody;

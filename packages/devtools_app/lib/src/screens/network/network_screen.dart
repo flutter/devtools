@@ -492,15 +492,18 @@ class ActionsColumn extends ColumnData<NetworkRequest>
         MenuItemButton(
           child: const Text('Copy as cURL'),
           onPressed: () {
-            unawaited(
-              copyToClipboard(
-                CurlCommand.from(data).toString(),
-                successMessage: 'Copied the cURL command to the clipboard',
-              ),
-            );
+            unawaited(_copyAsCurl(data));
           },
         ),
       ],
+    );
+  }
+
+  Future<void> _copyAsCurl(DartIOHttpRequestData data) async {
+    await data.getFullRequestData();
+    await copyToClipboard(
+      CurlCommand.from(data).toString(),
+      successMessage: 'Copied the cURL command to the clipboard',
     );
   }
 }
