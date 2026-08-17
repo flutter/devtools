@@ -294,11 +294,11 @@ void main() {
 
   test(
     'defaultActions includes ExtensionSettingsAction based on EmbedMode and screen type',
-        () {
+    () {
       setGlobal(IdeTheme, IdeTheme());
       expect(
         DevToolsScaffold.defaultActions().any(
-              (w) => w is ExtensionSettingsAction,
+          (w) => w is ExtensionSettingsAction,
         ),
         isTrue,
       );
@@ -306,7 +306,7 @@ void main() {
       setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedMany));
       expect(
         DevToolsScaffold.defaultActions().any(
-              (w) => w is ExtensionSettingsAction,
+          (w) => w is ExtensionSettingsAction,
         ),
         isFalse,
       );
