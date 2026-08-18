@@ -81,7 +81,7 @@ TODO: Remove this section if there are not any updates.
   [#8507](https://github.com/flutter/devtools/issues/8507)
 * Added validation during extension discovery to ensure that an extension's
   declared name in `config.yaml` matches the containing package name.
-  [#TODO](https://github.com/flutter/devtools/pull/TODO)
+  [#9965](https://github.com/flutter/devtools/pull/9965)
 
 ## Advanced developer mode updates
 
