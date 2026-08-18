@@ -4,16 +4,16 @@
 inspector/          @kenzieschmoll @srawlins
 
 # Network Files
-network/            @srawlins @bkonyi @kenzieschmoll
+network/            @srawlins @kenzieschmoll
 
 # Performance Files
 performance/        @kenzieschmoll
 
 # CPU Profiler files
-profiler/           @kenzieschmoll @bkonyi
+profiler/           @kenzieschmoll
 
 # Memory files
-memory/             @bkonyi @kenzieschmoll
+memory/             @kenzieschmoll
 
 # Debugger files
 debugger/           @srawlins
