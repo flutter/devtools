@@ -596,6 +596,64 @@ class HttpRequestCookiesView extends StatelessWidget {
   }
 }
 
+class WebSocketFramesView extends StatelessWidget {
+  const WebSocketFramesView(this.data, {super.key});
+
+  final WebSocket data;
+
+  @override
+  Widget build(BuildContext context) {
+    final events = data.events;
+
+    if (events.isEmpty) {
+      return const Center(child: Text('No WebSocket events'));
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(defaultSpacing),
+      children: [
+        DataTable(
+          columns: const [
+            DataColumn(label: Text('Frame')),
+            DataColumn(label: Text('Timestamp')),
+            DataColumn(label: Text('Direction')),
+            DataColumn(label: Text('Event')),
+            DataColumn(label: Text('Opcode')),
+            DataColumn(label: Text('Size')),
+            DataColumn(label: Text('Error')),
+          ],
+          rows: [
+            for (final event in events)
+              DataRow(
+                cells: [
+                  DataCell(Text(event.frameNumber?.toString() ?? '--')),
+                  DataCell(Text(formatDateTime(event.timestamp))),
+                  DataCell(Text(event.direction ?? '--')),
+                  DataCell(
+                    Text(
+                      event.event.startsWith('WebSocket.')
+                          ? event.event.substring('WebSocket.'.length)
+                          : event.event,
+                    ),
+                  ),
+                  DataCell(Text(event.opcode?.toString() ?? '--')),
+                  DataCell(
+                    Text(
+                      event.payloadSize != null
+                          ? formatBytes(event.payloadSize!)
+                          : '--',
+                    ),
+                  ),
+                  DataCell(Text(event.errorMessage ?? event.errorType ?? '--')),
+                ],
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 class NetworkRequestOverviewView extends StatelessWidget {
   const NetworkRequestOverviewView(this.data, {super.key});
 
@@ -605,6 +663,8 @@ class NetworkRequestOverviewView extends StatelessWidget {
   static const httpTimingGraphKey = Key('Http Timing Graph Key');
   @visibleForTesting
   static const socketTimingGraphKey = Key('Socket Timing Graph Key');
+  @visibleForTesting
+  static const webSocketTimingGraphKey = Key('WebSocket Timing Graph Key');
 
   final NetworkRequest data;
 
@@ -615,7 +675,10 @@ class NetworkRequestOverviewView extends StatelessWidget {
         padding: const EdgeInsets.all(defaultSpacing),
         children: [
           ..._buildGeneralRows(context),
-          if (data is Socket) ..._buildSocketOverviewRows(context),
+          if (data is Socket)
+            ..._buildSocketOverviewRows(context)
+          else if (data is WebSocket)
+            ..._buildWebSocketOverviewRows(context),
           const PaddedDivider(
             padding: EdgeInsets.only(bottom: denseRowSpacing),
           ),
@@ -661,14 +724,16 @@ class NetworkRequestOverviewView extends StatelessWidget {
         const SizedBox(height: defaultSpacing),
       ],
 
-      _buildRow(
-        context: context,
-        title: 'Response Size',
-        child: _valueText(bytes != null ? formatBytes(bytes) : '-'),
-      ),
-      const SizedBox(height: defaultSpacing),
+      if (data is! WebSocket) ...[
+        _buildRow(
+          context: context,
+          title: 'Response Size',
+          child: _valueText(bytes != null ? formatBytes(bytes) : '-'),
+        ),
+        const SizedBox(height: defaultSpacing),
+      ],
 
-      if (data.contentType != null) ...[
+      if (data.contentType != null && data is! WebSocket) ...[
         _buildRow(
           context: context,
           title: 'Content type',
@@ -684,20 +749,28 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Timing',
-        child: data is Socket
-            ? _buildSocketTimeGraph(context)
-            : _buildHttpTimeGraph(),
+        child: switch (data) {
+          Socket() => _buildSocketTimeGraph(context),
+          WebSocket() => _buildWebSocketTimeGraph(context),
+          _ => _buildHttpTimeGraph(),
+        },
       ),
       const SizedBox(height: denseSpacing),
       _buildRow(
         context: context,
         title: '',
-        child: _valueText(data.durationDisplay),
+        child: _valueText(
+          data.duration != null
+              ? durationText(data.duration!, fractionDigits: 0)
+              : 'Pending',
+        ),
       ),
       const SizedBox(height: defaultSpacing),
-      ...data is Socket
-          ? _buildSocketTimingRows(context)
-          : _buildHttpTimingRows(context),
+      ...switch (data) {
+        Socket() => _buildSocketTimingRows(context),
+        WebSocket() => _buildWebSocketTimingRows(context),
+        _ => _buildHttpTimingRows(context),
+      },
       const SizedBox(height: defaultSpacing),
       _buildRow(
         context: context,
@@ -717,7 +790,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     ];
   }
 
-  Duration? get _totalDuration => (data as DartIOHttpRequestData).duration;
+  Duration? get _totalDuration => data.duration;
 
   Widget _buildTimingRow(
     Color color,
@@ -837,6 +910,116 @@ class NetworkRequestOverviewView extends StatelessWidget {
       ),
       const SizedBox(height: defaultSpacing),
     ];
+  }
+
+  List<Widget> _buildWebSocketOverviewRows(BuildContext context) {
+    final webSocket = data as WebSocket;
+
+    return [
+      _buildRow(
+        context: context,
+        title: 'Connection id',
+        child: _valueText(webSocket.connectionId),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Protocol',
+        child: _valueText(webSocket.protocol ?? '--'),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Bytes sent',
+        child: _valueText(formatBytes(webSocket.bytesSent)),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Bytes received',
+        child: _valueText(formatBytes(webSocket.bytesReceived)),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Frames sent',
+        child: _valueText('${webSocket.framesSent}'),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Frames received',
+        child: _valueText('${webSocket.framesReceived}'),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Ping count',
+        child: _valueText('${webSocket.pingCount}'),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Pong count',
+        child: _valueText('${webSocket.pongCount}'),
+      ),
+      if (webSocket.closeCode != null) ...[
+        const SizedBox(height: defaultSpacing),
+        _buildRow(
+          context: context,
+          title: 'Close code',
+          child: _valueText('${webSocket.closeCode}'),
+        ),
+      ],
+      if (webSocket.closeReason != null) ...[
+        const SizedBox(height: defaultSpacing),
+        _buildRow(
+          context: context,
+          title: 'Close reason',
+          child: _valueText(webSocket.closeReason!),
+        ),
+      ],
+      if (webSocket.error != null) ...[
+        const SizedBox(height: defaultSpacing),
+        _buildRow(
+          context: context,
+          title: 'Error',
+          child: _valueText(
+            webSocket.error!,
+            TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
+        ),
+      ],
+    ];
+  }
+
+  List<Widget> _buildWebSocketTimingRows(BuildContext context) {
+    final webSocket = data as WebSocket;
+
+    return [
+      _buildRow(
+        context: context,
+        title: 'Last updated',
+        child: _valueText(formatDateTime(webSocket.lastUpdated)),
+      ),
+      const SizedBox(height: defaultSpacing),
+      _buildRow(
+        context: context,
+        title: 'Frames',
+        child: _valueText(
+          '${webSocket.framesSent} sent, '
+          '${webSocket.framesReceived} received',
+        ),
+      ),
+    ];
+  }
+
+  Widget _buildWebSocketTimeGraph(BuildContext context) {
+    return Container(
+      key: webSocketTimingGraphKey,
+      height: _timingGraphHeight,
+      color: Theme.of(context).colorScheme.primary,
+    );
   }
 
   Widget _buildSocketTimeGraph(BuildContext context) {

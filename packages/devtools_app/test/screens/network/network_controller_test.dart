@@ -420,6 +420,7 @@ void main() {
           currentNetworkRequests.updateOrAddAll(
             requests: reqs,
             sockets: sockets,
+            webSockets: const [],
             timelineMicrosOffset: 0,
           );
           expect(notifyCount, 1);
@@ -439,6 +440,7 @@ void main() {
           currentNetworkRequests.updateOrAddAll(
             requests: [request1Done],
             sockets: [socketStats1Done],
+            webSockets: const [],
             timelineMicrosOffset: 0,
           );
           expect(notifyCount, 2);
@@ -462,6 +464,7 @@ void main() {
         currentNetworkRequests.updateOrAddAll(
           requests: [request1Done],
           sockets: const [],
+          webSockets: const [],
           timelineMicrosOffset: 0,
         );
 
@@ -473,6 +476,7 @@ void main() {
         currentNetworkRequests.updateOrAddAll(
           requests: [request1CancelledWithStatusCode],
           sockets: const [],
+          webSockets: const [],
           timelineMicrosOffset: 0,
         );
 
@@ -488,6 +492,7 @@ void main() {
         currentNetworkRequests.updateOrAddAll(
           requests: reqs,
           sockets: sockets,
+          webSockets: const [],
           timelineMicrosOffset: 0,
         );
 
@@ -513,6 +518,7 @@ void main() {
         currentNetworkRequests.updateOrAddAll(
           requests: reqs,
           sockets: sockets,
+          webSockets: const [],
           timelineMicrosOffset: 0,
         );
 
@@ -537,6 +543,208 @@ void main() {
             ['22', null],
           ],
         );
+      });
+    });
+    group('websocket', () {
+      final connectTime = DateTime(2026, 8, 18, 10).toUtc();
+      final openTime = connectTime.add(const Duration(seconds: 1));
+      final lastUpdated = openTime.add(const Duration(seconds: 2));
+
+      final events = [
+        WebSocketEvent(event: 'WebSocket.Connect', timestamp: connectTime),
+        WebSocketEvent(
+          event: 'WebSocket.Send',
+          timestamp: openTime,
+          frameNumber: 1,
+          direction: 'out',
+          opcode: 'text',
+          payloadSize: 5,
+        ),
+        WebSocketEvent(
+          event: 'WebSocket.Receive',
+          timestamp: lastUpdated,
+          frameNumber: 2,
+          direction: 'in',
+          opcode: 'text',
+          payloadSize: 7,
+        ),
+      ];
+
+      WebSocketConnection createConnection({
+        String id = '42',
+        String state = 'open',
+        int bytesSent = 5,
+        int bytesReceived = 7,
+        int framesSent = 1,
+        int framesReceived = 1,
+        List<WebSocketEvent>? connectionEvents,
+      }) {
+        return WebSocketConnection(
+          isolateId: 'isolate-1',
+          id: id,
+          uri: Uri.parse('wss://example.com/socket'),
+          state: state,
+          protocol: 'chat',
+          connectTimestamp: connectTime,
+          openTimestamp: openTime,
+          bytesSent: bytesSent,
+          bytesReceived: bytesReceived,
+          framesSent: framesSent,
+          framesReceived: framesReceived,
+          pingCount: 2,
+          pongCount: 2,
+          lastUpdated: lastUpdated,
+          events: connectionEvents ?? events,
+        );
+      }
+
+      test('adds WebSocket connection', () {
+        final connection = createConnection();
+
+        currentNetworkRequests.updateOrAddAll(
+          requests: const [],
+          sockets: const [],
+          webSockets: [connection],
+          timelineMicrosOffset: 0,
+        );
+
+        expect(currentNetworkRequests.value, hasLength(1));
+
+        final request = currentNetworkRequests.getRequest(
+          'websocket:isolate-1:42',
+        );
+
+        expect(request, isA<WebSocket>());
+
+        final webSocket = request! as WebSocket;
+        expect(webSocket.connectionId, '42');
+        expect(webSocket.uri, 'wss://example.com/socket');
+        expect(webSocket.protocol, 'chat');
+        expect(webSocket.state, 'open');
+        expect(webSocket.bytesSent, 5);
+        expect(webSocket.bytesReceived, 7);
+        expect(webSocket.framesSent, 1);
+        expect(webSocket.framesReceived, 1);
+        expect(webSocket.pingCount, 2);
+        expect(webSocket.pongCount, 2);
+        expect(webSocket.events, hasLength(3));
+      });
+
+      test('updates existing WebSocket instead of adding duplicate', () {
+        final initialConnection = createConnection();
+
+        currentNetworkRequests.updateOrAddAll(
+          requests: const [],
+          sockets: const [],
+          webSockets: [initialConnection],
+          timelineMicrosOffset: 0,
+        );
+
+        final updatedConnection = createConnection(
+          bytesSent: 15,
+          bytesReceived: 27,
+          framesSent: 3,
+          framesReceived: 4,
+          connectionEvents: [
+            ...events,
+            WebSocketEvent(
+              event: 'WebSocket.Send',
+              timestamp: lastUpdated,
+              frameNumber: 3,
+              direction: 'out',
+              opcode: 'binary',
+              payloadSize: 10,
+            ),
+          ],
+        );
+
+        currentNetworkRequests.updateOrAddAll(
+          requests: const [],
+          sockets: const [],
+          webSockets: [updatedConnection],
+          timelineMicrosOffset: 0,
+        );
+
+        expect(currentNetworkRequests.value, hasLength(1));
+
+        final request = currentNetworkRequests.getRequest(
+          'websocket:isolate-1:42',
+        );
+
+        expect(request, isA<WebSocket>());
+
+        final webSocket = request! as WebSocket;
+        expect(webSocket.bytesSent, 15);
+        expect(webSocket.bytesReceived, 27);
+        expect(webSocket.framesSent, 3);
+        expect(webSocket.framesReceived, 4);
+        expect(webSocket.events, hasLength(4));
+      });
+
+      test('notifies listeners once for multiple WebSocket connections', () {
+        final connection1 = createConnection();
+
+        final connection2 = createConnection(id: '43');
+
+        currentNetworkRequests.updateOrAddAll(
+          requests: const [],
+          sockets: const [],
+          webSockets: [connection1, connection2],
+          timelineMicrosOffset: 0,
+        );
+
+        expect(currentNetworkRequests.value, hasLength(2));
+        expect(notifyCount, 1);
+      });
+
+      test('maps closed WebSocket state and duration', () {
+        final closeTime = openTime.add(const Duration(seconds: 5));
+
+        final connection = WebSocketConnection(
+          isolateId: 'isolate-1',
+          id: '44',
+          uri: Uri.parse('wss://example.com/socket'),
+          state: 'closed',
+          protocol: 'chat',
+          connectTimestamp: connectTime,
+          openTimestamp: openTime,
+          closeTimestamp: closeTime,
+          closeCode: 1000,
+          closeReason: 'Normal closure',
+          lastUpdated: closeTime,
+          events: const [],
+        );
+
+        final webSocket = WebSocket(connection);
+
+        expect(webSocket.state, 'closed');
+        expect(webSocket.inProgress, false);
+        expect(webSocket.didFail, false);
+        expect(webSocket.endTimestamp, closeTime);
+        expect(webSocket.duration, closeTime.difference(connectTime));
+        expect(webSocket.closeCode, 1000);
+        expect(webSocket.closeReason, 'Normal closure');
+      });
+
+      test('maps WebSocket error state', () {
+        final connection = WebSocketConnection(
+          isolateId: 'isolate-1',
+          id: '45',
+          uri: Uri.parse('wss://example.com/socket'),
+          state: 'error',
+          connectTimestamp: connectTime,
+          closeTimestamp: lastUpdated,
+          error: 'Connection failed',
+          lastUpdated: lastUpdated,
+          events: const [],
+        );
+
+        final webSocket = WebSocket(connection);
+
+        expect(webSocket.state, 'error');
+        expect(webSocket.didFail, true);
+        expect(webSocket.inProgress, false);
+        expect(webSocket.error, 'Connection failed');
       });
     });
   });
