@@ -123,7 +123,9 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       ..src = extensionUrl
-      ..allow = 'usb';
+      ..allow = 'usb'
+      ..sandbox.value =
+          'allow-scripts allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox';
     _extensionIFrame.style
       ..border = 'none'
       ..height = '100%'
