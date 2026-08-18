@@ -68,6 +68,221 @@ void main() {
     });
   });
 
+  group('WebSocketNetworkRequest', () {
+    final connectTimestamp = DateTime.utc(2026, 8, 18, 10);
+    final openTimestamp = connectTimestamp.add(const Duration(seconds: 1));
+    final lastUpdated = openTimestamp.add(const Duration(seconds: 2));
+
+    WebSocketConnection createConnection({
+      String id = '42',
+      String state = 'open',
+      int bytesSent = 100,
+      int bytesReceived = 200,
+      int framesSent = 10,
+      int framesReceived = 20,
+      int pingCount = 3,
+      int pongCount = 3,
+      DateTime? closeTimestamp,
+      int? closeCode,
+      String? closeReason,
+      String? error,
+      List<WebSocketEvent>? events,
+    }) {
+      return WebSocketConnection(
+        isolateId: 'isolate-1',
+        id: id,
+        uri: Uri.parse('wss://example.com/socket'),
+        state: state,
+        protocol: 'chat',
+        connectTimestamp: connectTimestamp,
+        openTimestamp: openTimestamp,
+        closeTimestamp: closeTimestamp,
+        bytesSent: bytesSent,
+        bytesReceived: bytesReceived,
+        framesSent: framesSent,
+        framesReceived: framesReceived,
+        pingCount: pingCount,
+        pongCount: pongCount,
+        closeCode: closeCode,
+        closeReason: closeReason,
+        error: error,
+        lastUpdated: lastUpdated,
+        events: events ?? const [],
+      );
+    }
+
+    test('maps connection properties correctly', () {
+      final connection = createConnection();
+
+      final webSocket = WebSocket(connection);
+
+      expect(webSocket.connectionId, '42');
+      expect(webSocket.uri, 'wss://example.com/socket');
+      expect(webSocket.protocol, 'chat');
+      expect(webSocket.state, 'open');
+
+      expect(webSocket.bytesSent, 100);
+      expect(webSocket.bytesReceived, 200);
+      expect(webSocket.framesSent, 10);
+      expect(webSocket.framesReceived, 20);
+      expect(webSocket.pingCount, 3);
+      expect(webSocket.pongCount, 3);
+
+      expect(webSocket.closeCode, isNull);
+      expect(webSocket.closeReason, isNull);
+      expect(webSocket.error, isNull);
+      expect(webSocket.lastUpdated, lastUpdated);
+    });
+
+    test('maps NetworkRequest properties correctly', () {
+      final connection = createConnection();
+
+      final webSocket = WebSocket(connection);
+
+      expect(webSocket.id, 'websocket:isolate-1:42');
+      expect(webSocket.method, 'WEBSOCKET');
+      expect(webSocket.uri, 'wss://example.com/socket');
+      expect(webSocket.contentType, 'websocket');
+      expect(webSocket.type, 'WebSocket');
+
+      expect(webSocket.startTimestamp, connectTimestamp);
+      expect(webSocket.endTimestamp, isNull);
+      expect(webSocket.duration, isNull);
+
+      expect(webSocket.status, 'open');
+      expect(webSocket.port, isNull);
+
+      expect(webSocket.requestBytes, 100);
+      expect(webSocket.responseBytes, 200);
+
+      expect(webSocket.didFail, false);
+      expect(webSocket.inProgress, true);
+    });
+
+    test('maps WebSocket events correctly', () {
+      final events = [
+        WebSocketEvent(event: 'WebSocket.Connect', timestamp: connectTimestamp),
+        WebSocketEvent(
+          event: 'WebSocket.Send',
+          timestamp: openTimestamp,
+          frameNumber: 1,
+          direction: 'out',
+          opcode: 'text',
+          payloadSize: 25,
+        ),
+        WebSocketEvent(
+          event: 'WebSocket.Receive',
+          timestamp: lastUpdated,
+          frameNumber: 2,
+          direction: 'in',
+          opcode: 'text',
+          payloadSize: 40,
+        ),
+      ];
+
+      final webSocket = WebSocket(createConnection(events: events));
+
+      expect(webSocket.events, hasLength(3));
+
+      expect(webSocket.events[0].event, 'WebSocket.Connect');
+
+      expect(webSocket.events[1].frameNumber, 1);
+      expect(webSocket.events[1].direction, 'out');
+      expect(webSocket.events[1].opcode, 'text');
+      expect(webSocket.events[1].payloadSize, 25);
+
+      expect(webSocket.events[2].frameNumber, 2);
+      expect(webSocket.events[2].direction, 'in');
+      expect(webSocket.events[2].opcode, 'text');
+      expect(webSocket.events[2].payloadSize, 40);
+    });
+
+    test('maps closed connection lifecycle correctly', () {
+      final closeTimestamp = openTimestamp.add(const Duration(seconds: 5));
+
+      final webSocket = WebSocket(
+        createConnection(
+          state: 'closed',
+          closeTimestamp: closeTimestamp,
+          closeCode: 1000,
+          closeReason: 'Normal closure',
+        ),
+      );
+
+      expect(webSocket.state, 'closed');
+      expect(webSocket.inProgress, false);
+      expect(webSocket.didFail, false);
+
+      expect(webSocket.endTimestamp, closeTimestamp);
+      expect(webSocket.duration, closeTimestamp.difference(connectTimestamp));
+
+      expect(webSocket.closeCode, 1000);
+      expect(webSocket.closeReason, 'Normal closure');
+    });
+
+    test('maps error connection correctly', () {
+      final webSocket = WebSocket(
+        createConnection(state: 'error', error: 'Connection failed'),
+      );
+
+      expect(webSocket.state, 'error');
+      expect(webSocket.error, 'Connection failed');
+      expect(webSocket.didFail, true);
+      expect(webSocket.inProgress, false);
+    });
+
+    test('equality and hashCode use stable connection identity', () {
+      final first = WebSocket(createConnection());
+
+      final second = WebSocket(createConnection(bytesSent: 500));
+
+      final different = WebSocket(createConnection(id: '43'));
+
+      expect(first == second, true);
+      expect(first.hashCode, second.hashCode);
+      expect(first == different, false);
+    });
+
+    test('toJson serializes connection and events', () {
+      final events = [
+        WebSocketEvent(
+          event: 'WebSocket.Send',
+          timestamp: openTimestamp,
+          frameNumber: 1,
+          direction: 'out',
+          opcode: 'text',
+          payloadSize: 25,
+        ),
+      ];
+
+      final webSocket = WebSocket(createConnection(events: events));
+
+      final json = webSocket.toJson();
+
+      expect(json['connectionId'], '42');
+      expect(json['uri'], 'wss://example.com/socket');
+      expect(json['protocol'], 'chat');
+      expect(json['state'], 'open');
+
+      expect(json['bytesSent'], 100);
+      expect(json['bytesReceived'], 200);
+      expect(json['framesSent'], 10);
+      expect(json['framesReceived'], 20);
+      expect(json['pingCount'], 3);
+      expect(json['pongCount'], 3);
+
+      expect(json['events'], hasLength(1));
+
+      final event = (json['events'] as List).first as Map<String, Object?>;
+
+      expect(event['event'], 'WebSocket.Send');
+      expect(event['frameNumber'], 1);
+      expect(event['direction'], 'out');
+      expect(event['opcode'], 'text');
+      expect(event['payloadSize'], 25);
+    });
+  });
+
   group('DartIOHttpRequestData', () {
     NetworkController controller;
     FakeServiceConnectionManager fakeServiceConnection;

@@ -239,3 +239,125 @@ extension SocketExtension on List<Socket> {
     return map((socket) => socket._socket).toList();
   }
 }
+
+class WebSocket extends NetworkRequest {
+  WebSocket(this._connection);
+
+  WebSocketConnection _connection;
+  WebSocketConnection get connection => _connection;
+  List<WebSocketEvent> get events => _connection.events;
+
+  String get connectionId => _connection.id;
+  String? get protocol => _connection.protocol;
+  String get state => _connection.state;
+
+  DateTime get lastUpdated => _connection.lastUpdated;
+
+  int get bytesSent => _connection.bytesSent;
+  int get bytesReceived => _connection.bytesReceived;
+  int get framesSent => _connection.framesSent;
+  int get framesReceived => _connection.framesReceived;
+  int get pingCount => _connection.pingCount;
+  int get pongCount => _connection.pongCount;
+  int? get closeCode => _connection.closeCode;
+  String? get closeReason => _connection.closeReason;
+  String? get error => _connection.error;
+
+  void update(WebSocket other) {
+    _connection = other._connection;
+    notifyListeners();
+  }
+
+  @override
+  String get id => 'websocket:${_connection.isolateId}:${_connection.id}';
+
+  @override
+  String get method => 'WEBSOCKET';
+
+  @override
+  String get uri => _connection.uri.toString();
+
+  @override
+  String? get contentType => 'websocket';
+
+  @override
+  String get type => 'WebSocket';
+
+  @override
+  Duration? get duration {
+    final closeTimestamp = _connection.closeTimestamp;
+    if (closeTimestamp == null) {
+      return null;
+    }
+
+    return closeTimestamp.difference(_connection.connectTimestamp);
+  }
+
+  @override
+  DateTime get startTimestamp => _connection.connectTimestamp;
+
+  @override
+  DateTime? get endTimestamp => _connection.closeTimestamp;
+
+  @override
+  String get status => _connection.state;
+
+  @override
+  int? get port => _connection.uri.hasPort ? _connection.uri.port : null;
+
+  @override
+  int get requestBytes => _connection.bytesSent;
+
+  @override
+  int get responseBytes => _connection.bytesReceived;
+
+  @override
+  bool get didFail => _connection.state == 'error';
+
+  @override
+  bool get inProgress =>
+      _connection.state != 'closed' && _connection.state != 'error';
+
+  @override
+  bool operator ==(Object other) => other is WebSocket && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  Map<String, Object?> toJson() {
+    return {
+      'connectionId': connectionId,
+      'uri': uri,
+      'protocol': protocol,
+      'state': state,
+      'connectTimestamp': startTimestamp.toIso8601String(),
+      'openTimestamp': _connection.openTimestamp?.toIso8601String(),
+      'closeTimestamp': endTimestamp?.toIso8601String(),
+      'bytesSent': bytesSent,
+      'bytesReceived': bytesReceived,
+      'framesSent': framesSent,
+      'framesReceived': framesReceived,
+      'pingCount': pingCount,
+      'pongCount': pongCount,
+      'closeCode': closeCode,
+      'closeReason': closeReason,
+      'error': error,
+      'lastUpdated': lastUpdated.toIso8601String(),
+      'events': events
+          .map(
+            (event) => {
+              'timestamp': event.timestamp.toIso8601String(),
+              'event': event.event,
+              'frameNumber': event.frameNumber,
+              'direction': event.direction,
+              'opcode': event.opcode,
+              'payloadSize': event.payloadSize,
+              'errorType': event.errorType,
+              'errorMessage': event.errorMessage,
+            },
+          )
+          .toList(),
+    };
+  }
+}

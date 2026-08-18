@@ -237,6 +237,7 @@ class NetworkController extends DevToolsScreenController
       ..updateOrAddAll(
         requests: httpProfileData,
         sockets: socketStatsData,
+        webSockets: const [],
         timelineMicrosOffset: offlineData.timelineMicrosOffset ?? 0,
       );
     _filterAndRefreshSearchMatches();
@@ -256,12 +257,14 @@ class NetworkController extends DevToolsScreenController
   void processNetworkTrafficHelper(
     List<SocketStatistic> sockets,
     List<HttpProfileRequest>? httpRequests,
+    List<WebSocketConnection> webSockets,
     int timelineMicrosOffset, {
     required CurrentNetworkRequests currentRequests,
   }) {
     currentRequests.updateOrAddAll(
       requests: httpRequests!,
       sockets: sockets,
+      webSockets: webSockets,
       timelineMicrosOffset: timelineMicrosOffset,
     );
 
@@ -278,11 +281,13 @@ class NetworkController extends DevToolsScreenController
   void processNetworkTraffic({
     required List<SocketStatistic> sockets,
     required List<HttpProfileRequest>? httpRequests,
+    required List<WebSocketConnection> webSockets,
   }) {
     // Trigger refresh.
     processNetworkTrafficHelper(
       sockets,
       httpRequests,
+      webSockets,
       _timelineMicrosOffset,
       currentRequests: _currentNetworkRequests,
     );
@@ -329,6 +334,9 @@ class NetworkController extends DevToolsScreenController
 
     networkService.updateLastHttpDataRefreshTime(
       alreadyRecordingHttp: alreadyRecordingHttp,
+    );
+    networkService.updateLastWebSocketDataRefreshTime(
+      alreadyRecordingWebSocket: alreadyRecordingHttp,
     );
     final timestamp = await networkService.updateLastSocketDataRefreshTime(
       alreadyRecordingSocketData: alreadyRecordingSocketData,
@@ -377,12 +385,14 @@ class NetworkController extends DevToolsScreenController
     _recordingNotifier.value = state;
   }
 
-  /// Updates the last refresh time of the socket and http data refresh times.
+  /// Updates the last refresh time of the HTTP, WebSocket, and Socket data.
   ///
-  /// This will ensure that future fetches for http and socket requests will at
-  /// most fetch requests since [updateLastRefreshTime] was called.
+  /// This will ensure that future fetches for http, socket and websocket
+  /// requests will atmost fetch requests since [updateLastRefreshTime] was
+  /// called.
   Future<void> updateLastRefreshTime() async {
     networkService.updateLastHttpDataRefreshTime();
+    await networkService.updateLastSocketDataRefreshTime();
     await networkService.updateLastSocketDataRefreshTime();
   }
 
@@ -557,10 +567,12 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
   void updateOrAddAll({
     required List<HttpProfileRequest> requests,
     required List<SocketStatistic> sockets,
+    required List<WebSocketConnection> webSockets,
     required int timelineMicrosOffset,
   }) {
     _updateOrAddRequests(requests);
     _updateSocketProfiles(sockets, timelineMicrosOffset);
+    _updateWebSocketProfiles(webSockets);
     notifyListeners();
   }
 
@@ -613,6 +625,21 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
         // already have, so we remove the current sockets and replace them with
         // updated data.
         _requestsById[socket.id] = socket;
+      }
+    }
+  }
+
+  void _updateWebSocketProfiles(List<WebSocketConnection> webSockets) {
+    for (final connection in webSockets) {
+      final webSocket = WebSocket(connection);
+      final existingRequest = _requestsById[webSocket.id];
+
+      if (existingRequest == null) {
+        _requestsById[webSocket.id] = webSocket;
+        value.add(webSocket);
+      } else {
+        assert(existingRequest is WebSocket);
+        (existingRequest as WebSocket).update(webSocket);
       }
     }
   }
