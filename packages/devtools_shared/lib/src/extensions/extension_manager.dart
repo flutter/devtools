@@ -148,6 +148,16 @@ class ExtensionsManager {
 
     for (final extension in extensions) {
       final config = extension.config;
+      final extensionName = config['name'];
+      if (extensionName != extension.package) {
+        parsingErrors.writeln(
+          'Ignoring extension from package "${extension.package}": its '
+          'config.yaml declares name "$extensionName", which does not match '
+          'the package name.',
+        );
+        continue;
+      }
+
       // TODO(https://github.com/dart-lang/pub/issues/4042): make this check
       // more robust.
       final isPubliclyHosted =

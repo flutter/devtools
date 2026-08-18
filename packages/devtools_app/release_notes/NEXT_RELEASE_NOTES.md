@@ -79,6 +79,9 @@ TODO: Remove this section if there are not any updates.
 
 * Hide the DevTools extensions menu button in single-screen embedded mode (`EmbedMode.embedOne`) on standard screens.
   [#8507](https://github.com/flutter/devtools/issues/8507)
+* Added validation during extension discovery to ensure that an extension's
+  declared name in `config.yaml` matches the containing package name.
+  [#TODO](https://github.com/flutter/devtools/pull/TODO)
 
 ## Advanced developer mode updates
 

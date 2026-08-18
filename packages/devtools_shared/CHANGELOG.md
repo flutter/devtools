@@ -1,8 +1,12 @@
 <!--
 Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
-found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
+# 14.0.1
+
+* Validate that an extension's declared name in `config.yaml` matches the package
+  name in `package_config.json`.
+
 # 14.0.0
 
 * **Breaking changes**: `LocalFileSystem`, an extension which provided some handy
