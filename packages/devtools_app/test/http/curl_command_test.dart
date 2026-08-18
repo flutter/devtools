@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:devtools_app/devtools_app.dart';
@@ -204,6 +205,74 @@ void main() {
         command.toString(),
         "curl --location --request POST 'https://jsonplaceholder.typicode.com/posts' \\\n--data-raw '{\n \"title\": \"foo\", \"body\": \"bar\", \"userId\": 1\n}\n '",
       );
+    });
+
+    test('includes headers and body when response never completes', () {
+      final data = DartIOHttpRequestData(
+        HttpProfileRequest.parse(<String, Object?>{
+          'id': '7',
+          'isolateId': 'isolates/0',
+          'method': 'POST',
+          'uri': 'https://example.com/api/login',
+          'events': <Object>[],
+          'startTime': 0,
+          'endTime': 1000,
+          'request': <String, Object?>{
+            'headers': <String, Object?>{
+              'content-type': <String>['application/json'],
+              'accept': <String>['application/json'],
+              'locale': <String>['en'],
+            },
+            'contentLength': 42,
+            'cookies': <Object>[],
+            'followRedirects': true,
+            'maxRedirects': 5,
+            'persistentConnection': false,
+          },
+          'response': null,
+          'requestBody': utf8.encode(
+            '{"email":"user@example.com","password":"secret"}',
+          ),
+        })!,
+        requestFullDataFromVmService: false,
+      );
+
+      expect(
+        data.requestBody,
+        '{"email":"user@example.com","password":"secret"}',
+      );
+      expect(
+        CurlCommand.from(data).toString(),
+        "curl --location --request POST 'https://example.com/api/login' \\\n--header 'content-type: application/json' \\\n--header 'accept: application/json' \\\n--header 'locale: en' \\\n--data-raw '{\"email\":\"user@example.com\",\"password\":\"secret\"}'",
+      );
+    });
+
+    test('includes body when request has an error', () {
+      final data = DartIOHttpRequestData(
+        HttpProfileRequest.parse(<String, Object?>{
+          'id': '8',
+          'isolateId': 'isolates/0',
+          'method': 'POST',
+          'uri': 'https://example.com/api/login',
+          'events': <Object>[],
+          'startTime': 0,
+          'endTime': 1000,
+          'request': <String, Object?>{
+            'error': 'Connection timed out',
+            'contentLength': 2,
+            'cookies': <Object>[],
+            'followRedirects': true,
+            'maxRedirects': 5,
+            'persistentConnection': false,
+          },
+          'response': null,
+          'requestBody': utf8.encode('{}'),
+        })!,
+        requestFullDataFromVmService: false,
+      );
+
+      expect(data.requestBody, '{}');
+      expect(CurlCommand.from(data).toString(), contains("--data-raw '{}'"));
     });
   });
 }

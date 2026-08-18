@@ -55,6 +55,8 @@ TODO: Remove this section if there are not any updates.
 
 * Fixed exported response status in HAR files so that they parse as integers
   instead of strings. [#9900](https://github.com/flutter/devtools/pull/9900)
+* Fixed Copy as cURL omitting request headers and body for failed or timed-out
+  requests. [#9963](https://github.com/flutter/devtools/pull/9963)
 
 ## Logging updates
 
