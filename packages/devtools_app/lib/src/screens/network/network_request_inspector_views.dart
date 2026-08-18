@@ -612,42 +612,47 @@ class WebSocketFramesView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(defaultSpacing),
       children: [
-        DataTable(
-          columns: const [
-            DataColumn(label: Text('Frame')),
-            DataColumn(label: Text('Timestamp')),
-            DataColumn(label: Text('Direction')),
-            DataColumn(label: Text('Event')),
-            DataColumn(label: Text('Opcode')),
-            DataColumn(label: Text('Size')),
-            DataColumn(label: Text('Error')),
-          ],
-          rows: [
-            for (final event in events)
-              DataRow(
-                cells: [
-                  DataCell(Text(event.frameNumber?.toString() ?? '--')),
-                  DataCell(Text(formatDateTime(event.timestamp))),
-                  DataCell(Text(event.direction ?? '--')),
-                  DataCell(
-                    Text(
-                      event.event.startsWith('WebSocket.')
-                          ? event.event.substring('WebSocket.'.length)
-                          : event.event,
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            columns: const [
+              DataColumn(label: Text('Frame')),
+              DataColumn(label: Text('Timestamp')),
+              DataColumn(label: Text('Direction')),
+              DataColumn(label: Text('Event')),
+              DataColumn(label: Text('Opcode')),
+              DataColumn(label: Text('Size')),
+              DataColumn(label: Text('Error')),
+            ],
+            rows: [
+              for (final event in events)
+                DataRow(
+                  cells: [
+                    DataCell(Text(event.frameNumber?.toString() ?? '--')),
+                    DataCell(Text(formatDateTime(event.timestamp))),
+                    DataCell(Text(event.direction ?? '--')),
+                    DataCell(
+                      Text(
+                        event.event.startsWith('WebSocket.')
+                            ? event.event.substring('WebSocket.'.length)
+                            : event.event,
+                      ),
                     ),
-                  ),
-                  DataCell(Text(event.opcode?.toString() ?? '--')),
-                  DataCell(
-                    Text(
-                      event.payloadSize != null
-                          ? formatBytes(event.payloadSize!)
-                          : '--',
+                    DataCell(Text(event.opcode?.toString() ?? '--')),
+                    DataCell(
+                      Text(
+                        event.payloadSize != null
+                            ? formatBytes(event.payloadSize!)
+                            : '--',
+                      ),
                     ),
-                  ),
-                  DataCell(Text(event.errorMessage ?? event.errorType ?? '--')),
-                ],
-              ),
-          ],
+                    DataCell(
+                      Text(event.errorMessage ?? event.errorType ?? '--'),
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ],
     );

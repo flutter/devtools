@@ -393,7 +393,6 @@ class NetworkController extends DevToolsScreenController
   Future<void> updateLastRefreshTime() async {
     networkService.updateLastHttpDataRefreshTime();
     await networkService.updateLastSocketDataRefreshTime();
-    await networkService.updateLastSocketDataRefreshTime();
   }
 
   Future<bool> _recordingNetworkTraffic({
