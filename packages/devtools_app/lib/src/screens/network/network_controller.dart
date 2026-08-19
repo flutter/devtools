@@ -192,6 +192,15 @@ class NetworkController extends DevToolsScreenController
       _currentNetworkRequests,
       _filterAndRefreshSearchMatches,
     );
+    autoDisposeStreamSubscription(
+      serviceConnection.serviceManager.isolateManager.onIsolateCreated.listen((
+        _,
+      ) async {
+        if (_recordingNotifier.value) {
+          await allowedError(_enableNetworkTrafficRecordingOnAllIsolates());
+        }
+      }),
+    );
   }
 
   @override
@@ -327,7 +336,7 @@ class NetworkController extends DevToolsScreenController
     // Cancel existing polling timer before starting recording.
     _updatePollingState(false);
 
-    networkService.updateLastHttpDataRefreshTime(
+    await networkService.updateLastHttpDataRefreshTime(
       alreadyRecordingHttp: alreadyRecordingHttp,
     );
     final timestamp = await networkService.updateLastSocketDataRefreshTime(
@@ -352,11 +361,16 @@ class NetworkController extends DevToolsScreenController
 
     // TODO(kenz): only call these if http logging and socket profiling are not
     // already enabled. Listen to service manager streams for this info.
+    await _enableNetworkTrafficRecordingOnAllIsolates();
+    await togglePolling(true);
+  }
+
+  /// Enables HTTP timeline logging and socket profiling on all isolates.
+  Future<void> _enableNetworkTrafficRecordingOnAllIsolates() async {
     await [
       http_service.toggleHttpRequestLogging(true),
       networkService.toggleSocketProfiling(true),
     ].wait;
-    await togglePolling(true);
   }
 
   Future<void> stopRecording() async {
@@ -382,7 +396,7 @@ class NetworkController extends DevToolsScreenController
   /// This will ensure that future fetches for http and socket requests will at
   /// most fetch requests since [updateLastRefreshTime] was called.
   Future<void> updateLastRefreshTime() async {
-    networkService.updateLastHttpDataRefreshTime();
+    await networkService.updateLastHttpDataRefreshTime();
     await networkService.updateLastSocketDataRefreshTime();
   }
 
