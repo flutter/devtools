@@ -72,10 +72,10 @@ class NetworkService {
     bool alreadyRecordingWebSocket = false,
   }) {
     if (!alreadyRecordingWebSocket) {
+      final now = DateTime.now().microsecondsSinceEpoch;
       for (final isolateId
           in lastWebSocketDataRefreshTimePerIsolate.keys.toList()) {
-        lastWebSocketDataRefreshTimePerIsolate[isolateId] =
-            DateTime.now().microsecondsSinceEpoch;
+        lastWebSocketDataRefreshTimePerIsolate[isolateId] = now;
       }
     }
   }
@@ -165,7 +165,7 @@ class NetworkService {
 
   Future<List<WebSocketConnection>> _refreshWebSocketProfile() async {
     final service = serviceConnection.serviceManager.service;
-    if (service == null) return [];
+    if (service == null) return const [];
 
     final connections = <WebSocketConnection>[];
 
