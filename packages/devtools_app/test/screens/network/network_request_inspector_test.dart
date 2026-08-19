@@ -286,5 +286,94 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 1));
       },
     );
+    testWidgets('WebSocket inspector shows Frames', (tester) async {
+      final connection = WebSocketConnection(
+        isolateId: 'isolate-1',
+        id: '42',
+        uri: Uri.parse('wss://example.com/socket'),
+        state: 'open',
+        protocol: 'chat',
+        connectTimestamp: DateTime.utc(2026, 8, 18, 10),
+        openTimestamp: DateTime.utc(2026, 8, 18, 10, 0, 1),
+        bytesSent: 100,
+        bytesReceived: 200,
+        framesSent: 10,
+        framesReceived: 20,
+        pingCount: 3,
+        pongCount: 3,
+        lastUpdated: DateTime.utc(2026, 8, 18, 10, 0, 2),
+        events: [
+          WebSocketEvent(
+            event: 'WebSocket.Send',
+            timestamp: DateTime.utc(2026, 8, 18, 10, 0, 1),
+            frameNumber: 1,
+            direction: 'out',
+            opcode: 'text',
+            payloadSize: 25,
+          ),
+          WebSocketEvent(
+            event: 'WebSocket.Receive',
+            timestamp: DateTime.utc(2026, 8, 18, 10, 0, 2),
+            frameNumber: 2,
+            direction: 'in',
+            opcode: 'text',
+            payloadSize: 40,
+          ),
+        ],
+      );
+
+      final webSocket = WebSocket(connection);
+
+      await tester.pumpWidget(
+        wrapWithControllers(
+          const NetworkRequestInspector(),
+          network: NetworkController(),
+          debugger: createMockDebuggerControllerWithDefaults(),
+        ),
+      );
+
+      final controller = screenControllers.lookup<NetworkController>();
+      controller.selectedRequest.value = webSocket;
+
+      await tester.pumpAndSettle();
+
+      // The Frames tab should exist for a WebSocket.
+      expect(find.text('Frames'), findsOneWidget);
+
+      // Switch to the Frames tab.
+      await tester.tap(find.text('Frames'));
+      await tester.pumpAndSettle();
+
+      // The Frames view should now be visible.
+      expect(find.byType(WebSocketFramesView), findsOneWidget);
+
+      // Verify the table headers.
+      expect(find.text('Frame'), findsOneWidget);
+      expect(find.text('Timestamp'), findsOneWidget);
+      expect(find.text('Direction'), findsOneWidget);
+      expect(find.text('Event'), findsOneWidget);
+      expect(find.text('Opcode'), findsOneWidget);
+      expect(find.text('Size'), findsOneWidget);
+      expect(find.text('Error'), findsOneWidget);
+
+      // Verify the first frame.
+      expect(find.text('1'), findsOneWidget);
+      expect(find.text('out'), findsOneWidget);
+      expect(find.text('Send'), findsOneWidget);
+      expect(find.text('25 B'), findsOneWidget);
+
+      // Verify the second frame.
+      expect(find.text('2'), findsOneWidget);
+      expect(find.text('in'), findsOneWidget);
+      expect(find.text('Receive'), findsOneWidget);
+      expect(find.text('40 B'), findsOneWidget);
+
+      // Both frames use the text opcode.
+      expect(find.text('text'), findsNWidgets(2));
+
+      // Stop polling before disposing the test.
+      await controller.stopRecording();
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+    });
   });
 }
