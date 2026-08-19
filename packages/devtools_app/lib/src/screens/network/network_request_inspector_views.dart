@@ -632,11 +632,9 @@ class WebSocketFramesView extends StatelessWidget {
                     DataCell(Text(formatDateTime(event.timestamp))),
                     DataCell(Text(event.direction ?? '--')),
                     DataCell(
-                      Text(
-                        event.event.startsWith('WebSocket.')
-                            ? event.event.substring('WebSocket.'.length)
-                            : event.event,
-                      ),
+                      // WebSocket timeline events are prefixed with `WebSocket.`.
+                      // Strip the prefix for display in the Event column.
+                      Text(event.event.substring('WebSocket.'.length)),
                     ),
                     DataCell(Text(event.opcode?.toString() ?? '--')),
                     DataCell(
@@ -968,29 +966,29 @@ class NetworkRequestOverviewView extends StatelessWidget {
         title: 'Pong count',
         child: _valueText('${webSocket.pongCount}'),
       ),
-      if (webSocket.closeCode != null) ...[
+      if (webSocket.closeCode case final closeCode?) ...[
         const SizedBox(height: defaultSpacing),
         _buildRow(
           context: context,
           title: 'Close code',
-          child: _valueText('${webSocket.closeCode}'),
+          child: _valueText('$closeCode'),
         ),
       ],
-      if (webSocket.closeReason != null) ...[
+      if (webSocket.closeReason case final closeReason?) ...[
         const SizedBox(height: defaultSpacing),
         _buildRow(
           context: context,
           title: 'Close reason',
-          child: _valueText(webSocket.closeReason!),
+          child: _valueText(closeReason),
         ),
       ],
-      if (webSocket.error != null) ...[
+      if (webSocket.error case final error?) ...[
         const SizedBox(height: defaultSpacing),
         _buildRow(
           context: context,
           title: 'Error',
           child: _valueText(
-            webSocket.error!,
+            error,
             TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ),

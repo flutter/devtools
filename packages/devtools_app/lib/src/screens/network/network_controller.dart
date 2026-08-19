@@ -637,7 +637,6 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
         _requestsById[webSocket.id] = webSocket;
         value.add(webSocket);
       } else {
-        assert(existingRequest is WebSocket);
         (existingRequest as WebSocket).update(webSocket);
       }
     }

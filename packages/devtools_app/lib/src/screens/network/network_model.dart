@@ -284,14 +284,8 @@ class WebSocket extends NetworkRequest {
   String get type => 'WebSocket';
 
   @override
-  Duration? get duration {
-    final closeTimestamp = _connection.closeTimestamp;
-    if (closeTimestamp == null) {
-      return null;
-    }
-
-    return closeTimestamp.difference(_connection.connectTimestamp);
-  }
+  Duration? get duration =>
+      _connection.closeTimestamp?.difference(_connection.connectTimestamp);
 
   @override
   DateTime get startTimestamp => _connection.connectTimestamp;
