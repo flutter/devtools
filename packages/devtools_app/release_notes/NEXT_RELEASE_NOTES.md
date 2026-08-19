@@ -35,7 +35,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any updates.
+* Added the ability to pin classes to the top of the Profile Memory table. [#8898](https://github.com/flutter/devtools/issues/8898)
 
 ## Debugger updates
 
@@ -53,13 +53,21 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
+## Network profiler updates
+
 * Added WebSocket support to the Network profiler, including WebSocket
   connection details, lifecycle events, frame-level inspection, and connection
   timing information.
   [#9968](https://github.com/flutter/devtools/pull/9968)
 * Fixed exported response status in HAR files so that they parse as integers
   instead of strings. [#9900](https://github.com/flutter/devtools/pull/9900)
-
+* Fixed an issue where the Network tab would stop capturing HTTP requests after
+  a hot restart. -
+  [#9856](https://github.com/flutter/devtools/pull/9856)
+* Fixed an issue where the Network tab would stop capturing new HTTP requests
+  after pressing Clear while recording. -
+  [#9856](https://github.com/flutter/devtools/pull/9856)
+  
 ## Logging updates
 
 * Correct time units and cumulative nature of GC events.
@@ -81,7 +89,8 @@ TODO: Remove this section if there are not any updates.
 
 ## DevTools extension updates
 
-TODO: Remove this section if there are not any updates.
+* Hide the DevTools extensions menu button in single-screen embedded mode (`EmbedMode.embedOne`) on standard screens.
+  [#8507](https://github.com/flutter/devtools/issues/8507)
 
 ## Advanced developer mode updates
 

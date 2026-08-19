@@ -14,8 +14,11 @@ class NetworkService {
   NetworkController get networkController =>
       screenControllers.lookup<NetworkController>();
 
-  /// Tracks the time (microseconds since epoch) that the HTTP profile was last
-  /// retrieved for a given isolate ID.
+  /// Tracks the VM timeline timestamp (microseconds) that the HTTP profile was
+  /// last retrieved for a given isolate ID.
+  ///
+  /// These values are passed to `getHttpProfile` as `updatedSince`, which must
+  /// use the VM's monotonic timeline clock — not wall-clock time.
   final lastHttpDataRefreshTimePerIsolate = <String, int>{};
 
   /// Tracks the time (microseconds since epoch) that the WebSocket profile was
@@ -45,21 +48,25 @@ class NetworkService {
     return timestamp;
   }
 
-  /// Updates the last HTTP data refresh time to the current time.
+  /// Updates the last HTTP data refresh time to the current VM timeline time.
   ///
   /// If [alreadyRecordingHttp] is true it's unclear when the last refresh time
   /// would have occurred, so the refresh time is not updated. Otherwise,
-  /// [lastHttpDataRefreshTimePerIsolate] is updated to the current
-  /// time.
-  void updateLastHttpDataRefreshTime({bool alreadyRecordingHttp = false}) {
+  /// [lastHttpDataRefreshTimePerIsolate] is updated to the current VM timeline
+  /// timestamp for each known isolate.
+  ///
+  /// Wall-clock time must not be used here: `getHttpProfile`'s `updatedSince`
+  /// expects the VM timeline clock. A wall-clock value would filter out all
+  /// subsequent requests.
+  Future<void> updateLastHttpDataRefreshTime({
+    bool alreadyRecordingHttp = false,
+  }) async {
     if (!alreadyRecordingHttp) {
+      final service = serviceConnection.serviceManager.service;
+      if (service == null) return;
+      final timestamp = (await service.getVMTimelineMicros()).timestamp!;
       for (final isolateId in lastHttpDataRefreshTimePerIsolate.keys.toList()) {
-        // It's safe to use `DateTime.now()` here since we don't need to worry
-        // about dropping data between the time the last profile was generated
-        // by the target application and the time `DateTime.now()` is called
-        // here.
-        lastHttpDataRefreshTimePerIsolate[isolateId] =
-            DateTime.now().microsecondsSinceEpoch;
+        lastHttpDataRefreshTimePerIsolate[isolateId] = timestamp;
       }
     }
   }
@@ -288,10 +295,16 @@ class NetworkService {
   }
 
   Future<void> clearData() async {
-    await updateLastSocketDataRefreshTime();
-    updateLastHttpDataRefreshTime();
-    await _clearSocketProfile();
-    await _clearHttpProfile();
-    await _clearWebSocketProfile();
+    try {
+      await updateLastSocketDataRefreshTime();
+      await updateLastHttpDataRefreshTime();
+      await _clearSocketProfile();
+      await _clearHttpProfile();
+      await _clearWebSocketProfile();
+    } on RPCError catch (e) {
+      if (!e.isServiceDisposedError) {
+        rethrow;
+      }
+    }
   }
 }
