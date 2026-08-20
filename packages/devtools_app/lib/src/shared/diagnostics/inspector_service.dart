@@ -922,6 +922,24 @@ abstract class InspectorObjectGroupBase
   }
 
   @override
+  Future<RemoteDiagnosticsNode?> getDetailsSubtree(
+    RemoteDiagnosticsNode? node, {
+    int subtreeDepth = 2,
+  }) async {
+    if (node == null || node.valueRef.id == null) return null;
+    return parseDiagnosticsNodeDaemon(
+      invokeServiceMethodDaemonParams(
+        WidgetInspectorServiceExtensions.getDetailsSubtree.name,
+        {
+          'objectGroup': groupName,
+          'arg': node.valueRef.id,
+          'subtreeDepth': subtreeDepth.toString(),
+        },
+      ),
+    );
+  }
+
+  @override
   bool isLocalClass(RemoteDiagnosticsNode node) =>
       inspectorService.isLocalClass(node);
 }
