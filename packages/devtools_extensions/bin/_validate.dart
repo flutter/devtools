@@ -78,6 +78,14 @@ void _validateDirectoryContents(String packagePath) {
     throw FileSystemException('${packageDirectory.path} directory not found');
   }
 
+  final pubspecFile = File(path.join(packageDirectory.path, 'pubspec.yaml'));
+  if (!pubspecFile.existsSync()) {
+    throw const FileSystemException('''
+A pubspec.yaml file is required, but none was found.
+See ${ValidateExtensionCommand.docUrl}.
+''');
+  }
+
   final devtoolsExtensionDir = Directory(
     path.join(packageDirectory.path, 'extension', 'devtools'),
   );
@@ -108,6 +116,22 @@ See ${ValidateExtensionCommand.docUrl}.
 An extension/devtools/config.yaml file is required, but none was found.
 See ${ValidateExtensionCommand.docUrl}.
 ''');
+  }
+
+  // Ensure the extension's name matches the package name in pubspec.yaml.
+  final pubspecYaml = loadYaml(pubspecFile.readAsStringSync());
+  if (pubspecYaml is YamlMap) {
+    final pubspecName = pubspecYaml['name'] as String?;
+    final configYaml = _configAsMap(packagePath);
+    final configName = configYaml['name'] as String?;
+    if (configName != null &&
+        pubspecName != null &&
+        configName != pubspecName) {
+      throw StateError(
+        'The "name" field in config.yaml ($configName) does not match the '
+        'package name in pubspec.yaml ($pubspecName).',
+      );
+    }
   }
 }
 

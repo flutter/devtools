@@ -44,10 +44,12 @@ void main() {
   Future<void> initializeTestDirectory({
     bool includeDependenciesWithExtensions = true,
     bool includeBadExtension = false,
+    bool includeSpoofedExtension = false,
   }) async {
     await extensionTestManager.setupTestDirectoryStructure(
       includeDependenciesWithExtensions: includeDependenciesWithExtensions,
       includeBadExtension: includeBadExtension,
+      includeSpoofedExtension: includeSpoofedExtension,
     );
     await testDtdConnection!.setIDEWorkspaceRoots(dtd!.info!.secret!, [
       extensionTestManager.packagesRootUri,
@@ -111,6 +113,37 @@ void main() {
         contains('Encountered errors while parsing extension config.yaml'),
       );
     });
+
+    test(
+      'ignores extension whose config.yaml name does not match package name',
+      () async {
+        await initializeTestDirectory(includeSpoofedExtension: true);
+        final response = await serveExtensions(extensionsManager);
+        expect(response.statusCode, HttpStatus.ok);
+        _verifyAllExtensions(extensionsManager);
+
+        // Verify that the spoofed extension with version 999.0.0 was not added
+        // and did not replace the legitimate provider extension.
+        expect(
+          extensionsManager.devtoolsExtensions.any(
+            (e) => e.version == '999.0.0',
+          ),
+          isFalse,
+        );
+
+        final parsedResponse =
+            json.decode(await response.readAsString()) as Map;
+        final warning =
+            parsedResponse[ExtensionsApi.extensionsResultWarningPropertyName];
+        expect(
+          warning,
+          contains(
+            'Ignoring extension from package "bad_pkg": its config.yaml '
+            'declares name "provider", which does not match the package name.',
+          ),
+        );
+      },
+    );
 
     test('succeeds for valid extensions when an exception is thrown', () async {
       await initializeTestDirectory();
