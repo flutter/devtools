@@ -69,12 +69,6 @@ class HotRestartNetworkVmService extends FakeVmServiceWrapper {
     _httpProfiles[isolateId] = requests;
   }
 
-  /// Sets the socket profile data that will be returned for [isolateId] when
-  /// socket profiling is enabled for that isolate.
-  void setSocketProfile(String isolateId, List<SocketStatistic> sockets) {
-    _socketProfiles[isolateId] = sockets;
-  }
-
   /// Whether HTTP timeline logging is enabled for [isolateId].
   bool isHttpLoggingEnabled(String isolateId) =>
       _httpLoggingEnabled[isolateId] ?? false;
