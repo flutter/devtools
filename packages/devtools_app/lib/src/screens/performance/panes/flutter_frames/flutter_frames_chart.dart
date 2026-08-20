@@ -249,6 +249,14 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
     _framesScrollController = ScrollController(
       initialScrollOffset: initialScrollOffset,
     );
+
+    // Snap after layout so [atScrollBottom] matches for live follow.
+    if (_selectedFrameIndex == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_framesScrollController.hasClients) return;
+        unawaited(_framesScrollController.autoScrollToBottom(jump: true));
+      });
+    }
   }
 
   @override
@@ -261,13 +269,18 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
   }
 
   double _calculateInitialHorizontalScrollOffset() {
-    final selectedIndex = _selectedFrameIndex;
-    if (selectedIndex == null) return 0.0;
-
     final chartWidthWithoutAxisLabels =
-        widget.constraints.maxWidth - _yAxisUnitsSpace;
+        math.max(0.0, widget.constraints.maxWidth - _yAxisUnitsSpace);
     final totalFramesInView =
         chartWidthWithoutAxisLabels ~/ _defaultFrameWidthWithPadding;
+
+    final selectedIndex = _selectedFrameIndex;
+    if (selectedIndex == null) {
+      // Dock to the live edge when remounting with no selection (#9525).
+      final framesOutOfView = widget.frames.length - totalFramesInView;
+      return math.max(0.0, framesOutOfView * _defaultFrameWidthWithPadding);
+    }
+
     final fullFrameRangeInView = Range(0, totalFramesInView);
 
     if (fullFrameRangeInView.contains(selectedIndex)) return 0.0;
