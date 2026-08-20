@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/console/widgets/description.dart';
 import '../../../shared/diagnostics/diagnostics_node.dart';
+import '../../../shared/diagnostics/primitives/source_location.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/tab.dart';
 import '../inspector_controller.dart';
@@ -76,47 +77,56 @@ class _DetailsTableState extends State<DetailsTable> {
         final widgetProperties = properties.widgetProperties;
         final renderProperties = properties.renderProperties;
         final layoutProperties = properties.layoutProperties;
+        final creationLocation = properties.creationLocation;
 
         final renderTabExists = renderProperties.isNotEmpty;
         final flexExplorerTabExists = selectedNode?.isFlexLayout ?? false;
 
-        return AnalyticsTabbedView(
-          gaScreen: gac.inspector,
-          onTabChanged: (int tabIndex) {
-            _lastSelectedTab = _getTabForIndex(
-              tabIndex,
-              renderTabExists: renderTabExists,
-              flexExplorerTabExists: flexExplorerTabExists,
-            );
-          },
-          initialSelectedIndex: _getIndexForTab(
-            _lastSelectedTab ?? _widgetPropertiesTab,
-            renderTabExists: renderTabExists,
-            flexExplorerTabExists: flexExplorerTabExists,
-          ),
-          tabs: [
-            (
-              tab: _widgetPropertiesTab,
-              tabView: PropertiesView(
-                properties: widgetProperties,
-                layoutProperties: layoutProperties,
-                controller: widget.controller,
-                scrollController: _widgetPropertiesScrollController,
+        return Column(
+          children: [
+            if (_shouldShowCreationLocation(creationLocation))
+              WidgetCreationLocationHeader(location: creationLocation!),
+            Expanded(
+              child: AnalyticsTabbedView(
+                gaScreen: gac.inspector,
+                onTabChanged: (int tabIndex) {
+                  _lastSelectedTab = _getTabForIndex(
+                    tabIndex,
+                    renderTabExists: renderTabExists,
+                    flexExplorerTabExists: flexExplorerTabExists,
+                  );
+                },
+                initialSelectedIndex: _getIndexForTab(
+                  _lastSelectedTab ?? _widgetPropertiesTab,
+                  renderTabExists: renderTabExists,
+                  flexExplorerTabExists: flexExplorerTabExists,
+                ),
+                tabs: [
+                  (
+                    tab: _widgetPropertiesTab,
+                    tabView: PropertiesView(
+                      properties: widgetProperties,
+                      layoutProperties: layoutProperties,
+                      controller: widget.controller,
+                      scrollController: _widgetPropertiesScrollController,
+                    ),
+                  ),
+                  if (renderTabExists)
+                    (
+                      tab: _renderObjectTab,
+                      tabView: PropertiesTable(
+                        properties: renderProperties,
+                        scrollController: _renderPropertiesScrollController,
+                      ),
+                    ),
+                  if (flexExplorerTabExists)
+                    (
+                      tab: _flexExplorerTab,
+                      tabView: FlexLayoutExplorerWidget(widget.controller),
+                    ),
+                ],
               ),
             ),
-            if (renderTabExists)
-              (
-                tab: _renderObjectTab,
-                tabView: PropertiesTable(
-                  properties: renderProperties,
-                  scrollController: _renderPropertiesScrollController,
-                ),
-              ),
-            if (flexExplorerTabExists)
-              (
-                tab: _flexExplorerTab,
-                tabView: FlexLayoutExplorerWidget(widget.controller),
-              ),
           ],
         );
       },
@@ -158,6 +168,48 @@ class _DetailsTableState extends State<DetailsTable> {
     if (renderTabExists) _renderObjectTab,
     if (flexExplorerTabExists) _flexExplorerTab,
   ];
+
+  bool _shouldShowCreationLocation(InspectorSourceLocation? location) {
+    return location?.getFile() != null;
+  }
+}
+
+/// Displays the source file path for the selected widget.
+///
+/// Matches the legacy inspector format: `filename.dart:line:column`.
+class WidgetCreationLocationHeader extends StatelessWidget {
+  const WidgetCreationLocationHeader({super.key, required this.location});
+
+  final InspectorSourceLocation location;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final file = location.getFile();
+    final line = location.getLine();
+    final column = location.getColumn();
+    final shortLocation = '${fileNameFromUri(file)}:$line:$column';
+    final fullLocation = '$file:$line:$column';
+
+    return Container(
+      width: double.infinity,
+      height: defaultHeaderHeight,
+      padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+      alignment: Alignment.centerLeft,
+      decoration: BoxDecoration(
+        border: Border(bottom: defaultBorderSide(theme)),
+      ),
+      child: DevToolsTooltip(
+        message: fullLocation,
+        child: Text(
+          shortLocation,
+          style: theme.subtleTextStyle,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
+      ),
+    );
+  }
 }
 
 /// Displays a widget's properties, including the layout properties and a
