@@ -926,7 +926,7 @@ abstract class InspectorObjectGroupBase
     RemoteDiagnosticsNode? node, {
     int subtreeDepth = 2,
   }) async {
-    if (node == null) return null;
+    if (node == null || node.valueRef.id == null) return null;
     return parseDiagnosticsNodeDaemon(
       invokeServiceMethodDaemonParams(
         WidgetInspectorServiceExtensions.getDetailsSubtree.name,

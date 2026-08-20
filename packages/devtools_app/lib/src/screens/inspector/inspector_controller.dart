@@ -830,7 +830,7 @@ class InspectorController extends DisposableController
         // Fetch widget properties:
         final wProperties = await diagnostic.getProperties(objectGroupApi);
         // Check if the selected node has changed, and if so return early:
-        if (_selectedNode.value != node) {
+        if (disposed || _selectedNode.value != node) {
           return;
         }
         widgetProperties.addAll(
@@ -851,7 +851,7 @@ class InspectorController extends DisposableController
           subtreeDepth: 0,
         );
         // Check if the selected node has changed, and if so return early:
-        if (_selectedNode.value != node) {
+        if (disposed || _selectedNode.value != node) {
           return;
         }
         creationLocation = detailsNode?.creationLocation;
@@ -859,7 +859,7 @@ class InspectorController extends DisposableController
         for (final renderObject in renderProperties) {
           final rProperties = await renderObject.getProperties(objectGroupApi);
           // Check if the selected node has changed, and if so return early:
-          if (_selectedNode.value != node) {
+          if (disposed || _selectedNode.value != node) {
             return;
           }
           renderProperties.addAll(rProperties);
@@ -868,6 +868,7 @@ class InspectorController extends DisposableController
         _log.warning(e, st);
       }
     }
+    if (disposed) return;
     _selectedNodeProperties.value = (
       widgetProperties: widgetProperties,
       renderProperties: renderProperties,
