@@ -59,6 +59,14 @@ String _debugExtensionPlaceholderHtml(String name) {
 ''';
 }
 
+/// The sandbox permissions granted to embedded extension iframes.
+///
+/// Restricts the extension from accessing same-origin resources such as
+/// the parent window DOM, cookies, or local storage, while allowing
+/// javascript execution, forms, downloads, and popup windows.
+const _extensionSandboxRules =
+    'allow-scripts allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox';
+
 class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     with AutoDisposeControllerMixin {
   EmbeddedExtensionControllerImpl(super.extensionConfig);
@@ -123,7 +131,8 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       ..src = extensionUrl
-      ..allow = 'usb';
+      ..allow = 'usb'
+      ..sandbox.value = _extensionSandboxRules;
     _extensionIFrame.style
       ..border = 'none'
       ..height = '100%'
