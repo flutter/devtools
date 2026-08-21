@@ -24,10 +24,10 @@ dependencies:
 
 dev_dependencies:
   # TODO(https://github.com/flutter/devtools/issues/9771): Update to published version
-  dart_skills_lint:
-    git:
-      url: https://github.com/flutter/skills
-      path: tool/dart_skills_lint
-      ref: 05e5a45fa412ddbdd1d694eee0c71f4bbaea2617
   logging: ^1.1.1
+  skills_lint:
+    git:
+      url: https://github.com/google/skills_lint.dart.git
+      path: packages/skills_lint
+      ref: main
   test: ^1.25.8
