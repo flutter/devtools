@@ -14,7 +14,7 @@ void main(List<String> args) {
   final note = args[1].trim();
   final pr = args[2].trim();
 
-  final prLink = pr == 'TODO' 
+  final prLink = pr == 'TODO'
       ? '[TODO](https://github.com/flutter/devtools/pull/TODO)'
       : '[#$pr](https://github.com/flutter/devtools/pull/$pr)';
 
@@ -52,15 +52,18 @@ void main(List<String> args) {
     // Find the next section start or the end of the file.
     var nextSectionStart = content.indexOf('\n## ', sectionStart + 1);
     if (nextSectionStart == -1) {
-      nextSectionStart =
-          content.indexOf('\n# Full commit history', sectionStart + 1);
+      nextSectionStart = content.indexOf(
+        '\n# Full commit history',
+        sectionStart + 1,
+      );
     }
     if (nextSectionStart == -1) {
       nextSectionStart = content.length;
     }
 
-    var sectionContent =
-        content.substring(sectionStart, nextSectionStart).trimRight();
+    var sectionContent = content
+        .substring(sectionStart, nextSectionStart)
+        .trimRight();
     sectionContent += '\n$newEntry';
 
     content =
