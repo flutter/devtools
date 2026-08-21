@@ -13,10 +13,10 @@ TARGET_FILE=$(echo "$INPUT" | python3 -c "import sys, json; data=json.load(sys.s
 # Check if a skill file was modified
 if [[ "$TARGET_FILE" == *"SKILL.md"* ]] || [[ "$TARGET_FILE" == *".agents/skills"* ]]; then
   echo "Skill edit detected: $TARGET_FILE" >&2
-  echo "Running dart_skills_lint..." >&2
+  echo "Running skills_lint..." >&2
   
   # Run the skills linter from tool/ directory
-  (cd tool && dart run dart_skills_lint:cli)
+  (cd tool && dart pub run skills_lint)
 fi
 
 # PostToolUse expects an empty JSON object on stdout
