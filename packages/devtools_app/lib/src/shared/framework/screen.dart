@@ -513,14 +513,13 @@ abstract class Screen {
     );
   }
 
-  if (screen.requiresAdvancedDeveloperMode) {
-    if (!preferences.advancedDeveloperModeEnabled.value) {
-      _log.finest('screen requires advanced developer mode: returning false');
-      return (
-        show: false,
-        disabledReason: ScreenDisabledReason.requiresAdvancedDeveloperMode,
-      );
-    }
+  if (screen.requiresAdvancedDeveloperMode &&
+      !preferences.advancedDeveloperModeEnabled.value) {
+    _log.finest('screen requires advanced developer mode: returning false');
+    return (
+      show: false,
+      disabledReason: ScreenDisabledReason.requiresAdvancedDeveloperMode,
+    );
   }
 
   final serviceManager = serviceConnection.serviceManager;

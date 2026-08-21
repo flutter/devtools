@@ -947,7 +947,7 @@ class _JsonViewerState extends State<JsonViewer> {
       ); // Creates tree structure
     }
     // Intended to be unawaited.
-    // ignore: discarded_futures
+    // ignore: discarded_futures, avoid-async-call-in-sync-function
     _initializeTree = _buildAndExpand(variable);
   }
 

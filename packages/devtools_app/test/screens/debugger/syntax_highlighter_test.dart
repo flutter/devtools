@@ -18,6 +18,7 @@ import 'package:devtools_test/helpers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
 
 const modifierSpans = [
   // Start multi-capture spans
@@ -486,6 +487,7 @@ void main() {
         );
       });
 
+      @isTest
       void testSingleSpan(
         String name,
         String spanText,

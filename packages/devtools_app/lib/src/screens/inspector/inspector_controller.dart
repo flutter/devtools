@@ -568,10 +568,9 @@ class InspectorController extends DisposableController
   }) {
     if (currentDistance > inRange.end) return null;
 
-    if (inRange.contains(currentDistance)) {
-      if (of.description == matching.description) {
-        return of;
-      }
+    if (inRange.contains(currentDistance) &&
+        of.description == matching.description) {
+      return of;
     }
 
     final children = of.childrenNow;
@@ -978,10 +977,8 @@ class InspectorController extends DisposableController
     required RemoteDiagnosticsNode? selection,
     bool notifyFlutterInspector = false,
   }) {
-    if (selection != null) {
-      if (selection.isCreatedByLocalProject) {
-        _navigateTo(selection);
-      }
+    if (selection != null && selection.isCreatedByLocalProject) {
+      _navigateTo(selection);
     }
 
     if (notifyFlutterInspector && selection != null) {

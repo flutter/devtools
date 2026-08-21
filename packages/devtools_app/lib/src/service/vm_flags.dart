@@ -43,17 +43,16 @@ class VmFlagManager with DisposerMixin {
 
   @visibleForTesting
   void handleVmEvent(Event event) async {
-    if (event.kind == EventKind.kVMFlagUpdate) {
-      if (_flagNotifiers.containsKey(event.flag)) {
-        final currentFlag = _flagNotifiers[event.flag]!.value;
-        _flagNotifiers[event.flag]!.value = Flag.parse({
-          'name': currentFlag.name,
-          'comment': currentFlag.comment,
-          'modified': true,
-          'valueAsString': event.newValue,
-        })!;
-        _flags.value = await service.getFlagList();
-      }
+    if (event.kind == EventKind.kVMFlagUpdate &&
+        _flagNotifiers.containsKey(event.flag)) {
+      final currentFlag = _flagNotifiers[event.flag]!.value;
+      _flagNotifiers[event.flag]!.value = Flag.parse({
+        'name': currentFlag.name,
+        'comment': currentFlag.comment,
+        'modified': true,
+        'valueAsString': event.newValue,
+      })!;
+      _flags.value = await service.getFlagList();
     }
   }
 

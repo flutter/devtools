@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/inbound_references_tree.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
@@ -281,7 +283,8 @@ void main() {
           InboundReferencesTree(
             controller: testObjectInspectorViewController,
             object: mockClassObject,
-            onExpanded: (bool _) => mockClassObject.requestInboundsRefs(),
+            onExpanded: (bool _) =>
+                unawaited(mockClassObject.requestInboundsRefs()),
           ),
         ),
       );
