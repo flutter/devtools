@@ -13,6 +13,8 @@ import '../../shared/http/http.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/byte_utils.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/table/table.dart';
+import '../../shared/table/table_data.dart';
 import '../../shared/ui/colors.dart';
 import '../../shared/ui/common_widgets.dart';
 import 'network_controller.dart';
@@ -596,10 +598,105 @@ class HttpRequestCookiesView extends StatelessWidget {
   }
 }
 
+class _WebSocketFrameColumn extends ColumnData<WebSocketEvent> {
+  const _WebSocketFrameColumn() : super('Frame', fixedWidthPx: 60);
+
+  @override
+  int? getValue(WebSocketEvent dataObject) => dataObject.frameNumber;
+
+  @override
+  String getDisplayValue(WebSocketEvent dataObject) =>
+      dataObject.frameNumber?.toString() ?? '--';
+}
+
+class _WebSocketTimestampColumn extends ColumnData<WebSocketEvent> {
+  const _WebSocketTimestampColumn() : super('Timestamp', fixedWidthPx: 150);
+
+  @override
+  DateTime getValue(WebSocketEvent dataObject) => dataObject.timestamp;
+
+  @override
+  String getDisplayValue(WebSocketEvent dataObject) =>
+      formatDateTime(dataObject.timestamp);
+}
+
+class _WebSocketDirectionColumn extends ColumnData<WebSocketEvent> {
+  const _WebSocketDirectionColumn() : super('Direction', fixedWidthPx: 100);
+
+  @override
+  String getValue(WebSocketEvent dataObject) => dataObject.direction ?? '--';
+
+  @override
+  String getDisplayValue(WebSocketEvent dataObject) =>
+      dataObject.direction ?? '--';
+}
+
+class _WebSocketEventColumn extends ColumnData<WebSocketEvent> {
+  const _WebSocketEventColumn() : super('Event', fixedWidthPx: 120);
+
+  @override
+  String getValue(WebSocketEvent dataObject) {
+    final event = dataObject.event;
+    return event.startsWith('WebSocket.')
+        ? event.substring('WebSocket.'.length)
+        : event;
+  }
+
+  @override
+  String getDisplayValue(WebSocketEvent dataObject) => getValue(dataObject);
+}
+
+class _WebSocketOpcodeColumn extends ColumnData<WebSocketEvent> {
+  const _WebSocketOpcodeColumn() : super('Opcode', fixedWidthPx: 100);
+
+  @override
+  String getValue(WebSocketEvent dataObject) =>
+      dataObject.opcode?.toString() ?? '--';
+
+  @override
+  String getDisplayValue(WebSocketEvent dataObject) =>
+      dataObject.opcode?.toString() ?? '--';
+}
+
+class _WebSocketSizeColumn extends ColumnData<WebSocketEvent> {
+  const _WebSocketSizeColumn() : super('Size', fixedWidthPx: 100);
+
+  @override
+  int? getValue(WebSocketEvent dataObject) => dataObject.payloadSize;
+
+  @override
+  String getDisplayValue(WebSocketEvent dataObject) =>
+      dataObject.payloadSize != null
+      ? formatBytes(dataObject.payloadSize!)
+      : '--';
+}
+
+class _WebSocketErrorColumn extends ColumnData<WebSocketEvent> {
+  const _WebSocketErrorColumn() : super('Error', fixedWidthPx: 180);
+
+  @override
+  String getValue(WebSocketEvent dataObject) =>
+      dataObject.errorMessage ?? dataObject.errorType ?? '--';
+
+  @override
+  String getDisplayValue(WebSocketEvent dataObject) =>
+      dataObject.errorMessage ?? dataObject.errorType ?? '--';
+}
+
 class WebSocketFramesView extends StatelessWidget {
   const WebSocketFramesView(this.data, {super.key});
 
   final WebSocket data;
+
+  static const _columns = <ColumnData<WebSocketEvent>>[
+    _WebSocketFrameColumn(),
+    _WebSocketTimestampColumn(),
+    _WebSocketDirectionColumn(),
+    _WebSocketEventColumn(),
+    _WebSocketOpcodeColumn(),
+    _WebSocketSizeColumn(),
+    _WebSocketErrorColumn(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -609,50 +706,17 @@ class WebSocketFramesView extends StatelessWidget {
       return const Center(child: Text('No WebSocket events'));
     }
 
-    return ListView(
+    return Padding(
       padding: const EdgeInsets.all(defaultSpacing),
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            columns: const [
-              DataColumn(label: Text('Frame')),
-              DataColumn(label: Text('Timestamp')),
-              DataColumn(label: Text('Direction')),
-              DataColumn(label: Text('Event')),
-              DataColumn(label: Text('Opcode')),
-              DataColumn(label: Text('Size')),
-              DataColumn(label: Text('Error')),
-            ],
-            rows: [
-              for (final event in events)
-                DataRow(
-                  cells: [
-                    DataCell(Text(event.frameNumber?.toString() ?? '--')),
-                    DataCell(Text(formatDateTime(event.timestamp))),
-                    DataCell(Text(event.direction ?? '--')),
-                    DataCell(
-                      // WebSocket timeline events are prefixed with `WebSocket.`.
-                      // Strip the prefix for display in the Event column.
-                      Text(event.event.substring('WebSocket.'.length)),
-                    ),
-                    DataCell(Text(event.opcode?.toString() ?? '--')),
-                    DataCell(
-                      Text(
-                        event.payloadSize != null
-                            ? formatBytes(event.payloadSize!)
-                            : '--',
-                      ),
-                    ),
-                    DataCell(
-                      Text(event.errorMessage ?? event.errorType ?? '--'),
-                    ),
-                  ],
-                ),
-            ],
-          ),
-        ),
-      ],
+      child: FlatTable<WebSocketEvent>(
+        keyFactory: (event) => ValueKey<WebSocketEvent>(event),
+        data: events,
+        dataKey: 'websocket-frames',
+        columns: _columns,
+        defaultSortColumn: _columns.first,
+        defaultSortDirection: SortDirection.ascending,
+        sizeColumnsToFit: false,
+      ),
     );
   }
 }

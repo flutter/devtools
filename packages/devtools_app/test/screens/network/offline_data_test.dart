@@ -131,6 +131,37 @@ void main() {
 
       // Validate selectedRequestId
       expect(offlineData.selectedRequestId, isNull);
+
+      // Validate webSocketData.
+      expect(offlineData.webSocketData, hasLength(1));
+
+      final webSocket = offlineData.webSocketData.single;
+
+      expect(webSocket.connectionId, '42');
+      expect(webSocket.uri.toString(), 'wss://example.com/socket');
+      expect(webSocket.state, 'open');
+      expect(webSocket.protocol, 'chat');
+
+      expect(webSocket.bytesSent, 100);
+      expect(webSocket.bytesReceived, 200);
+      expect(webSocket.framesSent, 10);
+      expect(webSocket.framesReceived, 20);
+      expect(webSocket.pingCount, 3);
+      expect(webSocket.pongCount, 3);
+
+      expect(webSocket.events, hasLength(2));
+
+      expect(webSocket.events[0].frameNumber, 1);
+      expect(webSocket.events[0].event, 'WebSocket.Send');
+      expect(webSocket.events[0].direction, 'out');
+      expect(webSocket.events[0].opcode, 'text');
+      expect(webSocket.events[0].payloadSize, 25);
+
+      expect(webSocket.events[1].frameNumber, 2);
+      expect(webSocket.events[1].event, 'WebSocket.Receive');
+      expect(webSocket.events[1].direction, 'in');
+      expect(webSocket.events[1].opcode, 'text');
+      expect(webSocket.events[1].payloadSize, 40);
     });
 
     test('OfflineNetworkData should serialize correctly', () {
@@ -150,6 +181,7 @@ void main() {
         final emptyOfflineData = OfflineNetworkData(
           httpRequestData: [],
           socketData: [],
+          webSocketData: [],
           timelineMicrosOffset: 1731482170837171,
         );
 
@@ -161,6 +193,7 @@ void main() {
       final populatedHttpData = OfflineNetworkData(
         httpRequestData: offlineData.httpRequestData,
         socketData: [],
+        webSocketData: [],
         timelineMicrosOffset: 1731482170837171,
       );
 
@@ -177,6 +210,42 @@ void main() {
       );
       expect(restoredData.socketData.length, offlineData.socketData.length);
       expect(restoredData.selectedRequestId, offlineData.selectedRequestId);
+
+      expect(
+        restoredData.webSocketData.length,
+        offlineData.webSocketData.length,
+      );
+
+      final restoredWebSocket = restoredData.webSocketData.single;
+      final originalWebSocket = offlineData.webSocketData.single;
+
+      expect(restoredWebSocket.connectionId, originalWebSocket.connectionId);
+      expect(restoredWebSocket.uri, originalWebSocket.uri);
+      expect(restoredWebSocket.state, originalWebSocket.state);
+      expect(restoredWebSocket.protocol, originalWebSocket.protocol);
+
+      expect(restoredWebSocket.bytesSent, originalWebSocket.bytesSent);
+      expect(restoredWebSocket.bytesReceived, originalWebSocket.bytesReceived);
+      expect(restoredWebSocket.framesSent, originalWebSocket.framesSent);
+      expect(
+        restoredWebSocket.framesReceived,
+        originalWebSocket.framesReceived,
+      );
+      expect(restoredWebSocket.pingCount, originalWebSocket.pingCount);
+      expect(restoredWebSocket.pongCount, originalWebSocket.pongCount);
+
+      expect(restoredWebSocket.events, hasLength(2));
+
+      for (var i = 0; i < originalWebSocket.events.length; i++) {
+        final originalEvent = originalWebSocket.events[i];
+        final restoredEvent = restoredWebSocket.events[i];
+
+        expect(restoredEvent.frameNumber, originalEvent.frameNumber);
+        expect(restoredEvent.event, originalEvent.event);
+        expect(restoredEvent.direction, originalEvent.direction);
+        expect(restoredEvent.opcode, originalEvent.opcode);
+        expect(restoredEvent.payloadSize, originalEvent.payloadSize);
+      }
     });
 
     test('Handles serialization errors gracefully', () {

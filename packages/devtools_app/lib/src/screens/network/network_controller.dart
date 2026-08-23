@@ -335,8 +335,10 @@ class NetworkController extends DevToolsScreenController
     networkService.updateLastHttpDataRefreshTime(
       alreadyRecordingHttp: alreadyRecordingHttp,
     );
-    networkService.updateLastWebSocketDataRefreshTime(
-      alreadyRecordingWebSocket: alreadyRecordingHttp,
+    unawaited(
+      networkService.updateLastWebSocketDataRefreshTime(
+        alreadyRecordingWebSocket: alreadyRecordingHttp,
+      ),
     );
     final timestamp = await networkService.updateLastSocketDataRefreshTime(
       alreadyRecordingSocketData: alreadyRecordingSocketData,
@@ -515,17 +517,21 @@ class NetworkController extends DevToolsScreenController
   OfflineScreenData prepareOfflineScreenData() {
     final httpRequestData = <DartIOHttpRequestData>[];
     final socketData = <Socket>[];
+    final webSocketData = <WebSocket>[];
     for (final request in _currentNetworkRequests.value) {
       if (request is DartIOHttpRequestData) {
         httpRequestData.add(request);
       } else if (request is Socket) {
         socketData.add(request);
+      } else if (request is WebSocket) {
+        webSocketData.add(request);
       }
     }
 
     final offlineData = OfflineNetworkData(
       httpRequestData: httpRequestData,
       socketData: socketData,
+      webSocketData: webSocketData,
       selectedRequestId: selectedRequest.value?.id,
       timelineMicrosOffset: _timelineMicrosOffset,
     );

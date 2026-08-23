@@ -68,14 +68,18 @@ class NetworkService {
   ///
   /// WebSocket profiling is controlled by HttpClient.enableTimelineLogging,
   /// so this timestamp follows the HTTP timeline logging lifecycle.
-  void updateLastWebSocketDataRefreshTime({
+  Future<void> updateLastWebSocketDataRefreshTime({
     bool alreadyRecordingWebSocket = false,
-  }) {
+  }) async {
     if (!alreadyRecordingWebSocket) {
-      final now = DateTime.now().microsecondsSinceEpoch;
+      final service = serviceConnection.serviceManager.service;
+      if (service == null) return;
+
+      final timestamp = (await service.getVMTimelineMicros()).timestamp!;
+
       for (final isolateId
           in lastWebSocketDataRefreshTimePerIsolate.keys.toList()) {
-        lastWebSocketDataRefreshTimePerIsolate[isolateId] = now;
+        lastWebSocketDataRefreshTimePerIsolate[isolateId] = timestamp;
       }
     }
   }

@@ -9,6 +9,8 @@ import 'package:vm_service/vm_service.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
+export 'package:vm_service/vm_service.dart' show WebSocketEvent;
+
 abstract class NetworkRequest
     with ChangeNotifier, SearchableDataMixin, Serializable {
   String get method;
@@ -243,6 +245,40 @@ extension SocketExtension on List<Socket> {
 class WebSocket extends NetworkRequest {
   WebSocket(this._connection);
 
+  factory WebSocket.fromJson(Map<String, Object?> json) {
+    return WebSocket(
+      WebSocketConnection(
+        isolateId: json['isolateId'] as String,
+        id: json['connectionId'] as String,
+        uri: Uri.parse(json['uri'] as String),
+        protocol: json['protocol'] as String?,
+        state: json['state'] as String,
+        connectTimestamp: DateTime.parse(json['connectTimestamp'] as String),
+        openTimestamp: json['openTimestamp'] != null
+            ? DateTime.parse(json['openTimestamp'] as String)
+            : null,
+        closeTimestamp: json['closeTimestamp'] != null
+            ? DateTime.parse(json['closeTimestamp'] as String)
+            : null,
+        bytesSent: json['bytesSent'] as int,
+        bytesReceived: json['bytesReceived'] as int,
+        framesSent: json['framesSent'] as int,
+        framesReceived: json['framesReceived'] as int,
+        pingCount: json['pingCount'] as int,
+        pongCount: json['pongCount'] as int,
+        closeCode: json['closeCode'] as int?,
+        closeReason: json['closeReason'] as String?,
+        error: json['error'] as String?,
+        lastUpdated: DateTime.parse(json['lastUpdated'] as String),
+        events: (json['events'] as List<Object?>? ?? [])
+            .whereType<Map<String, Object?>>()
+            .map(WebSocketEvent.parse)
+            .whereType<WebSocketEvent>()
+            .toList(),
+      ),
+    );
+  }
+
   WebSocketConnection _connection;
   WebSocketConnection get connection => _connection;
   List<WebSocketEvent> get events => _connection.events;
@@ -321,6 +357,7 @@ class WebSocket extends NetworkRequest {
   @override
   Map<String, Object?> toJson() {
     return {
+      'isolateId': _connection.isolateId,
       'connectionId': connectionId,
       'uri': uri,
       'protocol': protocol,
@@ -341,7 +378,7 @@ class WebSocket extends NetworkRequest {
       'events': events
           .map(
             (event) => {
-              'timestamp': event.timestamp.toIso8601String(),
+              'timestamp': event.timestamp.microsecondsSinceEpoch,
               'event': event.event,
               'frameNumber': event.frameNumber,
               'direction': event.direction,
