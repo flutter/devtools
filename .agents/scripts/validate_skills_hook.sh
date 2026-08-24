@@ -16,7 +16,7 @@ if [[ "$TARGET_FILE" == *"SKILL.md"* ]] || [[ "$TARGET_FILE" == *".agents/skills
   echo "Running skills_lint..." >&2
   
   # Run the skills linter from tool/ directory
-  (cd tool && dart pub run skills_lint)
+  (cd tool && dart run skills_lint)
 fi
 
 # PostToolUse expects an empty JSON object on stdout
