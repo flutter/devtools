@@ -5,6 +5,7 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_tool/utils.dart';
 import 'package:path/path.dart' as path;
 
 class DevToolsRepo {
@@ -278,14 +279,16 @@ class FlutterSdk {
 
   final String sdkPath;
 
-  static String get flutterExecutableName =>
-      Platform.isWindows ? 'flutter.bat' : 'flutter';
+  /// The name of the 'flutter' shell script for the current platform.
+  static String get flutterExecutableName => shellScriptName('flutter');
 
+  /// The name of the 'dart' wrapper shell script in Flutter for the current
+  /// platform.
+  ///
   /// On windows, 'dart' is fine for running the .exe from the Dart SDK directly
   /// but the wrapper in the Flutter bin folder is a .bat and needs an explicit
   /// extension.
-  static String get dartWrapperExecutableName =>
-      Platform.isWindows ? 'dart.bat' : 'dart';
+  static String get dartWrapperExecutableName => shellScriptName('dart');
 
   String get flutterExePath => path.join(sdkPath, 'bin', flutterExecutableName);
 
