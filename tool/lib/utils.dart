@@ -31,6 +31,14 @@ abstract class DartSdkHelper {
   }
 }
 
+/// Returns the name of the shell script [name] for the current platform.
+///
+/// On Windows, shell scripts have `.bat` extensions and must be invoked
+/// using them.
+String shellScriptName(String name) {
+  return Platform.isWindows ? '$name.bat' : name;
+}
+
 String localDartSdkLocation() {
   final localDartSdkLocation = Platform.environment['LOCAL_DART_SDK'];
   if (localDartSdkLocation == null) {
@@ -86,7 +94,11 @@ class CliCommand {
     List<String> args, {
     bool throwOnException = true,
   }) {
-    return CliCommand('gclient', args, throwOnException: throwOnException);
+    return CliCommand(
+      shellScriptName('gclient'),
+      args,
+      throwOnException: throwOnException,
+    );
   }
 
   factory CliCommand.tool(List<String> args, {bool throwOnException = true}) {
