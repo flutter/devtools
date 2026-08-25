@@ -82,15 +82,24 @@ class AnalyticsTabbedView extends StatefulWidget {
     this.initialSelectedIndex,
     this.analyticsSessionIdentifier,
     this.staticSingleTab = false,
-  }) : trailingWidgets = List.generate(
-         tabs.length,
-         (index) => tabs[index].tab.trailing ?? const SizedBox(),
-       );
+    List<Widget> trailingWidgets = const [],
+  }) : trailingWidgets = [
+         ...List.generate(
+           tabs.length,
+           (index) => tabs[index].tab.trailing ?? const SizedBox(),
+         ),
+         ...trailingWidgets,
+       ];
 
   final List<TabAndView> tabs;
 
   final String gaScreen;
 
+  /// Trailing widgets shown on the right side of the tab bar.
+  ///
+  /// The first [tabs.length] entries are per-tab trailings from
+  /// [DevToolsTab.trailing]. Any additional widgets passed to the constructor
+  /// are shown for every tab.
   final List<Widget> trailingWidgets;
 
   final int? initialSelectedIndex;
@@ -212,7 +221,13 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
               tabController: _tabController,
               staticSingleTab: widget.staticSingleTab,
             ),
-            widget.trailingWidgets[_currentTabControllerIndex],
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                widget.trailingWidgets[_currentTabControllerIndex],
+                ...widget.trailingWidgets.skip(widget.tabs.length),
+              ],
+            ),
           ],
         ),
       ),

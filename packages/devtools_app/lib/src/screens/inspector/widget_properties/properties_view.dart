@@ -41,7 +41,10 @@ class _DetailsTableState extends State<DetailsTable> {
   RemoteDiagnosticsNode? get selectedNode =>
       widget.controller.selectedDiagnostic;
 
-  late final DevToolsTab _widgetPropertiesTab;
+  final _widgetPropertiesTab = DevToolsTab.create(
+    tabName: 'Widget properties',
+    gaPrefix: DetailsTable.gaPrefix,
+  );
 
   final _renderObjectTab = DevToolsTab.create(
     tabName: 'Render object',
@@ -58,11 +61,6 @@ class _DetailsTableState extends State<DetailsTable> {
   @override
   void initState() {
     super.initState();
-    _widgetPropertiesTab = DevToolsTab.create(
-      tabName: 'Widget properties',
-      gaPrefix: DetailsTable.gaPrefix,
-      trailing: WidgetCreationLocationTrailing(controller: widget.controller),
-    );
     _widgetPropertiesScrollController = ScrollController();
     _renderPropertiesScrollController = ScrollController();
   }
@@ -87,6 +85,9 @@ class _DetailsTableState extends State<DetailsTable> {
 
         return AnalyticsTabbedView(
           gaScreen: gac.inspector,
+          trailingWidgets: [
+            WidgetCreationLocationTrailing(controller: widget.controller),
+          ],
           onTabChanged: (int tabIndex) {
             _lastSelectedTab = _getTabForIndex(
               tabIndex,
