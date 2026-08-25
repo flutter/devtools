@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../app.dart';
+import '../../extensions/extension_screen.dart';
 import '../../extensions/extension_settings.dart';
 import '../../screens/debugger/debugger_screen.dart';
 import '../../shared/analytics/prompt.dart';
@@ -57,14 +58,32 @@ class DevToolsScaffold extends StatefulWidget {
          embedMode: embedMode,
        );
 
-  static List<Widget> defaultActions({Color? color}) => [
-    OpenSettingsAction(color: color),
-    if (FeatureFlags.devToolsExtensions.isEnabled &&
-        !DevToolsQueryParams.load().hideExtensions)
-      ExtensionSettingsAction(color: color),
-    ReportFeedbackButton(color: color),
-    OpenAboutAction(color: color),
-  ];
+  /// Returns the list of ScaffoldAction widgets.
+  static List<Widget> defaultActions({
+    Color? color,
+    Screen? currentScreen,
+    DevToolsQueryParams? queryParams,
+  }) {
+    queryParams ??= DevToolsQueryParams.load();
+    // Whether DevTools is embedded in an IDE displaying extension(s).
+    final isEmbeddedExtensionScreen =
+        isEmbedded() &&
+        (currentScreen is ExtensionScreen ||
+            queryParams.hideAllExceptExtensions);
+    // Show extension settings if extensions are enabled and not hidden, AND:
+    // - DevTools is running standalone in the browser (!isEmbedded), OR
+    // - DevTools is embedded in an IDE, but specifically showing an extension.
+    final showExtensionSettings =
+        FeatureFlags.devToolsExtensions.isEnabled &&
+        !queryParams.hideExtensions &&
+        (!isEmbedded() || isEmbeddedExtensionScreen);
+    return [
+      OpenSettingsAction(color: color),
+      if (showExtensionSettings) ExtensionSettingsAction(color: color),
+      ReportFeedbackButton(color: color),
+      OpenAboutAction(color: color),
+    ];
+  }
 
   /// The padding around the content in the DevTools UI.
   EdgeInsets get appPadding => EdgeInsets.fromLTRB(
