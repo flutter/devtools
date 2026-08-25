@@ -34,7 +34,7 @@ abstract class DartSdkHelper {
 /// Returns the name of the shell script [name] for the current platform.
 ///
 /// On Windows, shell scripts have `.bat` extensions and must be invoked
-/// using them them.
+/// using them.
 String shellScriptName(String name) {
   return Platform.isWindows ? '$name.bat' : name;
 }
