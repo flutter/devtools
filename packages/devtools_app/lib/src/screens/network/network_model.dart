@@ -280,7 +280,6 @@ class WebSocket extends NetworkRequest {
   }
 
   WebSocketConnection _connection;
-  WebSocketConnection get connection => _connection;
   List<WebSocketEvent> get events => _connection.events;
 
   String get connectionId => _connection.id;
