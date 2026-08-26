@@ -26,7 +26,7 @@ Use this skill to find old, outdated issues in the `flutter/devtools` repository
 
 3. **Draft and Review Closing Comments (CRITICAL MANDATE)**:
    - For issues identified as candidates for closing, draft a detailed comment for each explaining *why* it can be closed.
-   - **Style Constraint**: DO NOT use em dashes (-) in the comments. Use hyphens (-) or colons (:) instead.
+   - **Style Constraint**: DO NOT use em dashes (—) in the comments. Use hyphens (-) or colons (:) instead.
    - **Template**: Consult `references/rationale_templates.md` for wording inspiration.
    - Each comment MUST end with: "If there is more work to do here, please let us know by filing a new issue with up to date information. Thanks!"
    - **User Approval Required**: You MUST present the identified issues (including URLs to the issues for easy navigation) and their drafted comments to the user and obtain explicit approval BEFORE running any command that closes an issue.
