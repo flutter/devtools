@@ -61,11 +61,11 @@ String _debugExtensionPlaceholderHtml(String name) {
 
 /// The sandbox permissions granted to embedded extension iframes.
 ///
-/// Restricts the extension from accessing same-origin resources such as
-/// the parent window DOM, cookies, or local storage, while allowing
-/// javascript execution, forms, downloads, and popup windows.
+/// Grants the extension same-origin capabilities (needed for service workers,
+/// storage, etc.) while allowing javascript execution, forms, downloads, and
+/// popup windows.
 const _extensionSandboxRules =
-    'allow-scripts allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox';
+    'allow-scripts allow-same-origin allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox';
 
 class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     with AutoDisposeControllerMixin {
