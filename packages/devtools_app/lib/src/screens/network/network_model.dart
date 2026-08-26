@@ -4,6 +4,7 @@
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/primitives/utils.dart';
@@ -41,6 +42,7 @@ abstract class NetworkRequest
 
   String get id;
 
+  @visibleForTesting
   String get durationDisplay {
     final duration = this.duration;
     final text = duration != null
