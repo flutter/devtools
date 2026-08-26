@@ -136,6 +136,11 @@ abstract class ExtensionsApi {
   /// name of the extension whose state is being queried.
   static const extensionNamePropertyName = 'name';
 
+  /// The property name for the query parameter optionally passed along with
+  /// [apiExtensionEnabledState] requests to the server that describes the
+  /// package name providing the extension.
+  static const extensionPackagePropertyName = 'package';
+
   /// The property name for the query parameter that is optionally passed along
   /// with [apiExtensionEnabledState] requests to the server to set the
   /// enabled state for the extension.

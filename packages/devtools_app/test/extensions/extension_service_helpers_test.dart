@@ -101,4 +101,94 @@ void main() {
       expect(takeLatestExtension(a, b), a);
     });
   });
+
+  group('deduplicateExtensionsAndTakeLatest', () {
+    test('deduplicates matching packageName and name', () {
+      final ignored = <DevToolsExtensionConfig>{};
+      final ext1 = DevToolsExtensionConfig.parse({
+        DevToolsExtensionConfig.nameKey: 'provider',
+        DevToolsExtensionConfig.packageNameKey: 'provider',
+        DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+        DevToolsExtensionConfig.versionKey: '1.0.0',
+        DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+        DevToolsExtensionConfig.requiresConnectionKey: 'false',
+        DevToolsExtensionConfig.extensionAssetsPathKey: '/path/to/provider_1',
+        DevToolsExtensionConfig.devtoolsOptionsUriKey:
+            'file:///path/to/options',
+        DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+        DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+      });
+      final ext2 = DevToolsExtensionConfig.parse({
+        DevToolsExtensionConfig.nameKey: 'provider',
+        DevToolsExtensionConfig.packageNameKey: 'provider',
+        DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+        DevToolsExtensionConfig.versionKey: '2.0.0',
+        DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+        DevToolsExtensionConfig.requiresConnectionKey: 'false',
+        DevToolsExtensionConfig.extensionAssetsPathKey: '/path/to/provider_2',
+        DevToolsExtensionConfig.devtoolsOptionsUriKey:
+            'file:///path/to/options',
+        DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+        DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+      });
+
+      deduplicateExtensionsAndTakeLatest(
+        [ext1, ext2],
+        onSetIgnored: (ext, {required ignore}) {
+          if (ignore) {
+            ignored.add(ext);
+          } else {
+            ignored.remove(ext);
+          }
+        },
+      );
+
+      expect(ignored, contains(ext1));
+      expect(ignored, isNot(contains(ext2)));
+    });
+
+    test('does not deduplicate across different packageNames', () {
+      final ignored = <DevToolsExtensionConfig>{};
+      final providerExt = DevToolsExtensionConfig.parse({
+        DevToolsExtensionConfig.nameKey: 'provider',
+        DevToolsExtensionConfig.packageNameKey: 'provider',
+        DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+        DevToolsExtensionConfig.versionKey: '1.0.0',
+        DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+        DevToolsExtensionConfig.requiresConnectionKey: 'false',
+        DevToolsExtensionConfig.extensionAssetsPathKey: '/path/to/provider',
+        DevToolsExtensionConfig.devtoolsOptionsUriKey:
+            'file:///path/to/options',
+        DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+        DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+      });
+      final spoofedExt = DevToolsExtensionConfig.parse({
+        DevToolsExtensionConfig.nameKey: 'provider',
+        DevToolsExtensionConfig.packageNameKey: 'bad_pkg',
+        DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+        DevToolsExtensionConfig.versionKey: '999.0.0',
+        DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+        DevToolsExtensionConfig.requiresConnectionKey: 'false',
+        DevToolsExtensionConfig.extensionAssetsPathKey: '/path/to/bad_pkg',
+        DevToolsExtensionConfig.devtoolsOptionsUriKey:
+            'file:///path/to/options',
+        DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
+        DevToolsExtensionConfig.detectedFromStaticContextKey: 'true',
+      });
+
+      deduplicateExtensionsAndTakeLatest(
+        [providerExt, spoofedExt],
+        onSetIgnored: (ext, {required ignore}) {
+          if (ignore) {
+            ignored.add(ext);
+          } else {
+            ignored.remove(ext);
+          }
+        },
+      );
+
+      // Neither should be ignored because they come from different packages.
+      expect(ignored, isEmpty);
+    });
+  });
 }

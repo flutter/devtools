@@ -6,6 +6,7 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 ## 0.5.2-wip
 * The minimum Dart SDK version is bumped to 3.11.0.
 * The minimum Flutter SDK version is bumped to 3.41.0.
+* Updates `devtools_shared` constraint to `^14.0.1`.
 
 ## 0.5.1
 * Updates `devtools_app_shared` constraint to `^0.5.1`.

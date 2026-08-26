@@ -232,7 +232,9 @@ class ExtensionService extends DisposableController
       // not always be true for extensions that are not published on pub or
       // extensions that do not follow best practices for naming.
       final isRuntimeDuplicate = runtimeExtensions.any(
-        (ext) => ext.name == staticExtension.name,
+        (ext) =>
+            ext.packageName == staticExtension.packageName &&
+            ext.name == staticExtension.name,
       );
       if (isRuntimeDuplicate) {
         _log.fine(
@@ -256,6 +258,7 @@ class ExtensionService extends DisposableController
       final stateFromOptionsFile = await server.extensionEnabledState(
         devtoolsOptionsFileUri: extension.devtoolsOptionsUri,
         extensionName: extension.name,
+        extensionPackage: extension.packageName,
       );
       final stateNotifier = _extensionEnabledStates.putIfAbsent(
         extension.name,
@@ -292,15 +295,18 @@ class ExtensionService extends DisposableController
     // Set the enabled state for all matching extensions, even if some are
     // marked as ignored due to being a duplicate. This ensures that
     // devtools_options.yaml files are kept in sync across the project.
-    final allMatchingExtensions = [
-      ...runtimeExtensions,
-      ...staticExtensions,
-    ].where((e) => e.name == extension.name);
+    final allMatchingExtensions = [...runtimeExtensions, ...staticExtensions]
+        .where(
+          (e) =>
+              e.packageName == extension.packageName &&
+              e.name == extension.name,
+        );
     await [
       for (final ext in allMatchingExtensions)
         server.extensionEnabledState(
           devtoolsOptionsFileUri: ext.devtoolsOptionsUri,
           extensionName: ext.name,
+          extensionPackage: ext.packageName,
           enable: enable,
         ),
     ].wait;
