@@ -53,6 +53,9 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
+* Added WebSocket support to the Network profiler, including WebSocket
+  connection details, lifecycle events, frame-level inspection, and connection
+  timing information. [#9968](https://github.com/flutter/devtools/pull/9968)
 * Fixed an issue where the Network tab would stop capturing HTTP requests after
   a hot restart. -
   [#9856](https://github.com/flutter/devtools/pull/9856)

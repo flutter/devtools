@@ -16,6 +16,7 @@ class OfflineNetworkData with Serializable {
   OfflineNetworkData({
     required this.httpRequestData,
     required this.socketData,
+    required this.webSocketData,
     this.selectedRequestId,
     required this.timelineMicrosOffset,
   });
@@ -62,12 +63,24 @@ class OfflineNetworkData with Serializable {
       selectedRequestId:
           json[_OfflineDataKeys.selectedRequestId.name] as String?,
       socketData: socketData,
+      webSocketData:
+          (json[_OfflineDataKeys.webSocketData.name] as List<Object?>?)
+              ?.map((e) {
+                if (e is Map<String, Object?>) {
+                  return WebSocket.fromJson(e);
+                }
+                return null;
+              })
+              .whereType<WebSocket>()
+              .toList() ??
+          [],
       timelineMicrosOffset: timelineMicrosOffset as int? ?? 0,
     );
   }
 
   @visibleForTesting
-  bool get isEmpty => httpRequestData.isEmpty && socketData.isEmpty;
+  bool get isEmpty =>
+      httpRequestData.isEmpty && socketData.isEmpty && webSocketData.isEmpty;
 
   /// List of current [DartIOHttpRequestData] network requests.
   final List<DartIOHttpRequestData> httpRequestData;
@@ -81,6 +94,9 @@ class OfflineNetworkData with Serializable {
   /// The list of socket statistics for the offline network data.
   final List<Socket> socketData;
 
+  /// The list of WebSocket connections for the offline network data.
+  final List<WebSocket> webSocketData;
+
   /// Converts the current offline data to a JSON format.
   @override
   Map<String, Object?> toJson() {
@@ -92,6 +108,9 @@ class OfflineNetworkData with Serializable {
       _OfflineDataKeys.socketData.name: socketData
           .map((e) => e.toJson())
           .toList(),
+      _OfflineDataKeys.webSocketData.name: webSocketData
+          .map((e) => e.toJson())
+          .toList(),
       _OfflineDataKeys.timelineMicrosOffset.name: timelineMicrosOffset,
     };
   }
@@ -101,6 +120,7 @@ enum _OfflineDataKeys {
   httpRequestData,
   selectedRequestId,
   socketData,
+  webSocketData,
   request,
   timelineMicrosOffset,
 }

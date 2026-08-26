@@ -9,6 +9,8 @@ import 'package:vm_service/vm_service.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
+export 'package:vm_service/vm_service.dart' show WebSocketEvent;
+
 abstract class NetworkRequest
     with ChangeNotifier, SearchableDataMixin, Serializable {
   String get method;
@@ -237,5 +239,155 @@ enum SocketJsonKey {
 extension SocketExtension on List<Socket> {
   List<SocketStatistic> get mapToSocketStatistics {
     return map((socket) => socket._socket).toList();
+  }
+}
+
+class WebSocket extends NetworkRequest {
+  WebSocket(this._connection);
+
+  factory WebSocket.fromJson(Map<String, Object?> json) {
+    return WebSocket(
+      WebSocketConnection(
+        isolateId: json['isolateId'] as String,
+        id: json['connectionId'] as String,
+        uri: Uri.parse(json['uri'] as String),
+        protocol: json['protocol'] as String?,
+        state: json['state'] as String,
+        connectTimestamp: DateTime.parse(json['connectTimestamp'] as String),
+        openTimestamp: json['openTimestamp'] != null
+            ? DateTime.parse(json['openTimestamp'] as String)
+            : null,
+        closeTimestamp: json['closeTimestamp'] != null
+            ? DateTime.parse(json['closeTimestamp'] as String)
+            : null,
+        bytesSent: json['bytesSent'] as int,
+        bytesReceived: json['bytesReceived'] as int,
+        framesSent: json['framesSent'] as int,
+        framesReceived: json['framesReceived'] as int,
+        pingCount: json['pingCount'] as int,
+        pongCount: json['pongCount'] as int,
+        closeCode: json['closeCode'] as int?,
+        closeReason: json['closeReason'] as String?,
+        error: json['error'] as String?,
+        lastUpdated: DateTime.parse(json['lastUpdated'] as String),
+        events: (json['events'] as List<Object?>? ?? [])
+            .whereType<Map<String, Object?>>()
+            .map(WebSocketEvent.parse)
+            .whereType<WebSocketEvent>()
+            .toList(),
+      ),
+    );
+  }
+
+  WebSocketConnection _connection;
+  List<WebSocketEvent> get events => _connection.events;
+
+  String get connectionId => _connection.id;
+  String? get protocol => _connection.protocol;
+  String get state => _connection.state;
+
+  DateTime get lastUpdated => _connection.lastUpdated;
+
+  int get bytesSent => _connection.bytesSent;
+  int get bytesReceived => _connection.bytesReceived;
+  int get framesSent => _connection.framesSent;
+  int get framesReceived => _connection.framesReceived;
+  int get pingCount => _connection.pingCount;
+  int get pongCount => _connection.pongCount;
+  int? get closeCode => _connection.closeCode;
+  String? get closeReason => _connection.closeReason;
+  String? get error => _connection.error;
+
+  void update(WebSocket other) {
+    _connection = other._connection;
+    notifyListeners();
+  }
+
+  @override
+  String get id => 'websocket:${_connection.isolateId}:${_connection.id}';
+
+  @override
+  String get method => 'WEBSOCKET';
+
+  @override
+  String get uri => _connection.uri.toString();
+
+  @override
+  String? get contentType => 'websocket';
+
+  @override
+  String get type => 'WebSocket';
+
+  @override
+  Duration? get duration =>
+      _connection.closeTimestamp?.difference(_connection.connectTimestamp);
+
+  @override
+  DateTime get startTimestamp => _connection.connectTimestamp;
+
+  @override
+  DateTime? get endTimestamp => _connection.closeTimestamp;
+
+  @override
+  String get status => _connection.state;
+
+  @override
+  int? get port => _connection.uri.hasPort ? _connection.uri.port : null;
+
+  @override
+  int get requestBytes => _connection.bytesSent;
+
+  @override
+  int get responseBytes => _connection.bytesReceived;
+
+  @override
+  bool get didFail => _connection.state == 'error';
+
+  @override
+  bool get inProgress =>
+      _connection.state != 'closed' && _connection.state != 'error';
+
+  @override
+  bool operator ==(Object other) => other is WebSocket && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  Map<String, Object?> toJson() {
+    return {
+      'isolateId': _connection.isolateId,
+      'connectionId': connectionId,
+      'uri': uri,
+      'protocol': protocol,
+      'state': state,
+      'connectTimestamp': startTimestamp.toIso8601String(),
+      'openTimestamp': _connection.openTimestamp?.toIso8601String(),
+      'closeTimestamp': endTimestamp?.toIso8601String(),
+      'bytesSent': bytesSent,
+      'bytesReceived': bytesReceived,
+      'framesSent': framesSent,
+      'framesReceived': framesReceived,
+      'pingCount': pingCount,
+      'pongCount': pongCount,
+      'closeCode': closeCode,
+      'closeReason': closeReason,
+      'error': error,
+      'lastUpdated': lastUpdated.toIso8601String(),
+      'events': events
+          .map(
+            (event) => {
+              'timestamp': event.timestamp.microsecondsSinceEpoch,
+              'event': event.event,
+              'frameNumber': event.frameNumber,
+              'direction': event.direction,
+              'opcode': event.opcode,
+              'payloadSize': event.payloadSize,
+              'errorType': event.errorType,
+              'errorMessage': event.errorMessage,
+            },
+          )
+          .toList(),
+    };
   }
 }

@@ -18,6 +18,7 @@ class NetworkRequestInspector extends StatelessWidget {
   const NetworkRequestInspector({super.key});
 
   static const _overviewTabTitle = 'Overview';
+  static const _framesTabTitle = 'Frames';
   static const _headersTabTitle = 'Headers';
   static const _requestTabTitle = 'Request';
   static const _responseTabTitle = 'Response';
@@ -68,6 +69,11 @@ class NetworkRequestInspector extends StatelessWidget {
         tab: _buildTab(tabName: NetworkRequestInspector._overviewTabTitle),
         tabView: NetworkRequestOverviewView(data),
       ),
+      if (data is WebSocket)
+        (
+          tab: _buildTab(tabName: NetworkRequestInspector._framesTabTitle),
+          tabView: WebSocketFramesView(data),
+        ),
       if (data is DartIOHttpRequestData) ...[
         (
           tab: _buildTab(tabName: NetworkRequestInspector._headersTabTitle),
