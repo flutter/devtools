@@ -452,10 +452,10 @@ void main() {
 
 class _RecordingServiceConnectionManager extends FakeServiceConnectionManager {
   @override
-  late final FakeServiceManager serviceManager = _RecordingServiceManager();
+  late final serviceManager = _RecordingServiceManager();
 }
 
-// ignore: subtype_of_sealed_class
+// ignore: subtype_of_sealed_class, fake for testing.
 class _RecordingServiceManager extends FakeServiceManager {
   final recordedCalls = <(String, Map<String, dynamic>?)>[];
 
@@ -472,13 +472,13 @@ class _RecordingServiceManager extends FakeServiceManager {
 class _NullIsolateServiceConnectionManager
     extends FakeServiceConnectionManager {
   @override
-  late final FakeServiceManager serviceManager = _NullIsolateServiceManager();
+  late final serviceManager = _NullIsolateServiceManager();
 }
 
-// ignore: subtype_of_sealed_class
+// ignore: subtype_of_sealed_class, fake for testing.
 class _NullIsolateServiceManager extends FakeServiceManager {
   @override
-  late final FakeIsolateManager isolateManager = _NullIsolateManager();
+  late final isolateManager = _NullIsolateManager();
 }
 
 base class _NullIsolateManager extends FakeIsolateManager {
