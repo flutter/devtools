@@ -41,33 +41,49 @@ class SemanticsNodeModel extends TreeNode<SemanticsNodeModel> {
   final String label;
 
   /// The current value of this node (e.g. the text in a text field) (maps to [SemanticsData.value]).
+  // TODO(hangyujin): Display in node details UI.
+  // ignore: unused-code, will be displayed when node details UI is added.
   final String value;
 
   /// Additional hint text spoken after a delay (maps to [SemanticsData.hint]).
+  // TODO(hangyujin): Display in node details UI.
+  // ignore: unused-code, will be displayed when node details UI is added.
   final String hint;
 
   /// A brief description of the widget the semantics node represents (maps to [SemanticsData.tooltip]).
+  // TODO(hangyujin): Display in node details UI.
+  // ignore: unused-code, will be displayed when node details UI is added.
   final String tooltip;
 
   /// The value that the node will take if the user increases it (maps to [SemanticsData.increasedValue]).
+  // TODO(hangyujin): Display in node details UI.
+  // ignore: unused-code, will be displayed when node details UI is added.
   final String increasedValue;
 
   /// The value that the node will take if the user decreases it (maps to [SemanticsData.decreasedValue]).
+  // TODO(hangyujin): Display in node details UI.
+  // ignore: unused-code, will be displayed when node details UI is added.
   final String decreasedValue;
 
   /// Semantic flags active on this node (e.g. `'isButton'`, `'isHeader'`).
   final List<String> flags;
 
   /// Semantic actions that can be performed on this node (e.g. `'tap'`, `'scrollLeft'`).
+  // TODO(hangyujin): Display in node details UI.
+  // ignore: unused-code, will be displayed when node details UI is added.
   final List<String> actions;
 
   /// The name of the Flutter widget that produced this node, if available.
   final String widgetName;
 
   /// Human-readable representation of this node's bounding rect (maps to [SemanticsData.rect]).
+  // TODO(hangyujin): Display in node details UI.
+  // ignore: unused-code, will be displayed when node details UI is added.
   final String rectString;
 
   /// The transformation matrix to apply to this node's coordinate system (maps to [SemanticsData.transform]).
+  // TODO(hangyujin): Display in node details UI.
+  // ignore: unused-code, will be displayed when node details UI is added.
   final List<double>? transform;
 
   @override
