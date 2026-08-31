@@ -19,7 +19,7 @@ Use this skill to find old, outdated issues in the `flutter/devtools` repository
 
 2. **Investigate Status**:
    - For each candidate, analyze its description and comments.
-   - **Pro Tip**: Use the bundled script `scripts/fetch_issue_details.sh <number>` to get a comprehensive view of the issue and its comments.
+   - **Pro Tip**: Use the bundled script `dart scripts/fetch_issues.dart <numbers...>` or `dart scripts/fetch_issues.dart --page <number>` to get a comprehensive view of issues and their comments.
    - Compare the issue's request or reported bug with the current state of the codebase.
    - Refer to `references/rationale_templates.md` for a library of common reasons issues become outdated in DevTools.
    - **Safety Rule**: Do not assume a bug is fixed or obsolete just because the screen has been updated or the file modified. Verify if the specific bug behavior is still possible. Valid bugs or feature requests should not be closed as stale just because they are old or have no activity. Inactivity alone does not invalidate a feature request or bug report.
@@ -43,7 +43,7 @@ Use this skill to find old, outdated issues in the `flutter/devtools` repository
 - Use available file and content search tools (such as `grep`, `ripgrep`, or environment-specific
 search tools) to check the current codebase for references to the issue or relevant code.
 - Look for related PRs that might have fixed the issue but didn't close it automatically.
-- **Pro Tip**: Use the bundled script `scripts/search_prs.sh <query>` to search for PRs in the repository.
+- **Pro Tip**: Use the bundled script `dart scripts/search_prs.dart <query>` to search for PRs in the repository.
 - For issues reporting specific versions, check the current DevTools version in `packages/devtools_app/pubspec.yaml`
 to determine if the reported version is very old. If the reported version is 1 or more major versions behind or 12 or more
 minor versions behind the current version, this issue is a good candidate for being obsolete.
