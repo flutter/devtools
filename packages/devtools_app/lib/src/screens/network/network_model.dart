@@ -41,6 +41,7 @@ abstract class NetworkRequest
 
   String get id;
 
+  @visibleForTesting
   String get durationDisplay {
     final duration = this.duration;
     final text = duration != null
