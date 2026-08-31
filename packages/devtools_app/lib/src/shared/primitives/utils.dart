@@ -545,7 +545,11 @@ class DebugTimingLogger {
   }
 }
 
-List<TextSpan> textSpansFromAnsi(String input, TextStyle defaultStyle) {
+List<TextSpan> textSpansFromAnsi(
+  String input,
+  TextStyle defaultStyle, {
+  required Brightness brightness,
+}) {
   final parser = AnsiParser(input);
   return parser.parse().map((entry) {
     final styled = entry.bold || entry.fgColor != null || entry.bgColor != null;
@@ -553,8 +557,8 @@ List<TextSpan> textSpansFromAnsi(String input, TextStyle defaultStyle) {
       text: entry.text,
       style: styled
           ? TextStyle(
-              color: ansiToColor(entry.fgColor),
-              backgroundColor: ansiToColor(entry.bgColor),
+              color: ansiToColor(entry.fgColor, brightness: brightness),
+              backgroundColor: ansiToColor(entry.bgColor, brightness: brightness),
               fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
             )
           : defaultStyle,
@@ -562,13 +566,27 @@ List<TextSpan> textSpansFromAnsi(String input, TextStyle defaultStyle) {
   }).toList();
 }
 
-Color? ansiToColor(List<int>? ansiInput) {
+Color? ansiToColor(List<int>? ansiInput, {required Brightness brightness}) {
   if (ansiInput == null) {
     return null;
   }
 
   assert(ansiInput.length == 3, 'Ansi color list should contain 3 elements');
-  return Color.fromRGBO(ansiInput[0], ansiInput[1], ansiInput[2], 1);
+  final color = Color.fromRGBO(ansiInput[0], ansiInput[1], ansiInput[2], 1);
+  return _ansiColorVisibleOnBackground(color, brightness);
+}
+
+/// Adjusts ANSI colors that would be unreadable against the DevTools background.
+Color _ansiColorVisibleOnBackground(Color color, Brightness brightness) {
+  final hsl = HSLColor.fromColor(color);
+  if (brightness == Brightness.dark) {
+    if (hsl.lightness < 0.2) {
+      return hsl.withLightness(0.65).toColor();
+    }
+  } else if (hsl.lightness > 0.85) {
+    return hsl.withLightness(0.25).toColor();
+  }
+  return color;
 }
 
 /// An extension on [LogicalKeySet] to provide user-facing names for key
