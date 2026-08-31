@@ -36,10 +36,10 @@ class SemanticsNodeModel extends TreeNode<SemanticsNodeModel> {
   };
 
   /// Parses a list of flag name strings into a set of [SemanticsFlag]s.
-  static Set<SemanticsFlag> parseFlags(List<dynamic>? rawFlags) {
+  static Set<SemanticsFlag> parseFlags(List<Object?>? rawFlags) {
     if (rawFlags == null) return const <SemanticsFlag>{};
     return rawFlags
-        .map((e) => _flagByName[e.toString()])
+        .map((e) => _flagByName[e?.toString()])
         .whereType<SemanticsFlag>()
         .toSet();
   }

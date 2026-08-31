@@ -249,7 +249,7 @@ class AccessibilityController extends DevToolsScreenController
   }
 
   SemanticsNodeModel _parseSemanticsNode(Map<String, dynamic> json) {
-    final rawFlags = json['flags'] as List?;
+    final rawFlags = json['flags'] as List<Object?>?;
     final flags = SemanticsNodeModel.parseFlags(rawFlags);
 
     return SemanticsNodeModel(
