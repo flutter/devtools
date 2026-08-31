@@ -2,108 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
-/// @docImport 'package:flutter/semantics.dart';
-library;
-
 import 'dart:async';
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../../service/service_extensions.dart' as extensions;
+import '../../service/service_registrations.dart' as registrations;
 import '../../shared/framework/screen.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/trees.dart';
+import 'semantics_node_model.dart';
 
-/// Represents a node in the semantics tree.
-class SemanticsNodeModel extends TreeNode<SemanticsNodeModel> {
-  SemanticsNodeModel({
-    required this.id,
-    this.label = '',
-    this.value = '',
-    this.hint = '',
-    this.tooltip = '',
-    this.increasedValue = '',
-    this.decreasedValue = '',
-    this.flags = const [],
-    this.actions = const [],
-    this.widgetName = '',
-    this.rectString = '',
-    this.transform,
-  });
+export 'semantics_node_model.dart';
 
-  /// The semantics node identifier, as provided by the Flutter framework.
-  final String id;
-
-  /// The user-visible label announced by screen readers (maps to [SemanticsData.label]).
-  final String label;
-
-  /// The current value of this node (e.g. the text in a text field) (maps to [SemanticsData.value]).
-  // TODO(hangyujin): Display in node details UI.
-  // ignore: unused-code, will be displayed when node details UI is added.
-  final String value;
-
-  /// Additional hint text spoken after a delay (maps to [SemanticsData.hint]).
-  // TODO(hangyujin): Display in node details UI.
-  // ignore: unused-code, will be displayed when node details UI is added.
-  final String hint;
-
-  /// A brief description of the widget the semantics node represents (maps to [SemanticsData.tooltip]).
-  // TODO(hangyujin): Display in node details UI.
-  // ignore: unused-code, will be displayed when node details UI is added.
-  final String tooltip;
-
-  /// The value that the node will take if the user increases it (maps to [SemanticsData.increasedValue]).
-  // TODO(hangyujin): Display in node details UI.
-  // ignore: unused-code, will be displayed when node details UI is added.
-  final String increasedValue;
-
-  /// The value that the node will take if the user decreases it (maps to [SemanticsData.decreasedValue]).
-  // TODO(hangyujin): Display in node details UI.
-  // ignore: unused-code, will be displayed when node details UI is added.
-  final String decreasedValue;
-
-  /// Semantic flags active on this node (e.g. `'isButton'`, `'isHeader'`).
-  final List<String> flags;
-
-  /// Semantic actions that can be performed on this node (e.g. `'tap'`, `'scrollLeft'`).
-  // TODO(hangyujin): Display in node details UI.
-  // ignore: unused-code, will be displayed when node details UI is added.
-  final List<String> actions;
-
-  /// The name of the Flutter widget that produced this node, if available.
-  final String widgetName;
-
-  /// Human-readable representation of this node's bounding rect (maps to [SemanticsData.rect]).
-  // TODO(hangyujin): Display in node details UI.
-  // ignore: unused-code, will be displayed when node details UI is added.
-  final String rectString;
-
-  /// The transformation matrix to apply to this node's coordinate system (maps to [SemanticsData.transform]).
-  // TODO(hangyujin): Display in node details UI.
-  // ignore: unused-code, will be displayed when node details UI is added.
-  final List<double>? transform;
-
-  @override
-  SemanticsNodeModel shallowCopy() {
-    return SemanticsNodeModel(
-      id: id,
-      label: label,
-      value: value,
-      hint: hint,
-      tooltip: tooltip,
-      increasedValue: increasedValue,
-      decreasedValue: decreasedValue,
-      flags: flags,
-      actions: actions,
-      widgetName: widgetName,
-      rectString: rectString,
-      transform: transform,
-    );
-  }
-}
+final _log = Logger('accessibility_controller');
 
 /// Modes for brightness override in the accessibility controls.
 enum BrightnessOverride {
@@ -250,19 +165,15 @@ class AccessibilityController extends DevToolsScreenController
 
     semanticsTreeLoading.value = true;
     semanticsTreeError.value = null;
-    // Intentionally do NOT clear semanticsRoots here so that the old tree
-    // remains visible while a refresh is in flight.
 
     try {
       await serviceConnection.serviceManager.callServiceExtensionOnMainIsolate(
-        'ext.flutter.accessibility.enableSemantics',
+        registrations.enableSemantics,
         args: {'enabled': 'true'},
       );
 
       final response = await serviceConnection.serviceManager
-          .callServiceExtensionOnMainIsolate(
-            'ext.flutter.accessibility.getSemanticsTree',
-          );
+          .callServiceExtensionOnMainIsolate(registrations.getSemanticsTree);
 
       final json = response.json;
       if (json != null && json.containsKey('error')) {
@@ -296,8 +207,7 @@ class AccessibilityController extends DevToolsScreenController
       semanticsRoots.value = roots;
       semanticsTreeError.value = null;
     } catch (e, st) {
-      debugPrint('Error loading semantics tree: $e');
-      debugPrint('$st');
+      _log.warning('Error loading semantics tree: $e', e, st);
       semanticsRoots.value = [];
       semanticsTreeError.value = 'Failed to load semantics tree: $e';
     } finally {
@@ -339,30 +249,14 @@ class AccessibilityController extends DevToolsScreenController
   }
 
   SemanticsNodeModel _parseSemanticsNode(Map<String, dynamic> json) {
-    final rect = json['rect'] as Map<String, dynamic>?;
-    final rectString = rect != null
-        ? 'rect: Rect.fromLTWH(${rect['left']}, ${rect['top']}, ${rect['width']}, ${rect['height']})'
-        : 'Rect.zero';
-
-    final flags = (json['flags'] as List?)?.cast<String>() ?? const [];
-    final actions = (json['actions'] as List?)?.cast<String>() ?? const [];
-    final transform = (json['transform'] as List?)
-        ?.map((e) => (e as num).toDouble())
-        .toList();
+    final rawFlags = json['flags'] as List?;
+    final flags = SemanticsNodeModel.parseFlags(rawFlags);
 
     return SemanticsNodeModel(
       id: json['id']?.toString() ?? '',
       label: json['label']?.toString() ?? '',
-      value: json['value']?.toString() ?? '',
-      hint: json['hint']?.toString() ?? '',
-      tooltip: json['tooltip']?.toString() ?? '',
-      increasedValue: json['increasedValue']?.toString() ?? '',
-      decreasedValue: json['decreasedValue']?.toString() ?? '',
       flags: flags,
-      actions: actions,
       widgetName: json['widgetName']?.toString() ?? '',
-      rectString: rectString,
-      transform: transform,
     );
   }
 
@@ -384,9 +278,7 @@ class AccessibilityController extends DevToolsScreenController
     try {
       if (serviceConnection.serviceManager.connectedState.value.connected) {
         await serviceConnection.serviceManager
-            .callServiceExtensionOnMainIsolate(
-              'ext.flutter.accessibility.disposeSemantics',
-            );
+            .callServiceExtensionOnMainIsolate(registrations.disposeSemantics);
       }
     } catch (_) {
       // Ignore errors if the app or isolate connection is already closed.

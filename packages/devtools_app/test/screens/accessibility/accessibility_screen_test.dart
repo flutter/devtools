@@ -5,6 +5,8 @@
 @TestOn('vm')
 library;
 
+import 'dart:ui' show SemanticsFlag;
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -189,9 +191,8 @@ void main() {
         final rootNode = SemanticsNodeModel(
           id: '0',
           label: 'Root Node',
-          flags: ['isHeader'],
+          flags: {SemanticsFlag.isHeader},
           widgetName: 'HeaderWidget',
-          rectString: 'rect: Rect.fromLTWH(0, 0, 100, 50)',
         );
         controller.semanticsRoots.value = [rootNode];
 
@@ -229,7 +230,7 @@ void main() {
         final childNode = SemanticsNodeModel(
           id: '1',
           label: 'Child Node',
-          flags: ['isButton'],
+          flags: {SemanticsFlag.isButton},
           widgetName: 'ElevatedButton',
         );
         final rootNode = SemanticsNodeModel(
@@ -295,7 +296,7 @@ void main() {
         final node = SemanticsNodeModel(
           id: '0',
           label: 'Checkbox Node',
-          flags: ['hasCheckedState'],
+          flags: {SemanticsFlag.hasCheckedState},
         );
         controller.semanticsRoots.value = [node];
 

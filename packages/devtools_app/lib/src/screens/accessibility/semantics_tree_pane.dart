@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:ui' show SemanticsFlag;
+
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
@@ -141,11 +143,21 @@ class _SemanticsTreeContent extends StatelessWidget {
   final AccessibilityController controller;
 
   static IconData _iconForNode(SemanticsNodeModel node) {
-    if (node.flags.contains('isButton')) return Icons.smart_button_rounded;
-    if (node.flags.contains('isTextField')) return Icons.text_fields_rounded;
-    if (node.flags.contains('isHeader')) return Icons.title_rounded;
-    if (node.flags.contains('isSlider')) return Icons.linear_scale_rounded;
-    if (node.flags.contains('hasCheckedState')) return Icons.check_box_outlined;
+    if (node.flags.contains(SemanticsFlag.isButton)) {
+      return Icons.smart_button_rounded;
+    }
+    if (node.flags.contains(SemanticsFlag.isTextField)) {
+      return Icons.text_fields_rounded;
+    }
+    if (node.flags.contains(SemanticsFlag.isHeader)) {
+      return Icons.title_rounded;
+    }
+    if (node.flags.contains(SemanticsFlag.isSlider)) {
+      return Icons.linear_scale_rounded;
+    }
+    if (node.flags.contains(SemanticsFlag.hasCheckedState)) {
+      return Icons.check_box_outlined;
+    }
     return Icons.widgets_outlined;
   }
 
@@ -205,7 +217,7 @@ class _SemanticsTreeContent extends StatelessWidget {
                       maxLines: 1,
                       style: theme.subtleTextStyle.copyWith(
                         color: colorScheme.primary,
-                        fontSize: 10,
+                        fontSize: smallFontSize,
                       ),
                     ),
                   ),

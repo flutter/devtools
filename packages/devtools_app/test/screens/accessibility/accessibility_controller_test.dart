@@ -5,7 +5,11 @@
 @TestOn('vm')
 library;
 
+import 'dart:ui' show SemanticsFlag;
+
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/service/service_registrations.dart'
+    as registrations;
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
@@ -28,11 +32,11 @@ void main() {
 
       fakeServiceConnection
               .serviceManager
-              .serviceExtensionResponses['ext.flutter.accessibility.enableSemantics'] =
+              .serviceExtensionResponses[registrations.enableSemantics] =
           Response.parse({})!;
       fakeServiceConnection
               .serviceManager
-              .serviceExtensionResponses['ext.flutter.accessibility.getSemanticsTree'] =
+              .serviceExtensionResponses[registrations.getSemanticsTree] =
           Response.parse({
             'data': {
               '0': {'id': '0', 'label': 'Root'},
@@ -144,40 +148,14 @@ void main() {
       final child = SemanticsNodeModel(
         id: '1',
         label: 'Child Node',
-        value: '10',
-        hint: 'Double tap to activate',
-        tooltip: 'Child Tooltip',
-        increasedValue: '11',
-        decreasedValue: '9',
-        flags: ['isButton', 'hasCheckedState'],
-        actions: ['tap', 'increase'],
+        flags: {SemanticsFlag.isButton, SemanticsFlag.hasCheckedState},
         widgetName: 'ElevatedButton',
-        rectString: 'rect: Rect.fromLTWH(0, 0, 50, 20)',
-        transform: [
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-          0.0,
-          0.0,
-          0.0,
-          0.0,
-          1.0,
-        ],
       );
       final parent = SemanticsNodeModel(
         id: '0',
         label: 'Parent Node',
-        flags: ['isHeader'],
+        flags: {SemanticsFlag.isHeader},
         widgetName: 'Column',
-        rectString: 'rect: Rect.fromLTWH(0, 0, 100, 100)',
       )..addChild(child);
 
       expect(parent.children, hasLength(1));
@@ -186,16 +164,11 @@ void main() {
       final copy = child.shallowCopy();
       expect(copy.id, equals('1'));
       expect(copy.label, equals('Child Node'));
-      expect(copy.value, equals('10'));
-      expect(copy.hint, equals('Double tap to activate'));
-      expect(copy.tooltip, equals('Child Tooltip'));
-      expect(copy.increasedValue, equals('11'));
-      expect(copy.decreasedValue, equals('9'));
-      expect(copy.flags, equals(['isButton', 'hasCheckedState']));
-      expect(copy.actions, equals(['tap', 'increase']));
+      expect(
+        copy.flags,
+        equals({SemanticsFlag.isButton, SemanticsFlag.hasCheckedState}),
+      );
       expect(copy.widgetName, equals('ElevatedButton'));
-      expect(copy.rectString, equals('rect: Rect.fromLTWH(0, 0, 50, 20)'));
-      expect(copy.transform, hasLength(16));
       expect(copy.children, isEmpty);
     });
 
@@ -222,12 +195,14 @@ void main() {
       () async {
         final fakeServiceManager =
             serviceConnection.serviceManager as FakeServiceManager;
-        fakeServiceManager
-                .serviceExtensionResponses['ext.flutter.accessibility.enableSemantics'] =
-            Response.parse({})!;
-        fakeServiceManager
-                .serviceExtensionResponses['ext.flutter.accessibility.getSemanticsTree'] =
-            Response.parse({'error': 'Semantics not enabled.'})!;
+        fakeServiceManager.serviceExtensionResponses[registrations
+            .enableSemantics] = Response.parse(
+          {},
+        )!;
+        fakeServiceManager.serviceExtensionResponses[registrations
+            .getSemanticsTree] = Response.parse({
+          'error': 'Semantics not enabled.',
+        })!;
 
         final testController = AccessibilityController();
         await testController.loadSemanticsTree();
@@ -247,94 +222,94 @@ void main() {
       () async {
         final fakeServiceManager =
             serviceConnection.serviceManager as FakeServiceManager;
-        fakeServiceManager
-                .serviceExtensionResponses['ext.flutter.accessibility.enableSemantics'] =
-            Response.parse({})!;
-        fakeServiceManager
-                .serviceExtensionResponses['ext.flutter.accessibility.getSemanticsTree'] =
-            Response.parse({
-              'data': {
-                '0': {
-                  'id': 0,
-                  'label': 'Root View',
-                  'value': 'Main Screen',
-                  'hint': '',
-                  'tooltip': '',
-                  'increasedValue': '',
-                  'decreasedValue': '',
-                  'flags': ['hasEnabledState', 'isEnabled'],
-                  'actions': [],
-                  'rect': {
-                    'left': 0.0,
-                    'top': 0.0,
-                    'width': 390.0,
-                    'height': 844.0,
-                  },
-                  'transform': [
-                    1.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    0.0,
-                    1.0,
-                  ],
-                  'childrenInTraversalOrder': [1, 2],
-                  'childrenInHitTestOrder': [2, 1],
-                },
-                '1': {
-                  'id': 1,
-                  'label': 'Settings Header',
-                  'flags': ['isHeader'],
-                  'actions': [],
-                  'rect': {
-                    'left': 16.0,
-                    'top': 40.0,
-                    'width': 358.0,
-                    'height': 32.0,
-                  },
-                },
-                '2': {
-                  'id': 2,
-                  'label': 'Search Input',
-                  'value': 'Flutter',
-                  'hint': 'Enter search query',
-                  'tooltip': 'Search field',
-                  'flags': ['isTextField'],
-                  'actions': ['tap', 'setSelection'],
-                  'rect': {
-                    'left': 16.0,
-                    'top': 88.0,
-                    'width': 358.0,
-                    'height': 48.0,
-                  },
-                  'childrenInTraversalOrder': [3],
-                  'childrenInHitTestOrder': [3],
-                },
-                '3': {
-                  'id': 3,
-                  'label': 'Clear Text',
-                  'tooltip': 'Clear input content',
-                  'flags': ['isButton', 'hasCheckedState'],
-                  'actions': ['tap'],
-                  'rect': {
-                    'left': 330.0,
-                    'top': 96.0,
-                    'width': 32.0,
-                    'height': 32.0,
-                  },
-                },
+        fakeServiceManager.serviceExtensionResponses[registrations
+            .enableSemantics] = Response.parse(
+          {},
+        )!;
+        fakeServiceManager.serviceExtensionResponses[registrations
+            .getSemanticsTree] = Response.parse({
+          'data': {
+            '0': {
+              'id': 0,
+              'label': 'Root View',
+              'value': 'Main Screen',
+              'hint': '',
+              'tooltip': '',
+              'increasedValue': '',
+              'decreasedValue': '',
+              'flags': ['hasEnabledState', 'isEnabled'],
+              'actions': [],
+              'rect': {
+                'left': 0.0,
+                'top': 0.0,
+                'width': 390.0,
+                'height': 844.0,
               },
-            })!;
+              'transform': [
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+              ],
+              'childrenInTraversalOrder': [1, 2],
+              'childrenInHitTestOrder': [2, 1],
+            },
+            '1': {
+              'id': 1,
+              'label': 'Settings Header',
+              'flags': ['isHeader'],
+              'actions': [],
+              'rect': {
+                'left': 16.0,
+                'top': 40.0,
+                'width': 358.0,
+                'height': 32.0,
+              },
+            },
+            '2': {
+              'id': 2,
+              'label': 'Search Input',
+              'value': 'Flutter',
+              'hint': 'Enter search query',
+              'tooltip': 'Search field',
+              'flags': ['isTextField'],
+              'actions': ['tap', 'setSelection'],
+              'rect': {
+                'left': 16.0,
+                'top': 88.0,
+                'width': 358.0,
+                'height': 48.0,
+              },
+              'childrenInTraversalOrder': [3],
+              'childrenInHitTestOrder': [3],
+            },
+            '3': {
+              'id': 3,
+              'label': 'Clear Text',
+              'tooltip': 'Clear input content',
+              'flags': ['isButton', 'hasCheckedState'],
+              'actions': ['tap'],
+              'rect': {
+                'left': 330.0,
+                'top': 96.0,
+                'width': 32.0,
+                'height': 32.0,
+              },
+            },
+          },
+        })!;
 
         final testController = AccessibilityController();
         await testController.loadSemanticsTree();
@@ -343,47 +318,33 @@ void main() {
         final root = testController.semanticsRoots.value.first;
         expect(root.id, equals('0'));
         expect(root.label, equals('Root View'));
-        expect(root.value, equals('Main Screen'));
-        expect(root.flags, equals(['hasEnabledState', 'isEnabled']));
         expect(
-          root.rectString,
-          equals('rect: Rect.fromLTWH(0.0, 0.0, 390.0, 844.0)'),
+          root.flags,
+          equals({SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled}),
         );
-        expect(root.transform, hasLength(16));
         expect(root.children, hasLength(2));
 
         // Node 1: Settings Header
         final headerNode = root.children[0];
         expect(headerNode.id, equals('1'));
         expect(headerNode.label, equals('Settings Header'));
-        expect(headerNode.flags, equals(['isHeader']));
-        expect(
-          headerNode.rectString,
-          equals('rect: Rect.fromLTWH(16.0, 40.0, 358.0, 32.0)'),
-        );
+        expect(headerNode.flags, equals({SemanticsFlag.isHeader}));
         expect(headerNode.children, isEmpty);
 
         // Node 2: Search Input
         final searchNode = root.children[1];
         expect(searchNode.id, equals('2'));
         expect(searchNode.label, equals('Search Input'));
-        expect(searchNode.value, equals('Flutter'));
-        expect(searchNode.hint, equals('Enter search query'));
-        expect(searchNode.tooltip, equals('Search field'));
-        expect(searchNode.flags, equals(['isTextField']));
-        expect(searchNode.actions, equals(['tap', 'setSelection']));
+        expect(searchNode.flags, equals({SemanticsFlag.isTextField}));
         expect(searchNode.children, hasLength(1));
 
         // Node 3: Clear Text Button (child of Node 2)
         final clearButtonNode = searchNode.children.first;
         expect(clearButtonNode.id, equals('3'));
         expect(clearButtonNode.label, equals('Clear Text'));
-        expect(clearButtonNode.tooltip, equals('Clear input content'));
-        expect(clearButtonNode.flags, equals(['isButton', 'hasCheckedState']));
-        expect(clearButtonNode.actions, equals(['tap']));
         expect(
-          clearButtonNode.rectString,
-          equals('rect: Rect.fromLTWH(330.0, 96.0, 32.0, 32.0)'),
+          clearButtonNode.flags,
+          equals({SemanticsFlag.isButton, SemanticsFlag.hasCheckedState}),
         );
         expect(clearButtonNode.children, isEmpty);
       },
@@ -394,25 +355,25 @@ void main() {
       () async {
         final fakeServiceManager =
             serviceConnection.serviceManager as FakeServiceManager;
-        fakeServiceManager
-                .serviceExtensionResponses['ext.flutter.accessibility.enableSemantics'] =
-            Response.parse({})!;
-        fakeServiceManager
-                .serviceExtensionResponses['ext.flutter.accessibility.getSemanticsTree'] =
-            Response.parse({
-              'data': {
-                '0': {
-                  'id': 0,
-                  'label': 'Root',
-                  'childrenInTraversalOrder': [1],
-                },
-                '1': {
-                  'id': 1,
-                  'label': 'Child full',
-                  'flags': ['isButton'],
-                },
-              },
-            })!;
+        fakeServiceManager.serviceExtensionResponses[registrations
+            .enableSemantics] = Response.parse(
+          {},
+        )!;
+        fakeServiceManager.serviceExtensionResponses[registrations
+            .getSemanticsTree] = Response.parse({
+          'data': {
+            '0': {
+              'id': 0,
+              'label': 'Root',
+              'childrenInTraversalOrder': [1],
+            },
+            '1': {
+              'id': 1,
+              'label': 'Child full',
+              'flags': ['isButton'],
+            },
+          },
+        })!;
 
         final testController = AccessibilityController();
         await testController.loadSemanticsTree();
@@ -424,7 +385,7 @@ void main() {
         expect(root.children, hasLength(1));
         expect(root.children.first.id, equals('1'));
         expect(root.children.first.label, equals('Child full'));
-        expect(root.children.first.flags, equals(['isButton']));
+        expect(root.children.first.flags, equals({SemanticsFlag.isButton}));
       },
     );
 
@@ -441,9 +402,7 @@ void main() {
                   as _RecordingServiceManager)
               .recordedCalls;
       expect(
-        calls.any(
-          (call) => call.$1 == 'ext.flutter.accessibility.disposeSemantics',
-        ),
+        calls.any((call) => call.$1 == registrations.disposeSemantics),
         isTrue,
       );
     });
