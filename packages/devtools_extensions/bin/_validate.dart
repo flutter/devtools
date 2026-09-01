@@ -122,7 +122,7 @@ See ${ValidateExtensionCommand.docUrl}.
   final configYaml = _configAsMap(packagePath);
   final configName = configYaml['name'];
   final underscoresAndLetters = RegExp(r'^[a-z0-9_]*$');
-  if (configName is! String? || configName == null || !underscoresAndLetters.hasMatch(configName)) {
+  if (configName is! String || !underscoresAndLetters.hasMatch(configName)) {
     throw StateError(
       'The "name" field in config.yaml should only contain lowercase letters, '
       'numbers, and underscores but instead was "$configName".',

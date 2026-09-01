@@ -4,7 +4,6 @@
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/primitives/utils.dart';
