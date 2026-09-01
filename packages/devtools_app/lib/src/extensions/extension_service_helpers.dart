@@ -19,9 +19,9 @@ void deduplicateExtensionsAndTakeLatest(
 }) {
   final deduped = <String>{};
   for (final ext in extensions) {
-    final dedupKey = '${ext.packageName}:${ext.name}';
-    if (deduped.contains(dedupKey)) continue;
-    deduped.add(dedupKey);
+    final dedupeKey = '${ext.packageName}:${ext.name}';
+    if (deduped.contains(dedupeKey)) continue;
+    deduped.add(dedupeKey);
 
     // This includes [ext] itself.
     final matchingExtensions = extensions.where(
