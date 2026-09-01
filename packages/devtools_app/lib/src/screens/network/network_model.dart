@@ -41,15 +41,6 @@ abstract class NetworkRequest
 
   String get id;
 
-  @visibleForTesting
-  String get durationDisplay {
-    final duration = this.duration;
-    final text = duration != null
-        ? durationText(duration, unit: DurationDisplayUnit.milliseconds)
-        : 'Pending';
-    return 'Duration: $text';
-  }
-
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
     return uri.caseInsensitiveContains(regExpSearch);
