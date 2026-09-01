@@ -752,11 +752,10 @@ packages:
   skills_lint:
     dependency: transitive
     description:
-      path: "packages/skills_lint"
-      ref: e6e695e1550f81342fe5acd4dbe65040b5aa44c3
-      resolved-ref: e6e695e1550f81342fe5acd4dbe65040b5aa44c3
-      url: "https://github.com/google/skills_lint.dart.git"
-    source: git
+      name: skills_lint
+      sha256: "5daeff89c8c9d812cfa811e119ae88a32bb81d28c73aa7e899155885b2e63a63"
+      url: "https://pub.dev"
+    source: hosted
     version: "0.5.1"
   sky_engine:
     dependency: transitive
@@ -975,10 +974,10 @@ packages:
     dependency: transitive
     description:
       name: vm_service
-      sha256: "0016aef94fc66495ac78af5859181e3f3bf2026bd8eecc72b9565601e19ab360"
+      sha256: "5f37239c4851efcef929cea7824e76df7f2f0970aef85d66bbc430afa40e72f0"
       url: "https://pub.dev"
     source: hosted
-    version: "15.2.0"
+    version: "15.3.0"
   vm_service_protos:
     dependency: transitive
     description:
