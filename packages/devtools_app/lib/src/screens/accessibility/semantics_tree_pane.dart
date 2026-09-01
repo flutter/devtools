@@ -12,6 +12,7 @@ import '../../shared/globals.dart';
 import '../../shared/ui/common_widgets.dart';
 import '../../shared/ui/tree_view.dart';
 import 'accessibility_controller.dart';
+import 'semantics_node_model.dart';
 
 /// A pane that displays the semantics tree of the connected app.
 class AccessibilitySemanticsTreePane extends StatelessWidget {

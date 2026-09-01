@@ -16,8 +16,6 @@ import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import 'semantics_node_model.dart';
 
-export 'semantics_node_model.dart';
-
 final _log = Logger('accessibility_controller');
 
 /// Modes for brightness override in the accessibility controls.
