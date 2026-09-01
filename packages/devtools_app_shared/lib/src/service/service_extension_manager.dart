@@ -222,6 +222,10 @@ final class ServiceExtensionManager with DisposerMixin {
       if (didSendFirstFrameEvent) {
         await _onFrameEventReceived();
       }
+    } on SentinelException catch (_) {
+      // Service extension or isolate stopped existing while calling, so do
+      // nothing. This typically happens during hot restarts.
+      return;
     } on RPCError catch (e) {
       if (e.code == RPCErrorKind.kServerError.code ||
           e.isServiceDisposedError) {
@@ -345,6 +349,10 @@ final class ServiceExtensionManager with DisposerMixin {
             );
             await _maybeRestoreExtension(name, value);
         }
+      } on SentinelException catch (_) {
+        // Service extension or isolate stopped existing while restoring, so do
+        // nothing. This typically happens during hot restarts.
+        return false;
       } on RPCError catch (e) {
         if (e.isServiceDisposedError) {
           return false;
@@ -445,6 +453,10 @@ final class ServiceExtensionManager with DisposerMixin {
             args: {name.substring(name.lastIndexOf('.') + 1): value},
           );
         }
+      } on SentinelException catch (_) {
+        // Service extension or isolate stopped existing while calling, so do
+        // nothing. This typically happens during hot restarts.
+        return false;
       } on RPCError catch (e) {
         if (e.isServiceDisposedError ||
             e.code == RPCErrorKind.kServerError.code) {
