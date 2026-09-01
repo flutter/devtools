@@ -161,7 +161,7 @@ class ExtensionsManager {
       final relativeExtensionLocation =
           config['buildLocation'] as String? ?? 'build';
 
-      final packageRoot = extension.rootUri.toFilePath();
+      final packageRoot = path.normalize(extension.rootUri.toFilePath());
       final location = path.normalize(
         path.join(
           packageRoot,
