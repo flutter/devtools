@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:io';
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/commands/build.dart';
@@ -27,6 +29,8 @@ import 'commands/update_dart_sdk_deps.dart';
 import 'commands/update_version.dart';
 
 const _flutterFromPathFlag = 'flutter-from-path';
+
+const _flutterFromPathEnvVar = 'DEVTOOLS_TOOL_FLUTTER_FROM_PATH';
 
 const _flutterSdkPathFlag = 'flutter-sdk-path';
 
@@ -62,7 +66,9 @@ class DevToolsCommandRunner extends CommandRunner {
             'Use the Flutter SDK on PATH for any `flutter`, `dart` and '
             '`dt` commands spawned by this process, instead of the '
             'Flutter SDK from tool/flutter-sdk which is used by default. '
-            'This is incompatible with the `$_flutterSdkPathFlag` flag.',
+            'This is incompatible with the `$_flutterSdkPathFlag` flag. '
+            'Can also be enabled via the `$_flutterFromPathEnvVar` '
+            'environment variable.',
       )
       ..addOption(
         _flutterSdkPathFlag,
@@ -76,6 +82,8 @@ class DevToolsCommandRunner extends CommandRunner {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) {
+    final flutterFromPathEnv =
+        Platform.environment[_flutterFromPathEnvVar]?.isNotEmpty == true;
     if (topLevelResults.flag(_flutterFromPathFlag) &&
         topLevelResults.wasParsed(_flutterSdkPathFlag)) {
       throw ArgParserException(
@@ -84,7 +92,8 @@ class DevToolsCommandRunner extends CommandRunner {
     }
     if (topLevelResults.wasParsed(_flutterSdkPathFlag)) {
       FlutterSdk.useFromPath(topLevelResults.option(_flutterSdkPathFlag)!);
-    } else if (topLevelResults.flag(_flutterFromPathFlag)) {
+    } else if (topLevelResults.flag(_flutterFromPathFlag) ||
+        flutterFromPathEnv) {
       FlutterSdk.useFromPathEnvironmentVariable();
     } else {
       FlutterSdk.useFromCurrentVm();

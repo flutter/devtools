@@ -21,17 +21,34 @@ function flutter {
 }
 export -f flutter
 
-# Make sure Flutter sdk has been provided
-if [ ! -d "./tool/flutter-sdk" ]; then
-    echo "Expected ./tool/flutter-sdk to exist"
-    exit 1;
+# Determine the Flutter SDK to use:
+# * If `DEVTOOLS_TOOL_FLUTTER_FROM_PATH` is set, then discover from `PATH`.
+# * If `./tool/flutter-sdk` (a directory) exists, then use that.
+if [ -n "$DEVTOOLS_TOOL_FLUTTER_FROM_PATH" ]; then
+    if command -v flutter &> /dev/null; then
+        FLUTTER_EXE="$(command -v flutter)"
+    elif command -v flutter.bat &> /dev/null; then
+        FLUTTER_EXE="$(command -v flutter.bat)"
+    else
+        echo "DEVTOOLS_TOOL_FLUTTER_FROM_PATH is set, but flutter was not found on PATH"
+        exit 1
+    fi
+    FLUTTER_BIN="$(cd "$(dirname "$FLUTTER_EXE")" && pwd -P)"
+    FLUTTER_DIR="$(cd "$FLUTTER_BIN/.." && pwd -P)"
+    echo "Using Flutter from PATH at: $FLUTTER_DIR"
+    export DEVTOOLS_TOOL_FLUTTER_FROM_PATH=true
+elif [ -d "./tool/flutter-sdk" ]; then
+    FLUTTER_DIR="$(pwd)/tool/flutter-sdk"
+else
+    echo "Expected ./tool/flutter-sdk to exist, or DEVTOOLS_TOOL_FLUTTER_FROM_PATH to be set"
+    exit 1
 fi
 
-# Look in the dart bin dir first, then the flutter one, then the one for the
-# devtools repo. We don't use the dart script from flutter/bin as that script
-# can and does print 'Waiting for another flutter command...' at inopportune
-# times.
-export PATH=`pwd`/tool/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/tool/flutter-sdk/bin:`pwd`/bin:$PATH
+# Look in the dart bin/ directory first, then the flutter one, then the one for
+# the devtools repo. We don't use the dart script from 'flutter/bin' as that
+# script can and does print 'Waiting for another flutter command...' at
+# inopportune times.
+export PATH="$FLUTTER_DIR/bin/cache/dart-sdk/bin:$FLUTTER_DIR/bin:`pwd`/bin:$PATH"
 
 # Look up the latest flutter candidate (this is the latest flutter version in g3)
 # TODO(https://github.com/flutter/devtools/issues/4591): re-write this script as a
@@ -40,7 +57,7 @@ export PATH=`pwd`/tool/flutter-sdk/bin/cache/dart-sdk/bin:`pwd`/tool/flutter-sdk
 flutter config --no-analytics
 flutter doctor
 
-# We should be using dart from ../flutter-sdk/bin/cache/dart-sdk/dart.
+# We should be using dart from the Flutter SDK's cache/dart-sdk/bin/ directory.
 echo "which flutter: " `which flutter`
 echo "which dart: " `which dart`
 

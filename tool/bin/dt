@@ -2,9 +2,19 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-if [ ! -z "$DEVTOOLS_TOOL_FLUTTER_FROM_PATH" ]
+USE_PATH=false
+if [ ! -z "$DEVTOOLS_TOOL_FLUTTER_FROM_PATH" ]; then
+  USE_PATH=true
+fi
+for arg in "$@"; do
+  if [ "$arg" = "-p" ] || [ "$arg" = "--flutter-from-path" ]; then
+    USE_PATH=true
+  fi
+done
+
+if [ "$USE_PATH" = true ]
 then
-  echo Running dt using Dart/Flutter from PATH because DEVTOOLS_TOOL_FLUTTER_FROM_PATH is set
+  echo Running dt using Dart/Flutter from PATH
   dart run "$SCRIPT_DIR/dt.dart" "$@"
 else
   if [ ! -d $SCRIPT_DIR/../flutter-sdk ]
