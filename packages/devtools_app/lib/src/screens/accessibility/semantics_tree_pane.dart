@@ -169,6 +169,8 @@ class _SemanticsTreeContent extends StatelessWidget {
 
     return TreeView<SemanticsNodeModel>(
       dataRootsListenable: controller.semanticsRoots,
+      scrollController: controller.treeScrollController,
+      includeScrollbar: true,
       dataDisplayProvider: (node, onPressed) {
         return InkWell(
           onTap: onPressed,

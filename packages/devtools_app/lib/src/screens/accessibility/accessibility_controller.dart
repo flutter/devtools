@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show ScrollController;
 import 'package:logging/logging.dart';
 
 import '../../service/service_extensions.dart' as extensions;
@@ -149,6 +150,7 @@ class AccessibilityController extends DevToolsScreenController
   final semanticsRoots = ValueNotifier<List<SemanticsNodeModel>>([]);
   final semanticsTreeLoading = ValueNotifier<bool>(false);
   final semanticsTreeError = ValueNotifier<String?>(null);
+  final treeScrollController = ScrollController();
 
   Future<void> loadSemanticsTree() async {
     if (semanticsTreeLoading.value) return;
@@ -209,7 +211,9 @@ class AccessibilityController extends DevToolsScreenController
       semanticsRoots.value = [];
       semanticsTreeError.value = 'Failed to load semantics tree: $e';
     } finally {
-      semanticsTreeLoading.value = false;
+      if (!disposed) {
+        semanticsTreeLoading.value = false;
+      }
     }
   }
 
@@ -269,6 +273,7 @@ class AccessibilityController extends DevToolsScreenController
     semanticsRoots.dispose();
     semanticsTreeLoading.dispose();
     semanticsTreeError.dispose();
+    treeScrollController.dispose();
     super.dispose();
   }
 
