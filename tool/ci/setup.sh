@@ -22,15 +22,15 @@ function flutter {
 export -f flutter
 
 # Determine the Flutter SDK to use:
-# * If `DEVTOOLS_TOOL_FLUTTER_FROM_PATH` is set, then discover from `PATH`.
+# * If `DEVTOOLS_TOOL_FLUTTER_FROM_PATH` is "true", then discover from `PATH`.
 # * If `./tool/flutter-sdk` (a directory) exists, then use that.
-if [ -n "$DEVTOOLS_TOOL_FLUTTER_FROM_PATH" ]; then
+if [ "$DEVTOOLS_TOOL_FLUTTER_FROM_PATH" = "true" ]; then
     if command -v flutter &> /dev/null; then
         FLUTTER_EXE="$(command -v flutter)"
     elif command -v flutter.bat &> /dev/null; then
         FLUTTER_EXE="$(command -v flutter.bat)"
     else
-        echo "DEVTOOLS_TOOL_FLUTTER_FROM_PATH is set, but flutter was not found on PATH"
+        echo "DEVTOOLS_TOOL_FLUTTER_FROM_PATH is set to true, but flutter was not found on PATH"
         exit 1
     fi
     FLUTTER_BIN="$(cd "$(dirname "$FLUTTER_EXE")" && pwd -P)"
@@ -40,7 +40,7 @@ if [ -n "$DEVTOOLS_TOOL_FLUTTER_FROM_PATH" ]; then
 elif [ -d "./tool/flutter-sdk" ]; then
     FLUTTER_DIR="$(pwd)/tool/flutter-sdk"
 else
-    echo "Expected ./tool/flutter-sdk to exist, or DEVTOOLS_TOOL_FLUTTER_FROM_PATH to be set"
+    echo "Expected ./tool/flutter-sdk to exist, or DEVTOOLS_TOOL_FLUTTER_FROM_PATH to be set to true"
     exit 1
 fi
 
