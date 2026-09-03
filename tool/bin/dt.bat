@@ -3,8 +3,15 @@ REM Use of this source code is governed by a BSD-style license that can be
 REM found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 @echo off
 
-IF DEFINED DEVTOOLS_TOOL_FLUTTER_FROM_PATH (
-	echo Running dt using Dart/Flutter from PATH because DEVTOOLS_TOOL_FLUTTER_FROM_PATH is set
+set USE_PATH=
+IF DEFINED DEVTOOLS_TOOL_FLUTTER_FROM_PATH set USE_PATH=1
+for %%a in (%*) do (
+	if "%%a"=="-p" set USE_PATH=1
+	if "%%a"=="--flutter-from-path" set USE_PATH=1
+)
+
+IF DEFINED USE_PATH (
+	echo Running dt using Dart/Flutter from PATH
 	dart run %~dp0/dt.dart %*
 ) ELSE (
 
