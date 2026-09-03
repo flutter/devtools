@@ -148,6 +148,7 @@ class ExtensionsManager {
 
     for (final extension in extensions) {
       final config = extension.config;
+
       // TODO(https://github.com/dart-lang/pub/issues/4042): make this check
       // more robust.
       final isPubliclyHosted =
@@ -160,16 +161,34 @@ class ExtensionsManager {
       final relativeExtensionLocation =
           config['buildLocation'] as String? ?? 'build';
 
-      final location = path.join(
-        extension.rootUri.toFilePath(),
-        'extension',
-        'devtools',
-        relativeExtensionLocation,
+      final packageRoot = path.normalize(extension.rootUri.toFilePath());
+      final location = path.normalize(
+        path.join(
+          packageRoot,
+          'extension',
+          'devtools',
+          relativeExtensionLocation,
+        ),
       );
+
+      // Verify that this extension's build location is a subdirectory of the
+      // package providing the extension. Usually this is
+      // $HOME/.pub-cache/hosted/pub.dev/foo-1.0.0/extension/devtools/build.
+      //
+      // This prevents packages from declaring a build location outside of
+      // their package directory (e.g. ../../../../.ssh/)
+      if (!path.isWithin(packageRoot, location)) {
+        parsingErrors.writeln(
+          'Ignoring extension from package "${extension.package}": invalid '
+          'buildLocation "$relativeExtensionLocation" outside package root.',
+        );
+        continue;
+      }
 
       try {
         final extensionConfig = DevToolsExtensionConfig.parse({
           ...config,
+          DevToolsExtensionConfig.packageNameKey: extension.package,
           DevToolsExtensionConfig.extensionAssetsPathKey: location,
           // The [packageConfigPath] will look like
           // 'pkg/.dart_tool/package_config.json' so we will store the

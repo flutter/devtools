@@ -78,6 +78,14 @@ void _validateDirectoryContents(String packagePath) {
     throw FileSystemException('${packageDirectory.path} directory not found');
   }
 
+  final pubspecFile = File(path.join(packageDirectory.path, 'pubspec.yaml'));
+  if (!pubspecFile.existsSync()) {
+    throw const FileSystemException('''
+A pubspec.yaml file is required, but none was found.
+See ${ValidateExtensionCommand.docUrl}.
+''');
+  }
+
   final devtoolsExtensionDir = Directory(
     path.join(packageDirectory.path, 'extension', 'devtools'),
   );
@@ -108,6 +116,17 @@ See ${ValidateExtensionCommand.docUrl}.
 An extension/devtools/config.yaml file is required, but none was found.
 See ${ValidateExtensionCommand.docUrl}.
 ''');
+  }
+
+  // Ensure the extension's name is a valid identifier.
+  final configYaml = _configAsMap(packagePath);
+  final configName = configYaml['name'];
+  final underscoresAndLetters = RegExp(r'^[a-z0-9_]*$');
+  if (configName is! String || !underscoresAndLetters.hasMatch(configName)) {
+    throw StateError(
+      'The "name" field in config.yaml should only contain lowercase letters, '
+      'numbers, and underscores but instead was "$configName".',
+    );
   }
 }
 

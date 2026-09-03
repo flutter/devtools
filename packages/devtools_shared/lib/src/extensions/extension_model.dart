@@ -16,6 +16,7 @@ import 'package:collection/collection.dart';
 class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
   DevToolsExtensionConfig._({
     required this.name,
+    required this.packageName,
     required this.issueTrackerLink,
     required this.version,
     required this.materialIconCodePoint,
@@ -69,9 +70,12 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
         codePoint = codePointFromJson as int;
       }
 
+      final packageName = json[packageNameKey] as String? ?? name;
+
       return DevToolsExtensionConfig._(
         // These values are required fields in the extension's config.yaml file.
         name: name,
+        packageName: packageName,
         issueTrackerLink: issueTracker,
         version: version,
         materialIconCodePoint: codePoint,
@@ -130,21 +134,29 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
   // The following keys are never expected to be in the extension's config.yaml
   // file. They are generated during the extension detection mechanism in the
   // DevTools server.
+  static const packageNameKey = 'packageName';
   static const extensionAssetsPathKey = 'extensionAssetsPath';
   static const devtoolsOptionsUriKey = 'devtoolsOptionsUri';
   static const isPubliclyHostedKey = 'isPubliclyHosted';
   static const detectedFromStaticContextKey = 'detectedFromStaticContext';
   static const _serverGeneratedKeys = [
+    packageNameKey,
     extensionAssetsPathKey,
     devtoolsOptionsUriKey,
     isPubliclyHostedKey,
     detectedFromStaticContextKey,
   ];
 
-  /// The package name that this extension is for.
+  /// The name that this extension is for.
   ///
-  /// This value should be defined by the extension's config.yaml file.
+  /// This value is defined by the extension's config.yaml file.
   final String name;
+
+  /// The Dart package that provides this DevTools extension.
+  ///
+  /// This value is parsed from the package name in
+  /// `.dart_tool/package_config.json`.
+  final String packageName;
 
   // TODO(kenz): we might want to add validation to these issue tracker
   // links to ensure they don't point to the DevTools repo or flutter repo.
@@ -230,12 +242,15 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
 
   String get displayName => name.toLowerCase();
 
-  String get identifier => '${displayName}_$version';
+  String get identifier => packageName == displayName
+      ? '${displayName}_$version'
+      : '${packageName}_${displayName}_$version';
 
   String get analyticsSafeName => isPubliclyHosted ? name : 'private';
 
   Map<String, Object?> toJson() => {
     nameKey: name,
+    packageNameKey: packageName,
     issueTrackerKey: issueTrackerLink,
     versionKey: version,
     materialIconCodePointKey: materialIconCodePoint,
@@ -248,11 +263,14 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
 
   @override
   int compareTo(DevToolsExtensionConfig other) {
-    var compare = name.compareTo(other.name);
+    var compare = packageName.compareTo(other.packageName);
     if (compare == 0) {
-      compare = extensionAssetsPath.compareTo(other.extensionAssetsPath);
+      compare = name.compareTo(other.name);
       if (compare == 0) {
-        return devtoolsOptionsUri.compareTo(other.devtoolsOptionsUri);
+        compare = extensionAssetsPath.compareTo(other.extensionAssetsPath);
+        if (compare == 0) {
+          return devtoolsOptionsUri.compareTo(other.devtoolsOptionsUri);
+        }
       }
     }
     return compare;
@@ -262,6 +280,7 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
   bool operator ==(Object other) {
     return other is DevToolsExtensionConfig &&
         other.name == name &&
+        other.packageName == packageName &&
         other.issueTrackerLink == issueTrackerLink &&
         other.version == version &&
         other.materialIconCodePoint == materialIconCodePoint &&
@@ -275,6 +294,7 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
   @override
   int get hashCode => Object.hash(
     name,
+    packageName,
     issueTrackerLink,
     version,
     materialIconCodePoint,
@@ -288,6 +308,9 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
   static void _assertGeneratedKeysPresent(Map<String, Object?> json) {
     final missingKeys = <String>[];
     for (final key in _serverGeneratedKeys) {
+      if (key == packageNameKey) {
+        continue; // Optional for backwards compatibility.
+      }
       if (!json.containsKey(key)) {
         missingKeys.add(key);
       }

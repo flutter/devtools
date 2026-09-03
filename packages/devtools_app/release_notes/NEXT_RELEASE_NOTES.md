@@ -86,6 +86,9 @@ TODO: Remove this section if there are not any updates.
 
 * Hide the DevTools extensions menu button in single-screen embedded mode (`EmbedMode.embedOne`) on standard screens.
   [#8507](https://github.com/flutter/devtools/issues/8507)
+* Improved DevTools extension isolation by tracking the providing package name for
+  enablement, deduplication, and asset loading.
+  [#9965](https://github.com/flutter/devtools/pull/9965)
 
 ## Advanced developer mode updates
 

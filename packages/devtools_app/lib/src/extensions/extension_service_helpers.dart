@@ -19,11 +19,14 @@ void deduplicateExtensionsAndTakeLatest(
 }) {
   final deduped = <String>{};
   for (final ext in extensions) {
-    if (deduped.contains(ext.name)) continue;
-    deduped.add(ext.name);
+    final dedupeKey = '${ext.packageName}:${ext.name}';
+    if (deduped.contains(dedupeKey)) continue;
+    deduped.add(dedupeKey);
 
     // This includes [ext] itself.
-    final matchingExtensions = extensions.where((e) => e.name == ext.name);
+    final matchingExtensions = extensions.where(
+      (e) => e.packageName == ext.packageName && e.name == ext.name,
+    );
     if (matchingExtensions.length > 1) {
       logger?.fine(
         'detected duplicate $extensionType extensions for ${ext.name}',
