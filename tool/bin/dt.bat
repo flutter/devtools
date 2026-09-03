@@ -4,7 +4,7 @@ REM found in the LICENSE file or at https://developers.google.com/open-source/li
 @echo off
 
 set USE_PATH=
-IF DEFINED DEVTOOLS_TOOL_FLUTTER_FROM_PATH set USE_PATH=1
+IF /I "%DEVTOOLS_TOOL_FLUTTER_FROM_PATH%"=="true" set USE_PATH=1
 for %%a in (%*) do (
 	if "%%a"=="-p" set USE_PATH=1
 	if "%%a"=="--flutter-from-path" set USE_PATH=1

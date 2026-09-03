@@ -82,8 +82,10 @@ class DevToolsCommandRunner extends CommandRunner {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) {
+    final flutterFromPathEnvValue =
+        Platform.environment[_flutterFromPathEnvVar] ?? '';
     final flutterFromPathEnv =
-        Platform.environment[_flutterFromPathEnvVar]?.isNotEmpty == true;
+        bool.tryParse(flutterFromPathEnvValue, caseSensitive: false) == true;
     if (topLevelResults.flag(_flutterFromPathFlag) &&
         topLevelResults.wasParsed(_flutterSdkPathFlag)) {
       throw ArgParserException(
