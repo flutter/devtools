@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'package:flutter/foundation.dart';
+
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/memory/classes.dart';
 import '../../../../../shared/memory/heap_data.dart';
@@ -42,7 +44,11 @@ class ObjectSetDiff {
         continue;
       }
 
-      assert(false);
+      if (kDebugMode) {
+        throw StateError(
+          'Unexpected state for code $code: before=$before, after=$after',
+        );
+      }
     }
 
     assert(

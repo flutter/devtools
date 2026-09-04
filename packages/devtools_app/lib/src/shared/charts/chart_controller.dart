@@ -4,6 +4,7 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../primitives/utils.dart';
@@ -315,7 +316,9 @@ class ChartController extends DisposableController
           labelInterval = labelsTwoMinutes;
           break;
         default:
-          assert(false, 'Unexpected Duration $rangeInMinutes');
+          if (kDebugMode) {
+            throw ArgumentError('Unexpected Duration $rangeInMinutes');
+          }
       }
     }
 

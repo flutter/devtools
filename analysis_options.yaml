@@ -177,12 +177,22 @@ dcm:
       # Ignore unused code in package examples.
       - packages/devtools_app_shared/example/**
   rules:
-#    - arguments-ordering Too strict
-#    - avoid-banned-imports # TODO(polina-c): add configuration
+    - avoid-accessing-collections-by-constant-index
+    - avoid-async-call-in-sync-function # This does catch findings that unawaited_futures misses.
+    - avoid-banned-imports:
+            entries:
+              - paths: ['packages/devtools_shared/lib/.*\.dart']
+                deny: ['package:flutter/.*']
+                message: 'Do not import Flutter libraries in devtools_shared.'
+                severity: error
+    - avoid-cascade-after-if-null
+    - avoid-collapsible-if
+    - avoid-collection-methods-with-unrelated-types
+    - avoid-constant-assert-conditions
+    - avoid-duplicate-named-imports
+    - avoid-empty-test-groups
     - avoid-importing-entrypoint-exports:
         only-in-src: true
-    - avoid-cascade-after-if-null
-    - avoid-collection-methods-with-unrelated-types
     - avoid-duplicate-exports
     - avoid-dynamic
 #    - avoid-global-state   TODO(jacobr): bunch of false positives around boolean flags.

@@ -4,10 +4,8 @@
 
 import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
-import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart'
-    as diff_pane_controller
-    show Json;
-import 'package:devtools_app/src/screens/memory/panes/diff/controller/snapshot_item.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/controller/snapshot_item.dart'
+    hide Json;
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -53,10 +51,7 @@ void main() {
       snapshots.first.diffWith.value = snapshots.last;
 
       final json = controller.toJson();
-      expect(
-        json.keys.toSet(),
-        equals(diff_pane_controller.Json.values.map((e) => e.name).toSet()),
-      );
+      expect(json.keys.toSet(), equals(Json.values.map((e) => e.name).toSet()));
       final fromJson = DiffPaneController.fromJson(json);
 
       final snapshotsFromJson = fromJson.core.snapshots.value

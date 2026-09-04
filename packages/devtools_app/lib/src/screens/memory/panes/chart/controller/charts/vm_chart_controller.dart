@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../shared/charts/chart_controller.dart';
 import '../../../../../../shared/charts/chart_trace.dart' as chart_trace;
-import '../../../../../../shared/charts/chart_trace.dart'
-    show ChartType, ChartSymbol;
 import '../../../../shared/primitives/memory_timeline.dart';
 import '../../data/charts.dart';
 
@@ -133,7 +131,7 @@ class VMChartController extends ChartController {
     }
 
     final externalIndex = createTrace(
-      ChartType.line,
+      chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
         color: _Colors.externals,
         symbol: chart_trace.ChartSymbol.disc,
@@ -149,7 +147,7 @@ class VMChartController extends ChartController {
 
     // Used Heap
     final usedIndex = createTrace(
-      ChartType.line,
+      chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
         color: _Colors.used,
         symbol: chart_trace.ChartSymbol.disc,
@@ -163,11 +161,11 @@ class VMChartController extends ChartController {
 
     // Heap Capacity
     final capacityIndex = createTrace(
-      ChartType.line,
+      chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
         color: _Colors.capacity,
         diameter: 0.0,
-        symbol: ChartSymbol.dashedLine,
+        symbol: chart_trace.ChartSymbol.dashedLine,
       ),
       name: VmTraceName.capacity.toString(),
     );
@@ -178,10 +176,10 @@ class VMChartController extends ChartController {
 
     // RSS
     final rSSIndex = createTrace(
-      ChartType.line,
+      chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
         color: _Colors.rss,
-        symbol: ChartSymbol.dashedLine,
+        symbol: chart_trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
       name: VmTraceName.rSS.toString(),

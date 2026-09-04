@@ -109,9 +109,11 @@ class PropertyEditorController extends DisposableController
           return;
         }
         _requestDebouncer.run(
-          () => _updateWithEditableWidgetData(
-            textDocument: textDocument,
-            cursorPosition: cursorPosition,
+          () => unawaited(
+            _updateWithEditableWidgetData(
+              textDocument: textDocument,
+              cursorPosition: cursorPosition,
+            ),
           ),
         );
       }),

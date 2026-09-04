@@ -205,10 +205,11 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
                         isSelectable: false,
                       );
                     } else {
-                      assert(
-                        false,
-                        'ConsoleLine of unsupported type ${line.runtimeType} encountered',
-                      );
+                      if (kDebugMode) {
+                        throw UnsupportedError(
+                          'ConsoleLine of unsupported type ${line.runtimeType} encountered',
+                        );
+                      }
                       return const SizedBox();
                     }
                   },

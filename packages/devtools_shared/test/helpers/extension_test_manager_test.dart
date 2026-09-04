@@ -8,8 +8,6 @@ import 'package:test/test.dart';
 import 'extension_test_manager.dart';
 
 void main() {
-  group('$ExtensionTestManager', () {});
-
   group('$TestPackageWithExtension', () {
     test('$driftPackage', () {
       expect(driftPackage.name, 'drift');

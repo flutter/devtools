@@ -7,6 +7,6 @@ import 'post_message.dart';
 Stream<PostMessageEvent> get onPostMessage =>
     throw UnsupportedError('unsupported platform');
 
-// ignore: unused-code, the web implementation is a useful helper for posting messages on the window's parent; this stub is necessary for config specific imports.
+// ignore: unused-code, the web implementation is a useful helper for posting messages on the window's parent; this stub is necessary for conditional imports.
 void postMessage(Object? _, String _) =>
     throw UnsupportedError('unsupported platform');

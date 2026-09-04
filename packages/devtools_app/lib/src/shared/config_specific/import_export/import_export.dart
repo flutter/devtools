@@ -77,16 +77,15 @@ class ImportController {
       return;
     }
 
-    if (activeScreenId == ScreenMetaData.performance.id) {
-      if (devToolsOfflineData.json.containsKey('traceEvents')) {
-        notificationService.push(
-          'It looks like you are trying to load data that was saved from an '
-          'old version of DevTools. This data uses a legacy format that is no '
-          'longer supported. To load this file in DevTools, you will need to '
-          'downgrade your Flutter version to < 3.22.',
-        );
-        return;
-      }
+    if (activeScreenId == ScreenMetaData.performance.id &&
+        devToolsOfflineData.json.containsKey('traceEvents')) {
+      notificationService.push(
+        'It looks like you are trying to load data that was saved from an '
+        'old version of DevTools. This data uses a legacy format that is no '
+        'longer supported. To load this file in DevTools, you will need to '
+        'downgrade your Flutter version to < 3.22.',
+      );
+      return;
     }
 
     final connectedApp = OfflineConnectedApp.parse(

@@ -252,7 +252,7 @@ class _HotReloadScaffoldAction extends ScaffoldAction {
     : super(
         icon: hotReloadIcon,
         tooltip: HotReloadButton._hotReloadTooltip,
-        onPressed: (_) => _callHotReload(),
+        onPressed: (_) => unawaited(_callHotReload()),
       );
 }
 

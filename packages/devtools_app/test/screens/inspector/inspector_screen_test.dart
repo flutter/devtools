@@ -85,7 +85,7 @@ void main() {
     await fakeExtensionManager.fakeFrame();
   }
 
-  void mockNoExtensionsAvailable() {
+  Future<void> mockNoExtensionsAvailable() async {
     fakeExtensionManager.extensionValueOnDevice = {
       extensions.toggleOnDeviceWidgetInspector.extension: true,
       extensions.toggleSelectWidgetMode.extension: false,
@@ -93,7 +93,7 @@ void main() {
     };
     // Don't actually send any events to the client indicating that service
     // extensions are avaiable.
-    fakeExtensionManager.fakeFrame();
+    await fakeExtensionManager.fakeFrame();
   }
 
   testWidgetsWithWindowSize('builds its tab', windowSize, (
@@ -206,7 +206,7 @@ void main() {
     'Test toggling service extension buttons with no extensions available',
     windowSize,
     (WidgetTester tester) async {
-      mockNoExtensionsAvailable();
+      await mockNoExtensionsAvailable();
       expect(
         fakeExtensionManager.extensionValueOnDevice[extensions
             .debugPaint
