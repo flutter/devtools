@@ -21,7 +21,10 @@ To learn more about DevTools, check out the
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any updates.
+* Added the widget source file path to the Inspector details pane
+  (`filename.dart:line:column`), matching legacy Inspector behavior. -
+  [#9972](https://github.com/flutter/devtools/pull/9972),
+  [#9922](https://github.com/flutter/devtools/issues/9922)
 
 ## Performance updates
 

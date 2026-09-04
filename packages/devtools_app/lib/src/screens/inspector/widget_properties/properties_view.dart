@@ -2,13 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
 import 'dart:math';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/console/widgets/description.dart';
+import '../../../shared/globals.dart';
 import '../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/tab.dart';
@@ -76,12 +80,14 @@ class _DetailsTableState extends State<DetailsTable> {
         final widgetProperties = properties.widgetProperties;
         final renderProperties = properties.renderProperties;
         final layoutProperties = properties.layoutProperties;
-
         final renderTabExists = renderProperties.isNotEmpty;
         final flexExplorerTabExists = selectedNode?.isFlexLayout ?? false;
 
         return AnalyticsTabbedView(
           gaScreen: gac.inspector,
+          trailingWidgets: [
+            WidgetCreationLocationTrailing(controller: widget.controller),
+          ],
           onTabChanged: (int tabIndex) {
             _lastSelectedTab = _getTabForIndex(
               tabIndex,
@@ -158,6 +164,90 @@ class _DetailsTableState extends State<DetailsTable> {
     if (renderTabExists) _renderObjectTab,
     if (flexExplorerTabExists) _flexExplorerTab,
   ];
+}
+
+/// Displays the source file path for the selected widget in the tab bar.
+///
+/// Matches the legacy inspector format: `filename.dart:line:column`.
+/// Tapping the link navigates the connected IDE to the source location.
+class WidgetCreationLocationTrailing extends StatefulWidget {
+  const WidgetCreationLocationTrailing({super.key, required this.controller});
+
+  final InspectorController controller;
+
+  @override
+  State<WidgetCreationLocationTrailing> createState() =>
+      _WidgetCreationLocationTrailingState();
+}
+
+class _WidgetCreationLocationTrailingState
+    extends State<WidgetCreationLocationTrailing> {
+  late final TapGestureRecognizer _tapRecognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _tapRecognizer = TapGestureRecognizer()
+      ..onTap = () {
+        unawaited(_navigateToLocation());
+      };
+  }
+
+  @override
+  void dispose() {
+    _tapRecognizer.dispose();
+    super.dispose();
+  }
+
+  Future<void> _navigateToLocation() async {
+    final location =
+        widget.controller.selectedNodeProperties.value.creationLocation;
+    final file = location?.getFile();
+    if (file == null) {
+      return;
+    }
+
+    await serviceConnection.serviceManager.service?.navigateToCode(
+      fileUriString: file,
+      line: location!.getLine(),
+      column: location.getColumn(),
+      source: 'devtools.inspector',
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<WidgetTreeNodeProperties>(
+      valueListenable: widget.controller.selectedNodeProperties,
+      builder: (context, properties, _) {
+        final location = properties.creationLocation;
+        final file = location?.getFile();
+        if (file == null) {
+          return const SizedBox.shrink();
+        }
+
+        final line = location!.getLine();
+        final column = location.getColumn();
+        final shortLocation = '${fileNameFromUri(file)}:$line:$column';
+        final fullLocation = '$file:$line:$column';
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+          child: DevToolsTooltip(
+            message: fullLocation,
+            child: RichText(
+              overflow: TextOverflow.ellipsis,
+              text: TextSpan(
+                text: shortLocation,
+                style: Theme.of(context).linkTextStyle,
+                recognizer: _tapRecognizer,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
 
 /// Displays a widget's properties, including the layout properties and a

@@ -39,4 +39,10 @@ abstract class InspectorObjectGroupApi<T extends DiagnosticableTree>
   );
 
   Future<List<T>> getProperties(InspectorInstanceRef instanceRef);
+
+  /// Returns a details subtree for [node], including creation location data.
+  ///
+  /// Pass a small [subtreeDepth] (for example `0`) when only node-level details
+  /// such as creation location are needed.
+  Future<T?> getDetailsSubtree(T? node, {int subtreeDepth = 2});
 }
