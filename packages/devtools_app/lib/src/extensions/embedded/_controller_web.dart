@@ -80,9 +80,11 @@ String _debugExtensionPlaceholderHtml(String name) {
 
 /// The sandbox permissions granted to embedded extension iframes.
 ///
-/// Grants the extension same-origin capabilities (needed for service workers,
-/// storage, etc.) while allowing javascript execution, forms, downloads, and
-/// popup windows.
+/// Configures the iframe sandbox to allow:
+/// - Script execution (`allow-scripts`)
+/// - Origin-based features like local storage and service workers (`allow-same-origin`)
+/// - Form submissions and downloads (`allow-forms`, `allow-downloads`)
+/// - Unrestricted popup windows and links (`allow-popups`, `allow-popups-to-escape-sandbox`)
 const _extensionSandboxRules =
     'allow-scripts allow-same-origin allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox';
 
