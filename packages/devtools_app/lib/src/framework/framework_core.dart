@@ -18,6 +18,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
+import '../service/post_message_service.dart';
 import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
 import '../shared/analytics/analytics.dart' as ga;
@@ -140,29 +141,34 @@ extension FrameworkCore on Never {
       final finishedCompleter = Completer<void>();
 
       try {
-        final service = await connect<VmServiceWrapper>(
-          uri: uri,
-          finishedCompleter: finishedCompleter,
-          serviceFactory:
-              ({
-                // ignore: avoid-dynamic, mirrors types of [VmServiceFactory].
-                required Stream<dynamic> /*String|List<int>*/ inStream,
-                required void Function(String message) writeMessage,
-                Log? log,
-                DisposeHandler? disposeHandler,
-                Future? streamClosed,
-                String? wsUri,
-                bool trackFutures = false,
-              }) => VmServiceWrapper.defaultFactory(
-                inStream: inStream,
-                writeMessage: writeMessage,
-                log: log,
-                disposeHandler: disposeHandler,
-                streamClosed: streamClosed,
-                wsUri: wsUri,
-                trackFutures: integrationTestMode,
-              ),
-        );
+        final service = isPostMessageUri(uri)
+            ? await connectWithPostMessage(
+                uri: uri,
+                finishedCompleter: finishedCompleter,
+              )
+            : await connect<VmServiceWrapper>(
+                uri: uri,
+                finishedCompleter: finishedCompleter,
+                serviceFactory:
+                    ({
+                      // ignore: avoid-dynamic, mirrors types of [VmServiceFactory].
+                      required Stream<dynamic> /*String|List<int>*/ inStream,
+                      required void Function(String message) writeMessage,
+                      Log? log,
+                      DisposeHandler? disposeHandler,
+                      Future? streamClosed,
+                      String? wsUri,
+                      bool trackFutures = false,
+                    }) => VmServiceWrapper.defaultFactory(
+                      inStream: inStream,
+                      writeMessage: writeMessage,
+                      log: log,
+                      disposeHandler: disposeHandler,
+                      streamClosed: streamClosed,
+                      wsUri: wsUri,
+                      trackFutures: integrationTestMode,
+                    ),
+              );
 
         await serviceConnection.serviceManager.vmServiceOpened(
           service,
