@@ -18,6 +18,9 @@ To learn more about DevTools, check out the
 * Fixed unreadable text in the release notes panel, where blockquotes were
   drawn on a hard coded light blue background in the dark theme.
   [#9957](https://github.com/flutter/devtools/pull/9957)
+* Added user-facing error notifications when importing data files that are
+  missing required fields or contain no data for the screen.
+  [TODO](https://github.com/flutter/devtools/pull/TODO)
 
 ## Inspector updates
 
@@ -25,7 +28,9 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed an issue where importing performance data with Flutter frames but no
+  timeline trace would treat the data as empty.
+  [TODO](https://github.com/flutter/devtools/pull/TODO)
 
 ## CPU profiler updates
 

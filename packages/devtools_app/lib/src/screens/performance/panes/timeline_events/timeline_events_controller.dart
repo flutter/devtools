@@ -498,11 +498,12 @@ class TimelineEventsController extends PerformanceFeatureController
 
   @override
   Future<void> setOfflineData(OfflinePerformanceData offlineData) async {
-    if (offlineData.perfettoTraceBinary != null) {
+    if (offlineData.perfettoTraceBinary != null &&
+        offlineData.perfettoTraceBinary!.isNotEmpty) {
       _updatePerfettoTrace(offlineData.perfettoTraceBinary!);
+      processTrackEvents();
+      await loadPerfettoTrace();
     }
-    processTrackEvents();
-    await loadPerfettoTrace();
 
     if (offlineData.selectedFrame != null) {
       perfettoController.scrollToTimeRange(

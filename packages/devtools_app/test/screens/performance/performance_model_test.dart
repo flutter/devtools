@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:typed_data';
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -17,6 +19,25 @@ void main() {
       expect(offlineData.rebuildCountModel, isNull);
       expect(offlineData.displayRefreshRate, 60.0);
       expect(offlineData.selectedTab, 0);
+    });
+
+    test('isEmpty', () {
+      expect(OfflinePerformanceData().isEmpty, isTrue);
+      expect(
+        OfflinePerformanceData(perfettoTraceBinary: Uint8List(0)).isEmpty,
+        isTrue,
+      );
+      expect(
+        OfflinePerformanceData(
+          perfettoTraceBinary: Uint8List.fromList([1, 2, 3]),
+        ).isEmpty,
+        isFalse,
+      );
+      expect(OfflinePerformanceData(frames: [testFrame0]).isEmpty, isFalse);
+      expect(
+        OfflinePerformanceData(rebuildCountModel: RebuildCountModel()).isEmpty,
+        isFalse,
+      );
     });
 
     test('init from parse', () {

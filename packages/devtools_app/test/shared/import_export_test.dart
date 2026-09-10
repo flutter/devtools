@@ -88,6 +88,46 @@ void main() {
         equals(attemptingToImportMessage('example')),
       );
     });
+
+    test('importData pushes notification when activeScreenId is missing', () {
+      importController.importData(devToolsFileJsonWithoutActiveScreenId);
+      expect(notifications.activeMessages.length, equals(1));
+      expect(
+        notifications.activeMessages.first.text,
+        equals(
+          'The imported file is not a valid DevTools snapshot because it does '
+          'not contain an activeScreenId field.',
+        ),
+      );
+    });
+
+    test(
+      'importData pushes notification when activeScreenId is not a String',
+      () {
+        importController.importData(
+          devToolsFileJsonWithNonStringActiveScreenId,
+        );
+        expect(notifications.activeMessages.length, equals(1));
+        expect(
+          notifications.activeMessages.first.text,
+          equals(
+            'The imported file is not a valid DevTools snapshot because it does '
+            'not contain an activeScreenId field.',
+          ),
+        );
+      },
+    );
+
+    test('importData pushes notification when screen data is missing', () {
+      importController.importData(devToolsFileJsonWithoutScreenData);
+      expect(notifications.activeMessages.length, equals(1));
+      expect(
+        notifications.activeMessages.first.text,
+        equals(
+          'The imported file does not contain data for screen \'example\'.',
+        ),
+      );
+    });
   });
 }
 
@@ -108,5 +148,30 @@ final devToolsFileJson = DevToolsJsonFile(
     'devToolsSnapshot': true,
     'activeScreenId': 'example',
     'example': {'title': 'example custom tools'},
+  },
+);
+final devToolsFileJsonWithoutActiveScreenId = DevToolsJsonFile(
+  name: 'devToolsFileJsonWithoutActiveScreenId',
+  lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(3000),
+  data: <String, Object?>{
+    'devToolsSnapshot': true,
+    'example': {'title': 'example custom tools'},
+  },
+);
+final devToolsFileJsonWithNonStringActiveScreenId = DevToolsJsonFile(
+  name: 'devToolsFileJsonWithNonStringActiveScreenId',
+  lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(3500),
+  data: <String, Object?>{
+    'devToolsSnapshot': true,
+    'activeScreenId': 12345,
+    'example': {'title': 'example custom tools'},
+  },
+);
+final devToolsFileJsonWithoutScreenData = DevToolsJsonFile(
+  name: 'devToolsFileJsonWithoutScreenData',
+  lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(4000),
+  data: <String, Object?>{
+    'devToolsSnapshot': true,
+    'activeScreenId': 'example',
   },
 );

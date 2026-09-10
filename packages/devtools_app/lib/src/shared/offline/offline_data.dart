@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../config_specific/import_export/import_export.dart';
 import '../framework/routing.dart';
@@ -131,6 +132,8 @@ class OfflineDataController {
 ///   ),
 /// }
 /// ```
+final _log = Logger('offline_data');
+
 mixin OfflineScreenControllerMixin<T>
     on DevToolsScreenController, AutoDisposeControllerMixin {
   final _exportController = ExportController();
@@ -168,19 +171,41 @@ mixin OfflineScreenControllerMixin<T>
     required FutureOr<void> Function(T data) loadData,
   }) async {
     if (offlineDataController.shouldLoadOfflineData(screenId)) {
-      // TODO(kenz): investigate this line of code. Do we need to be creating a
-      // second copy of the Map from offlineDataController.offlineDataJson or
-      // can we use it directly to save this `Map.of` call?
-      final json = Map<String, Object?>.of(
-        (offlineDataController.offlineDataJson[screenId] as Map)
-            .cast<String, Object?>(),
-      );
-      final screenData = createData(json);
+      final T screenData;
+      try {
+        // TODO(kenz): investigate this line of code. Do we need to be creating a
+        // second copy of the Map from offlineDataController.offlineDataJson or
+        // can we use it directly to save this `Map.of` call?
+        final json = Map<String, Object?>.of(
+          (offlineDataController.offlineDataJson[screenId] as Map)
+              .cast<String, Object?>(),
+        );
+        screenData = createData(json);
+      } catch (e, st) {
+        _log.shout('Error parsing offline data for $screenId', e, st);
+        notificationService.push(
+          'Failed to load offline data for screen \'$screenId\': $e',
+        );
+        return false;
+      }
+
       if (shouldLoad(screenData)) {
         _loadingOfflineData.value = true;
-        await loadData(screenData);
-        _loadingOfflineData.value = false;
-        return true;
+        try {
+          await loadData(screenData);
+          return true;
+        } catch (e, st) {
+          _log.shout('Error loading offline data for $screenId', e, st);
+          notificationService.push(
+            'Failed to load offline data for screen \'$screenId\': $e',
+          );
+        } finally {
+          _loadingOfflineData.value = false;
+        }
+      } else {
+        notificationService.push(
+          'The imported file does not contain any data for screen \'$screenId\'.',
+        );
       }
     }
     return false;

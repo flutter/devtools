@@ -65,7 +65,10 @@ class OfflinePerformanceData {
   /// tab they exported from.
   final int selectedTab;
 
-  bool get isEmpty => perfettoTraceBinary == null;
+  bool get isEmpty =>
+      (perfettoTraceBinary == null || perfettoTraceBinary!.isEmpty) &&
+      frames.isEmpty &&
+      rebuildCountModel == null;
 
   Map<String, Object?> toJson() => {
     traceBinaryKey: perfettoTraceBinary,
