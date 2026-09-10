@@ -12,8 +12,8 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/console/widgets/description.dart';
-import '../../../shared/globals.dart';
 import '../../../shared/diagnostics/diagnostics_node.dart';
+import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/ui/tab.dart';
 import '../inspector_controller.dart';

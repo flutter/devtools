@@ -115,6 +115,7 @@ class _TestInspectorController extends Fake implements InspectorController {
     _selectedNodeProperties.value = properties;
   }
 
+  @override
   void dispose() {
     _selectedNodeProperties.dispose();
   }

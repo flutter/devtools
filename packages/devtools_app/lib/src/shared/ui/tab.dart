@@ -97,8 +97,8 @@ class AnalyticsTabbedView extends StatefulWidget {
 
   /// Trailing widgets shown on the right side of the tab bar.
   ///
-  /// The first [tabs.length] entries are per-tab trailings from
-  /// [DevToolsTab.trailing]. Any additional widgets passed to the constructor
+  /// The first `tabs.length` entries are per-tab trailings from
+  /// `DevToolsTab.trailing`. Any additional widgets passed to the constructor
   /// are shown for every tab.
   final List<Widget> trailingWidgets;
 
