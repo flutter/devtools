@@ -112,7 +112,9 @@ class ExtensionView extends StatelessWidget {
         const SizedBox(height: intermediateSpacing),
         Expanded(
           child: ValueListenableBuilder<ExtensionEnabledState>(
-            valueListenable: extensionService.enabledStateListenable(ext.name),
+            valueListenable: extensionService.enabledStateListenable(
+              ext.packageName,
+            ),
             builder: (context, activationState, _) {
               if (activationState == ExtensionEnabledState.enabled) {
                 return KeepAliveWrapper(

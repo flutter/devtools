@@ -103,7 +103,7 @@ void main() {
   });
 
   group('deduplicateExtensionsAndTakeLatest', () {
-    test('deduplicates matching packageName and name', () {
+    test('deduplicates matching packageName', () {
       final ignored = <DevToolsExtensionConfig>{};
       final ext1 = DevToolsExtensionConfig.parse({
         DevToolsExtensionConfig.nameKey: 'provider',

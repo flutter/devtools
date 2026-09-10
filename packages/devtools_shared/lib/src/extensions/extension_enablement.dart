@@ -49,19 +49,13 @@ $_extensionsKey:
         ?.cast<Map<String, Object?>>();
     if (extensions == null) return ExtensionEnabledState.none;
 
-    final lookupKeys = _enablementLookupKeys(
-      extensionName: extensionName,
-      packageName: packageName,
-    );
-
+    final targetKey = packageName ?? extensionName;
     for (final e in extensions) {
       // Each entry should only have one key / value pair (e.g. '- foo: true').
       assert(e.keys.length == 1);
 
-      for (final key in lookupKeys) {
-        if (e.keys.first == key) {
-          return _extensionStateForValue(e[key]);
-        }
+      if (e.keys.first == targetKey) {
+        return _extensionStateForValue(e[targetKey]);
       }
     }
     return ExtensionEnabledState.none;
@@ -89,10 +83,7 @@ $_extensionsKey:
       extensions = options[_extensionsKey] as List<Map<String, Object?>>;
     }
 
-    final targetKey = _primaryEnablementKey(
-      extensionName: extensionName,
-      packageName: packageName,
-    );
+    final targetKey = packageName ?? extensionName;
 
     // Write the new enabled state to the map.
     final extension = extensions.firstWhereOrNull(
@@ -113,26 +104,6 @@ $_extensionsKey:
       extensionName: extensionName,
       packageName: packageName,
     );
-  }
-
-  static String _primaryEnablementKey({
-    required String extensionName,
-    String? packageName,
-  }) {
-    if (packageName == null || packageName == extensionName) {
-      return extensionName;
-    }
-    return '$packageName.$extensionName';
-  }
-
-  static List<String> _enablementLookupKeys({
-    required String extensionName,
-    String? packageName,
-  }) {
-    if (packageName == null || packageName == extensionName) {
-      return [extensionName];
-    }
-    return ['$packageName.$extensionName', packageName];
   }
 
   /// Returns the content of the `devtools_options.yaml` file at [optionsUri]

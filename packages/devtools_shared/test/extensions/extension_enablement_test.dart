@@ -132,7 +132,7 @@ extensions:
         ExtensionEnabledState.none,
       );
 
-      // Custom package with custom tool name writes and reads cleanly
+      // Custom package with custom tool name writes and reads cleanly using packageName
       options.setExtensionEnabledState(
         devtoolsOptionsUri: optionsUri,
         extensionName: 'custom_tool',
@@ -147,6 +147,14 @@ extensions:
         ),
         ExtensionEnabledState.enabled,
       );
+
+      final file = optionsFileFromTmp();
+      expect(file.readAsStringSync(), '''
+description: This file stores settings for Dart & Flutter DevTools.
+documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
+extensions:
+  - provider: true
+  - custom_pkg: true''');
     });
   });
 }
