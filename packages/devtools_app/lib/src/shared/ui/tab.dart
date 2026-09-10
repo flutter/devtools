@@ -73,7 +73,7 @@ class DevToolsTab extends Tab {
 /// value. This ensures that data being refreshed, or widget tree rebuilds don't
 /// send spurious analytics events.
 class AnalyticsTabbedView extends StatefulWidget {
-  AnalyticsTabbedView({
+  const AnalyticsTabbedView({
     super.key,
     required this.tabs,
     required this.gaScreen,
@@ -82,24 +82,18 @@ class AnalyticsTabbedView extends StatefulWidget {
     this.initialSelectedIndex,
     this.analyticsSessionIdentifier,
     this.staticSingleTab = false,
-    List<Widget> trailingWidgets = const [],
-  }) : trailingWidgets = [
-         ...List.generate(
-           tabs.length,
-           (index) => tabs[index].tab.trailing ?? const SizedBox(),
-         ),
-         ...trailingWidgets,
-       ];
+    this.trailingWidgets = const [],
+  });
 
   final List<TabAndView> tabs;
 
   final String gaScreen;
 
-  /// Trailing widgets shown on the right side of the tab bar.
+  /// Shared trailing widgets shown on the right side of the tab bar for every
+  /// tab.
   ///
-  /// The first `tabs.length` entries are per-tab trailings from
-  /// `DevToolsTab.trailing`. Any additional widgets passed to the constructor
-  /// are shown for every tab.
+  /// Per-tab trailings from `DevToolsTab.trailing` are shown separately for the
+  /// currently selected tab.
   final List<Widget> trailingWidgets;
 
   final int? initialSelectedIndex;
@@ -224,8 +218,8 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                widget.trailingWidgets[_currentTabControllerIndex],
-                ...widget.trailingWidgets.skip(widget.tabs.length),
+                ?widget.tabs[_currentTabControllerIndex].tab.trailing,
+                ...widget.trailingWidgets,
               ],
             ),
           ],
