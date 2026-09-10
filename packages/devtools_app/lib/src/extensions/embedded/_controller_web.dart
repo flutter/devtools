@@ -49,30 +49,11 @@ String _debugExtensionPlaceholderHtml(String name) {
       background-color: #202124;
       color: #e8eaed;
     }
-    #reload-info {
-      color: #8ab4f8;
-      font-weight: bold;
-      margin-top: 8px;
-    }
   </style>
 </head>
 <body>
   <h3>DevTools Extension Placeholder ($name)</h3>
   <p>Local debugging placeholder view.</p>
-  <p id="reload-info"></p>
-  <script>
-    document.getElementById('reload-info').textContent = 'Rendered at ' + new Date().toLocaleTimeString() + ' (Token: ' + Math.random().toString(36).substring(2, 8) + ')';
-
-    window.addEventListener('message', (event) => {
-      const data = event.data;
-      if (!data) return;
-      if (data.type === 'ping') {
-        window.parent.postMessage({ type: 'pong' }, '*');
-      } else if (data.type === 'forceReload') {
-        window.location.reload();
-      }
-    });
-  </script>
 </body>
 </html>
 ''';
