@@ -163,6 +163,7 @@ class _SizeColumn extends ColumnData<DiffClassData> {
   _SizeColumn(this.dataPart, this.sizeType)
     : super(
         columnTitle(dataPart),
+        titleTooltip: columnTooltip(dataPart),
         fixedWidthPx: 80.0,
         alignment: ColumnAlignment.right,
       );
@@ -180,6 +181,24 @@ class _SizeColumn extends ColumnData<DiffClassData> {
         return 'Delta';
       case _DataPart.persisted:
         return 'Persisted';
+    }
+  }
+
+  static String columnTooltip(_DataPart dataPart) {
+    switch (dataPart) {
+      case _DataPart.created:
+        return 'Size of this class allocated between the two snapshots.\n'
+            'This is the value for this row, not a cumulative total.';
+      case _DataPart.deleted:
+        return 'Size of this class released between the two snapshots.\n'
+            'This is the value for this row, not a cumulative total.';
+      case _DataPart.delta:
+        return 'Net size change of this class between the two snapshots '
+            '(allocated minus freed).\n'
+            'This is the value for this row, not a cumulative total.';
+      case _DataPart.persisted:
+        return 'Size of this class present in both snapshots.\n'
+            'This is the value for this row, not a cumulative total.';
     }
   }
 
