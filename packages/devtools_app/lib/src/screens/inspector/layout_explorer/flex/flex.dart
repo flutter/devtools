@@ -300,7 +300,6 @@ class FlexLayoutExplorerWidgetState
               ),
             ),
             child: VisualizeFlexChildren(
-              state: this,
               properties: propertiesLocal,
               children: children,
               highlighted: highlighted,
@@ -383,14 +382,22 @@ class FlexLayoutExplorerWidgetState
       ),
     );
 
-    return Container(
-      constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
-      child: Stack(
-        children: [
-          flexDescription,
-          verticalAxisDescription,
-          horizontalAxisDescription,
-        ],
+    return _FlexLayoutExplorerScope(
+      rootProperties: propertiesLocal,
+      onTap: onTap,
+      onDoubleTap: onDoubleTap,
+      markAsDirty: markAsDirty,
+      entranceController: entranceController,
+      entranceCurve: entranceCurve,
+      child: Container(
+        constraints: BoxConstraints(maxWidth: maxWidth, maxHeight: maxHeight),
+        child: Stack(
+          children: [
+            flexDescription,
+            verticalAxisDescription,
+            horizontalAxisDescription,
+          ],
+        ),
       ),
     );
   }
@@ -405,7 +412,6 @@ class FlexLayoutExplorerWidgetState
 class VisualizeFlexChildren extends StatefulWidget {
   const VisualizeFlexChildren({
     super.key,
-    required this.state,
     required this.properties,
     required this.children,
     required this.highlighted,
@@ -418,7 +424,6 @@ class VisualizeFlexChildren extends StatefulWidget {
   final LayoutProperties? highlighted;
   final ScrollController scrollController;
   final Axis direction;
-  final FlexLayoutExplorerWidgetState state;
 
   @override
   State<VisualizeFlexChildren> createState() => _VisualizeFlexChildrenState();
@@ -499,7 +504,6 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
 
             final visualizer = FlexChildVisualizer(
               key: isSelected ? selectedChildKey : null,
-              state: widget.state,
               layoutProperties: child,
               isSelected: isSelected,
               renderProperties: renderProperties[i],
@@ -573,13 +577,10 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
 class FlexChildVisualizer extends StatelessWidget {
   const FlexChildVisualizer({
     super.key,
-    required this.state,
     required this.layoutProperties,
     required this.renderProperties,
     required this.isSelected,
   });
-
-  final FlexLayoutExplorerWidgetState state;
 
   final bool isSelected;
 
@@ -587,30 +588,28 @@ class FlexChildVisualizer extends StatelessWidget {
 
   final RenderProperties renderProperties;
 
-  // TODO(polina-c, jacob314): consider refactoring to remove `!`.
-  FlexLayoutProperties get root => state.properties!;
-
   LayoutProperties get properties => renderProperties.layoutProperties;
 
   ObjectGroup? get objectGroup =>
       properties.node.objectGroupApi as ObjectGroup?;
 
-  void onChangeFlexFactor(int? newFlexFactor) async {
-    state.markAsDirty();
+  void _onChangeFlexFactor(int? newFlexFactor, VoidCallback markAsDirty) async {
+    markAsDirty();
     await objectGroup!.invokeSetFlexFactor(
       properties.node.valueRef,
       newFlexFactor,
     );
   }
 
-  void onChangeFlexFit(FlexFit? newFlexFit) async {
-    state.markAsDirty();
+  void _onChangeFlexFit(FlexFit? newFlexFit, VoidCallback markAsDirty) async {
+    markAsDirty();
     await objectGroup!.invokeSetFlexFit(properties.node.valueRef, newFlexFit!);
   }
 
   Widget _buildFlexFactorChangerDropdown(
     int maximumFlexFactor,
     ThemeData theme,
+    VoidCallback markAsDirty,
   ) {
     final propertiesLocal = properties;
 
@@ -632,7 +631,7 @@ class FlexChildVisualizer extends StatelessWidget {
 
     return DropdownButton<int>(
       value: propertiesLocal.flexFactor?.toInt().clamp(0, maximumFlexFactor),
-      onChanged: onChangeFlexFactor,
+      onChanged: (newFactor) => _onChangeFlexFactor(newFactor, markAsDirty),
       iconEnabledColor: textColor,
       underline: buildUnderline(),
       items: <DropdownMenuItem<int>>[
@@ -642,7 +641,10 @@ class FlexChildVisualizer extends StatelessWidget {
     );
   }
 
-  Widget _buildFlexFitChangerDropdown(ThemeData theme) {
+  Widget _buildFlexFitChangerDropdown(
+    ThemeData theme,
+    VoidCallback markAsDirty,
+  ) {
     Widget flexFitDescription(FlexFit flexFit) => Text(
       'fit: ${flexFit.name}',
       style: theme.regularTextStyleWithColor(emphasizedTextColor),
@@ -664,7 +666,7 @@ class FlexChildVisualizer extends StatelessWidget {
 
     return DropdownButton<FlexFit>(
       value: propertiesLocal.flexFit,
-      onChanged: onChangeFlexFit,
+      onChanged: (newFit) => _onChangeFlexFit(newFit, markAsDirty),
       underline: buildUnderline(),
       iconEnabledColor: emphasizedTextColor,
       items: <DropdownMenuItem<FlexFit>>[
@@ -675,7 +677,7 @@ class FlexChildVisualizer extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(ThemeData theme) {
+  Widget _buildContent(ThemeData theme, _FlexLayoutExplorerScope scope) {
     // TODO(https://github.com/flutter/devtools/issues/4058) allow more dynamic
     // flex factor input
     final currentFlexFactor = properties.flexFactor?.toInt() ?? 0;
@@ -690,11 +692,15 @@ class FlexChildVisualizer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Flexible(
-            child: _buildFlexFactorChangerDropdown(currentMaxFlexFactor, theme),
+            child: _buildFlexFactorChangerDropdown(
+              currentMaxFlexFactor,
+              theme,
+              scope._markAsDirty,
+            ),
           ),
           if (!properties.hasFlexFactor)
             Text(
-              'unconstrained ${root.isMainAxisHorizontal ? 'horizontal' : 'vertical'}',
+              'unconstrained ${scope._rootProperties.isMainAxisHorizontal ? 'horizontal' : 'vertical'}',
               style: theme.regularTextStyle.copyWith(
                 color: theme.colorScheme.unconstrainedColor,
                 fontStyle: FontStyle.italic,
@@ -705,7 +711,7 @@ class FlexChildVisualizer extends StatelessWidget {
               textScaler: const TextScaler.linear(smallTextScaleFactor),
               textAlign: TextAlign.center,
             ),
-          _buildFlexFitChangerDropdown(theme),
+          _buildFlexFitChangerDropdown(theme, scope._markAsDirty),
         ],
       ),
     );
@@ -713,10 +719,11 @@ class FlexChildVisualizer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scope = _FlexLayoutExplorerScope._of(context);
     final renderSize = renderProperties.size;
     final renderOffset = renderProperties.offset;
     final propertiesLocal = properties;
-    final rootLocal = root;
+    final rootLocal = scope._rootProperties;
 
     Widget buildEntranceAnimation(BuildContext _, Widget? child) {
       final vertical = rootLocal.isMainAxisVertical;
@@ -730,11 +737,11 @@ class FlexChildVisualizer extends StatelessWidget {
                 vertical ? minRenderHeight - entranceMargin : renderSize.height,
               ),
               end: renderSize,
-            ).evaluate(state.entranceCurve)!
+            ).evaluate(scope._entranceCurve)!
           : renderSize;
       // Not-expanded widgets enter much faster.
       return Opacity(
-        opacity: min([state.entranceCurve.value * 5, 1.0]),
+        opacity: min([scope._entranceCurve.value * 5, 1.0]),
         child: Padding(
           padding: EdgeInsets.symmetric(
             horizontal: math.max(0.0, (renderSize.width - size.width) / 2),
@@ -749,14 +756,14 @@ class FlexChildVisualizer extends StatelessWidget {
       top: renderOffset.dy,
       left: renderOffset.dx,
       child: GestureDetector(
-        onTap: () => unawaited(state.onTap(propertiesLocal)),
-        onDoubleTap: () => state.onDoubleTap(propertiesLocal),
-        onLongPress: () => state.onDoubleTap(propertiesLocal),
+        onTap: () => unawaited(scope._onTap(propertiesLocal)),
+        onDoubleTap: () => scope._onDoubleTap(propertiesLocal),
+        onLongPress: () => scope._onDoubleTap(propertiesLocal),
         child: SizedBox(
           width: renderSize.width,
           height: renderSize.height,
           child: AnimatedBuilder(
-            animation: state.entranceController,
+            animation: scope._entranceController,
             builder: buildEntranceAnimation,
             child: WidgetVisualizer(
               isFlex: true,
@@ -769,7 +776,7 @@ class FlexChildVisualizer extends StatelessWidget {
                 properties: propertiesLocal,
                 child: Align(
                   alignment: Alignment.topRight,
-                  child: _buildContent(Theme.of(context)),
+                  child: _buildContent(Theme.of(context), scope),
                 ),
               ),
             ),
@@ -782,4 +789,59 @@ class FlexChildVisualizer extends StatelessWidget {
   /// define the number of flex factor to be shown in the flex dropdown button
   /// for example if it's set to 5 the dropdown will consist of 6 items (null and 0..5)
   static const maximumFlexFactorOptions = 5;
+}
+
+/// Scope providing [FlexLayoutProperties] and callbacks for
+/// [FlexLayoutExplorerWidget] descendants.
+class _FlexLayoutExplorerScope extends InheritedWidget {
+  const _FlexLayoutExplorerScope({
+    required FlexLayoutProperties rootProperties,
+    required Future<void> Function(LayoutProperties properties) onTap,
+    required void Function(LayoutProperties properties) onDoubleTap,
+    required VoidCallback markAsDirty,
+    required AnimationController entranceController,
+    required CurvedAnimation entranceCurve,
+    required super.child,
+  }) : _rootProperties = rootProperties,
+       _onTap = onTap,
+       _onDoubleTap = onDoubleTap,
+       _markAsDirty = markAsDirty,
+       _entranceController = entranceController,
+       _entranceCurve = entranceCurve;
+
+  /// The properties of the root flex widget being inspected.
+  final FlexLayoutProperties _rootProperties;
+
+  /// Callback when a child widget is tapped.
+  final Future<void> Function(LayoutProperties properties) _onTap;
+
+  /// Callback when a child widget is double tapped.
+  final void Function(LayoutProperties properties) _onDoubleTap;
+
+  /// Callback to mark the layout explorer as dirty for a future refresh.
+  final VoidCallback _markAsDirty;
+
+  /// The animation controller for the entrance animation.
+  final AnimationController _entranceController;
+
+  /// The curved animation for the entrance animation.
+  final CurvedAnimation _entranceCurve;
+
+  /// Retrieves the nearest [_FlexLayoutExplorerScope] ancestor.
+  static _FlexLayoutExplorerScope _of(BuildContext context) {
+    final scope = context
+        .dependOnInheritedWidgetOfExactType<_FlexLayoutExplorerScope>();
+    assert(scope != null, 'No _FlexLayoutExplorerScope found in context');
+    return scope!;
+  }
+
+  @override
+  bool updateShouldNotify(_FlexLayoutExplorerScope oldWidget) {
+    return _rootProperties != oldWidget._rootProperties ||
+        _onTap != oldWidget._onTap ||
+        _onDoubleTap != oldWidget._onDoubleTap ||
+        _markAsDirty != oldWidget._markAsDirty ||
+        _entranceController != oldWidget._entranceController ||
+        _entranceCurve != oldWidget._entranceCurve;
+  }
 }
