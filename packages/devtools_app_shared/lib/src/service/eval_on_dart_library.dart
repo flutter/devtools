@@ -447,7 +447,7 @@ class EvalOnDartLibrary extends DisposableController
       '      for (int i = 0; i < 200; i++) {'
       '        await Future.delayed(const Duration(milliseconds: 50));'
       '        try {'
-      '          if (widgetInspectorService.toObject(readerId, "$readerGroup") == null) {'
+      '          if (widgetInspectorService.toObject(readerId!, "$readerGroup") == null) {'
       '            break;'
       '          }'
       '        } catch (_) {'

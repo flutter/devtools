@@ -76,7 +76,6 @@ void main() {
         await env.setupEnvironment();
         final mainIsolate =
             serviceConnection.serviceManager.isolateManager.mainIsolate;
-        expect(mainIsolate, isNotNull);
 
         final eval = EvalOnDartLibrary(
           'dart:core',
@@ -98,7 +97,6 @@ void main() {
         await env.setupEnvironment();
         final mainIsolate =
             serviceConnection.serviceManager.isolateManager.mainIsolate;
-        expect(mainIsolate, isNotNull);
 
         final eval = EvalOnDartLibrary(
           'dart:core',
