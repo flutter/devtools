@@ -23,15 +23,9 @@ $_documentationKey: https://docs.flutter.dev/tools/devtools/extensions#configure
 $_extensionsKey:
 ''';
 
-  /// Returns the current enabled state for [extensionName] in the
-  /// 'devtools_options.yaml' file at [devtoolsOptionsUri].
-  ///
-  /// If the 'devtools_options.yaml' file does not exist, it will be created
-  /// with an empty set of extensions.
-  ///
-  /// [devtoolsOptionsUri] is expected to be a file:// URI.
-  /// Returns the current enabled state for [extensionName] (and optionally
-  /// [packageName]) in the 'devtools_options.yaml' file at [devtoolsOptionsUri].
+  /// Returns the current enabled state of [packageName] (falls back to
+  /// [extensionName]) in the 'devtools_options.yaml' file at
+  /// [devtoolsOptionsUri].
   ///
   /// If the 'devtools_options.yaml' file does not exist, it will be created
   /// with an empty set of extensions.
@@ -61,7 +55,7 @@ $_extensionsKey:
     return ExtensionEnabledState.none;
   }
 
-  /// Sets the enabled state for [extensionName] (and optionally [packageName])
+  /// Sets the enabled state of [packageName] (falls back to [extensionName])
   /// in the 'devtools_options.yaml' file at [devtoolsOptionsUri].
   ///
   /// If the 'devtools_options.yaml' file does not exist, it will be created.
