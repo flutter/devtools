@@ -418,43 +418,50 @@ class EvalOnDartLibrary extends DisposableController
       isAlive: isAlive,
     );
 
-    final readerId = await safeEval(
-      // since we are awaiting the Future, we need to make sure that during the awaiting,
-      // the "reader" is not GCed
-      'widgetInspectorService.toId(<dynamic>[], "$readerGroup")',
-      isAlive: isAlive,
-      scope: {'widgetInspectorService': widgetInspectorServiceRef.id!},
-    ).then((ref) => ref.valueAsString!);
-
     await safeEval(
       '() async {'
-      '  final reader = widgetInspectorService.toObject("$readerId", "$readerGroup") as List;'
-      '  /* Keep a strong reference to `reader` in the target app to prevent it'
-      '     from being garbage collected by Chrome/VM before the future resolves.'
-      '     Without this, the reader is only weakly referenced by the inspector'
-      '     service and is aggressively GCed, causing a TypeError/TimeoutException'
-      '     or failing the assertion that the retrieved result length is 1 or 2.'
-      '     We use Future.delayed in a loop instead of Timer because Future is in'
-      '     dart:core and guaranteed to be resolved without requiring dart:async. */'
-      '  bool isDone = false;'
-      '  () async {'
-      '    int bufferTicks = 0;'
-      '    /* Stop pinning after a 1-second buffer when the future has completed. */'
-      '    while (!isDone && ++bufferTicks <=20) {'
-      '      final _ = reader;'
-      '      await Future.delayed(const Duration(milliseconds: 50));'
-      '    }'
-      '  }();'
+      '  String? readerId;'
       '  try {'
+      '    final reader = <dynamic>[];'
+      '    readerId = widgetInspectorService.toId(reader, "$readerGroup") as String;'
+      '    try {'
       // Cast as dynamic so that it is possible to await Future<void>
-      '    dynamic result = ($expression) as dynamic;'
-      '    reader.add(result);'
-      '  } catch (err, stack) {'
-      '    reader.add(err);'
-      '    reader.add(stack);'
-      '  } finally {'
-      '    isDone = true;'
-      '    postEvent("future_completed", {"future_id": $futureId, "client_id": $_clientId});'
+      '      dynamic result = ($expression) as dynamic;'
+      '      reader.add(result);'
+      '    } catch (err, stack) {'
+      '      reader.add(err);'
+      '      reader.add(stack);'
+      '    } finally {'
+      '      postEvent("future_completed", {'
+      '        "future_id": $futureId,'
+      '        "client_id": $_clientId,'
+      '        "reader_id": readerId,'
+      '      });'
+      '      /* Keep a strong reference to `reader` in the target app to prevent it'
+      '         from being garbage collected by Chrome/VM before DevTools retrieves it.'
+      '         Without this, the reader is only weakly referenced by the inspector'
+      '         service and is aggressively GCed, causing a TypeError/TimeoutException'
+      '         or failing the assertion that the retrieved result length is 1 or 2.'
+      '         We use Future.delayed in a loop instead of Timer because Future is in'
+      '         dart:core and guaranteed to be resolved without requiring dart:async. */'
+      '      for (int i = 0; i < 200; i++) {'
+      '        await Future.delayed(const Duration(milliseconds: 50));'
+      '        try {'
+      '          if (widgetInspectorService.toObject(readerId, "$readerGroup") == null) {'
+      '            break;'
+      '          }'
+      '        } catch (_) {'
+      '          break;'
+      '        }'
+      '        final _ = reader.length;'
+      '      }'
+      '    }'
+      '  } catch (err) {'
+      '    postEvent("future_completed", {'
+      '      "future_id": $futureId,'
+      '      "client_id": $_clientId,'
+      '      "error": err.toString(),'
+      '    });'
       '  }'
       '}()',
       isAlive: isAlive,
@@ -465,7 +472,15 @@ class EvalOnDartLibrary extends DisposableController
       },
     );
 
-    await future;
+    final event = await future;
+    if (event.extensionData?.data['error'] != null) {
+      throw UnknownEvalException(
+        expression: expression,
+        scope: scope,
+        exception: event.extensionData!.data['error'],
+      );
+    }
+    final readerId = event.extensionData!.data['reader_id'] as String;
 
     final resultRef = await evalInstance(
       '() {'

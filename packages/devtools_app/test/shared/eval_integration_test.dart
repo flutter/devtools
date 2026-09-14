@@ -5,7 +5,6 @@
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/flutter_test_driver.dart';
@@ -71,39 +70,60 @@ void main() {
           expect(instance2.classRef!.name, '_Future');
         },
         timeout: const Timeout.factor(2),
-        // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
-        // is addressed, we can unskip this for the Flutter customer tests.
-        tags: skipForCustomerTestsTag,
       );
 
-      test(
-        'returns the result of the future completion',
-        () async {
-          await env.setupEnvironment();
-          final mainIsolate =
-              serviceConnection.serviceManager.isolateManager.mainIsolate;
-          expect(mainIsolate, isNotNull);
+      test('returns the result of the future completion', () async {
+        await env.setupEnvironment();
+        final mainIsolate =
+            serviceConnection.serviceManager.isolateManager.mainIsolate;
+        expect(mainIsolate, isNotNull);
 
-          final eval = EvalOnDartLibrary(
-            'dart:core',
-            serviceConnection.serviceManager.service!,
-            serviceManager: serviceConnection.serviceManager,
-            isolate: mainIsolate,
+        final eval = EvalOnDartLibrary(
+          'dart:core',
+          serviceConnection.serviceManager.service!,
+          serviceManager: serviceConnection.serviceManager,
+          isolate: mainIsolate,
+        );
+
+        final instance = (await eval.asyncEval(
+          // The delay asserts that there is no issue with garbage collection
+          'await Future<int>.delayed(const Duration(milliseconds: 500), () => 42)',
+          isAlive: isAlive,
+        ))!;
+
+        expect(instance.valueAsString, '42');
+      }, timeout: const Timeout.factor(2));
+
+      test('survives garbage collection while the future is pending', () async {
+        await env.setupEnvironment();
+        final mainIsolate =
+            serviceConnection.serviceManager.isolateManager.mainIsolate;
+        expect(mainIsolate, isNotNull);
+
+        final eval = EvalOnDartLibrary(
+          'dart:core',
+          serviceConnection.serviceManager.service!,
+          serviceManager: serviceConnection.serviceManager,
+          isolate: mainIsolate,
+        );
+
+        final evalFuture = eval.asyncEval(
+          'await Future<int>.delayed(const Duration(milliseconds: 500), () => 42)',
+          isAlive: isAlive,
+        );
+
+        // Force garbage collection in the target isolate while the future is pending.
+        for (var i = 0; i < 3; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await serviceConnection.serviceManager.service!.getAllocationProfile(
+            mainIsolate.value!.id!,
+            gc: true,
           );
+        }
 
-          final instance = (await eval.asyncEval(
-            // The delay asserts that there is no issue with garbage collection
-            'await Future<int>.delayed(const Duration(milliseconds: 500), () => 42)',
-            isAlive: isAlive,
-          ))!;
-
-          expect(instance.valueAsString, '42');
-        },
-        timeout: const Timeout.factor(2),
-        // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
-        // is addressed, we can unskip this for the Flutter customer tests.
-        tags: skipForCustomerTestsTag,
-      );
+        final instance = (await evalFuture)!;
+        expect(instance.valueAsString, '42');
+      }, timeout: const Timeout.factor(2));
 
       test(
         'throws FutureFailedException when the future is rejected',
@@ -152,12 +172,7 @@ void main() {
           expect(error.valueAsString, 'foo');
         },
         timeout: const Timeout.factor(2),
-        // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
-        // is addressed, we can unskip this for the Flutter customer tests.
-        tags: skipForCustomerTestsTag,
       );
-      // TODO(https://github.com/flutter/devtools/issues/9484): if this flake
-      // is addressed, we can remove the retry.
-    }, retry: 3);
+    });
   });
 }
