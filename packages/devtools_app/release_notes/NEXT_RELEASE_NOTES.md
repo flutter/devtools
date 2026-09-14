@@ -88,7 +88,7 @@ TODO: Remove this section if there are not any updates.
   [#8507](https://github.com/flutter/devtools/issues/8507)
 * Improved DevTools extension isolation by tracking the providing package name for
   enablement, deduplication, and asset loading.
-  [#9965](https://github.com/flutter/devtools/pull/9965)
+  [#9981](https://github.com/flutter/devtools/pull/9981)
 
 ## Advanced developer mode updates
 
