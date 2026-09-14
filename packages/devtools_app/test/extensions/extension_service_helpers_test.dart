@@ -23,6 +23,7 @@ void main() {
       // Returns 'b' when 'a' has parsing errors.
       var a = DevToolsExtensionConfig.parse({
         DevToolsExtensionConfig.nameKey: 'bar',
+        DevToolsExtensionConfig.packageNameKey: 'bar',
         DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
         DevToolsExtensionConfig.versionKey: 'this-will-not-parse',
         DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
@@ -35,6 +36,7 @@ void main() {
       });
       var b = DevToolsExtensionConfig.parse({
         DevToolsExtensionConfig.nameKey: 'bar',
+        DevToolsExtensionConfig.packageNameKey: 'bar',
         DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
         DevToolsExtensionConfig.versionKey: '2.1.0',
         DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
@@ -50,6 +52,7 @@ void main() {
       // Returns 'a' when 'b' has parsing errors.
       a = DevToolsExtensionConfig.parse({
         DevToolsExtensionConfig.nameKey: 'bar',
+        DevToolsExtensionConfig.packageNameKey: 'bar',
         DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
         DevToolsExtensionConfig.versionKey: '2.1.0',
         DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
@@ -62,6 +65,7 @@ void main() {
       });
       b = DevToolsExtensionConfig.parse({
         DevToolsExtensionConfig.nameKey: 'bar',
+        DevToolsExtensionConfig.packageNameKey: 'bar',
         DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
         DevToolsExtensionConfig.versionKey: 'this-will-not-parse',
         DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
@@ -76,6 +80,7 @@ void main() {
       // Returns 'a' when both 'a' and 'b' have parsing errors.
       a = DevToolsExtensionConfig.parse({
         DevToolsExtensionConfig.nameKey: 'bar',
+        DevToolsExtensionConfig.packageNameKey: 'bar',
         DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
         DevToolsExtensionConfig.versionKey: 'this-will-not-parse',
         DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
@@ -88,6 +93,7 @@ void main() {
       });
       b = DevToolsExtensionConfig.parse({
         DevToolsExtensionConfig.nameKey: 'bar',
+        DevToolsExtensionConfig.packageNameKey: 'bar',
         DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
         DevToolsExtensionConfig.versionKey: 'this-will-not-parse',
         DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,

@@ -74,7 +74,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
 Future<ExtensionEnabledState> extensionEnabledState({
   required String devtoolsOptionsFileUri,
   required String extensionName,
-  String? extensionPackage,
+  required String extensionPackage,
   bool? enable,
 }) async {
   _log.fine(
@@ -93,8 +93,9 @@ Future<ExtensionEnabledState> extensionEnabledState({
       queryParameters: {
         ExtensionsApi.devtoolsOptionsUriPropertyName: devtoolsOptionsFileUri,
         ExtensionsApi.extensionNamePropertyName: extensionName,
-        ExtensionsApi.extensionPackagePropertyName: ?extensionPackage,
-        ExtensionsApi.enabledStatePropertyName: ?enable?.toString(),
+        ExtensionsApi.extensionPackagePropertyName: extensionPackage,
+        if (enable != null)
+          ExtensionsApi.enabledStatePropertyName: enable.toString(),
       },
     );
     final resp = await request(uri.toString());

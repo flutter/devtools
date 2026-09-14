@@ -342,6 +342,7 @@ final workspaceMember = TestPackage(
 
 final driftPackage = TestPackageWithExtension(
   name: 'drift',
+  packageName: 'drift',
   issueTracker: 'https://github.com/simolus3/drift/issues',
   version: '0.0.1',
   materialIconCodePoint: 62494,
@@ -351,6 +352,7 @@ final driftPackage = TestPackageWithExtension(
 );
 final providerPackage = TestPackageWithExtension(
   name: 'provider',
+  packageName: 'provider',
   issueTracker: 'https://github.com/rrousselGit/provider/issues',
   version: '0.0.1',
   materialIconCodePoint: 57521,
@@ -360,6 +362,7 @@ final providerPackage = TestPackageWithExtension(
 );
 final staticExtension1Package = TestPackageWithExtension(
   name: 'static_extension_1',
+  packageName: 'static_extension_1',
   issueTracker: 'https://www.google.com/',
   version: '1.0.0',
   materialIconCodePoint: 0xe50a,
@@ -369,6 +372,7 @@ final staticExtension1Package = TestPackageWithExtension(
 );
 final staticExtension2Package = TestPackageWithExtension(
   name: 'static_extension_2',
+  packageName: 'static_extension_2',
   issueTracker: 'https://www.google.com/',
   version: '2.0.0',
   materialIconCodePoint: 0xe50a,
@@ -378,6 +382,7 @@ final staticExtension2Package = TestPackageWithExtension(
 );
 final newerStaticExtension1Package = TestPackageWithExtension(
   name: 'static_extension_1',
+  packageName: 'static_extension_1',
   issueTracker: 'https://www.google.com/',
   version: '2.0.0',
   materialIconCodePoint: 0xe50a,
@@ -389,6 +394,7 @@ final newerStaticExtension1Package = TestPackageWithExtension(
 final badExtensionPackage = TestPackageWithExtension(
   // Extension names must be only lowercase letters and underscores.
   name: 'BAD_EXTENSION',
+  packageName: 'bad_extension',
   issueTracker: 'https://www.google.com/',
   version: '1.0.0',
   materialIconCodePoint: 0xe50a,
@@ -410,7 +416,7 @@ final spoofedExtensionPackage = TestPackageWithExtension(
 class TestPackageWithExtension {
   TestPackageWithExtension({
     required this.name,
-    String? packageName,
+    required this.packageName,
     required this.issueTracker,
     required this.version,
     required this.materialIconCodePoint,
@@ -418,10 +424,8 @@ class TestPackageWithExtension {
     required this.isPubliclyHosted,
     required this.packageVersion,
     String? relativePathFromExtensions,
-  }) : packageName = packageName ?? name.toLowerCase(),
-       assert(isPubliclyHosted == (packageVersion != null)),
-       relativePathFromExtensions =
-           relativePathFromExtensions ?? (packageName ?? name.toLowerCase());
+  }) : assert(isPubliclyHosted == (packageVersion != null)),
+       relativePathFromExtensions = relativePathFromExtensions ?? packageName;
 
   final String name;
   final String packageName;

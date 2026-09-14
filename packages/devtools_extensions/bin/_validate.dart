@@ -53,6 +53,7 @@ class ValidateExtensionCommand extends Command {
         ..._configAsMap(packagePath),
         // These are generated on the DevTools server, so pass in stubbed
         // values for the sake of validation.
+        DevToolsExtensionConfig.packageNameKey: '',
         DevToolsExtensionConfig.extensionAssetsPathKey: '',
         DevToolsExtensionConfig.devtoolsOptionsUriKey: '',
         DevToolsExtensionConfig.isPubliclyHostedKey: 'false',

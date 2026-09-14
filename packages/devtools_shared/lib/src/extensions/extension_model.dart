@@ -43,6 +43,7 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
       // The expected keys below are not from the extension's config.yaml
       // file; they are generated during the extension detection mechanism
       // in the DevTools server.
+      packageNameKey: final String packageName,
       extensionAssetsPathKey: final String extensionAssetsPath,
       devtoolsOptionsUriKey: final String devtoolsOptionsUri,
       isPubliclyHostedKey: final String isPubliclyHosted,
@@ -69,8 +70,6 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
       } else {
         codePoint = codePointFromJson as int;
       }
-
-      final packageName = json[packageNameKey] as String? ?? name;
 
       return DevToolsExtensionConfig._(
         // These values are required fields in the extension's config.yaml file.
@@ -308,9 +307,6 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
   static void _assertGeneratedKeysPresent(Map<String, Object?> json) {
     final missingKeys = <String>[];
     for (final key in _serverGeneratedKeys) {
-      if (key == packageNameKey) {
-        continue; // Optional for backwards compatibility.
-      }
       if (!json.containsKey(key)) {
         missingKeys.add(key);
       }
