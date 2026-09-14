@@ -293,8 +293,10 @@ class ExtensionService extends DisposableController
     // Set the enabled state for all matching extensions, even if some are
     // marked as ignored due to being a duplicate. This ensures that
     // devtools_options.yaml files are kept in sync across the project.
-    final allMatchingExtensions = [...runtimeExtensions, ...staticExtensions]
-        .where((e) => e.packageName == extension.packageName);
+    final allMatchingExtensions = [
+      ...runtimeExtensions,
+      ...staticExtensions,
+    ].where((e) => e.packageName == extension.packageName);
     await [
       for (final ext in allMatchingExtensions)
         server.extensionEnabledState(
