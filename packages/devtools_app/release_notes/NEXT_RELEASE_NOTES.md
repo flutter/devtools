@@ -21,11 +21,16 @@ To learn more about DevTools, check out the
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any updates.
+* Added the widget source file path to the Inspector details pane
+  (`filename.dart:line:column`), matching legacy Inspector behavior. -
+  [#9972](https://github.com/flutter/devtools/pull/9972),
+  [#9922](https://github.com/flutter/devtools/issues/9922)
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed a bug where the Flutter frames chart could appear frozen after
+  switching away from the Performance screen and coming back.
+  [#9960](https://github.com/flutter/devtools/pull/9960)
 
 ## CPU profiler updates
 
@@ -86,6 +91,8 @@ TODO: Remove this section if there are not any updates.
 
 * Hide the DevTools extensions menu button in single-screen embedded mode (`EmbedMode.embedOne`) on standard screens.
   [#8507](https://github.com/flutter/devtools/issues/8507)
+* Added iframe sandboxing for embedded DevTools extensions to enforce origin
+  isolation. [#9967](https://github.com/flutter/devtools/pull/9967)
 * Improved DevTools extension isolation by tracking the providing package name for
   enablement, deduplication, and asset loading.
   [#9981](https://github.com/flutter/devtools/pull/9981)

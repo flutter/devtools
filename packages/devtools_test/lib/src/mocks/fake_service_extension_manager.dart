@@ -79,7 +79,7 @@ base class FakeServiceExtensionManager extends Fake
   /// Hook for tests to call to fake changing the state of a service
   /// extension.
   void fakeServiceExtensionStateChanged(
-    final String name,
+    String name,
     String valueFromJson,
   ) async {
     final extension = serviceExtensionsAllowlist[name];

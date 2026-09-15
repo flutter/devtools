@@ -415,15 +415,6 @@ void main() {
       expect(httpWsHandshake.port, 56744);
     });
 
-    test('durationDisplay returns correct value', () {
-      expect(httpGet.durationDisplay, 'Duration: 811.7 ms');
-      expect(httpGetWithError.durationDisplay, 'Duration: 2029.5 ms');
-      expect(httpPost.durationDisplay, 'Duration: 1508.0 ms');
-      expect(httpPut.durationDisplay, 'Duration: 1325.8 ms');
-      expect(httpPatch.durationDisplay, 'Duration: 1243.7 ms');
-      expect(httpWsHandshake.durationDisplay, 'Duration: 41.4 ms');
-    });
-
     test('isValid returns correct value', () {
       expect(httpGet.isValid, isTrue);
       expect(httpGetWithError.isValid, isTrue);

@@ -31,6 +31,7 @@ import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
+import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/managers/notifications.dart';
@@ -55,6 +56,9 @@ typedef WidgetTreeNodeProperties = ({
 
   /// Layout properties for the widget.
   LayoutProperties? layoutProperties,
+
+  /// Source location where the selected widget was created.
+  InspectorSourceLocation? creationLocation,
 });
 
 /// This class is based on the InspectorPanel class from the Flutter IntelliJ
@@ -255,6 +259,7 @@ class InspectorController extends DisposableController
     widgetProperties: [],
     renderProperties: [],
     layoutProperties: null,
+    creationLocation: null,
   ));
 
   /// Whether the implementation widgets are hidden in the widget tree.
@@ -817,6 +822,7 @@ class InspectorController extends DisposableController
     final widgetProperties = <RemoteDiagnosticsNode>[];
     final renderProperties = <RemoteDiagnosticsNode>[];
     LayoutProperties? layoutProperties;
+    InspectorSourceLocation? creationLocation;
     final diagnostic = node?.diagnostic;
     final objectGroupApi = diagnostic?.objectGroupApi;
     if (diagnostic != null && objectGroupApi != null) {
@@ -824,7 +830,7 @@ class InspectorController extends DisposableController
         // Fetch widget properties:
         final wProperties = await diagnostic.getProperties(objectGroupApi);
         // Check if the selected node has changed, and if so return early:
-        if (_selectedNode.value != node) {
+        if (disposed || _selectedNode.value != node) {
           return;
         }
         widgetProperties.addAll(
@@ -838,11 +844,22 @@ class InspectorController extends DisposableController
           diagnostic,
           forFlexLayout: false,
         );
+        // Fetch creation location from the details subtree. Summary tree nodes
+        // omit creationLocation when loaded with fullDetails: false.
+        final detailsNode = await objectGroupApi.getDetailsSubtree(
+          diagnostic,
+          subtreeDepth: 0,
+        );
+        // Check if the selected node has changed, and if so return early:
+        if (disposed || _selectedNode.value != node) {
+          return;
+        }
+        creationLocation = detailsNode?.creationLocation;
         // Fetch RenderObject properties:
         for (final renderObject in renderProperties) {
           final rProperties = await renderObject.getProperties(objectGroupApi);
           // Check if the selected node has changed, and if so return early:
-          if (_selectedNode.value != node) {
+          if (disposed || _selectedNode.value != node) {
             return;
           }
           renderProperties.addAll(rProperties);
@@ -851,10 +868,12 @@ class InspectorController extends DisposableController
         _log.warning(e, st);
       }
     }
+    if (disposed) return;
     _selectedNodeProperties.value = (
       widgetProperties: widgetProperties,
       renderProperties: renderProperties,
       layoutProperties: layoutProperties,
+      creationLocation: creationLocation,
     );
   }
 

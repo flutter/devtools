@@ -222,12 +222,21 @@ final class ServiceExtensionManager with DisposerMixin {
       if (didSendFirstFrameEvent) {
         await _onFrameEventReceived();
       }
+    } on SentinelException catch (_) {
+      // Service extension or isolate stopped existing while calling, so do
+      // nothing. This typically happens during hot restarts.
+      return;
     } on RPCError catch (e) {
-      if (e.code == RPCErrorKind.kServerError.code) {
+      if (e.code == RPCErrorKind.kServerError.code ||
+          e.isServiceDisposedError) {
         // Connection disappeared
         return;
       }
-      rethrow;
+      _log.warning('Error checking for first Flutter frame: $e');
+      return;
+    } catch (e, st) {
+      _log.warning('Error checking for first Flutter frame: $e', e, st);
+      return;
     }
   }
 
@@ -274,6 +283,8 @@ final class ServiceExtensionManager with DisposerMixin {
       } on SentinelException catch (_) {
         // Service extension stopped existing while calling, so do nothing.
         // This typically happens during hot restarts.
+      } catch (e, st) {
+        _log.warning('Error adding service extension $name: $e', e, st);
       }
     } else {
       // Set any extensions that are already enabled on the device. This will
@@ -338,6 +349,10 @@ final class ServiceExtensionManager with DisposerMixin {
             );
             await _maybeRestoreExtension(name, value);
         }
+      } on SentinelException catch (_) {
+        // Service extension or isolate stopped existing while restoring, so do
+        // nothing. This typically happens during hot restarts.
+        return false;
       } on RPCError catch (e) {
         if (e.isServiceDisposedError) {
           return false;
@@ -438,12 +453,21 @@ final class ServiceExtensionManager with DisposerMixin {
             args: {name.substring(name.lastIndexOf('.') + 1): value},
           );
         }
+      } on SentinelException catch (_) {
+        // Service extension or isolate stopped existing while calling, so do
+        // nothing. This typically happens during hot restarts.
+        return false;
       } on RPCError catch (e) {
-        if (e.code == RPCErrorKind.kServerError.code) {
+        if (e.isServiceDisposedError ||
+            e.code == RPCErrorKind.kServerError.code) {
           // The connection disappeared.
           return false;
         }
-        rethrow;
+        _log.warning('Failed to call service extension $name: $e');
+        return false;
+      } catch (e, st) {
+        _log.warning('Failed to call service extension $name: $e', e, st);
+        return false;
       }
 
       return true;
