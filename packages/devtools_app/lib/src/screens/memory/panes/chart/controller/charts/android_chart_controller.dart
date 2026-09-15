@@ -8,8 +8,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../shared/charts/chart_controller.dart';
 import '../../../../../../shared/charts/chart_trace.dart' as chart_trace;
-import '../../../../../../shared/charts/chart_trace.dart'
-    show ChartType, ChartSymbol;
 import '../../../../shared/primitives/memory_timeline.dart';
 import '../../data/charts.dart';
 
@@ -122,10 +120,10 @@ class AndroidChartController extends ChartController {
 
     // Stack trace
     final stackIndex = createTrace(
-      ChartType.line,
+      chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
         color: _Color.stackColor,
-        symbol: ChartSymbol.disc,
+        symbol: chart_trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -138,10 +136,10 @@ class AndroidChartController extends ChartController {
 
     // Java heap trace.
     final javaHeapIndex = createTrace(
-      ChartType.line,
+      chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
         color: _Color.javaColor,
-        symbol: ChartSymbol.disc,
+        symbol: chart_trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -155,10 +153,10 @@ class AndroidChartController extends ChartController {
 
     // Code trace
     final codeIndex = createTrace(
-      ChartType.line,
+      chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
         color: _Color.codeColor,
-        symbol: ChartSymbol.disc,
+        symbol: chart_trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -171,10 +169,10 @@ class AndroidChartController extends ChartController {
 
     // Graphics Trace
     final graphicIndex = createTrace(
-      ChartType.line,
+      chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
         color: _Color.graphicColor,
-        symbol: ChartSymbol.disc,
+        symbol: chart_trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -188,10 +186,10 @@ class AndroidChartController extends ChartController {
 
     // Native heap trace.
     final nativeHeapIndex = createTrace(
-      ChartType.line,
+      chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
         color: _Color.nativeHeapColor,
-        symbol: ChartSymbol.disc,
+        symbol: chart_trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -205,10 +203,10 @@ class AndroidChartController extends ChartController {
 
     // Other trace
     final otherIndex = createTrace(
-      ChartType.line,
+      chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
         color: _Color.otherColor,
-        symbol: ChartSymbol.disc,
+        symbol: chart_trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -221,10 +219,10 @@ class AndroidChartController extends ChartController {
 
     // System trace
     final systemIndex = createTrace(
-      ChartType.line,
+      chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
         color: _Color.systemColor,
-        symbol: ChartSymbol.disc,
+        symbol: chart_trace.ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -241,7 +239,7 @@ class AndroidChartController extends ChartController {
       chart_trace.ChartType.line,
       chart_trace.PaintCharacteristics(
         color: _Color.totalColor,
-        symbol: ChartSymbol.dashedLine,
+        symbol: chart_trace.ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
       name: AndroidTraceName.total.toString(),

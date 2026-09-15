@@ -311,18 +311,16 @@ class InspectorService extends InspectorServiceBase {
     // determine the source of the inspector selection change directly from the
     // inspector selection changed event.
     final currentTime = DateTime.now().millisecondsSinceEpoch;
-    if (ref != null) {
-      if (_expectedSelectionChanges.containsKey(ref)) {
-        final times = _expectedSelectionChanges.remove(ref)!;
-        while (times.isNotEmpty) {
-          final time = times.removeAt(0);
-          if (time + _maxTimeDelaySelectionNotification >= currentTime) {
-            // We triggered this selection change ourselves. This logic would
-            // work fine without the timestamps for the typical case but we use
-            // the timestamps to be safe in case there is a bug and selection
-            // change events were somehow lost.
-            return true;
-          }
+    if (ref != null && _expectedSelectionChanges.containsKey(ref)) {
+      final times = _expectedSelectionChanges.remove(ref)!;
+      while (times.isNotEmpty) {
+        final time = times.removeAt(0);
+        if (time + _maxTimeDelaySelectionNotification >= currentTime) {
+          // We triggered this selection change ourselves. This logic would
+          // work fine without the timestamps for the typical case but we use
+          // the timestamps to be safe in case there is a bug and selection
+          // change events were somehow lost.
+          return true;
         }
       }
     }

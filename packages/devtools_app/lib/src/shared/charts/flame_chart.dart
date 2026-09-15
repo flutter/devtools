@@ -443,13 +443,11 @@ abstract class FlameChartState<
       );
       return KeyEventResult.handled;
     } else if (eventKey == PhysicalKeyboardKey.keyA) {
-      // `unawaited` does not work for FutureOr
-      // ignore: discarded_futures
+      // ignore: discarded_futures, avoid-async-call-in-sync-function, `unawaited` does not work for FutureOr
       scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
       return KeyEventResult.handled;
     } else if (eventKey == PhysicalKeyboardKey.keyD) {
-      // `unawaited` does not work for FutureOr
-      // ignore: discarded_futures
+      // ignore: discarded_futures, avoid-async-call-in-sync-function, `unawaited` does not work for FutureOr
       scrollToX(horizontalControllerGroup.offset + keyboardScrollUnit);
       return KeyEventResult.handled;
     }
@@ -480,8 +478,7 @@ abstract class FlameChartState<
       // to call this that guarantees the scroll controller offsets will be
       // updated for the new zoom level and layout size
       // https://github.com/flutter/devtools/issues/2012.
-      // `unawaited` does not work for FutureOr
-      // ignore: discarded_futures
+      // ignore: discarded_futures, avoid-async-call-in-sync-function, `unawaited` does not work for FutureOr
       scrollToX(newScrollOffset, jump: true);
     });
   }

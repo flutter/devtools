@@ -136,12 +136,11 @@ class FlutterFramesController extends PerformanceFeatureController {
   }
 
   void _maybeBadgeTabForJankyFrame(FlutterFrame frame) {
-    if (_badgeTabForJankyFrames.value) {
-      if (frame.isJanky(_displayRefreshRate.value)) {
-        serviceConnection.errorBadgeManager.incrementBadgeCount(
-          PerformanceScreen.id,
-        );
-      }
+    if (_badgeTabForJankyFrames.value &&
+        frame.isJanky(_displayRefreshRate.value)) {
+      serviceConnection.errorBadgeManager.incrementBadgeCount(
+        PerformanceScreen.id,
+      );
     }
   }
 

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +53,7 @@ class _NotConnectedOverlayState extends State<NotConnectedOverlay> {
           Text(stateLabel, style: theme.textTheme.headlineMedium),
           if (showReconnectButton)
             ElevatedButton(
-              onPressed: () => dtdManager.reconnect(),
+              onPressed: () => unawaited(dtdManager.reconnect()),
               child: const Text('Retry'),
             ),
         ],

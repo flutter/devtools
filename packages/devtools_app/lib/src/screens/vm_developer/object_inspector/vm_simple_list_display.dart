@@ -66,11 +66,12 @@ class _VmSimpleListDisplayState extends State<VmSimpleListDisplay> {
           .value!
           .id!;
       final service = serviceConnection.serviceManager.service!;
-      _initialized = service
-          .getObject(isolateId, elementsInstance.id!)
-          .then(
-            (e) => entries.addAll((e as Instance).elements!.cast<Response?>()),
-          );
+      _initialized = service.getObject(isolateId, elementsInstance.id!);
+      unawaited(
+        _initialized.then(
+          (e) => entries.addAll((e as Instance).elements!.cast<Response?>()),
+        ),
+      );
       return;
     }
     final elementsList = widget.vmObject.elementsAsList;

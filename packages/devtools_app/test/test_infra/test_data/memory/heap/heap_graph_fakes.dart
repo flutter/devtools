@@ -93,6 +93,7 @@ class FakeHeapSnapshotGraph extends Fake implements HeapSnapshotGraph {
           ),
         );
         final index = objects.length - 1;
+        // ignore: avoid-accessing-collections-by-constant-index, intentional use of special index.
         objects[heapRootIndex].addReference(index);
       }
     }
