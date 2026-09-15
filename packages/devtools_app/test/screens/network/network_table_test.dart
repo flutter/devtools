@@ -45,6 +45,7 @@ void main() {
       controller.processNetworkTrafficHelper(
         socketProfile.sockets,
         httpProfile.requests,
+        const [],
         0,
         currentRequests: currentRequests,
       );
@@ -104,6 +105,56 @@ void main() {
       // The hours and minutes field may be unreliable since it depends on the
       // timezone the test is running in (e.g. UTC vs IST).
       expect(column.getDisplayValue(getRequest), contains('26.279'));
+    });
+    test('WebSocket columns', () {
+      final connection = WebSocketConnection(
+        isolateId: 'isolate-1',
+        id: '42',
+        uri: Uri.parse('wss://example.com/socket'),
+        state: 'open',
+        protocol: 'chat',
+        connectTimestamp: DateTime.utc(2026, 8, 18, 10),
+        openTimestamp: DateTime.utc(2026, 8, 18, 10, 0, 1),
+        bytesSent: 100,
+        bytesReceived: 200,
+        framesSent: 10,
+        framesReceived: 20,
+        pingCount: 3,
+        pongCount: 3,
+        lastUpdated: DateTime.utc(2026, 8, 18, 10, 0, 2),
+        events: const [],
+      );
+
+      final webSocket = WebSocket(connection);
+
+      expect(
+        NetworkRequestsTable.addressColumn.getDisplayValue(webSocket),
+        connection.uri.toString(),
+      );
+      expect(
+        NetworkRequestsTable.methodColumn.getDisplayValue(webSocket),
+        'WEBSOCKET',
+      );
+      expect(
+        NetworkRequestsTable.statusColumn.getDisplayValue(webSocket),
+        'open',
+      );
+      expect(
+        NetworkRequestsTable.typeColumn.getDisplayValue(webSocket),
+        'WebSocket',
+      );
+      expect(
+        NetworkRequestsTable.durationColumn.getDisplayValue(webSocket),
+        'Pending',
+      );
+      expect(
+        NetworkRequestsTable.timestampColumn.getDisplayValue(webSocket),
+        contains('00.000'),
+      );
+      expect(
+        NetworkRequestsTable.responseSizeColumn.getDisplayValue(webSocket),
+        '200 B',
+      );
     });
   });
 }

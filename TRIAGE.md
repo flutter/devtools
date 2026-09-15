@@ -14,7 +14,7 @@ The triager is assigned by an automatic rotation of DevTools team members.
 - [Untriaged issues](https://github.com/flutter/devtools/issues?q=is%3Aopen+is%3Aissue+-label%3AP0%2CP1%2CP2%2CP3)
 - [Reproduce to verify issues](https://github.com/flutter/devtools/labels/reproduce%20to%20verify)
 (issues that need to be manually reproduced in order to verify validity)
-- [flutter/flutter issues related to DevTools](https://github.com/flutter/flutter/labels/d%3A%20devtools)
+- [flutter/flutter issues related to DevTools](https://github.com/flutter/flutter/labels/a%3A%20devtools)
 
 ## Triager responsibilities
 

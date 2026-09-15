@@ -192,6 +192,15 @@ class NetworkController extends DevToolsScreenController
       _currentNetworkRequests,
       _filterAndRefreshSearchMatches,
     );
+    autoDisposeStreamSubscription(
+      serviceConnection.serviceManager.isolateManager.onIsolateCreated.listen((
+        _,
+      ) async {
+        if (_recordingNotifier.value) {
+          await allowedError(_enableNetworkTrafficRecordingOnAllIsolates());
+        }
+      }),
+    );
   }
 
   @override
@@ -237,6 +246,7 @@ class NetworkController extends DevToolsScreenController
       ..updateOrAddAll(
         requests: httpProfileData,
         sockets: socketStatsData,
+        webSockets: const [],
         timelineMicrosOffset: offlineData.timelineMicrosOffset ?? 0,
       );
     _filterAndRefreshSearchMatches();
@@ -256,12 +266,14 @@ class NetworkController extends DevToolsScreenController
   void processNetworkTrafficHelper(
     List<SocketStatistic> sockets,
     List<HttpProfileRequest>? httpRequests,
+    List<WebSocketConnection> webSockets,
     int timelineMicrosOffset, {
     required CurrentNetworkRequests currentRequests,
   }) {
     currentRequests.updateOrAddAll(
       requests: httpRequests!,
       sockets: sockets,
+      webSockets: webSockets,
       timelineMicrosOffset: timelineMicrosOffset,
     );
 
@@ -278,11 +290,13 @@ class NetworkController extends DevToolsScreenController
   void processNetworkTraffic({
     required List<SocketStatistic> sockets,
     required List<HttpProfileRequest>? httpRequests,
+    required List<WebSocketConnection> webSockets,
   }) {
     // Trigger refresh.
     processNetworkTrafficHelper(
       sockets,
       httpRequests,
+      webSockets,
       _timelineMicrosOffset,
       currentRequests: _currentNetworkRequests,
     );
@@ -327,8 +341,13 @@ class NetworkController extends DevToolsScreenController
     // Cancel existing polling timer before starting recording.
     _updatePollingState(false);
 
-    networkService.updateLastHttpDataRefreshTime(
+    await networkService.updateLastHttpDataRefreshTime(
       alreadyRecordingHttp: alreadyRecordingHttp,
+    );
+    unawaited(
+      networkService.updateLastWebSocketDataRefreshTime(
+        alreadyRecordingWebSocket: alreadyRecordingHttp,
+      ),
     );
     final timestamp = await networkService.updateLastSocketDataRefreshTime(
       alreadyRecordingSocketData: alreadyRecordingSocketData,
@@ -352,11 +371,16 @@ class NetworkController extends DevToolsScreenController
 
     // TODO(kenz): only call these if http logging and socket profiling are not
     // already enabled. Listen to service manager streams for this info.
+    await _enableNetworkTrafficRecordingOnAllIsolates();
+    await togglePolling(true);
+  }
+
+  /// Enables HTTP timeline logging and socket profiling on all isolates.
+  Future<void> _enableNetworkTrafficRecordingOnAllIsolates() async {
     await [
       http_service.toggleHttpRequestLogging(true),
       networkService.toggleSocketProfiling(true),
     ].wait;
-    await togglePolling(true);
   }
 
   Future<void> stopRecording() async {
@@ -377,12 +401,13 @@ class NetworkController extends DevToolsScreenController
     _recordingNotifier.value = state;
   }
 
-  /// Updates the last refresh time of the socket and http data refresh times.
+  /// Updates the last refresh time of the HTTP, WebSocket, and Socket data.
   ///
-  /// This will ensure that future fetches for http and socket requests will at
-  /// most fetch requests since [updateLastRefreshTime] was called.
+  /// This will ensure that future fetches for http, socket and websocket
+  /// requests will atmost fetch requests since [updateLastRefreshTime] was
+  /// called.
   Future<void> updateLastRefreshTime() async {
-    networkService.updateLastHttpDataRefreshTime();
+    await networkService.updateLastHttpDataRefreshTime();
     await networkService.updateLastSocketDataRefreshTime();
   }
 
@@ -506,17 +531,21 @@ class NetworkController extends DevToolsScreenController
   OfflineScreenData prepareOfflineScreenData() {
     final httpRequestData = <DartIOHttpRequestData>[];
     final socketData = <Socket>[];
+    final webSocketData = <WebSocket>[];
     for (final request in _currentNetworkRequests.value) {
       if (request is DartIOHttpRequestData) {
         httpRequestData.add(request);
       } else if (request is Socket) {
         socketData.add(request);
+      } else if (request is WebSocket) {
+        webSocketData.add(request);
       }
     }
 
     final offlineData = OfflineNetworkData(
       httpRequestData: httpRequestData,
       socketData: socketData,
+      webSocketData: webSocketData,
       selectedRequestId: selectedRequest.value?.id,
       timelineMicrosOffset: _timelineMicrosOffset,
     );
@@ -557,10 +586,12 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
   void updateOrAddAll({
     required List<HttpProfileRequest> requests,
     required List<SocketStatistic> sockets,
+    required List<WebSocketConnection> webSockets,
     required int timelineMicrosOffset,
   }) {
     _updateOrAddRequests(requests);
     _updateSocketProfiles(sockets, timelineMicrosOffset);
+    _updateWebSocketProfiles(webSockets);
     notifyListeners();
   }
 
@@ -613,6 +644,20 @@ class CurrentNetworkRequests extends ValueNotifier<List<NetworkRequest>> {
         // already have, so we remove the current sockets and replace them with
         // updated data.
         _requestsById[socket.id] = socket;
+      }
+    }
+  }
+
+  void _updateWebSocketProfiles(List<WebSocketConnection> webSockets) {
+    for (final connection in webSockets) {
+      final webSocket = WebSocket(connection);
+      final existingRequest = _requestsById[webSocket.id];
+
+      if (existingRequest == null) {
+        _requestsById[webSocket.id] = webSocket;
+        value.add(webSocket);
+      } else {
+        (existingRequest as WebSocket).update(webSocket);
       }
     }
   }

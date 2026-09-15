@@ -40,6 +40,13 @@ final class IsolateManager with DisposerMixin {
   final _isolateCreatedController = StreamController<IsolateRef?>.broadcast();
   final _isolateExitedController = StreamController<IsolateRef?>.broadcast();
 
+  /// Stream of isolates that have been created since the VM service connection
+  /// was opened.
+  ///
+  /// This can be used to detect when a new isolate is spawned, such as after a
+  /// hot restart.
+  Stream<IsolateRef?> get onIsolateCreated => _isolateCreatedController.stream;
+
   ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
   final _selectedIsolate = ValueNotifier<IsolateRef?>(null);
 

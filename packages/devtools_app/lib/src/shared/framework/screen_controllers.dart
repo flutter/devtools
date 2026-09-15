@@ -51,6 +51,14 @@ class ScreenControllers {
     controllers[T] = _LazyController<T>(creator: controllerCreator);
   }
 
+  /// Whether a controller of type [T] has been registered for the active mode.
+  bool isRegistered<T>() {
+    final controllers = offlineDataController.showingOfflineData.value
+        ? offlineControllers
+        : this.controllers;
+    return controllers.containsKey(T);
+  }
+
   /// Returns the active screen controller of type [T].
   ///
   /// When DevTools is showing offline data, the offline screen controller will

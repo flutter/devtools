@@ -297,5 +297,45 @@
         "writeBytes": 18247
       }
     }
+  ],
+  "webSocketData": [
+    {
+      "isolateId": "isolate-1",
+      "connectionId": "42",
+      "uri": "wss://example.com/socket",
+      "state": "open",
+      "protocol": "chat",
+      "connectTimestamp": "2026-08-18T10:00:00.000Z",
+      "openTimestamp": "2026-08-18T10:00:01.000Z",
+      "closeTimestamp": null,
+      "bytesSent": 100,
+      "bytesReceived": 200,
+      "framesSent": 10,
+      "framesReceived": 20,
+      "pingCount": 3,
+      "pongCount": 3,
+      "closeCode": null,
+      "closeReason": null,
+      "error": null,
+      "lastUpdated": "2026-08-18T10:00:02.000Z",
+      "events": [
+        {
+          "event": "WebSocket.Send",
+          "timestamp": 1787047201000000,
+          "frameNumber": 1,
+          "direction": "out",
+          "opcode": "text",
+          "payloadSize": 25
+        },
+        {
+          "event": "WebSocket.Receive",
+          "timestamp": 1787047202000000,
+          "frameNumber": 2,
+          "direction": "in",
+          "opcode": "text",
+          "payloadSize": 40
+        }
+      ]
+    }
   ]
 }

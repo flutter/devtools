@@ -4,6 +4,8 @@
 
 // ignore_for_file: invalid_use_of_visible_for_testing_member, devtools_test is only used in test code.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/service.dart';
 // ignore: implementation_imports, intentional import from src/
 import 'package:devtools_app_shared/src/service/isolate_manager.dart';
@@ -29,6 +31,20 @@ base class FakeIsolateManager extends Fake with TestIsolateManager {
   final _mainIsolate = ValueNotifier(
     IsolateRef.parse({'id': 'fake_main_isolate_id'}),
   );
+
+  final _isolateCreatedController = StreamController<IsolateRef?>.broadcast();
+
+  @override
+  Stream<IsolateRef?> get onIsolateCreated => _isolateCreatedController.stream;
+
+  /// Notifies listeners that a new isolate was created.
+  ///
+  /// This can be used in tests to simulate a hot restart spawning a new
+  /// isolate.
+  @visibleForTesting
+  void notifyIsolateCreated(IsolateRef isolate) {
+    _isolateCreatedController.add(isolate);
+  }
 
   @override
   ValueNotifier<List<IsolateRef>> get isolates {

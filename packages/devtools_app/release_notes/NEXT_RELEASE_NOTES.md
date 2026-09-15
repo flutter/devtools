@@ -15,15 +15,22 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed unreadable text in the release notes panel, where blockquotes were
+  drawn on a hard coded light blue background in the dark theme.
+  [#9957](https://github.com/flutter/devtools/pull/9957)
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any updates.
+* Added the widget source file path to the Inspector details pane
+  (`filename.dart:line:column`), matching legacy Inspector behavior. -
+  [#9972](https://github.com/flutter/devtools/pull/9972),
+  [#9922](https://github.com/flutter/devtools/issues/9922)
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed a bug where the Flutter frames chart could appear frozen after
+  switching away from the Performance screen and coming back.
+  [#9960](https://github.com/flutter/devtools/pull/9960)
 
 ## CPU profiler updates
 
@@ -33,7 +40,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Memory updates
 
-TODO: Remove this section if there are not any updates.
+* Added the ability to pin classes to the top of the Profile Memory table. [#8898](https://github.com/flutter/devtools/issues/8898)
 
 ## Debugger updates
 
@@ -44,11 +51,22 @@ TODO: Remove this section if there are not any updates.
 * Fix a bug in the TextMate grammar parser that could result in code after
   comments being classified as comments.
   [#9921](https://github.com/flutter/devtools/pull/9921).
+* Fixed an overflow in the debugging controls when the Debugger screen is
+  narrow, such as when DevTools is embedded in an IDE side panel. The controls
+  now scroll horizontally instead of overflowing.
+  [#9949](https://github.com/flutter/devtools/pull/9949)
 
 ## Network profiler updates
 
-* Fixed exported response status in HAR files so that they parse as integers
-  instead of strings. [#9900](https://github.com/flutter/devtools/pull/9900)
+* Added WebSocket support to the Network profiler, including WebSocket
+  connection details, lifecycle events, frame-level inspection, and connection
+  timing information. [#9968](https://github.com/flutter/devtools/pull/9968)
+* Fixed an issue where the Network tab would stop capturing HTTP requests after
+  a hot restart. -
+  [#9856](https://github.com/flutter/devtools/pull/9856)
+* Fixed an issue where the Network tab would stop capturing new HTTP requests
+  after pressing Clear while recording. -
+  [#9856](https://github.com/flutter/devtools/pull/9856)
 
 ## Logging updates
 
@@ -61,7 +79,9 @@ TODO: Remove this section if there are not any updates.
 
 ## Deep links tool updates
 
-TODO: Remove this section if there are not any updates.
+* Added a "Watch tutorial" link to the status line that points to the
+  [deep links video tutorial](https://youtu.be/d7sZL6h1Elw).
+  [#9925](https://github.com/flutter/devtools/pull/9925)
 
 ## VS Code sidebar updates
 
@@ -69,7 +89,8 @@ TODO: Remove this section if there are not any updates.
 
 ## DevTools extension updates
 
-TODO: Remove this section if there are not any updates.
+* Hide the DevTools extensions menu button in single-screen embedded mode (`EmbedMode.embedOne`) on standard screens.
+  [#8507](https://github.com/flutter/devtools/issues/8507)
 
 ## Advanced developer mode updates
 

@@ -27,6 +27,8 @@ const _kNetworkDisconnectExperience = bool.fromEnvironment(
   defaultValue: true,
 );
 
+const _deepLinksTutorialVideoUrl = 'https://youtu.be/d7sZL6h1Elw';
+
 enum ScreenMetaData {
   home(
     'home',
@@ -124,6 +126,7 @@ enum ScreenMetaData {
     requiresConnection: false,
     requiresDartVm: true,
     requiresFlutter: true,
+    tutorialVideoUrl: _deepLinksTutorialVideoUrl,
   ),
   vmTools(
     'vm-tools',
@@ -154,6 +157,7 @@ enum ScreenMetaData {
     this.worksWithOfflineData = false,
     this.requiresLibrary,
     this.tutorialVideoTimestamp,
+    this.tutorialVideoUrl,
   }) : assert(
          icon == null || iconAsset == null,
          'Only one of icon or iconAsset may be specified.',
@@ -178,6 +182,13 @@ enum ScreenMetaData {
   /// This value will be appended to "https://youtu.be/_EYk-E29edo" to link to
   /// a particular chapter.
   final String? tutorialVideoTimestamp;
+
+  /// A custom video tutorial URL for a screen.
+  ///
+  /// If provided, this URL will be used instead of the default
+  /// "Dive in to DevTools" YouTube video timestamp. This is used for
+  /// screens that have their own dedicated video tutorials.
+  final String? tutorialVideoUrl;
 
   /// Looks up the [ScreenMetaData] value for the screen [id].
   static ScreenMetaData? lookup(String id) {

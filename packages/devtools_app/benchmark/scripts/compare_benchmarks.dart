@@ -5,7 +5,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:web_benchmarks/analysis.dart';
 
 import 'utils.dart';

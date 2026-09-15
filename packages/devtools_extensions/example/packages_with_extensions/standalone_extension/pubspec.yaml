@@ -12,6 +12,7 @@ environment:
   flutter: '>=3.0.0'
 
 dependencies:
+  # ignore: dependencies, intentional for example code.
   devtools_app_shared:
     path: ../../../../devtools_app_shared
   devtools_extensions:

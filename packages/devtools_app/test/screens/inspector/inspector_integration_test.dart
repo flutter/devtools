@@ -708,22 +708,3 @@ Future<void> _resetPubRootDirectories(InspectorService inspectorService) async {
     await inspectorService.addPubRootDirectories([rootLibrary]);
   }
 }
-
-extension _ObjectGroupTestExtension on ObjectGroup {
-  Future<RemoteDiagnosticsNode?> getDetailsSubtree(
-    RemoteDiagnosticsNode? node, {
-    int subtreeDepth = 2,
-  }) async {
-    if (node == null) return null;
-    final args = {
-      'objectGroup': groupName,
-      'arg': node.valueRef.id,
-      'subtreeDepth': subtreeDepth.toString(),
-    };
-    final json = await invokeServiceMethodDaemonParams(
-      WidgetInspectorServiceExtensions.getDetailsSubtree.name,
-      args,
-    );
-    return parseDiagnosticsNodeHelper(json as Map<String, Object?>?);
-  }
-}

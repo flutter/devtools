@@ -31,6 +31,8 @@ import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
+import '../../shared/diagnostics/primitives/source_location.dart';
+import '../../shared/framework/screen_controllers.dart';
 import '../../shared/globals.dart';
 import '../../shared/managers/notifications.dart';
 import '../../shared/primitives/query_parameters.dart';
@@ -38,6 +40,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/utils/utils.dart';
 import 'inspector_data_models.dart';
 import 'inspector_screen.dart';
+import 'inspector_screen_controller.dart';
 import 'inspector_tree_controller.dart';
 
 final _log = Logger('inspector_controller');
@@ -53,6 +56,9 @@ typedef WidgetTreeNodeProperties = ({
 
   /// Layout properties for the widget.
   LayoutProperties? layoutProperties,
+
+  /// Source location where the selected widget was created.
+  InspectorSourceLocation? creationLocation,
 });
 
 /// This class is based on the InspectorPanel class from the Flutter IntelliJ
@@ -149,6 +155,21 @@ class InspectorController extends DisposableController
     }
   }
 
+  /// Returns the [InspectorScreenController] when it is registered.
+  ///
+  /// [InspectorController] is sometimes constructed in unit tests without an
+  /// [InspectorScreenController] registered, so callers that only need to clear
+  /// errors on connect/reload should use this nullable accessor.
+  InspectorScreenController? get _inspectorScreenControllerOrNull {
+    final controllers = globals[ScreenControllers] as ScreenControllers?;
+    if (controllers == null) return null;
+    if (!controllers.isRegistered<InspectorScreenController>()) return null;
+    return controllers.lookup<InspectorScreenController>();
+  }
+
+  InspectorScreenController get _inspectorScreenController =>
+      screenControllers.lookup<InspectorScreenController>();
+
   void _handleConnectionStart() {
     // Clear any existing badge/errors for older errors that were collected.
     // Do this in a post frame callback so that we are not trying to clear the
@@ -157,7 +178,7 @@ class InspectorController extends DisposableController
     // TODO(kenz): When this method is called outside  createState(), this post
     // frame callback can be removed.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      serviceConnection.errorBadgeManager.clearErrors(InspectorScreen.id);
+      _inspectorScreenControllerOrNull?.clearErrors();
     });
   }
 
@@ -238,6 +259,7 @@ class InspectorController extends DisposableController
     widgetProperties: [],
     renderProperties: [],
     layoutProperties: null,
+    creationLocation: null,
   ));
 
   /// Whether the implementation widgets are hidden in the widget tree.
@@ -437,7 +459,7 @@ class InspectorController extends DisposableController
     }
 
     if (event.kind == EventKind.kIsolateReload) {
-      serviceConnection.errorBadgeManager.clearErrors(InspectorScreen.id);
+      _inspectorScreenControllerOrNull?.clearErrors();
       _receivedIsolateReloadEvent = true;
     }
   }
@@ -799,6 +821,7 @@ class InspectorController extends DisposableController
     final widgetProperties = <RemoteDiagnosticsNode>[];
     final renderProperties = <RemoteDiagnosticsNode>[];
     LayoutProperties? layoutProperties;
+    InspectorSourceLocation? creationLocation;
     final diagnostic = node?.diagnostic;
     final objectGroupApi = diagnostic?.objectGroupApi;
     if (diagnostic != null && objectGroupApi != null) {
@@ -806,7 +829,7 @@ class InspectorController extends DisposableController
         // Fetch widget properties:
         final wProperties = await diagnostic.getProperties(objectGroupApi);
         // Check if the selected node has changed, and if so return early:
-        if (_selectedNode.value != node) {
+        if (disposed || _selectedNode.value != node) {
           return;
         }
         widgetProperties.addAll(
@@ -820,11 +843,22 @@ class InspectorController extends DisposableController
           diagnostic,
           forFlexLayout: false,
         );
+        // Fetch creation location from the details subtree. Summary tree nodes
+        // omit creationLocation when loaded with fullDetails: false.
+        final detailsNode = await objectGroupApi.getDetailsSubtree(
+          diagnostic,
+          subtreeDepth: 0,
+        );
+        // Check if the selected node has changed, and if so return early:
+        if (disposed || _selectedNode.value != node) {
+          return;
+        }
+        creationLocation = detailsNode?.creationLocation;
         // Fetch RenderObject properties:
         for (final renderObject in renderProperties) {
           final rProperties = await renderObject.getProperties(objectGroupApi);
           // Check if the selected node has changed, and if so return early:
-          if (_selectedNode.value != node) {
+          if (disposed || _selectedNode.value != node) {
             return;
           }
           renderProperties.addAll(rProperties);
@@ -833,10 +867,12 @@ class InspectorController extends DisposableController
         _log.warning(e, st);
       }
     }
+    if (disposed) return;
     _selectedNodeProperties.value = (
       widgetProperties: widgetProperties,
       renderProperties: renderProperties,
       layoutProperties: layoutProperties,
+      creationLocation: creationLocation,
     );
   }
 
@@ -869,9 +905,7 @@ class InspectorController extends DisposableController
   void _updateSelectedErrorFromNode(InspectorTreeNode? node) {
     final inspectorRef = node?.diagnostic?.valueRef.id;
 
-    final errors = serviceConnection.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
+    final errors = _inspectorScreenController.inspectorErrors.value;
 
     // Check whether the node that was just selected has any errors associated
     // with it.
@@ -887,10 +921,7 @@ class InspectorController extends DisposableController
     if (errorIndex != null) {
       // Marking an error as read will automatically update the badge count to
       // reflect the remaining unread errors.
-      serviceConnection.errorBadgeManager.markErrorAsRead(
-        InspectorScreen.id,
-        errors[inspectorRef!]!,
-      );
+      _inspectorScreenController.markErrorAsRead(errors[inspectorRef!]!);
     }
   }
 
@@ -898,9 +929,7 @@ class InspectorController extends DisposableController
   void selectErrorByIndex(int index) {
     _selectedErrorIndex.value = index;
 
-    final errors = serviceConnection.errorBadgeManager
-        .erroredItemsForPage(InspectorScreen.id)
-        .value;
+    final errors = _inspectorScreenController.inspectorErrors.value;
 
     unawaited(
       updateSelectionFromService(inspectorRef: errors.keys.elementAt(index)),

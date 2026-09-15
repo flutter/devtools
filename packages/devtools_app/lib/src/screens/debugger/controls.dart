@@ -64,19 +64,37 @@ class _DebuggingControlsState extends State<DebuggingControls>
       height: defaultButtonHeight,
       child: Row(
         children: [
-          _pauseAndResumeButtons(
-            isPaused: serviceConnection.serviceManager.isMainIsolatePaused,
-            resuming: resuming,
+          // The debugging controls have no way to shrink further once their
+          // labels have already been dropped (see
+          // [DebuggingControls.minWidth]), so below roughly 630px the icon-only
+          // content still does not fit and the [Row] overflows. Making the
+          // controls scroll horizontally keeps every control reachable at any
+          // width instead of clipping them behind an overflow error. The
+          // libraries button stays pinned on the right, outside the scroll
+          // view, so it does not scroll out of reach.
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _pauseAndResumeButtons(
+                    isPaused:
+                        serviceConnection.serviceManager.isMainIsolatePaused,
+                    resuming: resuming,
+                  ),
+                  const SizedBox(width: denseSpacing),
+                  _stepButtons(canStep: canStep),
+                  const SizedBox(width: denseSpacing),
+                  BreakOnExceptionsControl(controller: controller),
+                  if (isVmApp) ...[
+                    const SizedBox(width: denseSpacing),
+                    CodeStatisticsControls(controller: controller),
+                  ],
+                ],
+              ),
+            ),
           ),
           const SizedBox(width: denseSpacing),
-          _stepButtons(canStep: canStep),
-          const SizedBox(width: denseSpacing),
-          BreakOnExceptionsControl(controller: controller),
-          if (isVmApp) ...[
-            const SizedBox(width: denseSpacing),
-            CodeStatisticsControls(controller: controller),
-          ],
-          const Expanded(child: SizedBox(width: denseSpacing)),
           _librariesButton(),
         ],
       ),
