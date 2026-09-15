@@ -66,7 +66,6 @@ class _VmSimpleListDisplayState extends State<VmSimpleListDisplay> {
           .value!
           .id!;
       final service = serviceConnection.serviceManager.service!;
-      // ignore: avoid-async-call-in-sync-function, intentional assignment of a future.
       _initialized = service.getObject(isolateId, elementsInstance.id!);
       unawaited(
         _initialized.then(

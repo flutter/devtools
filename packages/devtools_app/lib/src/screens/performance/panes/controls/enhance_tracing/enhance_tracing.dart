@@ -144,7 +144,6 @@ class _TraceWidgetBuildsSettingState extends State<TraceWidgetBuildsSetting>
 
       safeUnawaited(
         serviceConnection.serviceManager.serviceExtensionManager
-            // ignore: avoid-async-call-in-sync-function, safeUnawaited handles this.
             .waitForServiceExtensionAvailable(extension.extension)
             .then((isServiceAvailable) {
               if (isServiceAvailable) {
