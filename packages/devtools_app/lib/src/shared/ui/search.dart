@@ -1250,10 +1250,10 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
         }
         // Nothing found, pick item selected in dropdown.
         final autoCompleteList = widget.controller.searchAutoComplete.value;
-        if (autoCompleteList.isNotEmpty && foundExact == null ||
+        if (autoCompleteList.isNotEmpty && (foundExact == null ||
             autoCompleteList[widget.controller.currentHoveredIndex.value]
                     .text !=
-                foundExact) {
+                foundExact)) {
           foundExact =
               autoCompleteList[widget.controller.currentHoveredIndex.value]
                   .text;
