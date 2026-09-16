@@ -10,6 +10,7 @@ void main() {
     test('parses with a String materialIconCodePoint field', () {
       final config = DevToolsExtensionConfig.parse({
         'name': 'foo',
+        'packageName': 'foo',
         'issueTracker': 'www.google.com',
         'version': '1.0.0',
         'materialIconCodePoint': '0xf012',
@@ -21,6 +22,7 @@ void main() {
       });
 
       expect(config.name, 'foo');
+      expect(config.packageName, 'foo');
       expect(config.extensionAssetsPath, '/absolute/path/to/foo/extension');
       expect(config.issueTrackerLink, 'www.google.com');
       expect(config.version, '1.0.0');
@@ -31,6 +33,7 @@ void main() {
     test('parses with an int materialIconCodePoint field', () {
       final config = DevToolsExtensionConfig.parse({
         'name': 'foo',
+        'packageName': 'foo',
         'issueTracker': 'www.google.com',
         'version': '1.0.0',
         'materialIconCodePoint': 0xf012,
@@ -42,6 +45,7 @@ void main() {
       });
 
       expect(config.name, 'foo');
+      expect(config.packageName, 'foo');
       expect(config.extensionAssetsPath, '/absolute/path/to/foo/extension');
       expect(config.issueTrackerLink, 'www.google.com');
       expect(config.version, '1.0.0');
@@ -52,6 +56,7 @@ void main() {
     test('parses with a String requiresConnection field', () {
       final config = DevToolsExtensionConfig.parse({
         'name': 'foo',
+        'packageName': 'foo',
         'issueTracker': 'www.google.com',
         'version': '1.0.0',
         'materialIconCodePoint': '0xf012',
@@ -63,6 +68,7 @@ void main() {
       });
 
       expect(config.name, 'foo');
+      expect(config.packageName, 'foo');
       expect(config.extensionAssetsPath, '/absolute/path/to/foo/extension');
       expect(config.issueTrackerLink, 'www.google.com');
       expect(config.version, '1.0.0');
@@ -73,6 +79,7 @@ void main() {
     test('parses with a bool requiresConnection field', () {
       final config = DevToolsExtensionConfig.parse({
         'name': 'foo',
+        'packageName': 'foo',
         'issueTracker': 'www.google.com',
         'version': '1.0.0',
         'materialIconCodePoint': 0xf012,
@@ -84,11 +91,42 @@ void main() {
       });
 
       expect(config.name, 'foo');
+      expect(config.packageName, 'foo');
       expect(config.extensionAssetsPath, '/absolute/path/to/foo/extension');
       expect(config.issueTrackerLink, 'www.google.com');
       expect(config.version, '1.0.0');
       expect(config.materialIconCodePoint, 0xf012);
       expect(config.requiresConnection, false);
+    });
+
+    test('parses with a packageName field and computes identifier', () {
+      final configWithMatchingPackage = DevToolsExtensionConfig.parse({
+        'name': 'foo',
+        'packageName': 'foo',
+        'issueTracker': 'www.google.com',
+        'version': '1.0.0',
+        'materialIconCodePoint': 0xf012,
+        'extensionAssetsPath': '/absolute/path/to/foo/extension',
+        'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+        'isPubliclyHosted': 'false',
+        'detectedFromStaticContext': 'false',
+      });
+      expect(configWithMatchingPackage.packageName, 'foo');
+      expect(configWithMatchingPackage.identifier, 'foo_1.0.0');
+
+      final configWithDistinctPackage = DevToolsExtensionConfig.parse({
+        'name': 'bar',
+        'packageName': 'foo',
+        'issueTracker': 'www.google.com',
+        'version': '1.0.0',
+        'materialIconCodePoint': 0xf012,
+        'extensionAssetsPath': '/absolute/path/to/foo/extension',
+        'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+        'isPubliclyHosted': 'false',
+        'detectedFromStaticContext': 'false',
+      });
+      expect(configWithDistinctPackage.packageName, 'foo');
+      expect(configWithDistinctPackage.identifier, 'foo_bar_1.0.0');
     });
 
     group('parse throws when missing required field', () {
@@ -115,6 +153,7 @@ void main() {
       test('name', () {
         expect(() {
           DevToolsExtensionConfig.parse({
+            'packageName': 'foo',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
@@ -131,6 +170,7 @@ void main() {
         expect(() {
           DevToolsExtensionConfig.parse({
             'name': 'foo',
+            'packageName': 'foo',
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
             'extensionAssetsPath': '/absolute/path/to/foo/extension',
@@ -146,6 +186,7 @@ void main() {
         expect(() {
           DevToolsExtensionConfig.parse({
             'name': 'foo',
+            'packageName': 'foo',
             'issueTracker': 'www.google.com',
             'materialIconCodePoint': 0xf012,
             'extensionAssetsPath': '/absolute/path/to/foo/extension',
@@ -161,6 +202,7 @@ void main() {
         expect(() {
           DevToolsExtensionConfig.parse({
             'name': 'foo',
+            'packageName': 'foo',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
             'extensionAssetsPath': '/absolute/path/to/foo/extension',
@@ -171,10 +213,28 @@ void main() {
           });
         }, throwsMissingRequiredFieldsError());
       });
+
+      test('packageName', () {
+        expect(() {
+          DevToolsExtensionConfig.parse({
+            'name': 'foo',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+            'materialIconCodePoint': 0xf012,
+            'extensionAssetsPath': '/absolute/path/to/foo/extension',
+            'devtoolsOptionsUri':
+                'file:///path/to/package/devtools_options.yaml',
+            'isPubliclyHosted': 'false',
+            'detectedFromStaticContext': 'false',
+          });
+        }, throwsMissingGeneratedKeysError());
+      });
+
       test('extensionAssetsPath', () {
         expect(() {
           DevToolsExtensionConfig.parse({
             'name': 'foo',
+            'packageName': 'foo',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
@@ -190,6 +250,7 @@ void main() {
         expect(() {
           DevToolsExtensionConfig.parse({
             'name': 'foo',
+            'packageName': 'foo',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
@@ -204,6 +265,7 @@ void main() {
         expect(() {
           DevToolsExtensionConfig.parse({
             'name': 'foo',
+            'packageName': 'foo',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
@@ -218,6 +280,7 @@ void main() {
         expect(() {
           DevToolsExtensionConfig.parse({
             'name': 'foo',
+            'packageName': 'foo',
             'issueTracker': 'www.google.com',
             'version': '1.0.0',
             'materialIconCodePoint': 0xf012,
@@ -245,6 +308,7 @@ void main() {
         DevToolsExtensionConfig.parse({
           // Expects a String here.
           'name': 23,
+          'packageName': 'foo',
           'issueTracker': 'www.google.com',
           'version': '1.0.0',
           'materialIconCodePoint': 0xf012,
@@ -258,6 +322,7 @@ void main() {
       expect(() {
         DevToolsExtensionConfig.parse({
           'name': 'foo',
+          'packageName': 'foo',
           'issueTracker': 'www.google.com',
           'version': '1.0.0',
           'materialIconCodePoint': 0xf012,
@@ -284,6 +349,7 @@ void main() {
       expect(() {
         DevToolsExtensionConfig.parse({
           'name': 'name with spaces',
+          'packageName': 'foo',
           'issueTracker': 'www.google.com',
           'version': '1.0.0',
           'materialIconCodePoint': 0xf012,
@@ -297,6 +363,7 @@ void main() {
       expect(() {
         DevToolsExtensionConfig.parse({
           'name': 'Name_With_Capital_Letters',
+          'packageName': 'foo',
           'issueTracker': 'www.google.com',
           'version': '1.0.0',
           'materialIconCodePoint': 0xf012,
@@ -310,6 +377,7 @@ void main() {
       expect(() {
         DevToolsExtensionConfig.parse({
           'name': 'name.with\'specialchars/',
+          'packageName': 'foo',
           'issueTracker': 'www.google.com',
           'version': '1.0.0',
           'materialIconCodePoint': 0xf012,

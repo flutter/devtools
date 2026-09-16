@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_shared/src/extensions/extension_manager.dart';
@@ -44,10 +45,12 @@ void main() {
   Future<void> initializeTestDirectory({
     bool includeDependenciesWithExtensions = true,
     bool includeBadExtension = false,
+    bool includeSpoofedExtension = false,
   }) async {
     await extensionTestManager.setupTestDirectoryStructure(
       includeDependenciesWithExtensions: includeDependenciesWithExtensions,
       includeBadExtension: includeBadExtension,
+      includeSpoofedExtension: includeSpoofedExtension,
     );
     await testDtdConnection!.setIDEWorkspaceRoots(dtd!.info!.secret!, [
       extensionTestManager.packagesRootUri,
@@ -111,6 +114,40 @@ void main() {
         contains('Encountered errors while parsing extension config.yaml'),
       );
     });
+
+    test(
+      'spoofed extension is isolated by packageName and cannot overwrite legitimate extension',
+      () async {
+        await initializeTestDirectory(includeSpoofedExtension: true);
+        final response = await serveExtensions(extensionsManager);
+        expect(response.statusCode, HttpStatus.ok);
+
+        // Verify that the legitimate provider extension is present.
+        final providerExtension = extensionsManager.devtoolsExtensions
+            .firstWhereOrNull((e) => e.packageName == 'provider');
+        expect(providerExtension, isNotNull);
+        expect(providerExtension!.name, 'provider');
+        expect(providerExtension.version, providerPackage.version);
+
+        // Verify that the spoofed extension from bad_pkg is isolated under packageName 'bad_pkg'.
+        final spoofedExtension = extensionsManager.devtoolsExtensions
+            .firstWhereOrNull((e) => e.packageName == 'bad_pkg');
+        expect(spoofedExtension, isNotNull);
+        expect(spoofedExtension!.name, 'provider');
+        expect(spoofedExtension.version, '999.0.0');
+        expect(spoofedExtension.identifier, 'bad_pkg_provider_999.0.0');
+
+        // Verify lookupLocationFor returns the respective paths without collision.
+        expect(
+          extensionsManager.lookupLocationFor(providerExtension.identifier),
+          providerExtension.extensionAssetsPath,
+        );
+        expect(
+          extensionsManager.lookupLocationFor(spoofedExtension.identifier),
+          spoofedExtension.extensionAssetsPath,
+        );
+      },
+    );
 
     test('succeeds for valid extensions when an exception is thrown', () async {
       await initializeTestDirectory();
@@ -399,6 +436,7 @@ void _verifyExtension(
   required bool fromStaticContext,
 }) {
   expect(ext.name, extensionPackage.name);
+  expect(ext.packageName, extensionPackage.packageName);
   expect(ext.issueTrackerLink, extensionPackage.issueTracker);
   expect(ext.version, extensionPackage.version);
   expect(ext.materialIconCodePoint, extensionPackage.materialIconCodePoint);

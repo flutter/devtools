@@ -100,6 +100,7 @@ void main() {
         return await server.extensionEnabledState(
           devtoolsOptionsFileUri: ext.devtoolsOptionsUri,
           extensionName: ext.name,
+          extensionPackage: ext.packageName,
         );
       }
 

@@ -103,5 +103,58 @@ extensions:
         ExtensionEnabledState.none,
       );
     });
+
+    test('isolates enablement state by packageName', () {
+      options.setExtensionEnabledState(
+        devtoolsOptionsUri: optionsUri,
+        extensionName: 'provider',
+        packageName: 'provider',
+        enable: true,
+      );
+
+      // Legitimate provider matches
+      expect(
+        options.lookupExtensionEnabledState(
+          devtoolsOptionsUri: optionsUri,
+          extensionName: 'provider',
+          packageName: 'provider',
+        ),
+        ExtensionEnabledState.enabled,
+      );
+
+      // Spoofed package does not inherit provider's enablement
+      expect(
+        options.lookupExtensionEnabledState(
+          devtoolsOptionsUri: optionsUri,
+          extensionName: 'provider',
+          packageName: 'bad_pkg',
+        ),
+        ExtensionEnabledState.none,
+      );
+
+      // Custom package with custom tool name writes and reads cleanly using packageName
+      options.setExtensionEnabledState(
+        devtoolsOptionsUri: optionsUri,
+        extensionName: 'custom_tool',
+        packageName: 'custom_pkg',
+        enable: true,
+      );
+      expect(
+        options.lookupExtensionEnabledState(
+          devtoolsOptionsUri: optionsUri,
+          extensionName: 'custom_tool',
+          packageName: 'custom_pkg',
+        ),
+        ExtensionEnabledState.enabled,
+      );
+
+      final file = optionsFileFromTmp();
+      expect(file.readAsStringSync(), '''
+description: This file stores settings for Dart & Flutter DevTools.
+documentation: https://docs.flutter.dev/tools/devtools/extensions#configure-extension-enablement-states
+extensions:
+  - provider: true
+  - custom_pkg: true''');
+    });
   });
 }

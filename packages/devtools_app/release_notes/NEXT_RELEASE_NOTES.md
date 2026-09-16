@@ -93,6 +93,9 @@ TODO: Remove this section if there are not any updates.
   [#8507](https://github.com/flutter/devtools/issues/8507)
 * Added iframe sandboxing for embedded DevTools extensions to enforce origin
   isolation. [#9967](https://github.com/flutter/devtools/pull/9967)
+* Improved DevTools extension isolation by tracking the providing package name for
+  enablement, deduplication, and asset loading.
+  [#9981](https://github.com/flutter/devtools/pull/9981)
 
 ## Advanced developer mode updates
 

@@ -82,14 +82,19 @@ class ExtensionTestManager {
   Future<void> setupTestDirectoryStructure({
     bool includeDependenciesWithExtensions = true,
     bool includeBadExtension = false,
+    bool includeSpoofedExtension = false,
   }) async {
     _testDirectory = Directory.systemTemp.createTempSync();
 
     _setupPackages(
       includeDependenciesWithExtensions: includeDependenciesWithExtensions,
       includeBadExtension: includeBadExtension,
+      includeSpoofedExtension: includeSpoofedExtension,
     );
-    _setupExtensions(includeBadExtension: includeBadExtension);
+    _setupExtensions(
+      includeBadExtension: includeBadExtension,
+      includeSpoofedExtension: includeSpoofedExtension,
+    );
 
     // Generate the .dart_tool/package_config.json file for each Dart package.
     final testDirectoryContents = testDirectory.listSync();
@@ -144,10 +149,19 @@ class ExtensionTestManager {
   void _setupPackages({
     required bool includeDependenciesWithExtensions,
     required bool includeBadExtension,
+    bool includeSpoofedExtension = false,
   }) {
+    final TestPackage myApp;
+    if (includeSpoofedExtension) {
+      myApp = myAppPackageWithSpoofedExtension;
+    } else if (includeBadExtension) {
+      myApp = myAppPackageWithBadExtension;
+    } else {
+      myApp = myAppPackage;
+    }
     _setupPackage(
       createTestPackageFrom(
-        includeBadExtension ? myAppPackageWithBadExtension : myAppPackage,
+        myApp,
         includeDependenciesWithExtensions: includeDependenciesWithExtensions,
       ),
       isRuntimeRoot: true,
@@ -228,7 +242,10 @@ resolution: workspace
   ///       devtools/
   ///         build/
   ///         config.yaml
-  void _setupExtensions({required bool includeBadExtension}) {
+  void _setupExtensions({
+    required bool includeBadExtension,
+    bool includeSpoofedExtension = false,
+  }) {
     _setupExtension(staticExtension1Package);
     _setupExtension(staticExtension2Package);
 
@@ -237,6 +254,7 @@ resolution: workspace
     _setupExtension(newerStaticExtension1Package);
 
     if (includeBadExtension) _setupExtension(badExtensionPackage);
+    if (includeSpoofedExtension) _setupExtension(spoofedExtensionPackage);
   }
 
   void _setupPackage(TestPackage package, {bool isRuntimeRoot = false}) {
@@ -304,6 +322,10 @@ final myAppPackageWithBadExtension = TestPackage(
   name: myAppPackage.name,
   dependencies: [...myAppPackage.dependencies, badExtensionPackage],
 );
+final myAppPackageWithSpoofedExtension = TestPackage(
+  name: myAppPackage.name,
+  dependencies: [...myAppPackage.dependencies, spoofedExtensionPackage],
+);
 final otherRoot1Package = TestPackage(
   name: 'other_root_1',
   dependencies: [staticExtension1Package, staticExtension2Package],
@@ -320,6 +342,7 @@ final workspaceMember = TestPackage(
 
 final driftPackage = TestPackageWithExtension(
   name: 'drift',
+  packageName: 'drift',
   issueTracker: 'https://github.com/simolus3/drift/issues',
   version: '0.0.1',
   materialIconCodePoint: 62494,
@@ -329,6 +352,7 @@ final driftPackage = TestPackageWithExtension(
 );
 final providerPackage = TestPackageWithExtension(
   name: 'provider',
+  packageName: 'provider',
   issueTracker: 'https://github.com/rrousselGit/provider/issues',
   version: '0.0.1',
   materialIconCodePoint: 57521,
@@ -338,6 +362,7 @@ final providerPackage = TestPackageWithExtension(
 );
 final staticExtension1Package = TestPackageWithExtension(
   name: 'static_extension_1',
+  packageName: 'static_extension_1',
   issueTracker: 'https://www.google.com/',
   version: '1.0.0',
   materialIconCodePoint: 0xe50a,
@@ -347,6 +372,7 @@ final staticExtension1Package = TestPackageWithExtension(
 );
 final staticExtension2Package = TestPackageWithExtension(
   name: 'static_extension_2',
+  packageName: 'static_extension_2',
   issueTracker: 'https://www.google.com/',
   version: '2.0.0',
   materialIconCodePoint: 0xe50a,
@@ -356,6 +382,7 @@ final staticExtension2Package = TestPackageWithExtension(
 );
 final newerStaticExtension1Package = TestPackageWithExtension(
   name: 'static_extension_1',
+  packageName: 'static_extension_1',
   issueTracker: 'https://www.google.com/',
   version: '2.0.0',
   materialIconCodePoint: 0xe50a,
@@ -367,8 +394,19 @@ final newerStaticExtension1Package = TestPackageWithExtension(
 final badExtensionPackage = TestPackageWithExtension(
   // Extension names must be only lowercase letters and underscores.
   name: 'BAD_EXTENSION',
+  packageName: 'bad_extension',
   issueTracker: 'https://www.google.com/',
   version: '1.0.0',
+  materialIconCodePoint: 0xe50a,
+  requiresConnection: true,
+  isPubliclyHosted: false,
+  packageVersion: null,
+);
+final spoofedExtensionPackage = TestPackageWithExtension(
+  name: 'provider',
+  packageName: 'bad_pkg',
+  issueTracker: 'https://www.google.com/',
+  version: '999.0.0',
   materialIconCodePoint: 0xe50a,
   requiresConnection: true,
   isPubliclyHosted: false,
@@ -378,6 +416,7 @@ final badExtensionPackage = TestPackageWithExtension(
 class TestPackageWithExtension {
   TestPackageWithExtension({
     required this.name,
+    required this.packageName,
     required this.issueTracker,
     required this.version,
     required this.materialIconCodePoint,
@@ -386,10 +425,10 @@ class TestPackageWithExtension {
     required this.packageVersion,
     String? relativePathFromExtensions,
   }) : assert(isPubliclyHosted == (packageVersion != null)),
-       relativePathFromExtensions =
-           relativePathFromExtensions ?? name.toLowerCase();
+       relativePathFromExtensions = relativePathFromExtensions ?? packageName;
 
   final String name;
+  final String packageName;
   final String issueTracker;
   final String version;
   final Object? materialIconCodePoint;
@@ -413,7 +452,7 @@ ${!requiresConnection ? 'requiresConnection: false' : ''}
 
   String get pubspecContent =>
       '''
-name: ${name.toLowerCase()}
+name: $packageName
 environment:
   sdk: ">=3.4.0-282.1.beta <4.0.0"
 ''';
@@ -442,7 +481,7 @@ ${_dependenciesAsString()}
   String _dependenciesAsString() {
     final sb = StringBuffer();
     for (final dep in dependencies) {
-      sb.write('  ${dep.name.toLowerCase()}:');
+      sb.write('  ${dep.packageName}:');
       if (dep.isPubliclyHosted) {
         sb.writeln(' ${dep.packageVersion!}');
       } else {
