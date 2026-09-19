@@ -538,23 +538,23 @@ class LoggingController extends DevToolsScreenController
         _isNotNull(stackTrace)) {
       detailsComputer = () async {
         // Get the full string value of the message.
-        String result = await _retrieveFullStringValue(
+        final fullMessage = await _retrieveFullStringValue(
           service,
           e.isolate!,
           messageRef,
         );
 
+        String? fullError;
         // Get information about the error object. Some users of the
         // dart:developer log call may pass a data payload in the `error`
         // field, encoded as a json encoded string, so handle that case.
         if (_isNotNull(error)) {
           if (error!.valueAsString != null) {
-            final errorString = await _retrieveFullStringValue(
+            fullError = await _retrieveFullStringValue(
               service,
               e.isolate!,
               error,
             );
-            result += '\n\n$errorString';
           } else {
             // Call `toString()` on the error object and display that.
             final toStringResult = await service!.invoke(
@@ -566,25 +566,28 @@ class LoggingController extends DevToolsScreenController
             );
 
             if (toStringResult is ErrorRef) {
-              final errorString = _valueAsString(error);
-              result += '\n\n$errorString';
+              fullError = _valueAsString(error);
             } else if (toStringResult is InstanceRef) {
-              final str = await _retrieveFullStringValue(
+              fullError = await _retrieveFullStringValue(
                 service,
                 e.isolate!,
                 toStringResult,
               );
-              result += '\n\n$str';
             }
           }
         }
 
         // Get info about the stackTrace object.
-        if (_isNotNull(stackTrace)) {
-          result += '\n\n${_valueAsString(stackTrace)}';
-        }
+        final fullStackTrace = _isNotNull(stackTrace)
+            ? _valueAsString(stackTrace)
+            : null;
 
-        return result;
+        return computeDeveloperLogDetailsJson(
+          e.json!,
+          fullMessage: fullMessage,
+          fullError: fullError,
+          fullStackTrace: fullStackTrace,
+        );
       };
     }
 
@@ -964,6 +967,50 @@ String? _valueAsString(InstanceRef? ref) {
   return ref.valueAsStringIsTruncated == true
       ? '${ref.valueAsString}...'
       : ref.valueAsString;
+}
+
+/// Returns a JSON-encoded Logging event with full string values applied.
+@visibleForTesting
+String computeDeveloperLogDetailsJson(
+  Map<String, dynamic> eventJson, {
+  required String fullMessage,
+  String? fullError,
+  String? fullStackTrace,
+}) {
+  final detailsJson = jsonDecode(jsonEncode(eventJson)) as Map<String, dynamic>;
+  final logRecord = detailsJson['logRecord'];
+  if (logRecord is Map<String, dynamic>) {
+    _applyFullStringToInstanceJson(logRecord['message'], fullMessage);
+
+    if (fullError != null) {
+      final errorJson = logRecord['error'];
+      if (errorJson is Map<String, dynamic> &&
+          errorJson['valueAsString'] != null) {
+        _applyFullStringToInstanceJson(errorJson, fullError);
+      } else {
+        logRecord['errorAsString'] = fullError;
+      }
+    }
+
+    if (fullStackTrace != null) {
+      final stackJson = logRecord['stackTrace'];
+      if (stackJson is Map<String, dynamic> &&
+          stackJson['valueAsString'] != null) {
+        _applyFullStringToInstanceJson(stackJson, fullStackTrace);
+      } else {
+        logRecord['stackTraceAsString'] = fullStackTrace;
+      }
+    }
+  }
+
+  return jsonEncode(detailsJson);
+}
+
+void _applyFullStringToInstanceJson(Object? instanceJson, String fullValue) {
+  if (instanceJson is! Map) return;
+  instanceJson['valueAsString'] = fullValue;
+  instanceJson['valueAsStringIsTruncated'] = false;
+  instanceJson['length'] = fullValue.length;
 }
 
 /// A log data object that includes optional summary information about whether
