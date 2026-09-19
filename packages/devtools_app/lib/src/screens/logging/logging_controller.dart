@@ -977,28 +977,38 @@ String computeDeveloperLogDetailsJson(
   String? fullError,
   String? fullStackTrace,
 }) {
-  final detailsJson = jsonDecode(jsonEncode(eventJson)) as Map<String, dynamic>;
+  final detailsJson = Map<String, dynamic>.from(eventJson);
   final logRecord = detailsJson['logRecord'];
-  if (logRecord is Map<String, dynamic>) {
-    _applyFullStringToInstanceJson(logRecord['message'], fullMessage);
+  if (logRecord is Map) {
+    final logRecordCopy = Map<String, dynamic>.from(logRecord);
+    detailsJson['logRecord'] = logRecordCopy;
+
+    logRecordCopy['message'] = _applyFullStringToInstanceJson(
+      logRecordCopy['message'],
+      fullMessage,
+    );
 
     if (fullError != null) {
-      final errorJson = logRecord['error'];
-      if (errorJson is Map<String, dynamic> &&
-          errorJson['valueAsString'] != null) {
-        _applyFullStringToInstanceJson(errorJson, fullError);
+      final errorJson = logRecordCopy['error'];
+      if (errorJson is Map && errorJson['valueAsString'] != null) {
+        logRecordCopy['error'] = _applyFullStringToInstanceJson(
+          errorJson,
+          fullError,
+        );
       } else {
-        logRecord['errorAsString'] = fullError;
+        logRecordCopy['errorAsString'] = fullError;
       }
     }
 
     if (fullStackTrace != null) {
-      final stackJson = logRecord['stackTrace'];
-      if (stackJson is Map<String, dynamic> &&
-          stackJson['valueAsString'] != null) {
-        _applyFullStringToInstanceJson(stackJson, fullStackTrace);
+      final stackJson = logRecordCopy['stackTrace'];
+      if (stackJson is Map && stackJson['valueAsString'] != null) {
+        logRecordCopy['stackTrace'] = _applyFullStringToInstanceJson(
+          stackJson,
+          fullStackTrace,
+        );
       } else {
-        logRecord['stackTraceAsString'] = fullStackTrace;
+        logRecordCopy['stackTraceAsString'] = fullStackTrace;
       }
     }
   }
@@ -1006,11 +1016,14 @@ String computeDeveloperLogDetailsJson(
   return jsonEncode(detailsJson);
 }
 
-void _applyFullStringToInstanceJson(Object? instanceJson, String fullValue) {
-  if (instanceJson is! Map) return;
-  instanceJson['valueAsString'] = fullValue;
-  instanceJson['valueAsStringIsTruncated'] = false;
-  instanceJson['length'] = fullValue.length;
+Object? _applyFullStringToInstanceJson(Object? instanceJson, String fullValue) {
+  if (instanceJson is! Map) return instanceJson;
+  return <String, dynamic>{
+    ...Map<String, dynamic>.from(instanceJson),
+    'valueAsString': fullValue,
+    'valueAsStringIsTruncated': false,
+    'length': fullValue.length,
+  };
 }
 
 /// A log data object that includes optional summary information about whether
