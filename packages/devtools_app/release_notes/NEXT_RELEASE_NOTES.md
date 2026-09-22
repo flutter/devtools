@@ -72,6 +72,9 @@ To learn more about DevTools, check out the
 
 * Correct time units and cumulative nature of GC events.
   [#9890](https://github.com/flutter/devtools/pull/9890)
+* Fixed a bug where long `dart:developer` log messages lost their structured
+  Details view. -
+  [#10011](https://github.com/flutter/devtools/pull/10011),
 
 ## App size tool updates
 
