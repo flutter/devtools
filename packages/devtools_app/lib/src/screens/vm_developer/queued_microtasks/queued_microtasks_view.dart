@@ -4,7 +4,7 @@
 
 import 'package:collection/collection.dart' show ListExtensions;
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:vm_service/vm_service.dart';
 

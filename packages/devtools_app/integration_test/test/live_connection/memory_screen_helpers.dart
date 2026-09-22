@@ -7,7 +7,7 @@ import 'package:devtools_app/src/framework/scaffold/bottom_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/widgets/primary_controls.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Prepares the UI of the memory screen for an integration test.

@@ -5,7 +5,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:logging/logging.dart';
 

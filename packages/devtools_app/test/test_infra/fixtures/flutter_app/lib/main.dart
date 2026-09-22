@@ -8,7 +8,7 @@
 // debugger panel integration test will need to be updated with new line numbers
 // (the test verifies that breakpoints are hit at specific lines).
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'src/autocomplete.dart';
 import 'src/other_classes.dart';
 

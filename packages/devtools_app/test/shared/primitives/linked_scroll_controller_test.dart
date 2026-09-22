@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/shared/primitives/flutter_widgets/linked_scroll_controller.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // This file was originally forked from package:flutter_widgets. Note that the

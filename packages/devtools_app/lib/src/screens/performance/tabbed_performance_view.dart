@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/globals.dart';

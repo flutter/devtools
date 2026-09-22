@@ -9,7 +9,7 @@ import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_
     show Json;
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/snapshot_item.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../test_infra/scenes/memory/default.dart';

@@ -7,7 +7,7 @@ import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/ui/common_widgets.dart';
 import 'package:devtools_app_shared/src/ui/dialogs.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/matchers/matchers.dart';

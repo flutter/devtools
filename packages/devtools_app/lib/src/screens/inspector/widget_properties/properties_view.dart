@@ -8,7 +8,7 @@ import 'dart:math';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/console/widgets/description.dart';

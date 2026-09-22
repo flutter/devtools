@@ -59,6 +59,8 @@ dependencies:
   vm_snapshot_analysis: ^0.7.6
   web: ^1.0.0
 
+  material_ui: any
+  cupertino_ui: any
 dev_dependencies:
   args: ^2.4.2
   benchmark_harness: ^2.3.1
