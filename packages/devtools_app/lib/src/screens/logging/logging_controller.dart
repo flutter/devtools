@@ -977,11 +977,10 @@ String computeDeveloperLogDetailsJson(
   String? fullError,
   String? fullStackTrace,
 }) {
-  final detailsJson = Map<String, dynamic>.from(eventJson);
+  final detailsJson = Map<String, dynamic>.of(eventJson);
   final logRecord = detailsJson['logRecord'];
-  if (logRecord is Map) {
-    final logRecordCopy = Map<String, dynamic>.from(logRecord);
-    detailsJson['logRecord'] = logRecordCopy;
+  if (logRecord is Map<String, dynamic>) {
+    final logRecordCopy = Map<String, dynamic>.of(logRecord);
 
     logRecordCopy['message'] = _applyFullStringToInstanceJson(
       logRecordCopy['message'],
@@ -990,7 +989,8 @@ String computeDeveloperLogDetailsJson(
 
     if (fullError != null) {
       final errorJson = logRecordCopy['error'];
-      if (errorJson is Map && errorJson['valueAsString'] != null) {
+      if (errorJson is Map<String, dynamic> &&
+          errorJson['valueAsString'] != null) {
         logRecordCopy['error'] = _applyFullStringToInstanceJson(
           errorJson,
           fullError,
@@ -1002,7 +1002,8 @@ String computeDeveloperLogDetailsJson(
 
     if (fullStackTrace != null) {
       final stackJson = logRecordCopy['stackTrace'];
-      if (stackJson is Map && stackJson['valueAsString'] != null) {
+      if (stackJson is Map<String, dynamic> &&
+          stackJson['valueAsString'] != null) {
         logRecordCopy['stackTrace'] = _applyFullStringToInstanceJson(
           stackJson,
           fullStackTrace,
@@ -1011,15 +1012,17 @@ String computeDeveloperLogDetailsJson(
         logRecordCopy['stackTraceAsString'] = fullStackTrace;
       }
     }
+
+    detailsJson['logRecord'] = logRecordCopy;
   }
 
   return jsonEncode(detailsJson);
 }
 
 Object? _applyFullStringToInstanceJson(Object? instanceJson, String fullValue) {
-  if (instanceJson is! Map) return instanceJson;
+  if (instanceJson is! Map<String, dynamic>) return instanceJson;
   return <String, dynamic>{
-    ...Map<String, dynamic>.from(instanceJson),
+    ...instanceJson,
     'valueAsString': fullValue,
     'valueAsStringIsTruncated': false,
     'length': fullValue.length,
