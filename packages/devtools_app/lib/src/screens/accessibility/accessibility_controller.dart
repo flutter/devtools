@@ -160,6 +160,7 @@ class AccessibilityController extends DevToolsScreenController
 
   /// Selects [node] in the semantics tree and unselects any previously selected node.
   void selectSemanticsNode(SemanticsNodeModel? node) {
+    if (selectedSemanticsNode.value == node) return;
     selectedSemanticsNode.value?.unselect();
     node?.select();
     selectedSemanticsNode.value = node;
