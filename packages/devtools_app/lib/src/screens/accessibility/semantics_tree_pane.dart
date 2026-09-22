@@ -167,67 +167,73 @@ class _SemanticsTreeContent extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return TreeView<SemanticsNodeModel>(
-      dataRootsListenable: controller.semanticsRoots,
-      scrollController: controller.treeScrollController,
-      includeScrollbar: true,
-      dataDisplayProvider: (node, onPressed) {
-        return InkWell(
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-            child: Row(
-              children: [
-                Icon(
-                  _iconForNode(node),
-                  size: defaultIconSize,
-                  color: colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-                const SizedBox(width: denseSpacing),
-                Text(
-                  'SemanticsNode #${node.id}',
-                  maxLines: 1,
-                  style: theme.fixedFontStyle,
-                ),
-                if (node.label.isNotEmpty) ...[
-                  const SizedBox(width: denseSpacing),
-                  Flexible(
-                    child: Text(
-                      '"${node.label}"',
+    return ValueListenableBuilder<SemanticsNodeModel?>(
+      valueListenable: controller.selectedSemanticsNode,
+      builder: (context, _, _) {
+        return TreeView<SemanticsNodeModel>(
+          dataRootsListenable: controller.semanticsRoots,
+          scrollController: controller.treeScrollController,
+          includeScrollbar: true,
+          onItemSelected: controller.selectSemanticsNode,
+          dataDisplayProvider: (node, onPressed) {
+            return InkWell(
+              onTap: onPressed,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+                child: Row(
+                  children: [
+                    Icon(
+                      _iconForNode(node),
+                      size: defaultIconSize,
+                      color: colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                    const SizedBox(width: denseSpacing),
+                    Text(
+                      'SemanticsNode #${node.id}',
                       maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.subtleTextStyle.copyWith(
-                        fontStyle: FontStyle.italic,
-                        color: colorScheme.onSurface.withValues(alpha: 0.6),
+                      style: theme.fixedFontStyle,
+                    ),
+                    if (node.label.isNotEmpty) ...[
+                      const SizedBox(width: denseSpacing),
+                      Flexible(
+                        child: Text(
+                          '"${node.label}"',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.subtleTextStyle.copyWith(
+                            fontStyle: FontStyle.italic,
+                            color: colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-                if (node.widgetName.isNotEmpty) ...[
-                  const SizedBox(width: denseSpacing),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: densePadding,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primaryContainer.withValues(
-                        alpha: 0.2,
+                    ],
+                    if (node.widgetName.isNotEmpty) ...[
+                      const SizedBox(width: denseSpacing),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: densePadding,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.primaryContainer.withValues(
+                            alpha: 0.2,
+                          ),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          node.widgetName,
+                          maxLines: 1,
+                          style: theme.subtleTextStyle.copyWith(
+                            color: colorScheme.primary,
+                            fontSize: smallFontSize,
+                          ),
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      node.widgetName,
-                      maxLines: 1,
-                      style: theme.subtleTextStyle.copyWith(
-                        color: colorScheme.primary,
-                        fontSize: smallFontSize,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          },
         );
       },
     );

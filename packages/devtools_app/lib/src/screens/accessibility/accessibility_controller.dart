@@ -55,6 +55,11 @@ class AccessibilityController extends DevToolsScreenController
     addAutoDisposeListener(boldText, _onBoldTextChanged);
     addAutoDisposeListener(screenReader, _onScreenReaderChanged);
     addAutoDisposeListener(highContrast, _onHighContrastChanged);
+    addAutoDisposeListener(semanticsRoots, _onSemanticsRootsChanged);
+  }
+
+  void _onSemanticsRootsChanged() {
+    selectSemanticsNode(semanticsRoots.value.firstOrNull);
   }
 
   void _initSemanticsTree() {
@@ -148,9 +153,17 @@ class AccessibilityController extends DevToolsScreenController
   final highContrast = ValueNotifier<bool>(false);
 
   final semanticsRoots = ValueNotifier<List<SemanticsNodeModel>>([]);
+  final selectedSemanticsNode = ValueNotifier<SemanticsNodeModel?>(null);
   final semanticsTreeLoading = ValueNotifier<bool>(false);
   final semanticsTreeError = ValueNotifier<String?>(null);
   final treeScrollController = ScrollController();
+
+  /// Selects [node] in the semantics tree and unselects any previously selected node.
+  void selectSemanticsNode(SemanticsNodeModel? node) {
+    selectedSemanticsNode.value?.unselect();
+    node?.select();
+    selectedSemanticsNode.value = node;
+  }
 
   Future<void> loadSemanticsTree() async {
     if (semanticsTreeLoading.value) return;
@@ -174,6 +187,8 @@ class AccessibilityController extends DevToolsScreenController
 
       final response = await serviceConnection.serviceManager
           .callServiceExtensionOnMainIsolate(registrations.getSemanticsTree);
+
+      if (disposed) return;
 
       final json = response.json;
       if (json != null && json.containsKey('error')) {
@@ -208,8 +223,10 @@ class AccessibilityController extends DevToolsScreenController
       semanticsTreeError.value = null;
     } catch (e, st) {
       _log.warning('Error loading semantics tree: $e', e, st);
-      semanticsRoots.value = [];
-      semanticsTreeError.value = 'Failed to load semantics tree: $e';
+      if (!disposed) {
+        semanticsRoots.value = [];
+        semanticsTreeError.value = 'Failed to load semantics tree: $e';
+      }
     } finally {
       if (!disposed) {
         semanticsTreeLoading.value = false;
@@ -253,10 +270,14 @@ class AccessibilityController extends DevToolsScreenController
   SemanticsNodeModel _parseSemanticsNode(Map<String, dynamic> json) {
     final rawFlags = json['flags'] as List<Object?>?;
     final flags = SemanticsNodeModel.parseFlags(rawFlags);
+    final rect = SemanticsNodeModel.parseRect(json['rect']);
 
     return SemanticsNodeModel(
       id: json['id']?.toString() ?? '',
       label: json['label']?.toString() ?? '',
+      value: json['value']?.toString() ?? '',
+      hint: json['hint']?.toString() ?? '',
+      rect: rect,
       flags: flags,
       widgetName: json['widgetName']?.toString() ?? '',
     );
@@ -271,6 +292,7 @@ class AccessibilityController extends DevToolsScreenController
     screenReader.dispose();
     highContrast.dispose();
     semanticsRoots.dispose();
+    selectedSemanticsNode.dispose();
     semanticsTreeLoading.dispose();
     semanticsTreeError.dispose();
     treeScrollController.dispose();

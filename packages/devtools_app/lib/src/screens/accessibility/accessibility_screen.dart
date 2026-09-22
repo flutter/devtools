@@ -10,6 +10,7 @@ import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
 import 'accessibility_controller.dart';
 import 'overrides_pane.dart';
+import 'semantics_node_details_pane.dart';
 import 'semantics_tree_pane.dart';
 
 export 'overrides_pane.dart';
@@ -37,6 +38,12 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
   // ignore: unused-code, temporarily ignore since this screen is under active development.
   late AccessibilityController controller;
 
+  /// The initial split fractions for the three screen panes:
+  /// - [AccessibilitySemanticsTreePane]: 35%
+  /// - [SemanticsNodeDetailsPane]: 35%
+  /// - [AccessibilityOverridesPane]: 30%
+  static const _initialFractions = [0.35, 0.35, 0.3];
+
   @override
   void initState() {
     super.initState();
@@ -49,9 +56,10 @@ class _AccessibilityScreenBodyState extends State<AccessibilityScreenBody>
     final splitAxis = _splitAxisFor(context);
     return SplitPane(
       axis: splitAxis,
-      initialFractions: const [0.6, 0.4],
+      initialFractions: _initialFractions,
       children: const [
         AccessibilitySemanticsTreePane(),
+        SemanticsNodeDetailsPane(),
         AccessibilityOverridesPane(),
       ],
     );
