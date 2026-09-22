@@ -273,13 +273,17 @@ class FlutterBisectCommand extends Command {
 
     if (Directory(sdkPath).existsSync()) {
       log.stdout('Using Flutter SDK at $sdkPath');
-      await processManager.runAll(
-        commands: [
-          gitLongFilesCommand,
-          CliCommand.git(['fetch']),
-        ],
-        workingDirectory: sdkPath,
-      );
+      try {
+        await processManager.runAll(
+          commands: [
+            gitLongFilesCommand,
+            CliCommand.git(['fetch']),
+          ],
+          workingDirectory: sdkPath,
+        );
+      } catch (e) {
+        log.stderr('Warning: failed to fetch latest Flutter history: $e');
+      }
       return;
     }
 
