@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -165,7 +166,9 @@ class HeapClassName with Serializable {
     // TODO(polina-c): create a way for users to add their weak classes
     // or detect weak references automatically, without hard coding
     // class names.
-    assert(false, 'Unexpected library for $className: $library.');
+    if (kDebugMode) {
+      throw StateError('Unexpected library for $className: $library.');
+    }
     return false;
   }
 

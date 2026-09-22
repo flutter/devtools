@@ -397,11 +397,10 @@ class DevToolsTableState<T> extends State<DevToolsTable<T>>
     final verticalScrollController = this.verticalScrollController;
 
     // If we're at the end already, scroll to expose the new content.
-    if (widget.autoScrollContent) {
-      if (verticalScrollController.hasClients &&
-          verticalScrollController.atScrollBottom) {
-        unawaited(verticalScrollController.autoScrollToBottom());
-      }
+    if (widget.autoScrollContent &&
+        verticalScrollController.hasClients &&
+        verticalScrollController.atScrollBottom) {
+      unawaited(verticalScrollController.autoScrollToBottom());
     }
 
     final columnGroups = widget.tableController.columnGroups;

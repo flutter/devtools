@@ -188,13 +188,11 @@ class AccessibilityController extends DevToolsScreenController
       }
 
       final roots = <SemanticsNodeModel>[];
-      if (rawData is Map<String, dynamic>) {
-        if (rawData.isNotEmpty) {
-          final rootId = rawData.containsKey('0')
-              ? '0'
-              : rawData.keys.first.toString();
-          roots.add(_buildTreeFromNodesMap(rootId, rawData, <String>{}));
-        }
+      if (rawData is Map<String, dynamic> && rawData.isNotEmpty) {
+        final rootId = rawData.containsKey('0')
+            ? '0'
+            : rawData.keys.first.toString();
+        roots.add(_buildTreeFromNodesMap(rootId, rawData, <String>{}));
       }
 
       if (roots.isEmpty) {

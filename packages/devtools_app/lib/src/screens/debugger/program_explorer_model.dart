@@ -190,17 +190,16 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         ?.isolateNow
         ?.rootLib
         ?.uri;
-    if (rootLibUri != null) {
-      if (rootLibUri.startsWith('package:') ||
-          rootLibUri.startsWith('google3:')) {
-        final parts = rootLibUri.split('/')..removeLast();
-        final path = parts.join('/');
-        for (int i = 0; i < root.children.length; ++i) {
-          if (root.children[i].name.startsWith(path)) {
-            final rootLibNode = root.removeChildAtIndex(i);
-            root.addChild(rootLibNode, index: 0);
-            break;
-          }
+    if (rootLibUri != null &&
+        (rootLibUri.startsWith('package:') ||
+            rootLibUri.startsWith('google3:'))) {
+      final parts = rootLibUri.split('/')..removeLast();
+      final path = parts.join('/');
+      for (int i = 0; i < root.children.length; ++i) {
+        if (root.children[i].name.startsWith(path)) {
+          final rootLibNode = root.removeChildAtIndex(i);
+          root.addChild(rootLibNode, index: 0);
+          break;
         }
       }
     }

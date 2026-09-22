@@ -564,10 +564,10 @@ void main() {
           } else if (monitorType.isReset) {
             addDataToTrace(controller, monitorResetTraceIndex, rawData);
           } else {
-            assert(false, 'Unknown monitor type');
+            throw Exception('Unknown monitor type');
           }
         } else if (event.isEmpty) {
-          assert(false, 'Unexpected EventSample of isEmpty.');
+          throw Exception('Unexpected EventSample of isEmpty.');
         }
       }
     }

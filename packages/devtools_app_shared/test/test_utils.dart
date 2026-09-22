@@ -6,6 +6,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
 
 // NOTE: these helpers are duplicated from `package:devtools_test`. We copied
 // them instead of importing `devtools_test`, because `devtools_test` is not
@@ -28,6 +29,7 @@ Widget wrap(Widget widget) {
 }
 
 /// Runs a test with the size of the app window under test to [windowSize].
+@isTest
 void testWidgetsWithWindowSize(
   String name,
   Size windowSize,

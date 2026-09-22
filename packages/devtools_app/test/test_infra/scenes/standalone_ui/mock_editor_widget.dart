@@ -277,8 +277,9 @@ class _MockEditorWidgetState extends State<MockEditorWidget>
                     children: [
                       const Text('DTD Connection: '),
                       ElevatedButton(
-                        onPressed: () =>
-                            dtdManager.disconnectImpl(allowReconnect: true),
+                        onPressed: () => unawaited(
+                          dtdManager.disconnectImpl(allowReconnect: true),
+                        ),
                         child: const Text('Drop Connection'),
                       ),
                     ],
