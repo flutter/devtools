@@ -41,6 +41,9 @@ To learn more about DevTools, check out the
 ## Memory updates
 
 * Added the ability to pin classes to the top of the Profile Memory table. [#8898](https://github.com/flutter/devtools/issues/8898)
+* Clarified that Diff Snapshots size columns (Allocated, Freed, Delta, Persisted)
+  show memory for that class row, not a running total of the table.
+  [#8837](https://github.com/flutter/devtools/issues/8837)
 
 ## Debugger updates
 
