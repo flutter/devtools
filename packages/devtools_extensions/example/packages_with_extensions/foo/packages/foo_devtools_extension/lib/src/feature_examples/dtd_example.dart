@@ -8,7 +8,7 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:dtd/dtd.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:path/path.dart' as p;
 
 /// This widget shows an example of how you can call public APIs exposed by

@@ -27,6 +27,7 @@ dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
+  material_ui: ^1.4.0
   meta: ^1.9.1
   mockito: ^5.4.1
   path: ^1.8.0

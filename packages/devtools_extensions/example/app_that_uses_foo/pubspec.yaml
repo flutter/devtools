@@ -19,6 +19,7 @@ dependencies:
   foo:
     path: ../packages_with_extensions/foo/packages/foo
 
+  material_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
