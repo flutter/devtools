@@ -9,11 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  material_ui: ^1.4.0
   widget_icons:
     path: ../
-
-  material_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
