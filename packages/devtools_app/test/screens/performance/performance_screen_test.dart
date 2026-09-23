@@ -251,6 +251,46 @@ void main() {
         },
       );
 
+      // testWidgetsWithWindowSize(
+      //   'clears timeline on clear',
+      //   windowSize,
+      //   (WidgetTester tester) async {
+      //     await tester.runAsync(() async {
+      //       await pumpPerformanceScreen(tester, runAsync: true);
+      //       await tester.pumpAndSettle();
+
+      //       // Ensure the Timeline Events tab is selected.
+      //       final timelineEventsTabFinder = find.text('Timeline Events');
+      //       expect(timelineEventsTabFinder, findsOneWidget);
+      //       await tester.tap(timelineEventsTabFinder);
+      //       await tester.pumpAndSettle();
+
+      //       expect(
+      //         controller.timelineEventsController.allTraceEvents,
+      //         isNotEmpty,
+      //       );
+      //       expect(find.byType(FlutterFramesChart), findsOneWidget);
+      //       expect(find.byType(TimelineFlameChart), findsOneWidget);
+      //       expect(
+      //         find.byKey(TimelineEventsView.emptyTimelineKey),
+      //         findsNothing,
+      //       );
+      //       expect(find.byType(EventDetails), findsOneWidget);
+
+      //       await tester.tap(find.byIcon(Icons.block));
+      //       await tester.pumpAndSettle();
+      //       expect(controller.timelineEventsController.allTraceEvents, isEmpty);
+      //       expect(find.byType(FlutterFramesChart), findsOneWidget);
+      //       expect(find.byType(TimelineFlameChart), findsNothing);
+      //       expect(
+      //         find.byKey(TimelineEventsView.emptyTimelineKey),
+      //         findsOneWidget,
+      //       );
+      //       expect(find.byType(EventDetails), findsNothing);
+      //     });
+      //   },
+      // );
+
       testWidgetsWithWindowSize('opens enhance tracing overlay', windowSize, (
         WidgetTester tester,
       ) async {
