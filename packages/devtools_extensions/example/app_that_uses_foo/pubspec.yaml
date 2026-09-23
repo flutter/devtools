@@ -18,8 +18,8 @@ dependencies:
     path: ../packages_with_extensions/dart_foo/packages/dart_foo
   foo:
     path: ../packages_with_extensions/foo/packages/foo
+  material_ui: ^1.4.0
 
-  material_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

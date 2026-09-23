@@ -8,4 +8,4 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  material_ui: any
+  material_ui: ^1.4.0
