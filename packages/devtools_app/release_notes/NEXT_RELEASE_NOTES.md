@@ -70,7 +70,7 @@ To learn more about DevTools, check out the
 * Fixed the Request tab and Copy as cURL missing the body of HTTP requests
   that are still waiting for a response. A request body is only shown once it
   has been fully sent, so it is never shown truncated. -
-  [#TODO](https://github.com/flutter/devtools/pull/TODO)
+  [#10019](https://github.com/flutter/devtools/pull/10019)
 
 ## Logging updates
 
