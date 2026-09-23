@@ -7,8 +7,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:devtools_test/test_data.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 class PerformanceScreenAutomator {
   const PerformanceScreenAutomator(this.controller);

@@ -5,8 +5,8 @@
 import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/ui/search_highlighter.dart';
 import 'package:devtools_app_shared/ui.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   const style = TextStyle(fontSize: 12.0);

@@ -8,6 +8,7 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:devtools_app/src/screens/debugger/span_parser.dart';
 import 'package:devtools_app/src/screens/debugger/syntax_highlighter.dart';
 import 'package:devtools_app/src/shared/framework/routing.dart';
@@ -15,9 +16,8 @@ import 'package:devtools_app/src/shared/ui/colors.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:cupertino_ui/cupertino_ui.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 const modifierSpans = [
   // Start multi-capture spans
