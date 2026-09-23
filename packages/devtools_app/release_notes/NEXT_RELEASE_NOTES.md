@@ -67,6 +67,10 @@ To learn more about DevTools, check out the
 * Fixed an issue where the Network tab would stop capturing new HTTP requests
   after pressing Clear while recording. -
   [#9856](https://github.com/flutter/devtools/pull/9856)
+* Fixed the Request tab and Copy as cURL missing the body of HTTP requests
+  that are still waiting for a response. A request body is only shown once it
+  has been fully sent, so it is never shown truncated. -
+  [#TODO](https://github.com/flutter/devtools/pull/TODO)
 
 ## Logging updates
 
