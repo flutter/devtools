@@ -8,9 +8,9 @@ import 'dart:ui' as ui;
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/main.dart' as app;
 import 'package:devtools_app_shared/ui.dart';
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../helpers/actions.dart';
 import '../helpers/utils.dart';
