@@ -5,6 +5,8 @@
 @TestOn('vm')
 library;
 
+import 'dart:ui' show SemanticsFlag;
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -179,6 +181,129 @@ void main() {
         await tester.tap(highContrastSwitch);
         await tester.pumpAndSettle();
         expect(controller.highContrast.value, isTrue);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders semantics tree when nodes are loaded',
+      windowSize,
+      (WidgetTester tester) async {
+        final rootNode = SemanticsNodeModel(
+          id: '0',
+          label: 'Root Node',
+          flags: {SemanticsFlag.isHeader},
+          widgetName: 'HeaderWidget',
+        );
+        controller.semanticsRoots.value = [rootNode];
+
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.text('SemanticsNode #0'), findsAtLeastNWidgets(1));
+        expect(find.text('"Root Node"'), findsAtLeastNWidgets(1));
+        expect(find.text('HeaderWidget'), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders semantics tree error state when error occurs',
+      windowSize,
+      (WidgetTester tester) async {
+        controller.semanticsTreeError.value =
+            'Failed to load semantics tree: network error.';
+
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Failed to load semantics tree: network error.'),
+          findsOneWidget,
+        );
+        expect(find.text('Try Again'), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders parent and child nodes in semantics tree',
+      windowSize,
+      (WidgetTester tester) async {
+        final childNode = SemanticsNodeModel(
+          id: '1',
+          label: 'Child Node',
+          flags: {SemanticsFlag.isButton},
+          widgetName: 'ElevatedButton',
+        );
+        final rootNode = SemanticsNodeModel(
+          id: '0',
+          label: 'Root Node',
+          widgetName: 'Column',
+        )..addChild(childNode);
+
+        rootNode.expandCascading();
+        controller.semanticsRoots.value = [rootNode];
+
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.text('SemanticsNode #0'), findsOneWidget);
+        expect(find.text('SemanticsNode #1'), findsOneWidget);
+        expect(find.text('"Child Node"'), findsOneWidget);
+        expect(find.text('ElevatedButton'), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders empty state with Load Semantics Tree button when no roots',
+      windowSize,
+      (WidgetTester tester) async {
+        controller.semanticsRoots.value = [];
+        await pumpAccessibilityScreen(tester);
+        controller.semanticsTreeError.value = null;
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text(
+            'No semantics tree loaded. Inspect the accessibility hierarchy of the connected app.',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.widgetWithText(DevToolsButton, 'Load Semantics Tree'),
+          findsOneWidget,
+        );
+        expect(find.byType(RefreshButton), findsNothing);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders refresh button when roots are loaded',
+      windowSize,
+      (WidgetTester tester) async {
+        final rootNode = SemanticsNodeModel(id: '0', label: 'Root Node');
+        controller.semanticsRoots.value = [rootNode];
+
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(RefreshButton), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders appropriate icon for node with hasCheckedState flag',
+      windowSize,
+      (WidgetTester tester) async {
+        final node = SemanticsNodeModel(
+          id: '0',
+          label: 'Checkbox Node',
+          flags: {SemanticsFlag.hasCheckedState},
+        );
+        controller.semanticsRoots.value = [node];
+
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.byIcon(Icons.check_box_outlined), findsOneWidget);
       },
     );
   });

@@ -13,6 +13,7 @@ void main() {
   group('$TestPackageWithExtension', () {
     test('$driftPackage', () {
       expect(driftPackage.name, 'drift');
+      expect(driftPackage.packageName, 'drift');
       expect(
         driftPackage.issueTracker,
         'https://github.com/simolus3/drift/issues',
@@ -27,6 +28,7 @@ void main() {
 
     test('$providerPackage', () {
       expect(providerPackage.name, 'provider');
+      expect(providerPackage.packageName, 'provider');
       expect(
         providerPackage.issueTracker,
         'https://github.com/rrousselGit/provider/issues',
@@ -41,6 +43,7 @@ void main() {
 
     test('$staticExtension1Package', () {
       expect(staticExtension1Package.name, 'static_extension_1');
+      expect(staticExtension1Package.packageName, 'static_extension_1');
       expect(staticExtension1Package.issueTracker, 'https://www.google.com/');
       expect(staticExtension1Package.version, '1.0.0');
       expect(staticExtension1Package.materialIconCodePoint, 0xe50a);
@@ -67,6 +70,7 @@ requiresConnection: false
 
     test('$staticExtension2Package', () {
       expect(staticExtension2Package.name, 'static_extension_2');
+      expect(staticExtension2Package.packageName, 'static_extension_2');
       expect(staticExtension2Package.issueTracker, 'https://www.google.com/');
       expect(staticExtension2Package.version, '2.0.0');
       expect(staticExtension2Package.materialIconCodePoint, 0xe50a);
@@ -93,6 +97,7 @@ requiresConnection: false
 
     test('$newerStaticExtension1Package', () {
       expect(newerStaticExtension1Package.name, 'static_extension_1');
+      expect(newerStaticExtension1Package.packageName, 'static_extension_1');
       expect(
         newerStaticExtension1Package.issueTracker,
         'https://www.google.com/',
@@ -122,6 +127,7 @@ requiresConnection: false
 
     test('$badExtensionPackage', () {
       expect(badExtensionPackage.name, 'BAD_EXTENSION');
+      expect(badExtensionPackage.packageName, 'bad_extension');
       expect(badExtensionPackage.issueTracker, 'https://www.google.com/');
       expect(badExtensionPackage.version, '1.0.0');
       expect(badExtensionPackage.materialIconCodePoint, 0xe50a);
@@ -130,7 +136,7 @@ requiresConnection: false
       expect(badExtensionPackage.packageVersion, null);
       expect(
         badExtensionPackage.relativePathFromExtensions,
-        badExtensionPackage.name.toLowerCase(),
+        badExtensionPackage.packageName,
       );
       expect(badExtensionPackage.pubspecContent, '''
 name: bad_extension
@@ -141,6 +147,33 @@ environment:
 name: BAD_EXTENSION
 issueTracker: https://www.google.com/
 version: 1.0.0
+materialIconCodePoint: 58634
+
+''');
+    });
+
+    test('$spoofedExtensionPackage', () {
+      expect(spoofedExtensionPackage.name, 'provider');
+      expect(spoofedExtensionPackage.packageName, 'bad_pkg');
+      expect(spoofedExtensionPackage.issueTracker, 'https://www.google.com/');
+      expect(spoofedExtensionPackage.version, '999.0.0');
+      expect(spoofedExtensionPackage.materialIconCodePoint, 0xe50a);
+      expect(spoofedExtensionPackage.requiresConnection, true);
+      expect(spoofedExtensionPackage.isPubliclyHosted, false);
+      expect(spoofedExtensionPackage.packageVersion, null);
+      expect(
+        spoofedExtensionPackage.relativePathFromExtensions,
+        spoofedExtensionPackage.packageName,
+      );
+      expect(spoofedExtensionPackage.pubspecContent, '''
+name: bad_pkg
+environment:
+  sdk: ">=3.4.0-282.1.beta <4.0.0"
+''');
+      expect(spoofedExtensionPackage.configYamlContent, '''
+name: provider
+issueTracker: https://www.google.com/
+version: 999.0.0
 materialIconCodePoint: 58634
 
 ''');

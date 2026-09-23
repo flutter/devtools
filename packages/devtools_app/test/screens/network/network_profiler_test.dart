@@ -389,6 +389,14 @@ void main() {
   });
 
   group('NetworkRequestOverviewView', () {
+    setUp(() {
+      setGlobal(
+        ServiceConnectionManager,
+        FakeServiceConnectionManager(
+          service: FakeServiceManager.createFakeService(),
+        ),
+      );
+    });
     Future<void> pumpView(WidgetTester tester, NetworkRequest data) async {
       final widget = wrap(NetworkRequestOverviewView(data));
       await tester.pumpWidget(widget);
@@ -558,7 +566,7 @@ void main() {
         expect(find.text('Start time: '), findsOneWidget);
         expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
         expect(find.text('End time: '), findsOneWidget);
-        expect(find.text('Pending'), findsOneWidget);
+        expect(find.text('Pending'), findsNWidgets(2));
         expect(
           find.byKey(NetworkRequestOverviewView.socketTimingGraphKey),
           findsOneWidget,
@@ -571,6 +579,177 @@ void main() {
         expect(find.text('Last write time: '), findsOneWidget);
         expect(
           find.text(formatDateTime(data.lastWriteTimestamp!)),
+          findsOneWidget,
+        );
+      },
+    );
+    testWidgetsWithWindowSize('displays for web socket request', windowSize, (
+      tester,
+    ) async {
+      final connection = WebSocketConnection(
+        isolateId: 'isolate-1',
+        id: '42',
+        uri: Uri.parse('wss://example.com/socket'),
+        state: 'open',
+        protocol: 'chat',
+        connectTimestamp: DateTime.utc(2026, 8, 18, 10),
+        openTimestamp: DateTime.utc(2026, 8, 18, 10, 0, 1),
+        bytesSent: 100,
+        bytesReceived: 200,
+        framesSent: 10,
+        framesReceived: 20,
+        pingCount: 3,
+        pongCount: 3,
+        lastUpdated: DateTime.utc(2026, 8, 18, 10, 0, 2),
+        events: [
+          WebSocketEvent(
+            event: 'WebSocket.Send',
+            timestamp: DateTime.utc(2026, 8, 18, 10, 0, 1),
+            frameNumber: 1,
+            direction: 'out',
+            opcode: 'text',
+            payloadSize: 25,
+          ),
+        ],
+      );
+
+      final data = WebSocket(connection);
+
+      await pumpView(tester, data);
+
+      // Verify general information.
+      expect(find.text('Request uri: '), findsOneWidget);
+      expect(find.text('wss://example.com/socket'), findsOneWidget);
+      expect(find.text('Method: '), findsOneWidget);
+      expect(find.text('WEBSOCKET'), findsOneWidget);
+      expect(find.text('Status: '), findsOneWidget);
+      expect(find.text('open'), findsOneWidget);
+      expect(find.text('Port: '), findsNothing);
+      expect(find.text('Content type: '), findsNothing);
+
+      expect(find.text('Connection id: '), findsOneWidget);
+      expect(find.text('42'), findsOneWidget);
+      expect(find.text('Protocol: '), findsOneWidget);
+      expect(find.text('chat'), findsOneWidget);
+
+      expect(find.text('Bytes sent: '), findsOneWidget);
+      expect(find.text('100 B'), findsOneWidget);
+      expect(find.text('Bytes received: '), findsOneWidget);
+      expect(find.text('200 B'), findsOneWidget);
+
+      expect(find.text('Frames sent: '), findsOneWidget);
+      expect(find.text('10'), findsOneWidget);
+      expect(find.text('Frames received: '), findsOneWidget);
+      expect(find.text('20'), findsOneWidget);
+
+      expect(find.text('Ping count: '), findsOneWidget);
+      expect(find.text('3'), findsNWidgets(2));
+
+      expect(find.text('Pong count: '), findsOneWidget);
+
+      // Verify timing information.
+      expect(find.text('Timing: '), findsOneWidget);
+      expect(find.text('Start time: '), findsOneWidget);
+      expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
+      expect(find.text('End time: '), findsOneWidget);
+      expect(find.text('Pending'), findsNWidgets(2));
+      expect(
+        find.byKey(NetworkRequestOverviewView.webSocketTimingGraphKey),
+        findsOneWidget,
+      );
+    });
+
+    testWidgetsWithWindowSize(
+      'displays duration for closed web socket request',
+      windowSize,
+      (tester) async {
+        final connection = WebSocketConnection(
+          isolateId: 'isolate-1',
+          id: '42',
+          uri: Uri.parse('wss://example.com/socket'),
+          state: 'closed',
+          protocol: 'chat',
+          connectTimestamp: DateTime.utc(2026, 8, 18, 10),
+          openTimestamp: DateTime.utc(2026, 8, 18, 10, 0, 1),
+          closeTimestamp: DateTime.utc(2026, 8, 18, 10, 0, 6),
+          bytesSent: 100,
+          bytesReceived: 200,
+          framesSent: 10,
+          framesReceived: 20,
+          pingCount: 3,
+          pongCount: 3,
+          lastUpdated: DateTime.utc(2026, 8, 18, 10, 0, 7),
+          events: [
+            WebSocketEvent(
+              event: 'WebSocket.Send',
+              timestamp: DateTime.utc(2026, 8, 18, 10, 0, 1),
+              frameNumber: 1,
+              direction: 'out',
+              opcode: 'text',
+              payloadSize: 25,
+            ),
+            WebSocketEvent(
+              event: 'WebSocket.Close',
+              timestamp: DateTime.utc(2026, 8, 18, 10, 0, 6),
+              frameNumber: 2,
+              direction: 'out',
+              opcode: 'close',
+              payloadSize: 0,
+            ),
+          ],
+        );
+
+        final data = WebSocket(connection);
+
+        await pumpView(tester, data);
+
+        expect(find.text('Status: '), findsOneWidget);
+        expect(find.text('closed'), findsOneWidget);
+
+        expect(find.text('Connection id: '), findsOneWidget);
+        expect(find.text('42'), findsOneWidget);
+
+        expect(find.text('Protocol: '), findsOneWidget);
+        expect(find.text('chat'), findsOneWidget);
+
+        expect(find.text('Bytes sent: '), findsOneWidget);
+        expect(find.text('100 B'), findsOneWidget);
+
+        expect(find.text('Bytes received: '), findsOneWidget);
+        expect(find.text('200 B'), findsOneWidget);
+
+        expect(find.text('Frames sent: '), findsOneWidget);
+        expect(find.text('10'), findsOneWidget);
+
+        expect(find.text('Frames received: '), findsOneWidget);
+        expect(find.text('20'), findsOneWidget);
+
+        expect(find.text('Ping count: '), findsOneWidget);
+        expect(find.text('3'), findsNWidgets(2));
+
+        expect(find.text('Pong count: '), findsOneWidget);
+
+        // The connection lasted from 10:00:00 to 10:00:06.
+        expect(data.duration, const Duration(seconds: 6));
+        expect(
+          find.text(durationText(data.duration!, fractionDigits: 0)),
+          findsOneWidget,
+        );
+
+        expect(find.text('Start time: '), findsOneWidget);
+        expect(find.text(formatDateTime(data.startTimestamp)), findsOneWidget);
+
+        expect(find.text('End time: '), findsOneWidget);
+        expect(find.text(formatDateTime(data.endTimestamp!)), findsOneWidget);
+
+        expect(find.text('Last updated: '), findsOneWidget);
+        expect(
+          find.text(formatDateTime(connection.lastUpdated)),
+          findsOneWidget,
+        );
+
+        expect(
+          find.byKey(NetworkRequestOverviewView.webSocketTimingGraphKey),
           findsOneWidget,
         );
       },

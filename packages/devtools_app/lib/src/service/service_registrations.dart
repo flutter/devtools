@@ -60,3 +60,12 @@ const dwdsSendEvent = 'ext.dwds.sendEvent';
 /// Service extension that returns whether or not the Impeller rendering engine
 /// is being used (if false, the app is using SKIA).
 const isImpellerEnabled = 'ext.ui.window.impellerEnabled';
+
+/// Service extension to enable or disable semantics on the connected app.
+const enableSemantics = 'ext.flutter.accessibility.enableSemantics';
+
+/// Service extension to fetch the accessibility semantics tree from the connected app.
+const getSemanticsTree = 'ext.flutter.accessibility.getSemanticsTree';
+
+/// Service extension to dispose semantics on the connected app.
+const disposeSemantics = 'ext.flutter.accessibility.disposeSemantics';

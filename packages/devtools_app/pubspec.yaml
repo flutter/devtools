@@ -54,7 +54,7 @@ dependencies:
   stack_trace: ^1.12.0
   string_scanner: ^1.4.0
   unified_analytics: ^7.0.0
-  vm_service: ^15.0.2
+  vm_service: ^15.3.0
   vm_service_protos: ^2.0.0
   vm_snapshot_analysis: ^0.7.6
   web: ^1.0.0

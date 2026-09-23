@@ -30,6 +30,45 @@ import 'controller.dart';
 /// [ui_web.PlatformViewRegistry], which [_viewIdIncrementer] is used to create.
 var _viewIdIncrementer = 0;
 
+/// HTML template for the placeholder view used when debugging extensions without
+/// a running DevTools server.
+String _debugExtensionPlaceholderHtml(String name) {
+  return '''
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #202124;
+      color: #e8eaed;
+    }
+  </style>
+</head>
+<body>
+  <h3>DevTools Extension Placeholder ($name)</h3>
+  <p>Local debugging placeholder view.</p>
+</body>
+</html>
+''';
+}
+
+/// The sandbox permissions granted to embedded extension iframes.
+///
+/// Configures the iframe sandbox to allow:
+/// - Script execution (`allow-scripts`)
+/// - Origin-based features like local storage and service workers (`allow-same-origin`)
+/// - Form submissions and downloads (`allow-forms`, `allow-downloads`)
+/// - Unrestricted popup windows and links (`allow-popups`, `allow-popups-to-escape-sandbox`)
+const _extensionSandboxRules =
+    'allow-scripts allow-same-origin allow-forms allow-downloads allow-popups allow-popups-to-escape-sandbox';
+
 class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
     with AutoDisposeControllerMixin {
   EmbeddedExtensionControllerImpl(super.extensionConfig);
@@ -42,7 +81,8 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
 
   String get extensionUrl {
     if (debugDevToolsExtensions && !isDevToolsServerAvailable) {
-      return 'https://flutter.dev/';
+      final html = _debugExtensionPlaceholderHtml(extensionConfig.name);
+      return 'data:text/html;charset=utf-8,${Uri.encodeComponent(html)}';
     }
 
     final basePath = devtoolsAssetsBasePath(
@@ -93,7 +133,8 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       ..src = extensionUrl
-      ..allow = 'usb';
+      ..allow = 'usb'
+      ..sandbox.value = _extensionSandboxRules;
     _extensionIFrame.style
       ..border = 'none'
       ..height = '100%'

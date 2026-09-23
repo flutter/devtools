@@ -126,7 +126,10 @@ class StatusLine extends StatelessWidget {
         BulletSpacer(color: foregroundColor),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: DevToolsScaffold.defaultActions(color: foregroundColor),
+          children: DevToolsScaffold.defaultActions(
+            color: foregroundColor,
+            currentScreen: currentScreen,
+          ),
         ),
       ],
     ];

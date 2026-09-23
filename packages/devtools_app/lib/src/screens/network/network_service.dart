@@ -14,9 +14,16 @@ class NetworkService {
   NetworkController get networkController =>
       screenControllers.lookup<NetworkController>();
 
-  /// Tracks the time (microseconds since epoch) that the HTTP profile was last
-  /// retrieved for a given isolate ID.
+  /// Tracks the VM timeline timestamp (microseconds) that the HTTP profile was
+  /// last retrieved for a given isolate ID.
+  ///
+  /// These values are passed to `getHttpProfile` as `updatedSince`, which must
+  /// use the VM's monotonic timeline clock — not wall-clock time.
   final lastHttpDataRefreshTimePerIsolate = <String, int>{};
+
+  /// Tracks the time (microseconds since epoch) that the WebSocket profile was
+  /// last retrieved for a given isolate ID.
+  final lastWebSocketDataRefreshTimePerIsolate = <String, int>{};
 
   /// Updates the last Socket data refresh time to the current time.
   ///
@@ -41,21 +48,45 @@ class NetworkService {
     return timestamp;
   }
 
-  /// Updates the last HTTP data refresh time to the current time.
+  /// Updates the last HTTP data refresh time to the current VM timeline time.
   ///
   /// If [alreadyRecordingHttp] is true it's unclear when the last refresh time
   /// would have occurred, so the refresh time is not updated. Otherwise,
-  /// [lastHttpDataRefreshTimePerIsolate] is updated to the current
-  /// time.
-  void updateLastHttpDataRefreshTime({bool alreadyRecordingHttp = false}) {
+  /// [lastHttpDataRefreshTimePerIsolate] is updated to the current VM timeline
+  /// timestamp for each known isolate.
+  ///
+  /// Wall-clock time must not be used here: `getHttpProfile`'s `updatedSince`
+  /// expects the VM timeline clock. A wall-clock value would filter out all
+  /// subsequent requests.
+  Future<void> updateLastHttpDataRefreshTime({
+    bool alreadyRecordingHttp = false,
+  }) async {
     if (!alreadyRecordingHttp) {
+      final service = serviceConnection.serviceManager.service;
+      if (service == null) return;
+      final timestamp = (await service.getVMTimelineMicros()).timestamp!;
       for (final isolateId in lastHttpDataRefreshTimePerIsolate.keys.toList()) {
-        // It's safe to use `DateTime.now()` here since we don't need to worry
-        // about dropping data between the time the last profile was generated
-        // by the target application and the time `DateTime.now()` is called
-        // here.
-        lastHttpDataRefreshTimePerIsolate[isolateId] =
-            DateTime.now().microsecondsSinceEpoch;
+        lastHttpDataRefreshTimePerIsolate[isolateId] = timestamp;
+      }
+    }
+  }
+
+  /// Updates the last WebSocket data refresh time to the current time.
+  ///
+  /// WebSocket profiling is controlled by HttpClient.enableTimelineLogging,
+  /// so this timestamp follows the HTTP timeline logging lifecycle.
+  Future<void> updateLastWebSocketDataRefreshTime({
+    bool alreadyRecordingWebSocket = false,
+  }) async {
+    if (!alreadyRecordingWebSocket) {
+      final service = serviceConnection.serviceManager.service;
+      if (service == null) return;
+
+      final timestamp = (await service.getVMTimelineMicros()).timestamp!;
+
+      for (final isolateId
+          in lastWebSocketDataRefreshTimePerIsolate.keys.toList()) {
+        lastWebSocketDataRefreshTimePerIsolate[isolateId] = timestamp;
       }
     }
   }
@@ -79,6 +110,10 @@ class NetworkService {
       if (cancelledCallback?.call() ?? false) return;
 
       networkController.lastSocketDataRefreshMicros = timestamp;
+
+      final webSockets = await _refreshWebSocketProfile();
+      if (cancelledCallback?.call() ?? false) return;
+
       List<HttpProfileRequest>? httpRequests;
       httpRequests = await _refreshHttpProfile();
       if (cancelledCallback?.call() ?? false) return;
@@ -86,6 +121,7 @@ class NetworkService {
       networkController.processNetworkTraffic(
         sockets: sockets,
         httpRequests: httpRequests,
+        webSockets: webSockets,
       );
     } on RPCError catch (e) {
       if (!e.isServiceDisposedError) {
@@ -134,6 +170,67 @@ class NetworkService {
       // if the isolate is eventually resumed.
       // TODO(jacobr): detect whether the isolate is paused using the vm
       // service and handle this case gracefully rather than timing out.
+      await timeout(future, 500);
+    });
+  }
+
+  Future<List<WebSocketConnection>> _refreshWebSocketProfile() async {
+    final service = serviceConnection.serviceManager.service;
+    if (service == null) return const [];
+
+    final connections = <WebSocketConnection>[];
+
+    await service.forEachIsolate((isolate) async {
+      final isolateId = isolate.id!;
+
+      if (!await service.isWebSocketProfilingAvailable(isolateId)) {
+        return;
+      }
+
+      final profile = await service.getWebSocketProfile(
+        isolateId,
+        updatedSince: DateTime.fromMicrosecondsSinceEpoch(
+          lastWebSocketDataRefreshTimePerIsolate.putIfAbsent(
+            isolateId,
+            // If a new isolate has spawned, request all WebSocket connections
+            // from the start of the profile.
+            () => 0,
+          ),
+        ),
+      );
+
+      final fullConnections = await Future.wait(
+        profile.connections.map(
+          (connection) =>
+              service.getWebSocketConnection(isolateId, connection.id),
+        ),
+      );
+
+      connections.addAll(fullConnections);
+
+      // Use the profile timestamp rather than DateTime.now() so that we don't
+      // miss updates between the profile snapshot and this assignment.
+      lastWebSocketDataRefreshTimePerIsolate[isolateId] =
+          profile.timestamp.microsecondsSinceEpoch;
+    });
+
+    return connections;
+  }
+
+  Future<void> _clearWebSocketProfile() async {
+    final service = serviceConnection.serviceManager.service;
+    if (service == null) return;
+
+    await service.forEachIsolate((isolate) async {
+      final isolateId = isolate.id!;
+
+      if (!await service.isWebSocketProfilingAvailable(isolateId)) {
+        return;
+      }
+
+      final future = service.clearWebSocketProfile(isolateId);
+
+      // The call may not complete immediately if the isolate is paused.
       await timeout(future, 500);
     });
   }
@@ -202,9 +299,16 @@ class NetworkService {
   }
 
   Future<void> clearData() async {
-    await updateLastSocketDataRefreshTime();
-    updateLastHttpDataRefreshTime();
-    await _clearSocketProfile();
-    await _clearHttpProfile();
+    try {
+      await updateLastSocketDataRefreshTime();
+      await updateLastHttpDataRefreshTime();
+      await _clearSocketProfile();
+      await _clearHttpProfile();
+      await _clearWebSocketProfile();
+    } on RPCError catch (e) {
+      if (!e.isServiceDisposedError) {
+        rethrow;
+      }
+    }
   }
 }

@@ -6,6 +6,32 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../test_infra/test_data/network.dart';
 
+/// Creates a minimal [HttpProfileRequest] for use in Network View tests.
+HttpProfileRequest createTestHttpRequest({
+  required String id,
+  required String method,
+  int startTime = 2_000_000,
+  String uri = 'https://example.com/test',
+}) {
+  final endTime = startTime + 1000;
+  return HttpProfileRequest.parse({
+    'type': 'HttpProfileRequest',
+    'id': id,
+    'isolateId': 'isolates/test',
+    'method': method,
+    'uri': uri,
+    'events': [],
+    'startTime': startTime,
+    'endTime': endTime,
+    'response': {
+      'startTime': startTime,
+      'endTime': endTime,
+      'redirects': [],
+      'statusCode': 200,
+    },
+  })!;
+}
+
 SocketProfile loadSocketProfile() {
   return SocketProfile(
     sockets: [

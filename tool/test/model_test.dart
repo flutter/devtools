@@ -4,11 +4,29 @@
 
 import 'dart:io';
 
+import 'package:devtools_tool/devtools_command_runner.dart';
 import 'package:devtools_tool/model.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 void main() {
+  group('DevToolsCommandRunner', () {
+    test('parses --flutter-from-path flag', () {
+      final runner = DevToolsCommandRunner();
+      final results = runner.argParser.parse(['-p']);
+      expect(results['flutter-from-path'], isTrue);
+    });
+
+    test('parses --flutter-sdk-path option', () {
+      final runner = DevToolsCommandRunner();
+      final results = runner.argParser.parse([
+        '--flutter-sdk-path',
+        '/custom/path',
+      ]);
+      expect(results['flutter-sdk-path'], equals('/custom/path'));
+    });
+  });
+
   group('FlutterSdk.findFromPath', () {
     late Directory tempDir;
 

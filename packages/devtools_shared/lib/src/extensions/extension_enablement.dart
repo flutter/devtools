@@ -23,8 +23,9 @@ $_documentationKey: https://docs.flutter.dev/tools/devtools/extensions#configure
 $_extensionsKey:
 ''';
 
-  /// Returns the current enabled state for [extensionName] in the
-  /// 'devtools_options.yaml' file at [devtoolsOptionsUri].
+  /// Returns the current enabled state of [packageName] (falls back to
+  /// [extensionName]) in the 'devtools_options.yaml' file at
+  /// [devtoolsOptionsUri].
   ///
   /// If the 'devtools_options.yaml' file does not exist, it will be created
   /// with an empty set of extensions.
@@ -33,6 +34,7 @@ $_extensionsKey:
   ExtensionEnabledState lookupExtensionEnabledState({
     required Uri devtoolsOptionsUri,
     required String extensionName,
+    String? packageName,
   }) {
     final options = _optionsAsMap(optionsUri: devtoolsOptionsUri);
     if (options == null) return ExtensionEnabledState.error;
@@ -41,19 +43,20 @@ $_extensionsKey:
         ?.cast<Map<String, Object?>>();
     if (extensions == null) return ExtensionEnabledState.none;
 
+    final targetKey = packageName ?? extensionName;
     for (final e in extensions) {
       // Each entry should only have one key / value pair (e.g. '- foo: true').
       assert(e.keys.length == 1);
 
-      if (e.keys.first == extensionName) {
-        return _extensionStateForValue(e[extensionName]);
+      if (e.keys.first == targetKey) {
+        return _extensionStateForValue(e[targetKey]);
       }
     }
     return ExtensionEnabledState.none;
   }
 
-  /// Sets the enabled state for [extensionName] in the
-  /// 'devtools_options.yaml' file at [devtoolsOptionsUri].
+  /// Sets the enabled state of [packageName] (falls back to [extensionName])
+  /// in the 'devtools_options.yaml' file at [devtoolsOptionsUri].
   ///
   /// If the 'devtools_options.yaml' file does not exist, it will be created.
   ///
@@ -61,6 +64,7 @@ $_extensionsKey:
   ExtensionEnabledState setExtensionEnabledState({
     required Uri devtoolsOptionsUri,
     required String extensionName,
+    String? packageName,
     required bool enable,
   }) {
     final options = _optionsAsMap(optionsUri: devtoolsOptionsUri);
@@ -73,14 +77,16 @@ $_extensionsKey:
       extensions = options[_extensionsKey] as List<Map<String, Object?>>;
     }
 
+    final targetKey = packageName ?? extensionName;
+
     // Write the new enabled state to the map.
     final extension = extensions.firstWhereOrNull(
-      (e) => e.keys.first == extensionName,
+      (e) => e.keys.first == targetKey,
     );
     if (extension == null) {
-      extensions.add({extensionName: enable});
+      extensions.add({targetKey: enable});
     } else {
-      extension[extensionName] = enable;
+      extension[targetKey] = enable;
     }
 
     _writeToOptionsFile(optionsUri: devtoolsOptionsUri, options: options);
@@ -90,6 +96,7 @@ $_extensionsKey:
     return lookupExtensionEnabledState(
       devtoolsOptionsUri: devtoolsOptionsUri,
       extensionName: extensionName,
+      packageName: packageName,
     );
   }
 
