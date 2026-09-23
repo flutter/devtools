@@ -89,6 +89,13 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   bool isFetchingFullData = false;
 
+  /// Whether the last full data fetch happened before the request finished
+  /// sending, meaning its request body may have been truncated.
+  ///
+  /// While this is true, [requestBody] is hidden. Fetching the full data again
+  /// after the request has been sent (e.g. by re-selecting it) clears it.
+  bool _fetchedBeforeRequestSent = false;
+
   Future<void> getFullRequestData() async {
     try {
       if (isFetchingFullData) return; // We are already fetching
@@ -110,7 +117,8 @@ class DartIOHttpRequestData extends NetworkRequest {
           }
         }
 
-        if (fullRequest.requestBody != null) {
+        _fetchedBeforeRequestSent = !fullRequest.isRequestComplete;
+        if (fullRequest.requestBody != null && !_fetchedBeforeRequestSent) {
           try {
             _requestBody = utf8.decode(fullRequest.requestBody!);
           } catch (_) {
@@ -401,7 +409,12 @@ class DartIOHttpRequestData extends NetworkRequest {
     }
     final fullRequest = _request as HttpProfileRequest;
     try {
-      if (!_request.isResponseComplete) return null;
+      // The request body is fully known once the request has been sent (or
+      // has failed), so it does not need to wait for the response. This keeps
+      // it available for pending and failed requests, e.g. for Copy as cURL.
+      if (!_request.isRequestComplete || _fetchedBeforeRequestSent) {
+        return null;
+      }
       final acceptedMethods = {'POST', 'PUT', 'PATCH'};
       if (!acceptedMethods.contains(_request.method)) return null;
       if (_requestBody != null) return _requestBody;
