@@ -9,6 +9,7 @@ import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/performance_controls.dart';
+import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_stats.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
 import 'package:devtools_app/src/shared/feature_flags.dart';
@@ -218,7 +219,6 @@ void main() {
           await tester.runAsync(() async {
             await pumpPerformanceScreen(tester, runAsync: true);
             await tester.pumpAndSettle();
-
             final chartButtonFinder = find.byType(VisibilityButton);
             expect(chartButtonFinder, findsOneWidget);
 
@@ -231,7 +231,6 @@ void main() {
 
             await tester.tap(chartButtonFinder);
             await tester.pumpAndSettle();
-
             // The flutter frames chart should no longer be visible.
             expect(find.byType(FramesChartControls), findsNothing);
             expect(
@@ -394,6 +393,64 @@ void main() {
           });
         },
       );
+    });
+
+    group('RebuildStatsView', () {
+      late FakeServiceConnectionManager fakeServiceConnection;
+      late RebuildCountModel model;
+      late ValueNotifier<FlutterFrame?> selectedFrame;
+
+      setUp(() {
+        fakeServiceConnection = FakeServiceConnectionManager();
+        mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
+        setGlobal(ServiceConnectionManager, fakeServiceConnection);
+        setGlobal(IdeTheme, IdeTheme());
+        setGlobal(NotificationService, NotificationService());
+        setGlobal(BannerMessagesController, BannerMessagesController());
+        setGlobal(PreferencesController, PreferencesController());
+        setGlobal(OfflineDataController, OfflineDataController());
+        model = RebuildCountModel();
+        selectedFrame = ValueNotifier<FlutterFrame?>(null);
+      });
+
+      testWidgets('shows message when running in profile mode', (
+        WidgetTester tester,
+      ) async {
+        mockConnectedApp(
+          fakeServiceConnection.serviceManager.connectedApp!,
+          isProfileBuild: true,
+        );
+
+        await tester.pumpWidget(
+          wrapWithControllers(
+            RebuildStatsView(model: model, selectedFrame: selectedFrame),
+          ),
+        );
+        await tester.pump();
+
+        expect(
+          find.textContaining('Widget rebuild counts are only available'),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('shows normal UI when running in debug mode', (
+        WidgetTester tester,
+      ) async {
+        mockConnectedApp(fakeServiceConnection.serviceManager.connectedApp!);
+
+        await tester.pumpWidget(
+          wrapWithControllers(
+            RebuildStatsView(model: model, selectedFrame: selectedFrame),
+          ),
+        );
+        await tester.pump();
+
+        expect(
+          find.textContaining('Widget rebuild counts are only available'),
+          findsNothing,
+        );
+      });
     });
   });
 }

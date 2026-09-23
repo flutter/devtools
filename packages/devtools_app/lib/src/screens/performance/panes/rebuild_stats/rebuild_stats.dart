@@ -20,6 +20,12 @@ import '../../../../shared/ui/common_widgets.dart';
 import '../flutter_frames/flutter_frame_model.dart';
 import 'rebuild_stats_model.dart';
 
+@visibleForTesting
+const debugModeOnlyMessage =
+    'Rebuild information is not available for this frame.\n'
+    'Widget rebuild counts are only available when running '
+    'an app in debug mode.';
+
 class RebuildStatsView extends StatefulWidget {
   const RebuildStatsView({
     super.key,
@@ -92,6 +98,12 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
 
   @override
   Widget build(BuildContext context) {
+    final isProfileBuild =
+        serviceConnection.serviceManager.connectedApp?.isProfileBuildNow ??
+        false;
+    if (isProfileBuild) {
+      return const CenteredMessage(message: debugModeOnlyMessage);
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
