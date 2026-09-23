@@ -107,7 +107,8 @@ class FlutterTestEnvironment {
     if (force ||
         _needsSetup ||
         !reuseTestEnvironment ||
-        _isNewRunConfig(config)) {
+        _isNewRunConfig(config) ||
+        !serviceConnection.serviceManager.connectedState.value.connected) {
       _setupInProgress = Completer();
       try {
         // If we already have a running test device, stop it before setting up a
