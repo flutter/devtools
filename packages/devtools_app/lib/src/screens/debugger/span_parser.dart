@@ -443,7 +443,9 @@ class _MultilineMatcher extends GrammarMatcher {
       RegExp(r'\\([0-9]+)'),
       (match) {
         final groupIndex = int.parse(match.group(1)!);
-        final capturedText = beginMatch.group(groupIndex);
+        final capturedText = groupIndex <= beginMatch.groupCount
+            ? beginMatch.group(groupIndex)
+            : null;
         return capturedText == null
             // No capture, keep the original text.
             ? match.group(0)!
