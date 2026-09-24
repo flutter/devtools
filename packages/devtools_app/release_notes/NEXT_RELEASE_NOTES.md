@@ -59,6 +59,9 @@ To learn more about DevTools, check out the
   narrow, such as when DevTools is embedded in an IDE side panel. The controls
   now scroll horizontally instead of overflowing.
   [#9949](https://github.com/flutter/devtools/pull/9949)
+* Improved syntax highlighting of fenced code blocks that use more than three
+  backticks.
+  [#10021](https://github.com/flutter/devtools/pull/10021)
 
 ## Network profiler updates
 
