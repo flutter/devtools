@@ -17,8 +17,8 @@ import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:dtd/dtd.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../test_infra/test_data/deep_link/fake_responses.dart';

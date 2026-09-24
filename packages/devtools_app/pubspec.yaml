@@ -20,6 +20,7 @@ resolution: workspace
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
+  cupertino_ui: ^1.1.1
   dap: ^1.1.0
   dds_service_extensions: ^2.0.2
   devtools_app_shared:
@@ -36,9 +37,10 @@ dependencies:
     sdk: flutter
   http: ^1.1.0
   image: ^4.7.2
-  intl: ^0.19.0
+  intl: ^0.20.0
   json_rpc_2: ^3.0.2
   logging: ^1.1.1
+  material_ui: ^1.4.0
   meta: ^1.9.1
   mime: ^2.0.0
   path: ^1.8.0

@@ -3,9 +3,9 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 // NOTE: these helpers are duplicated from `package:devtools_test`. We copied
 // them instead of importing `devtools_test`, because `devtools_test` is not

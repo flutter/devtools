@@ -11,10 +11,12 @@ environment:
   flutter: '>=3.0.0'
 
 dependencies:
+  # ignore: dependencies, required for Flutter SDK.
   flutter:
     sdk: flutter
   custom_widgets:
     path: ../custom_widgets
+  material_ui: ^1.4.0
 
 dev_dependencies:
   flutter_lints: ^6.0.0

@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../extensions/extension_screen.dart';
 import '../../../shared/analytics/analytics.dart' as ga;

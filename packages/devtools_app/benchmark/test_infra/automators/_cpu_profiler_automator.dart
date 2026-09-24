@@ -10,8 +10,8 @@ import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:devtools_test/test_data.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 class CpuProfilerScreenAutomator {
   const CpuProfilerScreenAutomator(this.controller);

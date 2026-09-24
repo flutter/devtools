@@ -11,8 +11,8 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/inspector/inspector_data_models.dart';

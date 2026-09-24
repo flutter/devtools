@@ -7,9 +7,9 @@ import 'package:devtools_app/src/screens/inspector/layout_explorer/ui/theme.dart
 import 'package:devtools_app/src/shared/primitives/math_utils.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'layout_explorer_test_utils.dart';
 

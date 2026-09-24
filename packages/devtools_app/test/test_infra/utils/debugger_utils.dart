@@ -3,8 +3,8 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 Finder findDebuggerButtonWithIcon(IconData icon) => find.ancestor(
   of: find.byWidgetPredicate(

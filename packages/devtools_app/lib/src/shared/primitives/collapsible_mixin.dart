@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Provides `animations` triggered by toggling the expanded and visible state
 /// of a widget.

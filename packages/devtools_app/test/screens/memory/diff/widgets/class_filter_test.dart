@@ -7,8 +7,8 @@ import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/widgets/class_filter.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../../test_infra/matchers/matchers.dart';
 import '../../../../test_infra/scenes/memory/diff_snapshot.dart';

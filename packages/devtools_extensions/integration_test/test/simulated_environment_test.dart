@@ -6,10 +6,10 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:devtools_extensions/src/template/_simulated_devtools_environment/_simulated_devtools_environment.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foo_devtools_extension/src/feature_examples/devtools_extension_api_example.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 // To run this test:
 // dart run integration_test/run_tests.dart --target=integration_test/test/simulated_environment_test.dart
