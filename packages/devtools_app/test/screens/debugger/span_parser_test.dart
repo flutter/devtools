@@ -108,7 +108,7 @@ void main() {
       // These goldens are updated using the usual Flutter --update-goldens
       // flag:
       //
-      //     flutter test test/shared/span_parser_test.dart --update-goldens
+      //     flutter test test/screens/debugger/span_parser_test.dart --update-goldens
       final testFiles = testDataDirectory.listSync().whereType<File>().where(
         (file) => path.extension(file.path) == '.dart',
       );
