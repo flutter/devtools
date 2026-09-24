@@ -41,6 +41,9 @@ void main() {
                 colorScheme: useDarkTheme ? darkColorScheme : lightColorScheme,
               ),
             ),
+            builder: (context, child) =>
+                // ignore: deprecated_member_use
+                MaterialUiCompatibilityBridge(child: child!),
             home: SidePanelViewer(controller: controller),
           ),
         );

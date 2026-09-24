@@ -182,30 +182,7 @@ class SidePanel extends AnimatedWidget {
                 : Expanded(
                     child: Markdown(
                       data: markdownData!,
-                      // TODO(ryjohn): Upgrade to package:flutter_markdown_plus when
-                      // it supports package:material_ui. package:flutter_markdown
-                      // resolves Theme.of(context) using package:flutter/material.dart,
-                      // falling back to light theme defaults unless styles are
-                      // explicitly configured here.
                       styleSheet: MarkdownStyleSheet(
-                        p: theme.regularTextStyle,
-                        blockquote: theme.regularTextStyle,
-                        code: theme.regularTextStyle.copyWith(
-                          fontFamily: 'monospace',
-                          fontSize:
-                              (theme.regularTextStyle.fontSize ?? 14.0) * 0.85,
-                        ),
-                        h1: theme.textTheme.headlineSmall,
-                        h2: theme.textTheme.titleLarge,
-                        h3: theme.textTheme.titleMedium,
-                        h4: theme.textTheme.bodyLarge,
-                        h5: theme.textTheme.bodyLarge,
-                        h6: theme.textTheme.bodyLarge,
-                        listBullet: theme.regularTextStyle,
-                        tableBody: theme.regularTextStyle,
-                        tableHead: theme.regularTextStyle.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
                         // [MarkdownStyleSheet.fromTheme], which supplies the
                         // rest of the style sheet, hard codes
                         // `Colors.blue.shade100` as the blockquote fill while
