@@ -100,3 +100,55 @@
 >var h;
 #^^^ storage.type.primitive.dart
 #     ^ punctuation.terminator.dart
+>
+>/// Multiline dartdoc comment with more than three backticks.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
+>///
+#^^^ comment.block.documentation.dart
+>/// ``````
+#^^^^^^^^^^ comment.block.documentation.dart
+>/// code in six backticks
+#^^^^ comment.block.documentation.dart
+#    ^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart variable.other.source.dart
+>/// ```
+#^^^^^^^ comment.block.documentation.dart
+>/// three backticks is nested code
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
+>/// ```
+#^^^^^^^ comment.block.documentation.dart
+>/// more code
+#^^^^ comment.block.documentation.dart
+#    ^^^^^^^^^ comment.block.documentation.dart variable.other.source.dart
+>/// ``````
+#^^^^^^^^^^ comment.block.documentation.dart
+>///
+#^^^ comment.block.documentation.dart
+>/// Text
+#^^^^^^^^ comment.block.documentation.dart
+>var moreBackticks;
+#^^^ storage.type.primitive.dart
+#                 ^ punctuation.terminator.dart
+>
+>/// Multiline dartdoc comment with more closing backticks.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
+>///
+#^^^ comment.block.documentation.dart
+>/// ``````
+#^^^^^^^^^^ comment.block.documentation.dart
+>/// code in six backticks
+#^^^^ comment.block.documentation.dart
+#    ^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart variable.other.source.dart
+>/// ```
+#^^^^^^^ comment.block.documentation.dart
+>/// still code
+#^^^^^^^^^^^^^^ comment.block.documentation.dart
+>/// ``````````````````
+#^^^^^^^^^^^^^^^^^^^^^^ comment.block.documentation.dart
+>///
+#^^^ comment.block.documentation.dart
+>/// Text
+#^^^^ comment.block.documentation.dart
+#    ^^^^ comment.block.documentation.dart variable.other.source.dart
+>var moreClosingBackticks;
+#^^^ storage.type.primitive.dart
+#                        ^ punctuation.terminator.dart
