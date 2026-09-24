@@ -42,7 +42,7 @@ void main() {
               ),
             ),
             builder: (context, child) =>
-                // ignore: deprecated_member_use
+                // ignore: deprecated_member_use, needed for markdown package
                 MaterialUiCompatibilityBridge(child: child!),
             home: SidePanelViewer(controller: controller),
           ),
