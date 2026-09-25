@@ -62,6 +62,8 @@ To learn more about DevTools, check out the
 
 ## Network profiler updates
 
+* Fixed Copy as cURL omitting request headers and body for failed or timed-out
+  requests. [#9963](https://github.com/flutter/devtools/pull/9963)
 * Added WebSocket support to the Network profiler, including WebSocket
   connection details, lifecycle events, frame-level inspection, and connection
   timing information. [#9968](https://github.com/flutter/devtools/pull/9968)
