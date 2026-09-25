@@ -5,7 +5,7 @@
 @TestOn('vm')
 library;
 
-import 'dart:ui' show SemanticsFlag;
+import 'dart:ui' show Rect, SemanticsFlag;
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/service/service_registrations.dart'
@@ -144,33 +144,66 @@ void main() {
       },
     );
 
-    test('SemanticsNodeModel properties and shallowCopy', () {
-      final child = SemanticsNodeModel(
-        id: '1',
-        label: 'Child Node',
-        flags: {SemanticsFlag.isButton, SemanticsFlag.hasCheckedState},
-        widgetName: 'ElevatedButton',
-      );
-      final parent = SemanticsNodeModel(
-        id: '0',
-        label: 'Parent Node',
-        flags: {SemanticsFlag.isHeader},
-        widgetName: 'Column',
-      )..addChild(child);
+    test(
+      'SemanticsNodeModel properties, parseRect, rectDisplay, and shallowCopy',
+      () {
+        const expectedRect = Rect.fromLTWH(0, 0, 763, 32);
+        final child = SemanticsNodeModel(
+          id: '1',
+          label: 'Child Node',
+          value: 'Child Value',
+          hint: 'Child Hint',
+          rect: expectedRect,
+          flags: {SemanticsFlag.isButton, SemanticsFlag.hasCheckedState},
+          widgetName: 'ElevatedButton',
+        );
+        final parent = SemanticsNodeModel(
+          id: '0',
+          label: 'Parent Node',
+          flags: {SemanticsFlag.isHeader},
+          widgetName: 'Column',
+        )..addChild(child);
 
-      expect(parent.children, hasLength(1));
-      expect(parent.children.first.id, equals('1'));
+        expect(parent.children, hasLength(1));
+        expect(parent.children.first.id, equals('1'));
+        expect(parent.rectDisplay, isNull);
+        expect(child.rectDisplay, equals('rect: Rect.fromLTWH(0, 0, 763, 32)'));
 
-      final copy = child.shallowCopy();
-      expect(copy.id, equals('1'));
-      expect(copy.label, equals('Child Node'));
-      expect(
-        copy.flags,
-        equals({SemanticsFlag.isButton, SemanticsFlag.hasCheckedState}),
-      );
-      expect(copy.widgetName, equals('ElevatedButton'));
-      expect(copy.children, isEmpty);
-    });
+        final copy = child.shallowCopy();
+        expect(copy.id, equals('1'));
+        expect(copy.label, equals('Child Node'));
+        expect(copy.value, equals('Child Value'));
+        expect(copy.hint, equals('Child Hint'));
+        expect(copy.rect, equals(expectedRect));
+        expect(
+          copy.flags,
+          equals({SemanticsFlag.isButton, SemanticsFlag.hasCheckedState}),
+        );
+        expect(copy.widgetName, equals('ElevatedButton'));
+        expect(copy.children, isEmpty);
+
+        expect(
+          SemanticsNodeModel.parseRect({
+            'left': 10,
+            'top': 20,
+            'width': 100,
+            'height': 50,
+          }),
+          equals(const Rect.fromLTWH(10, 20, 100, 50)),
+        );
+        expect(
+          SemanticsNodeModel.parseRect({
+            'left': 10,
+            'top': 20,
+            'right': 110,
+            'bottom': 70,
+          }),
+          equals(const Rect.fromLTRB(10, 20, 110, 70)),
+        );
+        expect(SemanticsNodeModel.parseRect(null), isNull);
+        expect(SemanticsNodeModel.parseRect('invalid'), isNull);
+      },
+    );
 
     test(
       'loadSemanticsTree sets error state when no main isolate connected',
@@ -187,6 +220,7 @@ void main() {
         );
         expect(testController.semanticsTreeLoading.value, isFalse);
         expect(testController.semanticsRoots.value, isEmpty);
+        expect(testController.selectedSemanticsNode.value, isNull);
       },
     );
 
@@ -214,11 +248,12 @@ void main() {
           ),
         );
         expect(testController.semanticsRoots.value, isEmpty);
+        expect(testController.selectedSemanticsNode.value, isNull);
       },
     );
 
     test(
-      'loadSemanticsTree parses full SemanticsNode.toJson format with multiple nodes',
+      'loadSemanticsTree parses full SemanticsNode.toJson format with multiple nodes and selects root',
       () async {
         final fakeServiceManager =
             serviceConnection.serviceManager as FakeServiceManager;
@@ -318,16 +353,24 @@ void main() {
         final root = testController.semanticsRoots.value.first;
         expect(root.id, equals('0'));
         expect(root.label, equals('Root View'));
+        expect(root.value, equals('Main Screen'));
+        expect(root.hint, isEmpty);
+        expect(root.rect, equals(const Rect.fromLTWH(0, 0, 390, 844)));
         expect(
           root.flags,
           equals({SemanticsFlag.hasEnabledState, SemanticsFlag.isEnabled}),
         );
         expect(root.children, hasLength(2));
 
+        // Root node is automatically selected on load
+        expect(testController.selectedSemanticsNode.value, equals(root));
+        expect(root.isSelected, isTrue);
+
         // Node 1: Settings Header
         final headerNode = root.children[0];
         expect(headerNode.id, equals('1'));
         expect(headerNode.label, equals('Settings Header'));
+        expect(headerNode.rect, equals(const Rect.fromLTWH(16, 40, 358, 32)));
         expect(headerNode.flags, equals({SemanticsFlag.isHeader}));
         expect(headerNode.children, isEmpty);
 
@@ -335,6 +378,9 @@ void main() {
         final searchNode = root.children[1];
         expect(searchNode.id, equals('2'));
         expect(searchNode.label, equals('Search Input'));
+        expect(searchNode.value, equals('Flutter'));
+        expect(searchNode.hint, equals('Enter search query'));
+        expect(searchNode.rect, equals(const Rect.fromLTWH(16, 88, 358, 48)));
         expect(searchNode.flags, equals({SemanticsFlag.isTextField}));
         expect(searchNode.children, hasLength(1));
 
@@ -343,10 +389,23 @@ void main() {
         expect(clearButtonNode.id, equals('3'));
         expect(clearButtonNode.label, equals('Clear Text'));
         expect(
+          clearButtonNode.rect,
+          equals(const Rect.fromLTWH(330, 96, 32, 32)),
+        );
+        expect(
           clearButtonNode.flags,
           equals({SemanticsFlag.isButton, SemanticsFlag.hasCheckedState}),
         );
         expect(clearButtonNode.children, isEmpty);
+
+        // Selecting another node updates selectedSemanticsNode and isSelected state
+        testController.selectSemanticsNode(clearButtonNode);
+        expect(
+          testController.selectedSemanticsNode.value,
+          equals(clearButtonNode),
+        );
+        expect(clearButtonNode.isSelected, isTrue);
+        expect(root.isSelected, isFalse);
       },
     );
 

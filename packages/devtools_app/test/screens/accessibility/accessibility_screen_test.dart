@@ -72,11 +72,14 @@ void main() {
       expect(find.byType(AccessibilityScreenBody), findsOneWidget);
       expect(find.byType(SplitPane), findsAtLeastNWidgets(1));
 
-      // Overrides pane should be visible
-      expect(find.byType(AccessibilityOverridesPane), findsOneWidget);
-
       // Semantics Tree pane should be visible
       expect(find.byType(AccessibilitySemanticsTreePane), findsOneWidget);
+
+      // Semantics Node Details pane should be visible
+      expect(find.byType(SemanticsNodeDetailsPane), findsOneWidget);
+
+      // Overrides pane should be visible
+      expect(find.byType(AccessibilityOverridesPane), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -245,9 +248,27 @@ void main() {
         await pumpAccessibilityScreen(tester);
         await tester.pumpAndSettle();
 
-        expect(find.text('SemanticsNode #0'), findsOneWidget);
-        expect(find.text('SemanticsNode #1'), findsOneWidget);
-        expect(find.text('"Child Node"'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.text('SemanticsNode #0'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.text('SemanticsNode #1'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.text('"Child Node"'),
+          ),
+          findsOneWidget,
+        );
         expect(find.text('ElevatedButton'), findsOneWidget);
       },
     );
@@ -304,6 +325,153 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byIcon(Icons.check_box_outlined), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders node details placeholder when no node is selected',
+      windowSize,
+      (WidgetTester tester) async {
+        controller.semanticsRoots.value = [];
+
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Semantics Node Details'), findsOneWidget);
+        expect(
+          find.text('Select a node in the semantics tree to view its details.'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders root node details automatically and updates when a child node is selected',
+      windowSize,
+      (WidgetTester tester) async {
+        final childNode = SemanticsNodeModel(
+          id: '26',
+          label: 'CloseButton',
+          rect: const Rect.fromLTWH(0, 0, 763, 32),
+          flags: {
+            SemanticsFlag.isButton,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
+          },
+          widgetName: 'CloseButton',
+        );
+        final rootNode = SemanticsNodeModel(
+          id: '0',
+          label: 'Root Node',
+          value: 'Initial Value',
+          hint: 'Tap to interact',
+          rect: const Rect.fromLTWH(0, 0, 1000, 1000),
+          flags: {SemanticsFlag.isHeader},
+        )..addChild(childNode);
+
+        rootNode.expandCascading();
+        controller.semanticsRoots.value = [rootNode];
+
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        final detailsPane = find.byType(SemanticsNodeDetailsPane);
+
+        // Initially, root node (#0) is automatically selected
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('SemanticsNode #0'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: detailsPane, matching: find.text('"Root Node"')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('"Initial Value"'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('"Tap to interact"'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('rect: Rect.fromLTWH(0, 0, 1000, 1000)'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: detailsPane, matching: find.text('isHeader')),
+          findsOneWidget,
+        );
+
+        // Tap child node (#26) in the tree pane
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.text('SemanticsNode #26'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Details pane should now display SemanticsNode #26 details
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('SemanticsNode #26'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('"CloseButton"'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('rect: Rect.fromLTWH(0, 0, 763, 32)'),
+          ),
+          findsOneWidget,
+        );
+        // Empty value and hint should render as (empty)
+        expect(
+          find.descendant(of: detailsPane, matching: find.text('(empty)')),
+          findsNWidgets(2),
+        );
+        // Flags chips
+        expect(
+          find.descendant(of: detailsPane, matching: find.text('isButton')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('hasEnabledState'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: detailsPane, matching: find.text('isEnabled')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: detailsPane, matching: find.text('isFocusable')),
+          findsOneWidget,
+        );
       },
     );
   });
