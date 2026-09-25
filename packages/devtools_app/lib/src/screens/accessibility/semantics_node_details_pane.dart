@@ -5,7 +5,7 @@
 import 'dart:ui' show SemanticsFlag;
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../shared/globals.dart';
 import '../../shared/ui/common_widgets.dart';
@@ -84,25 +84,22 @@ class _SemanticsNodeDetailsContent extends StatelessWidget {
               title: _labelTitle,
               description: _labelDescription,
               child: _NodeDetailValueBox(
-                text: node.label.isNotEmpty ? '"${node.label}"' : null,
+                text: node.label,
                 highlightText: true,
+                wrapInQuotes: true,
               ),
             ),
             const SizedBox(height: defaultSpacing),
             _NodeDetailSection(
               title: _valueTitle,
               description: _valueDescription,
-              child: _NodeDetailValueBox(
-                text: node.value.isNotEmpty ? '"${node.value}"' : null,
-              ),
+              child: _NodeDetailValueBox(text: node.value, wrapInQuotes: true),
             ),
             const SizedBox(height: defaultSpacing),
             _NodeDetailSection(
               title: _hintTitle,
               description: _hintDescription,
-              child: _NodeDetailValueBox(
-                text: node.hint.isNotEmpty ? '"${node.hint}"' : null,
-              ),
+              child: _NodeDetailValueBox(text: node.hint, wrapInQuotes: true),
             ),
             const SizedBox(height: defaultSpacing),
             _NodeDetailSection(
@@ -155,10 +152,15 @@ class _NodeDetailSection extends StatelessWidget {
 
 /// A bordered container that displays a property value or `(empty)` if none is present.
 class _NodeDetailValueBox extends StatelessWidget {
-  const _NodeDetailValueBox({required this.text, this.highlightText = false});
+  const _NodeDetailValueBox({
+    required this.text,
+    this.highlightText = false,
+    this.wrapInQuotes = false,
+  });
 
   final String? text;
   final bool highlightText;
+  final bool wrapInQuotes;
 
   static const _emptyPlaceholder = '(empty)';
 
@@ -167,15 +169,9 @@ class _NodeDetailValueBox extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final hasValue = text != null && text!.isNotEmpty;
-
-    final textStyle = !hasValue
-        ? theme.subtleFixedFontStyle
-        : highlightText
-        ? theme.fixedFontStyle.copyWith(
-            color: colorScheme.primary,
-            fontWeight: FontWeight.bold,
-          )
-        : theme.fixedFontStyle;
+    final displayText = hasValue
+        ? (wrapInQuotes ? '"$text"' : text!)
+        : _emptyPlaceholder;
 
     return Container(
       width: double.infinity,
@@ -190,10 +186,23 @@ class _NodeDetailValueBox extends StatelessWidget {
         ),
       ),
       child: SelectableText(
-        hasValue ? text! : _emptyPlaceholder,
-        style: textStyle,
+        displayText,
+        style: _textStyle(theme, hasValue: hasValue),
       ),
     );
+  }
+
+  TextStyle _textStyle(ThemeData theme, {required bool hasValue}) {
+    if (!hasValue) {
+      return theme.subtleFixedFontStyle;
+    }
+    if (highlightText) {
+      return theme.fixedFontStyle.copyWith(
+        color: theme.colorScheme.primary,
+        fontWeight: FontWeight.bold,
+      );
+    }
+    return theme.fixedFontStyle;
   }
 }
 
