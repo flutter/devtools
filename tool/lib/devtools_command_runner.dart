@@ -8,6 +8,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/commands/build.dart';
 import 'package:devtools_tool/commands/fix_goldens.dart';
+import 'package:devtools_tool/commands/flutter_bisect.dart';
 import 'package:devtools_tool/commands/generate_code.dart';
 import 'package:devtools_tool/commands/release_notes_helper.dart';
 import 'package:devtools_tool/commands/run.dart';
@@ -40,6 +41,7 @@ class DevToolsCommandRunner extends CommandRunner {
     addCommand(AnalyzeCommand());
     addCommand(BuildCommand());
     addCommand(FixGoldensCommand());
+    addCommand(FlutterBisectCommand());
     addCommand(GenerateCodeCommand());
     addCommand(ListCommand());
     addCommand(PresubmitCommand());
