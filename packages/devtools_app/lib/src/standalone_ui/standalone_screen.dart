@@ -4,7 +4,7 @@
 
 import 'package:devtools_app_shared/service.dart';
 import 'package:dtd/dtd.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../shared/globals.dart';
 import '../shared/ui/common_widgets.dart';

@@ -5,7 +5,7 @@
 import 'package:devtools_app_shared/service.dart' show FlutterEvent;
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../../../shared/charts/chart_trace.dart';
 import '../../../../../shared/primitives/byte_utils.dart';

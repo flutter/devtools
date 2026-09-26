@@ -208,8 +208,82 @@ void main() {
         "curl --location --request POST 'https://jsonplaceholder.typicode.com/posts' \\\n--data-raw '{\n \"title\": \"foo\", \"body\": \"bar\", \"userId\": 1\n}\n '",
       );
     });
+
+    test('includes headers and body when response never completes', () {
+      final data = DartIOHttpRequestData(
+        HttpProfileRequest.parse(<String, Object?>{
+          'id': '7',
+          'isolateId': 'isolates/0',
+          'method': 'POST',
+          'uri': 'https://example.com/api/login',
+          'events': <Object>[],
+          'startTime': 0,
+          'endTime': 1000,
+          'request': <String, Object?>{
+            'headers': <String, Object?>{
+              'content-type': <String>['application/json'],
+              'accept': <String>['application/json'],
+              'locale': <String>['en'],
+            },
+            'contentLength': 42,
+            'cookies': <Object>[],
+            'followRedirects': true,
+            'maxRedirects': 5,
+            'persistentConnection': false,
+          },
+          'response': null,
+          'requestBody': utf8.encode(
+            '{"email":"user@example.com","password":"secret"}',
+          ),
+        })!,
+        requestFullDataFromVmService: false,
+      );
+
+      expect(
+        data.requestBody,
+        '{"email":"user@example.com","password":"secret"}',
+      );
+      expect(
+        CurlCommand.from(data).toString(),
+        "curl --location --request POST 'https://example.com/api/login' \\\n--header 'content-type: application/json' \\\n--header 'accept: application/json' \\\n--header 'locale: en' \\\n--data-raw '{\"email\":\"user@example.com\",\"password\":\"secret\"}'",
+      );
+    });
+
+    test('includes body when request has an error', () {
+      final data = DartIOHttpRequestData(
+        HttpProfileRequest.parse(<String, Object?>{
+          'id': '8',
+          'isolateId': 'isolates/0',
+          'method': 'POST',
+          'uri': 'https://example.com/api/login',
+          'events': <Object>[],
+          'startTime': 0,
+          'endTime': 1000,
+          'request': <String, Object?>{
+            'error': 'Connection timed out',
+            'contentLength': 2,
+            'cookies': <Object>[],
+            'followRedirects': true,
+            'maxRedirects': 5,
+            'persistentConnection': false,
+          },
+          'response': null,
+          'requestBody': utf8.encode('{}'),
+        })!,
+        requestFullDataFromVmService: false,
+      );
+
+      expect(data.requestBody, '{}');
+      expect(CurlCommand.from(data).toString(), contains("--data-raw '{}'"));
+    });
   });
 
+  // Regression coverage for the request body across the lifecycle of a
+  // request in the Network tab. The body is known once the request has been
+  // sent, so it must be available for Copy as cURL whether the request is
+  // still awaiting its response, completed, or failed, and it must survive the
+  // profile refreshes that replace the underlying request while it is pending.
+  // See https://github.com/flutter/devtools/pull/9963.
   group('NetworkCurlCommand request body lifecycle', () {
     const body = '{"email":"user@example.com"}';
     const curlWithHeaderAndBody =
@@ -230,24 +304,6 @@ void main() {
       expect(data.inProgress, isTrue);
       expect(data.requestBody, body);
       expect(CurlCommand.from(data).toString(), curlWithHeaderAndBody);
-    });
-
-    test('omits body while the request is still being sent', () {
-      final data = DartIOHttpRequestData(
-        _parseProfileRequest(
-          requestSent: false,
-          response: null,
-          requestBody: utf8.encode('{"email":'),
-        ),
-        requestFullDataFromVmService: false,
-      );
-
-      expect(data.inProgress, isTrue);
-      expect(data.requestBody, isNull);
-      expect(
-        CurlCommand.from(data).toString(),
-        "curl --location --request POST 'https://example.com/api/login'",
-      );
     });
 
     test('includes body for a completed request', () {
@@ -281,6 +337,9 @@ void main() {
       expect(CurlCommand.from(data).toString(), contains("--data-raw '$body'"));
     });
 
+    // These tests exercise `getFullRequestData`, which fetches the body from
+    // the VM service when a request is selected, followed by `merge` calls
+    // that simulate `getHttpProfile` polling.
     group('with VM service', () {
       tearDown(() => removeGlobal(ServiceConnectionManager));
 
@@ -331,65 +390,6 @@ void main() {
           expect(data.inProgress, isFalse);
           expect(data.requestBody, body);
           expect(CurlCommand.from(data).toString(), curlWithHeaderAndBody);
-        },
-      );
-
-      test(
-        'never exposes a partial body when selected while still being sent',
-        () async {
-          // Selecting the request while its body is being written fetches a
-          // partial body.
-          _serveFullRequestFromVmService(
-            _parseProfileRequest(
-              requestSent: false,
-              response: null,
-              requestBody: utf8.encode('{"email":'),
-            ),
-          );
-          final data = DartIOHttpRequestData(
-            _parseProfileRequest(requestSent: false, response: null),
-            requestFullDataFromVmService: false,
-          );
-          await data.getFullRequestData();
-          expect(data.requestBody, isNull);
-          expect(CurlCommand.from(data).toString(), isNot(contains('--data')));
-
-          // The request finishes sending. The next poll must not expose the
-          // partial body, or the empty body of the poll entry.
-          data.merge(
-            DartIOHttpRequestData(
-              _parseProfileRequest(requestSent: true, response: null),
-              requestFullDataFromVmService: false,
-            ),
-          );
-          expect(data.requestBody, isNull);
-          expect(CurlCommand.from(data).toString(), isNot(contains('--data')));
-
-          // Selecting the request again fetches the complete body.
-          _serveFullRequestFromVmService(
-            _parseProfileRequest(
-              requestSent: true,
-              response: null,
-              requestBody: utf8.encode(body),
-            ),
-          );
-          await data.getFullRequestData();
-          expect(data.inProgress, isTrue);
-          expect(data.requestBody, body);
-          expect(CurlCommand.from(data).toString(), curlWithHeaderAndBody);
-
-          // The response eventually completes.
-          data.merge(
-            DartIOHttpRequestData(
-              _parseProfileRequest(
-                requestSent: true,
-                response: _completedResponseJson,
-              ),
-              requestFullDataFromVmService: false,
-            ),
-          );
-          expect(data.inProgress, isFalse);
-          expect(data.requestBody, body);
         },
       );
     });

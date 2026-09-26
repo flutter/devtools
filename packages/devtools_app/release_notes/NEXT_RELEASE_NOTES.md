@@ -31,6 +31,9 @@ To learn more about DevTools, check out the
 * Fixed a bug where the Flutter frames chart could appear frozen after
   switching away from the Performance screen and coming back.
   [#9960](https://github.com/flutter/devtools/pull/9960)
+* Added a message in the Performance panel when widget rebuild tracking is
+  unavailable because the app is running in profile mode.
+  [#9755](https://github.com/flutter/devtools/pull/9755)
 
 ## CPU profiler updates
 
@@ -40,15 +43,16 @@ To learn more about DevTools, check out the
 
 ## Memory updates
 
-* Added the ability to pin classes to the top of the Profile Memory table. [#8898](https://github.com/flutter/devtools/issues/8898)
+* Added the ability to pin classes to the top of the Profile Memory table.
+  [#8898](https://github.com/flutter/devtools/issues/8898)
 
 ## Debugger updates
 
-* Prevent values from being garbage-collected, while being evaluated.
+* Prevented values from being garbage-collected, while being evaluated.
   [#9885](https://github.com/flutter/devtools/pull/9885)
 * Update to latest version of the Dart syntax highlighting grammar
   [#9920](https://github.com/flutter/devtools/pull/9920).
-* Fix a bug in the TextMate grammar parser that could result in code after
+* Fixed a bug in the TextMate grammar parser that could result in code after
   comments being classified as comments.
   [#9921](https://github.com/flutter/devtools/pull/9921).
 * Fixed an overflow in the debugging controls when the Debugger screen is
@@ -58,6 +62,8 @@ To learn more about DevTools, check out the
 
 ## Network profiler updates
 
+* Fixed Copy as cURL omitting request headers and body for failed or timed-out
+  requests. [#9963](https://github.com/flutter/devtools/pull/9963)
 * Added WebSocket support to the Network profiler, including WebSocket
   connection details, lifecycle events, frame-level inspection, and connection
   timing information. [#9968](https://github.com/flutter/devtools/pull/9968)
@@ -67,14 +73,10 @@ To learn more about DevTools, check out the
 * Fixed an issue where the Network tab would stop capturing new HTTP requests
   after pressing Clear while recording. -
   [#9856](https://github.com/flutter/devtools/pull/9856)
-* Fixed the Request tab and Copy as cURL missing the body of HTTP requests
-  that are still waiting for a response. A request body is only shown once it
-  has been fully sent, so it is never shown truncated. -
-  [#10020](https://github.com/flutter/devtools/pull/10020)
 
 ## Logging updates
 
-* Correct time units and cumulative nature of GC events.
+* Corrected time units and cumulative nature of GC events.
   [#9890](https://github.com/flutter/devtools/pull/9890)
 * Fixed a bug where long `dart:developer` log messages lost their structured
   Details view. -
@@ -87,7 +89,7 @@ TODO: Remove this section if there are not any updates.
 ## Deep links tool updates
 
 * Added a "Watch tutorial" link to the status line that points to the
-  [deep links video tutorial](https://youtu.be/d7sZL6h1Elw).
+  [deep links video tutorial](https://youtu.be/d7sZL6hIElw).
   [#9925](https://github.com/flutter/devtools/pull/9925)
 
 ## VS Code sidebar updates
@@ -96,12 +98,13 @@ TODO: Remove this section if there are not any updates.
 
 ## DevTools extension updates
 
-* Hide the DevTools extensions menu button in single-screen embedded mode (`EmbedMode.embedOne`) on standard screens.
+* Hide the DevTools extensions menu button in single-screen embedded mode
+  (`EmbedMode.embedOne`) on standard screens.
   [#8507](https://github.com/flutter/devtools/issues/8507)
 * Added iframe sandboxing for embedded DevTools extensions to enforce origin
   isolation. [#9967](https://github.com/flutter/devtools/pull/9967)
-* Improved DevTools extension isolation by tracking the providing package name for
-  enablement, deduplication, and asset loading.
+* Improved DevTools extension isolation by tracking the providing package
+  name for enablement, deduplication, and asset loading.
   [#9981](https://github.com/flutter/devtools/pull/9981)
 
 ## Advanced developer mode updates

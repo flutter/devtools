@@ -4,8 +4,8 @@
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;

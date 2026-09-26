@@ -12,7 +12,7 @@ import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import 'extensions/extension_screen.dart';
@@ -475,22 +475,27 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             message: 'Uh-oh, something went wrong. Please refresh the page.',
           );
         }
-        return MultiProvider(
-          providers: [
-            Provider<AnalyticsController>.value(
-              value: widget.analyticsController,
-            ),
-            Provider<HoverCardController>.value(value: hoverCardController),
-            Provider<ReleaseNotesController>.value(
-              value: releaseNotesController,
-            ),
-          ],
-          child: NotificationsView(
-            child: ReleaseNotesViewer(
-              controller: releaseNotesController,
-              child: DisconnectObserver(
-                routerDelegate: routerDelegate,
-                child: child,
+        // TODO(ryjohn): Upgrade to package:flutter_markdown_plus and stop using
+        // MaterialUiCompatibilityBridge when it switches to package:material_ui.
+        // ignore: deprecated_member_use
+        return MaterialUiCompatibilityBridge(
+          child: MultiProvider(
+            providers: [
+              Provider<AnalyticsController>.value(
+                value: widget.analyticsController,
+              ),
+              Provider<HoverCardController>.value(value: hoverCardController),
+              Provider<ReleaseNotesController>.value(
+                value: releaseNotesController,
+              ),
+            ],
+            child: NotificationsView(
+              child: ReleaseNotesViewer(
+                controller: releaseNotesController,
+                child: DisconnectObserver(
+                  routerDelegate: routerDelegate,
+                  child: child,
+                ),
               ),
             ),
           ),

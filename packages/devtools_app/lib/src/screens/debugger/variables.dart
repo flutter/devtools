@@ -7,7 +7,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart' hide Stack;
+import 'package:material_ui/material_ui.dart' hide Stack;
 
 import '../../shared/console/widgets/display_provider.dart';
 import '../../shared/diagnostics/dap_object_node.dart';

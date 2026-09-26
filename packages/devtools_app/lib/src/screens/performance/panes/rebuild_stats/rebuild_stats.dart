@@ -6,7 +6,7 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
@@ -19,6 +19,12 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/ui/common_widgets.dart';
 import '../flutter_frames/flutter_frame_model.dart';
 import 'rebuild_stats_model.dart';
+
+@visibleForTesting
+const debugModeOnlyMessage =
+    'Rebuild information is not available for this frame.\n'
+    'Widget rebuild counts are only available when running '
+    'an app in debug mode.';
 
 class RebuildStatsView extends StatefulWidget {
   const RebuildStatsView({
@@ -92,6 +98,12 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
 
   @override
   Widget build(BuildContext context) {
+    final isProfileBuild =
+        serviceConnection.serviceManager.connectedApp?.isProfileBuildNow ??
+        false;
+    if (isProfileBuild) {
+      return const CenteredMessage(message: debugModeOnlyMessage);
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

@@ -10,7 +10,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_extensions/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:web/web.dart';
 
 import '../../shared/config_specific/copy_to_clipboard/copy_to_clipboard.dart';

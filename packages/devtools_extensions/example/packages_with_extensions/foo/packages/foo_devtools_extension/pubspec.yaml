@@ -18,8 +18,10 @@ dependencies:
     path: ../../../../../../devtools_extensions 
   dtd: ^4.0.0
   path: ^1.8.0
+  # ignore: dependencies, required for Flutter SDK.
   flutter:
     sdk: flutter
+  material_ui: ^1.4.0
 
 flutter:
   uses-material-design: true

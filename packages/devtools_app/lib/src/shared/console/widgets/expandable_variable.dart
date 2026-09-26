@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/material.dart' hide Stack;
+import 'package:material_ui/material_ui.dart' hide Stack;
 
 import '../../../shared/primitives/listenable.dart';
 import '../../diagnostics/dart_object_node.dart';

@@ -5,7 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/initialization.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:web_benchmarks/client.dart';
 
 import 'automators/devtools_automator.dart';
