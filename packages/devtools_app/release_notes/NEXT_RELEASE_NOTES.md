@@ -18,6 +18,9 @@ To learn more about DevTools, check out the
 * Fixed unreadable text in the release notes panel, where blockquotes were
   drawn on a hard coded light blue background in the dark theme.
   [#9957](https://github.com/flutter/devtools/pull/9957)
+* Added support for proxying the VM service connection over a `MessagePort`
+  using `?uri=messageport:<origin>`.
+  [#9964](https://github.com/flutter/devtools/pull/9964)
 
 ## Inspector updates
 
