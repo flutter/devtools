@@ -214,9 +214,10 @@ class DeeplinkManager {
             .cast<String>()
             .toSet();
         _androidBuildVariantsCache[canonicalPath] = variants;
-      } on Object {
-        // Ignore cache population errors; _handleJsonOutput handles the
-        // response.
+      } on Object catch (e) {
+        return <String, String?>{
+          kErrorField: 'Failed to parse Android build variants: $e',
+        };
       }
       return _handleJsonOutput(jsonOutput);
     }, onError: _handleRunFlutterError);
@@ -282,9 +283,10 @@ class DeeplinkManager {
         _iosBuildOptionsCache[canonicalPath] = XcodeBuildOptions.fromJson(
           jsonOutput,
         );
-      } on Object {
-        // Ignore cache population errors; _handleJsonOutput handles the
-        // response.
+      } on Object catch (e) {
+        return <String, String?>{
+          kErrorField: 'Failed to parse iOS build options: $e',
+        };
       }
       return _handleJsonOutput(jsonOutput);
     }, onError: _handleRunFlutterError);

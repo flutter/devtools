@@ -390,6 +390,47 @@ Running Gradle task 'printBuildVariants'...                        10.4s
       );
       expect(response[DeeplinkManager.kErrorField], isNotNull);
     });
+
+    test(
+      'returns error when parsing Android build variants or iOS build options fails',
+      () async {
+        const projectRoot = '/abc';
+        manager.expectedCommands.addAll([
+          TestCommand(
+            executable: manager.mockedFlutterBinary,
+            arguments: <String>[
+              'analyze',
+              '--android',
+              '--list-build-variants',
+            ],
+            workingDirectory: projectRoot,
+            result: ProcessResult(0, 0, '[invalid json]', ''),
+          ),
+          TestCommand(
+            executable: manager.mockedFlutterBinary,
+            arguments: <String>['analyze', '--ios', '--list-build-options'],
+            workingDirectory: projectRoot,
+            result: ProcessResult(0, 0, '{invalid json}', ''),
+          ),
+        ]);
+
+        final androidResponse = await manager.getAndroidBuildVariants(
+          rootPath: projectRoot,
+        );
+        expect(
+          androidResponse[DeeplinkManager.kErrorField],
+          contains('Failed to parse Android build variants'),
+        );
+
+        final iosResponse = await manager.getIosBuildOptions(
+          rootPath: projectRoot,
+        );
+        expect(
+          iosResponse[DeeplinkManager.kErrorField],
+          contains('Failed to parse iOS build options'),
+        );
+      },
+    );
   });
 }
 
