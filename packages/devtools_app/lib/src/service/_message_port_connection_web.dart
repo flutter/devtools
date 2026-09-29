@@ -8,7 +8,6 @@ library;
 import 'dart:async';
 import 'dart:js_interop';
 
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 import 'package:web/web.dart';
 
@@ -16,6 +15,9 @@ import '../shared/globals.dart';
 import 'vm_service_wrapper.dart';
 
 final _log = Logger('message_port_connection');
+
+/// How long the embedder has to connect a new port and answer `getVersion`.
+const _connectTimeout = Duration(seconds: 10);
 
 /// Connects to a VM service over a `MessagePort`, as described in
 /// [messagePortUriScheme].
@@ -25,16 +27,23 @@ Future<VmServiceWrapper> connectWithMessagePort({
   required Uri uri,
   required Completer<void> finishedCompleter,
 }) async {
-  final parent = window.parent;
-  if (parent == null) {
+  final embedder = window.openerCrossOrigin ?? window.parentCrossOrigin;
+  if (embedder == null) {
     throw UnsupportedError(
-      'Connecting to a VM service over a MessagePort requires window.parent.',
+      'Connecting to a VM service over a MessagePort requires window.opener '
+      'or window.parent.',
     );
   }
   final targetOrigin = uri.path;
+  if (targetOrigin.isEmpty) {
+    throw ArgumentError(
+      'The messageport URI must specify a target origin, e.g., '
+      'messageport:https://example.com',
+    );
+  }
   // A new channel per connect, so reconnects and reloads just work.
   final channel = MessageChannel();
-  parent.postMessage(
+  embedder.postMessage(
     _ConnectMessage(action: 'connect', port: channel.port2),
     targetOrigin.toJS,
     [channel.port2].toJS,
@@ -44,7 +53,11 @@ Future<VmServiceWrapper> connectWithMessagePort({
   final messages = StreamController<Object>();
   port.onmessage = (MessageEvent event) {
     final data = event.data;
-    if (data.isA<JSString>()) {
+    if (data == null) {
+      // The embedder closed the connection. The service disposes itself when
+      // its stream is done.
+      unawaited(messages.close());
+    } else if (data.isA<JSString>()) {
       messages.add((data as JSString).toDart);
     } else if (data.isA<JSUint8Array>()) {
       messages.add((data as JSUint8Array).toDart);
@@ -53,23 +66,33 @@ Future<VmServiceWrapper> connectWithMessagePort({
     }
   }.toJS;
 
+  late final StreamSubscription<Event> unloadSubscription;
+  void closePort() {
+    if (finishedCompleter.isCompleted) return;
+    unawaited(unloadSubscription.cancel());
+    port
+      ..postMessage(null)
+      ..onmessage = null
+      ..close();
+    unawaited(messages.close());
+    finishedCompleter.complete();
+  }
+
+  unloadSubscription = EventStreamProviders.unloadEvent
+      .forTarget(window)
+      .listen((_) => closePort());
+
   final service = VmServiceWrapper.defaultFactory(
     inStream: messages.stream,
     writeMessage: (message) => port.postMessage(message.toJS),
-    disposeHandler: () async {
-      port
-        ..onmessage = null
-        ..close();
-      unawaited(messages.close());
-      finishedCompleter.safeComplete();
-    },
+    disposeHandler: () async => closePort(),
     wsUri: uri.toString(),
     trackFutures: integrationTestMode,
   );
 
   // Verify the connection, like `connect` from `package:devtools_shared` does.
   try {
-    await service.getVersion();
+    await service.getVersion().timeout(_connectTimeout);
   } catch (_) {
     await service.dispose();
     rethrow;
@@ -77,8 +100,8 @@ Future<VmServiceWrapper> connectWithMessagePort({
   return service;
 }
 
-/// The message that asks the page embedding DevTools to connect the
-/// transferred `port` to a VM service.
+/// The message that asks the embedder to connect the transferred `port` to a
+/// VM service.
 extension type _ConnectMessage._(JSObject _) implements JSObject {
   external factory _ConnectMessage({String action, MessagePort port});
 }

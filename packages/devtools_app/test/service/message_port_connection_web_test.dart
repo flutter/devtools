@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:web/web.dart';
 
 void main() {
-  test('connects to a VM service over a port posted to the parent', () async {
+  test('connects and closes over a port posted to the parent', () async {
     // The test runner loads each test suite in a same-origin iframe, so the
     // test can play the page embedding DevTools.
     final connectEvent = EventStreamProviders.messageEvent
@@ -31,9 +31,15 @@ void main() {
     // Play the VM service. DevTools only calls `getSupportedProtocols` and
     // `getVersion` here.
     final port = message.port;
+    final closedByDevTools = Completer<void>();
     port.onmessage = (MessageEvent event) {
+      final data = event.data;
+      if (data == null) {
+        closedByDevTools.complete();
+        return;
+      }
       final request =
-          jsonDecode((event.data as JSString).toDart) as Map<String, Object?>;
+          jsonDecode((data as JSString).toDart) as Map<String, Object?>;
       port.postMessage(
         jsonEncode({
           'jsonrpc': '2.0',
@@ -48,7 +54,9 @@ void main() {
     final service = await serviceFuture;
     expect((await service.getVersion()).major, 4);
 
-    await service.dispose();
+    // Either side posts `null` to close the connection.
+    port.postMessage(null);
+    await closedByDevTools.future;
     expect(finishedCompleter.isCompleted, isTrue);
   });
 }
