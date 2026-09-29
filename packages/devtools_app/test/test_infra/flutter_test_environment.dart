@@ -204,7 +204,7 @@ class FlutterTestEnvironment {
   void finalTeardown() {
     if (_tempTestAppDirectory case final tempTestAppDirectory?) {
       final tempDirectory = Directory(tempTestAppDirectory);
-      if (Directory(tempTestAppDirectory).existsSync()) {
+      if (tempDirectory.existsSync()) {
         tempDirectory.deleteSync(recursive: true);
       }
     }
