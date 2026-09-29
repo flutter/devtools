@@ -13,7 +13,7 @@ extension type const UniversalLinkSettings._(Map<String, Object?> _json) {
   ///
   /// The input needs to be in json format from DevTools server response.
   factory UniversalLinkSettings.fromErrorJson(String json) {
-    final jsonObject = jsonDecode(json) as Map;
+    final jsonObject = jsonDecode(json) as Map<String, Object?>;
     final message = jsonObject[_kErrorKey]! as String;
     return UniversalLinkSettings.error(message);
   }

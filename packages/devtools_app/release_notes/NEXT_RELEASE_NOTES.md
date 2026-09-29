@@ -91,6 +91,9 @@ TODO: Remove this section if there are not any updates.
 * Added a "Watch tutorial" link to the status line that points to the
   [deep links video tutorial](https://youtu.be/d7sZL6hIElw).
   [#9925](https://github.com/flutter/devtools/pull/9925)
+* Validated build option parameters and surfaced iOS universal link settings
+  errors in the Deep Links tool.
+  [#10022](https://github.com/flutter/devtools/pull/10022)
 
 ## VS Code sidebar updates
 

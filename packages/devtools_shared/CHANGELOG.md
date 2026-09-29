@@ -7,6 +7,9 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 
 * Track providing package name for DevTools extensions to isolate extension enablement,
   deduplication, and asset loading.
+* Validate `rootPath`, `buildVariant`, `configuration`, and `target` parameters in
+  `DeeplinkManager` and the deep link server handlers to prevent command and argument
+  injection when invoking the Flutter CLI.
 * Add `UniversalLinkSettings.fromErrorJson`, `UniversalLinkSettings.error`, and
   `UniversalLinkSettings.error` getter to surface iOS universal link settings errors.
 

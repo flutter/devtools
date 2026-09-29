@@ -149,18 +149,13 @@ class DeeplinkManager {
     bool suppressAnalytics = false,
   }) async {
     final flutterPath = getFlutterBinary();
-    final ProcessResult result;
-    try {
-      result = await runProcess(
-        flutterPath,
-        arguments: arguments,
-        workingDirectory: workingDirectory,
-        ide: ide,
-        suppressAnalytics: suppressAnalytics,
-      );
-    } on ProcessException catch (e) {
-      throw _FlutterProcessError(e.toString());
-    }
+    final result = await runProcess(
+      flutterPath,
+      arguments: arguments,
+      workingDirectory: workingDirectory,
+      ide: ide,
+      suppressAnalytics: suppressAnalytics,
+    );
     if (result.exitCode != 0) {
       throw _FlutterProcessError(
         'Flutter command exit with non-zero error code ${result.exitCode}\n${result.stderr}',
