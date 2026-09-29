@@ -56,7 +56,6 @@ class TestDeepLinksController extends DeepLinksController {
   }
 
   List<String> fakeAndroidDeepLinks = [];
-  String? fakeAndroidError;
   bool hasAndroidDomainErrors = false;
   String iosValidationResponse = '';
   List<String> fakeIosDomains = [];
@@ -74,10 +73,9 @@ class TestDeepLinksController extends DeepLinksController {
 
   @override
   Future<void> validateLinks() async {
-    androidAppLinks[selectedAndroidVariantIndex.value] =
-        fakeAndroidError != null
-        ? AppLinkSettings.error(fakeAndroidError!)
-        : fakeAppLinkSettings(fakeAndroidDeepLinks);
+    androidAppLinks[selectedAndroidVariantIndex.value] = fakeAppLinkSettings(
+      fakeAndroidDeepLinks,
+    );
     iosLinks[selectedIosConfigurationIndex.value] = fakeIosError != null
         ? UniversalLinkSettings.error(fakeIosError!)
         : fakeUniversalLinkSettings(fakeIosDomains);
