@@ -56,9 +56,7 @@ void main() {
       dtd?.process?.kill();
       await dtd?.process?.exitCode;
       dtd = null;
-    });
 
-    tearDownAll(() async {
       // Run with retry to ensure this deletes properly on Windows.
       await deleteDirectoryWithRetry(testDirectory);
     });

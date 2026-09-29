@@ -7,8 +7,6 @@
 @TestOn('vm')
 library;
 
-import 'dart:async';
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -47,7 +45,10 @@ void main() {
   try {
     group('inspector service tests', () {
       tearDown(env.tearDownEnvironment);
-      tearDownAll(() => unawaited(env.tearDownEnvironment(force: true)));
+      tearDownAll(() async {
+        await env.tearDownEnvironment(force: true);
+        env.finalTeardown();
+      });
 
       test('track widget creation on', () async {
         await env.setupEnvironment();

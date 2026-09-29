@@ -19,13 +19,16 @@ void main() {
     });
 
     tearDown(() {
-      expect(
-        manager.expectedCommands.isEmpty,
-        true,
-        reason:
-            'stub does not receive expected command ${manager.expectedCommands}',
-      );
-      tmpDir.deleteSync(recursive: true);
+      try {
+        expect(
+          manager.expectedCommands.isEmpty,
+          true,
+          reason:
+              'stub does not receive expected command ${manager.expectedCommands}',
+        );
+      } finally {
+        tmpDir.deleteSync(recursive: true);
+      }
     });
 
     test('getBuildVariants calls flutter command correctly', () async {

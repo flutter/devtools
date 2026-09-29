@@ -28,8 +28,10 @@ class ExtensionTestManager {
 
   Future<void> reset() async {
     // Run with retry to ensure this deletes properly on Windows.
-    await deleteDirectoryWithRetry(testDirectory);
-    _testDirectory = null;
+    if (_testDirectory case final testDirectory?) {
+      await deleteDirectoryWithRetry(testDirectory);
+      _testDirectory = null;
+    }
     _packagesRootUri = null;
     _runtimeAppRoot = null;
   }
