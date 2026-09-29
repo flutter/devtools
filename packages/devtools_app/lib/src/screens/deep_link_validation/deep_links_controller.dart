@@ -663,8 +663,8 @@ class DeepLinksController extends DevToolsScreenController
   }
 
   Future<void> validateLinks() async {
-    final appLinkSettings = currentAppLinkSettings;
-    if (appLinkSettings?.error != null) {
+    if (currentAppLinkSettings?.error != null ||
+        currentUniversalLinkSettings?.error != null) {
       pagePhase.value = PagePhase.analyzeErrorPage;
       ga.select(
         gac.deeplink,

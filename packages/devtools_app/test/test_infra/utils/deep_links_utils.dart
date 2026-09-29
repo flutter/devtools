@@ -5,6 +5,7 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_model.dart';
 import 'package:devtools_app/src/screens/deep_link_validation/deep_links_services.dart';
+import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
@@ -55,9 +56,11 @@ class TestDeepLinksController extends DeepLinksController {
   }
 
   List<String> fakeAndroidDeepLinks = [];
+  String? fakeAndroidError;
   bool hasAndroidDomainErrors = false;
   String iosValidationResponse = '';
   List<String> fakeIosDomains = [];
+  String? fakeIosError;
 
   late DeepLinksService _deepLinksService;
 
@@ -71,12 +74,13 @@ class TestDeepLinksController extends DeepLinksController {
 
   @override
   Future<void> validateLinks() async {
-    androidAppLinks[selectedAndroidVariantIndex.value] = fakeAppLinkSettings(
-      fakeAndroidDeepLinks,
-    );
-    iosLinks[selectedIosConfigurationIndex.value] = fakeUniversalLinkSettings(
-      fakeIosDomains,
-    );
+    androidAppLinks[selectedAndroidVariantIndex.value] =
+        fakeAndroidError != null
+        ? AppLinkSettings.error(fakeAndroidError!)
+        : fakeAppLinkSettings(fakeAndroidDeepLinks);
+    iosLinks[selectedIosConfigurationIndex.value] = fakeIosError != null
+        ? UniversalLinkSettings.error(fakeIosError!)
+        : fakeUniversalLinkSettings(fakeIosDomains);
 
     await super.validateLinks();
   }

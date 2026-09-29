@@ -7,6 +7,8 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 
 * Track providing package name for DevTools extensions to isolate extension enablement,
   deduplication, and asset loading.
+* Add `UniversalLinkSettings.fromErrorJson`, `UniversalLinkSettings.error`, and
+  `UniversalLinkSettings.error` getter to surface iOS universal link settings errors.
 
 # 14.0.0
 
