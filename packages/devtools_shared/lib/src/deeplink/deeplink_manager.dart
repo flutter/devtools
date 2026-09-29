@@ -87,9 +87,9 @@ class DeeplinkManager {
   Future<ProcessResult> runProcess(
     String executable, {
     required List<String> arguments,
-    String? workingDirectory,
-    String? ide,
-    bool suppressAnalytics = false,
+    required String workingDirectory,
+    required String? ide,
+    required bool suppressAnalytics,
   }) {
     final environment = <String, String>{
       ...Platform.environment,

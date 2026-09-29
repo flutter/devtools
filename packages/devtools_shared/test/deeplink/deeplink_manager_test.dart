@@ -445,9 +445,9 @@ class StubbedDeeplinkManager extends DeeplinkManager {
   Future<ProcessResult> runProcess(
     String executable, {
     required List<String> arguments,
-    String? workingDirectory,
-    String? ide,
-    bool suppressAnalytics = false,
+    required String workingDirectory,
+    required String? ide,
+    required bool suppressAnalytics,
   }) async {
     if (expectedCommands.isNotEmpty) {
       final expectedCommand = expectedCommands.removeAt(0);
@@ -472,14 +472,14 @@ class TestCommand {
   const TestCommand({
     required this.executable,
     required this.arguments,
-    this.workingDirectory,
+    required this.workingDirectory,
     this.ide,
     this.suppressAnalytics = false,
     required this.result,
   });
   final String executable;
   final List<String> arguments;
-  final String? workingDirectory;
+  final String workingDirectory;
   final String? ide;
   final bool suppressAnalytics;
   final ProcessResult result;
