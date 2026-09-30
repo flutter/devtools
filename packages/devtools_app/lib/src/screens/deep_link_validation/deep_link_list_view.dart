@@ -93,7 +93,11 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
               message: 'Your Flutter project has no Links to verify.',
             );
           case PagePhase.analyzeErrorPage:
-            assert(controller.currentAppLinkSettings?.error != null);
+            final error = [
+              controller.currentAppLinkSettings?.error,
+              controller.currentUniversalLinkSettings?.error,
+            ].nonNulls.join('\n\n');
+            assert(error.isNotEmpty);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -104,12 +108,8 @@ class _DeepLinkListViewMainPanel extends StatelessWidget {
                 const SizedBox(height: densePadding),
                 Expanded(
                   child: Scrollbar(
-                    thumbVisibility: true,
                     child: SingleChildScrollView(
-                      child: Text(
-                        controller.currentAppLinkSettings!.error!,
-                        style: theme.errorTextStyle,
-                      ),
+                      child: Text(error, style: theme.errorTextStyle),
                     ),
                   ),
                 ),

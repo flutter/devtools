@@ -14,6 +14,7 @@ void main() {
     late Directory tmpDir;
 
     setUp(() {
+      DeeplinkManager.clearBuildOptionsCache();
       manager = StubbedDeeplinkManager();
       tmpDir = Directory.current.createTempSync();
     });
@@ -33,12 +34,8 @@ void main() {
       manager.expectedCommands.add(
         TestCommand(
           executable: manager.mockedFlutterBinary,
-          arguments: <String>[
-            'analyze',
-            '--android',
-            '--list-build-variants',
-            projectRoot,
-          ],
+          arguments: <String>['analyze', '--android', '--list-build-variants'],
+          workingDirectory: projectRoot,
           result: ProcessResult(0, 0, r'''
 Running Gradle task 'printBuildVariants'...                        10.4s
 ["debug","release","profile"]
@@ -66,8 +63,8 @@ Running Gradle task 'printBuildVariants'...                        10.4s
               'analyze',
               '--android',
               '--list-build-variants',
-              projectRoot,
             ],
+            workingDirectory: projectRoot,
             ide: 'VS-Code',
             suppressAnalytics: true,
             result: ProcessResult(0, 0, r'''
@@ -97,8 +94,8 @@ Running Gradle task 'printBuildVariants'...                        10.4s
               'analyze',
               '--android',
               '--list-build-variants',
-              projectRoot,
             ],
+            workingDirectory: projectRoot,
             result: ProcessResult(0, 1, '', 'unknown error'),
           ),
         );
@@ -118,7 +115,16 @@ Running Gradle task 'printBuildVariants'...                        10.4s
       const buildVariant = 'someVariant';
       final jsonFile = File('${tmpDir.path}/some-output.json');
       jsonFile.writeAsStringSync(json);
-      manager.expectedCommands.add(
+      manager.expectedCommands.addAll([
+        TestCommand(
+          executable: manager.mockedFlutterBinary,
+          arguments: <String>['analyze', '--android', '--list-build-variants'],
+          workingDirectory: projectRoot,
+          result: ProcessResult(0, 0, '''
+Running Gradle task 'printBuildVariants'...                        10.4s
+["$buildVariant"]
+            ''', ''),
+        ),
         TestCommand(
           executable: manager.mockedFlutterBinary,
           arguments: <String>[
@@ -126,14 +132,15 @@ Running Gradle task 'printBuildVariants'...                        10.4s
             '--android',
             '--output-app-link-settings',
             '--build-variant=$buildVariant',
-            projectRoot,
           ],
+          workingDirectory: projectRoot,
           result: ProcessResult(0, 0, '''
 Running Gradle task 'printBuildVariants'...                        10.4s
 result saved in ${jsonFile.absolute.path}
             ''', ''),
         ),
-      );
+      ]);
+      await manager.getAndroidBuildVariants(rootPath: projectRoot);
       final response = await manager.getAndroidAppLinkSettings(
         buildVariant: buildVariant,
         rootPath: projectRoot,
@@ -141,6 +148,59 @@ result saved in ${jsonFile.absolute.path}
       expect(response[DeeplinkManager.kErrorField], isNull);
       expect(response[DeeplinkManager.kOutputJsonField], json);
     });
+
+    test(
+      'getAndroidAppLinkSettings reuses cached variants across instances',
+      () async {
+        const projectRoot = '/abc';
+        const json = '"some json"';
+        const buildVariant = 'release';
+        final jsonFile = File('${tmpDir.path}/some-output.json');
+        jsonFile.writeAsStringSync(json);
+
+        manager.expectedCommands.add(
+          TestCommand(
+            executable: manager.mockedFlutterBinary,
+            arguments: <String>[
+              'analyze',
+              '--android',
+              '--list-build-variants',
+            ],
+            workingDirectory: projectRoot,
+            result: ProcessResult(0, 0, '''
+Running Gradle task 'printBuildVariants'...                        10.4s
+["debug","release","profile"]
+            ''', ''),
+          ),
+        );
+        await manager.getAndroidBuildVariants(rootPath: projectRoot);
+
+        final secondManager = StubbedDeeplinkManager()
+          ..expectedCommands.add(
+            TestCommand(
+              executable: manager.mockedFlutterBinary,
+              arguments: <String>[
+                'analyze',
+                '--android',
+                '--output-app-link-settings',
+                '--build-variant=$buildVariant',
+              ],
+              workingDirectory: '$projectRoot/',
+              result: ProcessResult(0, 0, '''
+Running Gradle task 'printBuildVariants'...                        10.4s
+result saved in ${jsonFile.absolute.path}
+            ''', ''),
+            ),
+          );
+        final response = await secondManager.getAndroidAppLinkSettings(
+          buildVariant: buildVariant,
+          rootPath: '$projectRoot/',
+        );
+        expect(secondManager.expectedCommands, isEmpty);
+        expect(response[DeeplinkManager.kErrorField], isNull);
+        expect(response[DeeplinkManager.kOutputJsonField], json);
+      },
+    );
 
     test(
       'getIosUniversalLinkSettings calls flutter command correctly',
@@ -151,7 +211,15 @@ result saved in ${jsonFile.absolute.path}
         const target = 'someTarget';
         final jsonFile = File('${tmpDir.path}/some-output.json');
         jsonFile.writeAsStringSync(json);
-        manager.expectedCommands.add(
+        manager.expectedCommands.addAll([
+          TestCommand(
+            executable: manager.mockedFlutterBinary,
+            arguments: <String>['analyze', '--ios', '--list-build-options'],
+            workingDirectory: projectRoot,
+            result: ProcessResult(0, 0, '''
+{"configurations":["$configuration"],"targets":["$target"]}
+            ''', ''),
+          ),
           TestCommand(
             executable: manager.mockedFlutterBinary,
             arguments: <String>[
@@ -160,14 +228,15 @@ result saved in ${jsonFile.absolute.path}
               '--output-universal-link-settings',
               '--configuration=$configuration',
               '--target=$target',
-              projectRoot,
             ],
+            workingDirectory: projectRoot,
             result: ProcessResult(0, 0, '''
 Running Gradle task 'printBuildVariants'...                        10.4s
 result saved in ${jsonFile.absolute.path}
             ''', ''),
           ),
-        );
+        ]);
+        await manager.getIosBuildOptions(rootPath: projectRoot);
         final response = await manager.getIosUniversalLinkSettings(
           configuration: configuration,
           target: target,
@@ -183,12 +252,8 @@ result saved in ${jsonFile.absolute.path}
       manager.expectedCommands.add(
         TestCommand(
           executable: manager.mockedFlutterBinary,
-          arguments: <String>[
-            'analyze',
-            '--ios',
-            '--list-build-options',
-            projectRoot,
-          ],
+          arguments: <String>['analyze', '--ios', '--list-build-options'],
+          workingDirectory: projectRoot,
           result: ProcessResult(0, 0, r'''
 {"configurations":["Debug","Release","Profile"],"targets":["Runner","RunnerTests"]}
             ''', ''),
@@ -201,6 +266,171 @@ result saved in ${jsonFile.absolute.path}
         '{"configurations":["Debug","Release","Profile"],"targets":["Runner","RunnerTests"]}',
       );
     });
+
+    test(
+      'returns error when project build options have not been parsed yet',
+      () async {
+        const projectRoot = '/unparsed_project';
+        final androidResponse = await manager.getAndroidAppLinkSettings(
+          rootPath: projectRoot,
+          buildVariant: 'debug',
+        );
+        expect(
+          androidResponse[DeeplinkManager.kErrorField],
+          allOf(
+            contains('have not been parsed yet'),
+            contains('https://github.com/flutter/devtools/issues'),
+          ),
+        );
+
+        final iosResponse = await manager.getIosUniversalLinkSettings(
+          rootPath: projectRoot,
+          configuration: 'Debug',
+          target: 'Runner',
+        );
+        expect(
+          iosResponse[DeeplinkManager.kErrorField],
+          allOf(
+            contains('have not been parsed yet'),
+            contains('https://github.com/flutter/devtools/issues'),
+          ),
+        );
+      },
+    );
+
+    test(
+      'rejects buildVariant not in available Android build variants',
+      () async {
+        const projectRoot = '/abc';
+        manager.expectedCommands.add(
+          TestCommand(
+            executable: manager.mockedFlutterBinary,
+            arguments: <String>[
+              'analyze',
+              '--android',
+              '--list-build-variants',
+            ],
+            workingDirectory: projectRoot,
+            result: ProcessResult(0, 0, r'''
+Running Gradle task 'printBuildVariants'...                        10.4s
+["debug","release","profile"]
+            ''', ''),
+          ),
+        );
+        await manager.getAndroidBuildVariants(rootPath: projectRoot);
+
+        for (final invalidVariant in <String>[
+          'nonExistentVariant',
+          '"& calc & echo pwned > MARKER.txt &"',
+          'debug --help',
+        ]) {
+          final response = await manager.getAndroidAppLinkSettings(
+            rootPath: projectRoot,
+            buildVariant: invalidVariant,
+          );
+          expect(
+            response[DeeplinkManager.kErrorField],
+            allOf(
+              contains('Unknown Android build variant'),
+              contains('https://github.com/flutter/devtools/issues'),
+            ),
+          );
+        }
+      },
+    );
+
+    test(
+      'rejects configuration or target not in available iOS build options',
+      () async {
+        const projectRoot = '/abc';
+        manager.expectedCommands.add(
+          TestCommand(
+            executable: manager.mockedFlutterBinary,
+            arguments: <String>['analyze', '--ios', '--list-build-options'],
+            workingDirectory: projectRoot,
+            result: ProcessResult(0, 0, r'''
+{"configurations":["Debug","Release","Profile"],"targets":["Runner","RunnerTests"]}
+            ''', ''),
+          ),
+        );
+        await manager.getIosBuildOptions(rootPath: projectRoot);
+
+        final badConfigResponse = await manager.getIosUniversalLinkSettings(
+          rootPath: projectRoot,
+          configuration: '"& calc & echo pwned > MARKER.txt &"',
+          target: 'Runner',
+        );
+        expect(
+          badConfigResponse[DeeplinkManager.kErrorField],
+          allOf(
+            contains('Unknown iOS build configuration'),
+            contains('https://github.com/flutter/devtools/issues'),
+          ),
+        );
+
+        final badTargetResponse = await manager.getIosUniversalLinkSettings(
+          rootPath: projectRoot,
+          configuration: 'Debug',
+          target: 'Runner --help',
+        );
+        expect(
+          badTargetResponse[DeeplinkManager.kErrorField],
+          allOf(
+            contains('Unknown iOS build configuration'),
+            contains('https://github.com/flutter/devtools/issues'),
+          ),
+        );
+      },
+    );
+
+    test('returns error when workingDirectory does not exist', () async {
+      final realManager = DeeplinkManager();
+      final response = await realManager.getAndroidBuildVariants(
+        rootPath: '${tmpDir.path}/non_existent_dir_"&calc',
+      );
+      expect(response[DeeplinkManager.kErrorField], isNotNull);
+    });
+
+    test(
+      'returns error when parsing Android build variants or iOS build options fails',
+      () async {
+        const projectRoot = '/abc';
+        manager.expectedCommands.addAll([
+          TestCommand(
+            executable: manager.mockedFlutterBinary,
+            arguments: <String>[
+              'analyze',
+              '--android',
+              '--list-build-variants',
+            ],
+            workingDirectory: projectRoot,
+            result: ProcessResult(0, 0, '[invalid json]', ''),
+          ),
+          TestCommand(
+            executable: manager.mockedFlutterBinary,
+            arguments: <String>['analyze', '--ios', '--list-build-options'],
+            workingDirectory: projectRoot,
+            result: ProcessResult(0, 0, '{invalid json}', ''),
+          ),
+        ]);
+
+        final androidResponse = await manager.getAndroidBuildVariants(
+          rootPath: projectRoot,
+        );
+        expect(
+          androidResponse[DeeplinkManager.kErrorField],
+          contains('Failed to parse Android build variants'),
+        );
+
+        final iosResponse = await manager.getIosBuildOptions(
+          rootPath: projectRoot,
+        );
+        expect(
+          iosResponse[DeeplinkManager.kErrorField],
+          contains('Failed to parse iOS build options'),
+        );
+      },
+    );
   });
 }
 
@@ -215,8 +445,9 @@ class StubbedDeeplinkManager extends DeeplinkManager {
   Future<ProcessResult> runProcess(
     String executable, {
     required List<String> arguments,
-    String? ide,
-    bool suppressAnalytics = false,
+    required String workingDirectory,
+    required String? ide,
+    required bool suppressAnalytics,
   }) async {
     if (expectedCommands.isNotEmpty) {
       final expectedCommand = expectedCommands.removeAt(0);
@@ -228,6 +459,7 @@ class StubbedDeeplinkManager extends DeeplinkManager {
         ),
         isTrue,
       );
+      expect(workingDirectory, expectedCommand.workingDirectory);
       expect(ide, expectedCommand.ide);
       expect(suppressAnalytics, expectedCommand.suppressAnalytics);
       return expectedCommand.result;
@@ -240,18 +472,20 @@ class TestCommand {
   const TestCommand({
     required this.executable,
     required this.arguments,
+    required this.workingDirectory,
     this.ide,
     this.suppressAnalytics = false,
     required this.result,
   });
   final String executable;
   final List<String> arguments;
+  final String workingDirectory;
   final String? ide;
   final bool suppressAnalytics;
   final ProcessResult result;
 
   @override
   String toString() {
-    return '"$executable ${arguments.join(' ')}"';
+    return '"$executable ${arguments.join(' ')}" (workingDirectory: $workingDirectory)';
   }
 }

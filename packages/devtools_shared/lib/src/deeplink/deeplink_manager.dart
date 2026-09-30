@@ -8,6 +8,8 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
+import 'xcode_build_options.dart';
+
 class DeeplinkManager {
   /// A regex to retrieve the json part from the stdout of Android analyzer.
   ///
@@ -31,6 +33,25 @@ class DeeplinkManager {
   /// The key to retrieve output json from the returning map of this class's
   /// APIs.
   static const kOutputJsonField = 'json';
+
+  /// Cached Android build variants keyed by normalized project root path.
+  ///
+  /// Populated by [getAndroidBuildVariants] and used to validate `buildVariant`
+  /// in [getAndroidAppLinkSettings].
+  static final _androidBuildVariantsCache = <String, Set<String>>{};
+
+  /// Cached iOS Xcode build options keyed by normalized project root path.
+  ///
+  /// Populated by [getIosBuildOptions] and used to validate `configuration` and
+  /// `target` in [getIosUniversalLinkSettings].
+  static final _iosBuildOptionsCache = <String, XcodeBuildOptions>{};
+
+  /// Clears the cached Android build variants and iOS build options.
+  @visibleForTesting
+  static void clearBuildOptionsCache() {
+    _androidBuildVariantsCache.clear();
+    _iosBuildOptionsCache.clear();
+  }
 
   // TODO(https://github.com/flutter/devtools/issues/9702): Use the `DashTool`
   // and `DashEnvVar` enums and `getEnvironment()` helper directly from
@@ -66,8 +87,9 @@ class DeeplinkManager {
   Future<ProcessResult> runProcess(
     String executable, {
     required List<String> arguments,
-    String? ide,
-    bool suppressAnalytics = false,
+    required String workingDirectory,
+    required String? ide,
+    required bool suppressAnalytics,
   }) {
     final environment = <String, String>{
       ...Platform.environment,
@@ -75,7 +97,12 @@ class DeeplinkManager {
       'DASH__TOOL': ide != null ? _mapIdeToDashToolLabel(ide) : 'devtools',
     };
 
-    return Process.run(executable, arguments, environment: environment);
+    return Process.run(
+      executable,
+      arguments,
+      workingDirectory: workingDirectory,
+      environment: environment,
+    );
   }
 
   String _mapIdeToDashToolLabel(String ide) {
@@ -116,6 +143,7 @@ class DeeplinkManager {
 
   Future<String> _runFlutterCommand(
     List<String> arguments, {
+    required String workingDirectory,
     required RegExp outputMatcher,
     String? ide,
     bool suppressAnalytics = false,
@@ -124,6 +152,7 @@ class DeeplinkManager {
     final result = await runProcess(
       flutterPath,
       arguments: arguments,
+      workingDirectory: workingDirectory,
       ide: ide,
       suppressAnalytics: suppressAnalytics,
     );
@@ -140,10 +169,11 @@ class DeeplinkManager {
     }
   }
 
-  Map<String, Object?> _handleRunFlutterError(
-    covariant _FlutterProcessError error,
-  ) {
-    return <String, String?>{kErrorField: error.message};
+  Map<String, Object?> _handleRunFlutterError(Object error) {
+    final message = error is _FlutterProcessError
+        ? error.message
+        : error.toString();
+    return <String, String?>{kErrorField: message};
   }
 
   Future<Map<String, Object?>> _handleReadJsonFile(String filePath) {
@@ -166,31 +196,62 @@ class DeeplinkManager {
     String? ide,
     bool suppressAnalytics = false,
   }) {
+    final canonicalPath = path.canonicalize(rootPath);
     return _runFlutterCommand(
-      <String>['analyze', '--android', '--list-build-variants', rootPath],
+      <String>['analyze', '--android', '--list-build-variants'],
+      workingDirectory: rootPath,
       outputMatcher: _androidBuildVariantJsonRegex,
       ide: ide,
       suppressAnalytics: suppressAnalytics,
-    ).then<Map<String, Object?>>(
-      _handleJsonOutput,
-      onError: _handleRunFlutterError,
-    );
+    ).then<Map<String, Object?>>((jsonOutput) {
+      try {
+        final variants = (jsonDecode(jsonOutput) as List)
+            .cast<String>()
+            .toSet();
+        _androidBuildVariantsCache[canonicalPath] = variants;
+      } on Object catch (e) {
+        return <String, String?>{
+          kErrorField: 'Failed to parse Android build variants: $e',
+        };
+      }
+      return _handleJsonOutput(jsonOutput);
+    }, onError: _handleRunFlutterError);
   }
+
+  static const _fileIssueMessage =
+      'This should not happen; please file an issue at '
+      'https://github.com/flutter/devtools/issues.';
 
   Future<Map<String, Object?>> getAndroidAppLinkSettings({
     required String rootPath,
     required String buildVariant,
     String? ide,
     bool suppressAnalytics = false,
-  }) {
+  }) async {
+    final canonicalPath = path.canonicalize(rootPath);
+    final validVariants = _androidBuildVariantsCache[canonicalPath];
+    if (validVariants == null) {
+      return <String, String?>{
+        kErrorField:
+            'Android build variants for "$rootPath" have not been parsed yet. '
+            '$_fileIssueMessage',
+      };
+    }
+    if (!validVariants.contains(buildVariant)) {
+      return <String, String?>{
+        kErrorField:
+            'Unknown Android build variant "$buildVariant" for "$rootPath". '
+            '$_fileIssueMessage',
+      };
+    }
     return _runFlutterCommand(
       <String>[
         'analyze',
         '--android',
         '--output-app-link-settings',
         '--build-variant=$buildVariant',
-        rootPath,
       ],
+      workingDirectory: rootPath,
       outputMatcher: _outputFilePathRegex,
       ide: ide,
       suppressAnalytics: suppressAnalytics,
@@ -205,15 +266,25 @@ class DeeplinkManager {
     String? ide,
     bool suppressAnalytics = false,
   }) {
+    final canonicalPath = path.canonicalize(rootPath);
     return _runFlutterCommand(
-      <String>['analyze', '--ios', '--list-build-options', rootPath],
+      <String>['analyze', '--ios', '--list-build-options'],
+      workingDirectory: rootPath,
       outputMatcher: _iosBuildOptionsJsonRegex,
       ide: ide,
       suppressAnalytics: suppressAnalytics,
-    ).then<Map<String, Object?>>(
-      _handleJsonOutput,
-      onError: _handleRunFlutterError,
-    );
+    ).then<Map<String, Object?>>((jsonOutput) {
+      try {
+        _iosBuildOptionsCache[canonicalPath] = XcodeBuildOptions.fromJson(
+          jsonOutput,
+        );
+      } on Object catch (e) {
+        return <String, String?>{
+          kErrorField: 'Failed to parse iOS build options: $e',
+        };
+      }
+      return _handleJsonOutput(jsonOutput);
+    }, onError: _handleRunFlutterError);
   }
 
   Future<Map<String, Object?>> getIosUniversalLinkSettings({
@@ -222,7 +293,24 @@ class DeeplinkManager {
     required String target,
     String? ide,
     bool suppressAnalytics = false,
-  }) {
+  }) async {
+    final canonicalPath = path.canonicalize(rootPath);
+    final validOptions = _iosBuildOptionsCache[canonicalPath];
+    if (validOptions == null) {
+      return <String, String?>{
+        kErrorField:
+            'iOS build options for "$rootPath" have not been parsed yet. '
+            '$_fileIssueMessage',
+      };
+    }
+    if (!validOptions.configurations.contains(configuration) ||
+        !validOptions.targets.contains(target)) {
+      return <String, String?>{
+        kErrorField:
+            'Unknown iOS build configuration ($configuration) or target ($target) for "$rootPath". '
+            '$_fileIssueMessage',
+      };
+    }
     return _runFlutterCommand(
       <String>[
         'analyze',
@@ -230,8 +318,8 @@ class DeeplinkManager {
         '--output-universal-link-settings',
         '--configuration=$configuration',
         '--target=$target',
-        rootPath,
       ],
+      workingDirectory: rootPath,
       outputMatcher: _outputFilePathRegex,
       ide: ide,
       suppressAnalytics: suppressAnalytics,

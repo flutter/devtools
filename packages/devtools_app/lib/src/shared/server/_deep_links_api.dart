@@ -76,11 +76,14 @@ Future<UniversalLinkSettings> requestIosUniversalLinkSettings(
       },
     );
     final resp = await request(uri.toString());
-    if (resp?.statusOk ?? false) {
-      return UniversalLinkSettings.fromJson(resp!.body);
-    } else {
-      logWarning(resp, DeeplinkApi.iosUniversalLinkSettings);
+    if (resp != null) {
+      if (resp.statusOk) {
+        return UniversalLinkSettings.fromJson(resp.body);
+      } else {
+        logWarning(resp, DeeplinkApi.iosUniversalLinkSettings);
+        return UniversalLinkSettings.fromErrorJson(resp.body.toString());
+      }
     }
   }
-  return UniversalLinkSettings.empty;
+  return UniversalLinkSettings.error('DevTools server is not available');
 }
