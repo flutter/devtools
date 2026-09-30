@@ -142,7 +142,7 @@ void main() async {
 ///
 /// Deletes will be retried if they fail for a period to avoid failing due to
 /// Windows being slow to unlock files after processes terminate.
-Future<void> deleteDirectoryWithRetry(Directory directory) async {
+Future<void> deleteDirectoryWithRetry(Directory directory) {
   // On Windows, trying to delete a directory immediately after the
   // test completes may fail with a file locking error. To avoid this, retry
   // the delete a few times before failing.
@@ -150,7 +150,7 @@ Future<void> deleteDirectoryWithRetry(Directory directory) async {
   // On DanTup's Windows PC, it can take ~5s for the delete to work sometimes
   // and this will probably be slower on bots. Allow a reasonable time because
   // taking 10s to delete is better than failing the tests for a non-bug.
-  await runWithRetry(
+  return runWithRetry(
     callback: () => directory.deleteSync(recursive: true),
     maxRetries: 20,
     retryDelay: const Duration(milliseconds: 500),
