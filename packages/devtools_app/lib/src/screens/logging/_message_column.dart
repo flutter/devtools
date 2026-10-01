@@ -74,6 +74,7 @@ class MessageColumn extends ColumnData<LogData>
                         //  The current summary is generally the first 200 chars of details.
                         data.summary!,
                         theme.regularTextStyle,
+                        brightness: theme.brightness,
                       ),
                     if (hasSummary && hasDetails())
                       TextSpan(text: '  •  ', style: theme.subtleTextStyle),
@@ -81,6 +82,7 @@ class MessageColumn extends ColumnData<LogData>
                       ...textSpansFromAnsi(
                         detailsComputed ? data.details! : '<fetching>',
                         theme.subtleTextStyle,
+                        brightness: theme.brightness,
                       ),
                   ],
                 ),

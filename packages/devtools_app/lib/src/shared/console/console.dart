@@ -196,6 +196,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
                           children: textSpansFromAnsi(
                             line.text,
                             theme.regularTextStyle,
+                            brightness: theme.brightness,
                           ),
                         ),
                       );

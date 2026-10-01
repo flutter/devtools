@@ -680,6 +680,35 @@ void main() {
       equals('http://127.0.0.1:9100'),
     );
   });
+
+  group('ansiToColor', () {
+    test('lightens dark colors on dark backgrounds', () {
+      const black = Color.fromRGBO(0, 0, 0, 1);
+      final adjusted = ansiToColor([0, 0, 0], brightness: Brightness.dark)!;
+      expect(adjusted, isNot(equals(black)));
+      expect(adjusted.computeLuminance(), greaterThan(0.2));
+    });
+
+    test('darkens light colors on light backgrounds', () {
+      const white = Color.fromRGBO(255, 255, 255, 1);
+      final adjusted = ansiToColor([255, 255, 255], brightness: Brightness.light)!;
+      expect(adjusted, isNot(equals(white)));
+      expect(adjusted.computeLuminance(), lessThan(0.5));
+    });
+
+    test('preserves readable colors', () {
+      const red = Color.fromRGBO(187, 0, 0, 1);
+      expect(
+        ansiToColor([187, 0, 0], brightness: Brightness.dark),
+        equals(red),
+      );
+      expect(
+        ansiToColor([187, 0, 0], brightness: Brightness.light),
+        equals(red),
+      );
+    });
+  });
+  });
 }
 
 class _SubtractionResult {
