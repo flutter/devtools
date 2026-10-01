@@ -505,6 +505,32 @@ void main() {
       },
     );
 
+    test('prettyPrinted removes ANSI escape codes', () {
+      final log = LogData(
+        'stdout',
+        'flutter: \x1B[45mComponentChanged<AuthState>\x1B[0m updated',
+        0,
+      );
+      expect(
+        log.prettyPrinted(),
+        'flutter: ComponentChanged<AuthState> updated',
+      );
+    });
+
+    test('prettyPrinted removes ANSI escape codes from json details', () {
+      final log = LogData(
+        'log',
+        jsonEncode({'message': '\x1B[45mComponentChanged<AuthState>\x1B[0m'}),
+        0,
+      );
+      expect(
+        log.prettyPrinted(),
+        '{\n'
+        '  "message": "ComponentChanged<AuthState>"\n'
+        '}',
+      );
+    });
+
     test('computeDeveloperLogDetailsJson keeps structured details', () async {
       const truncatedPreview = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.';
       const fullMessage =
