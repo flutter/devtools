@@ -66,10 +66,10 @@ Future<VmServiceWrapper> connectWithMessagePort({
     }
   }.toJS;
 
-  late final StreamSubscription<Event> unloadSubscription;
+  late final StreamSubscription<Event> pageHideSubscription;
   void closePort() {
     if (finishedCompleter.isCompleted) return;
-    unawaited(unloadSubscription.cancel());
+    unawaited(pageHideSubscription.cancel());
     port
       ..postMessage(null)
       ..onmessage = null
@@ -78,9 +78,10 @@ Future<VmServiceWrapper> connectWithMessagePort({
     finishedCompleter.complete();
   }
 
-  unloadSubscription = EventStreamProviders.unloadEvent
-      .forTarget(window)
-      .listen((_) => closePort());
+  // Close the port on pagehide, matching browser WebSocket behavior.
+  pageHideSubscription = const EventStreamProvider<Event>(
+    'pagehide',
+  ).forTarget(window).listen((_) => closePort());
 
   final service = VmServiceWrapper.defaultFactory(
     inStream: messages.stream,
