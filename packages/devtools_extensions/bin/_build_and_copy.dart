@@ -62,7 +62,6 @@ class BuildExtensionCommand extends Command {
       [
         'build',
         'web',
-        '--pwa-strategy=offline-first',
         '--release',
         '--no-tree-shake-icons',
       ],
