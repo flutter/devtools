@@ -200,12 +200,12 @@ class FlutterTestEnvironment {
     _needsSetup = true;
   }
 
+  /// Deletes the temporary directory created for the test suite.
   void finalTeardown() {
-    // Delete the temporary directory created for the test suite.
-    if (_tempTestAppDirectory != null) {
-      final tempDirectory = Directory(_tempTestAppDirectory!);
+    if (_tempTestAppDirectory case final tempTestAppDirectory?) {
+      final tempDirectory = Directory(tempTestAppDirectory);
       if (tempDirectory.existsSync()) {
-        Directory(_tempTestAppDirectory!).deleteSync(recursive: true);
+        tempDirectory.deleteSync(recursive: true);
       }
     }
   }
