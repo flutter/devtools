@@ -84,6 +84,9 @@ To learn more about DevTools, check out the
 * Fixed a bug where long `dart:developer` log messages lost their structured
   Details view. -
   [#10011](https://github.com/flutter/devtools/pull/10011),
+* Fixed ANSI-colored log messages rendering with black text and a larger font,
+  and removed raw ANSI escape codes from the Details view. -
+  [#10028](https://github.com/flutter/devtools/pull/10028)
 
 ## App size tool updates
 
