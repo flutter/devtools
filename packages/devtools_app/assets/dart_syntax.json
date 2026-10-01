@@ -1,6 +1,6 @@
 {
 	"name": "Dart",
-	"version": "1.6.0",
+	"version": "1.8.0",
 	"fileTypes": [
 		"dart"
 	],
@@ -76,12 +76,12 @@
 
 	"repository": {
 		"dartdoc-codeblock-triple": {
-			"begin": "^\\s*///\\s*(?!\\s*```)",
+			"begin": "^\\s*///\\s*",
 			"end": "$",
 			"contentName": "variable.other.source.dart"
 		},
 		"dartdoc-codeblock-block": {
-			"begin": "^\\s*\\*\\s*(?!(\\s*```|\/))",
+			"begin": "^\\s*\\*\\s*",
 			"end": "$",
 			"contentName": "variable.other.source.dart"
 		},
@@ -96,8 +96,8 @@
 					}
 				},
 				{
-					"begin": "^\\s*///\\s*(```)",
-					"end": "^\\s*///\\s*(```)|^(?!\\s*///)",
+					"begin": "^\\s*///\\s*(`{3,})",
+					"end": "^\\s*///\\s*(?=\\1)`*|^(?!\\s*///)",
 					"patterns": [
 						{
 							"include": "#dartdoc-codeblock-triple"
@@ -105,8 +105,8 @@
 					]
 				},
 				{
-					"begin": "^\\s*\\*\\s*(```)",
-					"end": "^\\s*\\*\\s*(```)|^(?=\\s*\\*\/)",
+					"begin": "^\\s*\\*\\s*(`{3,})",
+					"end": "^\\s*\\*\\s*(?=\\1)`*|^(?=\\s*\\*\/)",
 					"patterns": [
 						{
 							"include": "#dartdoc-codeblock-block"
@@ -118,7 +118,7 @@
 					"name": "variable.other.source.dart"
 				},
 				{
-					"match": "(?:\\*|\\/\\/)\\s{4,}(.*?)(?=($|\\*\\/))",
+					"match": "(?:\\*|\\/\\/)\\s{5,}(.*?)(?=($|\\*\\/))",
 					"captures": {
 						"1": {
 							"name": "variable.other.source.dart"
