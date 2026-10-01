@@ -472,6 +472,43 @@ void main() {
           find.descendant(of: detailsPane, matching: find.text('isFocusable')),
           findsOneWidget,
         );
+
+        // Tap parent node (#0) in the tree pane to select it; its child (#26)
+        // should remain expanded and visible in the tree.
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.text('SemanticsNode #0'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(controller.selectedSemanticsNode.value, equals(rootNode));
+        expect(rootNode.isExpanded, isTrue);
+        expect(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.text('SemanticsNode #26'),
+          ),
+          findsOneWidget,
+        );
+
+        // Select child (#26) again, then tap the expand/collapse arrow on
+        // parent (#0); it should collapse without changing the selected node.
+        controller.selectSemanticsNode(childNode);
+        await tester.pumpAndSettle();
+        expect(controller.selectedSemanticsNode.value, equals(childNode));
+
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.byIcon(Icons.keyboard_arrow_down),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(rootNode.isExpanded, isFalse);
+        expect(controller.selectedSemanticsNode.value, equals(childNode));
       },
     );
   });
