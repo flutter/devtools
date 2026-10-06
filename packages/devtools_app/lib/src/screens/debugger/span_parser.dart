@@ -403,10 +403,9 @@ class _MultilineMatcher extends GrammarMatcher {
     Grammar grammar,
     LineScanner scanner,
     ScopeStack scopeStack,
+    RegExp resolvedEnd,
   ) {
-    while (!scanner.isDone &&
-        end != null &&
-        !scanner.matchesOnCurrentLine(end!)) {
+    while (!scanner.isDone && !scanner.matchesOnCurrentLine(resolvedEnd)) {
       bool foundMatch = false;
       for (final pattern in patterns ?? <GrammarMatcher>[]) {
         if (pattern.scan(grammar, scanner, scopeStack)) {
@@ -421,12 +420,41 @@ class _MultilineMatcher extends GrammarMatcher {
     }
   }
 
-  void _scanEnd(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
+  void _scanEnd(
+    Grammar grammar,
+    LineScanner scanner,
+    ScopeStack scopeStack,
+    RegExp resolvedEnd,
+  ) {
     final location = scanner.location;
-    if (end != null && !scanner.scanOnCurrentLine(end!)) {
+    if (!scanner.scanOnCurrentLine(resolvedEnd)) {
       return;
     }
     _processCaptureHelper(grammar, scanner, scopeStack, endCaptures, location);
+  }
+
+  /// Returns an updated `end` regex that handles references in the form `\\1`
+  /// to reference matches from the `begin` regex.
+  ///
+  /// For example, this allows matching the correct number of backticks to close
+  /// a code block as were used to open it.
+  RegExp _resolveEnd(Match beginMatch) {
+    final resolvedPattern = end!.pattern.replaceAllMapped(
+      RegExp(r'\\([0-9]+)'),
+      (match) {
+        final groupIndex = int.parse(match.group(1)!);
+        final capturedText = groupIndex <= beginMatch.groupCount
+            ? beginMatch.group(groupIndex)
+            : null;
+        return capturedText == null
+            // No capture, keep the original text.
+            ? match.group(0)!
+            // Otherwise, escape the referenced text in case it contains regex
+            // chars.
+            : RegExp.escape(capturedText);
+      },
+    );
+    return RegExp(resolvedPattern, multiLine: true);
   }
 
   void _processCaptureHelper(
@@ -456,10 +484,13 @@ class _MultilineMatcher extends GrammarMatcher {
     scopeStack.push(name, scanner.location);
     _scanBegin(grammar, scanner, scopeStack);
     if (end != null) {
+      // Resolve any references in the end regex that reference captures from
+      // the begin match.
+      final resolvedEnd = _resolveEnd(scanner.lastMatch!);
       scopeStack.push(contentName, scanner.location);
-      _scanUpToEndMatch(grammar, scanner, scopeStack);
+      _scanUpToEndMatch(grammar, scanner, scopeStack, resolvedEnd);
       scopeStack.pop(contentName, scanner.location);
-      _scanEnd(grammar, scanner, scopeStack);
+      _scanEnd(grammar, scanner, scopeStack, resolvedEnd);
     } else if (whileCond != null) {
       // Find the range of the string that is matched by the while condition.
       final start = scanner.position;
