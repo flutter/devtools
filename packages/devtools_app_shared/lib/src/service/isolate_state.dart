@@ -76,7 +76,7 @@ class RootInfo {
   final String? package;
 
   static String? _libraryToPackage(String? library) {
-    if (library == null) return null;
+    if (library == null || !library.startsWith('package:')) return null;
     final slashIndex = library.indexOf('/');
     if (slashIndex == -1) return library;
     return library.substring(0, slashIndex);
