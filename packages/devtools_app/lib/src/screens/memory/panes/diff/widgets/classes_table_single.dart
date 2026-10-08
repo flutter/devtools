@@ -12,6 +12,7 @@ import '../../../../../shared/primitives/byte_utils.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
+import '../../../shared/primitives/memory_utils.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/widgets/class_filter.dart';
 import '../../../shared/widgets/shared_memory_widgets.dart';
@@ -50,7 +51,9 @@ class _ClassNameColumn extends ColumnData<SingleClassData>
       theClass: data.className,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvents.diffClassSingleCopy.name,
-      rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
+      rootPackage: serviceConnection.serviceManager
+          .rootInfoNow()
+          .rootPackagePrefix,
     );
   }
 

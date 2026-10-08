@@ -28,6 +28,7 @@ class FakeServiceConnectionManager extends Fake
     List<String> availableServices = const [],
     List<String> availableLibraries = const [],
     String? rootLibrary,
+    RootInfo? rootInfo,
   }) {
     _serviceManager = FakeServiceManager(
       service: service,
@@ -36,6 +37,7 @@ class FakeServiceConnectionManager extends Fake
       availableLibraries: availableLibraries,
       availableServices: availableServices,
       rootLibrary: rootLibrary,
+      rootInfo: rootInfo,
     );
     for (final screen in ScreenMetaData.values) {
       final screenId = screen.id;
@@ -92,9 +94,11 @@ class FakeServiceManager extends Fake
     this.onVmServiceOpened,
     Map<String, Response>? serviceExtensionResponses,
     String? rootLibrary,
+    RootInfo? rootInfo,
     bool hasConnection = true,
   }) : serviceExtensionResponses =
            serviceExtensionResponses ?? _defaultServiceExtensionResponses,
+       _rootInfo = rootInfo ?? RootInfo('package:myPackage/myPackage.dart'),
        _isolateManager = FakeIsolateManager(rootLibrary: rootLibrary) {
     this.service = service ?? createFakeService();
     serviceUri = this.service!.wsUri;
@@ -179,8 +183,15 @@ class FakeServiceManager extends Fake
   @override
   ConnectedApp? connectedApp = MockConnectedApp();
 
+  /// The [RootInfo] returned by [rootInfoNow].
+  ///
+  /// This is independent of the `rootLibrary` constructor argument, which only
+  /// configures the root library of the fake main isolate. Some tests depend on
+  /// this defaulting to a fixed `package:` root library.
+  final RootInfo _rootInfo;
+
   @override
-  RootInfo rootInfoNow() => RootInfo('package:myPackage/myPackage.dart');
+  RootInfo rootInfoNow() => _rootInfo;
 
   @override
   Future<RootInfo?> tryToDetectMainRootInfo() => Future.value(rootInfoNow());
