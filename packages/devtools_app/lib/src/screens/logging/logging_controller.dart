@@ -1096,6 +1096,22 @@ class LogData with SearchableDataMixin {
   }
 
   String? prettyPrinted() {
+    if (_prettyPrinted != null) return _prettyPrinted;
+    final text = _prettyPrintedWithAnsi();
+    if (text == null) return null;
+    // JSON encoding escapes the ANSI escape character as `\u001b`.
+    final result = stripAnsi(text.replaceAll(_jsonEscapedAnsiEscape, '\x1B'));
+
+    // Only cache the value if details have already been computed.
+    if (detailsComputed.isCompleted) _prettyPrinted = result;
+    return result;
+  }
+
+  String? _prettyPrinted;
+
+  static final _jsonEscapedAnsiEscape = RegExp(r'\\u001[bB]');
+
+  String? _prettyPrintedWithAnsi() {
     if (!detailsComputed.isCompleted) {
       return details?.trim();
     }

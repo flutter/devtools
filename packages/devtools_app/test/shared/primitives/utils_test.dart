@@ -644,6 +644,67 @@ void main() {
     });
   });
 
+  group('textSpansFromAnsi', () {
+    const defaultStyle = TextStyle(
+      color: Color(0xFFEEEEEE),
+      fontSize: 12.0,
+      fontFamily: 'Roboto',
+    );
+
+    test('uses the default style for text without ANSI codes', () {
+      final spans = textSpansFromAnsi('plain', defaultStyle);
+      expect(spans, hasLength(1));
+      expect(spans.first.text, 'plain');
+      expect(spans.first.style, defaultStyle);
+    });
+
+    test('keeps the default color when only a background is set', () {
+      final spans = textSpansFromAnsi('\x1B[45mmagenta\x1B[0m', defaultStyle);
+      expect(spans, hasLength(1));
+      final style = spans.first.style!;
+      expect(style.color, defaultStyle.color);
+      expect(style.backgroundColor, const Color.fromRGBO(187, 0, 187, 1));
+      expect(style.fontSize, defaultStyle.fontSize);
+      expect(style.fontFamily, defaultStyle.fontFamily);
+    });
+
+    test('keeps the default font when a foreground is set', () {
+      final spans = textSpansFromAnsi(
+        'plain \x1B[32mgreen\x1B[0m plain',
+        defaultStyle,
+      );
+      expect(spans.map((s) => s.text), ['plain ', 'green', ' plain']);
+      final style = spans[1].style!;
+      expect(style.color, const Color.fromRGBO(0, 187, 0, 1));
+      expect(style.fontSize, defaultStyle.fontSize);
+      expect(style.fontFamily, defaultStyle.fontFamily);
+    });
+
+    test('applies bold', () {
+      final spans = textSpansFromAnsi('\x1B[1mbold\x1B[0m', defaultStyle);
+      final style = spans.first.style!;
+      expect(style.fontWeight, FontWeight.bold);
+      expect(style.color, defaultStyle.color);
+      expect(style.fontSize, defaultStyle.fontSize);
+    });
+  });
+
+  group('stripAnsi', () {
+    test('returns text without ANSI codes unchanged', () {
+      expect(stripAnsi('plain text'), 'plain text');
+    });
+
+    test('removes ANSI codes', () {
+      expect(
+        stripAnsi(
+          '\x1B[45mComponentChanged<AuthState>\x1B[0m '
+          '\x1B[38;5;208morange\x1B[0m \x1B[1;32mbold green\x1B[0m',
+        ),
+        'ComponentChanged<AuthState> orange bold green',
+      );
+    });
+  });
+
   test('devtoolsAssetsBasePath', () {
     // This is how a DevTools url will be structured when DevTools is served
     // directly from DDS using the `--observe` flag.

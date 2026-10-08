@@ -5,6 +5,7 @@
 @TestOn('vm')
 library;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
@@ -504,6 +505,47 @@ void main() {
         expect(nullDetails.prettyPrinted(), null);
       },
     );
+
+    test('prettyPrinted removes ANSI escape codes', () {
+      final log = LogData(
+        'stdout',
+        'flutter: \x1B[45mComponentChanged<AuthState>\x1B[0m updated',
+        0,
+      );
+      expect(
+        log.prettyPrinted(),
+        'flutter: ComponentChanged<AuthState> updated',
+      );
+    });
+
+    test('prettyPrinted is not cached before details are computed', () async {
+      final completer = Completer<String>();
+      final log = LogData(
+        'log',
+        'preview',
+        0,
+        detailsComputer: () => completer.future,
+      );
+      expect(log.prettyPrinted(), 'preview');
+
+      completer.complete('\x1B[32mfull details\x1B[0m');
+      await log.detailsComputed.future;
+      expect(log.prettyPrinted(), 'full details');
+    });
+
+    test('prettyPrinted removes ANSI escape codes from json details', () {
+      final log = LogData(
+        'log',
+        jsonEncode({'message': '\x1B[45mComponentChanged<AuthState>\x1B[0m'}),
+        0,
+      );
+      expect(
+        log.prettyPrinted(),
+        '{\n'
+        '  "message": "ComponentChanged<AuthState>"\n'
+        '}',
+      );
+    });
 
     test('computeDeveloperLogDetailsJson keeps structured details', () async {
       const truncatedPreview = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.';
