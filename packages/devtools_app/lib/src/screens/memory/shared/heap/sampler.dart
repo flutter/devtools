@@ -13,6 +13,7 @@ import '../../../../shared/memory/classes.dart';
 import '../../../../shared/memory/heap_data.dart';
 import '../../../../shared/memory/heap_object.dart';
 import '../../../../shared/utils/vm_utils.dart';
+import '../primitives/memory_utils.dart';
 
 class _HeapObjects {
   _HeapObjects(this.objects, this.heap);
@@ -106,7 +107,7 @@ class LiveClassSampler {
 
   bool get isEvalEnabled =>
       heapClass.classType(
-        serviceConnection.serviceManager.rootInfoNow().package,
+        serviceConnection.serviceManager.rootInfoNow().rootPackagePrefix,
       ) !=
       ClassType.runtime;
 
