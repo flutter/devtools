@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
@@ -41,7 +43,21 @@ class OfflinePerformanceData {
     );
   }
 
+  /// Legacy key for the Perfetto trace, stored as a JSON array of numbers.
+  ///
+  /// Encoding every byte as a JSON number is extremely memory intensive for
+  /// large traces (see https://github.com/flutter/devtools/issues/10010), so
+  /// this key is only read for backwards compatibility with files exported by
+  /// older versions of DevTools. New exports use [traceBinaryBase64Key].
   static const traceBinaryKey = 'traceBinary';
+
+  /// Key for the Perfetto trace, stored as a base64 encoded string once the
+  /// data is encoded as JSON.
+  ///
+  /// This is intentionally a different key than [traceBinaryKey] so that older
+  /// versions of DevTools, which expect a JSON array under [traceBinaryKey],
+  /// treat a new file as having no trace instead of throwing a type error.
+  static const traceBinaryBase64Key = 'traceBinaryBase64';
   static const rebuildCountModelKey = 'rebuildCountModel';
   static const displayRefreshRateKey = 'displayRefreshRate';
   static const flutterFramesKey = 'flutterFrames';
@@ -67,8 +83,16 @@ class OfflinePerformanceData {
 
   bool get isEmpty => perfettoTraceBinary == null;
 
+  /// The JSON serializable form of this data.
+  ///
+  /// The trace is stored as a [ByteData] view of [perfettoTraceBinary] rather
+  /// than being encoded here, so that this method does not copy the trace.
+  /// `toEncodable` converts the [ByteData] to a base64 string when the data is
+  /// encoded as JSON for export.
   Map<String, Object?> toJson() => {
-    traceBinaryKey: perfettoTraceBinary,
+    traceBinaryBase64Key: perfettoTraceBinary == null
+        ? null
+        : ByteData.sublistView(perfettoTraceBinary!),
     flutterFramesKey: frames.map((frame) => frame.json).toList(),
     selectedFrameIdKey: selectedFrame?.id,
     displayRefreshRateKey: displayRefreshRate,
@@ -79,9 +103,22 @@ class OfflinePerformanceData {
 
 extension type _PerformanceDataJson(Map<String, Object?> json) {
   Uint8List? get traceBinary {
-    final value = (json[OfflinePerformanceData.traceBinaryKey] as List?)
-        ?.cast<int>();
-    return value == null ? null : Uint8List.fromList(value);
+    final base64Trace = json[OfflinePerformanceData.traceBinaryBase64Key];
+    switch (base64Trace) {
+      case final String encoded:
+        return base64Decode(encoded);
+      case final ByteData data:
+        return Uint8List.sublistView(data);
+    }
+
+    // Files exported by older versions of DevTools store the trace as a list of
+    // numbers.
+    final legacyTrace = json[OfflinePerformanceData.traceBinaryKey];
+    return switch (legacyTrace) {
+      final Uint8List bytes => bytes,
+      final List<Object?> numbers => Uint8List.fromList(numbers.cast<int>()),
+      _ => null,
+    };
   }
 
   int? get selectedFrameId =>

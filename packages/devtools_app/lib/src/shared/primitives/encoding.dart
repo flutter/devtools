@@ -52,8 +52,9 @@ class ByteDataEncodeDecode extends EncodeDecode<ByteData> {
 
   @override
   Object toEncodable(ByteData value) {
-    final list = value.buffer.asUint8List();
-    return base64Encode(list);
+    // Use a view of just this data. The underlying buffer may be larger than
+    // the data represented by [value].
+    return base64Encode(Uint8List.sublistView(value));
   }
 
   @override
