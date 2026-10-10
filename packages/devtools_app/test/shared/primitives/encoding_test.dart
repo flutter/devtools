@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:devtools_app/src/shared/primitives/encoding.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,6 +21,16 @@ void main() {
 
     expect(decoded.classes.length, graph.classes.length);
     expect(decoded.objects.length, graph.objects.length);
+  });
+
+  test('$ByteDataEncodeDecode only encodes the bytes in the view', () {
+    final buffer = Uint8List.fromList([9, 1, 2, 3, 9]);
+    final view = ByteData.sublistView(buffer, 1, 4);
+    final encodeDecode = ByteDataEncodeDecode.instance;
+
+    final decoded = encodeDecode.decode(encodeDecode.toEncodable(view));
+
+    expect(Uint8List.sublistView(decoded), [1, 2, 3]);
   });
 
   test('$DateTimeEncodeDecode', () {

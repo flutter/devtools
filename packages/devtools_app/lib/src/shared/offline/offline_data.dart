@@ -189,9 +189,20 @@ mixin OfflineScreenControllerMixin<T>
   /// Exports the current screen data to a .json file and downloads the file to
   /// the user's Downloads directory.
   void exportData() {
-    final encodedData = _exportController.encode(
-      prepareOfflineScreenData().toJson(),
-    );
+    final String encodedData;
+    try {
+      encodedData = _exportController.encode(
+        prepareOfflineScreenData().toJson(),
+      );
+    } on RangeError catch (e) {
+      // The data is too large to be encoded as a single JSON string (the
+      // maximum string length in the browser is about 2^29 characters).
+      notificationService.pushError(
+        'Unable to export this screen\'s data because it is too large: '
+        '${e.message}',
+      );
+      return;
+    }
     _exportController.downloadFile(encodedData);
   }
 
