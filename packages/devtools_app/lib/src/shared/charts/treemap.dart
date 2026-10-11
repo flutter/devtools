@@ -401,7 +401,7 @@ class _TreemapState extends State<Treemap> {
             richMessage:
                 hoveredNode?.displayTextSpan(
                   defaultTextStyle: defaultTextStyle,
-                  color: Theme.of(context).colorScheme.tooltipTextColor
+                  color: Theme.of(context).colorScheme.tooltipTextColor,
                 ) ??
                 const TextSpan(text: ''),
             waitDuration: tooltipWaitLong,
