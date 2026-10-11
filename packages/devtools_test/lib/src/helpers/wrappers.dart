@@ -27,13 +27,20 @@ final _testNavigatorKey = GlobalKey<NavigatorState>();
 /// This includes a [MaterialApp] to provide context like [Theme.of], a
 /// [Material] to support elements like [TextField] that draw ink effects, and a
 /// [Directionality] to support [RenderFlex] widgets like [Row] and [Column].
-Widget wrap(Widget widget, {DevToolsQueryParams? queryParams}) {
+Widget wrap(
+  Widget widget, {
+  DevToolsQueryParams? queryParams,
+  bool isDarkTheme = false,
+}) {
   setGlobal(GlobalKey<NavigatorState>, _testNavigatorKey);
   return MaterialApp.router(
     theme: themeFor(
-      isDarkTheme: false,
+      isDarkTheme: isDarkTheme,
       ideTheme: IdeTheme(),
-      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: isDarkTheme ? darkColorScheme : lightColorScheme,
+      ),
     ),
     routerDelegate: DevToolsRouterDelegate.test(
       (context, page, args, state) => MaterialPage(
@@ -62,12 +69,15 @@ Widget wrap(Widget widget, {DevToolsQueryParams? queryParams}) {
 /// This includes a [MaterialApp] to provide context like [Theme.of], a
 /// [Material] to support elements like [TextField] that draw ink effects, and a
 /// [Directionality] to support [RenderFlex] widgets like [Row] and [Column].
-Widget wrapSimple(Widget widget) {
+Widget wrapSimple(Widget widget, {bool isDarkTheme = false}) {
   return MaterialApp(
     theme: themeFor(
-      isDarkTheme: false,
+      isDarkTheme: isDarkTheme,
       ideTheme: IdeTheme(),
-      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: isDarkTheme ? darkColorScheme : lightColorScheme,
+      ),
     ),
     home: Material(
       child: Directionality(
@@ -99,6 +109,7 @@ Widget wrapWithControllers(
   AccessibilityController? accessibility,
   bool includeRouter = true,
   DevToolsQueryParams? queryParams,
+  bool isDarkTheme = false,
 }) {
   // The [ScreenControllers] class uses the [OfflineDataController] class to
   // determine which type of controller should be returned from
@@ -192,8 +203,8 @@ Widget wrapWithControllers(
     child = MultiProvider(providers: providers, child: child);
   }
   return includeRouter
-      ? wrap(child, queryParams: queryParams)
-      : wrapSimple(child);
+      ? wrap(child, queryParams: queryParams, isDarkTheme: isDarkTheme)
+      : wrapSimple(child, isDarkTheme: isDarkTheme);
 }
 
 Widget wrapWithNotifications(Widget child) {
