@@ -21,6 +21,18 @@ import 'package:provider/provider.dart';
 /// for widget state to be preserved.
 final _testNavigatorKey = GlobalKey<NavigatorState>();
 
+/// Returns the [ThemeData] used by [wrap] and [wrapSimple] test helper widgets.
+ThemeData _testTheme({required bool isDarkTheme}) {
+  return themeFor(
+    isDarkTheme: isDarkTheme,
+    ideTheme: IdeTheme(),
+    theme: ThemeData(
+      useMaterial3: true,
+      colorScheme: isDarkTheme ? darkColorScheme : lightColorScheme,
+    ),
+  );
+}
+
 /// Wraps [widget] with the build context it needs to load in a test as well as
 /// the [DevToolsRouterDelegate].
 ///
@@ -34,14 +46,7 @@ Widget wrap(
 }) {
   setGlobal(GlobalKey<NavigatorState>, _testNavigatorKey);
   return MaterialApp.router(
-    theme: themeFor(
-      isDarkTheme: isDarkTheme,
-      ideTheme: IdeTheme(),
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: isDarkTheme ? darkColorScheme : lightColorScheme,
-      ),
-    ),
+    theme: _testTheme(isDarkTheme: isDarkTheme),
     routerDelegate: DevToolsRouterDelegate.test(
       (context, page, args, state) => MaterialPage(
         child: Material(
@@ -71,14 +76,7 @@ Widget wrap(
 /// [Directionality] to support [RenderFlex] widgets like [Row] and [Column].
 Widget wrapSimple(Widget widget, {bool isDarkTheme = false}) {
   return MaterialApp(
-    theme: themeFor(
-      isDarkTheme: isDarkTheme,
-      ideTheme: IdeTheme(),
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: isDarkTheme ? darkColorScheme : lightColorScheme,
-      ),
-    ),
+    theme: _testTheme(isDarkTheme: isDarkTheme),
     home: Material(
       child: Directionality(
         textDirection: TextDirection.ltr,
