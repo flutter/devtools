@@ -64,8 +64,9 @@ const isImpellerEnabled = 'ext.ui.window.impellerEnabled';
 /// Service extension to enable or disable semantics on the connected app.
 const enableSemantics = 'ext.flutter.accessibility.enableSemantics';
 
-/// Service extension to fetch the accessibility semantics tree from the connected app.
-const getSemanticsTree = 'ext.flutter.accessibility.getSemanticsTree';
+/// Service extension to fetch the accessibility semantics tree and any accessibility issues.
+const getIssuesAndSemanticsTree =
+    'ext.flutter.accessibility.getIssuesAndSemanticsTree';
 
 /// Service extension to dispose semantics on the connected app.
 const disposeSemantics = 'ext.flutter.accessibility.disposeSemantics';
