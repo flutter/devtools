@@ -12,6 +12,7 @@ import 'package:logging/logging.dart';
 import '../analytics/analytics.dart' as ga;
 import '../development_helpers.dart';
 import '../globals.dart';
+import '../primitives/query_parameters.dart';
 import '../primitives/utils.dart';
 import '../server/server.dart' as server;
 import '../utils/utils.dart';
@@ -232,7 +233,12 @@ class DevToolsSurvey {
   /// If [devEnvironments] is null, the survey can be shown to any platform.
   ///
   /// The possible values for this list correspond to the possible values of
-  /// `_ideLaunched` from [shared/analytics/_analytics_web.dart].
+  /// `_ideLaunched` from [shared/analytics/_analytics_web.dart]. They can also
+  /// be the labels of the Dash tools that IDEs pass in the `dashTool` query
+  /// parameter (e.g. 'vscode-plugins', 'intellij-plugins'), which are shared by
+  /// every variant of an IDE (e.g. VS Code, Cursor and Antigravity). Versions
+  /// of DevTools that predate the `dashTool` query parameter only recognize the
+  /// former.
   final List<String>? devEnvironments;
 }
 
@@ -250,10 +256,38 @@ extension ShowSurveyExtension on DevToolsSurvey {
         devToolsVersion,
       ).isSupported(minSupportedVersion: minDevToolsVersion!);
 
-  bool get meetsEnvironmentRequirement =>
-      devEnvironments == null ||
-      ga.ideLaunched.isEmpty ||
-      devEnvironments!.contains(ga.ideLaunched);
+  /// Whether this survey should be shown in the development environment that
+  /// the current DevTools session was launched from.
+  ///
+  /// See [meetsEnvironmentRequirementFor] for how [devEnvironments] are matched.
+  bool get meetsEnvironmentRequirement => meetsEnvironmentRequirementFor(
+    ideLaunched: ga.ideLaunched,
+    queryParams: DevToolsQueryParams.load(),
+  );
+
+  /// Whether this survey should be shown in the development environment that
+  /// DevTools was launched from, which is described by [ideLaunched] and
+  /// [queryParams].
+  ///
+  /// A survey that lists [devEnvironments] is shown if it lists the legacy
+  /// [ideLaunched] value, or the `dashTool` of the IDE integration that
+  /// launched DevTools. The legacy 'VSCode' environment also matches VS Code
+  /// forks (such as Cursor or Antigravity), which may not pass 'VSCode' as
+  /// their legacy IDE value.
+  @visibleForTesting
+  bool meetsEnvironmentRequirementFor({
+    required String ideLaunched,
+    required DevToolsQueryParams queryParams,
+  }) {
+    final environments = devEnvironments;
+    if (environments == null || ideLaunched.isEmpty) return true;
+
+    final dashTool = queryParams.dashTool;
+    return environments.contains(ideLaunched) ||
+        (dashTool != null && environments.contains(dashTool)) ||
+        (queryParams.isVsCode &&
+            environments.contains(DevToolsQueryParams.legacyVsCodeIdeValue));
+  }
 
   bool get shouldShow =>
       meetsDateRequirement &&
