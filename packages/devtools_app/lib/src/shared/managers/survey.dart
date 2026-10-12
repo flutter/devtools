@@ -12,6 +12,7 @@ import 'package:logging/logging.dart';
 import '../analytics/analytics.dart' as ga;
 import '../development_helpers.dart';
 import '../globals.dart';
+import '../primitives/query_parameters.dart';
 import '../primitives/utils.dart';
 import '../server/server.dart' as server;
 import '../utils/utils.dart';
@@ -232,7 +233,10 @@ class DevToolsSurvey {
   /// If [devEnvironments] is null, the survey can be shown to any platform.
   ///
   /// The possible values for this list correspond to the possible values of
-  /// `_ideLaunched` from [shared/analytics/_analytics_web.dart].
+  /// `_ideLaunched` from [shared/analytics/_analytics_web.dart]. The 'VSCode'
+  /// value also matches any VS Code based editor detected by
+  /// [DevToolsQueryParams.isVsCode] (e.g. via the `dashTool` query parameter),
+  /// even if `_ideLaunched` has a different value.
   final List<String>? devEnvironments;
 }
 
@@ -250,10 +254,11 @@ extension ShowSurveyExtension on DevToolsSurvey {
         devToolsVersion,
       ).isSupported(minSupportedVersion: minDevToolsVersion!);
 
-  bool get meetsEnvironmentRequirement =>
-      devEnvironments == null ||
-      ga.ideLaunched.isEmpty ||
-      devEnvironments!.contains(ga.ideLaunched);
+  bool get meetsEnvironmentRequirement {
+    final environments = devEnvironments;
+    if (environments == null || ga.ideLaunched.isEmpty) return true;
+    return environments.contains(_currentDevEnvironment());
+  }
 
   bool get shouldShow =>
       meetsDateRequirement &&
@@ -266,3 +271,30 @@ DateTime _currentClockTime() => fakeClockTimeForSurvey ?? DateTime.now();
 /// A hook to set a fake clock time for tests.
 @visibleForTesting
 DateTime? fakeClockTimeForSurvey;
+
+// TODO(https://github.com/flutter/devtools/issues/9811): also map
+// `dashTool=intellij-plugins` (and `dashIdeName`) onto the 'Android-Studio' and
+// 'IntelliJ-IDEA' environments once the IntelliJ plugin passes these values.
+/// The development environment to match against
+/// [DevToolsSurvey.devEnvironments].
+///
+/// VS Code based editors may pass the `dashTool` query parameter without the
+/// older `ide` query parameter, in which case `ga.ideLaunched` defaults to
+/// 'CLI'. To avoid treating those users as CLI users, VS Code is detected using
+/// [DevToolsQueryParams.isVsCode] before falling back to `ga.ideLaunched`.
+///
+/// Survey environment values are the `ide` query parameter values (see
+/// [DevToolsSurvey.devEnvironments]), so [DevToolsQueryParams.vsCodeIdeValue]
+/// is also the survey environment value for VS Code.
+String _currentDevEnvironment() => _currentQueryParams().isVsCode
+    ? DevToolsQueryParams.vsCodeIdeValue
+    : ga.ideLaunched;
+
+/// The DevTools query parameters, which may be faked for tests using
+/// [fakeQueryParamsForSurvey].
+DevToolsQueryParams _currentQueryParams() =>
+    fakeQueryParamsForSurvey ?? DevToolsQueryParams.load();
+
+/// A hook to set fake DevTools query parameters for tests.
+@visibleForTesting
+DevToolsQueryParams? fakeQueryParamsForSurvey;

@@ -4,11 +4,14 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/managers/survey.dart';
+import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   setUp(() {
     fakeClockTimeForSurvey = null;
+    fakeQueryParamsForSurvey = DevToolsQueryParams.empty();
+    ideLaunched = '';
   });
 
   group('SurveyService', () {
@@ -134,6 +137,34 @@ void main() {
         ideLaunched = 'VSCode';
         expect(vsCodeOnlySurvey.meetsEnvironmentRequirement, isTrue);
         expect(intelliJSurvey.meetsEnvironmentRequirement, isFalse);
+      });
+
+      test('meetsEnvironmentRequirement uses dashTool for VS Code', () {
+        final vsCodeOnlySurvey = DevToolsSurvey.fromJson({
+          'devEnvironments': ['VSCode'],
+        });
+        final intelliJSurvey = DevToolsSurvey.fromJson({
+          'devEnvironments': ['Android-Studio', 'IntelliJ-IDEA'],
+        });
+        final cliOnlySurvey = DevToolsSurvey.fromJson({
+          'devEnvironments': ['CLI'],
+        });
+
+        // Simulate a VS Code based editor that passes `dashTool` but not the
+        // `ide` query parameter, in which case `ideLaunched` defaults to 'CLI'.
+        ideLaunched = 'CLI';
+        fakeQueryParamsForSurvey = DevToolsQueryParams({
+          DevToolsQueryParams.dashToolKey: 'vscode-plugins',
+        });
+        expect(vsCodeOnlySurvey.meetsEnvironmentRequirement, isTrue);
+        expect(intelliJSurvey.meetsEnvironmentRequirement, isFalse);
+        expect(cliOnlySurvey.meetsEnvironmentRequirement, isFalse);
+
+        // A true CLI launch with no IDE query parameters.
+        fakeQueryParamsForSurvey = DevToolsQueryParams.empty();
+        expect(vsCodeOnlySurvey.meetsEnvironmentRequirement, isFalse);
+        expect(intelliJSurvey.meetsEnvironmentRequirement, isFalse);
+        expect(cliOnlySurvey.meetsEnvironmentRequirement, isTrue);
       });
     });
   });
