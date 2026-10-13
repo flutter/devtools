@@ -166,7 +166,6 @@ void main() {
       expect(
         DevToolsQueryParams({
           DevToolsQueryParams.dashToolKey: 'vscode-plugins',
-          DevToolsQueryParams.dashIdeNameKey: 'Cursor',
         }).isVsCode,
         isTrue,
       );

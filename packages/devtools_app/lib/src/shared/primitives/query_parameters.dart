@@ -53,8 +53,8 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   /// The IDE that DevTools is embedded in or was launched from.
   ///
   /// IDEs continue to pass this value for compatibility with older versions of
-  /// DevTools, but [dashTool] and [dashIdeName] are its replacements. Prefer
-  /// derived getters such as [isVsCode] over comparing this value directly.
+  /// DevTools, but [dashTool] is its replacement. Prefer derived getters such
+  /// as [isVsCode] over comparing this value directly.
   String? get ide => params[ideKey];
 
   /// The feature of the IDE that DevTools was opened from.
@@ -67,15 +67,6 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   /// IDE plugins set for the processes they spawn. See
   /// https://github.com/flutter/devtools/issues/9811.
   String? get dashTool => params[dashToolKey];
-
-  /// The name of the IDE that DevTools is embedded in or was launched from
-  /// (e.g. 'Visual Studio Code', 'Cursor', 'Android Studio').
-  ///
-  /// This matches the value of the `DASH__IDE_NAME` environment variable that
-  /// the IDE plugins set for the processes they spawn. This is not yet used by
-  /// DevTools logic but is intended for analytics reporting. See
-  /// https://github.com/flutter/devtools/issues/9811.
-  String? get dashIdeName => params[dashIdeNameKey];
 
   /// Whether DevTools is embedded in or was launched from the VS Code Dart
   /// extension (Dart-Code).
@@ -114,7 +105,6 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   static const ideKey = 'ide';
   static const ideFeatureKey = 'ideFeature';
   static const dashToolKey = 'dashTool';
-  static const dashIdeNameKey = 'dashIdeName';
 
   /// The legacy [ide] value passed by the VS Code Dart extension.
   static const vsCodeIdeValue = 'VSCode';
