@@ -160,7 +160,14 @@ void main() {
         expect(intelliJSurvey.meetsEnvironmentRequirement, isFalse);
         expect(cliOnlySurvey.meetsEnvironmentRequirement, isFalse);
 
+        // A detected VS Code environment is enforced even if `ideLaunched` has
+        // not been computed.
+        ideLaunched = '';
+        expect(vsCodeOnlySurvey.meetsEnvironmentRequirement, isTrue);
+        expect(intelliJSurvey.meetsEnvironmentRequirement, isFalse);
+
         // A true CLI launch with no IDE query parameters.
+        ideLaunched = 'CLI';
         fakeQueryParamsForSurvey = DevToolsQueryParams.empty();
         expect(vsCodeOnlySurvey.meetsEnvironmentRequirement, isFalse);
         expect(intelliJSurvey.meetsEnvironmentRequirement, isFalse);

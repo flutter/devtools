@@ -256,8 +256,11 @@ extension ShowSurveyExtension on DevToolsSurvey {
 
   bool get meetsEnvironmentRequirement {
     final environments = devEnvironments;
-    if (environments == null || ga.ideLaunched.isEmpty) return true;
-    return environments.contains(_currentDevEnvironment());
+    if (environments == null) return true;
+    final currentEnvironment = _currentDevEnvironment();
+    // An empty environment means it is unknown, so do not filter.
+    if (currentEnvironment.isEmpty) return true;
+    return environments.contains(currentEnvironment);
   }
 
   bool get shouldShow =>
