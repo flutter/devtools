@@ -30,6 +30,15 @@ and the CI testing ensures that the code is formatted correctly.
 * **Code Reuse & DRY**: Use shared primitives and components rather than recreating them from scratch. Flag duplicated code blocks (90%+ identical) and repeated sub-expressions or function calls within the same method as `[CONCERN]` or `[NIT]`, and suggest extracting them into local variables or constants.
 * **Constants & Magic Values**: Avoid using raw/magic strings or numbers. Extract them into descriptive named constants so the intent and meaning of the values are clear.
 * **Testing**: All changes should include automated tests to ensure correctness and prevent regressions.
+* **Release notes** (`packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md`):
+  * A PR should only add its own entry. Flag edits to other entries, removed blank lines or
+    punctuation, and leftover text from merge conflicts.
+  * Links in this file are intentionally relative (the notes are copied to the Flutter
+    website). Flag changes that make them absolute.
+  * Entries are past tense (e.g. "Added ..."), and the sentence ends with a period. The PR
+    link that follows the sentence (e.g. `[#1234](...)`) does not need a period.
+  * Only user-facing changes belong here. Changes to the `dt` tool, CI, tests, or internal
+    refactors should use the `release-notes-not-required` label instead.
 
 ## 3. Guidelines from Existing Documentation
 
