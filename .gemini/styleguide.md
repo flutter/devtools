@@ -28,6 +28,15 @@ and the CI testing ensures that the code is formatted correctly.
 * **Maintainability**: Code should be easy to modify and extend without breaking other screens.
 * **Consistency**: Adhering to consistent style across all DevTools packages improves collaboration and reduces errors.
 * **Code Reuse & DRY**: Use shared primitives and components rather than recreating them from scratch. Flag duplicated code blocks (90%+ identical) and repeated sub-expressions or function calls within the same method as `[CONCERN]` or `[NIT]`, and suggest extracting them into local variables or constants.
+  Prefer these DevTools helpers when the diff re-creates them:
+  * `CenteredMessage` instead of `Center` + `Text`; `NotifierSwitch` instead of a raw `Switch`
+    (from `packages/devtools_app/lib/src/shared/ui/common_widgets.dart`).
+  * `MultiValueListenableBuilder` instead of nested `ValueListenableBuilder`s; a `ValueNotifier`
+    plus a builder instead of calling `markNeedsBuild`/`setState` by hand.
+  * `safeUnawaited(...)` for fire-and-forget futures; `addAutoDisposeListener(...)` for listeners.
+  * `Logger` instead of `debugPrint`; theme sizes such as `smallFontSize` instead of raw numbers.
+  * In tests, existing helpers such as `mockConnectedApp` instead of hand-built mocks.
+  * A small `StatelessWidget` instead of a helper method that returns a widget.
 * **Constants & Magic Values**: Avoid using raw/magic strings or numbers. Extract them into descriptive named constants so the intent and meaning of the values are clear.
 * **Testing**: All changes should include automated tests to ensure correctness and prevent regressions.
 
