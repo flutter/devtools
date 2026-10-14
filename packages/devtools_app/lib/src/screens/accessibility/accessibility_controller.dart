@@ -209,18 +209,17 @@ class AccessibilityController extends DevToolsScreenController
       final rawIssues = json?['issues'];
       if (rawIssues is List<Object?>) {
         for (final rawIssue in rawIssues) {
-          if (rawIssue is Map) {
-            final nodeId = rawIssue['nodeId']?.toString();
-            if (nodeId != null) {
-              issuesMap
-                  .putIfAbsent(nodeId, () => [])
-                  .add(
-                    AccessibilityIssue(
-                      rule: rawIssue['rule']?.toString() ?? '',
-                      description: rawIssue['description']?.toString() ?? '',
-                    ),
-                  );
-            }
+          if (rawIssue is! Map) continue;
+          final nodeId = rawIssue['nodeId']?.toString();
+          if (nodeId != null) {
+            issuesMap
+                .putIfAbsent(nodeId, () => [])
+                .add(
+                  AccessibilityIssue(
+                    rule: rawIssue['rule']?.toString() ?? '',
+                    description: rawIssue['description']?.toString() ?? '',
+                  ),
+                );
           }
         }
       }
