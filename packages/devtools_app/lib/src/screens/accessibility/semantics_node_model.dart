@@ -9,6 +9,17 @@ import 'dart:ui' show Rect, SemanticsFlag;
 
 import '../../shared/primitives/trees.dart';
 
+/// Represents an accessibility issue detected on a semantics node.
+class AccessibilityIssue {
+  const AccessibilityIssue({required this.rule, required this.description});
+
+  /// The rule name that was violated.
+  final String rule;
+
+  /// A human-readable description of the issue.
+  final String description;
+}
+
 /// Represents a node in the accessibility semantics tree.
 class SemanticsNodeModel extends TreeNode<SemanticsNodeModel> {
   SemanticsNodeModel({
@@ -18,6 +29,7 @@ class SemanticsNodeModel extends TreeNode<SemanticsNodeModel> {
     this.hint = '',
     this.rect,
     this.flags = const <SemanticsFlag>{},
+    this.issues = const <AccessibilityIssue>[],
     this.widgetName = '',
   });
 
@@ -38,6 +50,9 @@ class SemanticsNodeModel extends TreeNode<SemanticsNodeModel> {
 
   /// Semantic flags active on this node.
   final Set<SemanticsFlag> flags;
+
+  /// The accessibility issues detected for this node.
+  final List<AccessibilityIssue> issues;
 
   /// The name of the Flutter widget that produced this node, if available.
   final String widgetName;
@@ -107,6 +122,7 @@ class SemanticsNodeModel extends TreeNode<SemanticsNodeModel> {
       hint: hint,
       rect: rect,
       flags: flags,
+      issues: issues,
       widgetName: widgetName,
     );
   }

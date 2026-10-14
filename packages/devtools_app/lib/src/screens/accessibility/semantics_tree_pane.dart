@@ -230,6 +230,14 @@ class _SemanticsTreeContent extends StatelessWidget {
                         ),
                       ),
                     ],
+                    if (node.issues.isNotEmpty) ...[
+                      const SizedBox(width: denseSpacing),
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        size: defaultIconSize,
+                        color: colorScheme.error,
+                      ),
+                    ],
                   ],
                 ),
               ),

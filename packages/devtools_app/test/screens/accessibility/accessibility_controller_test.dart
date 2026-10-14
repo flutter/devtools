@@ -35,13 +35,13 @@ void main() {
               .serviceExtensionResponses[registrations.enableSemantics] =
           Response.parse({})!;
       fakeServiceConnection
-              .serviceManager
-              .serviceExtensionResponses[registrations.getSemanticsTree] =
-          Response.parse({
-            'data': {
-              '0': {'id': '0', 'label': 'Root'},
-            },
-          })!;
+          .serviceManager
+          .serviceExtensionResponses[registrations
+          .getIssuesAndSemanticsTree] = Response.parse({
+        'data': {
+          '0': {'id': '0', 'label': 'Root'},
+        },
+      })!;
 
       setGlobal(NotificationService, NotificationService());
       setGlobal(
@@ -148,6 +148,12 @@ void main() {
       'SemanticsNodeModel properties, parseRect, rectDisplay, and shallowCopy',
       () {
         const expectedRect = Rect.fromLTWH(0, 0, 763, 32);
+        const expectedIssues = [
+          AccessibilityIssue(
+            rule: 'labeledTapTarget',
+            description: 'Interactive element has no label for screen readers.',
+          ),
+        ];
         final child = SemanticsNodeModel(
           id: '1',
           label: 'Child Node',
@@ -155,6 +161,7 @@ void main() {
           hint: 'Child Hint',
           rect: expectedRect,
           flags: {SemanticsFlag.isButton, SemanticsFlag.hasCheckedState},
+          issues: expectedIssues,
           widgetName: 'ElevatedButton',
         );
         final parent = SemanticsNodeModel(
@@ -179,6 +186,7 @@ void main() {
           copy.flags,
           equals({SemanticsFlag.isButton, SemanticsFlag.hasCheckedState}),
         );
+        expect(copy.issues, equals(expectedIssues));
         expect(copy.widgetName, equals('ElevatedButton'));
         expect(copy.children, isEmpty);
 
@@ -234,7 +242,7 @@ void main() {
           {},
         )!;
         fakeServiceManager.serviceExtensionResponses[registrations
-            .getSemanticsTree] = Response.parse({
+            .getIssuesAndSemanticsTree] = Response.parse({
           'error': 'Semantics not enabled.',
         })!;
 
@@ -262,7 +270,7 @@ void main() {
           {},
         )!;
         fakeServiceManager.serviceExtensionResponses[registrations
-            .getSemanticsTree] = Response.parse({
+            .getIssuesAndSemanticsTree] = Response.parse({
           'data': {
             '0': {
               'id': 0,
@@ -419,7 +427,7 @@ void main() {
           {},
         )!;
         fakeServiceManager.serviceExtensionResponses[registrations
-            .getSemanticsTree] = Response.parse({
+            .getIssuesAndSemanticsTree] = Response.parse({
           'data': {
             '0': {
               'id': 0,
@@ -445,6 +453,58 @@ void main() {
         expect(root.children.first.id, equals('1'));
         expect(root.children.first.label, equals('Child full'));
         expect(root.children.first.flags, equals({SemanticsFlag.isButton}));
+      },
+    );
+
+    test(
+      'loadSemanticsTree parses accessibility issues from getIssuesAndSemanticsTree',
+      () async {
+        final fakeServiceManager =
+            serviceConnection.serviceManager as FakeServiceManager;
+        fakeServiceManager.serviceExtensionResponses[registrations
+            .enableSemantics] = Response.parse(
+          {},
+        )!;
+        fakeServiceManager.serviceExtensionResponses[registrations
+            .getIssuesAndSemanticsTree] = Response.parse({
+          'data': {
+            '0': {
+              'id': 0,
+              'label': 'Root',
+              'childrenInTraversalOrder': [13],
+            },
+            '13': {
+              'id': 13,
+              'label': '',
+              'flags': ['isButton'],
+            },
+          },
+          'issues': [
+            {
+              'nodeId': 13,
+              'rule': 'labeledTapTarget',
+              'description':
+                  'Interactive element has no label for screen readers.',
+            },
+          ],
+        })!;
+
+        final testController = AccessibilityController();
+        await testController.loadSemanticsTree();
+
+        expect(testController.semanticsRoots.value, hasLength(1));
+        final root = testController.semanticsRoots.value.first;
+        expect(root.issues, isEmpty);
+        expect(root.children, hasLength(1));
+
+        final child = root.children.first;
+        expect(child.id, equals('13'));
+        expect(child.issues, hasLength(1));
+        expect(child.issues.first.rule, equals('labeledTapTarget'));
+        expect(
+          child.issues.first.description,
+          equals('Interactive element has no label for screen readers.'),
+        );
       },
     );
 
