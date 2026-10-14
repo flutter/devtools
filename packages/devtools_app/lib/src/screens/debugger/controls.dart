@@ -50,13 +50,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
   @override
   Widget build(BuildContext context) {
     final resuming = controller.resuming.value;
-    final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
-    final isSystemIsolate = controller.isSystemIsolate;
-    final canStep =
-        serviceConnection.serviceManager.isMainIsolatePaused &&
-        !resuming &&
-        hasStackFrames &&
-        !isSystemIsolate;
+    final canStep = controller.canStep;
     final isVmApp =
         serviceConnection.serviceManager.connectedApp?.isRunningOnDartVM ??
         false;
