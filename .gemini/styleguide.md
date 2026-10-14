@@ -35,13 +35,13 @@ and the CI testing ensures that the code is formatted correctly.
 
 Please refer to the following files for specific rules:
 
-* **General Style Context**: See [STYLE.md](STYLE.md) for rules on:
+* **General Style Context**: See [STYLE.md](../STYLE.md) for rules on:
   * Getter and setter order.
   * Naming for typedefs and function variables.
   * Overriding equality.
   * Windows/POSIX path handling conventions.
   * Default text styles.
-* **Repository Constraints**: See [AGENTS.md](AGENTS.md) for rules on:
+* **Repository Constraints**: See [AGENTS.md](../AGENTS.md) for rules on:
   * Constraints on `packages/devtools_shared` (no Flutter dependency).
   * Import restrictions (no importing `devtools_app.dart` from `src/`).
   * Published packages management (CHANGELOGs, versions, breaking changes).
