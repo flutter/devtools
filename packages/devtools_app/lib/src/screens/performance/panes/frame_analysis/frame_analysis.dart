@@ -91,41 +91,72 @@ class FlutterFrameAnalysisView extends StatelessWidget {
           ],
           if (rebuilds.isNullOrEmpty) ...[
             const PaddedDivider.noPadding(),
-            ValueListenableBuilder<ServiceExtensionState>(
-              valueListenable: serviceConnection
-                  .serviceManager
-                  .serviceExtensionManager
-                  .getServiceExtensionState(
-                    extensions.countWidgetBuilds.extension,
-                  ),
-              builder: (context, extensionState, _) {
-                if (!extensionState.enabled) {
-                  return Row(
-                    children: [
-                      const Text(
-                        'To see widget rebuilds for Flutter frames, enable',
-                      ),
-                      Flexible(
-                        child: ServiceExtensionCheckbox(
-                          serviceExtension: extensions.countWidgetBuilds,
-                          showDescription: false,
-                        ),
-                      ),
-                    ],
+            Builder(
+              builder: (context) {
+                final isProfileBuild =
+                    serviceConnection
+                        .serviceManager
+                        .connectedApp
+                        ?.isProfileBuildNow ??
+                    false;
+                final rebuildCountsAvailable = serviceConnection
+                    .serviceManager
+                    .serviceExtensionManager
+                    .isServiceExtensionAvailable(
+                      extensions.countWidgetBuilds.extension,
+                    );
+
+                // Widget rebuild counts rely on debug-only service extensions.
+                // Avoid showing a disabled checkbox in profile mode.
+                if (isProfileBuild || !rebuildCountsAvailable) {
+                  return const Text(
+                    'Rebuild information not available for this frame. Widget '
+                    'rebuild counts are only available when running an app in '
+                    'debug-mode.',
                   );
                 }
-                return const SizedBox();
+
+                return ValueListenableBuilder<ServiceExtensionState>(
+                  valueListenable: serviceConnection
+                      .serviceManager
+                      .serviceExtensionManager
+                      .getServiceExtensionState(
+                        extensions.countWidgetBuilds.extension,
+                      ),
+                  builder: (context, extensionState, _) {
+                    if (!extensionState.enabled) {
+                      return Row(
+                        children: [
+                          const Text(
+                            'To see widget rebuilds for Flutter frames, enable',
+                          ),
+                          Flexible(
+                            child: ServiceExtensionCheckbox(
+                              serviceExtension: extensions.countWidgetBuilds,
+                              showDescription: false,
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+                    // Extension is on, but this frame still has no rebuild data.
+                    if (rebuilds == null) {
+                      return const Text(
+                        'Rebuild information not available for this frame.',
+                      );
+                    }
+                    return const SizedBox();
+                  },
+                );
               },
             ),
           ],
-          if (rebuilds == null)
-            const Text('Rebuild information not available for this frame.')
-          else if (rebuilds.isEmpty)
+          if (rebuilds != null && rebuilds.isEmpty)
             const Text(
               'No widget rebuilds occurred for widgets that were directly '
               'created in your project.',
             )
-          else ...[
+          else if (rebuilds != null) ...[
             const SizedBox(height: defaultSpacing),
             Expanded(
               child: RebuildTable(
