@@ -18,6 +18,7 @@ import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/ui/common_widgets.dart';
 import '../../shared/heap/class_filter.dart';
+import '../../shared/primitives/memory_utils.dart';
 import '../../shared/primitives/simple_elements.dart';
 import '../../shared/widgets/class_filter.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
@@ -146,7 +147,9 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvents.diffClassSingleCopy.name,
-      rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
+      rootPackage: serviceConnection.serviceManager
+          .rootInfoNow()
+          .rootPackagePrefix,
     );
   }
 

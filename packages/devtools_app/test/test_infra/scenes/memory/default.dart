@@ -7,6 +7,7 @@ import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
+import 'package:devtools_app_shared/service.dart' show RootInfo;
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -97,9 +98,11 @@ class MemoryDefaultScene extends Scene {
   ///
   /// [classList] will be returned by VmService.getClassList.
   /// [heapProviders] will be used to for heap snapshotting.
+  /// [rootInfo] will be returned by ServiceManager.rootInfoNow.
   Future<void> setUp({
     ClassList? classList,
     List<HeapProvider>? heapProviders,
+    RootInfo? rootInfo,
   }) async {
     heapProviders = heapProviders ?? MemoryDefaultSceneHeaps.all;
 
@@ -129,6 +132,7 @@ class MemoryDefaultScene extends Scene {
         allocationData: allocationJson,
         classList: classList,
       ),
+      rootInfo: rootInfo,
     );
     final app = fakeServiceConnection.serviceManager.connectedApp!;
     mockConnectedApp(app, isProfileBuild: true);
