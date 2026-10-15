@@ -127,7 +127,7 @@ List<ConnectionDescription> generateDeviceDescription(
 
 /// This method should be public, because it is used by g3 specific code.
 List<String> issueLinkDetails() {
-  final ide = DevToolsQueryParams.load().ide;
+  final ide = DevToolsQueryParams.load().ideDisplayName;
   final issueDescriptionItems = [
     '<-- Please describe your problem here. Be sure to include repro steps. -->',
     '___', // This will create a separator in the rendered markdown.

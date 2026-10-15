@@ -172,7 +172,7 @@ class _PropertyEditorFooter extends StatelessWidget {
     if (!isEmbedded) return null;
     const uriPrefix = 'https://docs.flutter.dev/tools/';
     const uriHash = '#property-editor';
-    return '$uriPrefix${queryParams.ide == 'VSCode' ? 'vs-code' : 'android-studio'}$uriHash';
+    return '$uriPrefix${queryParams.isVsCode ? 'vs-code' : 'android-studio'}$uriHash';
   }
 }
 
