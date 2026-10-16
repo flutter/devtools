@@ -51,10 +51,33 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
       params[AppSizeApi.testAppSizeFilePropertyName];
 
   /// The IDE that DevTools is embedded in or was launched from.
+  ///
+  /// IDEs continue to pass this value for compatibility with older versions of
+  /// DevTools, but [dashTool] is its replacement. Prefer derived getters such
+  /// as [isVsCode] over comparing this value directly.
   String? get ide => params[ideKey];
 
   /// The feature of the IDE that DevTools was opened from.
   String? get ideFeature => params[ideFeatureKey];
+
+  /// The Dart tool (IDE plugin) that DevTools is embedded in or was launched
+  /// from (e.g. 'vscode-plugins' or 'intellij-plugins').
+  ///
+  /// This matches the value of the `DASH__TOOL` environment variable that the
+  /// IDE plugins set for the processes they spawn. See
+  /// https://github.com/flutter/devtools/issues/9811.
+  String? get dashTool => params[dashToolKey];
+
+  /// Whether DevTools is embedded in or was launched from the VS Code Dart
+  /// extension (Dart-Code).
+  ///
+  /// This is true for any VS Code based editor (e.g. VS Code, Cursor,
+  /// Antigravity). It is true if [dashTool] is 'vscode-plugins' or if the
+  /// [ide] value is 'VSCode', which supports older versions of Dart-Code that
+  /// do not pass [dashTool].
+  ///
+  /// See https://github.com/flutter/devtools/issues/9811.
+  bool get isVsCode => dashTool == vsCodeDashToolValue || ide == vsCodeIdeValue;
 
   /// Keys for theming values that an IDE may pass in the embedded DevTools URI.
   IdeThemeQueryParams get ideThemeParams => IdeThemeQueryParams(params);
@@ -81,6 +104,13 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   static const inspectorRefKey = 'inspectorRef';
   static const ideKey = 'ide';
   static const ideFeatureKey = 'ideFeature';
+  static const dashToolKey = 'dashTool';
+
+  /// The legacy [ide] value passed by the VS Code Dart extension.
+  static const vsCodeIdeValue = 'VSCode';
+
+  /// The [dashTool] value passed by the VS Code Dart extension.
+  static const vsCodeDashToolValue = 'vscode-plugins';
 
   /// Query parameter key to determine whether to use dart2wasm or dart2js.
   ///

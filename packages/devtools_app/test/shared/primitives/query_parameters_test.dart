@@ -156,5 +156,26 @@ void main() {
         );
       }
     });
+
+    test('isVsCode', () {
+      expect(DevToolsQueryParams.empty().isVsCode, isFalse);
+      expect(
+        DevToolsQueryParams({DevToolsQueryParams.ideKey: 'VSCode'}).isVsCode,
+        isTrue,
+      );
+      expect(
+        DevToolsQueryParams({
+          DevToolsQueryParams.dashToolKey: 'vscode-plugins',
+        }).isVsCode,
+        isTrue,
+      );
+      expect(
+        DevToolsQueryParams({
+          DevToolsQueryParams.ideKey: 'Android-Studio',
+          DevToolsQueryParams.dashToolKey: 'intellij-plugins',
+        }).isVsCode,
+        isFalse,
+      );
+    });
   });
 }

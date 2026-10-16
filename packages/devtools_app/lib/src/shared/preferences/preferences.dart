@@ -231,7 +231,7 @@ class PreferencesController extends DisposableController
       // default. This is because cross-origin-isolation is disabled by VS
       // Code. See https://github.com/microsoft/vscode/issues/186614.
       final embeddedInVsCode =
-          queryParams.embedMode.embedded && queryParams.ide == 'VSCode';
+          queryParams.embedMode.embedded && queryParams.isVsCode;
       if (!embeddedInVsCode) {
         notificationService.push(
           'Something went wrong when trying to load DevTools with WebAssembly. '
