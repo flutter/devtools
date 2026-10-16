@@ -63,7 +63,7 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
         logStatus(
           'Serving benchmarks (server port: $benchmarkPort, chrome port: $chromePort)',
         );
-        return await serveWebBenchmark(
+        final server = BenchmarkServer(
           benchmarkAppDirectory: projectRootDirectory(),
           entryPoint: generateBenchmarkEntryPoint(useWasm: useWasm),
           compilationOptions: useWasm
@@ -73,7 +73,13 @@ Future<void> _runBenchmarks({bool useWasm = false}) async {
           benchmarkPath: benchmarkPath(useWasm: useWasm),
           benchmarkServerPort: benchmarkPort,
           chromeDebugPort: chromePort,
+          headless: true,
         );
+        // If the test times out, the benchmark keeps running in the
+        // background. Make sure Chrome and the benchmark server are shut down
+        // so they don't collide with the next run.
+        addTearDown(server.stop);
+        return await server.run();
       } catch (e) {
         logStatus('Serving benchmarks failed with error: $e');
         return null;
