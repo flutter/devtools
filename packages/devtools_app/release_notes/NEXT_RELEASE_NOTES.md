@@ -17,7 +17,7 @@ To learn more about DevTools, check out the
 
 * Fixed an issue where Dart and Flutter web apps compiled with WebAssembly
   (Wasm) or modern web libraries (such as `package:web`) were not recognized as
-  web applications. [#TODO](https://github.com/flutter/devtools/pull/TODO)
+  web applications. [#10045](https://github.com/flutter/devtools/pull/10045)
 * Fixed unreadable text in the release notes panel, where blockquotes were
   drawn on a hard coded light blue background in the dark theme.
   [#9957](https://github.com/flutter/devtools/pull/9957)
