@@ -15,9 +15,29 @@ final _log = Logger('connected_app');
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 
-// TODO(kenz): if we want to support debugging dart2wasm web apps, we will need
-// to check for the presence of a different library.
+/// Present in older Dart and Flutter web apps, including google3.
+///
+/// Modern apps may use `package:web` / [dartJsInteropLibraryUri] instead.
 const dartHtmlLibraryUri = 'dart:html';
+
+/// Present in Dart web apps compiled to JavaScript or Wasm.
+///
+/// `package:web` is built on this library, so it is the reliable signal for
+/// modern and dart2wasm apps that no longer import [dartHtmlLibraryUri].
+const dartJsInteropLibraryUri = 'dart:js_interop';
+
+/// Part of the modern Dart web JS interop library suite.
+const dartJsInteropUnsafeLibraryUri = 'dart:js_interop_unsafe';
+
+/// Libraries whose presence indicates the connected app is a Dart web app.
+///
+/// [dartHtmlLibraryUri] is kept so older apps (including google3) are still
+/// detected.
+const dartWebLibraryUris = [
+  dartHtmlLibraryUri,
+  dartJsInteropLibraryUri,
+  dartJsInteropUnsafeLibraryUri,
+];
 
 // TODO(https://github.com/flutter/devtools/issues/6239): try to remove this.
 @sealed
@@ -85,8 +105,15 @@ class ConnectedApp {
   bool? _isProfileBuild;
 
   // TODO(kenz): investigate if we can use `libraryUriAvailableNow` instead.
-  Future<bool> get isDartWebApp async => _isDartWebApp ??= await serviceManager!
-      .libraryUriAvailable(dartHtmlLibraryUri);
+  Future<bool> get isDartWebApp async {
+    if (_isDartWebApp != null) return _isDartWebApp!;
+    for (final uri in dartWebLibraryUris) {
+      if (await serviceManager!.libraryUriAvailable(uri)) {
+        return _isDartWebApp = true;
+      }
+    }
+    return _isDartWebApp = false;
+  }
 
   bool? get isDartWebAppNow {
     assert(_isDartWebApp != null);
