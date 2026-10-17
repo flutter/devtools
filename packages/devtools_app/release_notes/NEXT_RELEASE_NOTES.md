@@ -15,7 +15,9 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed an issue where Dart and Flutter web apps compiled with WebAssembly
+  (Wasm) or modern web libraries (such as `package:web`) were not recognized as
+  web applications. [#TODO](https://github.com/flutter/devtools/pull/TODO)
 
 ## Inspector updates
 
