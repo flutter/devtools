@@ -58,7 +58,6 @@ export 'src/screens/profiler/cpu_profile_model.dart';
 export 'src/screens/profiler/profiler_screen.dart';
 export 'src/screens/profiler/profiler_screen_controller.dart';
 export 'src/screens/profiler/sampling_rate.dart';
-export 'src/screens/provider/provider_screen.dart';
 export 'src/screens/vm_developer/object_inspector/class_hierarchy_explorer.dart';
 export 'src/screens/vm_developer/object_inspector/class_hierarchy_explorer_controller.dart';
 export 'src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';

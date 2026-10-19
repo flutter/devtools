@@ -45,7 +45,6 @@ import 'screens/performance/performance_controller.dart';
 import 'screens/performance/performance_screen.dart';
 import 'screens/profiler/profiler_screen.dart';
 import 'screens/profiler/profiler_screen_controller.dart';
-import 'screens/provider/provider_screen.dart';
 import 'screens/vm_developer/vm_developer_tools_controller.dart';
 import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
@@ -726,7 +725,6 @@ List<DevToolsScreen> defaultScreens({
         AccessibilityScreen(),
         createController: (_) => AccessibilityController(),
       ),
-    DevToolsScreen<DevToolsScreenController>(ProviderScreen()),
     DevToolsScreen<AppSizeController>(
       AppSizeScreen(),
       createController: (_) => AppSizeController(),
