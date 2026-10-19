@@ -257,6 +257,11 @@ final class OfflineConnectedApp extends ConnectedApp {
   @override
   final bool? isDartWebAppNow;
 
+  /// There is no [serviceManager] to query for an offline app, so this
+  /// returns the value that was recorded when the app was exported.
+  @override
+  Future<bool> get isDartWebApp async => isDartWebAppNow ?? false;
+
   @override
   final bool? isRunningOnDartVM;
 
