@@ -98,6 +98,23 @@ void main() {
     );
   });
 
+  group('OfflineConnectedApp', () {
+    test(
+      'isDartWebApp returns the recorded value without a service manager',
+      () async {
+        expect(
+          await OfflineConnectedApp(isDartWebAppNow: true).isDartWebApp,
+          isTrue,
+        );
+        expect(
+          await OfflineConnectedApp(isDartWebAppNow: false).isDartWebApp,
+          isFalse,
+        );
+        expect(await OfflineConnectedApp().isDartWebApp, isFalse);
+      },
+    );
+  });
+
   group('constants', () {
     test('dartWebLibraryUris contains all web library URIs', () {
       expect(
