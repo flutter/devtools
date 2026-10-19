@@ -88,20 +88,7 @@ class DevToolsApp extends StatefulWidget {
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _screens {
     if (FeatureFlags.devToolsExtensions.isEnabled) {
-      // TODO(https://github.com/flutter/devtools/issues/6273): stop special
-      // casing the package:provider extension.
-      final containsProviderExtension = extensionService
-          .currentExtensions
-          .value
-          .visibleExtensions
-          .where((e) => e.name == 'provider')
-          .isNotEmpty;
-      final devToolsScreens = containsProviderExtension
-          ? _originalScreens
-                .where((s) => s.screenId != ScreenMetaData.provider.id)
-                .toList()
-          : _originalScreens;
-      return [...devToolsScreens, ..._extensionScreens];
+      return [..._originalScreens, ..._extensionScreens];
     }
     return _originalScreens;
   }
