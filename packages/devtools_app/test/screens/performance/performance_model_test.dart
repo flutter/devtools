@@ -130,13 +130,6 @@ void main() {
         );
       });
 
-      test('loads a legacy Uint8List', () {
-        final parsed = OfflinePerformanceData.fromJson({
-          OfflinePerformanceData.traceBinaryKey: trace,
-        });
-        expect(parsed.perfettoTraceBinary, same(trace));
-      });
-
       test('is empty when no trace is present', () {
         expect(OfflinePerformanceData.fromJson({}).isEmpty, isTrue);
       });

@@ -115,7 +115,6 @@ extension type _PerformanceDataJson(Map<String, Object?> json) {
     // numbers.
     final legacyTrace = json[OfflinePerformanceData.traceBinaryKey];
     return switch (legacyTrace) {
-      final Uint8List bytes => bytes,
       final List<Object?> numbers => Uint8List.fromList(numbers.cast<int>()),
       _ => null,
     };

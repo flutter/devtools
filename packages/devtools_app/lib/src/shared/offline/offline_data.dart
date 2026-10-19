@@ -194,12 +194,14 @@ mixin OfflineScreenControllerMixin<T>
       encodedData = _exportController.encode(
         prepareOfflineScreenData().toJson(),
       );
-    } on RangeError catch (e) {
-      // The data is too large to be encoded as a single JSON string (the
-      // maximum string length in the browser is about 2^29 characters).
+    } catch (e) {
+      // Encoding fails when the data is too large for a single JSON string (the
+      // maximum string length in the browser is about 2^29 characters). The
+      // exact error type depends on the compiler (dart2js vs. dart2wasm), so
+      // catch everything rather than a specific type.
       notificationService.pushError(
-        'Unable to export this screen\'s data because it is too large: '
-        '${e.message}',
+        'Unable to export this screen\'s data. It may be too large to export: '
+        '$e',
       );
       return;
     }
