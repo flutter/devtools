@@ -80,6 +80,10 @@ class _SemanticsNodeDetailsContent extends StatelessWidget {
             const SizedBox(height: denseSpacing),
             const Divider(),
             const SizedBox(height: denseSpacing),
+            if (node.issues.isNotEmpty) ...[
+              _AccessibilityIssuesSection(issues: node.issues),
+              const SizedBox(height: defaultSpacing),
+            ],
             _NodeDetailSection(
               title: _labelTitle,
               description: _labelDescription,
@@ -245,6 +249,96 @@ class _SemanticsFlagChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(_chipBorderRadius),
       ),
       child: Text(flag.name, style: theme.fixedFontStyle),
+    );
+  }
+}
+
+/// A section displaying all [AccessibilityIssue]s detected on the selected node.
+class _AccessibilityIssuesSection extends StatelessWidget {
+  const _AccessibilityIssuesSection({required this.issues});
+
+  final List<AccessibilityIssue> issues;
+
+  static const _issuesTitle = 'Accessibility Issues';
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final errorColor = theme.colorScheme.error;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              size: defaultIconSize,
+              color: errorColor,
+            ),
+            const SizedBox(width: denseSpacing),
+            Text(
+              '$_issuesTitle (${issues.length})',
+              style: theme.boldTextStyle.copyWith(color: errorColor),
+            ),
+          ],
+        ),
+        const SizedBox(height: denseSpacing),
+        for (var i = 0; i < issues.length; i++) ...[
+          if (i > 0) const SizedBox(height: denseSpacing),
+          _AccessibilityIssueBox(issue: issues[i]),
+        ],
+      ],
+    );
+  }
+}
+
+/// Displays an accessibility issue detected on a semantics node.
+class _AccessibilityIssueBox extends StatelessWidget {
+  const _AccessibilityIssueBox({required this.issue});
+
+  final AccessibilityIssue issue;
+
+  static const _boxBackgroundAlpha = 0.05;
+  static const _boxBorderAlpha = 0.5;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final errorColor = theme.colorScheme.error;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(defaultSpacing),
+      decoration: BoxDecoration(
+        color: errorColor.withValues(alpha: _boxBackgroundAlpha),
+        borderRadius: defaultBorderRadius,
+        border: Border.all(
+          color: errorColor.withValues(alpha: _boxBorderAlpha),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                size: defaultIconSize,
+                color: errorColor,
+              ),
+              const SizedBox(width: denseSpacing),
+              Expanded(
+                child: Text(
+                  issue.rule,
+                  style: theme.boldTextStyle.copyWith(color: errorColor),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: denseSpacing),
+          SelectableText(issue.description, style: theme.fixedFontStyle),
+        ],
+      ),
     );
   }
 }

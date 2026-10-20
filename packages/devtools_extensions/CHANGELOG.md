@@ -8,6 +8,7 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 * The minimum Flutter SDK version is bumped to 3.41.0.
 * Updates `devtools_shared` constraint to `^14.0.1`.
 * Add validation for `pubspec.yaml` existence and valid characters in the `config.yaml` `name` field to the `validate` command.
+* Remove the deprecated `--pwa-strategy` flag from the `build_and_copy` command.
 
 ## 0.5.1
 * Updates `devtools_app_shared` constraint to `^0.5.1`.

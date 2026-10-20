@@ -187,7 +187,9 @@ class AccessibilityController extends DevToolsScreenController
       );
 
       final response = await serviceConnection.serviceManager
-          .callServiceExtensionOnMainIsolate(registrations.getSemanticsTree);
+          .callServiceExtensionOnMainIsolate(
+            registrations.getIssuesAndSemanticsTree,
+          );
 
       if (disposed) return;
 
@@ -203,13 +205,34 @@ class AccessibilityController extends DevToolsScreenController
         );
       }
 
+      final issuesMap = <String, List<AccessibilityIssue>>{};
+      final rawIssues = json?['issues'];
+      if (rawIssues is List<Object?>) {
+        for (final rawIssue in rawIssues) {
+          if (rawIssue is! Map) continue;
+          final nodeId = rawIssue['nodeId']?.toString();
+          if (nodeId != null) {
+            issuesMap
+                .putIfAbsent(nodeId, () => [])
+                .add(
+                  AccessibilityIssue(
+                    rule: rawIssue['rule']?.toString() ?? '',
+                    description: rawIssue['description']?.toString() ?? '',
+                  ),
+                );
+          }
+        }
+      }
+
       final roots = <SemanticsNodeModel>[];
       if (rawData is Map<String, dynamic>) {
         if (rawData.isNotEmpty) {
           final rootId = rawData.containsKey('0')
               ? '0'
               : rawData.keys.first.toString();
-          roots.add(_buildTreeFromNodesMap(rootId, rawData, <String>{}));
+          roots.add(
+            _buildTreeFromNodesMap(rootId, rawData, <String>{}, issuesMap),
+          );
         }
       }
 
@@ -239,6 +262,7 @@ class AccessibilityController extends DevToolsScreenController
     String nodeId,
     Map<String, dynamic> nodesMap,
     Set<String> visited,
+    Map<String, List<AccessibilityIssue>> issuesMap,
   ) {
     if (!visited.add(nodeId)) {
       return SemanticsNodeModel(id: nodeId);
@@ -247,7 +271,8 @@ class AccessibilityController extends DevToolsScreenController
     final json =
         (nodesMap[nodeId] as Map<String, dynamic>?) ??
         <String, dynamic>{'id': nodeId};
-    final node = _parseSemanticsNode(json);
+    final nodeIssues = issuesMap[nodeId] ?? const [];
+    final node = _parseSemanticsNode(json, nodeIssues);
 
     final childIds =
         (json['childrenInTraversalOrder'] as List?)
@@ -260,7 +285,12 @@ class AccessibilityController extends DevToolsScreenController
 
     for (final childId in childIds) {
       if (nodesMap.containsKey(childId)) {
-        final childNode = _buildTreeFromNodesMap(childId, nodesMap, visited);
+        final childNode = _buildTreeFromNodesMap(
+          childId,
+          nodesMap,
+          visited,
+          issuesMap,
+        );
         node.addChild(childNode);
       }
     }
@@ -268,7 +298,10 @@ class AccessibilityController extends DevToolsScreenController
     return node;
   }
 
-  SemanticsNodeModel _parseSemanticsNode(Map<String, dynamic> json) {
+  SemanticsNodeModel _parseSemanticsNode(
+    Map<String, dynamic> json, [
+    List<AccessibilityIssue> issues = const [],
+  ]) {
     final rawFlags = json['flags'] as List<Object?>?;
     final flags = SemanticsNodeModel.parseFlags(rawFlags);
     final rect = SemanticsNodeModel.parseRect(json['rect']);
@@ -280,6 +313,7 @@ class AccessibilityController extends DevToolsScreenController
       hint: json['hint']?.toString() ?? '',
       rect: rect,
       flags: flags,
+      issues: issues,
       widgetName: json['widgetName']?.toString() ?? '',
     );
   }
