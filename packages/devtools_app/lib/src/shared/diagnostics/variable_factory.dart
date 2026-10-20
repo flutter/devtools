@@ -484,7 +484,7 @@ String? _formatSimdValue(Object? value) {
   String formatFloat(double lane) =>
       lane.toStringAsFixed(_simdFloatFractionDigits);
   String formatInt32(int lane) =>
-      (lane & 0xFFFFFFFF).toRadixString(16).padLeft(_simdInt32HexDigits, '0');
+      lane.toUnsigned(32).toRadixString(16).padLeft(_simdInt32HexDigits, '0');
 
   return switch (value) {
     Int32x4(:final x, :final y, :final z, :final w) =>
