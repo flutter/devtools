@@ -15,7 +15,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any updates.
+* Remove the legacy Provider screen, which was a placeholder to point users to
+the `package:provider` DevTools extension. [#10046](https://github.com/flutter/devtools/pull/10046)
 
 ## Inspector updates
 

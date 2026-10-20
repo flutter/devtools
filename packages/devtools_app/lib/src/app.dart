@@ -45,7 +45,6 @@ import 'screens/performance/performance_controller.dart';
 import 'screens/performance/performance_screen.dart';
 import 'screens/profiler/profiler_screen.dart';
 import 'screens/profiler/profiler_screen_controller.dart';
-import 'screens/provider/provider_screen.dart';
 import 'screens/vm_developer/vm_developer_tools_controller.dart';
 import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
@@ -89,20 +88,7 @@ class DevToolsApp extends StatefulWidget {
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _screens {
     if (FeatureFlags.devToolsExtensions.isEnabled) {
-      // TODO(https://github.com/flutter/devtools/issues/6273): stop special
-      // casing the package:provider extension.
-      final containsProviderExtension = extensionService
-          .currentExtensions
-          .value
-          .visibleExtensions
-          .where((e) => e.name == 'provider')
-          .isNotEmpty;
-      final devToolsScreens = containsProviderExtension
-          ? _originalScreens
-                .where((s) => s.screenId != ScreenMetaData.provider.id)
-                .toList()
-          : _originalScreens;
-      return [...devToolsScreens, ..._extensionScreens];
+      return [..._originalScreens, ..._extensionScreens];
     }
     return _originalScreens;
   }
@@ -726,7 +712,6 @@ List<DevToolsScreen> defaultScreens({
         AccessibilityScreen(),
         createController: (_) => AccessibilityController(),
       ),
-    DevToolsScreen<DevToolsScreenController>(ProviderScreen()),
     DevToolsScreen<AppSizeController>(
       AppSizeScreen(),
       createController: (_) => AppSizeController(),

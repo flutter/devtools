@@ -104,13 +104,6 @@ enum ScreenMetaData {
     icon: Icons.accessibility,
     requiresFlutter: true,
   ),
-  provider(
-    'provider',
-    title: 'Provider',
-    icon: Icons.attach_file,
-    requiresLibrary: 'package:provider/',
-    requiresDebugBuild: true,
-  ),
   appSize(
     'app-size',
     title: 'App Size',
@@ -155,6 +148,7 @@ enum ScreenMetaData {
     this.requiresAdvancedDeveloperMode = false,
     this.supportsWebServerDevice = false,
     this.worksWithOfflineData = false,
+    // ignore: unused_element_parameter, this is used in internally.
     this.requiresLibrary,
     this.tutorialVideoTimestamp,
     this.tutorialVideoUrl,
