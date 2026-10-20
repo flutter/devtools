@@ -4,7 +4,7 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
 ## 0.5.2-wip
-* Remove redundant argument values.
+* Removed redundant argument values.
 * Fix a `RangeError` thrown by `SplitPane` when the number of children
   changes between rebuilds.
 * Fix garbage collection and timeout issues with the result list in `asyncEval` on both native VM and web.
