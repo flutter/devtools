@@ -288,7 +288,7 @@ class RateLimiter {
       _pendingRequest = Completer();
       await callback();
     } finally {
-      _pendingRequest!.complete(null);
+      _pendingRequest!.complete();
     }
   }
 
