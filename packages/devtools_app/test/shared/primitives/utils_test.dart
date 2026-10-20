@@ -740,7 +740,10 @@ void main() {
 
     test('textSpansFromAnsi adjusts foreground color based on dark theme', () {
       // \x1B[30m is ANSI black
-      const darkThemeStyle = TextStyle(color: Color(0xFFFFFFFF));
+      const darkThemeStyle = TextStyle(
+        color: Color(0xFFFFFFFF),
+        fontFamily: 'monospace',
+      );
       final spans = textSpansFromAnsi(
         '\x1B[30mBlack text\x1B[0m',
         darkThemeStyle,
@@ -753,6 +756,8 @@ void main() {
         spans.first.style!.color,
         equals(const Color.fromRGBO(128, 128, 128, 1)),
       );
+      // Should preserve defaultStyle properties (e.g. fontFamily) via merge
+      expect(spans.first.style!.fontFamily, equals('monospace'));
     });
 
     test('textSpansFromAnsi infers dark theme from defaultStyle luminance', () {
