@@ -372,13 +372,6 @@ void main() {
     expect(
       variable.children.first.displayValue,
       '[ffffffff, 00000000, ffffffff, 00000000]',
-      skip: kIsWeb,
-    );
-    // Formatting is different on the web.
-    expect(
-      variable.children.first.displayValue,
-      '[-1, 0, -1, 0]',
-      skip: !kIsWeb,
     );
   });
 
@@ -408,12 +401,6 @@ void main() {
     expect(
       variable.children.first.displayValue,
       '[0.000000, -232.199997, 2.330000, 9.000000]',
-      skip: kIsWeb,
-    );
-    expect(
-      variable.children.first.displayValue,
-      '[0, -232.1999969482422, 2.3299999237060547, 9]',
-      skip: !kIsWeb,
     );
   });
 
@@ -438,16 +425,7 @@ void main() {
 
     await buildVariablesTree(variable);
 
-    expect(
-      variable.children.first.displayValue,
-      '[0.000000, -1232.222000]',
-      skip: kIsWeb,
-    );
-    expect(
-      variable.children.first.displayValue,
-      '[0, -1232.222]',
-      skip: !kIsWeb,
-    );
+    expect(variable.children.first.displayValue, '[0.000000, -1232.222000]');
   });
 
   test(
