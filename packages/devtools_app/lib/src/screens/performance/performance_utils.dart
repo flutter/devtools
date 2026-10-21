@@ -17,3 +17,14 @@ void pushNoTimelineEventsAvailableWarning() {
     'To avoid this, open the DevTools Performance page earlier.',
   );
 }
+
+/// Warns that timeline events are unavailable because the connected app uses
+/// a timeline recorder that does not store events in the Dart VM.
+void pushVmTimelineUnavailableWarning() {
+  notificationService.push(
+    'Timeline events are not available because the app uses a timeline '
+    'recorder, such as systrace, that does not store events in the Dart VM. '
+    'To see timeline events, restart the app without system tracing enabled.',
+    isDismissible: true,
+  );
+}
