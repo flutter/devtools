@@ -46,6 +46,14 @@ TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 
+* Corrected time units and cumulative nature of GC events.
+  [#9890](https://github.com/flutter/devtools/pull/9890)
+* Fixed a bug where long `dart:developer` log messages lost their structured
+  Details view. -
+  [#10011](https://github.com/flutter/devtools/pull/10011),
+* Fixed ANSI-colored log messages rendering with black text and a larger font,
+  and removed raw ANSI escape codes from the Details view. -
+  [#10028](https://github.com/flutter/devtools/pull/10028)
 TODO: Remove this section if there are not any updates.
 
 ## App size tool updates
