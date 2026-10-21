@@ -127,7 +127,7 @@ class FlutterFramesController extends PerformanceFeatureController {
       // [frame] was selected before its timeline events were available. Notify
       // listeners again so that views built from [selectedFrame], like the
       // Frame Analysis tab, rebuild with the data that is now available.
-      _selectedFrameNotifier.notifyListeners();
+      _selectedFrameNotifier.notifyFrameDataChanged();
     }
   }
 
@@ -232,15 +232,13 @@ class FlutterFramesController extends PerformanceFeatureController {
 
 /// Notifier for the selected [FlutterFrame].
 ///
-/// Timeline event data can be assigned to a [FlutterFrame] after the frame has
-/// been selected, so listeners need to be notified even when the selected
-/// [FlutterFrame] instance itself has not changed.
+/// Timeline events are assigned to a [FlutterFrame] in place, which can happen
+/// after the frame has been selected. [ValueNotifier] only notifies when
+/// [value] changes, and [notifyListeners] is protected, so this subclass
+/// exposes [notifyFrameDataChanged] for that case.
 class _SelectedFrameNotifier extends ValueNotifier<FlutterFrame?> {
   _SelectedFrameNotifier(super.value);
 
-  @override
-  // This override is needed to change visibility of the method.
-  void notifyListeners() {
-    super.notifyListeners();
-  }
+  /// Notifies listeners that the selected frame's data changed in place.
+  void notifyFrameDataChanged() => notifyListeners();
 }
