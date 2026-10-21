@@ -42,7 +42,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any updates.
+* Added copy buttons to the Headers and Cookies tabs of the request
+  inspector, and made cookie values and image metadata selectable.
 
 ## Logging updates
 
