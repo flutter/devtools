@@ -150,6 +150,9 @@ void main() {
         final intelliJDashToolSurvey = DevToolsSurvey.fromJson({
           'devEnvironments': ['intellij-plugins'],
         });
+        final cliSurvey = DevToolsSurvey.fromJson({
+          'devEnvironments': ['CLI'],
+        });
 
         bool meetsRequirement(
           DevToolsSurvey survey, {
@@ -285,6 +288,22 @@ void main() {
             ),
             isTrue,
           );
+          expect(
+            meetsRequirement(
+              intelliJSurvey,
+              ideLaunched: 'CLI',
+              queryParams: dashToolOnlyParams,
+            ),
+            isFalse,
+          );
+          expect(
+            meetsRequirement(
+              cliSurvey,
+              ideLaunched: 'CLI',
+              queryParams: dashToolOnlyParams,
+            ),
+            isFalse,
+          );
         });
 
         test('does not match other environments', () {
@@ -296,6 +315,7 @@ void main() {
           ]) {
             expect(meetsRequirement(survey, ideLaunched: 'CLI'), isFalse);
           }
+          expect(meetsRequirement(cliSurvey, ideLaunched: 'CLI'), isTrue);
         });
 
         test('matches any environment when none is specified or known', () {

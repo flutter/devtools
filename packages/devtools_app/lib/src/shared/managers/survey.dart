@@ -283,7 +283,13 @@ extension ShowSurveyExtension on DevToolsSurvey {
     if (environments == null || ideLaunched.isEmpty) return true;
 
     final dashTool = queryParams.dashTool;
-    return environments.contains(ideLaunched) ||
+    // When an IDE integration passes `dashTool` without the legacy `ide`
+    // parameter, `ga.ideLaunched` defaults to 'CLI'. Ignore that fallback so
+    // IDE launches do not match 'CLI' surveys.
+    final matchesIdeLaunched =
+        (dashTool == null || queryParams.ide != null) &&
+        environments.contains(ideLaunched);
+    return matchesIdeLaunched ||
         (dashTool != null && environments.contains(dashTool)) ||
         (queryParams.isVsCode &&
             environments.contains(DevToolsQueryParams.legacyVsCodeIdeValue));
