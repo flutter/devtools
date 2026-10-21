@@ -8,6 +8,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
+import 'package:unified_analytics/unified_analytics.dart' as ua;
 
 import '../analytics/analytics.dart' as ga;
 import '../development_helpers.dart';
@@ -271,9 +272,11 @@ extension ShowSurveyExtension on DevToolsSurvey {
   ///
   /// A survey that lists [devEnvironments] is shown if it lists the legacy
   /// [ideLaunched] value, or the `dashTool` of the IDE integration that
-  /// launched DevTools. The legacy 'VSCode' environment also matches VS Code
-  /// forks (such as Cursor or Antigravity), which may not pass 'VSCode' as
-  /// their legacy IDE value.
+  /// launched DevTools. The legacy and `dashTool` environment names for VS Code
+  /// ('VSCode' and 'vscode-plugins') and for IntelliJ/Android Studio
+  /// ('Android-Studio', 'IntelliJ-IDEA' and 'intellij-plugins') match
+  /// bidirectionally, including for VS Code forks (such as Cursor or
+  /// Antigravity) that do not pass 'VSCode' as their legacy IDE value.
   @visibleForTesting
   bool meetsEnvironmentRequirementFor({
     required String ideLaunched,
@@ -283,6 +286,28 @@ extension ShowSurveyExtension on DevToolsSurvey {
     if (environments == null || ideLaunched.isEmpty) return true;
 
     final dashTool = queryParams.dashTool;
+    final isVsCode =
+        queryParams.isVsCode ||
+        ideLaunched == DevToolsQueryParams.legacyVsCodeIdeValue;
+    if (isVsCode &&
+        (environments.contains(DevToolsQueryParams.legacyVsCodeIdeValue) ||
+            environments.contains(ua.DashTool.vscodePlugins.label))) {
+      return true;
+    }
+
+    final isIntelliJOrAndroidStudio =
+        dashTool == ua.DashTool.intellijPlugins.label ||
+        ideLaunched == DevToolsQueryParams.legacyAndroidStudioIdeValue ||
+        ideLaunched == DevToolsQueryParams.legacyIntelliJIdeValue;
+    if (isIntelliJOrAndroidStudio &&
+        (environments.contains(
+              DevToolsQueryParams.legacyAndroidStudioIdeValue,
+            ) ||
+            environments.contains(DevToolsQueryParams.legacyIntelliJIdeValue) ||
+            environments.contains(ua.DashTool.intellijPlugins.label))) {
+      return true;
+    }
+
     // When an IDE integration passes `dashTool` without the legacy `ide`
     // parameter, `ga.ideLaunched` defaults to 'CLI'. Ignore that fallback so
     // IDE launches do not match 'CLI' surveys.
@@ -290,9 +315,7 @@ extension ShowSurveyExtension on DevToolsSurvey {
         (dashTool == null || queryParams.ide != null) &&
         environments.contains(ideLaunched);
     return matchesIdeLaunched ||
-        (dashTool != null && environments.contains(dashTool)) ||
-        (queryParams.isVsCode &&
-            environments.contains(DevToolsQueryParams.legacyVsCodeIdeValue));
+        (dashTool != null && environments.contains(dashTool));
   }
 
   bool get shouldShow =>

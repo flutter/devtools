@@ -251,6 +251,51 @@ void main() {
           );
         });
 
+        test(
+          'matches dashTool environments when only the legacy ide value is passed',
+          () {
+            const vsCodeParams = {DevToolsQueryParams.ideKey: 'VSCode'};
+            expect(
+              meetsRequirement(
+                vsCodeDashToolSurvey,
+                ideLaunched: 'VSCode',
+                queryParams: vsCodeParams,
+              ),
+              isTrue,
+            );
+            expect(
+              meetsRequirement(
+                intelliJDashToolSurvey,
+                ideLaunched: 'VSCode',
+                queryParams: vsCodeParams,
+              ),
+              isFalse,
+            );
+
+            for (final ide in ['Android-Studio', 'IntelliJ-IDEA']) {
+              final params = {DevToolsQueryParams.ideKey: ide};
+              expect(
+                meetsRequirement(
+                  intelliJDashToolSurvey,
+                  ideLaunched: ide,
+                  queryParams: params,
+                ),
+                isTrue,
+                reason: ide,
+              );
+              expect(
+                meetsRequirement(
+                  vsCodeDashToolSurvey,
+                  ideLaunched: ide,
+                  queryParams: params,
+                ),
+                isFalse,
+                reason: ide,
+              );
+            }
+          },
+        );
+
         test('matches VS Code forks for the legacy VSCode environment', () {
           // A fork does not have to pass 'VSCode' as its legacy ide value.
           const cursorParams = {
@@ -301,6 +346,34 @@ void main() {
               cliSurvey,
               ideLaunched: 'CLI',
               queryParams: dashToolOnlyParams,
+            ),
+            isFalse,
+          );
+
+          const intelliJDashToolOnlyParams = {
+            DevToolsQueryParams.dashToolKey: 'intellij-plugins',
+          };
+          expect(
+            meetsRequirement(
+              intelliJSurvey,
+              ideLaunched: 'CLI',
+              queryParams: intelliJDashToolOnlyParams,
+            ),
+            isTrue,
+          );
+          expect(
+            meetsRequirement(
+              vsCodeSurvey,
+              ideLaunched: 'CLI',
+              queryParams: intelliJDashToolOnlyParams,
+            ),
+            isFalse,
+          );
+          expect(
+            meetsRequirement(
+              cliSurvey,
+              ideLaunched: 'CLI',
+              queryParams: intelliJDashToolOnlyParams,
             ),
             isFalse,
           );

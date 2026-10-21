@@ -135,6 +135,12 @@ extension type DevToolsQueryParams(Map<String, String?> params) {
   /// Code that use the same extension, pass.
   static const legacyVsCodeIdeValue = 'VSCode';
 
+  /// The value of the legacy [ide] parameter that Android Studio passes.
+  static const legacyAndroidStudioIdeValue = 'Android-Studio';
+
+  /// The value of the legacy [ide] parameter that IntelliJ IDEA passes.
+  static const legacyIntelliJIdeValue = 'IntelliJ-IDEA';
+
   /// Query parameter key to determine whether to use dart2wasm or dart2js.
   ///
   ///  This query parameter must match the String value in the Flutter bootstrap
