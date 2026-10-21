@@ -70,6 +70,7 @@ TODO: Remove this section if there are not any updates.
   [#10004](https://github.com/flutter/devtools/issues/10004)
 * Added copy buttons to the Headers and Cookies tabs of the request
   inspector, and made cookie values and image metadata selectable.
+  [#10052](https://github.com/flutter/devtools/pull/10052)
 
 ## Logging updates
 
