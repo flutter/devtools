@@ -68,6 +68,8 @@ TODO: Remove this section if there are not any updates.
   video tutorial link and the embedded DevTools actions moved into the
   More actions menu in the footer.
   [#10004](https://github.com/flutter/devtools/issues/10004)
+* Fixed the HttpOnly and Secure columns of the Cookies tab, which showed a
+  check mark for cookies that did not have those flags set.
 
 ## Logging updates
 
