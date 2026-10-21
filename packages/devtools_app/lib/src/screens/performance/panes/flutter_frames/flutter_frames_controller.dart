@@ -22,7 +22,7 @@ class FlutterFramesController extends PerformanceFeatureController {
 
   /// The currently selected timeline frame.
   ValueListenable<FlutterFrame?> get selectedFrame => _selectedFrameNotifier;
-  final _selectedFrameNotifier = ValueNotifier<FlutterFrame?>(null);
+  final _selectedFrameNotifier = _SelectedFrameNotifier(null);
 
   /// The flutter frames in the chart.
   ValueListenable<List<FlutterFrame>> get flutterFrames => _flutterFrames;
@@ -123,6 +123,12 @@ class FlutterFramesController extends PerformanceFeatureController {
       _unassignedFlutterFrames.remove(frameNumber);
       _updateFirstWellFormedFrameMicros(frame);
     }
+    if (_selectedFrameNotifier.value == frame) {
+      // [frame] was selected before its timeline events were available. Notify
+      // listeners again so that views built from [selectedFrame], like the
+      // Frame Analysis tab, rebuild with the data that is now available.
+      _selectedFrameNotifier.notifyListeners();
+    }
   }
 
   bool hasUnassignedFlutterFrame(int frameNumber) {
@@ -221,5 +227,20 @@ class FlutterFramesController extends PerformanceFeatureController {
     _badgeTabForJankyFrames.dispose();
     _displayRefreshRate.dispose();
     super.dispose();
+  }
+}
+
+/// Notifier for the selected [FlutterFrame].
+///
+/// Timeline event data can be assigned to a [FlutterFrame] after the frame has
+/// been selected, so listeners need to be notified even when the selected
+/// [FlutterFrame] instance itself has not changed.
+class _SelectedFrameNotifier extends ValueNotifier<FlutterFrame?> {
+  _SelectedFrameNotifier(super.value);
+
+  @override
+  // This override is needed to change visibility of the method.
+  void notifyListeners() {
+    super.notifyListeners();
   }
 }
