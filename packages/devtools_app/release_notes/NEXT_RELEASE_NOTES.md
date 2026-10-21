@@ -44,6 +44,7 @@ TODO: Remove this section if there are not any updates.
 
 * Fixed the HttpOnly and Secure columns of the Cookies tab, which showed a
   check mark for cookies that did not have those flags set.
+  [#10053](https://github.com/flutter/devtools/pull/10053)
 
 ## Logging updates
 
