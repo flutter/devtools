@@ -24,7 +24,10 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed the Frame Analysis tab showing "No timeline event analysis data
+  available for this frame" when a frame is selected before its timeline events
+  have been fetched from the VM.
+  [#10050](https://github.com/flutter/devtools/pull/10050)
 
 ## CPU profiler updates
 
