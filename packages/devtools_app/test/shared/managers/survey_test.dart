@@ -350,33 +350,41 @@ void main() {
             isFalse,
           );
 
-          const intelliJDashToolOnlyParams = {
-            DevToolsQueryParams.dashToolKey: 'intellij-plugins',
-          };
-          expect(
-            meetsRequirement(
-              intelliJSurvey,
-              ideLaunched: 'CLI',
-              queryParams: intelliJDashToolOnlyParams,
-            ),
-            isTrue,
-          );
-          expect(
-            meetsRequirement(
-              vsCodeSurvey,
-              ideLaunched: 'CLI',
-              queryParams: intelliJDashToolOnlyParams,
-            ),
-            isFalse,
-          );
-          expect(
-            meetsRequirement(
-              cliSurvey,
-              ideLaunched: 'CLI',
-              queryParams: intelliJDashToolOnlyParams,
-            ),
-            isFalse,
-          );
+          for (final dashTool in [
+            'intellij-plugins',
+            'android-studio-plugins',
+          ]) {
+            final intelliJDashToolOnlyParams = {
+              DevToolsQueryParams.dashToolKey: dashTool,
+            };
+            expect(
+              meetsRequirement(
+                intelliJSurvey,
+                ideLaunched: 'CLI',
+                queryParams: intelliJDashToolOnlyParams,
+              ),
+              isTrue,
+              reason: dashTool,
+            );
+            expect(
+              meetsRequirement(
+                vsCodeSurvey,
+                ideLaunched: 'CLI',
+                queryParams: intelliJDashToolOnlyParams,
+              ),
+              isFalse,
+              reason: dashTool,
+            );
+            expect(
+              meetsRequirement(
+                cliSurvey,
+                ideLaunched: 'CLI',
+                queryParams: intelliJDashToolOnlyParams,
+              ),
+              isFalse,
+              reason: dashTool,
+            );
+          }
         });
 
         test('does not match other environments', () {
@@ -389,6 +397,14 @@ void main() {
             expect(meetsRequirement(survey, ideLaunched: 'CLI'), isFalse);
           }
           expect(meetsRequirement(cliSurvey, ideLaunched: 'CLI'), isTrue);
+          expect(
+            meetsRequirement(
+              cliSurvey,
+              ideLaunched: 'CLI',
+              queryParams: {DevToolsQueryParams.dashToolKey: 'flutter-tool'},
+            ),
+            isTrue,
+          );
         });
 
         test('matches any environment when none is specified or known', () {

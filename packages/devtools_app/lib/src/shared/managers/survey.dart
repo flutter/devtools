@@ -274,9 +274,10 @@ extension ShowSurveyExtension on DevToolsSurvey {
   /// [ideLaunched] value, or the `dashTool` of the IDE integration that
   /// launched DevTools. The legacy and `dashTool` environment names for VS Code
   /// ('VSCode' and 'vscode-plugins') and for IntelliJ/Android Studio
-  /// ('Android-Studio', 'IntelliJ-IDEA' and 'intellij-plugins') match
-  /// bidirectionally, including for VS Code forks (such as Cursor or
-  /// Antigravity) that do not pass 'VSCode' as their legacy IDE value.
+  /// ('Android-Studio', 'IntelliJ-IDEA', 'intellij-plugins' and
+  /// 'android-studio-plugins') match bidirectionally, including for VS Code
+  /// forks (such as Cursor or Antigravity) that do not pass 'VSCode' as their
+  /// legacy IDE value.
   @visibleForTesting
   bool meetsEnvironmentRequirementFor({
     required String ideLaunched,
@@ -297,6 +298,7 @@ extension ShowSurveyExtension on DevToolsSurvey {
 
     final isIntelliJOrAndroidStudio =
         dashTool == ua.DashTool.intellijPlugins.label ||
+        dashTool == ua.DashTool.androidStudioPlugins.label ||
         ideLaunched == DevToolsQueryParams.legacyAndroidStudioIdeValue ||
         ideLaunched == DevToolsQueryParams.legacyIntelliJIdeValue;
     if (isIntelliJOrAndroidStudio &&
@@ -304,15 +306,17 @@ extension ShowSurveyExtension on DevToolsSurvey {
               DevToolsQueryParams.legacyAndroidStudioIdeValue,
             ) ||
             environments.contains(DevToolsQueryParams.legacyIntelliJIdeValue) ||
-            environments.contains(ua.DashTool.intellijPlugins.label))) {
+            environments.contains(ua.DashTool.intellijPlugins.label) ||
+            environments.contains(ua.DashTool.androidStudioPlugins.label))) {
       return true;
     }
 
     // When an IDE integration passes `dashTool` without the legacy `ide`
     // parameter, `ga.ideLaunched` defaults to 'CLI'. Ignore that fallback so
     // IDE launches do not match 'CLI' surveys.
+    final isIdeDashTool = isVsCode || isIntelliJOrAndroidStudio;
     final matchesIdeLaunched =
-        (dashTool == null || queryParams.ide != null) &&
+        (!isIdeDashTool || queryParams.ide != null) &&
         environments.contains(ideLaunched);
     return matchesIdeLaunched ||
         (dashTool != null && environments.contains(dashTool));
