@@ -24,7 +24,9 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed the Performance page loading forever when the connected app uses a
+  timeline recorder that DevTools cannot read from, such as systrace.
+  [#6524](https://github.com/flutter/devtools/issues/6524)
 
 ## CPU profiler updates
 
