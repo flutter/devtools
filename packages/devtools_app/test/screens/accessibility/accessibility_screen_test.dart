@@ -511,5 +511,85 @@ void main() {
         expect(controller.selectedSemanticsNode.value, equals(childNode));
       },
     );
+
+    testWidgetsWithWindowSize(
+      'renders accessibility issues in tree pane and node details pane',
+      windowSize,
+      (WidgetTester tester) async {
+        final nodeWithIssue = SemanticsNodeModel(
+          id: '13',
+          issues: const [
+            AccessibilityIssue(
+              rule: 'labeledTapTarget',
+              description:
+                  'Interactive element has no label for screen readers.',
+            ),
+          ],
+        );
+        final rootNode = SemanticsNodeModel(id: '0', label: 'Root Node')
+          ..addChild(nodeWithIssue);
+
+        rootNode.expandCascading();
+        controller.semanticsRoots.value = [rootNode];
+
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        final treePane = find.byType(AccessibilitySemanticsTreePane);
+        final detailsPane = find.byType(SemanticsNodeDetailsPane);
+
+        // Tree pane should display a warning icon for node #13.
+        expect(
+          find.descendant(
+            of: treePane,
+            matching: find.byIcon(Icons.warning_amber_rounded),
+          ),
+          findsOneWidget,
+        );
+
+        // Initially root node (#0) has no issues, so details pane has no issues section.
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.textContaining('Accessibility Issues'),
+          ),
+          findsNothing,
+        );
+
+        // Select node #13 in the tree pane.
+        await tester.tap(
+          find.descendant(
+            of: treePane,
+            matching: find.text('SemanticsNode #13'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Details pane should now show the Accessibility Issues section and card.
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('Accessibility Issues (1)'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('labeledTapTarget'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text(
+              'Interactive element has no label for screen readers.',
+            ),
+          ),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }

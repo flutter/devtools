@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/managers/survey.dart';
+import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -134,6 +135,291 @@ void main() {
         ideLaunched = 'VSCode';
         expect(vsCodeOnlySurvey.meetsEnvironmentRequirement, isTrue);
         expect(intelliJSurvey.meetsEnvironmentRequirement, isFalse);
+      });
+
+      group('meetsEnvironmentRequirementFor', () {
+        final vsCodeSurvey = DevToolsSurvey.fromJson({
+          'devEnvironments': ['VSCode'],
+        });
+        final intelliJSurvey = DevToolsSurvey.fromJson({
+          'devEnvironments': ['Android-Studio', 'IntelliJ-IDEA'],
+        });
+        final vsCodeDashToolSurvey = DevToolsSurvey.fromJson({
+          'devEnvironments': ['vscode-plugins'],
+        });
+        final intelliJDashToolSurvey = DevToolsSurvey.fromJson({
+          'devEnvironments': ['intellij-plugins'],
+        });
+        final cliSurvey = DevToolsSurvey.fromJson({
+          'devEnvironments': ['CLI'],
+        });
+
+        bool meetsRequirement(
+          DevToolsSurvey survey, {
+          required String ideLaunched,
+          Map<String, String?> queryParams = const {},
+        }) => survey.meetsEnvironmentRequirementFor(
+          ideLaunched: ideLaunched,
+          queryParams: DevToolsQueryParams(queryParams),
+        );
+
+        test('matches the legacy ide value', () {
+          // IDE integrations that predate the dashTool parameter.
+          const vsCodeParams = {DevToolsQueryParams.ideKey: 'VSCode'};
+          expect(
+            meetsRequirement(
+              vsCodeSurvey,
+              ideLaunched: 'VSCode',
+              queryParams: vsCodeParams,
+            ),
+            isTrue,
+          );
+          expect(
+            meetsRequirement(
+              intelliJSurvey,
+              ideLaunched: 'VSCode',
+              queryParams: vsCodeParams,
+            ),
+            isFalse,
+          );
+
+          const androidStudioParams = {
+            DevToolsQueryParams.ideKey: 'Android-Studio',
+          };
+          expect(
+            meetsRequirement(
+              intelliJSurvey,
+              ideLaunched: 'Android-Studio',
+              queryParams: androidStudioParams,
+            ),
+            isTrue,
+          );
+          expect(
+            meetsRequirement(
+              vsCodeSurvey,
+              ideLaunched: 'Android-Studio',
+              queryParams: androidStudioParams,
+            ),
+            isFalse,
+          );
+        });
+
+        test('matches the dashTool', () {
+          const vsCodeParams = {
+            DevToolsQueryParams.ideKey: 'VSCode',
+            DevToolsQueryParams.dashToolKey: 'vscode-plugins',
+            DevToolsQueryParams.dashIdeNameKey: 'Visual Studio Code',
+          };
+          expect(
+            meetsRequirement(
+              vsCodeDashToolSurvey,
+              ideLaunched: 'VSCode',
+              queryParams: vsCodeParams,
+            ),
+            isTrue,
+          );
+          expect(
+            meetsRequirement(
+              intelliJDashToolSurvey,
+              ideLaunched: 'VSCode',
+              queryParams: vsCodeParams,
+            ),
+            isFalse,
+          );
+
+          // Android Studio and IntelliJ share the same dashTool.
+          const androidStudioParams = {
+            DevToolsQueryParams.ideKey: 'Android-Studio',
+            DevToolsQueryParams.dashToolKey: 'intellij-plugins',
+            DevToolsQueryParams.dashIdeNameKey: 'Android Studio',
+          };
+          expect(
+            meetsRequirement(
+              intelliJDashToolSurvey,
+              ideLaunched: 'Android-Studio',
+              queryParams: androidStudioParams,
+            ),
+            isTrue,
+          );
+          expect(
+            meetsRequirement(
+              vsCodeDashToolSurvey,
+              ideLaunched: 'Android-Studio',
+              queryParams: androidStudioParams,
+            ),
+            isFalse,
+          );
+        });
+
+        test(
+          'matches dashTool environments when only the legacy ide value is passed',
+          () {
+            const vsCodeParams = {DevToolsQueryParams.ideKey: 'VSCode'};
+            expect(
+              meetsRequirement(
+                vsCodeDashToolSurvey,
+                ideLaunched: 'VSCode',
+                queryParams: vsCodeParams,
+              ),
+              isTrue,
+            );
+            expect(
+              meetsRequirement(
+                intelliJDashToolSurvey,
+                ideLaunched: 'VSCode',
+                queryParams: vsCodeParams,
+              ),
+              isFalse,
+            );
+
+            for (final ide in ['Android-Studio', 'IntelliJ-IDEA']) {
+              final params = {DevToolsQueryParams.ideKey: ide};
+              expect(
+                meetsRequirement(
+                  intelliJDashToolSurvey,
+                  ideLaunched: ide,
+                  queryParams: params,
+                ),
+                isTrue,
+                reason: ide,
+              );
+              expect(
+                meetsRequirement(
+                  vsCodeDashToolSurvey,
+                  ideLaunched: ide,
+                  queryParams: params,
+                ),
+                isFalse,
+                reason: ide,
+              );
+            }
+          },
+        );
+
+        test('matches VS Code forks for the legacy VSCode environment', () {
+          // A fork does not have to pass 'VSCode' as its legacy ide value.
+          const cursorParams = {
+            DevToolsQueryParams.ideKey: 'Cursor',
+            DevToolsQueryParams.dashToolKey: 'vscode-plugins',
+            DevToolsQueryParams.dashIdeNameKey: 'Cursor',
+          };
+          expect(
+            meetsRequirement(
+              vsCodeSurvey,
+              ideLaunched: 'Cursor',
+              queryParams: cursorParams,
+            ),
+            isTrue,
+          );
+          expect(
+            meetsRequirement(
+              intelliJSurvey,
+              ideLaunched: 'Cursor',
+              queryParams: cursorParams,
+            ),
+            isFalse,
+          );
+
+          // Once IDE integrations stop passing the legacy ide parameter, the
+          // launch environment defaults to 'CLI'.
+          const dashToolOnlyParams = {
+            DevToolsQueryParams.dashToolKey: 'vscode-plugins',
+          };
+          expect(
+            meetsRequirement(
+              vsCodeSurvey,
+              ideLaunched: 'CLI',
+              queryParams: dashToolOnlyParams,
+            ),
+            isTrue,
+          );
+          expect(
+            meetsRequirement(
+              intelliJSurvey,
+              ideLaunched: 'CLI',
+              queryParams: dashToolOnlyParams,
+            ),
+            isFalse,
+          );
+          expect(
+            meetsRequirement(
+              cliSurvey,
+              ideLaunched: 'CLI',
+              queryParams: dashToolOnlyParams,
+            ),
+            isFalse,
+          );
+
+          for (final dashTool in [
+            'intellij-plugins',
+            'android-studio-plugins',
+          ]) {
+            final intelliJDashToolOnlyParams = {
+              DevToolsQueryParams.dashToolKey: dashTool,
+            };
+            expect(
+              meetsRequirement(
+                intelliJSurvey,
+                ideLaunched: 'CLI',
+                queryParams: intelliJDashToolOnlyParams,
+              ),
+              isTrue,
+              reason: dashTool,
+            );
+            expect(
+              meetsRequirement(
+                vsCodeSurvey,
+                ideLaunched: 'CLI',
+                queryParams: intelliJDashToolOnlyParams,
+              ),
+              isFalse,
+              reason: dashTool,
+            );
+            expect(
+              meetsRequirement(
+                cliSurvey,
+                ideLaunched: 'CLI',
+                queryParams: intelliJDashToolOnlyParams,
+              ),
+              isFalse,
+              reason: dashTool,
+            );
+          }
+        });
+
+        test('does not match other environments', () {
+          for (final survey in [
+            vsCodeSurvey,
+            intelliJSurvey,
+            vsCodeDashToolSurvey,
+            intelliJDashToolSurvey,
+          ]) {
+            expect(meetsRequirement(survey, ideLaunched: 'CLI'), isFalse);
+          }
+          expect(meetsRequirement(cliSurvey, ideLaunched: 'CLI'), isTrue);
+          expect(
+            meetsRequirement(
+              cliSurvey,
+              ideLaunched: 'CLI',
+              queryParams: {DevToolsQueryParams.dashToolKey: 'flutter-tool'},
+            ),
+            isTrue,
+          );
+        });
+
+        test('matches any environment when none is specified or known', () {
+          final anyEnvironmentSurvey = DevToolsSurvey.fromJson({});
+          expect(
+            meetsRequirement(anyEnvironmentSurvey, ideLaunched: 'CLI'),
+            isTrue,
+          );
+
+          // The launch environment is not known until the analytics
+          // dimensions are computed.
+          for (final survey in [vsCodeSurvey, vsCodeDashToolSurvey]) {
+            expect(meetsRequirement(survey, ideLaunched: ''), isTrue);
+          }
+        });
       });
     });
   });

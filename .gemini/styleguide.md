@@ -28,20 +28,43 @@ and the CI testing ensures that the code is formatted correctly.
 * **Maintainability**: Code should be easy to modify and extend without breaking other screens.
 * **Consistency**: Adhering to consistent style across all DevTools packages improves collaboration and reduces errors.
 * **Code Reuse & DRY**: Use shared primitives and components rather than recreating them from scratch. Flag duplicated code blocks (90%+ identical) and repeated sub-expressions or function calls within the same method as `[CONCERN]` or `[NIT]`, and suggest extracting them into local variables or constants.
+  Prefer these DevTools helpers when the diff re-creates them:
+  * `CenteredMessage` instead of `Center` + `Text`, and `NotifierSwitch` instead of a raw `Switch`
+    nested inside a `ValueListenableBuilder` (both from
+    `packages/devtools_app/lib/src/shared/ui/common_widgets.dart`).
+  * `MultiValueListenableBuilder` instead of nested `ValueListenableBuilder`s; a `ValueNotifier`
+    plus a builder instead of calling `markNeedsBuild`/`setState` by hand.
+  * `safeUnawaited(...)` for fire-and-forget futures; `addAutoDisposeListener(...)` for listeners.
+  * `Logger` instead of `debugPrint`.
+  * Constants and shared styles from `packages/devtools_app_shared/lib/src/ui/theme/theme.dart`
+    instead of raw numbers or raw `TextStyle`s: sizes and spacing such as `smallFontSize`,
+    `defaultSpacing`, and `defaultIconSize`, and text styles such as
+    `Theme.of(context).regularTextStyle`, `boldTextStyle`, and `subtleTextStyle`.
+  * In tests, existing helpers such as `mockConnectedApp` instead of hand-built mocks.
+  * A small `StatelessWidget` instead of a helper method that returns a widget.
 * **Constants & Magic Values**: Avoid using raw/magic strings or numbers. Extract them into descriptive named constants so the intent and meaning of the values are clear.
 * **Testing**: All changes should include automated tests to ensure correctness and prevent regressions.
+* **Release notes** (`packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md`):
+  * A PR should only add its own entry. Flag edits to other entries, removed blank lines or
+    punctuation, and leftover text from merge conflicts.
+  * Links in this file are intentionally relative (the notes are copied to the Flutter
+    website). Flag changes that make them absolute.
+  * Entries are past tense (e.g. "Added ..."), and the sentence ends with a period. The PR
+    link that follows the sentence (e.g. `[#1234](...)`) does not need a period.
+  * Only user-facing changes belong here. Changes to the `dt` tool, CI, tests, or internal
+    refactors should use the `release-notes-not-required` label instead.
 
 ## 3. Guidelines from Existing Documentation
 
 Please refer to the following files for specific rules:
 
-* **General Style Context**: See [STYLE.md](STYLE.md) for rules on:
+* **General Style Context**: See [STYLE.md](../STYLE.md) for rules on:
   * Getter and setter order.
   * Naming for typedefs and function variables.
   * Overriding equality.
   * Windows/POSIX path handling conventions.
   * Default text styles.
-* **Repository Constraints**: See [AGENTS.md](AGENTS.md) for rules on:
+* **Repository Constraints**: See [AGENTS.md](../AGENTS.md) for rules on:
   * Constraints on `packages/devtools_shared` (no Flutter dependency).
   * Import restrictions (no importing `devtools_app.dart` from `src/`).
   * Published packages management (CHANGELOGs, versions, breaking changes).
