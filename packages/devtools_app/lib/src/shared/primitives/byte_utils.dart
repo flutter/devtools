@@ -162,12 +162,17 @@ class Uint8ListRingBuffer {
   /// Merges all the data in this ring buffer into a single [Uint8List] and
   /// returns it.
   Uint8List get merged {
-    final allBytes = BytesBuilder();
-    debugTimeSync(
-      () => data.forEach(allBytes.add),
-      debugName: 'Uint8ListRingBuffer.mergeAllData',
-    );
-    return allBytes.takeBytes();
+    // Allocate exactly once at the final size. A [BytesBuilder] over-allocates
+    // up to the next power of two, which is costly for very large traces.
+    final merged = Uint8List(size);
+    debugTimeSync(() {
+      var offset = 0;
+      for (final chunk in data) {
+        merged.setRange(offset, offset + chunk.length, chunk);
+        offset += chunk.length;
+      }
+    }, debugName: 'Uint8ListRingBuffer.mergeAllData');
+    return merged;
   }
 
   void clear() {
