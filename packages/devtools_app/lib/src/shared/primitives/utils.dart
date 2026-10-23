@@ -545,30 +545,105 @@ class DebugTimingLogger {
   }
 }
 
-List<TextSpan> textSpansFromAnsi(String input, TextStyle defaultStyle) {
+/// Converts a string with ANSI escape codes into a list of [TextSpan]s.
+///
+/// If [isDarkTheme] is provided, ANSI foreground colors are adjusted to ensure
+/// contrast against the theme background. If omitted, [isDarkTheme] is inferred
+/// from `defaultStyle.color` luminance when available.
+List<TextSpan> textSpansFromAnsi(
+  String input,
+  TextStyle defaultStyle, {
+  bool? isDarkTheme,
+}) {
+  final isDark =
+      isDarkTheme ??
+      (defaultStyle.color != null &&
+          defaultStyle.color!.computeLuminance() > 0.5);
+
   final parser = AnsiParser(input);
   return parser.parse().map((entry) {
     final styled = entry.bold || entry.fgColor != null || entry.bgColor != null;
+    if (!styled) return TextSpan(text: entry.text, style: defaultStyle);
+
+    // If an explicit background color is specified, determine contrast against it;
+    // otherwise contrast against the ambient theme.
+    final effectiveIsDark = entry.bgColor != null
+        ? Color.fromRGBO(
+                entry.bgColor![0],
+                entry.bgColor![1],
+                entry.bgColor![2],
+                1,
+              ).computeLuminance() <
+              0.5
+        : isDark;
+
     return TextSpan(
       text: entry.text,
-      style: styled
-          ? TextStyle(
-              color: ansiToColor(entry.fgColor),
-              backgroundColor: ansiToColor(entry.bgColor),
-              fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
-            )
-          : defaultStyle,
+      style: defaultStyle.merge(
+        TextStyle(
+          color: ansiToColor(entry.fgColor, isDarkTheme: effectiveIsDark),
+          backgroundColor: ansiToColor(entry.bgColor),
+          fontWeight: entry.bold ? FontWeight.bold : null,
+        ),
+      ),
     );
   }).toList();
 }
 
-Color? ansiToColor(List<int>? ansiInput) {
+/// Adjusted color for ANSI black text in dark theme, where pure black is
+/// invisible against a dark background.
+const _darkThemeBlackAdjustment = Color.fromRGBO(128, 128, 128, 1);
+
+/// Adjusted color for ANSI dark blue text in dark theme, where standard
+/// dark blue [0, 0, 187] has very low contrast against dark backgrounds.
+const _darkThemeBlueAdjustment = Color.fromRGBO(85, 135, 255, 1);
+
+/// Adjusted color for ANSI white text in light theme, where pure white is
+/// invisible against a light background.
+const _lightThemeWhiteAdjustment = Color.fromRGBO(128, 128, 128, 1);
+
+/// Adjusted color for ANSI bright yellow text in light theme, where
+/// bright yellow [255, 255, 85] has very low contrast against white backgrounds.
+const _lightThemeYellowAdjustment = Color.fromRGBO(187, 136, 0, 1);
+
+/// Converts an ANSI RGB list to a [Color].
+///
+/// When [isDarkTheme] is provided, colors that would otherwise be illegible
+/// (e.g., pure black on a dark background or pure white on a light background)
+/// are adjusted to maintain contrast and readability.
+Color? ansiToColor(List<int>? ansiInput, {bool? isDarkTheme}) {
   if (ansiInput == null) {
     return null;
   }
 
   assert(ansiInput.length == 3, 'Ansi color list should contain 3 elements');
-  return Color.fromRGBO(ansiInput[0], ansiInput[1], ansiInput[2], 1);
+  final r = ansiInput[0];
+  final g = ansiInput[1];
+  final b = ansiInput[2];
+
+  if (isDarkTheme != null) {
+    if (isDarkTheme) {
+      // In dark mode, pure black [0, 0, 0] is completely invisible on dark backgrounds.
+      if (r == 0 && g == 0 && b == 0) {
+        return _darkThemeBlackAdjustment;
+      }
+      // Standard ANSI dark blue [0, 0, 187] has very low contrast on dark backgrounds.
+      if (r == 0 && g == 0 && b == 187) {
+        return _darkThemeBlueAdjustment;
+      }
+    } else {
+      // In light mode, pure white [255, 255, 255] is completely invisible on light backgrounds.
+      if (r == 255 && g == 255 && b == 255) {
+        return _lightThemeWhiteAdjustment;
+      }
+      // Standard ANSI bright yellow [255, 255, 85] has very low contrast on white backgrounds.
+      if (r == 255 && g == 255 && b == 85) {
+        return _lightThemeYellowAdjustment;
+      }
+    }
+  }
+
+  return Color.fromRGBO(r, g, b, 1);
 }
 
 /// An extension on [LogicalKeySet] to provide user-facing names for key
