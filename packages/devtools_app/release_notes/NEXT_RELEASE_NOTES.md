@@ -47,7 +47,12 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any updates.
+* Added copy buttons to the Headers and Cookies tabs of the request
+  inspector, and made cookie values and image metadata selectable.
+  [#10052](https://github.com/flutter/devtools/pull/10052)
+* Fixed the `headersSize` reported in HAR exports for requests with
+  multi-value headers.
+  [#10052](https://github.com/flutter/devtools/pull/10052)
 
 ## Logging updates
 
