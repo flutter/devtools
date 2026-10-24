@@ -74,14 +74,21 @@ class HttpRequestHeadersView extends StatelessWidget {
   /// headers are not wrapped in brackets as they are in the tab.
   static String copyText(DartIOHttpRequestData data) {
     final sections = [
-      (title: _generalTitle, headers: data.general),
-      (title: _responseHeadersTitle, headers: data.responseHeaders),
-      (title: _requestHeadersTitle, headers: data.requestHeaders),
+      (title: _generalTitle, headers: data.general, format: generalInfoToText),
+      (
+        title: _responseHeadersTitle,
+        headers: data.responseHeaders,
+        format: headersToText,
+      ),
+      (
+        title: _requestHeadersTitle,
+        headers: data.requestHeaders,
+        format: headersToText,
+      ),
     ];
     return [
-      for (final (:title, :headers) in sections)
-        if (headers != null && headers.isNotEmpty)
-          '$title\n${headersToText(headers)}',
+      for (final (:title, :headers, :format) in sections)
+        if (headers != null && headers.isNotEmpty) '$title\n${format(headers)}',
     ].join('\n\n');
   }
 
