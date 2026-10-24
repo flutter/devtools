@@ -77,6 +77,20 @@ void main() {
     });
   });
 
+  group('generalInfoToText', () {
+    test('formats values as they are displayed', () {
+      final info = <String, Object?>{
+        'method': 'GET',
+        'redirects': <dynamic>[],
+        'isRedirect': false,
+      };
+      expect(
+        generalInfoToText(info),
+        'method: GET\nredirects: []\nisRedirect: false',
+      );
+    });
+  });
+
   group('requestCookiesToText', () {
     test('formats cookies as a Cookie header value', () {
       final cookies = [

@@ -63,6 +63,15 @@ int calculateHeadersSize(Map<String, Object?>? headers) {
 String headersToText(Map<String, Object?>? headers) =>
     headers == null ? '' : _headerLines(headers).join('\n');
 
+/// Formats [info] as plain `key: value` lines, the way the General section of
+/// the Headers tab displays them.
+///
+/// Unlike [headersToText], values are not treated as multi-value headers, since
+/// the General section holds request details like `redirects` rather than HTTP
+/// headers.
+String generalInfoToText(Map<String, Object?> info) =>
+    info.entries.map((entry) => '${entry.key}: ${entry.value}').join('\n');
+
 String _cookieNameAndValue(Cookie cookie) => '${cookie.name}=${cookie.value}';
 
 /// Formats request [cookies] the way they are sent in a `Cookie` header:
