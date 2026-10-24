@@ -12,14 +12,14 @@ const _cookieHeader = 'cookie';
 /// Returns [headers] as `key: value` lines, as they would appear on the wire.
 ///
 /// Header values decoded from JSON are a `List<dynamic>` rather than a
-/// `List<String>`, so any [List] is treated as a multi-value header:
+/// `List<String>`, so any [Iterable] is treated as a multi-value header:
 /// - `set-cookie` gets one line per value, since cookie dates
 ///   (`Expires=...`) contain commas.
 /// - `cookie` values are joined with `; `.
 /// - all other values are joined with `, `.
 Iterable<String> _headerLines(Map<String, Object?> headers) sync* {
   for (final MapEntry(:key, :value) in headers.entries) {
-    if (value is! List) {
+    if (value is! Iterable) {
       yield '$key: $value';
       continue;
     }
@@ -82,7 +82,8 @@ String responseCookiesToText(
   final rawCookies = responseHeaders?.entries
       .where((entry) => entry.key.toLowerCase() == _setCookieHeader)
       .expand(
-        (entry) => entry.value is List ? entry.value as List : [entry.value],
+        (entry) =>
+            entry.value is Iterable ? entry.value as Iterable : [entry.value],
       )
       .nonNulls
       .toList();

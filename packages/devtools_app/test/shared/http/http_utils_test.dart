@@ -64,6 +64,13 @@ void main() {
       expect(headersToText(headers), 'cookie: a=b; c=d');
     });
 
+    test('treats any iterable value as a multi-value header', () {
+      final headers = <String, Object?>{
+        'accept': {'text/html', 'application/json'},
+      };
+      expect(headersToText(headers), 'accept: text/html, application/json');
+    });
+
     test('handles null and empty headers', () {
       expect(headersToText(null), isEmpty);
       expect(headersToText({}), isEmpty);
