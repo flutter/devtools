@@ -49,5 +49,17 @@ void main() {
       expect(controller.flutterFramesController.isActiveFeature, isTrue);
       expect(controller.timelineEventsController.isActiveFeature, isTrue);
     });
+
+    test('fetchFullDataBeforeExport does not pull timeline events when showing '
+        'offline data', () async {
+      final mockServiceManager =
+          mockServiceConnection.serviceManager as MockServiceManager;
+      clearInteractions(mockServiceManager);
+
+      await controller.fetchFullDataBeforeExport();
+
+      verifyNever(mockServiceManager.service);
+      expect(controller.timelineEventsController.fullPerfettoTrace, isEmpty);
+    });
   });
 }

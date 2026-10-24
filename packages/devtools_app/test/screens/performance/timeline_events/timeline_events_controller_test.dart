@@ -82,6 +82,32 @@ void main() {
       );
     });
 
+    group('pullLatestTimelineEvents', () {
+      setUp(() {
+        setGlobal(PreferencesController, PreferencesController());
+      });
+
+      test('adds the latest VM timeline to the trace', () async {
+        expect(eventsController.fullPerfettoTrace, isEmpty);
+
+        await eventsController.pullLatestTimelineEvents();
+
+        expect(eventsController.fullPerfettoTrace, isNotEmpty);
+      });
+
+      test('completes without throwing when the pull fails', () async {
+        // This fake service throws when the VM timeline is requested because
+        // it was not provided any timeline data.
+        setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
+
+        await expectLater(
+          eventsController.pullLatestTimelineEvents(),
+          completes,
+        );
+        expect(eventsController.fullPerfettoTrace, isEmpty);
+      });
+    });
+
     group('can clearData', () {
       setUp(() async {
         // Set some data in the controller. It does not matter if it is connected
