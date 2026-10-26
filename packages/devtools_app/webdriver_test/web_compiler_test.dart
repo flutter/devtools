@@ -39,7 +39,19 @@ void main() {
       desired: {
         ...Capabilities.chrome,
         Capabilities.chromeOptions: {
-          'args': ['--headless'],
+          'binary': ?Platform.environment['CHROME_EXECUTABLE'],
+          'args': [
+            '--headless',
+            // Explicitly enable SwiftShader on headless Linux and Windows VMs
+            // without a hardware GPU so WebGL is available for the skwasm
+            // renderer. See https://github.com/flutter/devtools/issues/10032.
+            if (Platform.isLinux || Platform.isWindows) ...[
+              '--use-gl=angle',
+              '--use-angle=swiftshader',
+              '--enable-unsafe-swiftshader',
+              '--disable-gpu-sandbox',
+            ],
+          ],
         },
       },
     );
