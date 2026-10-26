@@ -15,7 +15,8 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-TODO: Remove this section if there are not any updates.
+* Remove the legacy Provider screen, which was a placeholder to point users to
+the `package:provider` DevTools extension. [#10046](https://github.com/flutter/devtools/pull/10046)
 
 ## Inspector updates
 
@@ -23,7 +24,12 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+* Reduced the memory used when saving Performance data for offline viewing,
+  and made the saved files smaller. Files saved with this version cannot be
+  opened in older versions of DevTools. Files saved with older versions can
+  still be opened.
+  [#10034](https://github.com/flutter/devtools/pull/10034),
+  [#10010](https://github.com/flutter/devtools/issues/10010)
 
 ## CPU profiler updates
 
