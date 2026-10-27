@@ -342,6 +342,18 @@ class TimelineEventsController extends PerformanceFeatureController
     await loadPerfettoTrace();
   }
 
+  /// Pulls any timeline events from the VM that have not been received yet.
+  ///
+  /// Unlike [forceRefresh], this does not reload the Perfetto trace viewer.
+  Future<void> pullLatestTimelineEvents() async {
+    try {
+      await _pullPerfettoVmTimeline();
+    } catch (e, st) {
+      // Don't block the export of the data we already have.
+      _log.warning('Failed to pull the latest timeline events.', e, st);
+    }
+  }
+
   void processTrackEvents() {
     if (!_isFlutterAppHelper()) {
       debugTraceCallback(
