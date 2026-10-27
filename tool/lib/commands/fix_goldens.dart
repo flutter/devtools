@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
 import '../utils.dart';
@@ -32,7 +31,7 @@ class FixGoldensCommand extends Command {
   @override
   String get name => 'fix-goldens';
 
-  final processManager = ProcessManager();
+  final processManager = createProcessManager();
 
   @override
   FutureOr? run() async {

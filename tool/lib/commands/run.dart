@@ -4,7 +4,6 @@
 
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/commands/shared.dart';
-import 'package:io/io.dart';
 
 import '../utils.dart';
 
@@ -30,7 +29,7 @@ class RunCommand extends Command {
 
   @override
   Future run() async {
-    final processManager = ProcessManager();
+    final processManager = createProcessManager();
     final process = await processManager.runProcess(
       CliCommand.tool([
         'serve',

@@ -5,7 +5,6 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
 import '../utils.dart';
@@ -41,7 +40,7 @@ class UpdateDartSdkDepsCommand extends Command {
   Future run() async {
     final commit = argResults![_argCommit] as String;
     final dartSdkLocation = localDartSdkLocation();
-    final processManager = ProcessManager();
+    final processManager = createProcessManager();
 
     print('Preparing a local Dart SDK branch...');
     await DartSdkHelper.fetchAndCheckoutMaster(processManager);

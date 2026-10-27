@@ -36,7 +36,7 @@ class ReleaseHelperCommand extends Command {
   @override
   FutureOr? run() async {
     final log = Logger.standard();
-    final processManager = ProcessManager();
+    final processManager = createProcessManager();
 
     final debug = argResults![_debugFlag] as bool;
     final currentBranchResult = await processManager.runProcess(
