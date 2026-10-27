@@ -51,7 +51,9 @@ TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 
-TODO: Remove this section if there are not any updates.
+* Improved ANSI-colored text readability by adapting foreground colors for
+  contrast against the active theme background. -
+  [#10049](https://github.com/flutter/devtools/pull/10049)
 
 ## App size tool updates
 
