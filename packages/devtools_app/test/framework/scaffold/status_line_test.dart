@@ -197,6 +197,60 @@ void main() {
         },
       );
     }
+
+    // The page status is wrapped in a Flexible, not an Expanded, so that it
+    // keeps its natural width and the spaceBetween alignment keeps spacing the
+    // footer items evenly on wide screens, as it did before this change.
+    for (final embedded in [false, true]) {
+      for (final width in [900.0, 901.0, 1400.0]) {
+        testWidgetsWithWindowSize(
+          'page status keeps its natural width on a wide screen '
+          '(${embedded ? 'embedded' : 'standalone'}, $width)',
+          Size(width, responsiveLayoutHeight),
+          (WidgetTester tester) async {
+            final errors = await pumpFooter(
+              tester,
+              pageId: ScreenMetaData.network.id,
+              embedded: embedded,
+              connected: true,
+            );
+            expect(errors, isEmpty, reason: errors.join('\n'));
+
+            final statusText = _inStatusLine(find.textContaining(' of '));
+            expect(statusText, findsOneWidget);
+            final textRect = tester.getRect(statusText);
+            // The nearest ancestor Row is the page status box, which also
+            // holds the recording spinner.
+            final boxRect = tester.getRect(
+              find.ancestor(of: statusText, matching: find.byType(Row)).first,
+            );
+            expect(
+              boxRect.width,
+              lessThanOrEqualTo(
+                textRect.width + denseSpacing + smallProgressSize + 8.0,
+              ),
+              reason:
+                  'The page status should hug its content on a wide screen; '
+                  'an Expanded wrapper would stretch it to fill the slack.',
+            );
+
+            if (!embedded) {
+              // With no trailing actions, the connection status is the last
+              // item and stays pinned to the right edge.
+              final connection = tester.getRect(
+                _connectionStatus(connected: true),
+              );
+              final statusLine = tester.getRect(find.byType(StatusLine));
+              expect(
+                statusLine.right - connection.right,
+                lessThanOrEqualTo(defaultSpacing + geometryTolerance),
+              );
+            }
+            await stopNetworkPolling(tester, network);
+          },
+        );
+      }
+    }
   });
 
   group('overflow menu', () {

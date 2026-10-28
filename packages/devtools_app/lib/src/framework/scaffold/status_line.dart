@@ -144,7 +144,7 @@ class StatusLine extends StatelessWidget {
       if (screenWidth > MediaSize.xs && pageStatus != null) ...[
         // The page status needs to be flexible so that the status line can
         // shrink to fit narrow screens without overflowing.
-        Expanded(child: pageStatus),
+        Flexible(child: pageStatus),
         BulletSpacer(color: foregroundColor),
       ],
       // The connection status needs to be flexible so that the status line
