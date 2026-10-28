@@ -70,9 +70,9 @@ void main() {
         'setFlag',
         'requirePermissionToResume',
         'getFlagList',
-        'getDartDevelopmentServiceVersion',
-        'getDartDevelopmentServiceVersion',
         'getVM',
+        'getDartDevelopmentServiceVersion',
+        'getDartDevelopmentServiceVersion',
       ]),
       reason:
           'Unexpected order of vm service calls upon connection. '
