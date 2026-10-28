@@ -230,48 +230,101 @@ class VmServiceWrapper extends VmService {
 
   Stream<Event> get onExtensionEventWithHistorySafe {
     return _maybeReturnStreamWithHistory(
-      onExtensionEventWithHistory,
+      EventStreams.kExtension,
+      ddsStream: onExtensionEventWithHistory,
       fallbackStream: onExtensionEvent,
     );
   }
 
   Stream<Event> get onLoggingEventWithHistorySafe {
     return _maybeReturnStreamWithHistory(
-      onLoggingEventWithHistory,
+      EventStreams.kLogging,
+      ddsStream: onLoggingEventWithHistory,
       fallbackStream: onLoggingEvent,
     );
   }
 
   Stream<Event> get onStderrEventWithHistorySafe {
     return _maybeReturnStreamWithHistory(
-      onStderrEventWithHistory,
+      EventStreams.kStderr,
+      ddsStream: onStderrEventWithHistory,
       fallbackStream: onStderrEvent,
     );
   }
 
   Stream<Event> get onStdoutEventWithHistorySafe {
     return _maybeReturnStreamWithHistory(
-      onStdoutEventWithHistory,
+      EventStreams.kStdout,
+      ddsStream: onStdoutEventWithHistory,
       fallbackStream: onStdoutEvent,
     );
   }
 
   Stream<Event> get onTimerEventWithHistorySafe {
     return _maybeReturnStreamWithHistory(
-      onTimerEventWithHistory,
+      EventStreams.kTimer,
+      ddsStream: onTimerEventWithHistory,
       fallbackStream: onTimerEvent,
     );
   }
 
   Stream<Event> _maybeReturnStreamWithHistory(
-    Stream<Event> ddsStream, {
+    String streamId, {
+    required Stream<Event> ddsStream,
     required Stream<Event> fallbackStream,
   }) {
     assert(_supportedProtocolsInitialized.isCompleted);
     if (_ddsSupported) {
-      return ddsStream;
+      return _streamWithHistoryIfCollected(
+        streamId,
+        ddsStream: ddsStream,
+        fallbackStream: fallbackStream,
+      );
     }
     return fallbackStream;
+  }
+
+  /// Returns [ddsStream] if DDS collects event history for [streamId], and
+  /// [fallbackStream] otherwise.
+  ///
+  /// DDS only collects event history for a stream when the VM service it is
+  /// connected to supports that stream. For example, the web debug service
+  /// does not support the `Timer` stream, so DDS rejects `getStreamHistory`
+  /// requests for it with an invalid params error. The DDS history streams
+  /// (e.g. [DdsExtension.onTimerEventWithHistory]) call `getStreamHistory`
+  /// when first listened to, and that error cannot be handled by listeners, so
+  /// we check whether history is collected before using [ddsStream].
+  Stream<Event> _streamWithHistoryIfCollected(
+    String streamId, {
+    required Stream<Event> ddsStream,
+    required Stream<Event> fallbackStream,
+  }) async* {
+    final historyCollected = await _isStreamHistoryCollected.putIfAbsent(
+      streamId,
+      () => _checkStreamHistoryCollected(streamId),
+    );
+    yield* historyCollected ? ddsStream : fallbackStream;
+  }
+
+  /// Cache of whether DDS collects event history for a given stream id.
+  final _isStreamHistoryCollected = <String, Future<bool>>{};
+
+  Future<bool> _checkStreamHistoryCollected(String streamId) async {
+    try {
+      await getStreamHistory(streamId);
+      return true;
+    } on RPCError catch (e) {
+      if (e.code != RPCErrorKind.kInvalidParams.code) {
+        // Do not cache unexpected failures so that we check again next time.
+        unawaited(_isStreamHistoryCollected.remove(streamId));
+        rethrow;
+      }
+      _log.fine(
+        'Event history is not collected for stream "$streamId". Falling back '
+        'to the stream without history.',
+      );
+      return false;
+    }
   }
 
   // Begin Dart IO extension method wrappers. We wrap these methods so that we
