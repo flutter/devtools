@@ -10,25 +10,16 @@ set -ex
 export SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 export DEVTOOLS_DIR=$SCRIPT_DIR/../..
 
-# In GitBash on Windows, we have to call flutter.bat so we alias them in this
-# script to call the correct one based on the OS.
-function flutter {
-    if [[ $RUNNER_OS == "Windows" ]]; then
-        command flutter.bat "$@"
-    else
-        command flutter "$@"
-    fi
-}
-export -f flutter
-
 # Determine the Flutter SDK to use:
 # * If `DEVTOOLS_TOOL_FLUTTER_FROM_PATH` is "true", then discover from `PATH`.
 # * If `./tool/flutter-sdk` (a directory) exists, then use that.
 if [ "$DEVTOOLS_TOOL_FLUTTER_FROM_PATH" = "true" ]; then
-    if command -v flutter &> /dev/null; then
-        FLUTTER_EXE="$(command -v flutter)"
-    elif command -v flutter.bat &> /dev/null; then
-        FLUTTER_EXE="$(command -v flutter.bat)"
+    # Use `type -P` instead of `command -v` so we resolve an executable file on
+    # PATH rather than a shell function or alias.
+    if type -P flutter &> /dev/null; then
+        FLUTTER_EXE="$(type -P flutter)"
+    elif type -P flutter.bat &> /dev/null; then
+        FLUTTER_EXE="$(type -P flutter.bat)"
     else
         echo "DEVTOOLS_TOOL_FLUTTER_FROM_PATH is set to true, but flutter was not found on PATH"
         exit 1
@@ -49,6 +40,17 @@ fi
 # script can and does print 'Waiting for another flutter command...' at
 # inopportune times.
 export PATH="$FLUTTER_DIR/bin/cache/dart-sdk/bin:$FLUTTER_DIR/bin:`pwd`/bin:$PATH"
+
+# In GitBash on Windows, we have to call flutter.bat so we alias them in this
+# script to call the correct one based on the OS.
+function flutter {
+    if [[ $RUNNER_OS == "Windows" ]]; then
+        command flutter.bat "$@"
+    else
+        command flutter "$@"
+    fi
+}
+export -f flutter
 
 # Look up the latest flutter candidate (this is the latest flutter version in g3)
 # TODO(https://github.com/flutter/devtools/issues/4591): re-write this script as a
