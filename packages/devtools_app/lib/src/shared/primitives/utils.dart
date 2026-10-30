@@ -587,19 +587,23 @@ Color? ansiToColor(List<int>? ansiInput, {Color? background}) {
 /// [color] and [background] is too low, blend the color toward black (on a
 /// light background) or white (on a dark background) to restore legibility.
 Color _adjustForContrast(Color color, Color background) {
+  // A 3:1 contrast ratio is sufficient for terminal-style output (WCAG AA
+  // large-text threshold).
+  const minContrastRatio = 3.0;
+  const contrastBlendFactor = 0.6;
+
   final fgLuminance = color.computeLuminance();
   final bgLuminance = background.computeLuminance();
   final contrastRatio =
       (max(fgLuminance, bgLuminance) + 0.05) /
       (min(fgLuminance, bgLuminance) + 0.05);
-  if (contrastRatio >= 3.0) {
-    // A 3:1 contrast ratio is sufficient for terminal-style output.
+  if (contrastRatio >= minContrastRatio) {
     return color;
   }
   return Color.lerp(
     color,
     bgLuminance > 0.5 ? Colors.black : Colors.white,
-    0.6,
+    contrastBlendFactor,
   )!;
 }
 
