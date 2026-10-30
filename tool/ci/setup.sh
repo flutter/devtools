@@ -44,7 +44,7 @@ export PATH="$FLUTTER_DIR/bin/cache/dart-sdk/bin:$FLUTTER_DIR/bin:`pwd`/bin:$PAT
 # In GitBash on Windows, we have to call flutter.bat so we alias them in this
 # script to call the correct one based on the OS.
 function flutter {
-    if [[ $RUNNER_OS == "Windows" ]]; then
+    if [[ "$RUNNER_OS" == "Windows" || "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
         command flutter.bat "$@"
     else
         command flutter "$@"
