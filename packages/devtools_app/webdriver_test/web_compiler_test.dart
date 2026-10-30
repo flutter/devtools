@@ -14,52 +14,76 @@ import 'package:webdriver/async_io.dart';
 import '../integration_test/test_infra/run/run_test.dart';
 
 void main() {
-  late Process devtoolsProcess;
-  late WebDriver driver;
+  ChromeDriver? chromedriver;
+  Process? devtoolsProcess;
+  WebDriver? driver;
   late String devToolsServerAddress;
 
   const serverStartupTimeout = Duration(minutes: 1);
 
+  Future<void> cleanUp() async {
+    try {
+      await driver?.quit();
+    } finally {
+      driver = null;
+      devtoolsProcess?.kill();
+      devtoolsProcess = null;
+      await chromedriver?.stop(debugLogging: true);
+      chromedriver = null;
+    }
+  }
+
   setUpAll(() async {
-    await ChromeDriver().start(debugLogging: true);
+    try {
+      chromedriver = ChromeDriver();
+      await chromedriver!.start(debugLogging: true);
 
-    // TODO(https://github.com/flutter/devtools/issues/9197): Launch the
-    // DevTools server from source.
-    // For now, this test uses the version of DevTools bundled in the Dart SDK
-    // because building and running from source is too prohibitive until
-    // DevTools is moved into the Dart SDK. See issue for details.
-    devtoolsProcess = await startDevToolsServer();
-    devToolsServerAddress = await listenForDevToolsAddress(
-      devtoolsProcess,
-      timeout: serverStartupTimeout,
-    );
+      // TODO(https://github.com/flutter/devtools/issues/9197): Launch the
+      // DevTools server from source.
+      // For now, this test uses the version of DevTools bundled in the Dart SDK
+      // because building and running from source is too prohibitive until
+      // DevTools is moved into the Dart SDK. See issue for details.
+      final startedDevToolsProcess = await startDevToolsServer();
+      devtoolsProcess = startedDevToolsProcess;
+      devToolsServerAddress = await listenForDevToolsAddress(
+        startedDevToolsProcess,
+        timeout: serverStartupTimeout,
+      );
 
-    driver = await createDriver(
-      uri: Uri.parse('http://127.0.0.1:${ChromeDriver.port}'),
-      desired: {
-        ...Capabilities.chrome,
-        Capabilities.chromeOptions: {
-          'binary': ?Platform.environment['CHROME_EXECUTABLE'],
-          'args': [
-            '--headless',
-            // Explicitly enable SwiftShader on headless Linux and Windows VMs
-            // without a hardware GPU so WebGL is available for the skwasm
-            // renderer. See https://github.com/flutter/devtools/issues/10032.
-            if (Platform.isLinux || Platform.isWindows) ...[
-              '--use-gl=angle',
-              '--use-angle=swiftshader',
-              '--enable-unsafe-swiftshader',
-              '--disable-gpu-sandbox',
+      driver = await createDriver(
+        uri: Uri.parse('http://127.0.0.1:${ChromeDriver.port}'),
+        desired: {
+          ...Capabilities.chrome,
+          Capabilities.chromeOptions: {
+            'binary': ?Platform.environment['CHROME_EXECUTABLE'],
+            'args': [
+              '--headless',
+              // Apparently, on Ubuntu 24.04+, AppArmor restricts unprivileged user
+              // namespaces, so this Chrome must be run with '--no-sandbox'.
+              // Flutter's `ChromiumLauncher.launch` similarly adds '--no-sandbox'
+              // when headless.
+              if (Platform.isLinux) '--no-sandbox',
+              // Explicitly enable SwiftShader on headless Linux and Windows VMs
+              // without a hardware GPU so WebGL is available for the skwasm
+              // renderer. See https://github.com/flutter/devtools/issues/10032.
+              if (Platform.isLinux || Platform.isWindows) ...[
+                '--use-gl=angle',
+                '--use-angle=swiftshader',
+                '--enable-unsafe-swiftshader',
+                '--disable-gpu-sandbox',
+              ],
             ],
-          ],
+          },
         },
-      },
-    );
+      );
+    } catch (_) {
+      await cleanUp();
+      rethrow;
+    }
   });
 
   tearDownAll(() async {
-    await driver.quit();
-    devtoolsProcess.kill();
+    await cleanUp();
   });
 
   /// Reads the "flt-renderer" attribute on the body element.
@@ -68,7 +92,7 @@ void main() {
   /// https://github.com/flutter/devtools/pull/9406#pullrequestreview-3142210823
   Future<String?> readRendererAttribute() => retryAsync<String?>(
     () async {
-      final body = await driver.findElement(const By.tagName('body'));
+      final body = await driver!.findElement(const By.tagName('body'));
       return body.attributes['flt-renderer'];
     },
     condition: (result) => result != null,
@@ -80,7 +104,7 @@ void main() {
     timeout: longTimeout,
     () async {
       // Open the DevTools URL with ?compiler=wasm.
-      await driver.get(
+      await driver!.get(
         _addQueryParam(devToolsServerAddress, param: 'compiler', value: 'wasm'),
       );
 
@@ -88,7 +112,7 @@ void main() {
       expect(await readRendererAttribute(), equals('skwasm'));
 
       // Open the DevTools URL with ?compiler=js.
-      await driver.get(
+      await driver!.get(
         _addQueryParam(devToolsServerAddress, param: 'compiler', value: 'js'),
       );
 
