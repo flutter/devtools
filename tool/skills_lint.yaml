@@ -3,6 +3,7 @@
 # found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 skills_lint:
   rules:
+    disallowed-field: error
     check-relative-paths: error
     check-absolute-paths: error
     check-trailing-whitespace: error
