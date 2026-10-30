@@ -545,7 +545,11 @@ class DebugTimingLogger {
   }
 }
 
-List<TextSpan> textSpansFromAnsi(String input, TextStyle defaultStyle) {
+List<TextSpan> textSpansFromAnsi(
+  String input,
+  TextStyle defaultStyle, {
+  Color? backgroundColor,
+}) {
   final parser = AnsiParser(input);
   return parser.parse().map((entry) {
     final styled = entry.bold || entry.fgColor != null || entry.bgColor != null;
@@ -553,7 +557,7 @@ List<TextSpan> textSpansFromAnsi(String input, TextStyle defaultStyle) {
       text: entry.text,
       style: styled
           ? TextStyle(
-              color: ansiToColor(entry.fgColor),
+              color: ansiToColor(entry.fgColor, background: backgroundColor),
               backgroundColor: ansiToColor(entry.bgColor),
               fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
             )
@@ -562,13 +566,45 @@ List<TextSpan> textSpansFromAnsi(String input, TextStyle defaultStyle) {
   }).toList();
 }
 
-Color? ansiToColor(List<int>? ansiInput) {
+Color? ansiToColor(List<int>? ansiInput, {Color? background}) {
   if (ansiInput == null) {
     return null;
   }
 
   assert(ansiInput.length == 3, 'Ansi color list should contain 3 elements');
-  return Color.fromRGBO(ansiInput[0], ansiInput[1], ansiInput[2], 1);
+  final color = Color.fromRGBO(ansiInput[0], ansiInput[1], ansiInput[2], 1);
+  if (background == null) {
+    return color;
+  }
+  return _adjustForContrast(color, background);
+}
+
+/// Returns [color] adjusted so that it remains legible against [background].
+///
+/// ANSI colors are fixed terminal colors, and some of them (e.g. ansi-black,
+/// ansi-white, ansi-bright-white) are effectively invisible against the
+/// corresponding light or dark themed background. When the contrast between
+/// [color] and [background] is too low, blend the color toward black (on a
+/// light background) or white (on a dark background) to restore legibility.
+Color _adjustForContrast(Color color, Color background) {
+  // A 3:1 contrast ratio is sufficient for terminal-style output (WCAG AA
+  // large-text threshold).
+  const minContrastRatio = 3.0;
+  const contrastBlendFactor = 0.6;
+
+  final fgLuminance = color.computeLuminance();
+  final bgLuminance = background.computeLuminance();
+  final contrastRatio =
+      (max(fgLuminance, bgLuminance) + 0.05) /
+      (min(fgLuminance, bgLuminance) + 0.05);
+  if (contrastRatio >= minContrastRatio) {
+    return color;
+  }
+  return Color.lerp(
+    color,
+    bgLuminance > 0.5 ? Colors.black : Colors.white,
+    contrastBlendFactor,
+  )!;
 }
 
 /// An extension on [LogicalKeySet] to provide user-facing names for key
