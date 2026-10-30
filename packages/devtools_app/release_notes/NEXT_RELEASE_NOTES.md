@@ -17,6 +17,9 @@ To learn more about DevTools, check out the
 
 * Remove the legacy Provider screen, which was a placeholder to point users to
 the `package:provider` DevTools extension. [#10046](https://github.com/flutter/devtools/pull/10046)
+* Fixed an issue where Dart and Flutter web apps compiled with WebAssembly
+  (Wasm) or modern web libraries (such as `package:web`) were not recognized as
+  web applications. [#10045](https://github.com/flutter/devtools/pull/10045)
 
 ## Inspector updates
 
