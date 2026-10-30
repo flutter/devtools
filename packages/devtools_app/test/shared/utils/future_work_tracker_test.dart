@@ -36,12 +36,12 @@ void main() {
         advanceClock(async);
         expect(tracker.active.value, isTrue);
 
-        completer1.complete(null);
+        completer1.complete();
         unawaited(completer1.future);
         advanceClock(async);
         expect(tracker.active.value, isTrue);
 
-        completer2.complete(null);
+        completer2.complete();
         unawaited(completer2.future);
         advanceClock(async);
         expect(tracker.active.value, isFalse);
@@ -66,7 +66,7 @@ void main() {
         advanceClock(async);
         expect(tracker.active.value, isTrue);
 
-        completer2.complete(null);
+        completer2.complete();
         unawaited(completer2.future);
         advanceClock(async);
         expect(tracker.active.value, isFalse);

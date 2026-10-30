@@ -6,14 +6,18 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/devtools_command_runner.dart';
+import 'package:devtools_tool/utils.dart';
 import 'package:io/io.dart';
 
 void main(List<String> args) async {
   final runner = DevToolsCommandRunner();
   try {
-    final dynamic result = await runner
-        .run(args)
-        .whenComplete(sharedStdIn.terminate);
+    final dynamic result = await runner.run(args).whenComplete(() async {
+      // Only touch [sharedStdIn] if it may have been used. Accessing it starts
+      // listening to stdin, which we must avoid when stdin is not a terminal.
+      // See [shouldForwardStdin].
+      if (shouldForwardStdin) await sharedStdIn.terminate();
+    });
 
     exit(result is int ? result : 0);
   } catch (e, st) {

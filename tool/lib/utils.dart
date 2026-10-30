@@ -51,6 +51,32 @@ String localDartSdkLocation() {
   return localDartSdkLocation;
 }
 
+/// Whether `dt` should forward its own stdin to the child processes it spawns.
+///
+/// We only forward stdin when it is attached to a terminal, which is the case
+/// where a user may actually type input for a child process (for example,
+/// hot reload commands for `flutter run` launched by `dt run`).
+///
+/// When stdin is not a terminal (for example, `/dev/null` on the CI bots),
+/// listening to it reads it to EOF, and dart:io then closes file descriptor 0.
+/// On macOS, the `posix_spawn`-based dart:io process implementation
+/// (introduced in Dart SDK commit 0171629a5478) mishandles spawning child
+/// processes once fd 0 has been closed and reused, which causes nested `dt`
+/// invocations to hang forever waiting for a child process that has already
+/// exited. Never listening to a non-terminal stdin avoids this. See
+/// https://github.com/dart-lang/sdk/issues/64744.
+// TODO(https://github.com/dart-lang/sdk/issues/64744): forward stdin
+// unconditionally again once this is fixed in the Dart SDK.
+final shouldForwardStdin = stdin.hasTerminal;
+
+/// Creates a [ProcessManager] for spawning child processes from `dt`.
+///
+/// Use this instead of the default [ProcessManager] constructor, which always
+/// listens to (and forwards) stdin. See [shouldForwardStdin] for details.
+ProcessManager createProcessManager() => ProcessManager(
+  stdin: shouldForwardStdin ? sharedStdIn : const Stream<List<int>>.empty(),
+);
+
 class CliCommand {
   CliCommand(
     this.exe,

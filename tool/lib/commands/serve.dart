@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/model.dart';
 import 'package:devtools_tool/utils.dart';
-import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
 import 'shared.dart';
@@ -142,7 +141,7 @@ class ServeCommand extends Command {
     );
 
     final repo = DevToolsRepo.getInstance();
-    final processManager = ProcessManager();
+    final processManager = createProcessManager();
 
     final results = argResults!;
     final buildApp = results[_buildAppFlag] as bool;

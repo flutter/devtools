@@ -3,7 +3,6 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:args/command_runner.dart';
-import 'package:io/io.dart';
 
 import '../utils.dart';
 import 'shared.dart';
@@ -22,7 +21,7 @@ class SyncCommand extends Command {
 
   @override
   Future run() async {
-    final processManager = ProcessManager();
+    final processManager = createProcessManager();
     await processManager.runProcess(
       CliCommand.git(['pull', 'upstream', 'master']),
     );

@@ -4,7 +4,6 @@
 
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/model.dart';
-import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
 import '../utils.dart';
@@ -40,7 +39,7 @@ class GenerateCodeCommand extends Command {
   @override
   Future run() async {
     final repo = DevToolsRepo.getInstance();
-    final processManager = ProcessManager();
+    final processManager = createProcessManager();
 
     Future<void> runOverPackages(
       CliCommand command, {

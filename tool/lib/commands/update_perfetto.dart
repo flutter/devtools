@@ -6,7 +6,7 @@ import 'dart:io';
 
 import 'package:args/command_runner.dart';
 import 'package:devtools_tool/model.dart';
-import 'package:io/io.dart';
+import 'package:io/io.dart' show copyPath;
 import 'package:path/path.dart' as path;
 
 import '../utils.dart';
@@ -52,7 +52,7 @@ class UpdatePerfettoCommand extends Command {
       throw 'Updating Perfetto is not currently supported on Windows';
     }
 
-    final processManager = ProcessManager();
+    final processManager = createProcessManager();
 
     final authenticate = argResults![_authFlag] as bool;
     if (authenticate) {

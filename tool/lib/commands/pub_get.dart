@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
-import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
 import '../model.dart';
@@ -38,7 +37,7 @@ class PubGetCommand extends Command {
   Future run() async {
     final log = Logger.standard();
     final repo = DevToolsRepo.getInstance();
-    final processManager = ProcessManager();
+    final processManager = createProcessManager();
     final packages = repo.getPackages();
 
     final upgrade = argResults![_upgradeFlag] as bool;

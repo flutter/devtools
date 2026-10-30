@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
-import 'package:io/io.dart';
 
 import '../model.dart';
 import '../utils.dart';
@@ -45,7 +44,7 @@ class AnalyzeCommand extends Command {
   Future run() async {
     final log = Logger.standard();
     final repo = DevToolsRepo.getInstance();
-    final processManager = ProcessManager();
+    final processManager = createProcessManager();
     final skipUnimportant = argResults![_skipUnimportantArg] as bool;
     final packages = repo.getPackages(
       skip: skipUnimportant ? _unimportantDirectories : [],
