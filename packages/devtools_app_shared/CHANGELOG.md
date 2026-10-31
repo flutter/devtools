@@ -14,6 +14,7 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
   such as the `file:` URI of a Dart CLI app started with `dart run`. Previously it
   was the scheme of the URI, such as `file:`, which is not a package.
 * Updates `devtools_shared` constraint to `^14.0.1`.
+* Add `windows` to the values of the `togglePlatformMode` service extension.
 
 ## 0.5.1
 * Add DevTools-styled text field `DevToolsTextField`.

@@ -198,7 +198,7 @@ final toggleOnDeviceWidgetInspector = ToggleableServiceExtension<bool>(
 final togglePlatformMode = ServiceExtension<String>(
   extension:
       '$flutterExtensionPrefix${FoundationServiceExtensions.platformOverride.name}',
-  values: ['iOS', 'android', 'fuchsia', 'macOS', 'linux'],
+  values: ['iOS', 'android', 'fuchsia', 'macOS', 'linux', 'windows'],
 );
 
 /// Override the platform brightness (light mode, dark mode, or system default).
