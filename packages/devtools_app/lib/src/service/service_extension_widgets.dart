@@ -24,6 +24,7 @@ import '../shared/globals.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/ui/common_widgets.dart';
+import '../shared/ui/drop_down_button.dart';
 import '../shared/ui/hover.dart';
 import 'service_extensions.dart';
 import 'service_registrations.dart';
@@ -1215,3 +1216,110 @@ class TogglePlatformSelector extends ServiceExtensionSelector {
 }
 
  */
+
+/// Dropdown that overrides the target platform of the connected Flutter app
+/// using the [togglePlatformMode] service extension.
+///
+/// Hidden when the connected app does not expose the service extension, for
+/// example when it runs in profile or release mode.
+class PlatformOverrideDropdown extends StatelessWidget {
+  const PlatformOverrideDropdown({super.key});
+
+  @visibleForTesting
+  static const dropdownKey = Key('PlatformOverrideDropdown DropdownButton');
+
+  static const _fuchsia = 'fuchsia';
+
+  @override
+  Widget build(BuildContext context) {
+    final extensionManager =
+        serviceConnection.serviceManager.serviceExtensionManager;
+    final extensionName = togglePlatformMode.extension;
+    return ValueListenableBuilder<bool>(
+      valueListenable: extensionManager.hasServiceExtension(extensionName),
+      builder: (context, available, _) {
+        if (!available) return const SizedBox.shrink();
+        return ValueListenableBuilder<ServiceExtensionState>(
+          valueListenable: extensionManager.getServiceExtensionState(
+            extensionName,
+          ),
+          builder: (context, state, _) {
+            // The value is null until DevTools has read it from the app.
+            final current = state.value as String?;
+            return AnalyticsDropDownButton<String>(
+              key: dropdownKey,
+              gaScreen: gac.inspector,
+              gaDropDownId: gac.togglePlatform,
+              message: togglePlatformMode.tooltip,
+              isDense: true,
+              value: current,
+              items: [
+                for (final platform in _platformsToShow(current))
+                  _buildMenuItem(platform),
+              ],
+              onChanged: _onPlatformChanged,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// The platforms to list in the menu.
+  ///
+  /// This must include [current], or [DropdownButton] throws.
+  List<String> _platformsToShow(String? current) {
+    final platforms = togglePlatformMode.values;
+    return [
+      // Only list Fuchsia when the app is already using it.
+      for (final platform in platforms)
+        if (platform != _fuchsia || platform == current) platform,
+      // The app can report a platform that DevTools does not list yet, such as
+      // one added in a newer version of Flutter.
+      if (current != null && !platforms.contains(current)) current,
+    ];
+  }
+
+  ({DropdownMenuItem<String> item, String gaId}) _buildMenuItem(
+    String platform,
+  ) {
+    final index = togglePlatformMode.values.indexOf(platform);
+    final label = index == -1
+        ? platform
+        : togglePlatformMode.displayValues[index];
+    return (
+      item: DropdownMenuItem<String>(
+        value: platform,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(_iconFor(platform), size: defaultIconSize),
+            const SizedBox(width: densePadding),
+            Text(label),
+          ],
+        ),
+      ),
+      gaId: platform,
+    );
+  }
+
+  static IconData _iconFor(String platform) => switch (platform) {
+    'android' => Icons.android,
+    'iOS' => Icons.phone_iphone,
+    'macOS' => Icons.laptop_mac,
+    'windows' => Icons.desktop_windows,
+    _ => Icons.computer,
+  };
+
+  void _onPlatformChanged(String? platform) {
+    if (platform == null) return;
+    unawaited(
+      serviceConnection.serviceManager.serviceExtensionManager
+          .setServiceExtensionState(
+            togglePlatformMode.extension,
+            enabled: true,
+            value: platform,
+          ),
+    );
+  }
+}

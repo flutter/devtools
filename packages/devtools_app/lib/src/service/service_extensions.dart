@@ -354,19 +354,11 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>.from(
   gaDocsItem: gac.slowAnimationDocs,
 );
 
-// TODO(https://github.com/flutter/devtools/issues/2780): hook this up in the UI.
-// ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/2780).
 final togglePlatformMode = ServiceExtensionDescription<String>.from(
   extensions.togglePlatformMode,
   title: 'Override target platform',
   iconAsset: 'icons/phone@2x.png',
-  displayValues: [
-    'Platform: iOS',
-    'Platform: Android',
-    'Platform: Fuchsia',
-    'Platform: MacOS',
-    'Platform: Linux',
-  ],
+  displayValues: ['iOS', 'Android', 'Fuchsia', 'macOS', 'Linux', 'Windows'],
   gaScreenName: gac.inspector,
   gaItem: gac.togglePlatform,
   tooltip: 'Override Target Platform',
