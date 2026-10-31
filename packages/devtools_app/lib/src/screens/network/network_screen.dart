@@ -69,10 +69,13 @@ class NetworkScreen extends Screen {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Showing ${nf.format(filteredCount)} of '
-              '${nf.format(totalCount)} '
-              '${pluralize('request', totalCount)}',
+            Flexible(
+              child: Text(
+                'Showing ${nf.format(filteredCount)} of '
+                '${nf.format(totalCount)} '
+                '${pluralize('request', totalCount)}',
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             const SizedBox(width: denseSpacing),
             child!,
@@ -183,6 +186,13 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
 
   bool _recording = false;
 
+  // The search and filter fields move between rows as the screen width
+  // crosses the responsive breakpoints below. The stable keys keep each
+  // field's state (text, selection, and focus) attached to the field when it
+  // is reparented to a different row in the same frame.
+  final _searchFieldKey = GlobalKey(debugLabel: 'networkSearchField');
+  final _filterFieldKey = GlobalKey(debugLabel: 'networkFilterField');
+
   @override
   void initState() {
     super.initState();
@@ -202,6 +212,26 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     }
 
     final screenWidth = ScreenSize(context).width;
+    // The search field's navigation controls and the filter field's prefix and
+    // suffix controls need more width than is left beside the other controls
+    // on narrow screens. Below [MediaSize.s] the filter field moves to its own
+    // row, and below [MediaSize.xs] the search field does too. The threshold
+    // for the filter row is [MediaSize.s] because the filter field's suffix
+    // controls overflowed by 16 pixels at a 600 pixel width.
+    final searchOnOwnRow = screenWidth <= MediaSize.xs;
+    final filterOnOwnRow = screenWidth <= MediaSize.s;
+    final searchField = SearchField<NetworkController>(
+      key: _searchFieldKey,
+      searchController: controller,
+      searchFieldWidth: screenWidth <= MediaSize.xs
+          ? defaultSearchFieldWidth
+          : wideSearchFieldWidth,
+    );
+    final filterField = StandaloneFilterField<NetworkRequest>(
+      key: _filterFieldKey,
+      controller: controller,
+      filteredItem: 'request',
+    );
     return Column(
       children: [
         Row(
@@ -226,21 +256,14 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
             ),
             const SizedBox(width: denseSpacing),
             // TODO(kenz): fix focus issue when state is refreshed
-            Expanded(
-              child: SearchField<NetworkController>(
-                searchController: controller,
-                searchFieldWidth: screenWidth <= MediaSize.xs
-                    ? defaultSearchFieldWidth
-                    : wideSearchFieldWidth,
-              ),
-            ),
-            const SizedBox(width: denseSpacing),
-            Expanded(
-              child: StandaloneFilterField<NetworkRequest>(
-                controller: controller,
-                filteredItem: 'request',
-              ),
-            ),
+            if (searchOnOwnRow)
+              const Spacer()
+            else
+              Expanded(child: searchField),
+            if (!filterOnOwnRow) ...[
+              const SizedBox(width: denseSpacing),
+              Expanded(child: filterField),
+            ],
             const SizedBox(width: denseSpacing),
             OpenSaveButtonGroup(
               screenId: ScreenMetaData.network.id,
@@ -262,6 +285,19 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
             ),
           ],
         ),
+        // On narrow screens, place the search and filter fields on their own
+        // rows so that each has enough space for its navigation, prefix, and
+        // suffix controls without overflowing.
+        if (searchOnOwnRow)
+          Padding(
+            padding: const EdgeInsets.only(top: denseSpacing),
+            child: Row(children: [Expanded(child: searchField)]),
+          ),
+        if (filterOnOwnRow)
+          Padding(
+            padding: const EdgeInsets.only(top: denseSpacing),
+            child: filterField,
+          ),
         if (!_recording)
           const Padding(
             padding: EdgeInsets.only(top: intermediateSpacing),

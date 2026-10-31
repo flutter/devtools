@@ -47,7 +47,11 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed an issue where the Network screen's toolbar controls and footer status
+  bar would overflow and overlap on narrow screens. On compact widths, the
+  video tutorial link and the embedded DevTools actions moved into the
+  More actions menu in the footer.
+  [#10004](https://github.com/flutter/devtools/issues/10004)
 
 ## Logging updates
 
