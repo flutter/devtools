@@ -55,7 +55,8 @@ TODO: Remove this section if there are not any updates.
 
 ## App size tool updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed treemap tooltip text color across light and dark theme
+  [#10035](https://github.com/flutter/devtools/pull/10035)
 
 ## Deep links tool updates
 
