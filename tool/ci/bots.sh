@@ -30,8 +30,7 @@ if [ "$BOT" = "main" ]; then
 
 elif [ "$BOT" = "build_ddc" ]; then
 
-    # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
-    flutter build web --pwa-strategy=none --no-tree-shake-icons
+    flutter build web --no-tree-shake-icons
 
 elif [ "$BOT" = "build_dart2js" ]; then
 
