@@ -15,8 +15,11 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-* Remove the legacy Provider screen, which was a placeholder to point users to
+* Removed the legacy Provider screen, which was a placeholder to point users to
 the `package:provider` DevTools extension. [#10046](https://github.com/flutter/devtools/pull/10046)
+* Added user-facing error notifications when importing data files that are
+  missing required fields or contain no data for the screen.
+  [#10005](https://github.com/flutter/devtools/pull/10005)
 
 ## Inspector updates
 
@@ -24,9 +27,18 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
+* Reduced the memory used when saving Performance data for offline viewing,
+  and made the saved files smaller. Files saved with this version cannot be
+  opened in older versions of DevTools. Files saved with older versions can
+  still be opened.
+  [#10034](https://github.com/flutter/devtools/pull/10034),
+  [#10010](https://github.com/flutter/devtools/issues/10010)
+* Fixed an issue where importing performance data with Flutter frames but no
+  timeline trace would treat the data as empty.
+  [#10005](https://github.com/flutter/devtools/pull/10005)
 * Fixed the Performance page loading forever when the connected app uses a
   timeline recorder that DevTools cannot read from, such as systrace.
-  [#6524](https://github.com/flutter/devtools/issues/6524)
+  [#10054](https://github.com/flutter/devtools/pull/10054)
 
 ## CPU profiler updates
 

@@ -24,6 +24,8 @@ void main() {
         AppSizeApi.testAppSizeFilePropertyName: '/path/to/test/file.json',
         DevToolsQueryParams.ideKey: 'Android-Studio',
         DevToolsQueryParams.ideFeatureKey: 'onDebugAutomatic',
+        DevToolsQueryParams.dashToolKey: 'intellij-plugins',
+        DevToolsQueryParams.dashIdeNameKey: 'Android Studio',
         DevToolsQueryParams.legacyPageKey: 'memory',
         // IdeThemeQueryParams values
         'embedMode': 'one',
@@ -47,6 +49,10 @@ void main() {
       expect(params.appSizeTestFilePath, '/path/to/test/file.json');
       expect(params.ide, 'Android-Studio');
       expect(params.ideFeature, 'onDebugAutomatic');
+      expect(params.dashTool, 'intellij-plugins');
+      expect(params.dashIdeName, 'Android Studio');
+      expect(params.ideDisplayName, 'Android Studio');
+      expect(params.isVsCode, false);
       expect(params.legacyPage, 'memory');
       expect(params.ideThemeParams.params, isNotEmpty);
       expect(params.embedMode, EmbedMode.embedOne);
@@ -68,6 +74,10 @@ void main() {
       expect(params.appSizeTestFilePath, isNull);
       expect(params.ide, isNull);
       expect(params.ideFeature, isNull);
+      expect(params.dashTool, isNull);
+      expect(params.dashIdeName, isNull);
+      expect(params.ideDisplayName, isNull);
+      expect(params.isVsCode, false);
       expect(params.legacyPage, isNull);
       expect(params.ideThemeParams.params, isEmpty);
       expect(params.embedMode, EmbedMode.none);
@@ -83,6 +93,8 @@ void main() {
         AppSizeApi.testAppSizeFilePropertyName: '/path/to/test/file.json',
         DevToolsQueryParams.ideKey: 'Android-Studio',
         DevToolsQueryParams.ideFeatureKey: 'onDebugAutomatic',
+        DevToolsQueryParams.dashToolKey: 'intellij-plugins',
+        DevToolsQueryParams.dashIdeNameKey: 'Android Studio',
         DevToolsQueryParams.legacyPageKey: 'memory',
         // IdeThemeQueryParams values
         'embedMode': 'one',
@@ -99,6 +111,8 @@ void main() {
       expect(params.appSizeTestFilePath, '/path/to/test/file.json');
       expect(params.ide, 'Android-Studio');
       expect(params.ideFeature, 'onDebugAutomatic');
+      expect(params.dashTool, 'intellij-plugins');
+      expect(params.dashIdeName, 'Android Studio');
       expect(params.legacyPage, 'memory');
       expect(params.ideThemeParams.params, isNotEmpty);
       expect(params.embedMode, EmbedMode.embedOne);
@@ -125,6 +139,8 @@ void main() {
       expect(params.appSizeTestFilePath, '/path/to/test/file.json');
       expect(params.ide, 'Android-Studio');
       expect(params.ideFeature, 'onDebugAutomatic');
+      expect(params.dashTool, 'intellij-plugins');
+      expect(params.dashIdeName, 'Android Studio');
       expect(params.legacyPage, 'memory');
       expect(params.ideThemeParams.params, isNotEmpty);
       expect(params.embedMode, EmbedMode.embedMany);
@@ -155,6 +171,101 @@ void main() {
           equals({'key': 'value.json', 'key2': '123'}),
         );
       }
+    });
+
+    test('parses the dashTool and dashIdeName that IDEs pass in the URL', () {
+      // Dart-Code percent-encodes spaces, and flutter-intellij encodes them as
+      // '+'. Both should be decoded.
+      final vsCodeParams = DevToolsQueryParams.fromUrl(
+        'http://localhost:9101/#/inspector?ide=VSCode&dashTool=vscode-plugins'
+        '&dashIdeName=Visual%20Studio%20Code',
+      );
+      expect(vsCodeParams.ide, 'VSCode');
+      expect(vsCodeParams.dashTool, 'vscode-plugins');
+      expect(vsCodeParams.dashIdeName, 'Visual Studio Code');
+
+      final intelliJParams = DevToolsQueryParams.fromUrl(
+        'http://localhost:9101/?ide=Android-Studio&dashTool=intellij-plugins'
+        '&dashIdeName=Android+Studio',
+      );
+      expect(intelliJParams.ide, 'Android-Studio');
+      expect(intelliJParams.dashTool, 'intellij-plugins');
+      expect(intelliJParams.dashIdeName, 'Android Studio');
+    });
+
+    group('isVsCode', () {
+      test('is true for the vscode-plugins dashTool', () {
+        final params = DevToolsQueryParams({
+          DevToolsQueryParams.dashToolKey: 'vscode-plugins',
+          DevToolsQueryParams.dashIdeNameKey: 'Visual Studio Code',
+        });
+        expect(params.isVsCode, true);
+      });
+
+      test('is true for VS Code forks, which share the dashTool', () {
+        final params = DevToolsQueryParams({
+          // A fork does not have to use the legacy 'VSCode' ide value.
+          DevToolsQueryParams.ideKey: 'Cursor',
+          DevToolsQueryParams.dashToolKey: 'vscode-plugins',
+          DevToolsQueryParams.dashIdeNameKey: 'Cursor',
+        });
+        expect(params.isVsCode, true);
+      });
+
+      test('falls back to the legacy ide parameter', () {
+        final params = DevToolsQueryParams({
+          DevToolsQueryParams.ideKey: 'VSCode',
+        });
+        expect(params.isVsCode, true);
+      });
+
+      test('is false for IntelliJ and Android Studio', () {
+        // Both pass the intellij-plugins dashTool, and are told apart by their
+        // dashIdeName.
+        for (final (ide, dashIdeName) in const [
+          ('IntelliJ-IDEA', 'IntelliJ Community'),
+          ('Android-Studio', 'Android Studio'),
+        ]) {
+          final params = DevToolsQueryParams({
+            DevToolsQueryParams.ideKey: ide,
+            DevToolsQueryParams.dashToolKey: 'intellij-plugins',
+            DevToolsQueryParams.dashIdeNameKey: dashIdeName,
+          });
+          expect(params.isVsCode, false, reason: dashIdeName);
+        }
+      });
+
+      test('is false for IDEs that only pass the legacy ide parameter', () {
+        for (final ide in ['IntelliJ-IDEA', 'Android-Studio']) {
+          final params = DevToolsQueryParams({DevToolsQueryParams.ideKey: ide});
+          expect(params.isVsCode, false, reason: ide);
+        }
+      });
+
+      test('is false when DevTools is not launched from an IDE', () {
+        expect(DevToolsQueryParams.empty().isVsCode, false);
+      });
+    });
+
+    group('ideDisplayName', () {
+      test('prefers dashIdeName, which identifies VS Code forks', () {
+        final params = DevToolsQueryParams({
+          DevToolsQueryParams.ideKey: 'VSCode',
+          DevToolsQueryParams.dashIdeNameKey: 'Cursor',
+        });
+        expect(params.ideDisplayName, 'Cursor');
+      });
+
+      test('falls back to the legacy ide parameter', () {
+        final params = DevToolsQueryParams({
+          DevToolsQueryParams.ideKey: 'Android-Studio',
+        });
+        expect(params.ideDisplayName, 'Android-Studio');
+      });
+
+      test('is null when DevTools is not launched from an IDE', () {
+        expect(DevToolsQueryParams.empty().ideDisplayName, isNull);
+      });
     });
   });
 }
