@@ -101,6 +101,41 @@ void main() {
     );
 
     test(
+      'does not send the brightness that the app reports back to the app',
+      () async {
+        final extensionManager =
+            serviceConnection.serviceManager.serviceExtensionManager
+                as FakeServiceExtensionManager;
+        final brightnessExtension = brightnessMode.extension;
+        extensionManager.extensionValueOnDevice[brightnessExtension] =
+            'Brightness.dark';
+        await extensionManager.fakeAddServiceExtension(brightnessExtension);
+        await extensionManager.fakeFrame();
+        // Forget the brightness on the device, so that a call to set it shows.
+        extensionManager.extensionValueOnDevice.remove(brightnessExtension);
+
+        // The page opens after DevTools read the brightness of the app.
+        final pageController = AccessibilityController()..init();
+        addTearDown(pageController.dispose);
+        expect(pageController.brightness.value, BrightnessOverride.dark);
+        // Let any call that the page makes in response finish.
+        await pumpEventQueue();
+
+        extensionManager.fakeServiceExtensionStateChanged(
+          brightnessExtension,
+          'Brightness.light',
+        );
+        expect(pageController.brightness.value, BrightnessOverride.light);
+
+        await pumpEventQueue();
+        expect(
+          extensionManager.extensionValueOnDevice,
+          isNot(contains(brightnessExtension)),
+        );
+      },
+    );
+
+    test(
       'setting controller brightness updates service extension state',
       () async {
         final fakeServiceExtensionManager =
@@ -111,20 +146,17 @@ void main() {
         expect(controller.brightness.value, BrightnessOverride.system);
 
         // Set to dark mode
-        controller.brightness.value = BrightnessOverride.dark;
-
-        // Wait for async operations to complete
-        await Future<void>.delayed(Duration.zero);
+        await controller.setBrightness(BrightnessOverride.dark);
 
         final darkState = fakeServiceExtensionManager
             .getServiceExtensionState(brightnessMode.extension)
             .value;
         expect(darkState.value, equals('Brightness.dark'));
         expect(darkState.enabled, isTrue);
+        expect(controller.brightness.value, BrightnessOverride.dark);
 
         // Set to light mode
-        controller.brightness.value = BrightnessOverride.light;
-        await Future<void>.delayed(Duration.zero);
+        await controller.setBrightness(BrightnessOverride.light);
 
         final lightState = fakeServiceExtensionManager
             .getServiceExtensionState(brightnessMode.extension)
@@ -133,8 +165,7 @@ void main() {
         expect(lightState.enabled, isTrue);
 
         // Set to system
-        controller.brightness.value = BrightnessOverride.system;
-        await Future<void>.delayed(Duration.zero);
+        await controller.setBrightness(BrightnessOverride.system);
 
         final systemState = fakeServiceExtensionManager
             .getServiceExtensionState(brightnessMode.extension)
@@ -143,6 +174,43 @@ void main() {
         expect(systemState.enabled, isFalse);
       },
     );
+
+    test('restores the brightness override after a hot restart', () async {
+      final extensionManager =
+          serviceConnection.serviceManager.serviceExtensionManager
+              as FakeServiceExtensionManager;
+      final isolateManager =
+          serviceConnection.serviceManager.isolateManager as FakeIsolateManager;
+      final brightnessExtension = brightnessMode.extension;
+      await extensionManager.fakeAddServiceExtension(brightnessExtension);
+      await extensionManager.fakeFrame();
+      await controller.setBrightness(BrightnessOverride.dark);
+      // Let any call that the page makes in response finish.
+      await pumpEventQueue();
+
+      // A hot restart replaces the main isolate, and the new one starts
+      // without the override.
+      extensionManager.fakeMainIsolateClosed();
+      isolateManager.setMainIsolate(null);
+      extensionManager.extensionValueOnDevice.remove(brightnessExtension);
+      isolateManager.setMainIsolate(
+        IsolateRef.parse({'id': 'new_main_isolate_id'}),
+      );
+      await extensionManager.fakeAddServiceExtension(brightnessExtension);
+      await extensionManager.fakeFrame();
+      expect(
+        extensionManager.extensionValueOnDevice[brightnessExtension],
+        'Brightness.dark',
+      );
+      expect(controller.brightness.value, BrightnessOverride.dark);
+
+      // The page follows the brightness of the new main isolate.
+      extensionManager.fakeServiceExtensionStateChanged(
+        brightnessExtension,
+        'Brightness.light',
+      );
+      expect(controller.brightness.value, BrightnessOverride.light);
+    });
 
     test(
       'SemanticsNodeModel properties, parseRect, rectDisplay, and shallowCopy',
