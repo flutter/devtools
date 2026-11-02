@@ -26,6 +26,7 @@ import '../shared/primitives/utils.dart';
 import '../shared/ui/common_widgets.dart';
 import '../shared/ui/drop_down_button.dart';
 import '../shared/ui/hover.dart';
+import '../shared/utils/utils.dart';
 import 'service_extensions.dart';
 import 'service_registrations.dart';
 
@@ -1235,31 +1236,29 @@ class PlatformOverrideDropdown extends StatelessWidget {
     final extensionManager =
         serviceConnection.serviceManager.serviceExtensionManager;
     final extensionName = togglePlatformMode.extension;
-    return ValueListenableBuilder<bool>(
-      valueListenable: extensionManager.hasServiceExtension(extensionName),
-      builder: (context, available, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        extensionManager.hasServiceExtension(extensionName),
+        extensionManager.getServiceExtensionState(extensionName),
+      ],
+      builder: (context, values, _) {
+        final available = values[0] as bool;
         if (!available) return const SizedBox.shrink();
-        return ValueListenableBuilder<ServiceExtensionState>(
-          valueListenable: extensionManager.getServiceExtensionState(
-            extensionName,
-          ),
-          builder: (context, state, _) {
-            // The value is null until DevTools has read it from the app.
-            final current = state.value as String?;
-            return AnalyticsDropDownButton<String>(
-              key: dropdownKey,
-              gaScreen: gac.inspector,
-              gaDropDownId: gac.togglePlatform,
-              message: togglePlatformMode.tooltip,
-              isDense: true,
-              value: current,
-              items: [
-                for (final platform in _platformsToShow(current))
-                  _buildMenuItem(platform),
-              ],
-              onChanged: _onPlatformChanged,
-            );
-          },
+        final state = values[1] as ServiceExtensionState;
+        // The value is null until DevTools has read it from the app.
+        final current = state.value as String?;
+        return AnalyticsDropDownButton<String>(
+          key: dropdownKey,
+          gaScreen: gac.inspector,
+          gaDropDownId: gac.togglePlatform,
+          message: togglePlatformMode.tooltip,
+          isDense: true,
+          value: current,
+          items: [
+            for (final platform in _platformsToShow(current))
+              _buildMenuItem(platform),
+          ],
+          onChanged: _onPlatformChanged,
         );
       },
     );
@@ -1313,7 +1312,7 @@ class PlatformOverrideDropdown extends StatelessWidget {
 
   void _onPlatformChanged(String? platform) {
     if (platform == null) return;
-    unawaited(
+    safeUnawaited(
       serviceConnection.serviceManager.serviceExtensionManager
           .setServiceExtensionState(
             togglePlatformMode.extension,
