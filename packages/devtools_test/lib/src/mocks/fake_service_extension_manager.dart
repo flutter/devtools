@@ -194,6 +194,16 @@ base class FakeServiceExtensionManager extends Fake
     }
   }
 
+  /// Hook for tests to simulate the main isolate exiting, as it does during a
+  /// hot restart.
+  ///
+  /// Like [ServiceExtensionManager], this also stops updating the listenables
+  /// that [hasServiceExtension] returned.
+  void fakeMainIsolateClosed() {
+    vmServiceClosed();
+    _serviceExtensionAvailable.clear();
+  }
+
   /// Sets the state for a service extension and makes the call to the VMService.
   @override
   Future<void> setServiceExtensionState(
