@@ -68,6 +68,8 @@ class OfflineDataController {
   }
 }
 
+final _log = Logger('offline_data');
+
 /// Mixin that provides offline support for a DevTools screen controller.
 ///
 /// The [Screen] that is associated with this controller must have
@@ -132,7 +134,6 @@ class OfflineDataController {
 ///   ),
 /// }
 /// ```
-final _log = Logger('offline_data');
 
 mixin OfflineScreenControllerMixin<T>
     on DevToolsScreenController, AutoDisposeControllerMixin {

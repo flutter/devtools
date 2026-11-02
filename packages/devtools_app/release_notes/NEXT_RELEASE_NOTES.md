@@ -20,7 +20,7 @@ To learn more about DevTools, check out the
   [#9957](https://github.com/flutter/devtools/pull/9957)
 * Added user-facing error notifications when importing data files that are
   missing required fields or contain no data for the screen.
-  [TODO](https://github.com/flutter/devtools/pull/TODO)
+  [#10005](https://github.com/flutter/devtools/pull/10005)
 
 ## Inspector updates
 
@@ -30,7 +30,7 @@ TODO: Remove this section if there are not any updates.
 
 * Fixed an issue where importing performance data with Flutter frames but no
   timeline trace would treat the data as empty.
-  [TODO](https://github.com/flutter/devtools/pull/TODO)
+  [#10005](https://github.com/flutter/devtools/pull/10005)
 
 ## CPU profiler updates
 

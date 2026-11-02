@@ -498,9 +498,9 @@ class TimelineEventsController extends PerformanceFeatureController
 
   @override
   Future<void> setOfflineData(OfflinePerformanceData offlineData) async {
-    if (offlineData.perfettoTraceBinary != null &&
-        offlineData.perfettoTraceBinary!.isNotEmpty) {
-      _updatePerfettoTrace(offlineData.perfettoTraceBinary!);
+    final perfettoTraceBinary = offlineData.perfettoTraceBinary;
+    if (perfettoTraceBinary != null && perfettoTraceBinary.isNotEmpty) {
+      _updatePerfettoTrace(perfettoTraceBinary);
       processTrackEvents();
       await loadPerfettoTrace();
     }
