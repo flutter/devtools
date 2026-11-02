@@ -22,15 +22,27 @@ void main() {
   const serverStartupTimeout = Duration(minutes: 1);
 
   Future<void> cleanUp() async {
+    // Close the browser session (ignore errors if it already crashed).
     try {
       await driver?.quit();
-    } finally {
-      driver = null;
-      devtoolsProcess?.kill();
-      devtoolsProcess = null;
-      await chromedriver?.stop(debugLogging: true);
-      chromedriver = null;
+    } catch (e) {
+      // ignore: avoid_print, this is test code.
+      print('Warning: Failed to quit WebDriver cleanly: $e');
     }
+
+    // Stop background processes.
+    devtoolsProcess?.kill();
+    try {
+      await chromedriver?.stop(debugLogging: true);
+    } catch (e) {
+      // ignore: avoid_print, this is test code.
+      print('Warning: Failed to stop chromedriver cleanly: $e');
+    }
+
+    // Reset state.
+    driver = null;
+    devtoolsProcess = null;
+    chromedriver = null;
   }
 
   setUpAll(() async {
