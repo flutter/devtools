@@ -36,6 +36,9 @@ TODO: Remove this section if there are not any updates.
 * Fixed an issue where importing performance data with Flutter frames but no
   timeline trace would treat the data as empty.
   [#10005](https://github.com/flutter/devtools/pull/10005)
+* Fixed the Performance page loading forever when the connected app uses a
+  timeline recorder that DevTools cannot read from, such as systrace.
+  [#10054](https://github.com/flutter/devtools/pull/10054)
 
 ## CPU profiler updates
 
