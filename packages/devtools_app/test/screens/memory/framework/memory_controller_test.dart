@@ -7,11 +7,12 @@ import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
+import 'package:devtools_app_shared/service.dart' show RootInfo;
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -176,5 +177,27 @@ void main() {
       expect(scene.controller.diff.hasSnapshots, false);
       expect(scene.controller.diff.core.snapshots.value.length, 1);
     });
+  });
+
+  group('root package', () {
+    for (final (rootLibrary, expectedRootPackage) in const [
+      ('package:my_app/main.dart', 'package:my_app'),
+      // The root library of a Dart CLI app started with `dart run` is a `file:`
+      // URI, not a `package:` URI.
+      ('file:///app/bin/main.dart', 'file:'),
+    ]) {
+      testWidgets(
+        'is $expectedRootPackage when the root library is $rootLibrary',
+        (WidgetTester tester) async {
+          scene = MemoryDefaultScene();
+          await scene.setUp(
+            classList: classList,
+            rootInfo: RootInfo(rootLibrary),
+          );
+
+          expect(scene.controller.trace!.rootPackage, expectedRootPackage);
+        },
+      );
+    }
   });
 }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
@@ -12,6 +13,8 @@ import 'import_export.dart';
 ExportControllerWeb createExportController() {
   return ExportControllerWeb();
 }
+
+const _revokeObjectUrlDelay = Duration(seconds: 1);
 
 class ExportControllerWeb extends ExportController {
   ExportControllerWeb() : super.impl();
@@ -29,11 +32,16 @@ class ExportControllerWeb extends ExportController {
       throw 'Unsupported content type: $T';
     }
 
-    element.setAttribute('href', URL.createObjectURL(blob));
+    final objectUrl = URL.createObjectURL(blob);
+    element.setAttribute('href', objectUrl);
     element.setAttribute('download', fileName);
     element.style.display = 'none';
     (document.body as HTMLBodyElement).append(element);
     element.click();
     element.remove();
+
+    // Release the memory held by the blob. Revoking synchronously can cancel
+    // the download in some browsers, so wait for the download to start.
+    Timer(_revokeObjectUrlDelay, () => URL.revokeObjectURL(objectUrl));
   }
 }

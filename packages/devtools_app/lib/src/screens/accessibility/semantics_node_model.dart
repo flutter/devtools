@@ -5,16 +5,31 @@
 /// @docImport 'package:flutter/semantics.dart';
 library;
 
-import 'dart:ui' show SemanticsFlag;
+import 'dart:ui' show Rect, SemanticsFlag;
 
 import '../../shared/primitives/trees.dart';
+
+/// Represents an accessibility issue detected on a semantics node.
+class AccessibilityIssue {
+  const AccessibilityIssue({required this.rule, required this.description});
+
+  /// The rule name that was violated.
+  final String rule;
+
+  /// A human-readable description of the issue.
+  final String description;
+}
 
 /// Represents a node in the accessibility semantics tree.
 class SemanticsNodeModel extends TreeNode<SemanticsNodeModel> {
   SemanticsNodeModel({
     required this.id,
     this.label = '',
+    this.value = '',
+    this.hint = '',
+    this.rect,
     this.flags = const <SemanticsFlag>{},
+    this.issues = const <AccessibilityIssue>[],
     this.widgetName = '',
   });
 
@@ -24,8 +39,20 @@ class SemanticsNodeModel extends TreeNode<SemanticsNodeModel> {
   /// The user-visible label announced by screen readers (maps to [SemanticsData.label]).
   final String label;
 
+  /// The textual description of the value of the node (maps to [SemanticsData.value]).
+  final String value;
+
+  /// A brief description of the result of performing an action on the node (maps to [SemanticsData.hint]).
+  final String hint;
+
+  /// The bounding box of the node in logical pixels (maps to [SemanticsNode.rect]).
+  final Rect? rect;
+
   /// Semantic flags active on this node.
   final Set<SemanticsFlag> flags;
+
+  /// The accessibility issues detected for this node.
+  final List<AccessibilityIssue> issues;
 
   /// The name of the Flutter widget that produced this node, if available.
   final String widgetName;
@@ -44,12 +71,58 @@ class SemanticsNodeModel extends TreeNode<SemanticsNodeModel> {
         .toSet();
   }
 
+  /// Parses a JSON representation of a bounding box into a [Rect].
+  static Rect? parseRect(Object? rawRect) {
+    if (rawRect is! Map) return null;
+    final left = (rawRect['left'] as num?)?.toDouble();
+    final top = (rawRect['top'] as num?)?.toDouble();
+    if (left == null || top == null) return null;
+
+    if (rawRect.containsKey('width') && rawRect.containsKey('height')) {
+      final width = (rawRect['width'] as num?)?.toDouble();
+      final height = (rawRect['height'] as num?)?.toDouble();
+      if (width != null && height != null) {
+        return Rect.fromLTWH(left, top, width, height);
+      }
+    }
+    if (rawRect.containsKey('right') && rawRect.containsKey('bottom')) {
+      final right = (rawRect['right'] as num?)?.toDouble();
+      final bottom = (rawRect['bottom'] as num?)?.toDouble();
+      if (right != null && bottom != null) {
+        return Rect.fromLTRB(left, top, right, bottom);
+      }
+    }
+    return null;
+  }
+
+  /// Formatted string representation of [rect] in `Rect.fromLTWH` syntax.
+  String? get rectDisplay {
+    final currentRect = rect;
+    if (currentRect == null) return null;
+    final left = _formatNumber(currentRect.left);
+    final top = _formatNumber(currentRect.top);
+    final width = _formatNumber(currentRect.width);
+    final height = _formatNumber(currentRect.height);
+    return 'rect: Rect.fromLTWH($left, $top, $width, $height)';
+  }
+
+  static String _formatNumber(double value) {
+    if (value == value.truncateToDouble()) {
+      return value.toInt().toString();
+    }
+    return value.toStringAsFixed(1);
+  }
+
   @override
   SemanticsNodeModel shallowCopy() {
     return SemanticsNodeModel(
       id: id,
       label: label,
+      value: value,
+      hint: hint,
+      rect: rect,
       flags: flags,
+      issues: issues,
       widgetName: widgetName,
     );
   }

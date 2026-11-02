@@ -6,8 +6,8 @@ import 'dart:convert';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
+import 'package:material_ui/material_ui.dart';
 
 import '../../shared/http/http.dart';
 import '../../shared/http/http_request_data.dart';

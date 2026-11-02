@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
@@ -29,7 +29,7 @@ class EmbeddedExtensionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final extensionName = ext.displayName;
+    final extensionPackage = ext.packageName;
     return SizedBox(
       width: double.infinity,
       child: Wrap(
@@ -40,7 +40,7 @@ class EmbeddedExtensionHeader extends StatelessWidget {
             padding: const EdgeInsets.only(left: borderPadding),
             child: RichText(
               text: TextSpan(
-                text: 'package:$extensionName extension',
+                text: 'package:$extensionPackage extension',
                 style: theme.regularTextStyle.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -96,7 +96,7 @@ class _ExtensionContextMenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ExtensionEnabledState>(
-      valueListenable: extensionService.enabledStateListenable(ext.displayName),
+      valueListenable: extensionService.enabledStateListenable(ext.packageName),
       builder: (context, activationState, _) {
         if (activationState != ExtensionEnabledState.enabled) {
           return const SizedBox.shrink();
@@ -168,7 +168,10 @@ class DisableExtensionDialog extends StatelessWidget {
               text: 'Are you sure you want to disable the ',
               style: theme.regularTextStyle,
               children: [
-                TextSpan(text: ext.displayName, style: theme.fixedFontStyle),
+                TextSpan(
+                  text: 'package:${ext.packageName}',
+                  style: theme.fixedFontStyle,
+                ),
                 const TextSpan(text: ' extension?'),
               ],
             ),
@@ -233,7 +236,10 @@ class EnableExtensionPrompt extends StatelessWidget {
               text: 'The ',
               style: theme.regularTextStyle,
               children: [
-                TextSpan(text: ext.name, style: theme.fixedFontStyle),
+                TextSpan(
+                  text: 'package:${ext.packageName}',
+                  style: theme.fixedFontStyle,
+                ),
                 const TextSpan(
                   text:
                       ' extension has not been enabled. Do you want to enable'

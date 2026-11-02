@@ -15,11 +15,12 @@ resolution: workspace
 dependencies:
   collection: ^1.15.0
   dds_service_extensions: ^2.0.0
-  devtools_shared: ^14.0.0
+  devtools_shared: ^14.0.1
   dtd: ^4.0.0
   flutter:
     sdk: flutter
   logging: ^1.1.1
+  material_ui: ^1.4.0
   meta: ^1.9.1
   path: ^1.8.0
   pointer_interceptor: ^0.10.1+1

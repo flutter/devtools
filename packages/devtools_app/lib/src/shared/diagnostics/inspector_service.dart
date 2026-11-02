@@ -14,11 +14,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/service_extensions.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -918,6 +918,24 @@ abstract class InspectorObjectGroupBase
           : WidgetInspectorServiceExtensions.getChildrenDetailsSubtree.name,
       parent,
       false,
+    );
+  }
+
+  @override
+  Future<RemoteDiagnosticsNode?> getDetailsSubtree(
+    RemoteDiagnosticsNode? node, {
+    int subtreeDepth = 2,
+  }) async {
+    if (node == null || node.valueRef.id == null) return null;
+    return parseDiagnosticsNodeDaemon(
+      invokeServiceMethodDaemonParams(
+        WidgetInspectorServiceExtensions.getDetailsSubtree.name,
+        {
+          'objectGroup': groupName,
+          'arg': node.valueRef.id,
+          'subtreeDepth': subtreeDepth.toString(),
+        },
+      ),
     );
   }
 

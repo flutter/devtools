@@ -11,8 +11,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../test_infra/test_data/performance/sample_performance_data.dart';
 
@@ -155,7 +155,29 @@ void main() {
         expect(scrollController.offset, equals(expectedOffset));
       }
 
-      testWidgets('is zero for no selected frame', (WidgetTester tester) async {
+      void verifyScrollAtLiveEdge(WidgetTester tester) {
+        final scrollbar = tester.widget<Scrollbar>(find.byType(Scrollbar));
+        final scrollController = scrollbar.controller!;
+        expect(
+          scrollController.offset,
+          equals(scrollController.position.maxScrollExtent),
+        );
+      }
+
+      FlutterFrame createFrame(int number) {
+        return FlutterFrame.fromJson({
+          'number': number,
+          'startTime': 10000 + number * 50000,
+          'elapsed': 20000,
+          'build': 10000,
+          'raster': 12000,
+          'vsyncOverhead': 10,
+        });
+      }
+
+      testWidgets('is at live edge for no selected frame', (
+        WidgetTester tester,
+      ) async {
         expect(framesController.selectedFrame.value, isNull);
 
         await pumpChart(tester);
@@ -165,7 +187,39 @@ void main() {
           findsNWidgets(totalFramesInView),
         );
 
-        verifyScrollOffset(tester, 0.0);
+        verifyScrollAtLiveEdge(tester);
+      });
+
+      testWidgets('stays at live edge when frames are added', (
+        WidgetTester tester,
+      ) async {
+        expect(framesController.selectedFrame.value, isNull);
+
+        await pumpChart(tester);
+        verifyScrollAtLiveEdge(tester);
+
+        framesController.addFrame(createFrame(totalNumFrames));
+        await tester.pumpAndSettle();
+        verifyScrollAtLiveEdge(tester);
+      });
+
+      testWidgets('docks to live edge after remount with no selection', (
+        WidgetTester tester,
+      ) async {
+        expect(framesController.selectedFrame.value, isNull);
+
+        await pumpChart(tester);
+        verifyScrollAtLiveEdge(tester);
+
+        // Leave Performance (dispose chart), then remount after new frames.
+        await tester.pumpWidget(wrap(const SizedBox.shrink()));
+        await tester.pumpAndSettle();
+
+        framesController.addFrame(createFrame(totalNumFrames));
+        framesController.addFrame(createFrame(totalNumFrames + 1));
+
+        await pumpChart(tester);
+        verifyScrollAtLiveEdge(tester);
       });
 
       testWidgets('is offset for selected frame', (WidgetTester tester) async {

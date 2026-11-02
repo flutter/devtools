@@ -69,14 +69,29 @@ class IsolateState {
   }
 }
 
+/// Information about the root library of an isolate of the connected app.
+///
+/// The root library is the library that contains the `main` function of the
+/// isolate. See also [Isolate.rootLib].
 class RootInfo {
   RootInfo(this.library) : package = _libraryToPackage(library);
 
+  /// The URI of the root library, or `null` if it is unknown.
+  ///
+  /// This is not necessarily a `package:` URI. For example, the root library of
+  /// a Dart CLI app started with `dart run` is a `file:` URI like
+  /// `file:///app/bin/main.dart`.
   final String? library;
+
+  /// The package that contains the root library, in the form `package:name`, or
+  /// `null` if it is unknown.
+  ///
+  /// This is `null` if [library] is `null` or is not a `package:` URI (for
+  /// example, a `file:` URI), since the name of the package is not known then.
   final String? package;
 
   static String? _libraryToPackage(String? library) {
-    if (library == null) return null;
+    if (library == null || !library.startsWith('package:')) return null;
     final slashIndex = library.indexOf('/');
     if (slashIndex == -1) return library;
     return library.substring(0, slashIndex);

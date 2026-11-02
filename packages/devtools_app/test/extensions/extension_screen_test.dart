@@ -12,8 +12,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   const windowSize = Size(2000.0, 2000.0);
@@ -79,34 +79,76 @@ void main() {
       await tester.pumpWidget(wrap(Builder(builder: fooScreen.build)));
       expect(find.byType(ExtensionView), findsOneWidget);
       expect(find.byType(EmbeddedExtensionHeader), findsOneWidget);
-      expect(find.richTextContaining('package:foo extension'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(EmbeddedExtensionHeader),
+          matching: find.richTextContaining('package:foo extension'),
+        ),
+        findsOneWidget,
+      );
       expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
       expect(find.richTextContaining('Report an issue'), findsOneWidget);
       expect(_extensionContextMenuFinder, findsNothing);
       expect(find.byType(EnableExtensionPrompt), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(EnableExtensionPrompt),
+          matching: find.richTextContaining(
+            'The package:foo extension has not been enabled',
+          ),
+        ),
+        findsOneWidget,
+      );
       expect(find.byType(EmbeddedExtensionView), findsNothing);
 
       await tester.pumpWidget(wrap(Builder(builder: barScreen.build)));
       expect(find.byType(ExtensionView), findsOneWidget);
       expect(find.byType(EmbeddedExtensionHeader), findsOneWidget);
-      expect(find.richTextContaining('package:bar extension'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(EmbeddedExtensionHeader),
+          matching: find.richTextContaining('package:bar extension'),
+        ),
+        findsOneWidget,
+      );
       expect(find.richTextContaining('(v2.0.0)'), findsOneWidget);
       expect(find.richTextContaining('Report an issue'), findsOneWidget);
       expect(_extensionContextMenuFinder, findsNothing);
       expect(find.byType(EnableExtensionPrompt), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(EnableExtensionPrompt),
+          matching: find.richTextContaining(
+            'The package:bar extension has not been enabled',
+          ),
+        ),
+        findsOneWidget,
+      );
       expect(find.byType(EmbeddedExtensionView), findsNothing);
 
       await tester.pumpWidget(wrap(Builder(builder: providerScreen.build)));
       expect(find.byType(ExtensionView), findsOneWidget);
       expect(find.byType(EmbeddedExtensionHeader), findsOneWidget);
       expect(
-        find.richTextContaining('package:provider extension'),
+        find.descendant(
+          of: find.byType(EmbeddedExtensionHeader),
+          matching: find.richTextContaining('package:provider extension'),
+        ),
         findsOneWidget,
       );
       expect(find.richTextContaining('(v3.0.0)'), findsOneWidget);
       expect(find.richTextContaining('Report an issue'), findsOneWidget);
       expect(_extensionContextMenuFinder, findsNothing);
       expect(find.byType(EnableExtensionPrompt), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(EnableExtensionPrompt),
+          matching: find.richTextContaining(
+            'The package:provider extension has not been enabled',
+          ),
+        ),
+        findsOneWidget,
+      );
       expect(find.byType(EmbeddedExtensionView), findsNothing);
     });
 
@@ -141,11 +183,26 @@ void main() {
       await tester.pumpWidget(wrap(Builder(builder: fooScreen.build)));
       expect(find.byType(ExtensionView), findsOneWidget);
       expect(find.byType(EmbeddedExtensionHeader), findsOneWidget);
-      expect(find.richTextContaining('package:foo extension'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(EmbeddedExtensionHeader),
+          matching: find.richTextContaining('package:foo extension'),
+        ),
+        findsOneWidget,
+      );
       expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
       expect(find.richTextContaining('Report an issue'), findsOneWidget);
       expect(_extensionContextMenuFinder, findsNothing);
       expect(find.byType(EnableExtensionPrompt), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(EnableExtensionPrompt),
+          matching: find.richTextContaining(
+            'The package:foo extension has not been enabled',
+          ),
+        ),
+        findsOneWidget,
+      );
       expect(find.byType(EmbeddedExtensionView), findsNothing);
     });
 

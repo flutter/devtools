@@ -4,7 +4,7 @@
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../../../../shared/charts/chart_controller.dart';
 import '../../../../../../shared/charts/chart_trace.dart' as chart_trace;

@@ -3,7 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart' as devtools_shared_ui;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ExampleWidget extends StatelessWidget {
   const ExampleWidget({super.key});

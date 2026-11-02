@@ -4,7 +4,7 @@
 
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class IdeThemedMaterialApp extends StatelessWidget {
   const IdeThemedMaterialApp({super.key, required this.home});

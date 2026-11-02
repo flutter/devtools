@@ -30,51 +30,59 @@ class RollbackCommand extends Command {
     final tempDir = (await io.Directory.systemTemp.createTemp(
       'devtools-rollback',
     )).absolute;
-    print('file://${tempDir.path}');
-    final tarball = io.File('${tempDir.path}/devtools.tar.gz');
-    final extractDir = await io.Directory(
-      '${tempDir.path}/extract/',
-    ).absolute.create();
-    final client = io.HttpClient();
-    final version = argResults![_toVersionArg] as String;
-    print('downloading tarball to ${tarball.path}');
-    final tarballRequest = await client.getUrl(
-      Uri.http(
-        'storage.googleapis.com',
-        'pub-packages/packages/devtools-$version.tar.gz',
-      ),
-    );
-    final tarballResponse = await tarballRequest.close();
-    await tarballResponse.pipe(tarball.openWrite());
-    print('Tarball written; unzipping.');
+    try {
+      print('file://${tempDir.path}');
+      final tarball = io.File('${tempDir.path}/devtools.tar.gz');
+      final extractDir = await io.Directory(
+        '${tempDir.path}/extract/',
+      ).absolute.create();
+      final client = io.HttpClient();
+      final version = argResults![_toVersionArg] as String;
+      print('downloading tarball to ${tarball.path}');
+      final tarballRequest = await client.getUrl(
+        Uri.http(
+          'storage.googleapis.com',
+          'pub-packages/packages/devtools-$version.tar.gz',
+        ),
+      );
+      final tarballResponse = await tarballRequest.close();
+      await tarballResponse.pipe(tarball.openWrite());
+      print('Tarball written; unzipping.');
 
-    await io.Process.run('tar', [
-      '-x',
-      '-z',
-      '-f',
-      tarball.path.split('/').last,
-      '-C',
-      extractDir.path,
-    ], workingDirectory: tempDir.path);
-    print('file://${tempDir.path}');
+      await io.Process.run('tar', [
+        '-x',
+        '-z',
+        '-f',
+        tarball.path.split('/').last,
+        '-C',
+        extractDir.path,
+      ], workingDirectory: tempDir.path);
+      print('file://${tempDir.path}');
 
-    final buildDir = io.Directory('${repo.repoPath}/packages/devtools/build/');
-    await buildDir.delete(recursive: true);
-    await io.Directory(
-      '${extractDir.path}build/',
-    ).rename('${repo.repoPath}/packages/devtools/build/');
+      final buildDir = io.Directory(
+        '${repo.repoPath}/packages/devtools/build/',
+      );
+      await buildDir.delete(recursive: true);
+      await io.Directory(
+        '${extractDir.path}build/',
+      ).rename('${repo.repoPath}/packages/devtools/build/');
 
-    print(
-      'Build outputs from Devtools version $version checked out and moved '
-      'to ${buildDir.path}',
-    );
-    print(
-      'To complete the rollback, go to ${repo.repoPath}/packages/devtools, '
-      'rev pubspec.yaml, update the changelog, unhide build/ from the '
-      'packages/devtools/.gitignore file, then run pub publish.',
-    );
-    // TODO(djshuckerow): automatically rev pubspec.yaml and update the
-    // changelog so that the user can just run pub publish from
-    // packages/devtools.
+      print(
+        'Build outputs from Devtools version $version checked out and moved '
+        'to ${buildDir.path}',
+      );
+      print(
+        'To complete the rollback, go to ${repo.repoPath}/packages/devtools, '
+        'rev pubspec.yaml, update the changelog, unhide build/ from the '
+        'packages/devtools/.gitignore file, then run pub publish.',
+      );
+      // TODO(djshuckerow): automatically rev pubspec.yaml and update the
+      // changelog so that the user can just run pub publish from
+      // packages/devtools.
+    } finally {
+      if (await tempDir.exists()) {
+        await tempDir.delete(recursive: true);
+      }
+    }
   }
 }

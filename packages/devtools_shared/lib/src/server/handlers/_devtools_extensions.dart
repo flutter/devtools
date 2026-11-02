@@ -104,12 +104,15 @@ extension _ExtensionsApiHandler on Never {
     }
 
     final extensionName = queryParams[ExtensionsApi.extensionNamePropertyName]!;
+    final extensionPackage =
+        queryParams[ExtensionsApi.extensionPackagePropertyName];
 
     final activate = queryParams[ExtensionsApi.enabledStatePropertyName];
     if (activate != null) {
       final newState = ServerApi._devToolsOptions.setExtensionEnabledState(
         devtoolsOptionsUri: devtoolsOptionsFileUri,
         extensionName: extensionName,
+        packageName: extensionPackage,
         enable: bool.parse(activate),
       );
       return ServerApi._encodeResponse(newState.name, api: api);
@@ -118,6 +121,7 @@ extension _ExtensionsApiHandler on Never {
         .lookupExtensionEnabledState(
           devtoolsOptionsUri: devtoolsOptionsFileUri,
           extensionName: extensionName,
+          packageName: extensionPackage,
         );
     return ServerApi._encodeResponse(activationState.name, api: api);
   }

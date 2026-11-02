@@ -4,7 +4,7 @@
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_extensions/devtools_extensions.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'common/ui.dart';
 import 'feature_examples/devtools_event_example.dart';

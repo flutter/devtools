@@ -7,13 +7,14 @@ import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
+import 'package:devtools_app_shared/service.dart' show RootInfo;
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mockito/mockito.dart';
 import 'package:stager/stager.dart';
 import 'package:vm_service/vm_service.dart';
@@ -97,9 +98,11 @@ class MemoryDefaultScene extends Scene {
   ///
   /// [classList] will be returned by VmService.getClassList.
   /// [heapProviders] will be used to for heap snapshotting.
+  /// [rootInfo] will be returned by ServiceManager.rootInfoNow.
   Future<void> setUp({
     ClassList? classList,
     List<HeapProvider>? heapProviders,
+    RootInfo? rootInfo,
   }) async {
     heapProviders = heapProviders ?? MemoryDefaultSceneHeaps.all;
 
@@ -129,6 +132,7 @@ class MemoryDefaultScene extends Scene {
         allocationData: allocationJson,
         classList: classList,
       ),
+      rootInfo: rootInfo,
     );
     final app = fakeServiceConnection.serviceManager.connectedApp!;
     mockConnectedApp(app, isProfileBuild: true);

@@ -10,8 +10,8 @@ import 'dart:typed_data';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_app_shared/web_utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:web/web.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;

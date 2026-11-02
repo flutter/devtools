@@ -4,8 +4,8 @@
 
 import 'package:devtools_app/src/screens/inspector/layout_explorer/ui/arrow.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../../test_infra/matchers/matchers.dart';
 

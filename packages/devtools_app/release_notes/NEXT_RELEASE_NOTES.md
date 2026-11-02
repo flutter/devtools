@@ -6,18 +6,17 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 This is a draft for future release notes that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.61.0 release notes
+# DevTools 2.62.0 release notes
 
-The 2.61.0 release of the Dart and Flutter DevTools
+The 2.62.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](/tools/devtools).
 
 ## General updates
 
-* Fixed unreadable text in the release notes panel, where blockquotes were
-  drawn on a hard coded light blue background in the dark theme.
-  [#9957](https://github.com/flutter/devtools/pull/9957)
+* Removed the legacy Provider screen, which was a placeholder to point users to
+the `package:provider` DevTools extension. [#10046](https://github.com/flutter/devtools/pull/10046)
 * Added user-facing error notifications when importing data files that are
   missing required fields or contain no data for the screen.
   [#10005](https://github.com/flutter/devtools/pull/10005)
@@ -28,50 +27,37 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
+* Reduced the memory used when saving Performance data for offline viewing,
+  and made the saved files smaller. Files saved with this version cannot be
+  opened in older versions of DevTools. Files saved with older versions can
+  still be opened.
+  [#10034](https://github.com/flutter/devtools/pull/10034),
+  [#10010](https://github.com/flutter/devtools/issues/10010)
 * Fixed an issue where importing performance data with Flutter frames but no
   timeline trace would treat the data as empty.
   [#10005](https://github.com/flutter/devtools/pull/10005)
 
 ## CPU profiler updates
 
-* Fixed a bug where resizing the CPU flame chart changes the timing values
-  across the top of the chart.
-  [#9915](https://github.com/flutter/devtools/pull/9915)
+TODO: Remove this section if there are not any updates.
 
 ## Memory updates
 
-* Added the ability to pin classes to the top of the Profile Memory table. [#8898](https://github.com/flutter/devtools/issues/8898)
+TODO: Remove this section if there are not any updates.
 
 ## Debugger updates
 
-* Prevent values from being garbage-collected, while being evaluated.
-  [#9885](https://github.com/flutter/devtools/pull/9885)
-* Update to latest version of the Dart syntax highlighting grammar
-  [#9920](https://github.com/flutter/devtools/pull/9920).
-* Fix a bug in the TextMate grammar parser that could result in code after
-  comments being classified as comments.
-  [#9921](https://github.com/flutter/devtools/pull/9921).
-* Fixed an overflow in the debugging controls when the Debugger screen is
-  narrow, such as when DevTools is embedded in an IDE side panel. The controls
-  now scroll horizontally instead of overflowing.
-  [#9949](https://github.com/flutter/devtools/pull/9949)
+* Improved syntax highlighting of fenced code blocks that use more than three
+  backticks.
+  [#10021](https://github.com/flutter/devtools/pull/10021)
 
 ## Network profiler updates
 
-* Added WebSocket support to the Network profiler, including WebSocket
-  connection details, lifecycle events, frame-level inspection, and connection
-  timing information. [#9968](https://github.com/flutter/devtools/pull/9968)
-* Fixed an issue where the Network tab would stop capturing HTTP requests after
-  a hot restart. -
-  [#9856](https://github.com/flutter/devtools/pull/9856)
-* Fixed an issue where the Network tab would stop capturing new HTTP requests
-  after pressing Clear while recording. -
-  [#9856](https://github.com/flutter/devtools/pull/9856)
+TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 
-* Correct time units and cumulative nature of GC events.
-  [#9890](https://github.com/flutter/devtools/pull/9890)
+TODO: Remove this section if there are not any updates.
 
 ## App size tool updates
 
@@ -79,9 +65,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Deep links tool updates
 
-* Added a "Watch tutorial" link to the status line that points to the
-  [deep links video tutorial](https://youtu.be/d7sZL6h1Elw).
-  [#9925](https://github.com/flutter/devtools/pull/9925)
+TODO: Remove this section if there are not any updates.
 
 ## VS Code sidebar updates
 
@@ -89,8 +73,7 @@ TODO: Remove this section if there are not any updates.
 
 ## DevTools extension updates
 
-* Hide the DevTools extensions menu button in single-screen embedded mode (`EmbedMode.embedOne`) on standard screens.
-  [#8507](https://github.com/flutter/devtools/issues/8507)
+TODO: Remove this section if there are not any updates.
 
 ## Advanced developer mode updates
 
@@ -99,4 +82,4 @@ TODO: Remove this section if there are not any updates.
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.61.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.62.0).

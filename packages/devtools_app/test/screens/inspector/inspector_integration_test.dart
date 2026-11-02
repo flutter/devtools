@@ -15,8 +15,8 @@ import 'package:devtools_app/src/shared/ui/tab.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:path/path.dart' as p;
 
 import '../../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
@@ -706,24 +706,5 @@ Future<void> _resetPubRootDirectories(InspectorService inspectorService) async {
       .mainIsolateRootLibraryUriAsString();
   if (rootLibrary != null) {
     await inspectorService.addPubRootDirectories([rootLibrary]);
-  }
-}
-
-extension _ObjectGroupTestExtension on ObjectGroup {
-  Future<RemoteDiagnosticsNode?> getDetailsSubtree(
-    RemoteDiagnosticsNode? node, {
-    int subtreeDepth = 2,
-  }) async {
-    if (node == null) return null;
-    final args = {
-      'objectGroup': groupName,
-      'arg': node.valueRef.id,
-      'subtreeDepth': subtreeDepth.toString(),
-    };
-    final json = await invokeServiceMethodDaemonParams(
-      WidgetInspectorServiceExtensions.getDetailsSubtree.name,
-      args,
-    );
-    return parseDiagnosticsNodeHelper(json as Map<String, Object?>?);
   }
 }

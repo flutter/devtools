@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../framework/scaffold/report_feedback_button.dart';
 import '../../../shared/analytics/analytics.dart' as ga;
@@ -140,7 +140,9 @@ class _PropertyEditorFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final documentationLink = _documentationLink();
+    final documentationLink = propertyEditorDocumentationLink(
+      DevToolsQueryParams.load(),
+    );
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -165,15 +167,17 @@ class _PropertyEditorFooter extends StatelessWidget {
       ),
     );
   }
+}
 
-  String? _documentationLink() {
-    final queryParams = DevToolsQueryParams.load();
-    final isEmbedded = queryParams.embedMode.embedded;
-    if (!isEmbedded) return null;
-    const uriPrefix = 'https://docs.flutter.dev/tools/';
-    const uriHash = '#property-editor';
-    return '$uriPrefix${queryParams.ide == 'VSCode' ? 'vs-code' : 'android-studio'}$uriHash';
-  }
+/// Returns the Property Editor documentation link for the IDE described by
+/// [queryParams], or `null` if DevTools is not embedded in an IDE.
+@visibleForTesting
+String? propertyEditorDocumentationLink(DevToolsQueryParams queryParams) {
+  final isEmbedded = queryParams.embedMode.embedded;
+  if (!isEmbedded) return null;
+  const uriPrefix = 'https://docs.flutter.dev/tools/';
+  const uriHash = '#property-editor';
+  return '$uriPrefix${queryParams.isVsCode ? 'vs-code' : 'android-studio'}$uriHash';
 }
 
 class _DocsLink extends StatelessWidget {

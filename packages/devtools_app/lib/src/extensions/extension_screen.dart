@@ -5,7 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
@@ -112,7 +112,9 @@ class ExtensionView extends StatelessWidget {
         const SizedBox(height: intermediateSpacing),
         Expanded(
           child: ValueListenableBuilder<ExtensionEnabledState>(
-            valueListenable: extensionService.enabledStateListenable(ext.name),
+            valueListenable: extensionService.enabledStateListenable(
+              ext.packageName,
+            ),
             builder: (context, activationState, _) {
               if (activationState == ExtensionEnabledState.enabled) {
                 return KeepAliveWrapper(

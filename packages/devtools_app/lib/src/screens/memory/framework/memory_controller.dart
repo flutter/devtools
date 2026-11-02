@@ -21,6 +21,7 @@ import '../panes/chart/controller/chart_pane_controller.dart';
 import '../panes/diff/controller/diff_pane_controller.dart';
 import '../panes/profile/profile_pane_controller.dart';
 import '../panes/tracing/tracing_pane_controller.dart';
+import '../shared/primitives/memory_utils.dart';
 import 'offline_data/offline_data.dart';
 
 /// Screen controller for the Memory screen.
@@ -129,7 +130,7 @@ class MemoryController extends DevToolsScreenController
     chart = MemoryChartPaneController(data: offlineData?.chart ?? ChartData());
 
     final rootPackage = isConnected
-        ? serviceConnection.serviceManager.rootInfoNow().package!
+        ? serviceConnection.serviceManager.rootInfoNow().rootPackagePrefix!
         : null;
 
     diff =

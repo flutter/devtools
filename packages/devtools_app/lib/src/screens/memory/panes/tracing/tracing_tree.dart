@@ -3,8 +3,8 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/primitives/utils.dart';

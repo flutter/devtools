@@ -10,7 +10,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/primitives/list_queue_value_notifier.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'editor_service/simulated_editor.dart';
 import 'shared/common_ui.dart';

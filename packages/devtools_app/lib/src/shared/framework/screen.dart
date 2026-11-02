@@ -12,8 +12,8 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../globals.dart';
 import '../primitives/listenable.dart';
@@ -104,13 +104,6 @@ enum ScreenMetaData {
     icon: Icons.accessibility,
     requiresFlutter: true,
   ),
-  provider(
-    'provider',
-    title: 'Provider',
-    icon: Icons.attach_file,
-    requiresLibrary: 'package:provider/',
-    requiresDebugBuild: true,
-  ),
   appSize(
     'app-size',
     title: 'App Size',
@@ -155,6 +148,7 @@ enum ScreenMetaData {
     this.requiresAdvancedDeveloperMode = false,
     this.supportsWebServerDevice = false,
     this.worksWithOfflineData = false,
+    // ignore: unused_element_parameter, this is used in internally.
     this.requiresLibrary,
     this.tutorialVideoTimestamp,
     this.tutorialVideoUrl,

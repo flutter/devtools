@@ -3,6 +3,15 @@ Copyright 2025 The Flutter Authors
 Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
+# 14.0.1
+
+* Track providing package name for DevTools extensions to isolate extension enablement,
+  deduplication, and asset loading.
+* Validate `rootPath`, `buildVariant`, `configuration`, and `target` parameters in
+  `DeeplinkManager`.
+* Add `UniversalLinkSettings.fromErrorJson`, `UniversalLinkSettings.error`, and
+  `UniversalLinkSettings.error` getter to surface iOS universal link settings errors.
+
 # 14.0.0
 
 * **Breaking changes**: `LocalFileSystem`, an extension which provided some handy

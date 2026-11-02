@@ -63,9 +63,7 @@ Future<TestDtdConnectionInfo> startDtd() async {
 
 class TestDartApp {
   TestDartApp() {
-    directory = Directory(
-      'tmp/test_app_${DateTime.now().millisecondsSinceEpoch}',
-    );
+    directory = Directory.systemTemp.createTempSync('test_app_');
   }
   static final dartVMServiceRegExp = RegExp(
     r'The Dart VM service is listening on (http://127.0.0.1:.*)',
@@ -78,7 +76,7 @@ class TestDartApp {
   StreamSubscription<String>? _stderrSub;
 
   Future<String> start() async {
-    await _initTestApp();
+    _initTestApp();
     process = await Process.start(Platform.resolvedExecutable, [
       '--observe=0',
       'bin/main.dart',
@@ -122,10 +120,10 @@ class TestDartApp {
     await deleteDirectoryWithRetry(directory);
   }
 
-  Future<void> _initTestApp() async {
-    await deleteDirectoryWithRetry(directory);
-    directory.createSync(recursive: true);
-    Directory(path.join(directory.path, '.dart_tool')).createSync();
+  void _initTestApp() {
+    Directory(
+      path.join(directory.path, '.dart_tool'),
+    ).createSync(recursive: true);
 
     final mainFile = File(path.join(directory.path, 'bin', 'main.dart'))
       ..createSync(recursive: true);

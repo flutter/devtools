@@ -5,7 +5,7 @@
 /// @docImport 'package:devtools_app_shared/src/ui/common.dart';
 library;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'split_pane.dart';
 

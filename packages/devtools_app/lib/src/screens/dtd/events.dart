@@ -5,7 +5,7 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:dtd/dtd.dart' show DartToolingDaemon, DTDEvent;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'dtd_tools_model.dart';
 import 'shared.dart';

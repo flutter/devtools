@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
@@ -476,15 +476,23 @@ class ActionsColumn extends ColumnData<NetworkRequest>
         MenuItemButton(
           child: const Text('Copy as cURL'),
           onPressed: () {
-            unawaited(
-              copyToClipboard(
-                CurlCommand.from(data).toString(),
-                successMessage: 'Copied the cURL command to the clipboard',
-              ),
-            );
+            unawaited(_copyAsCurl(data));
           },
         ),
       ],
+    );
+  }
+
+  Future<void> _copyAsCurl(DartIOHttpRequestData data) async {
+    try {
+      await data.getFullRequestData();
+    } catch (_) {
+      // Ignore errors fetching full data so we can still attempt to copy
+      // the partial request data we already have.
+    }
+    await copyToClipboard(
+      CurlCommand.from(data).toString(),
+      successMessage: 'Copied the cURL command to the clipboard',
     );
   }
 }

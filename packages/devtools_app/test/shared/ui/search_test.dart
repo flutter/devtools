@@ -5,8 +5,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:fake_async/fake_async.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   late TestSearchController searchController;

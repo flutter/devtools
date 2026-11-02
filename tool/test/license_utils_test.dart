@@ -60,7 +60,7 @@ void main() {
       await _setupTestConfigFile();
     });
 
-    tearDownAll(() async {
+    tearDown(() async {
       await deleteDirectoryWithRetry(testDirectory);
     });
 
@@ -171,7 +171,7 @@ text that should be removed from the file. */
       await _setupTestDirectoryStructure();
     });
 
-    tearDownAll(() async {
+    tearDown(() async {
       await deleteDirectoryWithRetry(testDirectory);
     });
 

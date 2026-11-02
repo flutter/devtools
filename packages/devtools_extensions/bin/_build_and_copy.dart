@@ -59,13 +59,7 @@ class BuildExtensionCommand extends Command {
     await _runProcess(
       processManager,
       Platform.isWindows ? 'flutter.bat' : 'flutter',
-      [
-        'build',
-        'web',
-        '--pwa-strategy=offline-first',
-        '--release',
-        '--no-tree-shake-icons',
-      ],
+      ['build', 'web', '--release', '--no-tree-shake-icons'],
       workingDirectory: source,
     );
 

@@ -5,8 +5,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The smallest contrast ratio WCAG 2.1 accepts for body text at level AA.
 ///
@@ -41,6 +41,9 @@ void main() {
                 colorScheme: useDarkTheme ? darkColorScheme : lightColorScheme,
               ),
             ),
+            builder: (context, child) =>
+                // ignore: deprecated_member_use, needed for markdown package
+                MaterialUiCompatibilityBridge(child: child!),
             home: SidePanelViewer(controller: controller),
           ),
         );

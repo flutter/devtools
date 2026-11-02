@@ -17,8 +17,8 @@ import 'package:devtools_shared/devtools_deeplink.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:dtd/dtd.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../test_infra/test_data/deep_link/fake_responses.dart';
@@ -655,5 +655,29 @@ void main() {
       expect(find.text('/ios-path1'), findsOneWidget);
       expect(find.text('NOT /ios-path2'), findsOneWidget);
     });
+
+    testWidgetsWithWindowSize(
+      'surfaces iOS universal link settings error to UI',
+      windowSize,
+      (WidgetTester tester) async {
+        final deepLinksController = TestDeepLinksController();
+        const iosErrorMessage =
+            'Unknown iOS build configuration (Debug) or target (Runner).';
+
+        deepLinksController
+          ..selectedProject.value = FlutterProject(
+            path: '/abc',
+            androidVariants: ['debug', 'release'],
+            iosBuildOptions: xcodeBuildOptions,
+          )
+          ..fakeAndroidDeepLinks = [defaultAndroidDeeplink]
+          ..fakeIosError = iosErrorMessage;
+
+        await pumpDeepLinkScreen(tester, controller: deepLinksController);
+
+        expect(deepLinksController.pagePhase.value, PagePhase.analyzeErrorPage);
+        expect(find.text(iosErrorMessage), findsOneWidget);
+      },
+    );
   });
 }

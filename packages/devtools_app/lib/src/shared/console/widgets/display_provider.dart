@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
 import '../../diagnostics/dap_object_node.dart';

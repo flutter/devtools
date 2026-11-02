@@ -5,9 +5,9 @@
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:logging/logging.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/colors.dart';

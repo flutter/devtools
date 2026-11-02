@@ -45,6 +45,24 @@ void main() {
       expect(settings.bundleIdentifier, 'com.example.app');
       expect(settings.teamIdentifier, isEmpty);
       expect(settings.associatedDomains, ['applinks:example.com']);
+      expect(settings.error, isNull);
+    });
+
+    test('parses error json correctly', () {
+      const json = '{"error": "Failed to load iOS settings"}';
+      final settings = UniversalLinkSettings.fromErrorJson(json);
+      expect(settings.bundleIdentifier, isEmpty);
+      expect(settings.teamIdentifier, isEmpty);
+      expect(settings.associatedDomains, isEmpty);
+      expect(settings.error, 'Failed to load iOS settings');
+    });
+
+    test('creates error settings correctly', () {
+      final settings = UniversalLinkSettings.error('Some error');
+      expect(settings.bundleIdentifier, isEmpty);
+      expect(settings.teamIdentifier, isEmpty);
+      expect(settings.associatedDomains, isEmpty);
+      expect(settings.error, 'Some error');
     });
   });
 }

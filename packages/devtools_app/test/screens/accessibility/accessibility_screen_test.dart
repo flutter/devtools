@@ -12,8 +12,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
@@ -72,11 +72,14 @@ void main() {
       expect(find.byType(AccessibilityScreenBody), findsOneWidget);
       expect(find.byType(SplitPane), findsAtLeastNWidgets(1));
 
-      // Overrides pane should be visible
-      expect(find.byType(AccessibilityOverridesPane), findsOneWidget);
-
       // Semantics Tree pane should be visible
       expect(find.byType(AccessibilitySemanticsTreePane), findsOneWidget);
+
+      // Semantics Node Details pane should be visible
+      expect(find.byType(SemanticsNodeDetailsPane), findsOneWidget);
+
+      // Overrides pane should be visible
+      expect(find.byType(AccessibilityOverridesPane), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -245,9 +248,27 @@ void main() {
         await pumpAccessibilityScreen(tester);
         await tester.pumpAndSettle();
 
-        expect(find.text('SemanticsNode #0'), findsOneWidget);
-        expect(find.text('SemanticsNode #1'), findsOneWidget);
-        expect(find.text('"Child Node"'), findsOneWidget);
+        expect(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.text('SemanticsNode #0'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.text('SemanticsNode #1'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.text('"Child Node"'),
+          ),
+          findsOneWidget,
+        );
         expect(find.text('ElevatedButton'), findsOneWidget);
       },
     );
@@ -304,6 +325,270 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byIcon(Icons.check_box_outlined), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders node details placeholder when no node is selected',
+      windowSize,
+      (WidgetTester tester) async {
+        controller.semanticsRoots.value = [];
+
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Semantics Node Details'), findsOneWidget);
+        expect(
+          find.text('Select a node in the semantics tree to view its details.'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders root node details automatically and updates when a child node is selected',
+      windowSize,
+      (WidgetTester tester) async {
+        final childNode = SemanticsNodeModel(
+          id: '26',
+          label: 'CloseButton',
+          rect: const Rect.fromLTWH(0, 0, 763, 32),
+          flags: {
+            SemanticsFlag.isButton,
+            SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
+          },
+          widgetName: 'CloseButton',
+        );
+        final rootNode = SemanticsNodeModel(
+          id: '0',
+          label: 'Root Node',
+          value: 'Initial Value',
+          hint: 'Tap to interact',
+          rect: const Rect.fromLTWH(0, 0, 1000, 1000),
+          flags: {SemanticsFlag.isHeader},
+        )..addChild(childNode);
+
+        rootNode.expandCascading();
+        controller.semanticsRoots.value = [rootNode];
+
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        final detailsPane = find.byType(SemanticsNodeDetailsPane);
+
+        // Initially, root node (#0) is automatically selected
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('SemanticsNode #0'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: detailsPane, matching: find.text('"Root Node"')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('"Initial Value"'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('"Tap to interact"'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('rect: Rect.fromLTWH(0, 0, 1000, 1000)'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: detailsPane, matching: find.text('isHeader')),
+          findsOneWidget,
+        );
+
+        // Tap child node (#26) in the tree pane
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.text('SemanticsNode #26'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Details pane should now display SemanticsNode #26 details
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('SemanticsNode #26'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('"CloseButton"'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('rect: Rect.fromLTWH(0, 0, 763, 32)'),
+          ),
+          findsOneWidget,
+        );
+        // Empty value and hint should render as (empty)
+        expect(
+          find.descendant(of: detailsPane, matching: find.text('(empty)')),
+          findsNWidgets(2),
+        );
+        // Flags chips
+        expect(
+          find.descendant(of: detailsPane, matching: find.text('isButton')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('hasEnabledState'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: detailsPane, matching: find.text('isEnabled')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: detailsPane, matching: find.text('isFocusable')),
+          findsOneWidget,
+        );
+
+        // Tap parent node (#0) in the tree pane to select it; its child (#26)
+        // should remain expanded and visible in the tree.
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.text('SemanticsNode #0'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(controller.selectedSemanticsNode.value, equals(rootNode));
+        expect(rootNode.isExpanded, isTrue);
+        expect(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.text('SemanticsNode #26'),
+          ),
+          findsOneWidget,
+        );
+
+        // Select child (#26) again, then tap the expand/collapse arrow on
+        // parent (#0); it should collapse without changing the selected node.
+        controller.selectSemanticsNode(childNode);
+        await tester.pumpAndSettle();
+        expect(controller.selectedSemanticsNode.value, equals(childNode));
+
+        await tester.tap(
+          find.descendant(
+            of: find.byType(AccessibilitySemanticsTreePane),
+            matching: find.byIcon(Icons.keyboard_arrow_down),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(rootNode.isExpanded, isFalse);
+        expect(controller.selectedSemanticsNode.value, equals(childNode));
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders accessibility issues in tree pane and node details pane',
+      windowSize,
+      (WidgetTester tester) async {
+        final nodeWithIssue = SemanticsNodeModel(
+          id: '13',
+          issues: const [
+            AccessibilityIssue(
+              rule: 'labeledTapTarget',
+              description:
+                  'Interactive element has no label for screen readers.',
+            ),
+          ],
+        );
+        final rootNode = SemanticsNodeModel(id: '0', label: 'Root Node')
+          ..addChild(nodeWithIssue);
+
+        rootNode.expandCascading();
+        controller.semanticsRoots.value = [rootNode];
+
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        final treePane = find.byType(AccessibilitySemanticsTreePane);
+        final detailsPane = find.byType(SemanticsNodeDetailsPane);
+
+        // Tree pane should display a warning icon for node #13.
+        expect(
+          find.descendant(
+            of: treePane,
+            matching: find.byIcon(Icons.warning_amber_rounded),
+          ),
+          findsOneWidget,
+        );
+
+        // Initially root node (#0) has no issues, so details pane has no issues section.
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.textContaining('Accessibility Issues'),
+          ),
+          findsNothing,
+        );
+
+        // Select node #13 in the tree pane.
+        await tester.tap(
+          find.descendant(
+            of: treePane,
+            matching: find.text('SemanticsNode #13'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Details pane should now show the Accessibility Issues section and card.
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('Accessibility Issues (1)'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text('labeledTapTarget'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: detailsPane,
+            matching: find.text(
+              'Interactive element has no label for screen readers.',
+            ),
+          ),
+          findsOneWidget,
+        );
       },
     );
   });

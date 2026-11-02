@@ -504,6 +504,93 @@ void main() {
         expect(nullDetails.prettyPrinted(), null);
       },
     );
+
+    test('computeDeveloperLogDetailsJson keeps structured details', () async {
+      const truncatedPreview = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.';
+      const fullMessage =
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.'
+          'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIn0.'
+          'signature-padding-to-make-this-longer-than-vm-preview';
+
+      final eventJson = <String, dynamic>{
+        'type': 'Event',
+        'kind': 'Logging',
+        'logRecord': {
+          'type': 'LogRecord',
+          'level': 800,
+          'message': {
+            'type': '@Instance',
+            'kind': 'String',
+            'valueAsString': truncatedPreview,
+            'valueAsStringIsTruncated': true,
+            'length': fullMessage.length,
+          },
+          'error': {'type': '@Instance', 'kind': 'Null'},
+          'stackTrace': {'type': '@Instance', 'kind': 'Null'},
+        },
+      };
+
+      final details = computeDeveloperLogDetailsJson(
+        eventJson,
+        fullMessage: fullMessage,
+      );
+      final log = LogData('log', details, 1);
+      await log.compute();
+
+      final decoded = jsonDecode(log.details!) as Map<String, dynamic>;
+      expect(decoded['kind'], 'Logging');
+      expect(decoded['logRecord'], isA<Map>());
+
+      final message =
+          (decoded['logRecord'] as Map)['message'] as Map<String, dynamic>;
+      expect(message['valueAsString'], fullMessage);
+      expect(message['valueAsStringIsTruncated'], false);
+      expect(message['length'], fullMessage.length);
+      expect(jsonDecode(log.encodedDetails), isA<Map>());
+    });
+
+    test('computeDeveloperLogDetailsJson updates error and stackTrace', () {
+      final eventJson = <String, dynamic>{
+        'type': 'Event',
+        'kind': 'Logging',
+        'logRecord': {
+          'message': {
+            'valueAsString': 'short',
+            'valueAsStringIsTruncated': false,
+            'length': 5,
+          },
+          'error': {
+            'valueAsString': 'err...',
+            'valueAsStringIsTruncated': true,
+            'length': 20,
+          },
+          'stackTrace': {
+            'valueAsString': '#0 foo',
+            'valueAsStringIsTruncated': false,
+            'length': 6,
+          },
+        },
+      };
+
+      final details = computeDeveloperLogDetailsJson(
+        eventJson,
+        fullMessage: 'short',
+        fullError: 'error-full-message',
+        fullStackTrace: '#0 foo\n#1 bar',
+      );
+      final decoded = jsonDecode(details) as Map<String, dynamic>;
+      final logRecord = decoded['logRecord'] as Map<String, dynamic>;
+
+      expect(
+        (logRecord['error'] as Map)['valueAsString'],
+        'error-full-message',
+      );
+      expect((logRecord['error'] as Map)['valueAsStringIsTruncated'], false);
+      expect(
+        (logRecord['stackTrace'] as Map)['valueAsString'],
+        '#0 foo\n#1 bar',
+      );
+    });
   });
 
   group('StdoutEventHandler', () {

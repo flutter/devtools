@@ -91,6 +91,7 @@ extension StubDevToolsExtensions on Never {
   /// connected app.
   static final fooExtension = DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'foo',
+    DevToolsExtensionConfig.packageNameKey: 'foo',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',
@@ -105,6 +106,7 @@ extension StubDevToolsExtensions on Never {
   /// connected app.
   static final providerExtension = DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'provider',
+    DevToolsExtensionConfig.packageNameKey: 'provider',
     DevToolsExtensionConfig.issueTrackerKey:
         'https://github.com/rrousselGit/provider/issues',
     DevToolsExtensionConfig.versionKey: '3.0.0',
@@ -121,6 +123,7 @@ extension StubDevToolsExtensions on Never {
   /// not require a connected app.
   static final someToolExtension = DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'some_tool',
+    DevToolsExtensionConfig.packageNameKey: 'some_tool',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: '0xe00c',
@@ -137,6 +140,7 @@ extension StubDevToolsExtensions on Never {
   /// require a connected app.
   static final barExtension = DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'bar',
+    DevToolsExtensionConfig.packageNameKey: 'bar',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '2.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
@@ -153,6 +157,7 @@ extension StubDevToolsExtensions on Never {
   /// extension.
   static final newerBarExtension = DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'bar',
+    DevToolsExtensionConfig.packageNameKey: 'bar',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '2.1.0', // Newer version.
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
@@ -168,6 +173,7 @@ extension StubDevToolsExtensions on Never {
   /// connected app.
   static final bazExtension = DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'baz',
+    DevToolsExtensionConfig.packageNameKey: 'baz',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: 0xe716,
@@ -182,6 +188,7 @@ extension StubDevToolsExtensions on Never {
   /// of a runtime extension [fooExtension], which requires a connected app.
   static final duplicateFooExtension = DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'foo',
+    DevToolsExtensionConfig.packageNameKey: 'foo',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
     DevToolsExtensionConfig.versionKey: '1.0.0',
     DevToolsExtensionConfig.materialIconCodePointKey: '0xe0b1',

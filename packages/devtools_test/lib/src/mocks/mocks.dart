@@ -81,6 +81,7 @@ class TestInspectorController extends Fake implements InspectorController {
         widgetProperties: [],
         renderProperties: [],
         layoutProperties: null,
+        creationLocation: null,
       ));
 
   @override

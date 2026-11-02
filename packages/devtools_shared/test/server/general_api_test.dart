@@ -186,7 +186,7 @@ void main() {
           expect(response.success, true);
           expect(response.message, isNull);
           expect(response.uri, isNotNull);
-          expect(response.uri!.toString(), endsWith(app!.directory.path));
+          expect(response.uri!.toFilePath(), endsWith(app!.directory.path));
         });
 
         test('succeeds for a disconnect event when cache is empty', () async {
@@ -223,7 +223,7 @@ void main() {
             expect(response.success, true);
             expect(response.message, isNull);
             expect(response.uri, isNotNull);
-            expect(response.uri!.toString(), endsWith(app!.directory.path));
+            expect(response.uri!.toFilePath(), endsWith(app!.directory.path));
 
             final disconnectResponse =
                 await server.VmServiceHandler.detectRootPackageForVmService(
@@ -236,7 +236,7 @@ void main() {
             expect(disconnectResponse.message, isNull);
             expect(disconnectResponse.uri, isNotNull);
             expect(
-              disconnectResponse.uri!.toString(),
+              disconnectResponse.uri!.toFilePath(),
               endsWith(app!.directory.path),
             );
           },

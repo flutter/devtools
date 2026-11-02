@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/analytics/constants.dart' as gac;
@@ -172,10 +172,6 @@ class SidebarDevToolsScreens extends StatelessWidget {
       ScreenMetaData.home ||
       ScreenMetaData.debugger ||
       ScreenMetaData.vmTools ||
-      // This screen will be removed from the first party DevTools screens soon.
-      // If the user depends on package:provider, the provider extension should
-      // show up in the DevTools extensions list instead.
-      ScreenMetaData.provider ||
       ScreenMetaData.simple => false,
       _ => true,
     };

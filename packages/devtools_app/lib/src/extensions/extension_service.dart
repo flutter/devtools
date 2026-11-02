@@ -111,12 +111,12 @@ class ExtensionService extends DisposableController
   final _ignoredStaticExtensionsByHashCode = <int>{};
 
   /// Returns the [ValueListenable] that stores the [ExtensionEnabledState] for
-  /// the DevTools Extension with [extensionName].
+  /// the DevTools Extension provided by [extensionPackageName].
   ValueListenable<ExtensionEnabledState> enabledStateListenable(
-    String extensionName,
+    String extensionPackageName,
   ) {
     return _extensionEnabledStates.putIfAbsent(
-      extensionName.toLowerCase(),
+      extensionPackageName.toLowerCase(),
       () => ValueNotifier<ExtensionEnabledState>(ExtensionEnabledState.none),
     );
   }
@@ -232,7 +232,7 @@ class ExtensionService extends DisposableController
       // not always be true for extensions that are not published on pub or
       // extensions that do not follow best practices for naming.
       final isRuntimeDuplicate = runtimeExtensions.any(
-        (ext) => ext.name == staticExtension.name,
+        (ext) => ext.packageName == staticExtension.packageName,
       );
       if (isRuntimeDuplicate) {
         _log.fine(
@@ -256,9 +256,10 @@ class ExtensionService extends DisposableController
       final stateFromOptionsFile = await server.extensionEnabledState(
         devtoolsOptionsFileUri: extension.devtoolsOptionsUri,
         extensionName: extension.name,
+        extensionPackage: extension.packageName,
       );
       final stateNotifier = _extensionEnabledStates.putIfAbsent(
-        extension.name,
+        extension.packageName.toLowerCase(),
         () => ValueNotifier<ExtensionEnabledState>(stateFromOptionsFile),
       );
       stateNotifier.value = stateFromOptionsFile;
@@ -295,12 +296,13 @@ class ExtensionService extends DisposableController
     final allMatchingExtensions = [
       ...runtimeExtensions,
       ...staticExtensions,
-    ].where((e) => e.name == extension.name);
+    ].where((e) => e.packageName == extension.packageName);
     await [
       for (final ext in allMatchingExtensions)
         server.extensionEnabledState(
           devtoolsOptionsFileUri: ext.devtoolsOptionsUri,
           extensionName: ext.name,
+          extensionPackage: ext.packageName,
           enable: enable,
         ),
     ].wait;

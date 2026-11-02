@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
@@ -172,9 +172,9 @@ class ExtensionSetting extends StatelessWidget {
       ),
     ];
     final theme = Theme.of(context);
-    final extensionName = extension.name.toLowerCase();
+    final packageName = extension.packageName.toLowerCase();
     return ValueListenableBuilder(
-      valueListenable: extensionService.enabledStateListenable(extensionName),
+      valueListenable: extensionService.enabledStateListenable(packageName),
       builder: (context, enabledState, _) {
         return Padding(
           padding: const EdgeInsets.only(bottom: denseSpacing),
@@ -182,7 +182,7 @@ class ExtensionSetting extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'package:$extensionName',
+                'package:$packageName',
                 overflow: TextOverflow.ellipsis,
                 style: theme.fixedFontStyle,
               ),

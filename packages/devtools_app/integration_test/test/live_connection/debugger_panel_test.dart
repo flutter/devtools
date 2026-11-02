@@ -9,9 +9,9 @@ import 'package:devtools_app/src/screens/debugger/codeview.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:devtools_test/integration_test.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 // To run the test while connected to a flutter-tester device:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/debugger_panel_test.dart

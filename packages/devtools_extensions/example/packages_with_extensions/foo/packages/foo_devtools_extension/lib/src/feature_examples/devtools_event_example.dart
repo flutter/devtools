@@ -4,7 +4,7 @@
 
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_extensions/devtools_extensions.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// This widget shows an example of how you can register a custom event handler
 /// for any type of [DevToolsExtensionEventType].
