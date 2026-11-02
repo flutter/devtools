@@ -23,6 +23,25 @@ void main() {
       expect(offlineData.selectedTab, 0);
     });
 
+    test('isEmpty', () {
+      expect(OfflinePerformanceData().isEmpty, isTrue);
+      expect(
+        OfflinePerformanceData(perfettoTraceBinary: Uint8List(0)).isEmpty,
+        isTrue,
+      );
+      expect(
+        OfflinePerformanceData(
+          perfettoTraceBinary: Uint8List.fromList([1, 2, 3]),
+        ).isEmpty,
+        isFalse,
+      );
+      expect(OfflinePerformanceData(frames: [testFrame0]).isEmpty, isFalse);
+      expect(
+        OfflinePerformanceData(rebuildCountModel: RebuildCountModel()).isEmpty,
+        isFalse,
+      );
+    });
+
     test('init from parse', () {
       OfflinePerformanceData offlineData = OfflinePerformanceData.fromJson({});
       expect(offlineData.frames, isEmpty);
