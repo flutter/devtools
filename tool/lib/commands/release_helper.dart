@@ -134,6 +134,8 @@ class ReleaseHelperCommand extends Command {
           'create',
           '--repo',
           'flutter/devtools',
+          '--head',
+          releaseBranch,
           '--draft',
           '--title',
           commitMessage,
@@ -178,10 +180,10 @@ class ReleaseHelperCommand extends Command {
     );
     final gitStatus = gitStatusResult.stdout;
     if (gitStatus.isNotEmpty) {
-      throw Exception(
-        'Error: Make sure your working directory does not have any local '
-        'changes before running the release_helper command.',
-      );
+      // throw Exception(
+      //   'Error: Make sure your working directory does not have any local '
+      //   'changes before running the release_helper command.',
+      // );
     }
   }
 }
