@@ -114,7 +114,6 @@ class BuildCommand extends Command {
             if (buildMode == 'debug') '--dart2js-optimization=O1',
             if (buildMode != 'debug') '--$buildMode',
           ],
-          '--pwa-strategy=offline-first',
           '--no-tree-shake-icons',
         ]),
       ],

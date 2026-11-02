@@ -31,7 +31,6 @@ void main() {
       await _runProcess('flutter', [
         'build',
         'web',
-        '--pwa-strategy=offline-first',
         '--release',
         '--no-tree-shake-icons',
       ]);
