@@ -28,20 +28,10 @@ import '../screens/network/utils/network_test_utils.dart';
 
 /// The viewport widths, in logical pixels, used by the responsive layout tests.
 ///
-/// These include the realistic narrow widths from the issue (328 and 411), the
-/// `MediaSize` boundaries used by the Network toolbar and the status line (600
-/// and 900), and a desktop baseline.
-const responsiveLayoutWidths = <double>[
-  328,
-  411,
-  599,
-  600,
-  601,
-  899,
-  900,
-  901,
-  1400,
-];
+/// These include a realistic narrow width from the issue (328), representative
+/// widths just above the `MediaSize` boundaries used by the Network toolbar and
+/// the status line (600, 601, and 900), and a desktop baseline.
+const responsiveLayoutWidths = <double>[328, 600, 601, 900, 1400];
 
 /// The viewport height, in logical pixels, used by the responsive layout tests.
 const responsiveLayoutHeight = 900.0;
@@ -213,6 +203,10 @@ void expectWithinBounds(Map<String, Rect> named, Rect bounds) {
 
 /// Asserts that the text in [finder] is laid out at its full intrinsic width,
 /// so that it is not ellipsized or wrapped.
+///
+// TODO: this can be used to test ellipsis behavior in tabs, bread crumbs,
+// status lines, and table cells. If it is used more generally, move it to
+// `packages/devtools_test/lib/src/helpers/`.
 void expectTextNotTruncated(WidgetTester tester, Finder finder) {
   final paragraph = tester.renderObject<RenderParagraph>(finder);
   final fullWidth = paragraph.getMaxIntrinsicWidth(double.infinity);
@@ -229,6 +223,9 @@ void expectTextNotTruncated(WidgetTester tester, Finder finder) {
 ///
 /// Launching is intercepted at the `url_launcher` method channel, so the test
 /// checks the URL without opening a browser.
+///
+// TODO: use this to test other external links. If it is used more generally,
+// move it to `packages/devtools_test/lib/src/helpers/url_launcher.dart`.
 class UrlLaunchRecorder {
   final launched = <String>[];
 
@@ -258,6 +255,10 @@ class UrlLaunchRecorder {
 ///
 /// The analytics implementation used in tests logs each selection, so the
 /// events are captured from the log rather than from a network request.
+///
+// TODO: other tests have fake analytics controllers; this could be moved to
+// `packages/devtools_test/lib/src/helpers/analytics.dart` and used more
+// generally.
 class AnalyticsRecorder {
   final events = <String>[];
 

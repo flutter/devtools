@@ -8,12 +8,15 @@ library;
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/scaffold/about_dialog.dart';
 import 'package:devtools_app/src/framework/scaffold/settings_dialog.dart';
+import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 
 import '../../test_infra/responsive_layout_utils.dart';
 
@@ -122,74 +125,71 @@ void main() {
   setUpAll(loadFonts);
 
   late FakeServiceConnectionManager connection;
-  late NetworkController network;
-  late LoggingController logging;
-  late DebuggerController debugger;
 
   setUp(() {
     connection = createLayoutServiceConnection();
     setUpLayoutGlobals(connection);
-    network = NetworkController();
-    logging = LoggingController();
-    debugger = DebuggerController();
   });
 
-  Future<List<String>> pumpFooter(
+  /// Pumps an isolated [StatusLine] for [screen] and returns any reported
+  /// [FlutterError]s.
+  ///
+  /// The status line is a stateless widget, so it is tested in isolation
+  /// rather than through `pumpDevToolsScaffold`. The tests use
+  /// [_FakeStatusScreen], whose page status needs no screen controller, so no
+  /// controller is initialized and no polling timers need cleanup.
+  Future<List<String>> pumpStatusLine(
     WidgetTester tester, {
-    required String pageId,
+    required Screen screen,
     required bool embedded,
     required bool connected,
   }) {
-    return collectFlutterErrors(
-      () => pumpDevToolsScaffold(
-        tester,
-        pageId: pageId,
-        embedded: embedded,
-        connected: connected,
-        connection: connection,
-        network: network,
-        logging: logging,
-        debugger: debugger,
-      ),
-    );
+    final embedMode = embedded ? EmbedMode.embedOne : EmbedMode.none;
+    setGlobal(IdeTheme, IdeTheme(embedMode: embedMode));
+    connection.serviceManager.setConnectedState(connected);
+    return collectFlutterErrors(() async {
+      await tester.pumpWidget(
+        // The providers sit above the app so that dialogs opened from the
+        // footer can read them, as they do in the app.
+        MultiProvider(
+          providers: [
+            Provider<AnalyticsController>.value(
+              value: AnalyticsController(
+                enabled: false,
+                shouldShowConsentMessage: false,
+                consentMessage: 'fake message',
+              ),
+            ),
+            Provider<ReleaseNotesController>.value(
+              value: ReleaseNotesController(),
+            ),
+          ],
+          child: wrapWithControllers(
+            Scaffold(
+              bottomNavigationBar: StatusLine(
+                currentScreen: screen,
+                isEmbedded: embedded,
+                isConnected: connected,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 1));
+    });
   }
 
   group('footer layout', () {
-    for (final embedded in [false, true]) {
-      for (final connected in [true, false]) {
-        final mode =
-            '${embedded ? 'embedded' : 'standalone'}, '
-            '${connected ? 'connected' : 'disconnected'}';
-
-        for (final width in responsiveLayoutWidths) {
-          testWidgetsWithWindowSize(
-            'Network footer ($mode) has no overlap or clipping at $width',
-            Size(width, responsiveLayoutHeight),
-            (WidgetTester tester) async {
-              final errors = await pumpFooter(
-                tester,
-                pageId: ScreenMetaData.network.id,
-                embedded: embedded,
-                connected: connected,
-              );
-              expect(errors, isEmpty, reason: errors.join('\n'));
-              _expectFooterGeometry(tester, width: width, connected: connected);
-              await stopNetworkPolling(tester, network);
-            },
-          );
-        }
-      }
-    }
-
-    for (final width in [328.0, 600.0, 901.0, 1400.0]) {
+    for (final width in responsiveLayoutWidths) {
       testWidgetsWithWindowSize(
-        'Logging footer (embedded) has no overlap or clipping at $width',
+        'Network footer (standalone, connected) has no overlap or clipping '
+        'at $width',
         Size(width, responsiveLayoutHeight),
         (WidgetTester tester) async {
-          final errors = await pumpFooter(
+          final errors = await pumpStatusLine(
             tester,
-            pageId: ScreenMetaData.logging.id,
-            embedded: true,
+            screen: const _FakeStatusScreen(),
+            embedded: false,
             connected: true,
           );
           expect(errors, isEmpty, reason: errors.join('\n'));
@@ -198,58 +198,122 @@ void main() {
       );
     }
 
+    // The embedded branch only adds the secondary actions, which the overflow
+    // menu tests below cover; one narrow embedded smoke test exercises it.
+    testWidgetsWithWindowSize(
+      'Network footer (embedded, connected) has no overlap or clipping at 328',
+      const Size(328, responsiveLayoutHeight),
+      (WidgetTester tester) async {
+        final errors = await pumpStatusLine(
+          tester,
+          screen: const _FakeStatusScreen(),
+          embedded: true,
+          connected: true,
+        );
+        expect(errors, isEmpty, reason: errors.join('\n'));
+        _expectFooterGeometry(tester, width: 328, connected: true);
+      },
+    );
+
+    // The disconnected connection status is an icon with a tooltip at
+    // [MediaSize.xs] and text above it, so two representative widths cover the
+    // icon-vs-text behavior.
+    for (final (width, showsIcon) in [(328.0, true), (1400.0, false)]) {
+      testWidgetsWithWindowSize(
+        'Network footer (standalone, disconnected) has no overlap or clipping '
+        'at $width',
+        Size(width, responsiveLayoutHeight),
+        (WidgetTester tester) async {
+          final errors = await pumpStatusLine(
+            tester,
+            // The real screens show no page status while disconnected.
+            screen: const _FakeStatusScreen(statusText: null),
+            embedded: false,
+            connected: false,
+          );
+          expect(errors, isEmpty, reason: errors.join('\n'));
+          _expectFooterGeometry(tester, width: width, connected: false);
+          expect(
+            _inStatusLine(find.byTooltip(_noClientConnection)),
+            showsIcon ? findsOneWidget : findsNothing,
+            reason: 'Expected ${showsIcon ? 'icon' : 'text'} at $width',
+          );
+          expect(
+            _inStatusLine(find.text(_noClientConnection)),
+            showsIcon ? findsNothing : findsOneWidget,
+            reason: 'Expected ${showsIcon ? 'no text' : 'text'} at $width',
+          );
+        },
+      );
+    }
+
+    testWidgetsWithWindowSize(
+      'footer for a screen without a page status lays out cleanly',
+      const Size(328, responsiveLayoutHeight),
+      (WidgetTester tester) async {
+        final errors = await pumpStatusLine(
+          tester,
+          screen: const _FakeStatusScreen(statusText: null),
+          embedded: false,
+          connected: true,
+        );
+        expect(errors, isEmpty, reason: errors.join('\n'));
+        expect(find.byType(StatusLine), findsOneWidget);
+        final statusLine = tester.getRect(find.byType(StatusLine));
+        final connection = tester.getRect(_connectionStatus(connected: true));
+        expectWithinBounds({'connection': connection}, statusLine);
+      },
+    );
+
     // The page status is wrapped in a Flexible, not an Expanded, so that it
     // keeps its natural width and the spaceBetween alignment keeps spacing the
     // footer items evenly on wide screens, as it did before this change.
     for (final embedded in [false, true]) {
-      for (final width in [900.0, 901.0, 1400.0]) {
-        testWidgetsWithWindowSize(
-          'page status keeps its natural width on a wide screen '
-          '(${embedded ? 'embedded' : 'standalone'}, $width)',
-          Size(width, responsiveLayoutHeight),
-          (WidgetTester tester) async {
-            final errors = await pumpFooter(
-              tester,
-              pageId: ScreenMetaData.network.id,
-              embedded: embedded,
-              connected: true,
-            );
-            expect(errors, isEmpty, reason: errors.join('\n'));
+      testWidgetsWithWindowSize(
+        'page status keeps its natural width on a wide screen '
+        '(${embedded ? 'embedded' : 'standalone'})',
+        const Size(1400, responsiveLayoutHeight),
+        (WidgetTester tester) async {
+          final errors = await pumpStatusLine(
+            tester,
+            screen: const _FakeStatusScreen(),
+            embedded: embedded,
+            connected: true,
+          );
+          expect(errors, isEmpty, reason: errors.join('\n'));
 
-            final statusText = _inStatusLine(find.textContaining(' of '));
-            expect(statusText, findsOneWidget);
-            final textRect = tester.getRect(statusText);
-            // The nearest ancestor Row is the page status box, which also
-            // holds the recording spinner.
-            final boxRect = tester.getRect(
-              find.ancestor(of: statusText, matching: find.byType(Row)).first,
+          final statusText = _inStatusLine(find.textContaining(' of '));
+          expect(statusText, findsOneWidget);
+          final textRect = tester.getRect(statusText);
+          // The nearest ancestor Row is the page status box, which also
+          // holds the recording spinner.
+          final boxRect = tester.getRect(
+            find.ancestor(of: statusText, matching: find.byType(Row)).first,
+          );
+          expect(
+            boxRect.width,
+            lessThanOrEqualTo(
+              textRect.width + denseSpacing + smallProgressSize + 8.0,
+            ),
+            reason:
+                'The page status should hug its content on a wide screen; '
+                'an Expanded wrapper would stretch it to fill the slack.',
+          );
+
+          if (!embedded) {
+            // With no trailing actions, the connection status is the last
+            // item and stays pinned to the right edge.
+            final connection = tester.getRect(
+              _connectionStatus(connected: true),
             );
+            final statusLine = tester.getRect(find.byType(StatusLine));
             expect(
-              boxRect.width,
-              lessThanOrEqualTo(
-                textRect.width + denseSpacing + smallProgressSize + 8.0,
-              ),
-              reason:
-                  'The page status should hug its content on a wide screen; '
-                  'an Expanded wrapper would stretch it to fill the slack.',
+              statusLine.right - connection.right,
+              lessThanOrEqualTo(defaultSpacing + geometryTolerance),
             );
-
-            if (!embedded) {
-              // With no trailing actions, the connection status is the last
-              // item and stays pinned to the right edge.
-              final connection = tester.getRect(
-                _connectionStatus(connected: true),
-              );
-              final statusLine = tester.getRect(find.byType(StatusLine));
-              expect(
-                statusLine.right - connection.right,
-                lessThanOrEqualTo(defaultSpacing + geometryTolerance),
-              );
-            }
-            await stopNetworkPolling(tester, network);
-          },
-        );
-      }
+          }
+        },
+      );
     }
   });
 
@@ -259,9 +323,9 @@ void main() {
       const Size(_compactInteractionWidth, responsiveLayoutHeight),
       (WidgetTester tester) async {
         final handle = tester.ensureSemantics();
-        await pumpFooter(
+        await pumpStatusLine(
           tester,
-          pageId: ScreenMetaData.network.id,
+          screen: const _FakeStatusScreen(),
           embedded: true,
           connected: true,
         );
@@ -286,7 +350,6 @@ void main() {
           ),
         );
         handle.dispose();
-        await stopNetworkPolling(tester, network);
       },
     );
 
@@ -294,9 +357,9 @@ void main() {
       'opens with Enter, lists every action, and closes with Escape',
       const Size(_compactInteractionWidth, responsiveLayoutHeight),
       (WidgetTester tester) async {
-        await pumpFooter(
+        await pumpStatusLine(
           tester,
-          pageId: ScreenMetaData.network.id,
+          screen: const _FakeStatusScreen(),
           embedded: true,
           connected: true,
         );
@@ -315,7 +378,6 @@ void main() {
         await tester.sendKeyEvent(LogicalKeyboardKey.escape);
         await tester.pump(const Duration(milliseconds: 500));
         expect(find.byType(PopupMenuItem<VoidCallback>), findsNothing);
-        await stopNetworkPolling(tester, network);
       },
     );
 
@@ -323,9 +385,9 @@ void main() {
       'Settings from the menu opens the Settings dialog',
       const Size(_compactInteractionWidth, responsiveLayoutHeight),
       (WidgetTester tester) async {
-        await pumpFooter(
+        await pumpStatusLine(
           tester,
-          pageId: ScreenMetaData.network.id,
+          screen: const _FakeStatusScreen(),
           embedded: true,
           connected: true,
         );
@@ -335,108 +397,92 @@ void main() {
         );
         expect(errors, isEmpty, reason: errors.join('\n'));
         await _expectDialogOpens(tester, find.byType(SettingsDialog));
-        await stopNetworkPolling(tester, network);
       },
     );
 
-    for (final width in [_compactInteractionWidth, 328.0]) {
-      testWidgetsWithWindowSize(
-        'About from the menu opens the About dialog'
-        ' at $width',
-        Size(width, responsiveLayoutHeight),
-        (WidgetTester tester) async {
-          await pumpFooter(
-            tester,
-            pageId: ScreenMetaData.network.id,
-            embedded: true,
-            connected: true,
-          );
-          await _openMenuWithKeyboard(tester);
-          final errors = await collectFlutterErrors(
-            () => _activateMenuItem(tester, 'About DevTools'),
-          );
-          expect(errors, isEmpty, reason: errors.join('\n'));
-          await _expectDialogOpens(tester, find.byType(DevToolsAboutDialog));
-          await stopNetworkPolling(tester, network);
-        },
-      );
-    }
+    testWidgetsWithWindowSize(
+      'About from the menu opens the About dialog',
+      const Size(_compactInteractionWidth, responsiveLayoutHeight),
+      (WidgetTester tester) async {
+        await pumpStatusLine(
+          tester,
+          screen: const _FakeStatusScreen(),
+          embedded: true,
+          connected: true,
+        );
+        await _openMenuWithKeyboard(tester);
+        final errors = await collectFlutterErrors(
+          () => _activateMenuItem(tester, 'About DevTools'),
+        );
+        expect(errors, isEmpty, reason: errors.join('\n'));
+        await _expectDialogOpens(tester, find.byType(DevToolsAboutDialog));
+      },
+    );
 
-    for (final width in [_compactInteractionWidth, 328.0]) {
-      testWidgetsWithWindowSize(
-        'Watch tutorial from the menu opens the same video and records the same '
-        'analytics event as the inline link'
-        ' at $width',
-        Size(width, responsiveLayoutHeight),
-        (WidgetTester tester) async {
-          final urls = UrlLaunchRecorder()..install();
-          final analytics = AnalyticsRecorder()..install();
-          addTearDown(() {
-            urls.dispose();
-            analytics.dispose();
-          });
-          await pumpFooter(
-            tester,
-            pageId: ScreenMetaData.network.id,
-            embedded: true,
-            connected: true,
-          );
-          await _openMenuWithKeyboard(tester);
-          await _activateMenuItem(tester, 'Watch tutorial');
-          await tester.pump(const Duration(milliseconds: 200));
+    testWidgetsWithWindowSize(
+      'Watch tutorial from the menu opens the same video and records the same '
+      'analytics event as the inline link',
+      const Size(_compactInteractionWidth, responsiveLayoutHeight),
+      (WidgetTester tester) async {
+        final urls = UrlLaunchRecorder()..install();
+        final analytics = AnalyticsRecorder()..install();
+        addTearDown(() {
+          urls.dispose();
+          analytics.dispose();
+        });
+        await pumpStatusLine(
+          tester,
+          screen: const _FakeStatusScreen(),
+          embedded: true,
+          connected: true,
+        );
+        await _openMenuWithKeyboard(tester);
+        await _activateMenuItem(tester, 'Watch tutorial');
+        await tester.pump(const Duration(milliseconds: 200));
 
-          expect(urls.launched, [_tutorialUrl(ScreenMetaData.network)]);
-          expect(
-            analytics.recordedSelection(
-              screenId: ScreenMetaData.network.id,
-              item: AnalyticsRecorder.tutorialItem(ScreenMetaData.network.id),
-            ),
-            isTrue,
-          );
-          await stopNetworkPolling(tester, network);
-        },
-      );
-    }
+        expect(urls.launched, [_tutorialUrl(ScreenMetaData.network)]);
+        expect(
+          analytics.recordedSelection(
+            screenId: ScreenMetaData.network.id,
+            item: AnalyticsRecorder.tutorialItem(ScreenMetaData.network.id),
+          ),
+          isTrue,
+        );
+      },
+    );
 
-    for (final width in [_compactInteractionWidth, 328.0]) {
-      testWidgetsWithWindowSize(
-        'Report feedback from the menu opens the issue tracker and records the '
-        'analytics event'
-        ' at $width',
-        Size(width, responsiveLayoutHeight),
-        (WidgetTester tester) async {
-          final urls = UrlLaunchRecorder()..install();
-          final analytics = AnalyticsRecorder()..install();
-          addTearDown(() {
-            urls.dispose();
-            analytics.dispose();
-          });
-          await pumpFooter(
-            tester,
-            pageId: ScreenMetaData.network.id,
-            embedded: true,
-            connected: true,
-          );
-          await _openMenuWithKeyboard(tester);
-          await _activateMenuItem(tester, 'Report feedback');
-          await tester.pump(const Duration(milliseconds: 200));
+    testWidgetsWithWindowSize(
+      'Report feedback from the menu opens the issue tracker and records the '
+      'analytics event',
+      const Size(_compactInteractionWidth, responsiveLayoutHeight),
+      (WidgetTester tester) async {
+        final urls = UrlLaunchRecorder()..install();
+        final analytics = AnalyticsRecorder()..install();
+        addTearDown(() {
+          urls.dispose();
+          analytics.dispose();
+        });
+        await pumpStatusLine(
+          tester,
+          screen: const _FakeStatusScreen(),
+          embedded: true,
+          connected: true,
+        );
+        await _openMenuWithKeyboard(tester);
+        await _activateMenuItem(tester, 'Report feedback');
+        await tester.pump(const Duration(milliseconds: 200));
 
-          expect(urls.launched, hasLength(1));
-          expect(
-            urls.launched.single,
-            startsWith('https://github.com/flutter/devtools/issues/new'),
-          );
-          expect(
-            analytics.recordedSelection(
-              screenId: 'main',
-              item: 'feedbackButton',
-            ),
-            isTrue,
-          );
-          await stopNetworkPolling(tester, network);
-        },
-      );
-    }
+        expect(urls.launched, hasLength(1));
+        expect(
+          urls.launched.single,
+          startsWith('https://github.com/flutter/devtools/issues/new'),
+        );
+        expect(
+          analytics.recordedSelection(screenId: 'main', item: 'feedbackButton'),
+          isTrue,
+        );
+      },
+    );
 
     testWidgetsWithWindowSize(
       'inline tutorial link at a wide width opens the same video',
@@ -444,9 +490,9 @@ void main() {
       (WidgetTester tester) async {
         final urls = UrlLaunchRecorder()..install();
         addTearDown(urls.dispose);
-        await pumpFooter(
+        await pumpStatusLine(
           tester,
-          pageId: ScreenMetaData.network.id,
+          screen: const _FakeStatusScreen(),
           embedded: true,
           connected: true,
         );
@@ -454,7 +500,6 @@ void main() {
         await tester.tap(_inStatusLine(find.text('Watch tutorial')));
         await tester.pump(const Duration(milliseconds: 200));
         expect(urls.launched, [_tutorialUrl(ScreenMetaData.network)]);
-        await stopNetworkPolling(tester, network);
       },
     );
   });
@@ -507,5 +552,42 @@ void _expectFooterGeometry(
   if (trigger.evaluate().isNotEmpty) {
     expect(tester.getSize(trigger).width, actionWidgetSize);
     expectInteractable(trigger);
+  }
+}
+
+/// A lightweight [Screen] for testing [StatusLine] in isolation.
+///
+/// Its page status needs no screen controller, so no controller is ever
+/// initialized and no polling timers need cleanup (unlike a real screen,
+/// whose `buildStatus` looks up a controller and would start one).
+/// [statusText] is the page status content; `null` means no page status.
+class _FakeStatusScreen extends Screen {
+  const _FakeStatusScreen({this.statusText = '1 of 10 requests'})
+    : super(_screenId);
+
+  static const _screenId = 'network';
+
+  final String? statusText;
+
+  @override
+  String? get docPageId => 'network';
+
+  @override
+  Widget buildScreenBody(BuildContext context) => const SizedBox();
+
+  @override
+  Widget? buildStatus(BuildContext context) {
+    final text = statusText;
+    if (text == null) return null;
+    // Mimics the real page status: a spinner-sized element followed by text,
+    // so the Flexible wrapper's natural-width behavior is exercised.
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(width: smallProgressSize, height: smallProgressSize),
+        const SizedBox(width: denseSpacing),
+        Text(text),
+      ],
+    );
   }
 }

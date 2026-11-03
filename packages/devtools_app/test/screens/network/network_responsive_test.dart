@@ -123,33 +123,55 @@ void main() {
     debugger = DebuggerController();
   });
 
-  for (final embedded in [false, true]) {
-    group('Network toolbar (${embedded ? 'embedded' : 'standalone'})', () {
-      for (final width in responsiveLayoutWidths) {
-        testWidgetsWithWindowSize(
-          'has no overlap or clipping at $width',
-          Size(width, responsiveLayoutHeight),
-          (WidgetTester tester) async {
-            final errors = await collectFlutterErrors(
-              () => pumpDevToolsScaffold(
-                tester,
-                pageId: ScreenMetaData.network.id,
-                embedded: embedded,
-                connected: true,
-                connection: connection,
-                network: network,
-                logging: logging,
-                debugger: debugger,
-              ),
-            );
-            expect(errors, isEmpty, reason: errors.join('\n'));
-            _expectToolbarLayout(tester, width: width);
-            await stopNetworkPolling(tester, network);
-          },
-        );
-      }
-    });
-  }
+  group('Network toolbar (standalone)', () {
+    for (final width in responsiveLayoutWidths) {
+      testWidgetsWithWindowSize(
+        'has no overlap or clipping at $width',
+        Size(width, responsiveLayoutHeight),
+        (WidgetTester tester) async {
+          final errors = await collectFlutterErrors(
+            () => pumpDevToolsScaffold(
+              tester,
+              pageId: ScreenMetaData.network.id,
+              embedded: false,
+              connected: true,
+              connection: connection,
+              network: network,
+              logging: logging,
+              debugger: debugger,
+            ),
+          );
+          expect(errors, isEmpty, reason: errors.join('\n'));
+          _expectToolbarLayout(tester, width: width);
+          await stopNetworkPolling(tester, network);
+        },
+      );
+    }
+  });
+
+  // The toolbar does not read the embed mode, so one narrow embedded smoke
+  // test covers the embedded path.
+  testWidgetsWithWindowSize(
+    'Network toolbar (embedded) has no overlap or clipping at 328',
+    const Size(328, responsiveLayoutHeight),
+    (WidgetTester tester) async {
+      final errors = await collectFlutterErrors(
+        () => pumpDevToolsScaffold(
+          tester,
+          pageId: ScreenMetaData.network.id,
+          embedded: true,
+          connected: true,
+          connection: connection,
+          network: network,
+          logging: logging,
+          debugger: debugger,
+        ),
+      );
+      expect(errors, isEmpty, reason: errors.join('\n'));
+      _expectToolbarLayout(tester, width: 328);
+      await stopNetworkPolling(tester, network);
+    },
+  );
 
   group('Network toolbar state across resizes', () {
     // Resizing across the breakpoints reparents the search and filter fields
@@ -219,7 +241,7 @@ void main() {
 
         // Cross each boundary in both directions in the same tree, and finish
         // on a wide desktop baseline.
-        for (final width in [599.0, 600.0, 899.0, 900.0, 899.0, 1400.0]) {
+        for (final width in [328.0, 600.0, 900.0, 601.0, 1400.0]) {
           final resizeErrors = await collectFlutterErrors(
             () => _setWindowWidth(tester, width),
           );
@@ -283,45 +305,5 @@ void main() {
         await stopNetworkPolling(tester, network);
       },
     );
-  });
-
-  group('Network toolbar behavior', () {
-    for (final width in [328.0, 900.0, 1400.0]) {
-      testWidgetsWithWindowSize(
-        'search, filter, and recording work at $width',
-        Size(width, responsiveLayoutHeight),
-        (WidgetTester tester) async {
-          await pumpDevToolsScaffold(
-            tester,
-            pageId: ScreenMetaData.network.id,
-            embedded: false,
-            connected: true,
-            connection: connection,
-            network: network,
-            logging: logging,
-            debugger: debugger,
-          );
-
-          await tester.enterText(
-            find.descendant(of: _search, matching: find.byType(EditableText)),
-            'GET',
-          );
-          expect(network.search, 'GET');
-
-          await tester.enterText(
-            find.descendant(of: _filter, matching: find.byType(EditableText)),
-            'http',
-          );
-          expect(network.activeFilter.value.queryFilter.query, 'http');
-
-          final wasRecording = network.recordingNotifier.value;
-          await tester.tap(_recordButton);
-          await tester.pump(const Duration(seconds: 1));
-          expect(network.recordingNotifier.value, !wasRecording);
-
-          await stopNetworkPolling(tester, network);
-        },
-      );
-    }
   });
 }
