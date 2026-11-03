@@ -18,6 +18,11 @@ To learn more about DevTools, check out the
 * Remove the legacy Provider screen, which was a placeholder to point users to
 the `package:provider` DevTools extension. [#10046](https://github.com/flutter/devtools/pull/10046)
 
+* Improved the readability of ANSI-colored text in the console and logging
+screens: colors that are hard to see against the current light or dark theme,
+such as black or white, are now adjusted to remain legible.
+[#10060](https://github.com/flutter/devtools/pull/10060)
+
 ## Inspector updates
 
 TODO: Remove this section if there are not any updates.
