@@ -4,10 +4,14 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
 ## 0.5.2-wip
+* Fix `forEachIsolateHelper` to rethrow isolate callback exceptions directly
+  using `Future.wait` instead of wrapping them in a `ParallelWaitError`.
 * Fix a `RangeError` thrown by `SplitPane` when the number of children
   changes between rebuilds.
-* Fix garbage collection and timeout issues with the result list in `asyncEval` on both native VM and web.
-* Safely handle RPC errors and unexpected exceptions when calling service extensions in `ServiceExtensionManager`.
+* Fix garbage collection and timeout issues with the result list in `asyncEval`
+  on both native VM and web.
+* Safely handle RPC errors and unexpected exceptions when calling service
+  extensions in `ServiceExtensionManager`.
 * The minimum Dart SDK version is bumped to 3.11.0.
 * The minimum Flutter SDK version is bumped to 3.41.0.
 * Fix `RootInfo.package` to be `null` when the root library is not a `package:` URI,

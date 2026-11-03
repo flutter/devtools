@@ -374,6 +374,26 @@ void main() {
     );
 
     test(
+      'refreshNetworkData swallows service disappeared error during isolate iteration',
+      () async {
+        final localVmService = HotRestartNetworkVmService();
+        final localConnection = FakeServiceConnectionManager(
+          service: localVmService,
+        );
+        final localController = await initNetworkLifecycleController(
+          vmService: localVmService,
+          fakeServiceConnection: localConnection,
+        );
+
+        localVmService.simulateServiceDisappeared = true;
+        await expectLater(
+          localController.networkService.refreshNetworkData(),
+          completes,
+        );
+      },
+    );
+
+    test(
       'updateLastHttpDataRefreshTime does not add entries for new isolates',
       () async {
         final localVmService = HotRestartNetworkVmService();
