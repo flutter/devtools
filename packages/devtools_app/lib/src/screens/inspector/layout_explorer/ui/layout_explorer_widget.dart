@@ -49,11 +49,9 @@ abstract class LayoutExplorerWidgetState<
 
   InspectorObjectGroupManager? objectGroupManager;
 
-  // ignore: unused-code, false positive "this getter is used but never assigned a value"
   AnimatedLayoutProperties<L>? get animatedProperties => _animatedProperties;
   AnimatedLayoutProperties<L>? _animatedProperties;
 
-  // ignore: unused-code, false positive "this getter is used but never assigned a value"
   L? get properties =>
       _previousProperties ?? _animatedProperties as L? ?? _properties;
 
