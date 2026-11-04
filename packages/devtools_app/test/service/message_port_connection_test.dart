@@ -26,16 +26,20 @@ void main() {
       expect(isMessagePortUri(Uri.parse('messageport')), isFalse);
     });
 
-    test('survives normalizeVmServiceUri', () {
-      // `FrameworkCore.initVmService` normalizes the `uri` query parameter
-      // before checking the scheme, so the target origin must survive it.
-      for (final targetOrigin in ['https://example.com', '*']) {
-        final uri = normalizeVmServiceUri('messageport:$targetOrigin')!;
-        expect(isMessagePortUri(uri), isTrue);
-        expect(uri.path, targetOrigin);
-        expect(uri.toString(), 'messageport:$targetOrigin');
-      }
-    });
+    test(
+      'parseMessagePortUri preserves target origin and rejects other URIs',
+      () {
+        for (final targetOrigin in ['https://example.com', '*']) {
+          expect(normalizeVmServiceUri('messageport:$targetOrigin'), isNull);
+          final uri = parseMessagePortUri('  messageport:$targetOrigin#/vm  ')!;
+          expect(isMessagePortUri(uri), isTrue);
+          expect(uri.path, targetOrigin);
+          expect(uri.toString(), 'messageport:$targetOrigin');
+        }
+        expect(parseMessagePortUri('messageport:'), isNull);
+        expect(parseMessagePortUri('ws://127.0.0.1:8181/ws'), isNull);
+      },
+    );
   });
 
   test('connectWithMessagePort is not supported outside the web', () {

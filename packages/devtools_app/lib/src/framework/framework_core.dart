@@ -134,7 +134,9 @@ extension FrameworkCore on Never {
       return true;
     }
 
-    final uri = normalizeVmServiceUri(serviceUriAsString);
+    final uri =
+        parseMessagePortUri(serviceUriAsString) ??
+        normalizeVmServiceUri(serviceUriAsString);
     if (uri != null) {
       vmServiceInitializationInProgress = true;
       _lastServiceUriAsString = serviceUriAsString;

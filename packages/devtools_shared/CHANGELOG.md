@@ -31,6 +31,8 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 * Confine `devtoolsOptionsUri` in `api/extensionEnabledState` to currently
   served extensions, reject symlinked `devtools_options.yaml` files, and prevent
   recursive directory creation when looking up `devtools_options.yaml`.
+* Restrict `normalizeVmServiceUri` to allowed VM service schemes (`http`, `https`,
+    `ws`, `wss`, `sse`, `sses`) and loopback hosts (`localhost`, `127.0.0.0/8`, `::1`).
 
 # 14.0.0
 
