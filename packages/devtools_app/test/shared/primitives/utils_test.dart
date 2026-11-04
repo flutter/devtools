@@ -680,6 +680,130 @@ void main() {
       equals('http://127.0.0.1:9100'),
     );
   });
+
+  group('ansiToColor and textSpansFromAnsi', () {
+    test('ansiToColor returns basic colors without theme', () {
+      expect(
+        ansiToColor([255, 0, 0]),
+        equals(const Color.fromRGBO(255, 0, 0, 1)),
+      );
+      expect(
+        ansiToColor([0, 255, 0]),
+        equals(const Color.fromRGBO(0, 255, 0, 1)),
+      );
+      expect(ansiToColor(null), isNull);
+    });
+
+    test('ansiToColor adjusts black and dark blue for dark theme', () {
+      // In dark theme, black [0, 0, 0] is adjusted to readable gray
+      expect(
+        ansiToColor([0, 0, 0], isDarkTheme: true),
+        equals(const Color.fromRGBO(128, 128, 128, 1)),
+      );
+      // In dark theme, standard dark blue [0, 0, 187] is adjusted for contrast
+      expect(
+        ansiToColor([0, 0, 187], isDarkTheme: true),
+        equals(const Color.fromRGBO(85, 135, 255, 1)),
+      );
+      // In light theme, black remains [0, 0, 0]
+      expect(
+        ansiToColor([0, 0, 0], isDarkTheme: false),
+        equals(const Color.fromRGBO(0, 0, 0, 1)),
+      );
+    });
+
+    test('ansiToColor adjusts white and bright yellow for light theme', () {
+      // In light theme, white [255, 255, 255] is adjusted to readable gray
+      expect(
+        ansiToColor([255, 255, 255], isDarkTheme: false),
+        equals(const Color.fromRGBO(128, 128, 128, 1)),
+      );
+      // In light theme, bright yellow [255, 255, 85] is adjusted for contrast
+      expect(
+        ansiToColor([255, 255, 85], isDarkTheme: false),
+        equals(const Color.fromRGBO(187, 136, 0, 1)),
+      );
+      // In dark theme, white remains [255, 255, 255]
+      expect(
+        ansiToColor([255, 255, 255], isDarkTheme: true),
+        equals(const Color.fromRGBO(255, 255, 255, 1)),
+      );
+    });
+
+    test('textSpansFromAnsi parses unstyled text', () {
+      const defaultStyle = TextStyle(color: Color(0xFFFFFFFF));
+      final spans = textSpansFromAnsi('hello world', defaultStyle);
+      expect(spans.length, equals(1));
+      expect(spans.first.text, equals('hello world'));
+      expect(spans.first.style, equals(defaultStyle));
+    });
+
+    test('textSpansFromAnsi adjusts foreground color based on dark theme', () {
+      // \x1B[30m is ANSI black
+      const darkThemeStyle = TextStyle(
+        color: Color(0xFFFFFFFF),
+        fontFamily: 'monospace',
+      );
+      final spans = textSpansFromAnsi(
+        '\x1B[30mBlack text\x1B[0m',
+        darkThemeStyle,
+        isDarkTheme: true,
+      );
+      expect(spans.length, equals(1));
+      expect(spans.first.text, equals('Black text'));
+      // Should not be pure black in dark theme
+      expect(
+        spans.first.style!.color,
+        equals(const Color.fromRGBO(128, 128, 128, 1)),
+      );
+      // Should preserve defaultStyle properties (e.g. fontFamily) via merge
+      expect(spans.first.style!.fontFamily, equals('monospace'));
+    });
+
+    test('textSpansFromAnsi infers dark theme from defaultStyle luminance', () {
+      // White text implies dark theme background
+      const darkThemeStyle = TextStyle(color: Color(0xFFFFFFFF));
+      final spans = textSpansFromAnsi(
+        '\x1B[30mBlack text\x1B[0m',
+        darkThemeStyle,
+      );
+      expect(
+        spans.first.style!.color,
+        equals(const Color.fromRGBO(128, 128, 128, 1)),
+      );
+
+      // Black text implies light theme background
+      const lightThemeStyle = TextStyle(color: Color(0xFF000000));
+      final lightSpans = textSpansFromAnsi(
+        '\x1B[37mWhite text\x1B[0m',
+        lightThemeStyle,
+      );
+      expect(
+        lightSpans.first.style!.color,
+        equals(const Color.fromRGBO(128, 128, 128, 1)),
+      );
+    });
+
+    test('textSpansFromAnsi respects explicit background color', () {
+      // \x1B[40;37m is black background with white text
+      const lightThemeStyle = TextStyle(color: Color(0xFF000000));
+      final spans = textSpansFromAnsi(
+        '\x1B[40;37mWhite on black\x1B[0m',
+        lightThemeStyle,
+        isDarkTheme: false,
+      );
+      expect(spans.first.text, equals('White on black'));
+      expect(
+        spans.first.style!.backgroundColor,
+        equals(const Color.fromRGBO(0, 0, 0, 1)),
+      );
+      // On an explicit black background, white text remains white
+      expect(
+        spans.first.style!.color,
+        equals(const Color.fromRGBO(255, 255, 255, 1)),
+      );
+    });
+  });
 }
 
 class _SubtractionResult {
