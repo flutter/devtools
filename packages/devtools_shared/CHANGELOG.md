@@ -7,6 +7,8 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 
 * Track providing package name for DevTools extensions to isolate extension enablement,
   deduplication, and asset loading.
+* Validate `DevToolsExtensionConfig.version` as a semantic version and use a collision-free
+  delimiter in `DevToolsExtensionConfig.identifier`.
 * Validate `rootPath`, `buildVariant`, `configuration`, and `target` parameters in
   `DeeplinkManager`.
 * Add `UniversalLinkSettings.fromErrorJson`, `UniversalLinkSettings.error`, and

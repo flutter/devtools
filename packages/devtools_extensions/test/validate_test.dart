@@ -84,8 +84,8 @@ environment:
         expect(
           process.stderr,
           contains(
-            'Validation error: The "name" field in config.yaml should only '
-            'contain lowercase letters, numbers, and underscores',
+            'Validation error: The "name" field in the extension config.yaml '
+            'should only contain lowercase letters, numbers, and underscores',
           ),
         );
       } finally {

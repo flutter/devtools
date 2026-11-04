@@ -137,7 +137,7 @@ void main() {
         expect(spoofedExtension, isNotNull);
         expect(spoofedExtension!.name, 'provider');
         expect(spoofedExtension.version, '999.0.0');
-        expect(spoofedExtension.identifier, 'bad_pkg_provider_999.0.0');
+        expect(spoofedExtension.identifier, 'bad_pkg-provider_999.0.0');
 
         // Verify lookupLocationFor returns the respective paths without collision.
         expect(
