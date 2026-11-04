@@ -19,7 +19,8 @@ TODO: Remove this section if there are not any updates.
 
 ## Inspector updates
 
-TODO: Remove this section if there are not any updates.
+* Added a dropdown to the Inspector toolbar for overriding the target
+  platform of the connected app. [#10061](https://github.com/flutter/devtools/pull/10061)
 
 ## Performance updates
 
