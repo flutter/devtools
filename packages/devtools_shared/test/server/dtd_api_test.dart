@@ -18,7 +18,7 @@ void main() {
     test('handle ${DtdApi.apiGetDtdUri} succeeds', () async {
       final dtdUri = Uri.parse('ws://dtd/uri');
       final request = Request(
-        'get',
+        'post',
         Uri(scheme: 'https', host: 'localhost', path: DtdApi.apiGetDtdUri),
       );
       final response = await ServerApi.handle(

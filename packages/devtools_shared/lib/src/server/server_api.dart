@@ -44,10 +44,101 @@ class ServerApi {
   static const logsKey = 'logs';
   static const errorKey = 'error';
 
+  static const _postMethod = 'POST';
+  static const _optionsMethod = 'OPTIONS';
+  static const _originHeader = 'origin';
+  static const _secFetchSiteHeader = 'sec-fetch-site';
+  static const _crossSiteSecFetchSite = 'cross-site';
+  static const _allowedSecFetchSites = {'same-origin', 'same-site', 'none'};
+
   /// Determines whether or not [request] is an API call.
   static bool canHandle(shelf.Request request) {
     return request.url.path.startsWith(apiPrefix);
   }
+
+  /// Validates [request] to mitigate CSRF, DNS rebinding, and cross-origin
+  /// attacks before dispatching to any [ServerApi] handler.
+  ///
+  /// Returns a [shelf.Response] if the request is rejected, or `null` if the
+  /// request is valid.
+  static shelf.Response? _validateRequest(
+    shelf.Request request,
+    ServerApi api,
+  ) {
+    final method = request.method.toUpperCase();
+    if (method != _postMethod && method != _optionsMethod) {
+      return shelf.Response(
+        HttpStatus.methodNotAllowed,
+        body: 'Method Not Allowed: ${request.method}',
+      );
+    }
+
+    final hostHeaders = request.headersAll[HttpHeaders.hostHeader];
+    if (hostHeaders != null && hostHeaders.length > 1) {
+      return api.forbidden('Invalid Host header');
+    }
+    final hostHeader = request.headers[HttpHeaders.hostHeader];
+    final host = hostHeader != null
+        ? _extractHostFromHeader(hostHeader)
+        : request.requestedUri.host;
+    if (host == null ||
+        !_isLoopbackHost(host) ||
+        !_isLoopbackHost(request.requestedUri.host)) {
+      return api.forbidden('Invalid Host header');
+    }
+
+    final originHeaders = request.headersAll[_originHeader];
+    if (originHeaders != null && originHeaders.length > 1) {
+      return api.forbidden('Invalid Origin header');
+    }
+    final originHeader = request.headers[_originHeader];
+    if (originHeader != null) {
+      final originUri = Uri.tryParse(originHeader.trim());
+      if (originUri == null ||
+          originUri.userInfo.isNotEmpty ||
+          !_isLoopbackHost(originUri.host)) {
+        return api.forbidden('Invalid Origin header');
+      }
+    }
+
+    final secFetchSite = request.headers[_secFetchSiteHeader]
+        ?.trim()
+        .toLowerCase();
+    // Allow `cross-site` when a validated loopback `Origin` header is present
+    // (e.g. `http://localhost:<port>` calling `http://127.0.0.1:<port>` in
+    // `debug_devtools_server` mode).
+    if (secFetchSite != null &&
+        !_allowedSecFetchSites.contains(secFetchSite) &&
+        !(secFetchSite == _crossSiteSecFetchSite && originHeader != null)) {
+      return api.forbidden('Cross-site requests are not allowed');
+    }
+
+    return null;
+  }
+
+  /// Extracts the host component from an HTTP `Host` header value, or returns
+  /// `null` if the header is malformed.
+  static String? _extractHostFromHeader(String hostHeader) {
+    final trimmed = hostHeader.trim();
+    if (trimmed.isEmpty) return null;
+    if (trimmed == '::1') return '::1';
+    final parsed = Uri.tryParse('http://$trimmed');
+    if (parsed == null ||
+        parsed.userInfo.isNotEmpty ||
+        parsed.path.isNotEmpty ||
+        parsed.hasQuery ||
+        parsed.hasFragment ||
+        parsed.host.isEmpty) {
+      return null;
+    }
+    return parsed.host;
+  }
+
+  /// Returns whether [host] is a loopback host
+  /// (`localhost`, `127.x.x.x`, or `::1`).
+  static bool _isLoopbackHost(String host) =>
+      host == 'localhost' ||
+      (InternetAddress.tryParse(host)?.isLoopback ?? false);
 
   /// Handles all requests.
   ///
@@ -60,6 +151,24 @@ class ServerApi {
     DtdInfo? dtd,
   }) {
     api ??= ServerApi();
+    final validationErrorResponse = _validateRequest(request, api);
+    if (validationErrorResponse != null) {
+      return validationErrorResponse;
+    }
+    if (request.method.toUpperCase() == _optionsMethod) {
+      // Respond to CORS preflight requests (e.g. from `debug_devtools_server`
+      // running on another loopback port). `Access-Control-Allow-Origin` is
+      // intentionally omitted here and controlled by the server's `--disable-cors`
+      // configuration.
+      return shelf.Response(
+        HttpStatus.noContent,
+        headers: const {
+          HttpHeaders.accessControlAllowMethodsHeader:
+              '$_postMethod, $_optionsMethod',
+          HttpHeaders.accessControlAllowHeadersHeader: devToolsRequestHeader,
+        },
+      );
+    }
     final queryParams = request.requestedUri.queryParameters;
     switch (request.url.path) {
       case apiNotifyForVmServiceConnection:

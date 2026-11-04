@@ -18,7 +18,7 @@ void main() {
     test('handle deeplink api ${DeeplinkApi.androidBuildVariants}', () async {
       const expectedRootPath = '/abc';
       final request = Request(
-        'get',
+        'post',
         Uri(
           scheme: 'https',
           host: 'localhost',
@@ -46,7 +46,7 @@ void main() {
       'handle deeplink api ${DeeplinkApi.androidBuildVariants} returns bad request if no root path',
       () async {
         final request = Request(
-          'get',
+          'post',
           Uri(
             scheme: 'https',
             host: 'localhost',
@@ -67,7 +67,7 @@ void main() {
       const buildVariant = 'buildVariant';
       const someMessage = 'some message';
       final request = Request(
-        'get',
+        'post',
         Uri(
           scheme: 'https',
           host: 'localhost',
@@ -97,7 +97,7 @@ void main() {
       const expectedRootPath = '/abc';
       const someMessage = 'some message';
       final request = Request(
-        'get',
+        'post',
         Uri(
           scheme: 'https',
           host: 'localhost',
@@ -129,7 +129,7 @@ void main() {
         const target = 'target';
         const someMessage = 'some message';
         final request = Request(
-          'get',
+          'post',
           Uri(
             scheme: 'https',
             host: 'localhost',
