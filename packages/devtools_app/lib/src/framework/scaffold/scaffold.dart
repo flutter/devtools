@@ -24,6 +24,7 @@ import '../../shared/globals.dart';
 import '../../shared/managers/banner_messages.dart';
 import '../../shared/primitives/query_parameters.dart';
 import '../../shared/title.dart';
+import '../../shared/ui/common_widgets.dart';
 import 'about_dialog.dart';
 import 'app_bar.dart';
 import 'bottom_pane.dart';
@@ -59,7 +60,7 @@ class DevToolsScaffold extends StatefulWidget {
        );
 
   /// Returns the list of ScaffoldAction widgets.
-  static List<Widget> defaultActions({
+  static List<ScaffoldAction> defaultActions({
     Color? color,
     Screen? currentScreen,
     DevToolsQueryParams? queryParams,
