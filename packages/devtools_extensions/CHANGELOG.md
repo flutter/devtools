@@ -9,6 +9,20 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 * Updates `devtools_shared` constraint to `^14.0.1`.
 * Add validation for `pubspec.yaml` existence and valid characters in the `config.yaml` `name` field to the `validate` command.
 * Remove the deprecated `--pwa-strategy` flag from the `build_and_copy` command.
+* Reduce extension build output size by pruning web engine resources that are
+  never requested at runtime. `.js.symbols` debug files are always removed,
+  and `skwasm`/`wimp` renderer files are removed when the build output
+  contains no root-level `.wasm` application artifact (so the wasm
+  renderer is not selected). A new opt-in `--prune-cdn-canvaskit` flag
+  additionally removes the entire local `canvaskit/` directory (~36 MB) for
+  builds that are known to load all engine resources from the CDN at
+  runtime; it cannot be combined with `--no-web-resources-cdn`.
+* Add a `--tree-shake-icons` flag to the `build_and_copy` command that allows
+  the compiler to tree-shake icon fonts (disabled by default for backwards
+  compatibility). Passing it can shrink `MaterialIcons-Regular.otf` by ~99%.
+* Add a `--web-resources-cdn` / `--no-web-resources-cdn` flag to the
+  `build_and_copy` command for building extensions that do not load CanvasKit
+  from the CDN (e.g. for offline use).
 
 ## 0.5.1
 * Updates `devtools_app_shared` constraint to `^0.5.1`.
