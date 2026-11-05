@@ -69,6 +69,14 @@ class ImportController {
     final devToolsOfflineData = _DevToolsOfflineData(json);
     // TODO(kenz): support imports for more than one screen at a time.
     final activeScreenId = devToolsOfflineData.activeScreenId;
+    if (activeScreenId == null) {
+      notificationService.push(
+        'The imported file is not a valid DevTools snapshot because it does '
+        'not contain an activeScreenId field.',
+      );
+      return;
+    }
+
     if (expectedScreenId != null && activeScreenId != expectedScreenId) {
       notificationService.push(
         'Expected a data file for screen \'$expectedScreenId\' but received one'
@@ -89,6 +97,14 @@ class ImportController {
       }
     }
 
+    if (!devToolsOfflineData.json.containsKey(activeScreenId) ||
+        devToolsOfflineData.json[activeScreenId] == null) {
+      notificationService.push(
+        'The imported file does not contain data for screen \'$activeScreenId\'.',
+      );
+      return;
+    }
+
     final connectedApp = OfflineConnectedApp.parse(
       devToolsOfflineData.connectedApp,
     );
@@ -106,8 +122,10 @@ extension type _DevToolsOfflineData(Map<String, Object?> json) {
     return connectedApp == null ? {} : connectedApp.cast<String, Object?>();
   }
 
-  String get activeScreenId =>
-      json[DevToolsExportKeys.activeScreenId.name] as String;
+  String? get activeScreenId {
+    final value = json[DevToolsExportKeys.activeScreenId.name];
+    return value is String ? value : null;
+  }
 }
 
 enum ExportFileType {

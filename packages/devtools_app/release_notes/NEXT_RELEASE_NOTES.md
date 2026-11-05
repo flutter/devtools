@@ -15,8 +15,11 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-* Remove the legacy Provider screen, which was a placeholder to point users to
+* Removed the legacy Provider screen, which was a placeholder to point users to
 the `package:provider` DevTools extension. [#10046](https://github.com/flutter/devtools/pull/10046)
+* Added user-facing error notifications when importing data files that are
+  missing required fields or contain no data for the screen.
+  [#10005](https://github.com/flutter/devtools/pull/10005)
 
 ## Inspector updates
 
@@ -30,6 +33,9 @@ TODO: Remove this section if there are not any updates.
   still be opened.
   [#10034](https://github.com/flutter/devtools/pull/10034),
   [#10010](https://github.com/flutter/devtools/issues/10010)
+* Fixed an issue where importing performance data with Flutter frames but no
+  timeline trace would treat the data as empty.
+  [#10005](https://github.com/flutter/devtools/pull/10005)
 
 ## CPU profiler updates
 
