@@ -6,20 +6,21 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 This is a draft for future release notes that are going to land on
 [the Flutter website](https://docs.flutter.dev/tools/devtools/release-notes).
 
-# DevTools 2.62.0 release notes
+# DevTools 2.63.0 release notes
 
-The 2.62.0 release of the Dart and Flutter DevTools
+The 2.63.0 release of the Dart and Flutter DevTools
 includes the following changes among other general improvements.
 To learn more about DevTools, check out the
 [DevTools overview](/tools/devtools).
 
 ## General updates
 
-* Removed the legacy Provider screen, which was a placeholder to point users to
-the `package:provider` DevTools extension. [#10046](https://github.com/flutter/devtools/pull/10046)
-* Added user-facing error notifications when importing data files that are
-  missing required fields or contain no data for the screen.
-  [#10005](https://github.com/flutter/devtools/pull/10005)
+TODO: Remove this section if there are not any updates.
+
+* Improved the readability of ANSI-colored text in the console and logging
+screens: colors that are hard to see against the current light or dark theme,
+such as black or white, are now adjusted to remain legible.
+[#10060](https://github.com/flutter/devtools/pull/10060)
 
 ## Inspector updates
 
@@ -27,15 +28,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
-* Reduced the memory used when saving Performance data for offline viewing,
-  and made the saved files smaller. Files saved with this version cannot be
-  opened in older versions of DevTools. Files saved with older versions can
-  still be opened.
-  [#10034](https://github.com/flutter/devtools/pull/10034),
-  [#10010](https://github.com/flutter/devtools/issues/10010)
-* Fixed an issue where importing performance data with Flutter frames but no
-  timeline trace would treat the data as empty.
-  [#10005](https://github.com/flutter/devtools/pull/10005)
+TODO: Remove this section if there are not any updates.
 
 ## CPU profiler updates
 
@@ -47,9 +40,7 @@ TODO: Remove this section if there are not any updates.
 
 ## Debugger updates
 
-* Improved syntax highlighting of fenced code blocks that use more than three
-  backticks.
-  [#10021](https://github.com/flutter/devtools/pull/10021)
+TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
@@ -82,4 +73,4 @@ TODO: Remove this section if there are not any updates.
 ## Full commit history
 
 To find a complete list of changes in this release, check out the
-[DevTools git log](https://github.com/flutter/devtools/tree/v2.62.0).
+[DevTools git log](https://github.com/flutter/devtools/tree/v2.63.0).

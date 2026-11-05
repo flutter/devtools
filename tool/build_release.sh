@@ -79,7 +79,6 @@ flutter pub get
 flutter build web \
   --source-maps \
   --wasm \
-  --pwa-strategy=offline-first \
   --release \
   --no-tree-shake-icons \
   --no-minify-wasm

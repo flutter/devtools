@@ -109,6 +109,10 @@ class HotRestartNetworkVmService extends FakeVmServiceWrapper {
     return Success();
   }
 
+  /// When true, [getSocketProfileWrapper] throws an [RPCError] with
+  /// [RPCErrorKind.kServiceDisappeared], simulating service shutdown.
+  bool simulateServiceDisappeared = false;
+
   @override
   Future<void> forEachIsolate(Future<void> Function(IsolateRef) callback) =>
       callback(IsolateRef.parse({'id': _currentIsolateId, 'name': 'main'})!);
@@ -173,6 +177,13 @@ class HotRestartNetworkVmService extends FakeVmServiceWrapper {
 
   @override
   Future<SocketProfile> getSocketProfileWrapper(String isolateId) async {
+    if (simulateServiceDisappeared) {
+      throw RPCError(
+        'ext.dart.io.getSocketProfile',
+        RPCErrorKind.kServiceDisappeared.code,
+        'Service has disappeared',
+      );
+    }
     if (!(_socketProfilingEnabled[isolateId] ?? false)) {
       return SocketProfile(sockets: []);
     }
