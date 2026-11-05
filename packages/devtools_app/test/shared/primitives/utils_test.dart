@@ -11,6 +11,59 @@ import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('utils', () {
+    group('textSpansFromAnsi', () {
+      const defaultStyle = TextStyle();
+      // Theme surface colors used by DevTools (see devtools_app_shared).
+      const lightSurface = Color(0xFFFFFFFF);
+      const darkSurface = Color(0xFF1B1B1F);
+
+      test('adjusts low-contrast foreground for a light background', () {
+        // ansi-white is invisible on a white background.
+        final spans = textSpansFromAnsi(
+          '\x1B[37mhello\x1B[0m',
+          defaultStyle,
+          backgroundColor: lightSurface,
+        );
+        final color = spans.single.style!.color!;
+        expect(color.computeLuminance(), lessThan(1.0));
+        expect(color, isNot(equals(lightSurface)));
+      });
+
+      test('adjusts low-contrast foreground for a dark background', () {
+        // ansi-black is invisible on a near-black background.
+        final spans = textSpansFromAnsi(
+          '\x1B[30mhello\x1B[0m',
+          defaultStyle,
+          backgroundColor: darkSurface,
+        );
+        final color = spans.single.style!.color!;
+        expect(
+          color.computeLuminance(),
+          greaterThan(darkSurface.computeLuminance()),
+        );
+      });
+
+      test('keeps colors that already have sufficient contrast', () {
+        // ansi-red is legible on a white background and must be unchanged.
+        final spans = textSpansFromAnsi(
+          '\x1B[31mhello\x1B[0m',
+          defaultStyle,
+          backgroundColor: lightSurface,
+        );
+        expect(
+          spans.single.style!.color,
+          equals(const Color.fromRGBO(187, 0, 0, 1)),
+        );
+      });
+
+      test('does not adjust colors when no background is provided', () {
+        final spans = textSpansFromAnsi('\x1B[37mhello\x1B[0m', defaultStyle);
+        expect(
+          spans.single.style!.color,
+          equals(const Color.fromRGBO(255, 255, 255, 1)),
+        );
+      });
+    });
     group('durationText', () {
       test('infers unit based on duration', () {
         expect(durationText(Duration.zero), equals('0 μs'));
