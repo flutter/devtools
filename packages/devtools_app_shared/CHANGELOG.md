@@ -4,6 +4,11 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
 ## 0.5.2-wip
+* Detect Dart web apps by the presence of `dart:js_interop` or
+  `dart:js_interop_unsafe` in addition to `dart:html`, so dart2wasm and
+  `package:web` apps are recognized without dropping support for older
+  `dart:html` apps. Adds the `dartJsInteropLibraryUri`,
+  `dartJsInteropUnsafeLibraryUri`, and `dartWebLibraryUris` constants.
 * Fix `forEachIsolateHelper` to rethrow isolate callback exceptions directly
   using `Future.wait` instead of wrapping them in a `ParallelWaitError`.
 * Fix a `RangeError` thrown by `SplitPane` when the number of children

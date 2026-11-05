@@ -235,6 +235,11 @@ class FakeServiceManager extends Fake
   }
 
   @override
+  Future<bool> libraryUriAvailable(String uri) async {
+    return libraryUriAvailableNow(uri);
+  }
+
+  @override
   Future<void> manuallyDisconnect() async {
     setConnectedState(false, manual: true);
   }
