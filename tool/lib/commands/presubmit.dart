@@ -37,7 +37,7 @@ class PresubmitCommand extends Command {
   Future run() async {
     final log = Logger.standard();
     final repo = DevToolsRepo.getInstance();
-    final pm = processManager ?? createProcessManager();
+    final pm = processManager ?? ProcessManager();
     final fix = argResults!['fix'] as bool;
 
     log.stdout('Running pub get...');

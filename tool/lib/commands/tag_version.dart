@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
 import 'package:devtools_tool/model.dart';
+import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 import '../utils.dart';
@@ -40,7 +41,7 @@ class TagVersionCommand extends Command {
     final version = yamlMap['version'].toString();
     log.stdout('Current DevTools version: $version');
 
-    final processManager = createProcessManager();
+    final processManager = ProcessManager();
 
     final gitTag = 'v$version';
     log.stdout('Creating git tag: $gitTag');

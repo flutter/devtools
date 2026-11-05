@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
 import 'package:devtools_tool/model.dart';
+import 'package:io/io.dart';
 
 import '../utils.dart';
 import 'shared.dart';
@@ -42,7 +43,7 @@ class UpdateFlutterSdkCommand extends Command {
         argResults![SharedCommandArgs.updateOnPath.flagName] as bool;
     final log = Logger.standard();
     final repo = DevToolsRepo.getInstance();
-    final processManager = createProcessManager();
+    final processManager = ProcessManager();
 
     final String? flutterVersion;
     final versionStr = repo.readFile(Uri.parse('flutter-candidate.txt')).trim();

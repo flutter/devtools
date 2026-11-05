@@ -9,7 +9,7 @@ import 'package:args/command_runner.dart';
 import 'package:cli_util/cli_logging.dart';
 import 'package:devtools_tool/model.dart';
 import 'package:devtools_tool/utils.dart';
-import 'package:io/io.dart' show copyPath;
+import 'package:io/io.dart';
 import 'package:path/path.dart' as p;
 
 class ReleaseNotesCommand extends Command {
@@ -42,7 +42,7 @@ class ReleaseNotesCommand extends Command {
   @override
   FutureOr? run() async {
     final log = Logger.standard();
-    final processManager = createProcessManager();
+    final processManager = ProcessManager();
 
     final devToolsReleaseNotesDirectory = Directory(
       p.join(
