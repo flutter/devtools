@@ -53,14 +53,44 @@ ExpansionTile _buildTile(
 class HttpRequestHeadersView extends StatelessWidget {
   const HttpRequestHeadersView(this.data, {super.key});
 
+  static const _generalTitle = 'General';
+  static const _responseHeadersTitle = 'Response Headers';
+  static const _requestHeadersTitle = 'Request Headers';
+
   @visibleForTesting
-  static const generalKey = Key('General');
+  static const generalKey = Key(_generalTitle);
   @visibleForTesting
-  static const requestHeadersKey = Key('Request Headers');
+  static const requestHeadersKey = Key(_requestHeadersTitle);
   @visibleForTesting
-  static const responseHeadersKey = Key('Response Headers');
+  static const responseHeadersKey = Key(_responseHeadersTitle);
 
   final DartIOHttpRequestData data;
+
+  /// The contents of the Headers tab as plain text, for copying.
+  ///
+  /// Each non-empty section is listed under its title, in the same order as
+  /// the tab displays them, separated by a blank line. Values are formatted as
+  /// they would appear on the wire (see [headersToText]), so multi-value
+  /// headers are not wrapped in brackets as they are in the tab.
+  static String copyText(DartIOHttpRequestData data) {
+    final sections = [
+      (title: _generalTitle, headers: data.general, format: generalInfoToText),
+      (
+        title: _responseHeadersTitle,
+        headers: data.responseHeaders,
+        format: headersToText,
+      ),
+      (
+        title: _requestHeadersTitle,
+        headers: data.requestHeaders,
+        format: headersToText,
+      ),
+    ];
+    return [
+      for (final (:title, :headers, :format) in sections)
+        if (headers != null && headers.isNotEmpty) '$title\n${format(headers)}',
+    ].join('\n\n');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,19 +103,19 @@ class HttpRequestHeadersView extends StatelessWidget {
           child: ListView(
             children: [
               _buildHeadersTile(
-                'General',
+                _generalTitle,
                 general,
                 constraints,
                 key: generalKey,
               ),
               _buildHeadersTile(
-                'Response Headers',
+                _responseHeadersTitle,
                 responseHeaders,
                 constraints,
                 key: responseHeadersKey,
               ),
               _buildHeadersTile(
-                'Request Headers',
+                _requestHeadersTitle,
                 requestHeaders,
                 constraints,
                 key: requestHeadersKey,
@@ -413,25 +443,30 @@ class ImageResponseView extends StatelessWidget {
   Widget build(BuildContext context) {
     final encodedResponse = data.encodedResponse!;
     final img = image.decodeImage(encodedResponse)!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _buildTile('Image Preview', [
-          Padding(
-            padding: const EdgeInsets.all(denseSpacing),
-            child: Image.memory(encodedResponse),
-          ),
-        ]),
-        _buildTile('Metadata', [
-          _buildRow(context, 'Format', data.type),
-          _buildRow(
-            context,
-            'Size',
-            prettyPrintBytes(encodedResponse.lengthInBytes, includeUnit: true)!,
-          ),
-          _buildRow(context, 'Dimensions', '${img.width} x ${img.height}'),
-        ]),
-      ],
+    return SelectionArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildTile('Image Preview', [
+            Padding(
+              padding: const EdgeInsets.all(denseSpacing),
+              child: Image.memory(encodedResponse),
+            ),
+          ]),
+          _buildTile('Metadata', [
+            _buildRow(context, 'Format', data.type),
+            _buildRow(
+              context,
+              'Size',
+              prettyPrintBytes(
+                encodedResponse.lengthInBytes,
+                includeUnit: true,
+              )!,
+            ),
+            _buildRow(context, 'Dimensions', '${img.width} x ${img.height}'),
+          ]),
+        ],
+      ),
     );
   }
 
@@ -463,12 +498,35 @@ bool _isJsonDecodable(String source) {
 class HttpRequestCookiesView extends StatelessWidget {
   const HttpRequestCookiesView(this.data, {super.key});
 
+  static const _requestCookiesTitle = 'Request Cookies';
+  static const _responseCookiesTitle = 'Response Cookies';
+
   @visibleForTesting
-  static const requestCookiesKey = Key('Request Cookies');
+  static const requestCookiesKey = Key(_requestCookiesTitle);
   @visibleForTesting
-  static const responseCookiesKey = Key('Response Cookies');
+  static const responseCookiesKey = Key(_responseCookiesTitle);
 
   final DartIOHttpRequestData data;
+
+  /// The contents of the Cookies tab as plain text, for copying.
+  ///
+  /// Response cookies are listed as raw `Set-Cookie` values, one per line, and
+  /// request cookies as a `Cookie` header value. Sections are in the same
+  /// order as the tab displays them, separated by a blank line.
+  static String copyText(DartIOHttpRequestData data) {
+    final responseCookies = data.responseCookies;
+    final requestCookies = data.requestCookies;
+    final responseCookiesText = responseCookiesToText(
+      responseCookies,
+      data.responseHeaders,
+    );
+    return [
+      if (responseCookies.isNotEmpty)
+        '$_responseCookiesTitle\n$responseCookiesText',
+      if (requestCookies.isNotEmpty)
+        '$_requestCookiesTitle\n${requestCookiesToText(requestCookies)}',
+    ].join('\n\n');
+  }
 
   DataRow _buildRow(int index, Cookie cookie, {bool requestCookies = false}) {
     return DataRow.byIndex(
@@ -568,30 +626,32 @@ class HttpRequestCookiesView extends StatelessWidget {
     final responseCookies = data.responseCookies;
     return LayoutBuilder(
       builder: (context, constraints) {
-        return ListView(
-          children: [
-            if (responseCookies.isNotEmpty)
-              _buildCookiesTable(
-                context,
-                'Response Cookies',
-                responseCookies,
-                constraints,
-                responseCookiesKey,
-              ),
-            // Add padding between the cookie tables if displaying both
-            // response and request cookies.
-            if (responseCookies.isNotEmpty && requestCookies.isNotEmpty)
-              const Padding(padding: EdgeInsets.only(bottom: 24.0)),
-            if (requestCookies.isNotEmpty)
-              _buildCookiesTable(
-                context,
-                'Request Cookies',
-                requestCookies,
-                constraints,
-                requestCookiesKey,
-                requestCookies: true,
-              ),
-          ],
+        return SelectionArea(
+          child: ListView(
+            children: [
+              if (responseCookies.isNotEmpty)
+                _buildCookiesTable(
+                  context,
+                  _responseCookiesTitle,
+                  responseCookies,
+                  constraints,
+                  responseCookiesKey,
+                ),
+              // Add padding between the cookie tables if displaying both
+              // response and request cookies.
+              if (responseCookies.isNotEmpty && requestCookies.isNotEmpty)
+                const Padding(padding: EdgeInsets.only(bottom: 24.0)),
+              if (requestCookies.isNotEmpty)
+                _buildCookiesTable(
+                  context,
+                  _requestCookiesTitle,
+                  requestCookies,
+                  constraints,
+                  requestCookiesKey,
+                  requestCookies: true,
+                ),
+            ],
+          ),
         );
       },
     );
