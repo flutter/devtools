@@ -9,6 +9,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector_views.dart';
 import 'package:devtools_app/src/shared/http/http.dart';
+import 'package:devtools_app/src/shared/ui/file_import.dart';
 import 'package:devtools_app/src/shared/ui/tab.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
@@ -107,6 +108,37 @@ void main() {
 
       await clearTimeouts(tester);
     });
+
+    for (final narrowSize in const [Size(410.0, 800.0), Size(330.0, 800.0)]) {
+      testWidgetsWithWindowSize(
+        'controls do not overlap or overflow at ${narrowSize.width}px wide',
+        narrowSize,
+        (WidgetTester tester) async {
+          controller = NetworkController();
+          await pumpNetworkScreen(tester);
+          await tester.pumpAndSettle();
+
+          expect(tester.takeException(), isNull);
+
+          final searchRect = tester.getRect(
+            find.byType(SearchField<NetworkController>),
+          );
+          final filterRect = tester.getRect(
+            find.byType(StandaloneFilterField<NetworkRequest>),
+          );
+          final openSaveRect = tester.getRect(find.byType(OpenSaveButtonGroup));
+
+          expect(searchRect.overlaps(filterRect), isFalse);
+          expect(searchRect.overlaps(openSaveRect), isFalse);
+          expect(filterRect.overlaps(openSaveRect), isFalse);
+          for (final rect in [searchRect, filterRect, openSaveRect]) {
+            expect(rect.right, lessThanOrEqualTo(narrowSize.width));
+          }
+
+          await clearTimeouts(tester);
+        },
+      );
+    }
 
     Future<void> loadRequestsAndCheck(WidgetTester tester) async {
       expect(find.byType(StartStopRecordingButton), findsOneWidget);
