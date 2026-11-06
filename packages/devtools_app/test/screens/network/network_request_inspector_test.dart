@@ -355,5 +355,29 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 1));
       },
     );
+
+    testWidgets('cookie HttpOnly and Secure columns match the cookie', (
+      tester,
+    ) async {
+      final cookieJson = Map<String, Object?>.of(httpGetJson)
+        ..['response'] = {
+          ...httpGetJson['response'] as Map<String, Object?>,
+          'cookies': ['sid=1; HttpOnly'],
+        };
+      final cookieRequest = DartIOHttpRequestData(
+        HttpProfileRequest.parse(cookieJson)!,
+        requestFullDataFromVmService: false,
+      );
+
+      await tester.pumpWidget(wrap(HttpRequestCookiesView(cookieRequest)));
+
+      // The cookie is HttpOnly but not Secure.
+      final cells = find.descendant(
+        of: find.byKey(HttpRequestCookiesView.responseCookiesKey),
+        matching: find.byType(Icon),
+      );
+      final icons = tester.widgetList<Icon>(cells).map((icon) => icon.icon);
+      expect(icons, [Icons.check, Icons.close]);
+    });
   });
 }
