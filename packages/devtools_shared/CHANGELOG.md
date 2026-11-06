@@ -11,6 +11,14 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
   `DeeplinkManager`.
 * Add `UniversalLinkSettings.fromErrorJson`, `UniversalLinkSettings.error`, and
   `UniversalLinkSettings.error` getter to surface iOS universal link settings errors.
+* `DeeplinkManager` now builds the environment for the `flutter` processes it
+  starts with `getEnvironment()` from `package:unified_analytics`, so
+  `DASH__TOOL` passes on this process's root tool. A known `ide` still overrides
+  it, and an unknown `ide` now falls back to the inherited root tool instead of
+  always using `devtools`. When `suppressAnalytics` is false, an inherited
+  `DASH__SUPPRESS_ANALYTICS=true` is now passed on instead of being reset to
+  `false`.
+* Require `package:unified_analytics` `^8.4.0`.
 
 # 14.0.0
 

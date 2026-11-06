@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:devtools_shared/src/deeplink/deeplink_manager.dart';
 import 'package:test/test.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 void main() {
   group('DeeplinkManager', () {
@@ -434,6 +435,94 @@ Running Gradle task 'printBuildVariants'...                        10.4s
         );
       },
     );
+  });
+
+  group('DeeplinkManager.buildEnvironment', () {
+    final manager = DeeplinkManager();
+    // What `getEnvironment()` passes on when DevTools starts a sub-tool and no
+    // IDE override applies: this process's root tool, or `devtools`.
+    final inheritedRootTool = getEnvironment(
+      currentTool: DashTool.devtools,
+    )[DashEnvVar.tool.name];
+
+    test('sets DASH__TOOL to the IDE that opened DevTools', () {
+      for (final MapEntry(key: ide, value: tool) in {
+        'VS-Code': DashTool.vscodePlugins,
+        'vscode': DashTool.vscodePlugins,
+        'IntelliJ-IDEA': DashTool.intellijPlugins,
+        'intellijplugins': DashTool.intellijPlugins,
+        'Android-Studio': DashTool.androidStudioPlugins,
+        'androidstudio': DashTool.androidStudioPlugins,
+      }.entries) {
+        final environment = manager.buildEnvironment(
+          ide: ide,
+          suppressAnalytics: false,
+        );
+        expect(environment[DashEnvVar.tool.name], tool.label, reason: ide);
+      }
+    });
+
+    test('uses the inherited root tool when there is no known IDE', () {
+      expect(inheritedRootTool, isNotNull);
+      for (final ide in [null, 'unknown-ide']) {
+        final environment = manager.buildEnvironment(
+          ide: ide,
+          suppressAnalytics: false,
+        );
+        expect(environment[DashEnvVar.tool.name], inheritedRootTool);
+      }
+    });
+
+    test('never passes on a shared component or an invalid label', () {
+      final environment = manager.buildEnvironment(
+        ide: 'VS-Code',
+        suppressAnalytics: false,
+      );
+      expect(
+        () => DashTool.fromLabel(environment[DashEnvVar.tool.name]!),
+        returnsNormally,
+      );
+      expect(
+        DashTool.fromLabel(environment[DashEnvVar.tool.name]!).canBeRootTool,
+        isTrue,
+      );
+    });
+
+    test('suppresses analytics when requested, even if inherited is false', () {
+      // `dart test` runs under `dart`, which sets
+      // DASH__SUPPRESS_ANALYTICS=false for its child processes.
+      expect(
+        manager.buildEnvironment(
+          ide: null,
+          suppressAnalytics: true,
+        )[DashEnvVar.suppressAnalytics.name],
+        'true',
+      );
+    });
+
+    test('otherwise passes on the inherited suppression value', () {
+      expect(
+        manager.buildEnvironment(
+          ide: null,
+          suppressAnalytics: false,
+        )[DashEnvVar.suppressAnalytics.name],
+        areAnalyticsSuppressed().toString(),
+      );
+    });
+
+    test('keeps the rest of the process environment', () {
+      final environment = manager.buildEnvironment(
+        ide: null,
+        suppressAnalytics: false,
+      );
+      for (final MapEntry(:key, :value) in Platform.environment.entries) {
+        if (key == DashEnvVar.tool.name ||
+            key == DashEnvVar.suppressAnalytics.name) {
+          continue;
+        }
+        expect(environment[key], value, reason: key);
+      }
+    });
   });
 }
 
