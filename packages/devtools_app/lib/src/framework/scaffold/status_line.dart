@@ -90,9 +90,12 @@ class StatusLine extends StatelessWidget {
     final pageStatus = currentScreen.buildStatus(context);
     final widerThanXxs = screenWidth > MediaSize.xxs;
     final screenMetaData = ScreenMetaData.lookup(currentScreen.screenId);
+    // The video tutorial link is secondary, so it is the first thing to go when
+    // there is not enough room for the status items.
     final showVideoTutorial =
-        screenMetaData?.tutorialVideoTimestamp != null ||
-        screenMetaData?.tutorialVideoUrl != null;
+        screenWidth > MediaSize.xs &&
+        (screenMetaData?.tutorialVideoTimestamp != null ||
+            screenMetaData?.tutorialVideoUrl != null);
     return [
       Row(
         mainAxisSize: MainAxisSize.min,
@@ -121,7 +124,7 @@ class StatusLine extends StatelessWidget {
         pageStatus,
         BulletSpacer(color: foregroundColor),
       ],
-      buildConnectionStatus(context, screenWidth),
+      Flexible(child: buildConnectionStatus(context, screenWidth)),
       if (widerThanXxs && isEmbedded) ...[
         BulletSpacer(color: foregroundColor),
         Row(

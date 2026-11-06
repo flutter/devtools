@@ -202,66 +202,89 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
     }
 
     final screenWidth = ScreenSize(context).width;
+    final isNarrow = screenWidth <= MediaSize.xs;
+    final recordButton = StartStopRecordingButton(
+      recording: _recording,
+      onPressed: () async => await controller.togglePolling(!_recording),
+      tooltipOverride: _recording
+          ? 'Stop recording network traffic'
+          : 'Resume recording network traffic',
+      minScreenWidthForText: double.infinity,
+      gaScreen: gac.network,
+      gaSelection: _recording ? gac.pause : gac.resume,
+    );
+    final clearButton = ClearButton(
+      minScreenWidthForText: _NetworkProfilerControls._includeTextWidth,
+      gaScreen: gac.network,
+      gaSelection: gac.clear,
+      onPressed: controller.clear,
+    );
+    // TODO(kenz): fix focus issue when state is refreshed
+    final searchField = SearchField<NetworkController>(
+      searchController: controller,
+      searchFieldWidth: isNarrow
+          ? defaultSearchFieldWidth
+          : wideSearchFieldWidth,
+    );
+    final filterField = StandaloneFilterField<NetworkRequest>(
+      controller: controller,
+      filteredItem: 'request',
+    );
+    final openSaveButtons = OpenSaveButtonGroup(
+      screenId: ScreenMetaData.network.id,
+      saveFormats: const [SaveFormat.devtools, SaveFormat.har],
+      gaItemForSaveFormatSelection: (SaveFormat format) => switch (format) {
+        SaveFormat.devtools => gac.saveFile,
+        SaveFormat.har => gac.NetworkEvent.downloadAsHar.name,
+      },
+      onSave: (SaveFormat format) async {
+        switch (format) {
+          case SaveFormat.devtools:
+            await controller.fetchFullDataBeforeExport();
+            controller.exportData();
+          case SaveFormat.har:
+            await controller.exportAsHarFile();
+        }
+      },
+    );
+
     return Column(
       children: [
-        Row(
-          children: [
-            StartStopRecordingButton(
-              recording: _recording,
-              onPressed: () async =>
-                  await controller.togglePolling(!_recording),
-              tooltipOverride: _recording
-                  ? 'Stop recording network traffic'
-                  : 'Resume recording network traffic',
-              minScreenWidthForText: double.infinity,
-              gaScreen: gac.network,
-              gaSelection: _recording ? gac.pause : gac.resume,
-            ),
-            const SizedBox(width: denseSpacing),
-            ClearButton(
-              minScreenWidthForText: _NetworkProfilerControls._includeTextWidth,
-              gaScreen: gac.network,
-              gaSelection: gac.clear,
-              onPressed: controller.clear,
-            ),
-            const SizedBox(width: denseSpacing),
-            // TODO(kenz): fix focus issue when state is refreshed
-            Expanded(
-              child: SearchField<NetworkController>(
-                searchController: controller,
-                searchFieldWidth: screenWidth <= MediaSize.xs
-                    ? defaultSearchFieldWidth
-                    : wideSearchFieldWidth,
+        if (isNarrow)
+          // On narrow screens the search and filter fields do not fit next to
+          // the buttons without overlapping, so they get their own rows.
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  recordButton,
+                  const SizedBox(width: denseSpacing),
+                  clearButton,
+                  const Spacer(),
+                  openSaveButtons,
+                ],
               ),
-            ),
-            const SizedBox(width: denseSpacing),
-            Expanded(
-              child: StandaloneFilterField<NetworkRequest>(
-                controller: controller,
-                filteredItem: 'request',
-              ),
-            ),
-            const SizedBox(width: denseSpacing),
-            OpenSaveButtonGroup(
-              screenId: ScreenMetaData.network.id,
-              saveFormats: const [SaveFormat.devtools, SaveFormat.har],
-              gaItemForSaveFormatSelection: (SaveFormat format) =>
-                  switch (format) {
-                    SaveFormat.devtools => gac.saveFile,
-                    SaveFormat.har => gac.NetworkEvent.downloadAsHar.name,
-                  },
-              onSave: (SaveFormat format) async {
-                switch (format) {
-                  case SaveFormat.devtools:
-                    await controller.fetchFullDataBeforeExport();
-                    controller.exportData();
-                  case SaveFormat.har:
-                    await controller.exportAsHarFile();
-                }
-              },
-            ),
-          ],
-        ),
+              const SizedBox(height: denseSpacing),
+              searchField,
+              const SizedBox(height: denseSpacing),
+              filterField,
+            ],
+          )
+        else
+          Row(
+            children: [
+              recordButton,
+              const SizedBox(width: denseSpacing),
+              clearButton,
+              const SizedBox(width: denseSpacing),
+              Expanded(child: searchField),
+              const SizedBox(width: denseSpacing),
+              Expanded(child: filterField),
+              const SizedBox(width: denseSpacing),
+              openSaveButtons,
+            ],
+          ),
         if (!_recording)
           const Padding(
             padding: EdgeInsets.only(top: intermediateSpacing),
