@@ -60,7 +60,7 @@ class DeeplinkManager {
   ///
   /// Contains multiple spelling and format variations (with/without hyphens
   /// or suffixes) passed by different IDE integrations to ensure O(1) lookup.
-  static final _ideToDashTool = <String, DashTool>{
+  static const _ideToDashTool = <String, DashTool>{
     'vs-code': DashTool.vscodePlugins,
     'vscode': DashTool.vscodePlugins,
     'vscodeplugins': DashTool.vscodePlugins,
