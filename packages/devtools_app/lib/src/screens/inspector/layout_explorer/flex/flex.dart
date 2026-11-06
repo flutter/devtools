@@ -131,7 +131,7 @@ class FlexLayoutExplorerWidgetState
       alignmentEnumEntries = MainAxisAlignment.values;
       selected = propertiesLocal.mainAxisAlignment;
     } else {
-      alignmentEnumEntries = CrossAxisAlignment.values.toList(growable: true);
+      alignmentEnumEntries = CrossAxisAlignment.values.toList();
       if (propertiesLocal.textBaseline == null) {
         // TODO(albertusangga): Look for ways to visualize baseline when it is null
         alignmentEnumEntries.remove(CrossAxisAlignment.baseline);
