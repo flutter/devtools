@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../shared/globals.dart';
@@ -38,25 +41,7 @@ class AccessibilityOverridesPane extends StatelessWidget {
               const SizedBox(height: denseSpacing),
               _BrightnessOverride(controller: controller),
               const SizedBox(height: defaultSpacing),
-              _TextScaleOverride(controller: controller),
-              const SizedBox(height: defaultSpacing),
-              _SwitchOverride(
-                label: 'Bold Text',
-                description: 'Forces all text in the application to be bold.',
-                notifier: controller.boldText,
-              ),
-              const SizedBox(height: defaultSpacing),
-              _SwitchOverride(
-                label: 'Screen Reader Debugger',
-                description: 'Debug and test screen reader layouts.',
-                notifier: controller.screenReader,
-              ),
-              const SizedBox(height: defaultSpacing),
-              _SwitchOverride(
-                label: 'High Contrast',
-                description: 'Increases the contrast of text and icons.',
-                notifier: controller.highContrast,
-              ),
+              _ViewMetricsOverrides(controller: controller),
             ],
           ),
         ),
@@ -128,46 +113,134 @@ class _BrightnessOverride extends StatelessWidget {
   }
 }
 
-class _TextScaleOverride extends StatelessWidget {
-  const _TextScaleOverride({required this.controller});
+/// The controls of `ext.flutter.viewMetricsOverride`, which are disabled with
+/// a tooltip while the app does not support it.
+class _ViewMetricsOverrides extends StatelessWidget {
+  const _ViewMetricsOverrides({required this.controller});
 
   final AccessibilityController controller;
 
+  static const _unavailableMessage =
+      'Unavailable because the connected app is a profile build, or uses a '
+      'Flutter version that does not support these overrides.';
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: controller.overridesAvailable,
+      builder: (context, available, _) {
+        final overrides = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _TextScaleOverride(controller: controller, enabled: available),
+            const SizedBox(height: defaultSpacing),
+            _SwitchOverride(
+              label: 'Bold Text',
+              description: 'Forces all text in the application to be bold.',
+              value: controller.boldText,
+              onChanged: available ? controller.setBoldText : null,
+            ),
+            const SizedBox(height: defaultSpacing),
+            _SwitchOverride(
+              label: 'Screen Reader Debugger',
+              description: 'Debug and test screen reader layouts.',
+              value: controller.screenReader,
+              onChanged: available ? controller.setScreenReader : null,
+            ),
+            const SizedBox(height: defaultSpacing),
+            _SwitchOverride(
+              label: 'High Contrast',
+              description: 'Increases the contrast of text and icons.',
+              value: controller.highContrast,
+              onChanged: available ? controller.setHighContrast : null,
+            ),
+          ],
+        );
+        if (available) return overrides;
+        return DevToolsTooltip(message: _unavailableMessage, child: overrides);
+      },
+    );
+  }
+}
+
+class _TextScaleOverride extends StatefulWidget {
+  const _TextScaleOverride({required this.controller, required this.enabled});
+
+  final AccessibilityController controller;
+
+  /// Whether the text scale can be changed.
+  final bool enabled;
+
+  @override
+  State<_TextScaleOverride> createState() => _TextScaleOverrideState();
+}
+
+class _TextScaleOverrideState extends State<_TextScaleOverride> {
   static const _minTextScale = 0.5;
   static const _maxTextScale = 3.0;
   static const _textScaleDivisions = 25;
 
+  /// The text scale that the slider shows while the user moves it, until the
+  /// app answers the override.
+  double? _sliderTextScale;
+
+  Future<void> _overrideTextScale(double textScale) async {
+    await widget.controller.setTextScale(textScale);
+    if (mounted && _sliderTextScale == textScale) {
+      setState(() => _sliderTextScale = null);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ValueListenableBuilder<double>(
-      valueListenable: controller.textScale,
-      builder: (context, value, _) {
+    final enabled = widget.enabled;
+    return ValueListenableBuilder<double?>(
+      valueListenable: widget.controller.textScale,
+      builder: (context, appTextScale, _) {
+        final textScale = _sliderTextScale ?? appTextScale;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const _AccessibilityPanelLabel(
-                  label: 'Text Scale',
-                  description: 'Scale the system font size.',
+                const Expanded(
+                  child: _AccessibilityPanelLabel(
+                    label: 'Text Scale',
+                    description: 'Scale the system font size.',
+                  ),
                 ),
                 Text(
-                  '${value.toStringAsFixed(2)}x',
+                  // 1.0 is an override too, so the text scale of the platform
+                  // is shown by name rather than as a factor.
+                  textScale == null
+                      ? 'System default'
+                      : '${textScale.toStringAsFixed(2)}x',
                   style: theme.boldTextStyle,
+                ),
+                const SizedBox(width: denseSpacing),
+                DevToolsButton.iconOnly(
+                  icon: Icons.restart_alt,
+                  outlined: false,
+                  tooltip: 'Use the system text scale',
+                  onPressed: enabled && appTextScale != null
+                      ? () => unawaited(widget.controller.setTextScale(null))
+                      : null,
                 ),
               ],
             ),
             const SizedBox(height: densePadding),
             Slider(
-              value: value,
+              value: (textScale ?? 1.0).clamp(_minTextScale, _maxTextScale),
               min: _minTextScale,
               max: _maxTextScale,
               divisions: _textScaleDivisions,
-              onChanged: (newValue) {
-                controller.textScale.value = newValue;
-              },
+              onChanged: enabled
+                  ? (value) => setState(() => _sliderTextScale = value)
+                  : null,
+              onChangeEnd: enabled
+                  ? (value) => unawaited(_overrideTextScale(value))
+                  : null,
             ),
           ],
         );
@@ -180,12 +253,18 @@ class _SwitchOverride extends StatelessWidget {
   const _SwitchOverride({
     required this.label,
     required this.description,
-    required this.notifier,
+    required this.value,
+    required this.onChanged,
   });
 
   final String label;
   final String description;
-  final ValueNotifier<bool> notifier;
+
+  /// Whether the app has this override on.
+  final ValueListenable<bool> value;
+
+  /// Called when the user toggles the switch, or null to disable the switch.
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +276,11 @@ class _SwitchOverride extends StatelessWidget {
             description: description,
           ),
         ),
-        NotifierSwitch(notifier: notifier),
+        ValueListenableBuilder<bool>(
+          valueListenable: value,
+          builder: (context, isOn, _) =>
+              DevToolsSwitch(value: isOn, onChanged: onChanged),
+        ),
       ],
     );
   }
