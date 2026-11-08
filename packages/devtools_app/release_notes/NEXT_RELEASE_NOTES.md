@@ -15,6 +15,10 @@ To learn more about DevTools, check out the
 
 ## General updates
 
+* Added guidance to run "flutter attach" when a Flutter debug app cannot
+  evaluate expressions and a debug-only screen is unavailable.
+  [#4091](https://github.com/flutter/devtools/issues/4091)
+
 TODO: Remove this section if there are not any updates.
 
 * Improved the readability of ANSI-colored text in the console and logging
