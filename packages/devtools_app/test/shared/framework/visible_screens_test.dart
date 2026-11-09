@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/framework/framework_controller.dart';
+import 'package:devtools_app_shared/service_extensions.dart' as extensions;
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -164,6 +165,37 @@ void main() {
           // DTDToolsScreen,
         ]),
       );
+    });
+
+    testWidgets('explain unavailable evaluation in an unattached debug app', (
+      WidgetTester tester,
+    ) async {
+      // Failed expression evaluation makes the build-mode heuristic report
+      // profile mode, even though debug-only extensions are registered.
+      setupMockConnectedApp(flutter: true, debugMode: false);
+      final extensionManager =
+          fakeServiceConnection.serviceManager.serviceExtensionManager;
+      // The extension may still be pending its first frame.
+      await extensionManager.fakeAddServiceExtension(
+        extensions.debugAllowBanner.extension,
+      );
+
+      final result = shouldShowScreen(DebuggerScreen());
+      expect(result.show, isFalse);
+      expect(result.disabledReason?.message, contains('flutter attach'));
+      expect(
+        result.disabledReason?.message,
+        isNot(contains('only supports debug')),
+      );
+    });
+
+    testWidgets('keep the profile-build explanation for a real profile app', (
+      WidgetTester tester,
+    ) async {
+      setupMockConnectedApp(flutter: true, debugMode: false);
+      final result = shouldShowScreen(DebuggerScreen());
+      expect(result.show, isFalse);
+      expect(result.disabledReason?.message, 'only supports debug builds.');
     });
 
     testWidgets('are correct for Flutter (non-web) profile app', (
