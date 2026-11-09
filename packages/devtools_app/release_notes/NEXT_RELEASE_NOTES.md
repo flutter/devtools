@@ -15,7 +15,7 @@ To learn more about DevTools, check out the
 
 ## General updates
 
-* Handle network failures when fetching survey metadata without an unhandled
+* Handled network failures when fetching survey metadata without an unhandled
   exception. [#8562](https://github.com/flutter/devtools/issues/8562)
 
 * Added guidance to run "flutter attach" when a Flutter debug app cannot
