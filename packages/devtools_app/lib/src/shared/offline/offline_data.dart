@@ -10,6 +10,7 @@ import 'dart:async';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../config_specific/import_export/import_export.dart';
 import '../framework/routing.dart';
@@ -66,6 +67,8 @@ class OfflineDataController {
     previousConnectedApp = null;
   }
 }
+
+final _log = Logger('offline_data');
 
 /// Mixin that provides offline support for a DevTools screen controller.
 ///
@@ -131,6 +134,7 @@ class OfflineDataController {
 ///   ),
 /// }
 /// ```
+
 mixin OfflineScreenControllerMixin<T>
     on DevToolsScreenController, AutoDisposeControllerMixin {
   final _exportController = ExportController();
@@ -168,19 +172,41 @@ mixin OfflineScreenControllerMixin<T>
     required FutureOr<void> Function(T data) loadData,
   }) async {
     if (offlineDataController.shouldLoadOfflineData(screenId)) {
-      // TODO(kenz): investigate this line of code. Do we need to be creating a
-      // second copy of the Map from offlineDataController.offlineDataJson or
-      // can we use it directly to save this `Map.of` call?
-      final json = Map<String, Object?>.of(
-        (offlineDataController.offlineDataJson[screenId] as Map)
-            .cast<String, Object?>(),
-      );
-      final screenData = createData(json);
+      final T screenData;
+      try {
+        // TODO(kenz): investigate this line of code. Do we need to be creating a
+        // second copy of the Map from offlineDataController.offlineDataJson or
+        // can we use it directly to save this `Map.of` call?
+        final json = Map<String, Object?>.of(
+          (offlineDataController.offlineDataJson[screenId] as Map)
+              .cast<String, Object?>(),
+        );
+        screenData = createData(json);
+      } catch (e, st) {
+        _log.shout('Error parsing offline data for $screenId', e, st);
+        notificationService.push(
+          'Failed to load offline data for screen \'$screenId\': $e',
+        );
+        return false;
+      }
+
       if (shouldLoad(screenData)) {
         _loadingOfflineData.value = true;
-        await loadData(screenData);
-        _loadingOfflineData.value = false;
-        return true;
+        try {
+          await loadData(screenData);
+          return true;
+        } catch (e, st) {
+          _log.shout('Error loading offline data for $screenId', e, st);
+          notificationService.push(
+            'Failed to load offline data for screen \'$screenId\': $e',
+          );
+        } finally {
+          _loadingOfflineData.value = false;
+        }
+      } else {
+        notificationService.push(
+          'The imported file does not contain any data for screen \'$screenId\'.',
+        );
       }
     }
     return false;
@@ -189,9 +215,22 @@ mixin OfflineScreenControllerMixin<T>
   /// Exports the current screen data to a .json file and downloads the file to
   /// the user's Downloads directory.
   void exportData() {
-    final encodedData = _exportController.encode(
-      prepareOfflineScreenData().toJson(),
-    );
+    final String encodedData;
+    try {
+      encodedData = _exportController.encode(
+        prepareOfflineScreenData().toJson(),
+      );
+    } catch (e) {
+      // Encoding fails when the data is too large for a single JSON string (the
+      // maximum string length in the browser is about 2^29 characters). The
+      // exact error type depends on the compiler (dart2js vs. dart2wasm), so
+      // catch everything rather than a specific type.
+      notificationService.pushError(
+        'Unable to export this screen\'s data. It may be too large to export: '
+        '$e',
+      );
+      return;
+    }
     _exportController.downloadFile(encodedData);
   }
 

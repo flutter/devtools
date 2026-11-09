@@ -782,10 +782,10 @@ packages:
     dependency: transitive
     description:
       name: skills_lint
-      sha256: "5daeff89c8c9d812cfa811e119ae88a32bb81d28c73aa7e899155885b2e63a63"
+      sha256: b7af62b95189d9f80c397c13133bb9a5dfae079cc18a7e3236ab3ea2d79edc41
       url: "https://pub.dev"
     source: hosted
-    version: "0.5.1"
+    version: "0.5.3"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -879,6 +879,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.1"
+  tar:
+    dependency: transitive
+    description:
+      name: tar
+      sha256: af61a6382fb7a702b93a7b400492405793e0ebf3d2bea5d698d5ca39823ca46f
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.3"
   term_glyph:
     dependency: transitive
     description:
@@ -891,26 +899,26 @@ packages:
     dependency: transitive
     description:
       name: test
-      sha256: de5d145b0afff7921e5e788a880f52d7e5f3ae24068a202f6fd3b58e4ba26323
+      sha256: "44b2fccf4407bcdb5e105c064c5d6b5e2a640c87761f8b03cdce8cf532d98cfa"
       url: "https://pub.dev"
     source: hosted
-    version: "1.32.0"
+    version: "1.33.0"
   test_api:
     dependency: transitive
     description:
       name: test_api
-      sha256: "0a10344e901e5b2e63819567951cb6a06673ed6b84f40462188ff5a0c41f371f"
+      sha256: "47481c58bb92d0b1d218f0510ff5647e768f8e1256d07077a151fb520923b51d"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.14"
+    version: "0.7.15"
   test_core:
     dependency: transitive
     description:
       name: test_core
-      sha256: "80f3fb49087454e07e7e07c67578cfdd156c8c3a5227d8b3f47c7b2d019c2e93"
+      sha256: "9dec4c178bd61493e1cd2060ffe701fcb61c43da2493e99590fb1b0cc82eb4af"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.20"
+    version: "0.6.21"
   typed_data:
     dependency: transitive
     description:
@@ -923,10 +931,10 @@ packages:
     dependency: transitive
     description:
       name: unified_analytics
-      sha256: d581cd7007f5a60594195ee5d35337edea7d53757e4cff5a2f5168b82ec31d05
+      sha256: "4013958a461aafcd9b80baf96b85e1537ae10991a05e7b05f34e4bee6202dfb0"
       url: "https://pub.dev"
     source: hosted
-    version: "7.0.2"
+    version: "8.4.0"
   url_launcher:
     dependency: transitive
     description:
@@ -995,10 +1003,10 @@ packages:
     dependency: transitive
     description:
       name: vector_math
-      sha256: "92b9910f66ed1057fd4da7b040ae7c74cafacf885bdc81be496928d5049b032d"
+      sha256: fa49e1674cb84acb900141714e6c6e1f9ae099827c24d141430ff6819db4e1bc
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.3"
+    version: "2.4.4"
   vm_service:
     dependency: transitive
     description:

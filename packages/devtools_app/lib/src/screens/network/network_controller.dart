@@ -377,10 +377,10 @@ class NetworkController extends DevToolsScreenController
 
   /// Enables HTTP timeline logging and socket profiling on all isolates.
   Future<void> _enableNetworkTrafficRecordingOnAllIsolates() async {
-    await [
+    await Future.wait([
       http_service.toggleHttpRequestLogging(true),
       networkService.toggleSocketProfiling(true),
-    ].wait;
+    ]);
   }
 
   Future<void> stopRecording() async {

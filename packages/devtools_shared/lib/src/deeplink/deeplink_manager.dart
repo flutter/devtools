@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'xcode_build_options.dart';
 
@@ -53,26 +54,22 @@ class DeeplinkManager {
     _iosBuildOptionsCache.clear();
   }
 
-  // TODO(https://github.com/flutter/devtools/issues/9702): Use the `DashTool`
-  // and `DashEnvVar` enums and `getEnvironment()` helper directly from
-  // `package:unified_analytics` once the pinned Flutter candidate SDK in this
-  // repository is bumped to a stable Dart SDK version >= 3.10.0 (resolving the
-  // dev SDK version solving conflict on CI).
-  /// Mappings from case-insensitive IDE query parameter values to their
-  /// corresponding DashTool canonical label strings used by `package:unified_analytics`.
+  /// Mappings from case-insensitive IDE query parameter values to the
+  /// [DashTool] that should be reported as the root tool of the `flutter`
+  /// processes DevTools starts for that IDE.
   ///
   /// Contains multiple spelling and format variations (with/without hyphens
   /// or suffixes) passed by different IDE integrations to ensure O(1) lookup.
-  static const _ideToDashToolMap = <String, String>{
-    'vs-code': 'vscode-plugins',
-    'vscode': 'vscode-plugins',
-    'vscodeplugins': 'vscode-plugins',
-    'intellij-idea': 'intellij-plugins',
-    'intellij': 'intellij-plugins',
-    'intellijplugins': 'intellij-plugins',
-    'android-studio': 'android-studio-plugins',
-    'androidstudio': 'android-studio-plugins',
-    'androidstudioplugins': 'android-studio-plugins',
+  static const _ideToDashTool = <String, DashTool>{
+    'vs-code': DashTool.vscodePlugins,
+    'vscode': DashTool.vscodePlugins,
+    'vscodeplugins': DashTool.vscodePlugins,
+    'intellij-idea': DashTool.intellijPlugins,
+    'intellij': DashTool.intellijPlugins,
+    'intellijplugins': DashTool.intellijPlugins,
+    'android-studio': DashTool.androidStudioPlugins,
+    'androidstudio': DashTool.androidStudioPlugins,
+    'androidstudioplugins': DashTool.androidStudioPlugins,
   };
 
   /// A regex to retrieve the file path from the stdout of iOS or Android
@@ -91,27 +88,45 @@ class DeeplinkManager {
     required String? ide,
     required bool suppressAnalytics,
   }) {
-    final environment = <String, String>{
-      ...Platform.environment,
-      'DASH__SUPPRESS_ANALYTICS': suppressAnalytics.toString(),
-      'DASH__TOOL': ide != null ? _mapIdeToDashToolLabel(ide) : 'devtools',
-    };
-
     return Process.run(
       executable,
       arguments,
       workingDirectory: workingDirectory,
-      environment: environment,
+      environment: buildEnvironment(
+        ide: ide,
+        suppressAnalytics: suppressAnalytics,
+      ),
     );
   }
 
-  String _mapIdeToDashToolLabel(String ide) {
-    final lowerIde = ide.toLowerCase();
-    final mappedTool = _ideToDashToolMap[lowerIde];
-    if (mappedTool != null) {
-      return mappedTool;
-    }
-    return 'devtools';
+  /// Returns the environment for a `flutter` process that DevTools starts.
+  ///
+  /// Uses `getEnvironment()` from `package:unified_analytics`, which sets
+  /// `DASH__SUPPRESS_ANALYTICS` and passes on the root tool from this
+  /// process's `DASH__TOOL` (falling back to `devtools`). If [ide] names a
+  /// known IDE, its [DashTool] overrides `DASH__TOOL`, because the IDE that
+  /// opened DevTools is the user's entry point for this request.
+  ///
+  /// If [suppressAnalytics] is true, analytics are always suppressed.
+  /// `getEnvironment()` alone would let an inherited
+  /// `DASH__SUPPRESS_ANALYTICS=false` (which `dart` sets for the processes it
+  /// starts) win over it.
+  // TODO(https://github.com/dart-lang/tools/issues/2803): Pass the IDE as a
+  // `fallbackRootTool` to `getEnvironment()` once it supports one.
+  @visibleForTesting
+  Map<String, String> buildEnvironment({
+    required String? ide,
+    required bool suppressAnalytics,
+  }) {
+    final ideTool = ide == null ? null : _ideToDashTool[ide.toLowerCase()];
+    return {
+      ...getEnvironment(
+        currentTool: DashTool.devtools,
+        suppressAnalytics: suppressAnalytics,
+      ),
+      if (ideTool != null) DashEnvVar.tool.name: ideTool.label,
+      if (suppressAnalytics) DashEnvVar.suppressAnalytics.name: 'true',
+    };
   }
 
   @visibleForTesting

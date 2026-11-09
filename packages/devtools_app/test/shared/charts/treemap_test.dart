@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
+import 'dart:ui';
 
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/charts/treemap.dart';
@@ -29,7 +30,11 @@ void main() {
   }
 
   // Pump treemap widget with tree built with test data.
-  Future<void> pumpTreemapWidget(WidgetTester tester, Key treemapKey) async {
+  Future<void> pumpTreemapWidget(
+    WidgetTester tester,
+    Key treemapKey, {
+    bool isDarkTheme = false,
+  }) async {
     await tester.pumpWidget(
       wrap(
         LayoutBuilder(
@@ -45,6 +50,7 @@ void main() {
             );
           },
         ),
+        isDarkTheme: isDarkTheme,
       ),
     );
     await tester.pumpAndSettle();
@@ -220,6 +226,52 @@ void main() {
       // Await delay for golden comparison.
       await tester.pumpAndSettle(const Duration(seconds: 2));
     }, skip: kIsWeb);
+  });
+
+  group('Treemap tooltip text color', () {
+    setUp(() {
+      root = TreemapNode(name: 'root')
+        ..addChild(
+          TreemapNode(name: 'parent', byteSize: 1000)
+            ..addChild(TreemapNode(name: 'leaf_1', byteSize: 500))
+            ..addChild(TreemapNode(name: 'leaf_2', byteSize: 500)),
+        );
+    });
+    for (final isDarkTheme in [false, true]) {
+      final themeName = isDarkTheme ? 'dark' : 'light';
+      testWidgetsWithWindowSize(
+        'tooltip has correct text color in $themeName theme',
+        windowSize,
+        (WidgetTester tester) async {
+          const treemapKey = Key('Treemap');
+          await pumpTreemapWidget(tester, treemapKey, isDarkTheme: isDarkTheme);
+
+          final tooltipFinder = find.byWidgetPredicate(
+            (widget) => widget is DevToolsTooltip && widget.richMessage != null,
+          );
+          final customPaint = find.descendant(
+            of: tooltipFinder,
+            matching: find.byType(CustomPaint),
+          );
+
+          // Hover over the painted cell.
+          final gesture = await tester.createGesture(
+            kind: PointerDeviceKind.mouse,
+          );
+          await gesture.addPointer(location: Offset.zero);
+          addTearDown(gesture.removePointer);
+          await gesture.moveTo(tester.getCenter(customPaint));
+          await tester.pumpAndSettle();
+
+          final tooltip = tester.widget<DevToolsTooltip>(tooltipFinder);
+          final textSpan = tooltip.richMessage as TextSpan?;
+          final expectedColor = isDarkTheme ? Colors.black : Colors.white;
+          expect(textSpan, isNotNull);
+          expect(textSpan!.text, isNotEmpty);
+          expect(textSpan.style?.color, equals(expectedColor));
+        },
+      );
+    }
   });
 }
 
