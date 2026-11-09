@@ -555,14 +555,20 @@ List<TextSpan> textSpansFromAnsi(
     return TextSpan(
       text: entry.text,
       style: styled
-          ? TextStyle(
+          ? defaultStyle.copyWith(
               color: ansiToColor(entry.fgColor, background: backgroundColor),
               backgroundColor: ansiToColor(entry.bgColor),
-              fontWeight: entry.bold ? FontWeight.bold : FontWeight.normal,
+              fontWeight: entry.bold ? FontWeight.bold : null,
             )
           : defaultStyle,
     );
   }).toList();
+}
+
+/// Returns [input] with all ANSI escape codes removed.
+String stripAnsi(String input) {
+  if (!input.contains('\x1B')) return input;
+  return AnsiParser(input).parse().map((entry) => entry.text).join();
 }
 
 Color? ansiToColor(List<int>? ansiInput, {Color? background}) {
