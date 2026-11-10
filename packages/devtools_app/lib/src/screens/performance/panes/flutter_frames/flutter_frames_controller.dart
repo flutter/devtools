@@ -22,7 +22,7 @@ class FlutterFramesController extends PerformanceFeatureController {
 
   /// The currently selected timeline frame.
   ValueListenable<FlutterFrame?> get selectedFrame => _selectedFrameNotifier;
-  final _selectedFrameNotifier = ValueNotifier<FlutterFrame?>(null);
+  final _selectedFrameNotifier = _SelectedFrameNotifier(null);
 
   /// The flutter frames in the chart.
   ValueListenable<List<FlutterFrame>> get flutterFrames => _flutterFrames;
@@ -123,6 +123,12 @@ class FlutterFramesController extends PerformanceFeatureController {
       _unassignedFlutterFrames.remove(frameNumber);
       _updateFirstWellFormedFrameMicros(frame);
     }
+    if (_selectedFrameNotifier.value == frame) {
+      // [frame] was selected before its timeline events were available. Notify
+      // listeners again so that views built from [selectedFrame], like the
+      // Frame Analysis tab, rebuild with the data that is now available.
+      _selectedFrameNotifier.notifyFrameDataChanged();
+    }
   }
 
   bool hasUnassignedFlutterFrame(int frameNumber) {
@@ -222,4 +228,17 @@ class FlutterFramesController extends PerformanceFeatureController {
     _displayRefreshRate.dispose();
     super.dispose();
   }
+}
+
+/// Notifier for the selected [FlutterFrame].
+///
+/// Timeline events are assigned to a [FlutterFrame] in place, which can happen
+/// after the frame has been selected. [ValueNotifier] only notifies when
+/// [value] changes, and [notifyListeners] is protected, so this subclass
+/// exposes [notifyFrameDataChanged] for that case.
+class _SelectedFrameNotifier extends ValueNotifier<FlutterFrame?> {
+  _SelectedFrameNotifier(super.value);
+
+  /// Notifies listeners that the selected frame's data changed in place.
+  void notifyFrameDataChanged() => notifyListeners();
 }
