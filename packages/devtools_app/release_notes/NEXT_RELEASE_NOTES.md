@@ -15,6 +15,9 @@ To learn more about DevTools, check out the
 
 ## General updates
 
+* Reused source maps across error reports instead of fetching and parsing them
+  repeatedly. [#9910](https://github.com/flutter/devtools/issues/9910)
+
 * Added guidance to run "flutter attach" when a Flutter debug app cannot
   evaluate expressions and a debug-only screen is unavailable.
   [#4091](https://github.com/flutter/devtools/issues/4091)
