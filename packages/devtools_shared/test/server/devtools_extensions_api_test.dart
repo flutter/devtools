@@ -342,6 +342,111 @@ void main() {
       },
     );
 
+    test('rejects extension with broken or outside directory symlink inside '
+        'build directory', () async {
+      await initializeTestDirectory();
+      final extensionBuildDir = Directory(
+        p.join(
+          extensionTestManager.testDirectory.path,
+          'extensions',
+          staticExtension2Package.relativePathFromExtensions,
+          'extension',
+          'devtools',
+          'build',
+        ),
+      );
+      Link(
+        p.join(extensionBuildDir.path, 'broken_link.txt'),
+      ).createSync(p.join(extensionBuildDir.path, 'does_not_exist.txt'));
+
+      final outsideDir = Directory(
+        p.join(extensionTestManager.testDirectory.path, 'outside_dir'),
+      )..createSync(recursive: true);
+      final newerBuildDir = Directory(
+        p.join(
+          extensionTestManager.testDirectory.path,
+          'extensions',
+          newerStaticExtension1Package.relativePathFromExtensions,
+          'extension',
+          'devtools',
+          'build',
+        ),
+      );
+      Link(
+        p.join(newerBuildDir.path, 'outside_dir_link'),
+      ).createSync(outsideDir.path);
+
+      final response = await serveExtensions(extensionsManager);
+      expect(response.statusCode, HttpStatus.ok);
+      expect(
+        extensionsManager.devtoolsExtensions.where(
+          (e) => e.packageName == staticExtension2Package.packageName,
+        ),
+        isEmpty,
+      );
+      expect(
+        extensionsManager.devtoolsExtensions.where(
+          (e) =>
+              e.packageName == newerStaticExtension1Package.packageName &&
+              e.version == newerStaticExtension1Package.version,
+        ),
+        isEmpty,
+      );
+
+      final parsedResponse = json.decode(await response.readAsString()) as Map;
+      final warning =
+          parsedResponse[ExtensionsApi.extensionsResultWarningPropertyName]
+              as String;
+      expect(
+        warning,
+        contains('contains a symlink pointing outside the build directory'),
+      );
+    });
+
+    test(
+      'allows extension with symlinks pointing within build directory',
+      () async {
+        await initializeTestDirectory();
+        final extensionBuildDir = Directory(
+          p.join(
+            extensionTestManager.testDirectory.path,
+            'extensions',
+            staticExtension2Package.relativePathFromExtensions,
+            'extension',
+            'devtools',
+            'build',
+          ),
+        );
+        final indexFile = File(p.join(extensionBuildDir.path, 'index.html'))
+          ..writeAsStringSync('<html></html>', flush: true);
+        final assetsDir = Directory(p.join(extensionBuildDir.path, 'assets'))
+          ..createSync(recursive: true);
+        File(
+          p.join(assetsDir.path, 'data.json'),
+        ).writeAsStringSync('{}', flush: true);
+
+        Link(
+          p.join(extensionBuildDir.path, 'alias.html'),
+        ).createSync(indexFile.path);
+        Link(
+          p.join(extensionBuildDir.path, 'assets_alias'),
+        ).createSync(assetsDir.path);
+        Link(
+          p.join(extensionBuildDir.path, 'self_link'),
+        ).createSync(extensionBuildDir.path);
+
+        final response = await serveExtensions(extensionsManager);
+        expect(response.statusCode, HttpStatus.ok);
+        final parsedResponse =
+            json.decode(await response.readAsString()) as Map;
+        expect(
+          parsedResponse[ExtensionsApi.extensionsResultWarningPropertyName],
+          isNull,
+        );
+        _verifyAllExtensions(extensionsManager);
+      },
+    );
+
     test(
       'rejects extension with non-existent or non-directory buildLocation',
       () async {

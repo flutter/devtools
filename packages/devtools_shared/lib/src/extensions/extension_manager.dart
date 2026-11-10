@@ -334,10 +334,20 @@ class ExtensionsManager {
     }
 
     for (final entry in entries) {
-      final resolvedTarget = _resolveTargetPath(entry.path);
-      if (resolvedTarget == null ||
-          (!path.isWithin(resolvedLocation, resolvedTarget) &&
-              !path.equals(resolvedLocation, resolvedTarget))) {
+      // Because listSync was called with followLinks: false on
+      // resolvedLocation, any non-Link entry physically resides within
+      // resolvedLocation.
+      if (entry is! Link) continue;
+      String? resolvedTargetPath;
+      try {
+        resolvedTargetPath = path.normalize(entry.resolveSymbolicLinksSync());
+      } on FileSystemException {
+        // Leave resolvedTargetPath as null so broken or unresolvable symlinks
+        // are rejected below.
+      }
+      if (resolvedTargetPath == null ||
+          (!path.isWithin(resolvedLocation, resolvedTargetPath) &&
+              !path.equals(resolvedLocation, resolvedTargetPath))) {
         return (
           resolvedLocation: null,
           error:
@@ -347,23 +357,6 @@ class ExtensionsManager {
       }
     }
     return (resolvedLocation: resolvedLocation, error: null);
-  }
-
-  /// Resolves [entityPath] to a normalized target path if it points to an
-  /// existing file or directory, or returns `null` if it is broken or cannot be
-  /// resolved.
-  String? _resolveTargetPath(String entityPath) {
-    final target = File(entityPath).existsSync()
-        ? File(entityPath)
-        : Directory(entityPath).existsSync()
-        ? Directory(entityPath)
-        : null;
-    if (target == null) return null;
-    try {
-      return path.normalize(target.resolveSymbolicLinksSync());
-    } on FileSystemException {
-      return null;
-    }
   }
 
   void _assertUriFormat(String? uriString) {
