@@ -605,7 +605,7 @@ class EvalOnDartLibrary extends DisposableController
     // This is an optimization to avoid sending stale requests across the wire.
     void wrappedRequest() async {
       if (isAlive != null && isAlive.disposed || disposed) {
-        response.complete(null);
+        response.complete();
         return;
       }
       try {
@@ -613,11 +613,11 @@ class EvalOnDartLibrary extends DisposableController
         if (!disposed && value is! Sentinel) {
           response.complete(value);
         } else {
-          response.complete(null);
+          response.complete();
         }
       } catch (e) {
         if (disposed || isAlive?.disposed == true) {
-          response.complete(null);
+          response.complete();
         } else {
           response.completeError(e);
         }
@@ -629,7 +629,7 @@ class EvalOnDartLibrary extends DisposableController
       wrappedRequest();
     } else {
       if (isAlive != null && isAlive.disposed || disposed) {
-        response.complete(null);
+        response.complete();
         return response.future;
       }
 
