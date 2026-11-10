@@ -77,7 +77,11 @@ TODO: Remove this section if there are not any updates.
 
 ## DevTools extension updates
 
-TODO: Remove this section if there are not any updates.
+* Validated DevTools extension filesystem access by rejecting non-local
+  `file://` URIs (such as UNC paths), invalid `buildLocation` paths, and broken
+  or out-of-bounds symbolic links to prevent extensions from accessing arbitrary
+  files outside the package root or build directory.
+  [#10083](https://github.com/flutter/devtools/pull/10083)
 
 ## Advanced developer mode updates
 
