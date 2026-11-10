@@ -73,6 +73,7 @@ void main() {
               : null,
         },
       ),
+      headers: const {devToolsRequestHeader: '1'},
     );
     return await ServerApi.handle(
       request,
@@ -214,6 +215,7 @@ void main() {
               ExtensionsApi.enabledStatePropertyName: enable.toString(),
           },
         ),
+        headers: const {devToolsRequestHeader: '1'},
       );
       return await ServerApi.handle(
         request,

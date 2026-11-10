@@ -48,8 +48,13 @@ class ServerApi {
   static const _optionsMethod = 'OPTIONS';
   static const _originHeader = 'origin';
   static const _secFetchSiteHeader = 'sec-fetch-site';
-  static const _crossSiteSecFetchSite = 'cross-site';
-  static const _allowedSecFetchSites = {'same-origin', 'same-site', 'none'};
+  static const _allowedSecFetchSitesWithoutOrigin = {'same-origin', 'none'};
+  static const _allowedSecFetchSitesWithOrigin = {
+    'same-origin',
+    'same-site',
+    'cross-site',
+    'none',
+  };
 
   /// Determines whether or not [request] is an API call.
   static bool canHandle(shelf.Request request) {
@@ -59,18 +64,41 @@ class ServerApi {
   /// Validates [request] to mitigate CSRF, DNS rebinding, and cross-origin
   /// attacks before dispatching to any [ServerApi] handler.
   ///
+  /// When [disableOriginCheck] is `true`, `Host`, `Origin`, and
+  /// `Sec-Fetch-Site` validation is skipped, while HTTP method and
+  /// [devToolsRequestHeader] checks are still enforced.
+  ///
+  /// When [disableOriginCheck] is `false`, requests from loopback hosts/origins
+  /// and any URI in [allowedOrigins] are accepted.
+  ///
   /// Returns a [shelf.Response] if the request is rejected, or `null` if the
   /// request is valid.
   static shelf.Response? _validateRequest(
     shelf.Request request,
-    ServerApi api,
-  ) {
+    ServerApi api, {
+    required bool disableOriginCheck,
+    required List<Uri> allowedOrigins,
+  }) {
     final method = request.method.toUpperCase();
     if (method != _postMethod && method != _optionsMethod) {
       return shelf.Response(
         HttpStatus.methodNotAllowed,
         body: 'Method Not Allowed: ${request.method}',
+        headers: const <String, String>{
+          HttpHeaders.allowHeader: '$_postMethod, $_optionsMethod',
+        },
       );
+    }
+
+    if (method == _postMethod) {
+      final requestHeader = request.headers[devToolsRequestHeader];
+      if (requestHeader == null || requestHeader.trim().isEmpty) {
+        return api.forbidden('Missing $devToolsRequestHeader header');
+      }
+    }
+
+    if (disableOriginCheck) {
+      return null;
     }
 
     final hostHeaders = request.headersAll[HttpHeaders.hostHeader];
@@ -82,8 +110,8 @@ class ServerApi {
         ? _extractHostFromHeader(hostHeader)
         : request.requestedUri.host;
     if (host == null ||
-        !_isLoopbackHost(host) ||
-        !_isLoopbackHost(request.requestedUri.host)) {
+        !_isAllowedHost(host, allowedOrigins) ||
+        !_isAllowedHost(request.requestedUri.host, allowedOrigins)) {
       return api.forbidden('Invalid Host header');
     }
 
@@ -95,8 +123,13 @@ class ServerApi {
     if (originHeader != null) {
       final originUri = Uri.tryParse(originHeader.trim());
       if (originUri == null ||
+          !_isHttpOrHttps(originUri) ||
           originUri.userInfo.isNotEmpty ||
-          !_isLoopbackHost(originUri.host)) {
+          originUri.host.isEmpty ||
+          originUri.path.isNotEmpty ||
+          originUri.hasQuery ||
+          originUri.hasFragment ||
+          !_isAllowedOrigin(originUri, allowedOrigins)) {
         return api.forbidden('Invalid Origin header');
       }
     }
@@ -104,13 +137,13 @@ class ServerApi {
     final secFetchSite = request.headers[_secFetchSiteHeader]
         ?.trim()
         .toLowerCase();
-    // Allow `cross-site` when a validated loopback `Origin` header is present
-    // (e.g. `http://localhost:<port>` calling `http://127.0.0.1:<port>` in
-    // `debug_devtools_server` mode).
-    if (secFetchSite != null &&
-        !_allowedSecFetchSites.contains(secFetchSite) &&
-        !(secFetchSite == _crossSiteSecFetchSite && originHeader != null)) {
-      return api.forbidden('Cross-site requests are not allowed');
+    if (secFetchSite != null) {
+      final allowedSites = originHeader != null
+          ? _allowedSecFetchSitesWithOrigin
+          : _allowedSecFetchSitesWithoutOrigin;
+      if (!allowedSites.contains(secFetchSite)) {
+        return api.forbidden('Cross-site requests are not allowed');
+      }
     }
 
     return null;
@@ -134,24 +167,84 @@ class ServerApi {
     return parsed.host;
   }
 
+  /// Returns whether [uri] uses the `http` or `https` scheme.
+  static bool _isHttpOrHttps(Uri uri) {
+    return uri.isScheme('http') || uri.isScheme('https');
+  }
+
+  /// Returns whether [host] is a loopback host or matches the host of an entry
+  /// in [allowedOrigins].
+  static bool _isAllowedHost(String host, List<Uri> allowedOrigins) {
+    if (host.isEmpty) return false;
+    if (_isLoopbackHost(host)) return true;
+
+    for (final allowedOrigin in allowedOrigins) {
+      if (allowedOrigin.host.isEmpty) continue;
+      if (_hostsMatch(allowedOrigin.host, host)) return true;
+    }
+    return false;
+  }
+
+  /// Returns whether [originUri] is a loopback origin or matches the scheme,
+  /// host, and port of an HTTP(S) URI in [allowedOrigins].
+  static bool _isAllowedOrigin(Uri originUri, List<Uri> allowedOrigins) {
+    if (originUri.host.isEmpty) return false;
+    if (_isLoopbackHost(originUri.host)) return true;
+
+    for (final allowedOrigin in allowedOrigins) {
+      if (!_isHttpOrHttps(allowedOrigin)) continue;
+      if (allowedOrigin.host.isEmpty) continue;
+      if (originUri.scheme != allowedOrigin.scheme) continue;
+      if (originUri.port != allowedOrigin.port) continue;
+      if (_hostsMatch(allowedOrigin.host, originUri.host)) return true;
+    }
+    return false;
+  }
+
+  /// Returns whether [a] and [b] refer to the same hostname or IP address.
+  static bool _hostsMatch(String a, String b) {
+    if (a.toLowerCase() == b.toLowerCase()) return true;
+    final addrA = InternetAddress.tryParse(a);
+    final addrB = InternetAddress.tryParse(b);
+    if (addrA == null || addrB == null) return false;
+    return const ListEquality<int>().equals(addrA.rawAddress, addrB.rawAddress);
+  }
+
   /// Returns whether [host] is a loopback host
   /// (`localhost`, `127.x.x.x`, or `::1`).
-  static bool _isLoopbackHost(String host) =>
-      host == 'localhost' ||
-      (InternetAddress.tryParse(host)?.isLoopback ?? false);
+  static bool _isLoopbackHost(String host) {
+    if (host.toLowerCase() == 'localhost') return true;
+    final address = InternetAddress.tryParse(host);
+    return address?.isLoopback ?? false;
+  }
 
   /// Handles all requests.
   ///
   /// To override an API call, pass in a subclass of [ServerApi].
+  ///
+  /// Set [disableOriginCheck] to `true` to bypass `Host`, `Origin`, and
+  /// `Sec-Fetch-Site` validation while still enforcing HTTP method and
+  /// [devToolsRequestHeader] checks.
+  ///
+  /// Pass [allowedOrigins] to permit requests from specific non-loopback
+  /// origins (and their corresponding `Host` headers) in addition to loopback
+  /// hosts and origins.
   static FutureOr<shelf.Response> handle(
     shelf.Request request, {
     required ExtensionsManager extensionsManager,
     required DeeplinkManager deeplinkManager,
     ServerApi? api,
     DtdInfo? dtd,
+    bool disableOriginCheck = false,
+    List<Uri> allowedOrigins = const <Uri>[],
   }) {
     api ??= ServerApi();
-    final validationErrorResponse = _validateRequest(request, api);
+    final validationErrorResponse = _validateRequest(
+      request,
+      api,
+      disableOriginCheck: disableOriginCheck,
+      allowedOrigins: allowedOrigins,
+    );
     if (validationErrorResponse != null) {
       return validationErrorResponse;
     }

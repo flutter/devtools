@@ -27,6 +27,7 @@ void main() {
             DeeplinkApi.deeplinkRootPathPropertyName: expectedRootPath,
           },
         ),
+        headers: const {devToolsRequestHeader: '1'},
       );
       final fakeManager = FakeDeeplinkManager();
       fakeManager.responseForGetAndroidBuildVariants = <String, String>{
@@ -52,6 +53,7 @@ void main() {
             host: 'localhost',
             path: DeeplinkApi.androidBuildVariants,
           ),
+          headers: const {devToolsRequestHeader: '1'},
         );
         final response = await ServerApi.handle(
           request,
@@ -77,6 +79,7 @@ void main() {
             DeeplinkApi.androidBuildVariantPropertyName: buildVariant,
           },
         ),
+        headers: const {devToolsRequestHeader: '1'},
       );
       final fakeManager = FakeDeeplinkManager();
       fakeManager.responseForGetAndroidAppLinkSettings = <String, String>{
@@ -106,6 +109,7 @@ void main() {
             DeeplinkApi.deeplinkRootPathPropertyName: expectedRootPath,
           },
         ),
+        headers: const {devToolsRequestHeader: '1'},
       );
       final fakeManager = FakeDeeplinkManager();
       fakeManager.responseForGetIosBuildOptions = <String, String>{
@@ -140,6 +144,7 @@ void main() {
               DeeplinkApi.xcodeTargetPropertyName: target,
             },
           ),
+          headers: const {devToolsRequestHeader: '1'},
         );
         final fakeManager = FakeDeeplinkManager();
         fakeManager.responseForGetIosUniversalLinkSettings = <String, String>{

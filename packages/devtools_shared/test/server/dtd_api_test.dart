@@ -20,6 +20,7 @@ void main() {
       final request = Request(
         'post',
         Uri(scheme: 'https', host: 'localhost', path: DtdApi.apiGetDtdUri),
+        headers: const {devToolsRequestHeader: '1'},
       );
       final response = await ServerApi.handle(
         request,
