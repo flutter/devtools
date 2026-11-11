@@ -32,6 +32,11 @@ class ExtensionsManager {
   /// [serveAvailableExtensions] is called.
   final devtoolsExtensions = <DevToolsExtensionConfig>[];
 
+  /// The set of `devtools_options.yaml` file URIs for all currently served
+  /// DevTools extensions.
+  Set<String> get servedDevToolsOptionsUris =>
+      devtoolsExtensions.map((e) => e.devtoolsOptionsUri).toSet();
+
   final _extensionLocationsByIdentifier = <String, String?>{};
 
   /// Returns the absolute path of the assets for the extension with identifier

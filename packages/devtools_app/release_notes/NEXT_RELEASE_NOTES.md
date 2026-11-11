@@ -97,6 +97,10 @@ TODO: Remove this section if there are not any updates.
   the connected app's package root is registered with the Dart Tooling Daemon
   before available DevTools extensions are refreshed.
   [#10086](https://github.com/flutter/devtools/pull/10086)
+* Confined DevTools extension options file access to currently served
+  extensions, rejected symlinked `devtools_options.yaml` files, and prevented
+  creating missing parent directories.
+  [#10088](https://github.com/flutter/devtools/pull/10088)
 
 ## Advanced developer mode updates
 
