@@ -645,6 +645,192 @@ void main() {
         );
       },
     );
+
+    test(
+      'rejects packageRootUri when directory does not exist or is not a Dart '
+      'package root',
+      () async {
+        await initializeTestDirectory();
+        final nonExistentRootUri = Uri.file(
+          p.join(extensionTestManager.packagesRootUri.toFilePath(), 'missing'),
+        ).toString();
+        final nonPackageDir = Directory(
+          p.join(
+            extensionTestManager.packagesRootUri.toFilePath(),
+            'empty_dir',
+          ),
+        )..createSync(recursive: true);
+        final nonPackageRootUri = Uri.file(nonPackageDir.path).toString();
+
+        for (final invalidRootUri in [nonExistentRootUri, nonPackageRootUri]) {
+          final request = Request(
+            'post',
+            Uri(
+              scheme: 'https',
+              host: 'localhost',
+              path: ExtensionsApi.apiServeAvailableExtensions,
+              queryParameters: {
+                ExtensionsApi.packageRootUriPropertyName: invalidRootUri,
+              },
+            ),
+            headers: const {devToolsRequestHeader: '1'},
+          );
+          final response = await ServerApi.handle(
+            request,
+            extensionsManager: extensionsManager,
+            deeplinkManager: FakeDeeplinkManager(),
+            dtd: dtd!.info,
+          );
+          expect(response.statusCode, HttpStatus.internalServerError);
+          expect(extensionsManager.devtoolsExtensions, isEmpty);
+        }
+      },
+    );
+
+    test('rejects packageRootUri outside IDE workspace roots', () async {
+      await initializeTestDirectory();
+      final outsidePackageDir = Directory(
+        p.join(extensionTestManager.testDirectory.path, 'outside_pkg'),
+      )..createSync(recursive: true);
+      File(p.join(outsidePackageDir.path, 'pubspec.yaml')).writeAsStringSync('''
+name: outside_pkg
+environment:
+  sdk: "^3.5.0"
+''');
+      final outsideRootUri = Uri.file(outsidePackageDir.path).toString();
+      final request = Request(
+        'post',
+        Uri(
+          scheme: 'https',
+          host: 'localhost',
+          path: ExtensionsApi.apiServeAvailableExtensions,
+          queryParameters: {
+            ExtensionsApi.packageRootUriPropertyName: outsideRootUri,
+          },
+        ),
+        headers: const {devToolsRequestHeader: '1'},
+      );
+      final response = await ServerApi.handle(
+        request,
+        extensionsManager: extensionsManager,
+        deeplinkManager: FakeDeeplinkManager(),
+        dtd: dtd!.info,
+      );
+      expect(response.statusCode, HttpStatus.internalServerError);
+      expect(extensionsManager.devtoolsExtensions, isEmpty);
+    });
+
+    test('rejects packageRootUri when IDE workspace roots are empty', () async {
+      await initializeTestDirectory();
+      await testDtdConnection!.setIDEWorkspaceRoots(
+        dtd!.info!.secret!,
+        const <Uri>[],
+      );
+
+      final request = Request(
+        'post',
+        Uri(
+          scheme: 'https',
+          host: 'localhost',
+          path: ExtensionsApi.apiServeAvailableExtensions,
+          queryParameters: {
+            ExtensionsApi.packageRootUriPropertyName:
+                extensionTestManager.runtimeAppRoot,
+          },
+        ),
+        headers: const {devToolsRequestHeader: '1'},
+      );
+      final response = await ServerApi.handle(
+        request,
+        extensionsManager: extensionsManager,
+        deeplinkManager: FakeDeeplinkManager(),
+        dtd: dtd!.info,
+      );
+      expect(response.statusCode, HttpStatus.internalServerError);
+      expect(extensionsManager.devtoolsExtensions, isEmpty);
+    });
+
+    test('rejects packageRootUri symlink inside workspace pointing outside '
+        'workspace', () async {
+      await initializeTestDirectory();
+      final outsidePackageDir = Directory(
+        p.join(extensionTestManager.testDirectory.path, 'outside_pkg'),
+      )..createSync(recursive: true);
+      File(p.join(outsidePackageDir.path, 'pubspec.yaml')).writeAsStringSync('''
+name: outside_pkg
+environment:
+  sdk: "^3.5.0"
+''');
+      final symlinkInWorkspace = Link(
+        p.join(
+          extensionTestManager.packagesRootUri.toFilePath(),
+          'linked_outside_pkg',
+        ),
+      )..createSync(outsidePackageDir.path);
+
+      final request = Request(
+        'post',
+        Uri(
+          scheme: 'https',
+          host: 'localhost',
+          path: ExtensionsApi.apiServeAvailableExtensions,
+          queryParameters: {
+            ExtensionsApi.packageRootUriPropertyName: Uri.file(
+              symlinkInWorkspace.path,
+            ).toString(),
+          },
+        ),
+        headers: const {devToolsRequestHeader: '1'},
+      );
+      final response = await ServerApi.handle(
+        request,
+        extensionsManager: extensionsManager,
+        deeplinkManager: FakeDeeplinkManager(),
+        dtd: dtd!.info,
+      );
+      expect(response.statusCode, HttpStatus.internalServerError);
+      expect(extensionsManager.devtoolsExtensions, isEmpty);
+    });
+
+    test('rejects packageRootUri whose package_config.json resolves above '
+        'the IDE workspace root', () async {
+      await initializeTestDirectory();
+      final workspaceMemberDir = Directory(
+        p.join(
+          extensionTestManager.packagesRootUri.toFilePath(),
+          'workspace_root',
+          'workspace_member',
+        ),
+      );
+      // Set the IDE workspace root to the sub-package only, so the parent
+      // workspace_root/.dart_tool/package_config.json is outside the IDE
+      // workspace root.
+      await testDtdConnection!.setIDEWorkspaceRoots(dtd!.info!.secret!, [
+        workspaceMemberDir.uri,
+      ]);
+
+      final request = Request(
+        'post',
+        Uri(
+          scheme: 'https',
+          host: 'localhost',
+          path: ExtensionsApi.apiServeAvailableExtensions,
+          queryParameters: {
+            ExtensionsApi.packageRootUriPropertyName: workspaceMemberDir.uri
+                .toString(),
+          },
+        ),
+        headers: const {devToolsRequestHeader: '1'},
+      );
+      final response = await ServerApi.handle(
+        request,
+        extensionsManager: extensionsManager,
+        deeplinkManager: FakeDeeplinkManager(),
+        dtd: dtd!.info,
+      );
+      expect(response.statusCode, HttpStatus.internalServerError);
+      expect(extensionsManager.devtoolsExtensions, isEmpty);
+    });
   });
 
   group(ExtensionsApi.apiExtensionEnabledState, () {

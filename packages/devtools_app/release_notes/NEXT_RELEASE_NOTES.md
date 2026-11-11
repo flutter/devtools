@@ -114,6 +114,9 @@ TODO: Remove this section if there are not any updates.
 * Validated DevTools extension version strings and prevented extension
   identifier collisions when serving extension assets.
   [#10090](https://github.com/flutter/devtools/pull/10090)
+* Confined extension server package roots and options files to active workspace
+  roots and currently served extensions.
+  [#TODO](https://github.com/flutter/devtools/pull/TODO)
 
 ## Advanced developer mode updates
 

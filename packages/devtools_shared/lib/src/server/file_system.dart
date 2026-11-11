@@ -3,13 +3,34 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'dart:convert';
-import 'dart:io' as io show Platform, File;
+import 'dart:io' as io show Directory, File, FileSystemException, Platform;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
 import 'devtools_store.dart';
+
+/// Returns whether [uri] is a non-null `file:` URI with an empty host (local
+/// file path, rejecting non-`file` schemes and UNC/remote hosts).
+bool isLocalFileUri(Uri? uri) =>
+    uri != null && uri.scheme == 'file' && uri.host.isEmpty;
+
+/// Returns whether [childPath] is equal to or contained within [parentPath].
+bool isWithinOrEqualPath(String parentPath, String childPath) =>
+    path.equals(parentPath, childPath) || path.isWithin(parentPath, childPath);
+
+/// Returns the normalized, symlink-resolved path for [dirPath], or `null` if
+/// [dirPath] does not exist as a directory or symbolic link resolution fails.
+String? tryResolveDirectoryPath(String dirPath) {
+  final directory = io.Directory(dirPath);
+  if (!directory.existsSync()) return null;
+  try {
+    return path.normalize(directory.resolveSymbolicLinksSync());
+  } on io.FileSystemException {
+    return null;
+  }
+}
 
 /// The real, local file system, which can be avoided in tests.
 const fileSystem = LocalFileSystem();
