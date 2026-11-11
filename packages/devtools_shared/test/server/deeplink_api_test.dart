@@ -18,7 +18,7 @@ void main() {
     test('handle deeplink api ${DeeplinkApi.androidBuildVariants}', () async {
       const expectedRootPath = '/abc';
       final request = Request(
-        'get',
+        'post',
         Uri(
           scheme: 'https',
           host: 'localhost',
@@ -27,6 +27,7 @@ void main() {
             DeeplinkApi.deeplinkRootPathPropertyName: expectedRootPath,
           },
         ),
+        headers: const {devToolsRequestHeader: '1'},
       );
       final fakeManager = FakeDeeplinkManager();
       fakeManager.responseForGetAndroidBuildVariants = <String, String>{
@@ -46,12 +47,13 @@ void main() {
       'handle deeplink api ${DeeplinkApi.androidBuildVariants} returns bad request if no root path',
       () async {
         final request = Request(
-          'get',
+          'post',
           Uri(
             scheme: 'https',
             host: 'localhost',
             path: DeeplinkApi.androidBuildVariants,
           ),
+          headers: const {devToolsRequestHeader: '1'},
         );
         final response = await ServerApi.handle(
           request,
@@ -67,7 +69,7 @@ void main() {
       const buildVariant = 'buildVariant';
       const someMessage = 'some message';
       final request = Request(
-        'get',
+        'post',
         Uri(
           scheme: 'https',
           host: 'localhost',
@@ -77,6 +79,7 @@ void main() {
             DeeplinkApi.androidBuildVariantPropertyName: buildVariant,
           },
         ),
+        headers: const {devToolsRequestHeader: '1'},
       );
       final fakeManager = FakeDeeplinkManager();
       fakeManager.responseForGetAndroidAppLinkSettings = <String, String>{
@@ -97,7 +100,7 @@ void main() {
       const expectedRootPath = '/abc';
       const someMessage = 'some message';
       final request = Request(
-        'get',
+        'post',
         Uri(
           scheme: 'https',
           host: 'localhost',
@@ -106,6 +109,7 @@ void main() {
             DeeplinkApi.deeplinkRootPathPropertyName: expectedRootPath,
           },
         ),
+        headers: const {devToolsRequestHeader: '1'},
       );
       final fakeManager = FakeDeeplinkManager();
       fakeManager.responseForGetIosBuildOptions = <String, String>{
@@ -129,7 +133,7 @@ void main() {
         const target = 'target';
         const someMessage = 'some message';
         final request = Request(
-          'get',
+          'post',
           Uri(
             scheme: 'https',
             host: 'localhost',
@@ -140,6 +144,7 @@ void main() {
               DeeplinkApi.xcodeTargetPropertyName: target,
             },
           ),
+          headers: const {devToolsRequestHeader: '1'},
         );
         final fakeManager = FakeDeeplinkManager();
         fakeManager.responseForGetIosUniversalLinkSettings = <String, String>{

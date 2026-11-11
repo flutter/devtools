@@ -18,6 +18,9 @@ To learn more about DevTools, check out the
 * Handled network failures when fetching survey metadata without an unhandled
   exception. [#8562](https://github.com/flutter/devtools/issues/8562)
 
+* Reused source maps across error reports instead of fetching and parsing them
+  repeatedly. [#9910](https://github.com/flutter/devtools/issues/9910)
+
 * Added guidance to run "flutter attach" when a Flutter debug app cannot
   evaluate expressions and a debug-only screen is unavailable.
   [#4091](https://github.com/flutter/devtools/issues/4091)
@@ -28,6 +31,11 @@ TODO: Remove this section if there are not any updates.
 screens: colors that are hard to see against the current light or dark theme,
 such as black or white, are now adjusted to remain legible.
 [#10060](https://github.com/flutter/devtools/pull/10060)
+* Validated incoming DevTools server requests by requiring `POST` (with
+  `X-DevTools-Request`) or `OPTIONS` methods and validating `Host`, `Origin`,
+  and `Sec-Fetch-Site` headers to protect against cross-site request forgery
+  (CSRF), DNS rebinding, and cross-origin attacks.
+  [#10082](https://github.com/flutter/devtools/pull/10082)
 
 ## Inspector updates
 
@@ -35,7 +43,10 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed the Frame Analysis tab showing "No timeline event analysis data
+  available for this frame" when a frame is selected before its timeline events
+  have been fetched from the VM.
+  [#10050](https://github.com/flutter/devtools/pull/10050)
 
 ## CPU profiler updates
 
@@ -55,11 +66,20 @@ TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 
+* Corrected time units and cumulative nature of GC events.
+  [#9890](https://github.com/flutter/devtools/pull/9890)
+* Fixed a bug where long `dart:developer` log messages lost their structured
+  Details view. -
+  [#10011](https://github.com/flutter/devtools/pull/10011),
+* Fixed ANSI-colored log messages rendering with black text and a larger font,
+  and removed raw ANSI escape codes from the Details view. -
+  [#10028](https://github.com/flutter/devtools/pull/10028)
 TODO: Remove this section if there are not any updates.
 
 ## App size tool updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed treemap tooltip text color across light and dark theme
+  [#10035](https://github.com/flutter/devtools/pull/10035)
 
 ## Deep links tool updates
 
@@ -71,7 +91,11 @@ TODO: Remove this section if there are not any updates.
 
 ## DevTools extension updates
 
-TODO: Remove this section if there are not any updates.
+* Validated DevTools extension filesystem access by rejecting non-local
+  `file://` URIs (such as UNC paths), invalid `buildLocation` paths, and broken
+  or out-of-bounds symbolic links to prevent extensions from accessing arbitrary
+  files outside the package root or build directory.
+  [#10083](https://github.com/flutter/devtools/pull/10083)
 
 ## Advanced developer mode updates
 

@@ -19,6 +19,15 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
   `DASH__SUPPRESS_ANALYTICS=true` is now passed on instead of being reset to
   `false`.
 * Require `package:unified_analytics` `^8.4.0`.
+* Require `POST` (with `devToolsRequestHeader`) or `OPTIONS` CORS preflight
+  requests and validate `Host`, `Origin`, and `Sec-Fetch-Site` headers in
+  `ServerApi.handle` to prevent cross-site and DNS rebinding requests, with
+  optional `disableOriginCheck` and `allowedOrigins` parameters.
+* Add `devToolsRequestHeader` constant (`X-DevTools-Request`).
+* Reject `file://` URIs with non-empty hosts (UNC paths), absolute, missing, or
+  non-directory `buildLocation` paths, and symbolic links resolving outside the
+  extension build or package root in `ExtensionsManager`, and store valid
+  resolved paths in `DevToolsExtensionConfig.extensionAssetsPath`.
 
 # 14.0.0
 
