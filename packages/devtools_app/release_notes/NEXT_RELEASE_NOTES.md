@@ -28,6 +28,11 @@ TODO: Remove this section if there are not any updates.
 screens: colors that are hard to see against the current light or dark theme,
 such as black or white, are now adjusted to remain legible.
 [#10060](https://github.com/flutter/devtools/pull/10060)
+* Validated incoming DevTools server requests by requiring `POST` (with
+  `X-DevTools-Request`) or `OPTIONS` methods and validating `Host`, `Origin`,
+  and `Sec-Fetch-Site` headers to protect against cross-site request forgery
+  (CSRF), DNS rebinding, and cross-origin attacks.
+  [#10082](https://github.com/flutter/devtools/pull/10082)
 
 ## Inspector updates
 

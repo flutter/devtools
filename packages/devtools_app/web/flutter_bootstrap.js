@@ -40,7 +40,12 @@ async function getDevToolsWasmOptOutPreference() {
   // running from `flutter run` anyway.
   const request = 'api/getPreferenceValue?key=experiment.wasmOptOut';
   try {
-    const response = await fetch(request);
+    // This header name must match `devToolsRequestHeader` in
+    // `packages/devtools_shared/lib/src/devtools_api.dart`.
+    const response = await fetch(request, {
+      method: 'POST',
+      headers: { 'X-DevTools-Request': '1' },
+    });
     if (!response.ok) {
       console.warn(`[${response.status} response] ${request}`);
       return false;
