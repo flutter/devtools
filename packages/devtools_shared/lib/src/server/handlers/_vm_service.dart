@@ -12,11 +12,14 @@ extension VmServiceHandler on Never {
   ///
   /// This map is used to lookup package roots for a particular VM service when
   /// [handleNotifyForVmServiceConnection] is called for a VM service disconnect
-  /// in DevTools app.
-  ///
-  /// If the Dart Tooling Daemon was not started by DevTools, this map will
-  /// never be used.
+  /// in DevTools app, and to validate runtime package roots in
+  /// [ExtensionsManager.serveAvailableExtensions].
   static final _packageRootsForVmServiceConnections = <String, Uri>{};
+
+  /// Returns an unmodifiable view of the package root URIs for currently
+  /// connected VM services.
+  static Iterable<Uri> get packageRootsForVmServiceConnections =>
+      UnmodifiableListView(_packageRootsForVmServiceConnections.values);
 
   static Future<shelf.Response> handleNotifyForVmServiceConnection(
     ServerApi api,
@@ -32,12 +35,8 @@ extension VmServiceHandler on Never {
     if (missingRequiredParams != null) return missingRequiredParams;
 
     final dtdUri = dtd?.localUri;
-    final dtdSecret = dtd?.secret;
-    if (dtdUri == null || dtdSecret == null) {
-      // If DevTools server did not start DTD, there is nothing for us to do.
-      // This assertion may change in the future if the DevTools server has
-      // other functionality that interacts with VM service connections from
-      // DevTools app clients.
+    if (dtdUri == null) {
+      // If DTD is not available, there is nothing for us to do.
       return api.success();
     }
 
@@ -60,10 +59,10 @@ extension VmServiceHandler on Never {
     }
 
     DartToolingDaemon? dartToolingDaemon;
+    final dtdSecret = dtd?.secret;
     try {
-      dartToolingDaemon = await DartToolingDaemon.connect(dtd!.localUri);
+      dartToolingDaemon = await DartToolingDaemon.connect(dtdUri);
 
-      // ignore: unnecessary_null_comparison, intentionally added to guard against future logic changes.
       if (dtdSecret != null) {
         final uriAsString = vmServiceUri.toString();
         connected
@@ -85,12 +84,12 @@ extension VmServiceHandler on Never {
       );
       if (detectRootResponse.success) {
         final rootUri = detectRootResponse.uri;
-        if (rootUri == null) {
+        if (rootUri == null || dtdSecret == null) {
           return api.success();
         }
         return await updateDtdWorkspaceRoots(
           dartToolingDaemon,
-          dtdConnectionInfo: dtd,
+          dtdConnectionInfo: dtd!,
           rootFromVmService: rootUri,
           connected: connected,
           api: api,
@@ -150,8 +149,8 @@ extension VmServiceHandler on Never {
         vmService = null;
       }
     } else {
-      final cachedRootForVmService =
-          _packageRootsForVmServiceConnections[vmServiceUriAsString];
+      final cachedRootForVmService = _packageRootsForVmServiceConnections
+          .remove(vmServiceUriAsString);
       if (cachedRootForVmService == null) {
         // If there is no root to remove, there is nothing for us to do.
         return (success: true, message: null, uri: null);

@@ -775,6 +775,10 @@ void main() {
             expect(response.message, isNull);
             expect(response.uri, isNotNull);
             expect(response.uri!.toFilePath(), endsWith(app!.directory.path));
+            expect(
+              server.VmServiceHandler.packageRootsForVmServiceConnections,
+              contains(response.uri),
+            );
 
             final disconnectResponse =
                 await server.VmServiceHandler.detectRootPackageForVmService(
@@ -789,6 +793,10 @@ void main() {
             expect(
               disconnectResponse.uri!.toFilePath(),
               endsWith(app!.directory.path),
+            );
+            expect(
+              server.VmServiceHandler.packageRootsForVmServiceConnections,
+              isNot(contains(response.uri)),
             );
           },
         );
