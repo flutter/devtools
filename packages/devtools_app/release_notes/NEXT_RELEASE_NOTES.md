@@ -15,6 +15,13 @@ To learn more about DevTools, check out the
 
 ## General updates
 
+* Reused source maps across error reports instead of fetching and parsing them
+  repeatedly. [#9910](https://github.com/flutter/devtools/issues/9910)
+
+* Added guidance to run "flutter attach" when a Flutter debug app cannot
+  evaluate expressions and a debug-only screen is unavailable.
+  [#4091](https://github.com/flutter/devtools/issues/4091)
+
 TODO: Remove this section if there are not any updates.
 
 * Improved the readability of ANSI-colored text in the console and logging
@@ -33,7 +40,10 @@ TODO: Remove this section if there are not any updates.
 
 ## Performance updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed the Frame Analysis tab showing "No timeline event analysis data
+  available for this frame" when a frame is selected before its timeline events
+  have been fetched from the VM.
+  [#10050](https://github.com/flutter/devtools/pull/10050)
 
 ## CPU profiler updates
 
@@ -53,11 +63,20 @@ TODO: Remove this section if there are not any updates.
 
 ## Logging updates
 
+* Corrected time units and cumulative nature of GC events.
+  [#9890](https://github.com/flutter/devtools/pull/9890)
+* Fixed a bug where long `dart:developer` log messages lost their structured
+  Details view. -
+  [#10011](https://github.com/flutter/devtools/pull/10011),
+* Fixed ANSI-colored log messages rendering with black text and a larger font,
+  and removed raw ANSI escape codes from the Details view. -
+  [#10028](https://github.com/flutter/devtools/pull/10028)
 TODO: Remove this section if there are not any updates.
 
 ## App size tool updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed treemap tooltip text color across light and dark theme
+  [#10035](https://github.com/flutter/devtools/pull/10035)
 
 ## Deep links tool updates
 
@@ -69,7 +88,11 @@ TODO: Remove this section if there are not any updates.
 
 ## DevTools extension updates
 
-TODO: Remove this section if there are not any updates.
+* Validated DevTools extension filesystem access by rejecting non-local
+  `file://` URIs (such as UNC paths), invalid `buildLocation` paths, and broken
+  or out-of-bounds symbolic links to prevent extensions from accessing arbitrary
+  files outside the package root or build directory.
+  [#10083](https://github.com/flutter/devtools/pull/10083)
 
 ## Advanced developer mode updates
 

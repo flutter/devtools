@@ -24,6 +24,10 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
   `ServerApi.handle` to prevent cross-site and DNS rebinding requests, with
   optional `disableOriginCheck` and `allowedOrigins` parameters.
 * Add `devToolsRequestHeader` constant (`X-DevTools-Request`).
+* Reject `file://` URIs with non-empty hosts (UNC paths), absolute, missing, or
+  non-directory `buildLocation` paths, and symbolic links resolving outside the
+  extension build or package root in `ExtensionsManager`, and store valid
+  resolved paths in `DevToolsExtensionConfig.extensionAssetsPath`.
 
 # 14.0.0
 
