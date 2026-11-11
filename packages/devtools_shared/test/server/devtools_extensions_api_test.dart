@@ -60,6 +60,7 @@ void main() {
   Future<Response> serveExtensions(
     ExtensionsManager manager, {
     bool includeRuntimeRoot = true,
+    String? packageRootUriOverride,
   }) async {
     final request = Request(
       'post',
@@ -68,9 +69,9 @@ void main() {
         host: 'localhost',
         path: ExtensionsApi.apiServeAvailableExtensions,
         queryParameters: {
-          ExtensionsApi.packageRootUriPropertyName: includeRuntimeRoot
-              ? extensionTestManager.runtimeAppRoot
-              : null,
+          ExtensionsApi.packageRootUriPropertyName:
+              packageRootUriOverride ??
+              (includeRuntimeRoot ? extensionTestManager.runtimeAppRoot : null),
         },
       ),
       headers: const {devToolsRequestHeader: '1'},
@@ -184,20 +185,9 @@ void main() {
       () async {
         await initializeTestDirectory();
         const uncUri = 'file://remotehost/share/app';
-        final request = Request(
-          'post',
-          Uri(
-            scheme: 'https',
-            host: 'localhost',
-            path: ExtensionsApi.apiServeAvailableExtensions,
-            queryParameters: {ExtensionsApi.packageRootUriPropertyName: uncUri},
-          ),
-        );
-        final response = await ServerApi.handle(
-          request,
-          extensionsManager: extensionsManager,
-          deeplinkManager: FakeDeeplinkManager(),
-          dtd: dtd!.info,
+        final response = await serveExtensions(
+          extensionsManager,
+          packageRootUriOverride: uncUri,
         );
         expect(response.statusCode, HttpStatus.badRequest);
         expect(extensionsManager.devtoolsExtensions, isEmpty);
