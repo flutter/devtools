@@ -241,7 +241,7 @@ void main() {
 
         // Cross each boundary in both directions in the same tree, and finish
         // on a wide desktop baseline.
-        for (final width in [328.0, 600.0, 900.0, 601.0, 1400.0]) {
+        for (final width in [328.0, 600.0, 900.0, 601.0, 901.0, 1400.0]) {
           final resizeErrors = await collectFlutterErrors(
             () => _setWindowWidth(tester, width),
           );
