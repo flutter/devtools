@@ -39,7 +39,7 @@ To learn more about DevTools, check out the
   [#9755](https://github.com/flutter/devtools/pull/9755)
 * Fixed a bug where data exported from the Performance screen could be
   missing the most recent timeline events. -
-  [TODO](https://github.com/flutter/devtools/pull/TODO),
+  [#10055](https://github.com/flutter/devtools/pull/10055),
   [#9731](https://github.com/flutter/devtools/issues/9731)
 
 ## CPU profiler updates
