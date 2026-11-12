@@ -148,7 +148,10 @@ class _SecondaryPerformanceControls extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         OpenSaveButtonGroup(
           screenId: ScreenMetaData.performance.id,
-          onSave: (_) => controller.exportData(),
+          onSave: (_) async {
+            await controller.fetchFullDataBeforeExport();
+            controller.exportData();
+          },
         ),
         if (isFlutterApp) ...[
           const SizedBox(width: denseSpacing),

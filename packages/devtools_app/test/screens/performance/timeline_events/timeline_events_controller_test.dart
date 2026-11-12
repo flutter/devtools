@@ -10,6 +10,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../../test_infra/test_data/performance/sample_performance_data.dart';
 
@@ -80,6 +81,64 @@ void main() {
         eventsController.perfettoController.processor.rasterTrackId,
         equals(testRasterTrackId),
       );
+    });
+
+    group('pullLatestTimelineEvents', () {
+      setUp(() {
+        setGlobal(PreferencesController, PreferencesController());
+      });
+
+      test('adds the latest VM timeline to the trace', () async {
+        expect(eventsController.fullPerfettoTrace, isEmpty);
+
+        await eventsController.pullLatestTimelineEvents();
+
+        expect(eventsController.fullPerfettoTrace, isNotEmpty);
+      });
+
+      test('completes without throwing when the pull fails', () async {
+        // This fake service throws when the VM timeline is requested because
+        // it was not provided any timeline data.
+        setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
+
+        await expectLater(
+          eventsController.pullLatestTimelineEvents(),
+          completes,
+        );
+        expect(eventsController.fullPerfettoTrace, isEmpty);
+      });
+
+      test('does not request the same time range twice', () async {
+        final mockService = MockVmServiceWrapper();
+        var currentVmTimeMicros = 0;
+        when(mockService.getVMTimelineMicros()).thenAnswer((_) async {
+          currentVmTimeMicros += 100;
+          return Timestamp(timestamp: currentVmTimeMicros);
+        });
+        final requestedTimeOrigins = <int?>[];
+        when(
+          mockService.getPerfettoVMTimeline(
+            timeOriginMicros: anyNamed('timeOriginMicros'),
+            timeExtentMicros: anyNamed('timeExtentMicros'),
+          ),
+        ).thenAnswer((invocation) async {
+          requestedTimeOrigins.add(
+            invocation.namedArguments[#timeOriginMicros] as int?,
+          );
+          return perfettoVmTimeline;
+        });
+        final serviceConnectionWithMock = FakeServiceConnectionManager();
+        serviceConnectionWithMock.serviceManager.service = mockService;
+        setGlobal(ServiceConnectionManager, serviceConnectionWithMock);
+
+        // Start the second pull before the first one has finished.
+        await [
+          eventsController.pullLatestTimelineEvents(),
+          eventsController.pullLatestTimelineEvents(),
+        ].wait;
+
+        expect(requestedTimeOrigins, equals([0, 101]));
+      });
     });
 
     group('can clearData', () {

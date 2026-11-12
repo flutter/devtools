@@ -291,6 +291,20 @@ class PerformanceController extends DevToolsScreenController
     ).toJson(),
   );
 
+  /// Pulls the latest timeline events so that they are included in the export.
+  ///
+  /// Timeline events are only polled periodically, so the most recent events
+  /// would otherwise be missing from the export.
+  Future<void> fetchFullDataBeforeExport() async {
+    final serviceManager = serviceConnection.serviceManager;
+    if (offlineDataController.showingOfflineData.value ||
+        !serviceManager.connectedState.value.connected ||
+        (serviceManager.connectedApp?.isDartWebAppNow ?? false)) {
+      return;
+    }
+    await timelineEventsController.pullLatestTimelineEvents();
+  }
+
   @override
   FutureOr<void> releaseMemory({bool partial = false}) async {
     await clearData(partial: partial, clearVmTimeline: !partial);

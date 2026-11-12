@@ -118,6 +118,9 @@ class TimelineEventsController extends PerformanceFeatureController
 
   int _nextPollStartMicros = 0;
 
+  /// The most recent pull of the VM timeline, if any.
+  Future<void>? _latestPull;
+
   /// The number of requests per second that we allow for pulling the VM
   /// timeline.
   ///
@@ -170,7 +173,26 @@ class TimelineEventsController extends PerformanceFeatureController
     });
   }
 
-  Future<void> _pullPerfettoVmTimeline({bool isInitialPull = false}) async {
+  /// Pulls the VM timeline events that have not been received yet.
+  ///
+  /// Pulls can be started by polling, [forceRefresh], and
+  /// [pullLatestTimelineEvents], so each pull waits for the previous one to
+  /// finish. Otherwise two pulls could request the same time range and add
+  /// the same events to the trace twice.
+  Future<void> _pullPerfettoVmTimeline({bool isInitialPull = false}) {
+    final previousPull = _latestPull;
+    return _latestPull = () async {
+      if (previousPull != null) {
+        // Errors from the previous pull are handled by its own caller.
+        await previousPull.catchError((_) {});
+      }
+      await _pullPerfettoVmTimelineHelper(isInitialPull: isInitialPull);
+    }();
+  }
+
+  Future<void> _pullPerfettoVmTimelineHelper({
+    bool isInitialPull = false,
+  }) async {
     final service = serviceConnection.serviceManager.service;
     if (service == null) return;
     final currentVmTime = await service.getVMTimelineMicros();
@@ -340,6 +362,18 @@ class TimelineEventsController extends PerformanceFeatureController
     await _pullPerfettoVmTimeline();
     processTrackEvents();
     await loadPerfettoTrace();
+  }
+
+  /// Pulls any timeline events from the VM that have not been received yet.
+  ///
+  /// Unlike [forceRefresh], this does not reload the Perfetto trace viewer.
+  Future<void> pullLatestTimelineEvents() async {
+    try {
+      await _pullPerfettoVmTimeline();
+    } catch (e, st) {
+      // Don't block the export of the data we already have.
+      _log.warning('Failed to pull the latest timeline events.', e, st);
+    }
   }
 
   void processTrackEvents() {
