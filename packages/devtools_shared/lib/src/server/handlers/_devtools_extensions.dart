@@ -127,13 +127,22 @@ extension _ExtensionsApiHandler on Never {
     // this path points outside of the extension directory.
     final isServedExtensionOptionsFile =
         requestedOptionsPath != null &&
-        extensionsManager.servedDevToolsOptionsUris.any((uriString) {
-          final uri = Uri.tryParse(uriString);
+        extensionsManager.devtoolsExtensions.any((ext) {
+          final uri = Uri.tryParse(ext.devtoolsOptionsUri);
           if (uri == null) return false;
+          if (uri.scheme == 'file' && uri.host.isEmpty) {
+            // If these are equal, there's no need to call
+            // _resolveOptionsFilePath again, so return early.
+            final servedPathUnresolved = p.normalize(uri.toFilePath());
+            if (p.equals(servedPathUnresolved, requestedOptionsPath)) {
+              return true;
+            }
+          }
           final servedPath = _resolveOptionsFilePath(uri);
           return servedPath != null &&
               p.equals(servedPath, requestedOptionsPath);
         });
+
     if (!isServedExtensionOptionsFile) {
       return api.badRequest(
         'Invalid devtoolsOptionsUri: must belong to a currently served '
