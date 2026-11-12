@@ -23,6 +23,18 @@ extension _ExtensionsApiHandler on Never {
     final logs = <String>[];
     final rootFileUriString =
         queryParams[ExtensionsApi.packageRootUriPropertyName];
+    if (rootFileUriString != null && rootFileUriString.isNotEmpty) {
+      final rootFileUri = Uri.tryParse(rootFileUriString);
+      if (!rootFileUriString.startsWith('file://') ||
+          rootFileUri == null ||
+          rootFileUri.scheme != 'file' ||
+          rootFileUri.host.isNotEmpty) {
+        return api.badRequest(
+          'Invalid ${ExtensionsApi.packageRootUriPropertyName}: must be a '
+          'file:// URI with an empty host.',
+        );
+      }
+    }
     final result = <String, Object?>{};
 
     /// Helper to return a success response with all available extensions

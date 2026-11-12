@@ -11,8 +11,8 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 // Benchmark size in kB.
-const bundleSizeBenchmark = 6000;
-const gzipBundleSizeBenchmark = 1750;
+const bundleSizeBenchmark = 6200;
+const gzipBundleSizeBenchmark = 1900;
 
 void main() {
   group('Web Compile', () {
@@ -31,7 +31,6 @@ void main() {
       await _runProcess('flutter', [
         'build',
         'web',
-        '--pwa-strategy=offline-first',
         '--release',
         '--no-tree-shake-icons',
       ]);

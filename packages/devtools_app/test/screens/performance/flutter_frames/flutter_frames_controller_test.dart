@@ -87,6 +87,43 @@ void main() {
       expect(framesController.selectedFrame.value, equals(FlutterFrame4.frame));
     });
 
+    test('notifies listeners when events are assigned to selected frame', () {
+      when(
+        // ignore: discarded_futures, by design
+        mockTimelineEventsController.handleSelectedFrame(any),
+      ).thenAnswer((_) => Future.value());
+
+      final frame = FlutterFrame.fromJson({
+        'number': 3,
+        'startTime': 40000,
+        'elapsed': 20000,
+        'build': 16000,
+        'raster': 16000,
+        'vsyncOverhead': 1000,
+      });
+      framesController.addFrame(frame);
+      framesController.handleSelectedFrame(frame);
+      expect(frame.frameAnalysis, isNull);
+
+      var notifyCount = 0;
+      framesController.selectedFrame.addListener(() => notifyCount++);
+
+      // Assigning an event to the selected frame should notify listeners, even
+      // though the selected frame instance has not changed.
+      framesController.assignEventToFrame(frame.id, FlutterFrame2.uiEvent);
+      expect(notifyCount, equals(1));
+      expect(framesController.selectedFrame.value, equals(frame));
+      expect(frame.frameAnalysis, isNotNull);
+
+      // Assigning an event to a frame that is not selected should not notify.
+      framesController.addFrame(testFrame2);
+      framesController.assignEventToFrame(
+        testFrame2.id,
+        FlutterFrame2.rasterEvent,
+      );
+      expect(notifyCount, equals(1));
+    });
+
     test('can setOfflineData', () async {
       // Ensure we are starting in an empty state.
       expect(framesController.flutterFrames.value, isEmpty);

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:dtd/dtd.dart';
 import 'package:extension_discovery/extension_discovery.dart';
@@ -149,6 +151,16 @@ class ExtensionsManager {
     for (final extension in extensions) {
       final config = extension.config;
 
+      if (extension.rootUri.scheme != 'file' ||
+          extension.rootUri.host.isNotEmpty) {
+        parsingErrors.writeln(
+          'Ignoring extension from package "${extension.package}": invalid '
+          'package root URI "${extension.rootUri}" must be a file:// URI '
+          'with an empty host.',
+        );
+        continue;
+      }
+
       // TODO(https://github.com/dart-lang/pub/issues/4042): make this check
       // more robust.
       final isPubliclyHosted =
@@ -160,6 +172,21 @@ class ExtensionsManager {
       // defaults to 'build';
       final relativeExtensionLocation =
           config['buildLocation'] as String? ?? 'build';
+
+      // Ensure that `relativeExtensionLocation is not absolute to prevent
+      // arbitrary access to the filesystem.
+      //
+      // For example, path.join(a, b, c, d) discards a, b, and c if d is
+      // absolute.
+      if (path.isAbsolute(relativeExtensionLocation) ||
+          path.posix.isAbsolute(relativeExtensionLocation) ||
+          path.windows.isAbsolute(relativeExtensionLocation)) {
+        parsingErrors.writeln(
+          'Ignoring extension from package "${extension.package}": invalid '
+          'buildLocation "$relativeExtensionLocation" must be a relative path.',
+        );
+        continue;
+      }
 
       final packageRoot = path.normalize(extension.rootUri.toFilePath());
       final location = path.normalize(
@@ -185,11 +212,23 @@ class ExtensionsManager {
         continue;
       }
 
+      final (:resolvedLocation, :error) = _validateAndResolveExtensionLocation(
+        packageRootPath: packageRoot,
+        locationPath: location,
+        relativeExtensionLocation: relativeExtensionLocation,
+      );
+      if (resolvedLocation == null) {
+        parsingErrors.writeln(
+          'Ignoring extension from package "${extension.package}": $error',
+        );
+        continue;
+      }
+
       try {
         final extensionConfig = DevToolsExtensionConfig.parse({
           ...config,
           DevToolsExtensionConfig.packageNameKey: extension.package,
-          DevToolsExtensionConfig.extensionAssetsPathKey: location,
+          DevToolsExtensionConfig.extensionAssetsPathKey: resolvedLocation,
           // The [packageConfigPath] will look like
           // 'pkg/.dart_tool/package_config.json' so we will store the
           // devtools_options.yaml file at the 'pkg' root:
@@ -210,9 +249,128 @@ class ExtensionsManager {
     }
   }
 
+  /// Validates that [packageRootPath] and [locationPath] exist as directories
+  /// and that [locationPath] and all entries within it do not resolve via
+  /// symbolic links outside [packageRootPath] or [locationPath].
+  ///
+  /// This prevents a package from registering a non-existent or non-directory
+  /// build location, or using symlinks in its extension directory to expose
+  /// arbitrary files or directories on the host filesystem.
+  ///
+  /// Returns a record containing either the canonical `resolvedLocation` on
+  /// success, or an `error` description using [relativeExtensionLocation] if
+  /// validation fails.
+  ({String? resolvedLocation, String? error})
+  _validateAndResolveExtensionLocation({
+    required String packageRootPath,
+    required String locationPath,
+    required String relativeExtensionLocation,
+  }) {
+    if (FileSystemEntity.isLinkSync(locationPath) &&
+        !Directory(locationPath).existsSync()) {
+      return (
+        resolvedLocation: null,
+        error:
+            'invalid buildLocation "$relativeExtensionLocation" is a broken '
+            'or non-directory symlink.',
+      );
+    }
+
+    if (!Directory(packageRootPath).existsSync()) {
+      return (
+        resolvedLocation: null,
+        error: 'package root does not exist or is not a directory.',
+      );
+    }
+
+    if (!Directory(locationPath).existsSync()) {
+      return (
+        resolvedLocation: null,
+        error:
+            'invalid buildLocation "$relativeExtensionLocation" does not '
+            'exist or is not a directory.',
+      );
+    }
+
+    final String resolvedPackageRoot;
+    final String resolvedLocation;
+    try {
+      resolvedPackageRoot = path.normalize(
+        Directory(packageRootPath).resolveSymbolicLinksSync(),
+      );
+      resolvedLocation = path.normalize(
+        Directory(locationPath).resolveSymbolicLinksSync(),
+      );
+    } on FileSystemException catch (e) {
+      return (
+        resolvedLocation: null,
+        error:
+            'failed to resolve symbolic links for buildLocation '
+            '"$relativeExtensionLocation" ($e).',
+      );
+    }
+
+    if (!path.isWithin(resolvedPackageRoot, resolvedLocation)) {
+      return (
+        resolvedLocation: null,
+        error:
+            'invalid buildLocation "$relativeExtensionLocation" resolves '
+            'outside package root.',
+      );
+    }
+
+    final List<FileSystemEntity> entries;
+    try {
+      entries = Directory(
+        resolvedLocation,
+      ).listSync(recursive: true, followLinks: false);
+    } on FileSystemException catch (e) {
+      return (
+        resolvedLocation: null,
+        error:
+            'failed to inspect extension build directory '
+            '"$relativeExtensionLocation" ($e).',
+      );
+    }
+
+    for (final entry in entries) {
+      // Because listSync was called with followLinks: false on
+      // resolvedLocation, any non-Link entry physically resides within
+      // resolvedLocation.
+      if (entry is! Link) continue;
+      String? resolvedTargetPath;
+      try {
+        resolvedTargetPath = path.normalize(entry.resolveSymbolicLinksSync());
+      } on FileSystemException {
+        // Leave resolvedTargetPath as null so broken or unresolvable symlinks
+        // are rejected below.
+      }
+      if (resolvedTargetPath == null ||
+          (!path.isWithin(resolvedLocation, resolvedTargetPath) &&
+              !path.equals(resolvedLocation, resolvedTargetPath))) {
+        return (
+          resolvedLocation: null,
+          error:
+              'extension build directory contains a symlink pointing '
+              'outside the build directory ("${entry.path}").',
+        );
+      }
+    }
+    return (resolvedLocation: resolvedLocation, error: null);
+  }
+
   void _assertUriFormat(String? uriString) {
-    if (uriString != null && !uriString.startsWith('file://')) {
-      throw ArgumentError.value(uriString, 'must be a file:// URI String');
+    if (uriString == null) return;
+    final uri = Uri.tryParse(uriString);
+    if (!uriString.startsWith('file://') ||
+        uri == null ||
+        uri.scheme != 'file' ||
+        uri.host.isNotEmpty) {
+      throw ArgumentError.value(
+        uriString,
+        'uriString',
+        'must be a file:// URI String with an empty host',
+      );
     }
   }
 

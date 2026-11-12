@@ -7,7 +7,7 @@ publish_to: none
 
 # Note: this version should only be updated by running the 'dt update-version'
 # command that updates the version here and in 'devtools.dart'.
-version: 2.61.0
+version: 2.63.0-dev.0
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_app
 
@@ -55,7 +55,7 @@ dependencies:
   sse: ^4.1.2
   stack_trace: ^1.12.0
   string_scanner: ^1.4.0
-  unified_analytics: ^7.0.0
+  unified_analytics: ^8.4.0
   vm_service: ^15.3.0
   vm_service_protos: ^2.0.0
   vm_snapshot_analysis: ^0.7.6
