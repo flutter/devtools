@@ -59,7 +59,9 @@ TODO: Remove this section if there are not any updates.
 
 ## Network profiler updates
 
-TODO: Remove this section if there are not any updates.
+* Fixed the Network screen's toolbar controls overlapping, and the status bar
+items being clipped, on narrow screens.
+[#10076](https://github.com/flutter/devtools/pull/10076)
 
 ## Logging updates
 

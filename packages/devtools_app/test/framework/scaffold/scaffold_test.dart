@@ -354,6 +354,29 @@ void main() {
       expect(find.byType(ExtensionSettingsAction), findsNothing);
     },
   );
+
+  for (final width in const [410.0, 330.0]) {
+    testWidgetsWithWindowSize(
+      'StatusLine does not overflow when embedded on a ${width}px wide screen',
+      Size(width, 800.0),
+      (WidgetTester tester) async {
+        setGlobal(IdeTheme, IdeTheme(embedMode: EmbedMode.embedOne));
+        await tester.pumpWidget(
+          wrapScaffold(
+            const Scaffold(
+              body: StatusLine(
+                currentScreen: _screen1,
+                isEmbedded: true,
+                isConnected: false,
+              ),
+            ),
+          ),
+        );
+        expect(find.byType(StatusLine), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 }
 
 class _TestScreen extends Screen {
