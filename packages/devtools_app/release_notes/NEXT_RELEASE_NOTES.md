@@ -37,6 +37,10 @@ To learn more about DevTools, check out the
 * Added a message in the Performance panel when widget rebuild tracking is
   unavailable because the app is running in profile mode.
   [#9755](https://github.com/flutter/devtools/pull/9755)
+* Fixed a bug where data exported from the Performance screen could be
+  missing the most recent timeline events. -
+  [TODO](https://github.com/flutter/devtools/pull/TODO),
+  [#9731](https://github.com/flutter/devtools/issues/9731)
 
 ## CPU profiler updates
 
