@@ -125,11 +125,9 @@ class ServiceConnectionManager {
       serviceTrafficLogger = VmServiceTrafficLogger(service!);
     }
 
-    unawaited(
-      server.notifyForVmServiceConnection(
-        vmServiceUri: serviceManager.serviceUri!,
-        connected: true,
-      ),
+    await server.notifyForVmServiceConnection(
+      vmServiceUri: serviceManager.serviceUri!,
+      connected: true,
     );
   }
 
