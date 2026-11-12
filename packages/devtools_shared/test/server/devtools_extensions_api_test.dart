@@ -716,6 +716,101 @@ void main() {
       }
     });
 
+    test('rejects devtoolsOptionsUri in a non-existent directory and does not '
+        'create the directory', () async {
+      await serveExtensions(extensionsManager);
+      final nonExistentDir = Directory(
+        p.join(extensionTestManager.testDirectory.path, 'non_existent_dir'),
+      );
+      expect(nonExistentDir.existsSync(), isFalse);
+
+      final invalidOptionsUri = Uri.file(
+        p.join(nonExistentDir.path, devtoolsOptionsFileName),
+      ).toString();
+      final response = await sendEnabledStateRequest(
+        extensionName: 'drift',
+        enable: true,
+        optionsUriOverride: invalidOptionsUri,
+      );
+
+      expect(response.statusCode, HttpStatus.badRequest);
+      expect(nonExistentDir.existsSync(), isFalse);
+    });
+
+    test('rejects devtoolsOptionsUri in an existing directory or unserved Dart '
+        'package directory', () async {
+      await serveExtensions(extensionsManager);
+
+      final nonPackageDir = Directory(
+        p.join(extensionTestManager.testDirectory.path, 'non_package_dir'),
+      )..createSync(recursive: true);
+      final unservedPackageDir = Directory(
+        p.join(extensionTestManager.testDirectory.path, 'unserved_pkg'),
+      )..createSync(recursive: true);
+
+      const unservedPubspec = '''
+name: unserved_pkg
+environment:
+  sdk: "^3.5.0"
+''';
+      File(
+        p.join(unservedPackageDir.path, 'pubspec.yaml'),
+      ).writeAsStringSync(unservedPubspec);
+
+      for (final dir in [nonPackageDir, unservedPackageDir]) {
+        final invalidOptionsFile = File(
+          p.join(dir.path, devtoolsOptionsFileName),
+        );
+        final response = await sendEnabledStateRequest(
+          extensionName: 'drift',
+          enable: true,
+          optionsUriOverride: invalidOptionsFile.uri.toString(),
+        );
+
+        expect(response.statusCode, HttpStatus.badRequest);
+        expect(invalidOptionsFile.existsSync(), isFalse);
+      }
+    });
+
+    test(
+      'rejects devtoolsOptionsUri when devtools_options.yaml is a symlink',
+      () async {
+        await serveExtensions(extensionsManager);
+
+        final outsideTarget = File(
+          p.join(extensionTestManager.testDirectory.path, 'outside_target.txt'),
+        )..writeAsStringSync('unchanged');
+        final brokenTarget = File(
+          p.join(extensionTestManager.testDirectory.path, 'broken_target.txt'),
+        );
+
+        final optionsLink = Link(optionsFile.path)
+          ..createSync(outsideTarget.path);
+        addTearDown(() {
+          if (FileSystemEntity.isLinkSync(optionsLink.path)) {
+            optionsLink.deleteSync();
+          }
+        });
+
+        var response = await sendEnabledStateRequest(
+          extensionName: 'drift',
+          enable: true,
+        );
+        expect(response.statusCode, HttpStatus.badRequest);
+        expect(outsideTarget.readAsStringSync(), 'unchanged');
+
+        optionsLink
+          ..deleteSync()
+          ..createSync(brokenTarget.path);
+        response = await sendEnabledStateRequest(
+          extensionName: 'drift',
+          enable: true,
+        );
+        expect(response.statusCode, HttpStatus.badRequest);
+        expect(brokenTarget.existsSync(), isFalse);
+      },
+    );
+
     test('accepts a valid devtools_options.yaml file: URI', () async {
       await serveExtensions(extensionsManager);
       final response = await sendEnabledStateRequest(extensionName: 'drift');

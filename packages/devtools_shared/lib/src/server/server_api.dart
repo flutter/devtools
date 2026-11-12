@@ -18,6 +18,7 @@ import 'package:vm_service/vm_service.dart';
 import '../common.dart';
 import '../deeplink/deeplink_manager.dart';
 import '../devtools_api.dart';
+import '../extensions/constants.dart';
 import '../extensions/extension_enablement.dart';
 import '../extensions/extension_manager.dart';
 import '../service/service.dart';
@@ -347,6 +348,7 @@ class ServerApi {
         return _ExtensionsApiHandler.handleExtensionEnabledState(
           api,
           queryParams,
+          extensionsManager,
         );
 
       // ----- deeplink api. -----

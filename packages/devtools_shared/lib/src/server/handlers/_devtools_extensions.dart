@@ -78,6 +78,7 @@ extension _ExtensionsApiHandler on Never {
   static shelf.Response handleExtensionEnabledState(
     ServerApi api,
     Map<String, String> queryParams,
+    ExtensionsManager extensionsManager,
   ) {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
       [
@@ -108,13 +109,48 @@ extension _ExtensionsApiHandler on Never {
     final fileName = isFileUri
         ? p.basename(devtoolsOptionsFileUri.toFilePath())
         : '';
-    if (!isFileUri || fileName != 'devtools_options.yaml') {
+    if (!isFileUri || fileName != devtoolsOptionsFileName) {
       return api.badRequest(
         'Invalid devtoolsOptionsUri: must be a file: URI named '
-        "'devtools_options.yaml'.",
+        "'$devtoolsOptionsFileName'.",
       );
     }
 
+    final requestedOptionsPath = _resolveOptionsFilePath(
+      devtoolsOptionsFileUri,
+    );
+
+    // Make sure that this extension's `devtools_options.yaml` file is
+    // being served by [ExtensionsManager].
+    //
+    // This prevents DevTools from creating missing directories on disk when
+    // this path points outside of the extension directory.
+    final isServedExtensionOptionsFile =
+        requestedOptionsPath != null &&
+        extensionsManager.devtoolsExtensions.any((ext) {
+          final uri = Uri.tryParse(ext.devtoolsOptionsUri);
+          if (uri == null) return false;
+          if (uri.scheme == 'file' && uri.host.isEmpty) {
+            // If these are equal, there's no need to call
+            // _resolveOptionsFilePath again, so return early.
+            final servedPathUnresolved = p.normalize(uri.toFilePath());
+            if (p.equals(servedPathUnresolved, requestedOptionsPath)) {
+              return true;
+            }
+          }
+          final servedPath = _resolveOptionsFilePath(uri);
+          return servedPath != null &&
+              p.equals(servedPath, requestedOptionsPath);
+        });
+
+    if (!isServedExtensionOptionsFile) {
+      return api.badRequest(
+        'Invalid devtoolsOptionsUri: must belong to a currently served '
+        'DevTools extension.',
+      );
+    }
+
+    final optionsFileUri = Uri.file(requestedOptionsPath);
     final extensionName = queryParams[ExtensionsApi.extensionNamePropertyName]!;
     final extensionPackage =
         queryParams[ExtensionsApi.extensionPackagePropertyName];
@@ -122,7 +158,7 @@ extension _ExtensionsApiHandler on Never {
     final activate = queryParams[ExtensionsApi.enabledStatePropertyName];
     if (activate != null) {
       final newState = ServerApi._devToolsOptions.setExtensionEnabledState(
-        devtoolsOptionsUri: devtoolsOptionsFileUri,
+        devtoolsOptionsUri: optionsFileUri,
         extensionName: extensionName,
         packageName: extensionPackage,
         enable: bool.parse(activate),
@@ -131,10 +167,35 @@ extension _ExtensionsApiHandler on Never {
     }
     final activationState = ServerApi._devToolsOptions
         .lookupExtensionEnabledState(
-          devtoolsOptionsUri: devtoolsOptionsFileUri,
+          devtoolsOptionsUri: optionsFileUri,
           extensionName: extensionName,
           packageName: extensionPackage,
         );
     return ServerApi._encodeResponse(activationState.name, api: api);
+  }
+
+  /// Resolves symbolic links on the parent directory of [uri] to return the
+  /// absolute path to `devtools_options.yaml`.
+  ///
+  /// Returns the actual file path to `devtools_options.yaml`, or `null` if
+  /// [uri] is not a local `file:` URI, its parent directory does not exist, or
+  /// the `devtools_options.yaml` file itself is a symbolic link.
+  static String? _resolveOptionsFilePath(Uri uri) {
+    if (uri.scheme != 'file' || uri.host.isNotEmpty) return null;
+
+    final filePath = p.normalize(uri.toFilePath());
+    if (p.basename(filePath) != devtoolsOptionsFileName) return null;
+
+    final parentDir = Directory(p.dirname(filePath));
+    if (!parentDir.existsSync()) return null;
+
+    try {
+      final resolvedParent = p.normalize(parentDir.resolveSymbolicLinksSync());
+      final resolvedFilePath = p.join(resolvedParent, devtoolsOptionsFileName);
+      if (FileSystemEntity.isLinkSync(resolvedFilePath)) return null;
+      return resolvedFilePath;
+    } on FileSystemException {
+      return null;
+    }
   }
 }

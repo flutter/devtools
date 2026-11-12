@@ -28,6 +28,9 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
   non-directory `buildLocation` paths, and symbolic links resolving outside the
   extension build or package root in `ExtensionsManager`, and store valid
   resolved paths in `DevToolsExtensionConfig.extensionAssetsPath`.
+* Confine `devtoolsOptionsUri` in `api/extensionEnabledState` to currently
+  served extensions, reject symlinked `devtools_options.yaml` files, and prevent
+  recursive directory creation when looking up `devtools_options.yaml`.
 
 # 14.0.0
 
