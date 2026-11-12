@@ -93,6 +93,10 @@ TODO: Remove this section if there are not any updates.
   or out-of-bounds symbolic links to prevent extensions from accessing arbitrary
   files outside the package root or build directory.
   [#10083](https://github.com/flutter/devtools/pull/10083)
+* Fixed a race condition when running DevTools from the CLI or standalone so
+  the connected app's package root is registered with the Dart Tooling Daemon
+  before available DevTools extensions are refreshed.
+  [#10086](https://github.com/flutter/devtools/pull/10086)
 
 ## Advanced developer mode updates
 
