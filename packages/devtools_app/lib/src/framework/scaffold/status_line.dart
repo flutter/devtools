@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
@@ -57,8 +60,12 @@ class StatusLine extends StatelessWidget {
       valueListenable: currentScreen.showIsolateSelector,
       builder: (context, showIsolateSelector, _) {
         showIsolateSelector = showIsolateSelector && isConnected;
+        // Keep every footer item on a single line. Items that do not fit are
+        // truncated rather than overflowing the status line.
         return DefaultTextStyle.merge(
           style: TextStyle(color: foregroundColor),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           child: Container(
             decoration: BoxDecoration(
               color: backgroundColor,
@@ -93,6 +100,24 @@ class StatusLine extends StatelessWidget {
     final showVideoTutorial =
         screenMetaData?.tutorialVideoTimestamp != null ||
         screenMetaData?.tutorialVideoUrl != null;
+    // Secondary items (the tutorial link and, when embedded, the DevTools
+    // actions) are shown inline only on wide screens. Below [MediaSize.s] they
+    // move into one overflow menu, so they stay reachable and the device name
+    // and page status are not squeezed.
+    final showSecondaryItemsInline = screenWidth > MediaSize.s;
+    final showTutorialInline = showVideoTutorial && showSecondaryItemsInline;
+    final embeddedActions = isEmbedded
+        ? DevToolsScaffold.defaultActions(
+            color: foregroundColor,
+            currentScreen: currentScreen,
+          )
+        : const <ScaffoldAction>[];
+    final overflowTutorial = showVideoTutorial && !showTutorialInline
+        ? screenMetaData
+        : null;
+    final overflowActions = showSecondaryItemsInline
+        ? const <ScaffoldAction>[]
+        : embeddedActions;
     return [
       Row(
         mainAxisSize: MainAxisSize.min,
@@ -102,11 +127,10 @@ class StatusLine extends StatelessWidget {
             screenWidth: screenWidth,
             highlightForConnection: highlightForConnection,
           ),
-          if (showVideoTutorial) ...[
+          if (showTutorialInline) ...[
             BulletSpacer(color: foregroundColor),
             VideoTutorialLink(
               screenMetaData: screenMetaData!,
-              screenWidth: screenWidth,
               highlightForConnection: highlightForConnection,
             ),
           ],
@@ -118,18 +142,28 @@ class StatusLine extends StatelessWidget {
         BulletSpacer(color: foregroundColor),
       ],
       if (screenWidth > MediaSize.xs && pageStatus != null) ...[
-        pageStatus,
+        // The page status needs to be flexible so that the status line can
+        // shrink to fit narrow screens without overflowing.
+        Flexible(child: pageStatus),
         BulletSpacer(color: foregroundColor),
       ],
-      buildConnectionStatus(context, screenWidth),
-      if (widerThanXxs && isEmbedded) ...[
+      // The connection status needs to be flexible so that the status line
+      // can shrink to fit narrow screens without overflowing.
+      Flexible(child: buildConnectionStatus(context, screenWidth)),
+      if (showSecondaryItemsInline && embeddedActions.isNotEmpty) ...[
         BulletSpacer(color: foregroundColor),
         Row(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: DevToolsScaffold.defaultActions(
-            color: foregroundColor,
-            currentScreen: currentScreen,
-          ),
+          children: embeddedActions,
+        ),
+      ],
+      if (overflowTutorial != null || overflowActions.isNotEmpty) ...[
+        BulletSpacer(color: foregroundColor),
+        _StatusLineOverflowMenu(
+          tutorial: overflowTutorial,
+          actions: overflowActions,
+          color: foregroundColor,
         ),
       ],
     ];
@@ -174,16 +208,18 @@ class StatusLine extends StatelessWidget {
                 },
               ),
               const SizedBox(width: denseSpacing),
-              DevToolsTooltip(
-                message: 'Connected device',
-                child: Text(
-                  description,
-                  style: highlightForConnection
-                      ? theme.regularTextStyle.copyWith(
-                          color: theme.colorScheme.onPrimary,
-                        )
-                      : theme.regularTextStyle,
-                  overflow: TextOverflow.clip,
+              Flexible(
+                child: DevToolsTooltip(
+                  message: 'Connected device',
+                  child: Text(
+                    description,
+                    style: highlightForConnection
+                        ? theme.regularTextStyle.copyWith(
+                            color: theme.colorScheme.onPrimary,
+                          )
+                        : theme.regularTextStyle,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
             ],
@@ -192,7 +228,7 @@ class StatusLine extends StatelessWidget {
           return child!;
         }
       },
-      child: screenWidth <= MediaSize.xxs
+      child: screenWidth <= MediaSize.xs
           ? const DevToolsTooltip(
               message: noConnectionMsg,
               child: Icon(Icons.warning_amber_rounded, size: actionsIconSize),
@@ -245,7 +281,6 @@ class VideoTutorialLink extends StatelessWidget {
   VideoTutorialLink({
     super.key,
     required this.screenMetaData,
-    required this.screenWidth,
     required this.highlightForConnection,
   }) : assert(
          screenMetaData.tutorialVideoTimestamp != null ||
@@ -254,11 +289,29 @@ class VideoTutorialLink extends StatelessWidget {
 
   final ScreenMetaData screenMetaData;
 
-  final MediaSize screenWidth;
-
   final bool highlightForConnection;
 
   static const _devToolsYouTubeVideoUrl = 'https://youtu.be/_EYk-E29edo';
+
+  static GaLink _linkFor(ScreenMetaData screenMetaData) {
+    return GaLink(
+      display: 'Watch tutorial',
+      url:
+          screenMetaData.tutorialVideoUrl ??
+          '$_devToolsYouTubeVideoUrl${screenMetaData.tutorialVideoTimestamp}',
+      gaScreenName: screenMetaData.id,
+      gaSelectedItemDescription:
+          '${gac.videoTutorialLink}-${screenMetaData.id}',
+    );
+  }
+
+  /// Opens the tutorial video for [screenMetaData] and records the same
+  /// analytics event as this link, for use from the overflow menu.
+  static void open(ScreenMetaData screenMetaData) {
+    final link = _linkFor(screenMetaData);
+    unawaited(launchUrlWithErrorHandling(link.url));
+    ga.select(link.gaScreenName!, link.gaSelectedItemDescription!);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -267,16 +320,56 @@ class VideoTutorialLink extends StatelessWidget {
         : null;
     return LinkIconLabel(
       icon: Icons.ondemand_video_rounded,
-      link: GaLink(
-        display: screenWidth <= MediaSize.xs ? 'Tutorial' : 'Watch tutorial',
-        url:
-            screenMetaData.tutorialVideoUrl ??
-            '$_devToolsYouTubeVideoUrl${screenMetaData.tutorialVideoTimestamp}',
-        gaScreenName: screenMetaData.id,
-        gaSelectedItemDescription:
-            '${gac.videoTutorialLink}-${screenMetaData.id}',
-      ),
+      link: _linkFor(screenMetaData),
       color: color,
+    );
+  }
+}
+
+/// The footer items that do not fit at the current width: the video tutorial
+/// link and, for embedded DevTools, the DevTools actions (Settings, Feedback,
+/// About, and extension settings), in one menu.
+///
+/// Each item runs the same behavior as its inline counterpart.
+class _StatusLineOverflowMenu extends StatelessWidget {
+  const _StatusLineOverflowMenu({
+    required this.tutorial,
+    required this.actions,
+    required this.color,
+  });
+
+  /// The metadata of the screen whose tutorial should be offered, if any.
+  final ScreenMetaData? tutorial;
+
+  final List<ScaffoldAction> actions;
+
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final tutorial = this.tutorial;
+    return PopupMenuButton<VoidCallback>(
+      tooltip: 'More actions',
+      padding: EdgeInsets.zero,
+      onSelected: (onSelected) => onSelected(),
+      itemBuilder: (_) => [
+        if (tutorial != null)
+          PopupMenuItem(
+            value: () => VideoTutorialLink.open(tutorial),
+            child: const Text('Watch tutorial'),
+          ),
+        for (final action in actions)
+          PopupMenuItem(
+            value: () => action.onPressed(context),
+            child: Text(action.tooltip),
+          ),
+      ],
+      child: SizedBox(
+        width: actionWidgetSize,
+        child: Center(
+          child: Icon(Icons.more_horiz, size: actionsIconSize, color: color),
+        ),
+      ),
     );
   }
 }
