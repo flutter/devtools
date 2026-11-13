@@ -24,10 +24,9 @@ const dartHtmlLibraryUri = 'dart:html';
 ///
 /// `package:web` is built on this library, so it is the reliable signal for
 /// modern and dart2wasm apps that no longer import [dartHtmlLibraryUri].
+/// Library URIs are matched by prefix, so this also covers
+/// `dart:js_interop_unsafe`.
 const dartJsInteropLibraryUri = 'dart:js_interop';
-
-/// Part of the modern Dart web JS interop library suite.
-const dartJsInteropUnsafeLibraryUri = 'dart:js_interop_unsafe';
 
 /// Libraries whose presence indicates the connected app is a Dart web app.
 ///
@@ -36,7 +35,6 @@ const dartJsInteropUnsafeLibraryUri = 'dart:js_interop_unsafe';
 const dartWebLibraryUris = [
   dartHtmlLibraryUri,
   dartJsInteropLibraryUri,
-  dartJsInteropUnsafeLibraryUri,
 ];
 
 // TODO(https://github.com/flutter/devtools/issues/6239): try to remove this.

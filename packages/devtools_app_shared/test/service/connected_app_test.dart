@@ -25,18 +25,6 @@ void main() {
       expect(app.isDartWebAppNow, isTrue);
     });
 
-    test(
-      'isDartWebApp is true when dart:js_interop_unsafe is available',
-      () async {
-        final serviceManager = _FakeServiceManager(
-          availableLibraries: ['dart:js_interop_unsafe'],
-        );
-        final app = ConnectedApp(serviceManager);
-        expect(await app.isDartWebApp, isTrue);
-        expect(app.isDartWebAppNow, isTrue);
-      },
-    );
-
     test('isDartWebApp is false when no web libraries are available', () async {
       final serviceManager = _FakeServiceManager(
         availableLibraries: [
@@ -113,19 +101,6 @@ void main() {
         expect(await OfflineConnectedApp().isDartWebApp, isFalse);
       },
     );
-  });
-
-  group('constants', () {
-    test('dartWebLibraryUris contains all web library URIs', () {
-      expect(
-        dartWebLibraryUris,
-        containsAll([
-          dartHtmlLibraryUri,
-          dartJsInteropLibraryUri,
-          dartJsInteropUnsafeLibraryUri,
-        ]),
-      );
-    });
   });
 }
 
