@@ -5,9 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('calculateHeadersSize', () {
     test('joins JSON list values without brackets', () {
-      // Header values decoded from JSON are List<dynamic>, not List<String>.
+      // Header values decoded from JSON are untyped lists, not List<String>.
       final headers = <String, Object?>{
-        'accept': <dynamic>['a', 'b'],
+        'accept': <Object?>['a', 'b'],
       };
       // 'accept: a, b\r\n' + '\r\n'
       expect(calculateHeadersSize(headers), 16);
@@ -15,7 +15,7 @@ void main() {
 
     test('counts each set-cookie value as its own line', () {
       final headers = <String, Object?>{
-        'set-cookie': <dynamic>['a=1', 'b=2'],
+        'set-cookie': <Object?>['a=1', 'b=2'],
       };
       // 'set-cookie: a=1\r\n' * 2 + '\r\n'
       expect(calculateHeadersSize(headers), 36);
@@ -29,9 +29,9 @@ void main() {
   group('headersToText', () {
     test('formats headers as key: value lines', () {
       final headers = <String, Object?>{
-        'content-type': <dynamic>['application/json'],
-        'content-length': <dynamic>[15],
-        'accept': <dynamic>['text/html', 'application/json'],
+        'content-type': <Object?>['application/json'],
+        'content-length': <Object?>[15],
+        'accept': <Object?>['text/html', 'application/json'],
         'statusCode': 200,
       };
       expect(
@@ -45,7 +45,7 @@ void main() {
 
     test('puts each set-cookie value on its own line', () {
       final headers = <String, Object?>{
-        'set-cookie': <dynamic>[
+        'set-cookie': <Object?>[
           'sid=1; Path=/',
           'theme=dark; Expires=Wed, 21 Oct 2026 07:28:00 GMT',
         ],
@@ -59,7 +59,7 @@ void main() {
 
     test('joins cookie header values with a semicolon', () {
       final headers = <String, Object?>{
-        'cookie': <dynamic>['a=b', 'c=d'],
+        'cookie': <Object?>['a=b', 'c=d'],
       };
       expect(headersToText(headers), 'cookie: a=b; c=d');
     });
@@ -81,7 +81,7 @@ void main() {
     test('formats values as they are displayed', () {
       final info = <String, Object?>{
         'method': 'GET',
-        'redirects': <dynamic>[],
+        'redirects': <Object?>[],
         'isRedirect': false,
       };
       expect(
@@ -106,7 +106,7 @@ void main() {
 
     test('uses the raw set-cookie header values', () {
       final headers = <String, Object?>{
-        'Set-Cookie': <dynamic>['sid=1; Path=/; Max-Age=60'],
+        'Set-Cookie': <Object?>['sid=1; Path=/; Max-Age=60'],
       };
       expect(
         responseCookiesToText(cookies, headers),

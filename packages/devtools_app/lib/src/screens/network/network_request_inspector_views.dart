@@ -73,22 +73,13 @@ class HttpRequestHeadersView extends StatelessWidget {
   /// they would appear on the wire (see [headersToText]), so multi-value
   /// headers are not wrapped in brackets as they are in the tab.
   static String copyText(DartIOHttpRequestData data) {
-    final sections = [
-      (title: _generalTitle, headers: data.general, format: generalInfoToText),
-      (
-        title: _responseHeadersTitle,
-        headers: data.responseHeaders,
-        format: headersToText,
-      ),
-      (
-        title: _requestHeadersTitle,
-        headers: data.requestHeaders,
-        format: headersToText,
-      ),
-    ];
     return [
-      for (final (:title, :headers, :format) in sections)
-        if (headers != null && headers.isNotEmpty) '$title\n${format(headers)}',
+      if (data.general case final general when general.isNotEmpty)
+        '$_generalTitle\n${generalInfoToText(general)}',
+      if (data.responseHeaders case final headers? when headers.isNotEmpty)
+        '$_responseHeadersTitle\n${headersToText(headers)}',
+      if (data.requestHeaders case final headers? when headers.isNotEmpty)
+        '$_requestHeadersTitle\n${headersToText(headers)}',
     ].join('\n\n');
   }
 

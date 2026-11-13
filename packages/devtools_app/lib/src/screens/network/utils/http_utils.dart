@@ -88,18 +88,14 @@ String responseCookiesToText(
   List<Cookie> cookies,
   Map<String, Object?>? responseHeaders,
 ) {
-  final rawCookies = responseHeaders?.entries
-      .where((entry) => entry.key.toLowerCase() == _setCookieHeader)
-      .expand(
-        (entry) =>
-            entry.value is Iterable ? entry.value as Iterable : [entry.value],
-      )
-      .nonNulls
-      .toList();
-  if (rawCookies != null && rawCookies.isNotEmpty) {
-    return rawCookies.join('\n');
-  }
-  return cookies.map(_cookieNameAndValue).join('\n');
+  final parsedCookies = cookies.map(_cookieNameAndValue).join('\n');
+  if (responseHeaders == null) return parsedCookies;
+  final rawCookies = [
+    for (final MapEntry(:key, :value) in responseHeaders.entries)
+      if (key.toLowerCase() == _setCookieHeader)
+        if (value is Iterable) ...value.nonNulls else ?value,
+  ];
+  return rawCookies.isEmpty ? parsedCookies : rawCookies.join('\n');
 }
 
 // Output Formats:
