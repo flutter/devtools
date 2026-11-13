@@ -6,6 +6,8 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/managers/survey.dart';
 import 'package:devtools_app/src/shared/primitives/query_parameters.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 
 void main() {
   setUp(() {
@@ -13,9 +15,65 @@ void main() {
   });
 
   group('SurveyService', () {
+    Future<DevToolsSurvey?> fetchWithClient(MockClient client) =>
+        http.runWithClient(
+          () => SurveyService().fetchSurveyContent(),
+          () => client,
+        );
+
     test('can fetch survey metadata', () async {
-      final survey = await SurveyService().fetchSurveyContent();
-      expect(survey, isNotNull);
+      final survey = await fetchWithClient(
+        MockClient(
+          (_) async => http.Response('{"uniqueId":"test-survey"}', 200),
+        ),
+      );
+      expect(survey!.id, 'test-survey');
+    });
+
+    test('returns no survey for an unsuccessful response', () async {
+      final survey = await fetchWithClient(
+        MockClient((_) async => http.Response('Unavailable', 503)),
+      );
+      expect(survey, isNull);
+    });
+
+    test('returns no survey when the network request fails', () async {
+      final survey = await fetchWithClient(
+        MockClient(
+          (request) => Future<http.Response>.error(
+            http.ClientException('Network unavailable', request.url),
+          ),
+        ),
+      );
+      expect(survey, isNull);
+    });
+
+    test('can fetch a survey after a network failure', () async {
+      var requests = 0;
+      final client = MockClient((request) async {
+        if (requests++ == 0) {
+          throw http.ClientException('Network unavailable', request.url);
+        }
+        return http.Response('{"uniqueId":"test-survey"}', 200);
+      });
+
+      expect(await fetchWithClient(client), isNull);
+      expect((await fetchWithClient(client))!.id, 'test-survey');
+      expect(requests, 2);
+    });
+
+    test('preserves error handling for invalid metadata types', () async {
+      final survey = await fetchWithClient(
+        MockClient((_) async => http.Response('{"uniqueId":42}', 200)),
+      );
+      expect(survey, isNull);
+    });
+
+    test('does not suppress malformed JSON exceptions', () async {
+      await expectLater(
+        fetchWithClient(MockClient((_) async => http.Response('{', 200))),
+        throwsFormatException,
+      );
     });
   });
 

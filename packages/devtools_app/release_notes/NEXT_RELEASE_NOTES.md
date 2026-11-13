@@ -15,6 +15,9 @@ To learn more about DevTools, check out the
 
 ## General updates
 
+* Handled network failures when fetching survey metadata without an unhandled
+  exception. [#8562](https://github.com/flutter/devtools/issues/8562)
+
 * Reused source maps across error reports instead of fetching and parsing them
   repeatedly. [#9910](https://github.com/flutter/devtools/issues/9910)
 
