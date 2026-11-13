@@ -17,12 +17,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../test_infra/utils/view_metrics_override_utils.dart';
+
 void main() {
   group('AccessibilityController', () {
     late AccessibilityController controller;
+    late FakeViewMetricsOverrideExtension fakeExtension;
 
     setUp(() {
-      final fakeServiceConnection = FakeServiceConnectionManager();
+      final fakeServiceConnection = ViewMetricsOverrideServiceConnection();
+      fakeExtension = fakeServiceConnection.extension;
       when(
         fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
       ).thenReturn(false);
@@ -60,7 +64,8 @@ void main() {
         uninitializedController.brightness.value,
         BrightnessOverride.system,
       );
-      expect(uninitializedController.textScale.value, 1.0);
+      expect(uninitializedController.overridesAvailable.value, isFalse);
+      expect(uninitializedController.textScale.value, isNull);
       expect(uninitializedController.boldText.value, isFalse);
       expect(uninitializedController.screenReader.value, isFalse);
       expect(uninitializedController.highContrast.value, isFalse);
@@ -524,6 +529,44 @@ void main() {
         calls.any((call) => call.$1 == registrations.disposeSemantics),
         isTrue,
       );
+    });
+
+    group('view metrics overrides', () {
+      test('show the overrides of the app once it supports them', () async {
+        fakeExtension.registry['0'] = {
+          'textScaling': [
+            [8, 16],
+            [100, 100],
+          ],
+          'boldText': true,
+          'accessibleNavigation': true,
+          'highContrast': false,
+        };
+        expect(controller.overridesAvailable.value, isFalse);
+
+        await fakeExtension.register();
+        await pumpEventQueue();
+
+        expect(controller.overridesAvailable.value, isTrue);
+        // Like the app, the page reports the ratio of the first point.
+        expect(controller.textScale.value, 2.0);
+        expect(controller.boldText.value, isTrue);
+        expect(controller.screenReader.value, isTrue);
+        expect(controller.highContrast.value, isFalse);
+      });
+
+      test('1.0 is a text scale override', () async {
+        await fakeExtension.register();
+        await pumpEventQueue();
+
+        await controller.setTextScale(1.0);
+        expect(fakeExtension.registry['0'], {
+          'textScaling': [
+            [1, 1.0],
+          ],
+        });
+        expect(controller.textScale.value, 1.0);
+      });
     });
   });
 }
