@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
+import 'dart:async';
+
 import 'package:devtools_app_shared/ui.dart';
 import 'package:material_ui/material_ui.dart' hide Badge;
 
@@ -15,12 +17,24 @@ import 'debugger_model.dart';
 const executableLineRadius = 1.5;
 const breakpointRadius = 6.0;
 
+/// The color of the dot that marks a breakpoint.
+///
+/// Disabled breakpoints use a muted color, so that they are visibly different
+/// from enabled ones in both the breakpoints list and the gutter.
+Color breakpointMarkerColor(ThemeData theme, {required bool enabled}) =>
+    enabled ? theme.colorScheme.primary : theme.unselectedWidgetColor;
+
 class Breakpoints extends StatelessWidget {
   const Breakpoints({super.key});
 
   @override
   Widget build(BuildContext context) {
     final controller = screenControllers.lookup<DebuggerController>();
+    // DWDS does not support enabling or disabling breakpoints, so only offer
+    // the checkbox when the app is not a Dart web app.
+    final canDisableBreakpoints =
+        !(serviceConnection.serviceManager.connectedApp?.isDartWebAppNow ??
+            false);
     return MultiValueListenableBuilder(
       listenables: [
         breakpointManager.breakpointsWithLocation,
@@ -37,6 +51,7 @@ class Breakpoints extends StatelessWidget {
             return _Breakpoint(
               breakpoint: breakpoints[index],
               selectedBreakpoint: selectedBreakpoint,
+              showEnabledCheckbox: canDisableBreakpoints,
             );
           },
         );
@@ -49,10 +64,14 @@ class _Breakpoint extends StatelessWidget {
   const _Breakpoint({
     required this.breakpoint,
     required this.selectedBreakpoint,
+    required this.showEnabledCheckbox,
   });
 
   final BreakpointAndSourcePosition breakpoint;
   final BreakpointAndSourcePosition? selectedBreakpoint;
+
+  /// Whether to show a checkbox that enables or disables [breakpoint].
+  final bool showEnabledCheckbox;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +87,21 @@ class _Breakpoint extends StatelessWidget {
           padding: const EdgeInsets.all(borderPadding),
           child: Row(
             children: [
+              if (showEnabledCheckbox)
+                SizedBox(
+                  width: defaultListItemHeight,
+                  child: Checkbox(
+                    value: breakpoint.enabled,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                    onChanged: (enabled) => unawaited(
+                      breakpointManager.setBreakpointEnabled(
+                        breakpoint.breakpoint,
+                        enabled: enabled!,
+                      ),
+                    ),
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.only(
                   left: borderPadding,
@@ -75,7 +109,7 @@ class _Breakpoint extends StatelessWidget {
                 ),
                 child: createCircleWidget(
                   breakpointRadius,
-                  theme.colorScheme.primary,
+                  breakpointMarkerColor(theme, enabled: breakpoint.enabled),
                 ),
               ),
               Flexible(

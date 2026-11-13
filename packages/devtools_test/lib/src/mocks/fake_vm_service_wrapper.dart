@@ -85,6 +85,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   final ClassList? _classList;
   late final Map<String, String>? _reverseResolvedUriMap;
   final _gcEventStream = StreamController<Event>.broadcast();
+  final _debugEventStream = StreamController<Event>.broadcast();
 
   final _flags = <String, List<Flag?>>{
     'flags': <Flag>[
@@ -539,7 +540,11 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Stream<Event> get onExtensionEventWithHistorySafe => const Stream.empty();
 
   @override
-  Stream<Event> get onDebugEvent => const Stream.empty();
+  Stream<Event> get onDebugEvent => _debugEventStream.stream;
+
+  void emitDebugEvent(Event event) {
+    _debugEventStream.sink.add(event);
+  }
 
   @override
   Stream<Event> get onTimelineEvent => const Stream.empty();

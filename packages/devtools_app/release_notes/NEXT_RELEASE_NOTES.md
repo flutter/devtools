@@ -59,7 +59,11 @@ TODO: Remove this section if there are not any updates.
 
 ## Debugger updates
 
-TODO: Remove this section if there are not any updates.
+* Added a checkbox to each breakpoint in the Breakpoints pane, so that
+  breakpoints can be disabled without removing them. Disabled breakpoints are
+  shown in a muted color and don't pause execution. This isn't yet available
+  for Dart web apps.
+  [#696](https://github.com/flutter/devtools/issues/696)
 
 ## Network profiler updates
 
