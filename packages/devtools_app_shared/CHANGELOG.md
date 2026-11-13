@@ -5,6 +5,10 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 -->
 ## 0.5.2-wip
 * Removed redundant argument values.
+* Detect Dart web apps by the presence of `dart:js_interop` in addition to
+  `dart:html`, so dart2wasm and `package:web` apps are recognized without
+  dropping support for older `dart:html` apps. Adds the
+  `dartJsInteropLibraryUri` and `dartWebLibraryUris` constants.
 * Fix `forEachIsolateHelper` to rethrow isolate callback exceptions directly
   using `Future.wait` instead of wrapping them in a `ParallelWaitError`.
 * Fix a `RangeError` thrown by `SplitPane` when the number of children
