@@ -68,6 +68,12 @@ TODO: Remove this section if there are not any updates.
   video tutorial link and the embedded DevTools actions moved into the
   More actions menu in the footer.
   [#10004](https://github.com/flutter/devtools/issues/10004)
+* Added copy buttons to the Headers and Cookies tabs of the request
+  inspector, and made cookie values and image metadata selectable.
+  [#10052](https://github.com/flutter/devtools/pull/10052)
+* Fixed the `headersSize` reported in HAR exports for requests with
+  multi-value headers.
+  [#10052](https://github.com/flutter/devtools/pull/10052)
 
 ## Logging updates
 
