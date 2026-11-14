@@ -269,6 +269,160 @@ void main() {
       expectWasmRendererKept();
     });
 
+    test(
+      'default keeps everything when builds is mutated through an alias',
+      () {
+        // The configuration object escapes through a plain read, so mutations
+        // through the alias are invisible to per-token checks and must be
+        // caught by the file-wide builds-access scan.
+        _writeFlutterBootstrap(
+          buildDir,
+          '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+          'const config = _flutter.buildConfig;\n'
+          'config.builds.push('
+          '{"compileTarget":"dart2js","renderer":"skwasm"});\n',
+        );
+
+        pruneDefault();
+
+        expectSymbolsRemoved();
+        expectWasmRendererKept();
+      },
+    );
+
+    test(
+      'default keeps everything when builds is replaced through an alias',
+      () {
+        _writeFlutterBootstrap(
+          buildDir,
+          '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+          'const config = _flutter.buildConfig;\n'
+          'config.builds = [{"compileTarget":"dart2js",'
+          '"renderer":"skwasm"}];\n',
+        );
+
+        pruneDefault();
+
+        expectSymbolsRemoved();
+        expectWasmRendererKept();
+      },
+    );
+
+    test('default keeps everything when builds is mutated through '
+        'destructuring', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        'const {builds} = _flutter.buildConfig;\n'
+        'builds.push({"compileTarget":"dart2js","renderer":"skwasm"});\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when builds is mutated through '
+        'Object.assign', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        'Object.assign(_flutter.buildConfig, {builds: [{'
+        '"compileTarget":"dart2js","renderer":"skwasm"}]});\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when builds is mutated through a '
+        'computed member', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        'const config = _flutter.buildConfig;\n'
+        'config["builds"].push('
+        '{"compileTarget":"dart2js","renderer":"skwasm"});\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when a builds entry is mutated in a '
+        'for-of loop', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        'const config = _flutter.buildConfig;\n'
+        'for (const build of config.builds) {\n'
+        '  build.renderer = "skwasm";\n'
+        '}\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when buildConfig is replaced through '
+        'Object.defineProperty', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        'Object.defineProperty(_flutter, "buildConfig", '
+        '{value: {builds: []}});\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when the config is reached through '
+        'globalThis', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        'globalThis._flutter.buildConfig = ${_buildsJson(_dart2jsCanvasKitBuilds)};\n'
+        'const config = globalThis._flutter.buildConfig;\n'
+        'config.builds.push('
+        '{"compileTarget":"dart2js","renderer":"skwasm"});\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default still prunes when the loader only reads builds in a '
+        'for-of loop', () {
+      // Mirrors the real flutter_bootstrap.js loader: it aliases the config
+      // and iterates `builds` read-only.
+      _writeFlutterBootstrap(
+        buildDir,
+        'let i = _flutter.buildConfig;\n'
+        'for (const build of i.builds) {\n'
+        '  console.log(build.compileTarget, build.renderer);\n'
+        '}\n'
+        '_flutter.buildConfig = ${_buildsJson(_dart2jsCanvasKitBuilds)};\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererRemoved();
+      expectRuntimeAssetsKept();
+      expectOtherOutputIntact();
+    });
+
     test('reads a build config inlined in index.html', () {
       // Templates that use {{flutter_build_config}} inline the configuration
       // into index.html instead of referencing flutter_bootstrap.js.

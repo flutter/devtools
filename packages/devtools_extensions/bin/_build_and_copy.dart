@@ -198,7 +198,11 @@ class BuildExtensionCommand extends Command {
   ///   a root-level `.wasm` application artifact, so artifact presence alone
   ///   cannot prove the renderer is unreachable. When no readable
   ///   configuration is found, or any discovered configuration is dynamic,
-  ///   malformed, or mutates `builds`, the variants are kept.
+  ///   malformed, or could be mutated at runtime — through reassignment,
+  ///   `builds` access, aliases, destructuring, `Object.assign`/`Reflect`,
+  ///   computed keys, or dynamic execution — the variants are kept. The
+  ///   proof covers only the two inspected files; scripts loaded by the page
+  ///   from other files are outside its scope.
   /// * The entire `canvaskit/` directory is removed only when
   ///   [pruneLocalCanvasKit] is enabled. Whether a build loads CanvasKit
   ///   locally or from the CDN depends on runtime configuration that cannot
@@ -279,8 +283,14 @@ class BuildExtensionCommand extends Command {
     return foundConfig && !renderers.contains(_skwasmRendererName);
   }
 
+  // Matches `_flutter.buildConfig` and `window._flutter.buildConfig`,
+  // including optional-chaining (`?.`) and whitespace around the dots, and
+  // prefixed forms such as `globalThis._flutter.buildConfig` (the lookbehind
+  // only excludes identifier characters so that `foo._flutter.buildConfig`
+  // is still inspected — over-inclusion only ever keeps assets).
   static final _buildConfigToken = RegExp(
-    r'(?<![A-Za-z0-9_$.])(?:window\.)?_flutter\.buildConfig(?![A-Za-z0-9_$])',
+    r'(?<![A-Za-z0-9_$])(?:window\s*\.\s*)?_flutter\s*'
+    r'(?:\?\s*\.\s*|\.\s*)buildConfig(?![A-Za-z0-9_$])',
   );
 
   // Matches access to the `builds` property or any computed property access
@@ -290,23 +300,103 @@ class BuildExtensionCommand extends Command {
     r'^\s*(?:(?:\?\s*\.\s*|\.\s*)builds\b|(?:\?\.)?\s*\[)',
   );
 
+  // A comma directly after a non-assignment `_flutter.buildConfig` reference
+  // means the object escapes into an argument list or literal, where it could
+  // be mutated through an alias that the per-token checks cannot see.
+  static final _configEscapePattern = RegExp(r'^\s*,');
+
+  // Dynamic code execution cannot be analyzed statically.
+  static final _dynamicExecutionPattern = RegExp(
+    r'\beval\s*\(|new\s+Function\s*\(|\bFunction\s*\(\s*[\x27\x22]|\bwith\s*\(|'
+    r'(?:setTimeout|setInterval|setImmediate)\s*\(\s*[\x27\x22]',
+  );
+
+  // Computed access to the configuration object itself, which bypasses the
+  // `_flutter.buildConfig` token entirely.
+  static final _computedConfigAccessPattern = RegExp(
+    r'(?:window|globalThis|self|top|parent|frames)\s*(?:\?\s*\.\s*)?'
+    r'\[\s*[\x27\x22]_flutter[\x27\x22]'
+    r'|(?:window\s*\.\s*)?_flutter\s*(?:\?\s*\.\s*)?\[\s*[\x27\x22](?:buildConfig|builds)[\x27\x22]',
+  );
+
+  // `Object.*`/`Reflect.*` calls that could replace or mutate `builds` or
+  // `buildConfig` through a string key. Read-only lookups such as
+  // `Object.keys` are intentionally not matched.
+  static final _objectBuildsMutationPattern = RegExp(
+    r'Object\s*\.\s*(?:assign|definePropert\w*|setPrototypeOf)\s*'
+    r'\([^;{}]{0,200}?[\x27\x22](?:builds|buildConfig)[\x27\x22]'
+    r'|Reflect\s*\.\s*(?:set|definePropert\w*|deleteProperty)\s*'
+    r'\([^;{}]{0,200}?[\x27\x22](?:builds|buildConfig)[\x27\x22]',
+  );
+
+  // Computed `builds` member access such as `config['builds']`,
+  // `config?.['builds']`, or a computed object key `{['builds']: ...}`.
+  static final _computedBuildsMemberPattern = RegExp(
+    r'[\w$\)\].?{]\s*\[\s*[\x27\x22]builds[\x27\x22]\s*\]',
+  );
+
+  // An unquoted or quoted `builds`/`buildConfig` key or shorthand property in
+  // an object literal, which could smuggle a replacement configuration into
+  // `Object.assign` or similar. The parsed `_flutter.buildConfig` literals
+  // are blanked out before this scan runs, so the emitted `"builds":[...]`
+  // JSON key does not match.
+  static final _buildsKeyPattern = RegExp(
+    r'[{,]\s*(?:builds|buildConfig)\s*[:,}]'
+    r'|[{,]\s*[\x27\x22](?:builds|buildConfig)[\x27\x22]\s*:',
+  );
+
+  // Destructuring that pulls `builds`/`buildConfig` out of an object, e.g.
+  // `const {builds} = config` or `const {builds: b} = config`.
+  static final _buildsDestructurePattern = RegExp(
+    r'\{[^{}]*\b(?:builds|buildConfig)\b[^{}]*\}\s*=(?![=>])',
+  );
+
+  // Any `.builds`/`?.builds` property access anywhere in the file.
+  static final _buildsPropertyAccessPattern = RegExp(
+    r'(?:\?\s*\.\s*|\.\s*)builds\b',
+  );
+
+  // The only provably safe `.builds` use: iterating the entries of a
+  // `for...of` loop over a declared loop variable. The loop body is verified
+  // separately to not mutate the entries.
+  static final _safeBuildsIterationPattern = RegExp(
+    r'for\s*(?:await\s+)?\(\s*(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s+of\s+'
+    r'[A-Za-z_$][\w$]*\s*(?:\?\s*\.\s*|\.\s*)builds\s*\)',
+  );
+
   /// Statically extracts the renderer values of every
   /// `_flutter.buildConfig = {...}` literal in [content].
   ///
   /// Returns null when the configuration cannot be proven safe: a
   /// non-literal assignment (for example `_flutter.buildConfig =
   /// runtimeConfig`), malformed JSON, a `builds` value that is not a list of
-  /// objects, or code that reads or mutates `builds` outside the emitted
-  /// literals. Plain reads of the configuration (as performed by the Flutter
-  /// loader itself) are ignored.
+  /// objects, code that reads or mutates `builds` outside the emitted
+  /// literals, or code that could mutate the configuration through an alias,
+  /// destructuring, `Object.assign`/`Reflect`, computed keys, or dynamic
+  /// execution. The configuration object can escape the literal through
+  /// plain reads (the Flutter loader itself does `let i =
+  /// _flutter.buildConfig`), so every `.builds` access in the file must be a
+  /// read-only `for...of` iteration whose body does not write to the loop
+  /// variable.
+  ///
+  /// This is necessarily a heuristic: code in other files loaded by the page,
+  /// `eval`-free computed keys (for example `config['bui' + 'lds']`), and
+  /// mutations performed inside functions receiving the configuration or a
+  /// `builds` entry through a parameter cannot be ruled out. Those cases are
+  /// the documented limit of the static proof; everything detectable in the
+  /// two inspected files fails closed and keeps the engine variants.
   static _BuildConfigInspection? _inspectBuildConfig(String content) {
     var foundConfig = false;
     final renderers = <String>{};
+    final literalRanges = <(int, int)>[];
     for (final match in _buildConfigToken.allMatches(content)) {
       final rest = content.substring(match.end);
       final assignment = RegExp(r'^\s*=(?![=>])').firstMatch(rest);
       if (assignment == null) {
-        if (_buildsAccessPattern.hasMatch(rest)) return null;
+        if (_buildsAccessPattern.hasMatch(rest) ||
+            _configEscapePattern.hasMatch(rest)) {
+          return null;
+        }
         continue;
       }
       final rhs = rest.substring(assignment.end);
@@ -331,8 +421,261 @@ class BuildExtensionCommand extends Command {
         final renderer = entry['renderer'];
         if (renderer is String) renderers.add(renderer);
       }
+      final literalStart = match.end + assignment.end + openBrace;
+      literalRanges.add((literalStart, literalStart + jsonText.length));
+    }
+    if (_hasUnsafeBuildsMutation(_blankRanges(content, literalRanges))) {
+      return null;
     }
     return (foundConfig: foundConfig, renderers: renderers);
+  }
+
+  /// Whether [content] (with the parsed config literals already blanked out)
+  /// contains code that could add, replace, or mutate `builds` entries or the
+  /// `buildConfig` object itself.
+  static bool _hasUnsafeBuildsMutation(String content) {
+    return _dynamicExecutionPattern.hasMatch(content) ||
+        _computedConfigAccessPattern.hasMatch(content) ||
+        _objectBuildsMutationPattern.hasMatch(content) ||
+        _computedBuildsMemberPattern.hasMatch(content) ||
+        _buildsKeyPattern.hasMatch(content) ||
+        _buildsDestructurePattern.hasMatch(content) ||
+        _hasUnsafeBuildsPropertyAccess(content);
+  }
+
+  /// Whether [content] contains a `.builds` access that is not a read-only
+  /// `for...of` iteration, or a `for...of` iteration whose body writes to the
+  /// loop variable (which would mutate a `builds` entry in place).
+  static bool _hasUnsafeBuildsPropertyAccess(String content) {
+    final safeSpans = <(int, int)>[];
+    for (final match in _safeBuildsIterationPattern.allMatches(content)) {
+      final buildsAccess = _buildsPropertyAccessPattern.firstMatch(
+        match.group(0)!,
+      );
+      if (buildsAccess != null) {
+        safeSpans.add((
+          match.start + buildsAccess.start,
+          match.start + buildsAccess.end,
+        ));
+      }
+      final body = _extractForBody(content, match.end);
+      final loopVariable = match.group(1);
+      if (body == null ||
+          loopVariable == null ||
+          _hasLoopVariableWrite(body, loopVariable)) {
+        return true;
+      }
+    }
+    for (final match in _buildsPropertyAccessPattern.allMatches(content)) {
+      final isSafeIteration = safeSpans.any(
+        (span) => match.start >= span.$1 && match.start < span.$2,
+      );
+      if (!isSafeIteration) return true;
+    }
+    return false;
+  }
+
+  /// Returns the brace-delimited body of the `for` statement whose header
+  /// ends at [headerEnd], or null when the body is not a brace block (which
+  /// cannot be verified and therefore fails closed).
+  static String? _extractForBody(String content, int headerEnd) {
+    var i = headerEnd;
+    while (i < content.length && _isJsWhitespace(content.codeUnitAt(i))) {
+      i++;
+    }
+    if (i >= content.length || content.codeUnitAt(i) != 0x7B) return null;
+    return _extractJsBraceBlock(content, i);
+  }
+
+  /// Whether [body] (the text inside a `for...of` loop over `builds`)
+  /// contains writes to [loopVariable]'s properties or index, or passes it
+  /// to APIs that could mutate it.
+  static bool _hasLoopVariableWrite(String body, String loopVariable) {
+    final variable = RegExp.escape(loopVariable);
+    final propertyWrite = RegExp(
+      '\\b$variable\\s*(?:\\?\\s*\\.\\s*|\\.\\s*)[A-Za-z_\$][\\w\$]*'
+      '(?:\\s*(?:\\?\\s*\\.\\s*|\\.\\s*)[A-Za-z_\$][\\w\$]*'
+      '|\\s*(?:\\?\\s*\\.)?\\[[^\\]\\n]{0,40}\\])*\\s*'
+      '(?:\\?\\s*)?(?:(?:&&|\\|\\||\\?\\?|<<|>>>?|[-+*/%&|^])?=(?![=>])'
+      '|\\+\\+|--)',
+    );
+    final indexAccess = RegExp('\\b$variable\\s*(?:\\?\\s*\\.\\s*)?\\[');
+    final objectMutation = RegExp(
+      '\\b(?:Object\\s*\\.\\s*(?:assign|definePropert\\w*)'
+      '|Reflect\\s*\\.\\s*\\w+|delete)\\b[^;{}\\n]{0,80}?\\b$variable\\b',
+    );
+    return propertyWrite.hasMatch(body) ||
+        indexAccess.hasMatch(body) ||
+        objectMutation.hasMatch(body);
+  }
+
+  /// Returns the contents of the brace-delimited block starting at the `{`
+  /// at [openBraceIndex], skipping over JavaScript strings, template
+  /// literals, comments, and regex literals. Returns null when the block
+  /// never closes.
+  static String? _extractJsBraceBlock(String content, int openBraceIndex) {
+    const normal = 0, singleQuote = 1, doubleQuote = 2, template = 3;
+    const lineComment = 4, blockComment = 5, regex = 6;
+    var state = normal;
+    var inRegexClass = false;
+    var escaped = false;
+    var depth = 0;
+    for (var i = openBraceIndex; i < content.length; i++) {
+      final unit = content.codeUnitAt(i);
+      final next = i + 1 < content.length ? content.codeUnitAt(i + 1) : -1;
+      switch (state) {
+        case normal:
+          if (unit == 0x7B) {
+            depth++;
+          } else if (unit == 0x7D) {
+            depth--;
+            if (depth == 0) {
+              return content.substring(openBraceIndex + 1, i);
+            }
+          } else if (unit == 0x27) {
+            state = singleQuote;
+          } else if (unit == 0x22) {
+            state = doubleQuote;
+          } else if (unit == 0x60) {
+            state = template;
+          } else if (unit == 0x2F && next == 0x2F) {
+            state = lineComment;
+            i++;
+          } else if (unit == 0x2F && next == 0x2A) {
+            state = blockComment;
+            i++;
+          } else if (unit == 0x2F && _regexAllowedBefore(content, i)) {
+            state = regex;
+            inRegexClass = false;
+          }
+        case singleQuote:
+          if (escaped) {
+            escaped = false;
+          } else if (unit == 0x5C) {
+            escaped = true;
+          } else if (unit == 0x27) {
+            state = normal;
+          }
+        case doubleQuote:
+          if (escaped) {
+            escaped = false;
+          } else if (unit == 0x5C) {
+            escaped = true;
+          } else if (unit == 0x22) {
+            state = normal;
+          }
+        case template:
+          if (escaped) {
+            escaped = false;
+          } else if (unit == 0x5C) {
+            escaped = true;
+          } else if (unit == 0x60) {
+            state = normal;
+          }
+        case lineComment:
+          if (unit == 0x0A) state = normal;
+        case blockComment:
+          if (unit == 0x2A && next == 0x2F) {
+            state = normal;
+            i++;
+          }
+        case regex:
+          if (escaped) {
+            escaped = false;
+          } else if (unit == 0x5C) {
+            escaped = true;
+          } else if (unit == 0x5B) {
+            inRegexClass = true;
+          } else if (unit == 0x5D) {
+            inRegexClass = false;
+          } else if (unit == 0x2F && !inRegexClass) {
+            state = normal;
+          } else if (unit == 0x0A) {
+            return null;
+          }
+      }
+    }
+    return null;
+  }
+
+  /// Whether a `/` at [slashIndex] is more likely to start a regex literal
+  /// than to be a division operator, based on the preceding token.
+  static bool _regexAllowedBefore(String content, int slashIndex) {
+    var i = slashIndex - 1;
+    while (i >= 0 && _isJsWhitespace(content.codeUnitAt(i))) {
+      i--;
+    }
+    if (i < 0) return true;
+    final unit = content.codeUnitAt(i);
+    // After an operand (identifier char, closing bracket, quote, digit) a
+    // slash is division; after an operator, keyword, or opening token it is
+    // a regex.
+    if ((unit >= 0x30 && unit <= 0x39) ||
+        (unit >= 0x41 && unit <= 0x5A) ||
+        (unit >= 0x61 && unit <= 0x7A) ||
+        unit == 0x5F ||
+        unit == 0x24 ||
+        unit == 0x29 ||
+        unit == 0x5D ||
+        unit == 0x22 ||
+        unit == 0x27 ||
+        unit == 0x60) {
+      // Identifier characters could still end in a keyword like `return`.
+      final wordEnd = i + 1;
+      var wordStart = i;
+      while (wordStart > 0 &&
+          _isJsIdentifierChar(content.codeUnitAt(wordStart - 1))) {
+        wordStart--;
+      }
+      if (wordStart < wordEnd) {
+        final word = content.substring(wordStart, wordEnd);
+        return const {
+          'return',
+          'typeof',
+          'case',
+          'in',
+          'of',
+          'new',
+          'delete',
+          'void',
+          'throw',
+          'else',
+          'do',
+          'yield',
+          'await',
+          'instanceof',
+        }.contains(word);
+      }
+      return false;
+    }
+    return true;
+  }
+
+  static bool _isJsWhitespace(int unit) =>
+      unit == 0x20 || unit == 0x09 || unit == 0x0A || unit == 0x0D;
+
+  static bool _isJsIdentifierChar(int unit) =>
+      (unit >= 0x30 && unit <= 0x39) ||
+      (unit >= 0x41 && unit <= 0x5A) ||
+      (unit >= 0x61 && unit <= 0x7A) ||
+      unit == 0x5F ||
+      unit == 0x24;
+
+  /// Returns [content] with each `(start, end)` range replaced by spaces so
+  /// that pattern scans do not match inside the already-parsed config
+  /// literals.
+  static String _blankRanges(String content, List<(int, int)> ranges) {
+    if (ranges.isEmpty) return content;
+    final buffer = StringBuffer();
+    var position = 0;
+    for (final (start, end) in ranges) {
+      buffer
+        ..write(content.substring(position, start))
+        ..write(' ' * (end - start));
+      position = end;
+    }
+    buffer.write(content.substring(position));
+    return buffer.toString();
   }
 
   /// Returns the balanced `{...}` literal starting at the `{` at [start] in
