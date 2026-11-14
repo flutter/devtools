@@ -318,21 +318,56 @@ class BuildExtensionCommand extends Command {
   );
 
   // Computed access to the configuration object itself, which bypasses the
-  // `_flutter.buildConfig` token entirely.
+  // `_flutter.buildConfig` token entirely: `globalThis['_flutter']`,
+  // `_flutter['buildConfig']`, or any other `_flutter[...]` member access
+  // (the key expression cannot be evaluated statically).
   static final _computedConfigAccessPattern = RegExp(
-    r'(?:window|globalThis|self|top|parent|frames)\s*(?:\?\s*\.\s*)?'
+    r'(?:window|globalThis|global|self|top|parent|frames)\s*(?:\?\s*\.\s*)?'
     r'\[\s*[\x27\x22]_flutter[\x27\x22]'
-    r'|(?:window\s*\.\s*)?_flutter\s*(?:\?\s*\.\s*)?\[\s*[\x27\x22](?:buildConfig|builds)[\x27\x22]',
+    r'|(?:window\s*\.\s*)?_flutter\s*(?:\?\s*\.\s*)?\[',
   );
 
-  // `Object.*`/`Reflect.*` calls that could replace or mutate `builds` or
-  // `buildConfig` through a string key. Read-only lookups such as
-  // `Object.keys` are intentionally not matched.
+  // `Object.*`/`Reflect.*` calls that could replace or mutate `builds`,
+  // `buildConfig`, or a builds entry's `renderer` through a string key.
+  // Read-only lookups such as `Object.keys` are intentionally not matched.
   static final _objectBuildsMutationPattern = RegExp(
     r'Object\s*\.\s*(?:assign|definePropert\w*|setPrototypeOf)\s*'
-    r'\([^;{}]{0,200}?[\x27\x22](?:builds|buildConfig)[\x27\x22]'
+    r'\([^;{}]{0,200}?[\x27\x22](?:builds|buildConfig|renderer)[\x27\x22]'
     r'|Reflect\s*\.\s*(?:set|definePropert\w*|deleteProperty)\s*'
-    r'\([^;{}]{0,200}?[\x27\x22](?:builds|buildConfig)[\x27\x22]',
+    r'\([^;{}]{0,200}?[\x27\x22](?:builds|buildConfig|renderer)[\x27\x22]',
+  );
+
+  // A quoted `builds`/`buildConfig`/`renderer` key string anywhere in the
+  // file, which could smuggle a watched property through a variable
+  // (`const k = 'builds'; config[k].push(...)`) or computed access that the
+  // key-position patterns cannot see. The parsed `_flutter.buildConfig`
+  // literals are blanked out before this scan runs.
+  static final _watchedKeyStringPattern = RegExp(
+    r'[\x27\x22](?:builds|buildConfig|renderer)[\x27\x22]',
+  );
+
+  // A write to a `renderer` property, e.g. `entry.renderer = 'skwasm'` or
+  // `Object.prototype.renderer = 'skwasm'` (prototype pollution makes every
+  // builds entry appear to use the skwasm renderer). Reads such as
+  // `build.renderer` in the loader's `for...of` loop do not match.
+  static final _rendererWritePattern = RegExp(
+    r'(?:\?\s*\.\s*|\.\s*)renderer\s*'
+    r'(?:\s*(?:\?\s*\.\s*)?\[[^\]\n]{0,40}\]\s*)?'
+    r'(?:(?:&&|\|\||\?\?|<<|>>>?|[-+*/%&|^])?=(?![=>])|\+\+|--)',
+  );
+
+  // An explicit `_flutter.loader.load({...})` invocation whose options
+  // object is inspected for `config`/`renderer`/`builds` overrides below.
+  // Custom bootstrap code can pass runtime-derived configuration that
+  // selects a different renderer than the static `builds` entries declare.
+  static final _loaderLoadCallPattern = RegExp(
+    r'_flutter\s*\.\s*loader\s*\.\s*load\s*\(\s*\{',
+  );
+
+  // Keys inside a `load({...})` options object that can override the
+  // renderer or build selection at runtime.
+  static final _loaderOverrideKeyPattern = RegExp(
+    r'(?:^|[{,])\s*[\x27\x22]?(?:config|renderer|builds|buildConfig)[\x27\x22]?\s*:',
   );
 
   // Computed `builds` member access such as `config['builds']`,
@@ -341,14 +376,15 @@ class BuildExtensionCommand extends Command {
     r'[\w$\)\].?{]\s*\[\s*[\x27\x22]builds[\x27\x22]\s*\]',
   );
 
-  // An unquoted or quoted `builds`/`buildConfig` key or shorthand property in
-  // an object literal, which could smuggle a replacement configuration into
-  // `Object.assign` or similar. The parsed `_flutter.buildConfig` literals
+  // An unquoted or quoted `builds`/`buildConfig`/`renderer` key or shorthand
+  // property in an object literal, which could smuggle a replacement
+  // configuration or renderer override into `Object.assign`, a `load()`
+  // options object, or similar. The parsed `_flutter.buildConfig` literals
   // are blanked out before this scan runs, so the emitted `"builds":[...]`
   // JSON key does not match.
   static final _buildsKeyPattern = RegExp(
-    r'[{,]\s*(?:builds|buildConfig)\s*[:,}]'
-    r'|[{,]\s*[\x27\x22](?:builds|buildConfig)[\x27\x22]\s*:',
+    r'[{,]\s*(?:builds|buildConfig|renderer)\s*[:,}]'
+    r'|[{,]\s*[\x27\x22](?:builds|buildConfig|renderer)[\x27\x22]\s*:',
   );
 
   // Destructuring that pulls `builds`/`buildConfig` out of an object, e.g.
@@ -376,11 +412,14 @@ class BuildExtensionCommand extends Command {
   /// Returns null when the configuration cannot be proven safe: a
   /// non-literal assignment (for example `_flutter.buildConfig =
   /// runtimeConfig`), malformed JSON, a `builds` value that is not a list of
-  /// objects, code that reads or mutates `builds` outside the emitted
-  /// literals, or code that could mutate the configuration through an alias,
-  /// destructuring, `Object.assign`/`Reflect`, computed keys, or dynamic
-  /// execution. The configuration object can escape the literal through
-  /// plain reads (the Flutter loader itself does `let i =
+  /// objects, a `builds` entry with a present-but-non-string `renderer`,
+  /// code that reads or mutates `builds`/`renderer` outside the
+  /// emitted literals, an explicit `_flutter.loader.load({...})` call with
+  /// `config`/`renderer`/`builds` overrides, or code that could mutate the
+  /// configuration through an alias, destructuring, `Object.assign`/
+  /// `Reflect`, computed keys, quoted key strings, prototype pollution, or
+  /// dynamic execution. The configuration object can escape the literal
+  /// through plain reads (the Flutter loader itself does `let i =
   /// _flutter.buildConfig`), so every `.builds` access in the file must be a
   /// read-only `for...of` iteration whose body does not write to the loop
   /// variable.
@@ -424,8 +463,13 @@ class BuildExtensionCommand extends Command {
       foundConfig = true;
       for (final entry in builds) {
         if (entry is! Map) return null;
-        final renderer = entry['renderer'];
-        if (renderer is String) renderers.add(renderer);
+        if (entry.containsKey('renderer')) {
+          final renderer = entry['renderer'];
+          // A present-but-non-string renderer cannot be compared against the
+          // known renderer names, so the configuration is unproven.
+          if (renderer is! String) return null;
+          renderers.add(renderer.toLowerCase());
+        }
       }
       final literalStart = match.end + assignment.end + openBrace;
       literalRanges.add((literalStart, literalStart + jsonText.length));
@@ -444,9 +488,27 @@ class BuildExtensionCommand extends Command {
         _computedConfigAccessPattern.hasMatch(content) ||
         _objectBuildsMutationPattern.hasMatch(content) ||
         _computedBuildsMemberPattern.hasMatch(content) ||
+        _watchedKeyStringPattern.hasMatch(content) ||
+        _rendererWritePattern.hasMatch(content) ||
         _buildsKeyPattern.hasMatch(content) ||
         _buildsDestructurePattern.hasMatch(content) ||
+        _hasLoaderConfigOverride(content) ||
         _hasUnsafeBuildsPropertyAccess(content);
+  }
+
+  /// Whether [content] contains an explicit `_flutter.loader.load({...})`
+  /// call whose options object sets `config`, `renderer`, `builds`, or
+  /// `buildConfig` — a runtime override that can select engine resources
+  /// independently of the static `builds` entries.
+  static bool _hasLoaderConfigOverride(String content) {
+    for (final match in _loaderLoadCallPattern.allMatches(content)) {
+      // The match ends at the `{` opening the options object.
+      final options = _extractJsBraceBlock(content, match.end - 1);
+      if (options == null || _loaderOverrideKeyPattern.hasMatch(options)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// Whether [content] contains a `.builds` access that is not a read-only

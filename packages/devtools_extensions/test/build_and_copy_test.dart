@@ -444,6 +444,116 @@ void main() {
       expectWasmRendererKept();
     });
 
+    test('default keeps everything when the loader is invoked with a '
+        'config override', () {
+      // Custom bootstrap code (as shipped in devtools_app's own
+      // flutter_bootstrap.js) can pass runtime-derived configuration to
+      // `_flutter.loader.load`, which can select a different renderer than
+      // the static `builds` entries declare.
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        '_flutter.loader.load({\n'
+        '  serviceWorkerSettings: {serviceWorkerVersion: null},\n'
+        '  config: {renderer: "skwasm"},\n'
+        '});\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when a builds key is smuggled through '
+        'a variable', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        'const config = _flutter.buildConfig;\n'
+        'const key = "builds";\n'
+        'config[key].push('
+        '{"compileTarget":"dart2js","renderer":"skwasm"});\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when the config is reached through '
+        'computed global access', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        "global['_flutter'].buildConfig = runtimeConfig;\n",
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when buildConfig is assigned through '
+        'computed member access', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        "_flutter['build' + 'Config'] = runtimeConfig;\n",
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when the renderer property is polluted '
+        'on a prototype', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        'Object.prototype.renderer = "skwasm";\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when a builds entry has a non-string '
+        'renderer', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        _flutterBuildConfigScript(
+          '[{"compileTarget":"dart2js","renderer":123},{}]',
+        ),
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when a builds entry uses a non-lowercase '
+        'skwasm renderer', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        _flutterBuildConfigScript(
+          '[{"compileTarget":"dart2js","renderer":"SKWASM"},{}]',
+        ),
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
     test('default still prunes when buildConfig is only compared', () {
       _writeFlutterBootstrap(
         buildDir,
