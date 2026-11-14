@@ -300,10 +300,16 @@ class BuildExtensionCommand extends Command {
     r'^\s*(?:(?:\?\s*\.\s*|\.\s*)builds\b|(?:\?\.)?\s*\[)',
   );
 
-  // A comma directly after a non-assignment `_flutter.buildConfig` reference
-  // means the object escapes into an argument list or literal, where it could
-  // be mutated through an alias that the per-token checks cannot see.
-  static final _configEscapePattern = RegExp(r'^\s*,');
+  // A value-position continuation directly after a non-assignment
+  // `_flutter.buildConfig` reference — an argument or literal separator
+  // (`,`, `)`, `]`, `}`), a ternary/case colon, a logical or bitwise operator,
+  // or a `??` that is not optional chaining — means the object escapes into a
+  // context where it could be mutated through an alias that the per-token
+  // checks cannot see. Property reads (`.x`, `?.x`) and statement ends (`;`)
+  // are the only continuations that cannot leak the object itself.
+  static final _configEscapePattern = RegExp(
+    r'^\s*(?:[,\)\]}:&|]|\?(?!\s*\.))',
+  );
 
   // Dynamic code execution cannot be analyzed statically.
   static final _dynamicExecutionPattern = RegExp(

@@ -402,6 +402,65 @@ void main() {
       expectWasmRendererKept();
     });
 
+    test('default keeps everything when the config escapes into a call', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        'loadRuntimeConfig(_flutter.buildConfig);\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when the config is spread into an '
+        'object literal', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        'const copy = {..._flutter.buildConfig};\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default keeps everything when the config escapes through ??', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        'const cfg = _flutter.buildConfig ?? fallbackConfig;\n'
+        'cfg.builds.push('
+        '{"compileTarget":"dart2js","renderer":"skwasm"});\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererKept();
+    });
+
+    test('default still prunes when buildConfig is only compared', () {
+      _writeFlutterBootstrap(
+        buildDir,
+        '${_flutterBuildConfigScript(_dart2jsCanvasKitBuilds)}'
+        'if (_flutter.buildConfig === window.__expectedConfig) {\n'
+        '  console.log("same config");\n'
+        '}\n',
+      );
+
+      pruneDefault();
+
+      expectSymbolsRemoved();
+      expectWasmRendererRemoved();
+      expectRuntimeAssetsKept();
+      expectOtherOutputIntact();
+    });
+
     test('default still prunes when the loader only reads builds in a '
         'for-of loop', () {
       // Mirrors the real flutter_bootstrap.js loader: it aliases the config
