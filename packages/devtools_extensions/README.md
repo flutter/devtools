@@ -345,6 +345,29 @@ your extension and copy the output to the `extension/devtools` directory:
     dart run devtools_extensions build_and_copy --source=. --dest=../some_pkg/extension/devtools
     ```
 
+The `build_and_copy` command accepts a few optional flags:
+
+* `--tree-shake-icons` allows the compiler to tree-shake the icon fonts used by
+  the extension. This is disabled by default to preserve backwards compatibility
+  for extensions that create `IconData` dynamically. Passing it can shrink
+  `MaterialIcons-Regular.otf` by ~99%.
+* `--web-resources-cdn` (the default) loads web engine resources such as
+  CanvasKit from the Google CDN. Pass `--no-web-resources-cdn` to bundle the
+  resources the extension needs locally instead, for example for offline use.
+* `--prune-local-canvaskit` deletes the bundled `canvaskit/` directory from the
+  copied extension build output (~36 MB). Only use this when the app is known to
+  load **all** web engine resources from the CDN at runtime: the default
+  `flutter build web` configuration with no custom `flutter_bootstrap.js` or
+  `index.html` initialization and no runtime configuration that could select
+  local resources. It cannot be combined with `--no-web-resources-cdn`.
+
+  By default, `build_and_copy` already removes engine files that are provably
+  unreachable: `.js.symbols` debug files are always removed, and the
+  `skwasm*`/`wimp*` renderer variants are removed when every
+  `_flutter.buildConfig` in the build output selects no `skwasm` renderer.
+  The flag above goes further and removes the CanvasKit variants themselves,
+  which is only safe when the CDN is guaranteed to serve them.
+
 Then publish your package. When running `pub publish`, you will see a warning if you
 do not have the `config.yaml` file and a non-empty `build` directory as required.
 
