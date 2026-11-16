@@ -116,7 +116,7 @@ TODO: Remove this section if there are not any updates.
   [#10090](https://github.com/flutter/devtools/pull/10090)
 * Confined extension server package roots and options files to active workspace
   roots and currently served extensions.
-  [#TODO](https://github.com/flutter/devtools/pull/TODO)
+  [#10089](https://github.com/flutter/devtools/pull/10089)
 
 ## Advanced developer mode updates
 
