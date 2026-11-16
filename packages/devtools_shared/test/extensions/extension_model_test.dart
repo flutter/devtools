@@ -126,7 +126,36 @@ void main() {
         'detectedFromStaticContext': 'false',
       });
       expect(configWithDistinctPackage.packageName, 'foo');
-      expect(configWithDistinctPackage.identifier, 'foo_bar_1.0.0');
+      expect(configWithDistinctPackage.identifier, 'foo-bar_1.0.0');
+
+      final devicePreviewConfig = DevToolsExtensionConfig.parse({
+        'name': 'device_preview',
+        'packageName': 'device_preview',
+        'issueTracker': 'www.google.com',
+        'version': '1.0.0',
+        'materialIconCodePoint': 0xf012,
+        'extensionAssetsPath': '/absolute/path/to/device_preview/extension',
+        'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+        'isPubliclyHosted': 'false',
+        'detectedFromStaticContext': 'false',
+      });
+      final spoofedDeviceConfig = DevToolsExtensionConfig.parse({
+        'name': 'preview',
+        'packageName': 'device',
+        'issueTracker': 'www.google.com',
+        'version': '1.0.0',
+        'materialIconCodePoint': 0xf012,
+        'extensionAssetsPath': '/absolute/path/to/device/extension',
+        'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+        'isPubliclyHosted': 'false',
+        'detectedFromStaticContext': 'false',
+      });
+      expect(devicePreviewConfig.identifier, 'device_preview_1.0.0');
+      expect(spoofedDeviceConfig.identifier, 'device-preview_1.0.0');
+      expect(
+        spoofedDeviceConfig.identifier,
+        isNot(equals(devicePreviewConfig.identifier)),
+      );
     });
 
     group('parse throws when missing required field', () {
@@ -387,6 +416,70 @@ void main() {
           'detectedFromStaticContext': 'false',
         });
       }, throwsInvalidNameError());
+    });
+
+    test('parse throws for invalid version', () {
+      Matcher throwsInvalidVersionError() {
+        return throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'invalid version StateError',
+            startsWith(
+              'The "version" field in the extension config.yaml must be a '
+              'valid semantic version',
+            ),
+          ),
+        );
+      }
+
+      for (final invalidVersion in [
+        'bar_2.0.0',
+        '1.0.0_1',
+        '1.0',
+        'invalid',
+        '1.0.0/../../etc',
+        '1.0.0 beta',
+        '',
+      ]) {
+        expect(
+          () {
+            DevToolsExtensionConfig.parse({
+              'name': 'foo',
+              'packageName': 'foo',
+              'issueTracker': 'www.google.com',
+              'version': invalidVersion,
+              'materialIconCodePoint': 0xf012,
+              'extensionAssetsPath': '/absolute/path/to/foo/extension',
+              'devtoolsOptionsUri':
+                  'file:///path/to/package/devtools_options.yaml',
+              'isPubliclyHosted': 'false',
+              'detectedFromStaticContext': 'false',
+            });
+          },
+          throwsInvalidVersionError(),
+          reason: 'Expected version "$invalidVersion" to be rejected',
+        );
+      }
+
+      for (final validVersion in [
+        '1.0.0',
+        '0.0.1-dev.1',
+        '2.1.0+build.42',
+        '1.0.0-alpha.1+exp.sha.5114f85',
+      ]) {
+        final config = DevToolsExtensionConfig.parse({
+          'name': 'foo',
+          'packageName': 'foo',
+          'issueTracker': 'www.google.com',
+          'version': validVersion,
+          'materialIconCodePoint': 0xf012,
+          'extensionAssetsPath': '/absolute/path/to/foo/extension',
+          'devtoolsOptionsUri': 'file:///path/to/package/devtools_options.yaml',
+          'isPubliclyHosted': 'false',
+          'detectedFromStaticContext': 'false',
+        });
+        expect(config.version, validVersion);
+      }
     });
   });
 }

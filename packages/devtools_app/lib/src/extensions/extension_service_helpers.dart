@@ -62,29 +62,8 @@ DevToolsExtensionConfig takeLatestExtension(
   DevToolsExtensionConfig a,
   DevToolsExtensionConfig b,
 ) {
-  bool exceptionParsingA = false;
-  bool exceptionParsingB = false;
-  SemanticVersion? versionA;
-  SemanticVersion? versionB;
-  try {
-    versionA = SemanticVersion.parse(a.version);
-  } catch (_) {
-    exceptionParsingA = true;
-  }
-
-  try {
-    versionB = SemanticVersion.parse(b.version);
-  } catch (_) {
-    exceptionParsingB = true;
-  }
-
-  if (exceptionParsingA || exceptionParsingB) {
-    if (exceptionParsingA) {
-      return b;
-    }
-    return a;
-  }
-
-  final versionCompare = versionA!.compareTo(versionB!);
+  final versionA = SemanticVersion.parse(a.version);
+  final versionB = SemanticVersion.parse(b.version);
+  final versionCompare = versionA.compareTo(versionB);
   return versionCompare >= 0 ? a : b;
 }
