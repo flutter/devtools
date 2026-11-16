@@ -109,6 +109,7 @@ TODO: Remove this section if there are not any updates.
   extensions, rejected symlinked `devtools_options.yaml` files, and prevented
   creating missing parent directories.
   [#10088](https://github.com/flutter/devtools/pull/10088)
+- Validated DevTools extension version strings and prevented extension identifier collisions when serving extension assets. [#10090](https://github.com/flutter/devtools/pull/10090)
 
 ## Advanced developer mode updates
 
