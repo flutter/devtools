@@ -33,6 +33,8 @@ such as black or white, are now adjusted to remain legible.
   and `Sec-Fetch-Site` headers to protect against cross-site request forgery
   (CSRF), DNS rebinding, and cross-origin attacks.
   [#10082](https://github.com/flutter/devtools/pull/10082)
+* Restricted VM service connection URIs to allowed schemes and loopback hosts.
+  [#10091](https://github.com/flutter/devtools/pull/10091)
 
 ## Inspector updates
 
