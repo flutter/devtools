@@ -32,13 +32,12 @@ final _ipv4LoopbackRegex = RegExp(
   r'^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$',
 );
 
-/// Returns whether [host] is a loopback host (`localhost`, `::1`, `[::1]`, or
+/// Returns whether [host] is a loopback host (`localhost`, `::1`, or
 /// an IPv4 address in `127.0.0.0/8`).
 bool isLoopbackHost(String host) {
   final normalizedHost = host.toLowerCase();
   return normalizedHost == 'localhost' ||
       normalizedHost == '::1' ||
-      normalizedHost == '[::1]' ||
       _ipv4LoopbackRegex.hasMatch(normalizedHost);
 }
 
