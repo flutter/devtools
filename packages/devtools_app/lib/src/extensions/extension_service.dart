@@ -34,22 +34,21 @@ typedef DevToolsExtensionsGroup = ({
 
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {
-  ExtensionService({this.fixedAppRoot, this.ignoreServiceConnection = false});
+  ExtensionService({
+    this.fixedVmServiceUri,
+    this.ignoreServiceConnection = false,
+  });
 
-  /// The fixed (unchanging) root file:// URI for the application this
+  /// The fixed (unchanging) VM service URI for the application this
   /// [ExtensionService] will manage DevTools extensions for.
   ///
-  /// When null, [_appRoot] will be calculated from the
+  /// When null, the VM service URI will be retrieved from the
   /// `serviceConnection.serviceManager`'s currently connected app.
-  final Uri? fixedAppRoot;
+  final String? fixedVmServiceUri;
 
   /// Whether to ignore the VM service connection for the context of this
   /// service.
   final bool ignoreServiceConnection;
-
-  /// The root file:// URI for the Dart / Flutter application this
-  /// [ExtensionService] will manage DevTools extensions for.
-  Uri? _appRoot;
 
   /// A listenable for the current set of DevTools extensions.
   ///
@@ -134,8 +133,8 @@ class ExtensionService extends DisposableController
 
     // We only need to add VM service manager related listeners when we are
     // interacting with the currently connected app (i.e. when
-    // [fixedAppRootUri] is null).
-    if (fixedAppRoot == null && !ignoreServiceConnection) {
+    // [fixedVmServiceUri] is null).
+    if (fixedVmServiceUri == null && !ignoreServiceConnection) {
       addAutoDisposeListener(
         serviceConnection.serviceManager.connectedState,
         () async {
@@ -171,16 +170,14 @@ class ExtensionService extends DisposableController
     _log.fine('refreshing the ExtensionService');
     _reset();
 
-    _appRoot = null;
-    if (fixedAppRoot != null) {
-      _appRoot = fixedAppRoot;
+    String? vmServiceUri;
+    if (fixedVmServiceUri != null) {
+      vmServiceUri = fixedVmServiceUri;
     } else if (!ignoreServiceConnection &&
         serviceConnection.serviceManager.connectedState.value.connected &&
         serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
             null) {
-      _appRoot = await serviceConnection.serviceManager.connectedAppPackageRoot(
-        dtdManager,
-      );
+      vmServiceUri = serviceConnection.serviceManager.serviceUri;
     }
 
     // TODO(kenz): gracefully handle app connections / disconnects when there
@@ -188,7 +185,9 @@ class ExtensionService extends DisposableController
     // when connection states change or hot restarts occur.
 
     _refreshInProgress.value = true;
-    final allExtensions = await server.refreshAvailableExtensions(_appRoot);
+    final allExtensions = await server.refreshAvailableExtensions(
+      vmServiceUri: vmServiceUri,
+    );
     runtimeExtensions = allExtensions
         .where((e) => !e.detectedFromStaticContext)
         .toList();
@@ -336,7 +335,6 @@ class ExtensionService extends DisposableController
 
   void _reset() {
     _log.fine('resetting the ExtensionService');
-    _appRoot = null;
     runtimeExtensions.clear();
     staticExtensions.clear();
     _ignoredStaticExtensionsByHashCode.clear();

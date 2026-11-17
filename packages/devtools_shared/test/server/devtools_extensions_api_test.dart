@@ -33,7 +33,10 @@ void main() {
     testDtdConnection = await DartToolingDaemon.connect(dtd!.info!.localUri);
   });
 
+  const fakeRuntimeVmServiceUri = 'ws://127.0.0.1:8181/fake-runtime-app=/ws';
+
   tearDown(() async {
+    VmServiceHandler.clearPackageRootsForTesting();
     await testDtdConnection?.close();
     dtd?.process?.kill();
     await dtd?.process?.exitCode;
@@ -52,6 +55,10 @@ void main() {
       includeBadExtension: includeBadExtension,
       includeSpoofedExtension: includeSpoofedExtension,
     );
+    VmServiceHandler.setPackageRootForVmServiceForTesting(
+      fakeRuntimeVmServiceUri,
+      Uri.parse(extensionTestManager.runtimeAppRoot),
+    );
     await testDtdConnection!.setIDEWorkspaceRoots(dtd!.info!.secret!, [
       extensionTestManager.packagesRootUri,
     ]);
@@ -60,7 +67,7 @@ void main() {
   Future<Response> serveExtensions(
     ExtensionsManager manager, {
     bool includeRuntimeRoot = true,
-    String? packageRootUriOverride,
+    String? vmServiceUriOverride,
   }) async {
     final request = Request(
       'post',
@@ -69,9 +76,9 @@ void main() {
         host: 'localhost',
         path: ExtensionsApi.apiServeAvailableExtensions,
         queryParameters: {
-          ExtensionsApi.packageRootUriPropertyName:
-              packageRootUriOverride ??
-              (includeRuntimeRoot ? extensionTestManager.runtimeAppRoot : null),
+          ExtensionsApi.vmServiceUriPropertyName:
+              vmServiceUriOverride ??
+              (includeRuntimeRoot ? fakeRuntimeVmServiceUri : null),
         },
       ),
       headers: const {devToolsRequestHeader: '1'},
@@ -181,17 +188,28 @@ void main() {
     );
 
     test(
-      'rejects packageRootUri with non-empty host (Windows UNC path)',
+      'rejects non-loopback or invalid vmServiceUri and UNC packageRootUri',
       () async {
         await initializeTestDirectory();
-        const uncUri = 'file://remotehost/share/app';
-        final response = await serveExtensions(
-          extensionsManager,
-          packageRootUriOverride: uncUri,
-        );
-        expect(response.statusCode, HttpStatus.badRequest);
-        expect(extensionsManager.devtoolsExtensions, isEmpty);
+        for (final invalidVmServiceUri in [
+          'file://remotehost/share/app',
+          'file:///Users/me/app',
+          'ws://evil.host:8181/ws',
+          'not_a_uri',
+        ]) {
+          final response = await serveExtensions(
+            extensionsManager,
+            vmServiceUriOverride: invalidVmServiceUri,
+          );
+          expect(
+            response.statusCode,
+            HttpStatus.badRequest,
+            reason: 'Expected $invalidVmServiceUri to be rejected',
+          );
+          expect(extensionsManager.devtoolsExtensions, isEmpty);
+        }
 
+        const uncUri = 'file://remotehost/share/app';
         await expectLater(
           extensionsManager.serveAvailableExtensions(uncUri, <String>[], null),
           throwsArgumentError,

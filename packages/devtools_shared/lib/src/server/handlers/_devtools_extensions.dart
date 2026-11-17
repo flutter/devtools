@@ -13,7 +13,7 @@ extension _ExtensionsApiHandler on Never {
     DtdInfo? dtd,
   ) async {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
-      [ExtensionsApi.packageRootUriPropertyName],
+      const [ExtensionsApi.vmServiceUriPropertyName],
       queryParams: queryParams,
       api: api,
       requestName: ExtensionsApi.apiServeAvailableExtensions,
@@ -21,18 +21,38 @@ extension _ExtensionsApiHandler on Never {
     if (missingRequiredParams != null) return missingRequiredParams;
 
     final logs = <String>[];
-    final rootFileUriString =
-        queryParams[ExtensionsApi.packageRootUriPropertyName];
-    if (rootFileUriString != null && rootFileUriString.isNotEmpty) {
-      final rootFileUri = Uri.tryParse(rootFileUriString);
-      if (!rootFileUriString.startsWith('file://') ||
-          rootFileUri == null ||
-          rootFileUri.scheme != 'file' ||
-          rootFileUri.host.isNotEmpty) {
+    final vmServiceUriString =
+        queryParams[ExtensionsApi.vmServiceUriPropertyName];
+    String? rootFileUriString;
+    if (vmServiceUriString != null && vmServiceUriString.isNotEmpty) {
+      final vmServiceUri = normalizeVmServiceUri(vmServiceUriString);
+      if (vmServiceUri == null) {
         return api.badRequest(
-          'Invalid ${ExtensionsApi.packageRootUriPropertyName}: must be a '
-          'file:// URI with an empty host.',
+          'Cannot normalize VM service URI: $vmServiceUriString',
         );
+      }
+
+      DartToolingDaemon? dartToolingDaemon;
+      try {
+        final dtdUri = dtd?.localUri;
+        if (dtdUri != null) {
+          dartToolingDaemon = await DartToolingDaemon.connect(dtdUri);
+        }
+        final detectRootResponse =
+            await VmServiceHandler.detectRootPackageForVmService(
+              vmServiceUriAsString: vmServiceUriString,
+              vmServiceUri: vmServiceUri,
+              connected: true,
+              dtd: dartToolingDaemon,
+            );
+        if (!detectRootResponse.success) {
+          return api.serverError(detectRootResponse.message, logs);
+        }
+        rootFileUriString = detectRootResponse.uri?.toString();
+      } catch (e) {
+        return api.serverError('$e', logs);
+      } finally {
+        await dartToolingDaemon?.close();
       }
     }
     final result = <String, Object?>{};

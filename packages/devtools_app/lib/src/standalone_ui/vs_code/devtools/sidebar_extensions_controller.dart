@@ -141,9 +141,12 @@ class SidebarDevToolsExtensionsController extends DisposableController
   Future<void> _initExtensionsForDebugSessions() async {
     for (final debugSession in _debugSessions.values) {
       final fileUri = debugSession.projectRootFileUri;
-      if (fileUri != null && !_searchedProjectRoots.contains(fileUri)) {
+      final vmServiceUri = debugSession.vmServiceUri;
+      if (fileUri != null &&
+          vmServiceUri != null &&
+          !_searchedProjectRoots.contains(fileUri)) {
         _searchedProjectRoots.add(fileUri);
-        await _detectExtensions(fileUri);
+        await _detectExtensions(fileUri, vmServiceUri: vmServiceUri);
       }
     }
   }
@@ -162,14 +165,17 @@ class SidebarDevToolsExtensionsController extends DisposableController
   // the workspace or for a debug session changes. We will likely need some
   // watch event from the IDE or analysis server to signal when any
   // package_config.json file in the workspace changes.
-  Future<void> _detectExtensions(Uri? projectRootUri) async {
+  Future<void> _detectExtensions(
+    Uri? projectRootUri, {
+    String? vmServiceUri,
+  }) async {
     final extensionService = projectRootUri == null
         ?
           // A null [projectRootUri] indicates that this is an extensions lookup
           // for the entire workspace, not a debug session with a fixed root URI.
           ExtensionService(ignoreServiceConnection: true)
         : ExtensionService(
-            fixedAppRoot: projectRootUri,
+            fixedVmServiceUri: vmServiceUri,
             ignoreServiceConnection: true,
           );
     assert(

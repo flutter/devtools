@@ -18,6 +18,23 @@ extension VmServiceHandler on Never {
   /// never be used.
   static final _packageRootsForVmServiceConnections = <String, Uri>{};
 
+  /// Registers a cached [rootPackageUri] for [vmServiceUriAsString] in
+  /// [_packageRootsForVmServiceConnections] for testing.
+  @visibleForTesting
+  static void setPackageRootForVmServiceForTesting(
+    String vmServiceUriAsString,
+    Uri rootPackageUri,
+  ) {
+    _packageRootsForVmServiceConnections[vmServiceUriAsString] = rootPackageUri;
+  }
+
+  /// Clears all cached package roots in [_packageRootsForVmServiceConnections]
+  /// for testing.
+  @visibleForTesting
+  static void clearPackageRootsForTesting() {
+    _packageRootsForVmServiceConnections.clear();
+  }
+
   static Future<shelf.Response> handleNotifyForVmServiceConnection(
     ServerApi api,
     Map<String, String> queryParams,
@@ -110,13 +127,16 @@ extension VmServiceHandler on Never {
     required String vmServiceUriAsString,
     required Uri vmServiceUri,
     required bool connected,
-    required DartToolingDaemon dtd,
+    required DartToolingDaemon? dtd,
   }) async {
     final Uri rootPackageUri;
     if (connected) {
-      // TODO(kenz): should we first try to lookup the root from
-      // [_packageRootsForVmServiceConnections]? Could the root library of the
-      // main isolate change during the lifetime of a VM service instance?
+      final cachedRoot =
+          _packageRootsForVmServiceConnections[vmServiceUriAsString] ??
+          _packageRootsForVmServiceConnections[vmServiceUri.toString()];
+      if (cachedRoot != null) {
+        return (success: true, message: null, uri: cachedRoot);
+      }
 
       VmService? vmService;
       try {
@@ -139,6 +159,8 @@ extension VmServiceHandler on Never {
         rootPackageUri = Uri.parse(root);
         _packageRootsForVmServiceConnections[vmServiceUriAsString] =
             rootPackageUri;
+        _packageRootsForVmServiceConnections[vmServiceUri.toString()] =
+            rootPackageUri;
       } catch (e) {
         return (
           success: false,
@@ -151,7 +173,8 @@ extension VmServiceHandler on Never {
       }
     } else {
       final cachedRootForVmService =
-          _packageRootsForVmServiceConnections[vmServiceUriAsString];
+          _packageRootsForVmServiceConnections[vmServiceUriAsString] ??
+          _packageRootsForVmServiceConnections[vmServiceUri.toString()];
       if (cachedRootForVmService == null) {
         // If there is no root to remove, there is nothing for us to do.
         return (success: true, message: null, uri: null);
@@ -183,23 +206,90 @@ extension VmServiceHandler on Never {
 
 extension on VmService {
   Future<String?> rootPackageDirectoryForMainIsolate(
-    DartToolingDaemon dtd,
+    DartToolingDaemon? dtd,
   ) async {
-    final fileUriString = await _rootLibraryForMainIsolate;
-    return fileUriString != null
-        ? await packageRootFromFileUriString(fileUriString, dtd: dtd)
-        : null;
+    final mainIsolate = await _detectMainIsolate;
+    final rootLib = mainIsolate.rootLib;
+    final rootLibUri = rootLib?.uri;
+    if (rootLibUri == null) return null;
+
+    final fileUriString = (await lookupResolvedPackageUris(mainIsolate.id!, [
+      rootLibUri,
+    ])).uris?.first;
+    if (fileUriString == null) return null;
+
+    var packageRootUriString = await packageRootFromFileUriString(
+      fileUriString,
+      dtd: dtd,
+    );
+
+    // If a Dart library URI was returned, this may be a test target (i.e. a
+    // VM service connection spawned from `dart test` or `flutter test`).
+    if (packageRootUriString.endsWith('.dart') && rootLib?.id != null) {
+      packageRootUriString =
+          (await _lookupTestTargetPackageRoot(
+            isolateId: mainIsolate.id!,
+            rootLibraryId: rootLib!.id!,
+            dtd: dtd,
+          )) ??
+          packageRootUriString;
+    }
+
+    return packageRootUriString;
   }
 
-  Future<String?> get _rootLibraryForMainIsolate async {
-    final mainIsolate = await _detectMainIsolate;
-    final rootLib = mainIsolate.rootLib?.uri;
-    if (rootLib == null) return null;
+  Future<String?> _lookupTestTargetPackageRoot({
+    required String isolateId,
+    required String rootLibraryId,
+    required DartToolingDaemon? dtd,
+  }) async {
+    try {
+      final obj = await getObject(isolateId, rootLibraryId);
+      if (obj is! Library) return null;
 
-    final fileUriAsString = (await lookupResolvedPackageUris(mainIsolate.id!, [
-      rootLib,
-    ])).uris?.first;
-    return fileUriAsString;
+      try {
+        final evalResult = await evaluate(
+          isolateId,
+          rootLibraryId,
+          'packageConfigLocation',
+        );
+        if (evalResult is InstanceRef) {
+          final packageConfig = evalResult.valueAsString;
+          final packageConfigSuffix = p.posix.join(
+            '.dart_tool',
+            'package_config.json',
+          );
+          if (packageConfig != null &&
+              packageConfig.endsWith(packageConfigSuffix)) {
+            return packageConfig.substring(
+              0,
+              packageConfig.length - packageConfigSuffix.length - 1,
+            );
+          }
+        }
+      } catch (_) {
+        // Fall back to import prefix lookup if evaluation fails.
+      }
+
+      final testTargetUri = (obj.dependencies ?? <LibraryDependency>[])
+          .firstWhereOrNull((dep) => dep.prefix == 'test')
+          ?.target
+          ?.uri;
+      if (testTargetUri != null) {
+        final resolvedTargetUri = (await lookupResolvedPackageUris(isolateId, [
+          testTargetUri,
+        ])).uris?.first;
+        if (resolvedTargetUri != null) {
+          return await packageRootFromFileUriString(
+            resolvedTargetUri,
+            dtd: dtd,
+          );
+        }
+      }
+    } catch (_) {
+      // Fail gracefully if the test target lookup fails.
+    }
+    return null;
   }
 
   /// Uses heuristics to detect the main isolate.

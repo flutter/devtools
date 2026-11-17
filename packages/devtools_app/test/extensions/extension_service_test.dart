@@ -36,7 +36,7 @@ void main() {
 
     test('initialize when connected', () async {
       final service = ExtensionService(
-        fixedAppRoot: Uri.parse('file:///Users/me/package_root_1'),
+        fixedVmServiceUri: 'ws://127.0.0.1:8181/ws',
       );
       expect(service.availableExtensions, isEmpty);
       expect(service.staticExtensions, isEmpty);
@@ -87,7 +87,7 @@ void main() {
 
     test('setExtensionEnabledState', () async {
       final service = ExtensionService(
-        fixedAppRoot: Uri.parse('file:///Users/me/package_root_1'),
+        fixedVmServiceUri: 'ws://127.0.0.1:8181/ws',
       );
       await service.initialize();
       expect(service.staticExtensions.length, 4);
