@@ -32,8 +32,8 @@ final _log = Logger('view_metrics_override_client');
 ///
 /// The registry lives in the main isolate of the app, so a hot restart empties
 /// it. When the extension is registered again on the new isolate, this client
-/// reads the registry and restores the metrics that it overrides, with the
-/// values that they had before the restart.
+/// reads the registry and restores the [restoredMetrics] that the app had
+/// before the restart, with the values that they had, whoever set them.
 ///
 /// See `FoundationServiceExtensions.viewMetricsOverride` in
 /// `package:flutter/foundation.dart` for the protocol.
@@ -43,8 +43,10 @@ class ViewMetricsOverrideClient extends DisposableController
   ///
   /// The client listens to the extension events of the VM service connection
   /// that is open when it is created, so, like a screen controller, it has to
-  /// be created again for a new connection.
-  ViewMetricsOverrideClient() {
+  /// be created again for a new connection. Create only one client per
+  /// connection: like two tools, two clients can overwrite each other's
+  /// changes.
+  ViewMetricsOverrideClient({required this.restoredMetrics}) {
     final serviceManager = serviceConnection.serviceManager;
     addAutoDisposeListener(
       serviceManager.isolateManager.mainIsolate,
@@ -58,6 +60,12 @@ class ViewMetricsOverrideClient extends DisposableController
     }
     _onMainIsolateChanged();
   }
+
+  /// The metrics that this client sets again after a hot restart if the app
+  /// had them, whoever set them, such as the metrics that a page shows.
+  ///
+  /// The other metrics are left to the tools that set them.
+  final Set<String> restoredMetrics;
 
   /// The ID of the implicit view, as a key of the registry.
   static const _implicitViewId = '0';
@@ -78,10 +86,6 @@ class ViewMetricsOverrideClient extends DisposableController
 
   /// Whether the current main isolate has reported its overrides.
   bool _overridesReported = false;
-
-  /// The metrics that this client overrides, which it sets again after a hot
-  /// restart if the app still overrides them.
-  final _ownMetrics = <String>{};
 
   /// The metrics to set again once the extension is registered on the new
   /// main isolate, with the values that they had on the previous one.
@@ -121,8 +125,7 @@ class ViewMetricsOverrideClient extends DisposableController
   ///
   /// The keys and values of [metrics] have the format of [overrides]. A null
   /// value stops overriding the metric, so that the app uses the value that
-  /// the platform reports, and this client no longer sets it again after a hot
-  /// restart.
+  /// the platform reports.
   ///
   /// A change that another client makes after this client last heard from the
   /// app, and before the app receives this call, is lost.
@@ -132,13 +135,6 @@ class ViewMetricsOverrideClient extends DisposableController
   /// returned future completes once the app answers, or once a hot restart
   /// interrupts the call.
   Future<void> updateOverrides(Map<String, Object?> metrics) => _queue(() {
-    for (final MapEntry(key: metric, :value) in metrics.entries) {
-      if (value == null) {
-        _ownMetrics.remove(metric);
-      } else {
-        _ownMetrics.add(metric);
-      }
-    }
     // These values replace the ones that a pending restore would set.
     _metricsToRestore = Map<String, Object?>.of(_metricsToRestore)
       ..removeWhere((metric, _) => metrics.containsKey(metric));
@@ -275,11 +271,11 @@ class ViewMetricsOverrideClient extends DisposableController
     _nextMainIsolateChange.complete();
     _nextMainIsolateChange = Completer<void>();
     // A hot restart replaces the main isolate, and the registry with it, so
-    // remember the values of the metrics that this client overrides.
+    // remember the values that the app had for the metrics to restore.
     final viewOverrides = _overrides.value;
     _metricsToRestore = {
       ..._metricsToRestore,
-      for (final metric in _ownMetrics)
+      for (final metric in restoredMetrics)
         if (viewOverrides.containsKey(metric)) metric: viewOverrides[metric],
     };
     _overridesReported = false;

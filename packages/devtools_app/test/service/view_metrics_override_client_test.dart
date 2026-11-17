@@ -54,11 +54,19 @@ void main() {
       'Failed',
     );
 
+    // The metrics that the accessibility page shows.
+    const restoredMetrics = <String>{
+      'textScaling',
+      'boldText',
+      'accessibleNavigation',
+      'highContrast',
+    };
+
     setUp(() {
       connection = ViewMetricsOverrideServiceConnection();
       extension = connection.extension;
       setGlobal(ServiceConnectionManager, connection);
-      client = ViewMetricsOverrideClient();
+      client = ViewMetricsOverrideClient(restoredMetrics: restoredMetrics);
     });
 
     tearDown(() {
@@ -85,11 +93,11 @@ void main() {
       expect(client.overrides.value, {'platformBrightness': 'dark'});
 
       // A client created once the extension is registered reads it too.
-      final otherClient = ViewMetricsOverrideClient();
-      addTearDown(otherClient.dispose);
+      client.dispose();
+      client = ViewMetricsOverrideClient(restoredMetrics: restoredMetrics);
       await pumpEventQueue();
-      expect(otherClient.available.value, isTrue);
-      expect(otherClient.overrides.value, {'platformBrightness': 'dark'});
+      expect(client.available.value, isTrue);
+      expect(client.overrides.value, {'platformBrightness': 'dark'});
     });
 
     test('updateOverrides keeps the metrics that other clients set', () async {
@@ -242,17 +250,18 @@ void main() {
       });
     });
 
-    test('sets its metrics again after a hot restart', () async {
+    test('restores the metrics that the app had after a hot restart', () async {
       extension.registry['0'] = {'platformBrightness': 'dark'};
       await extension.register();
       await pumpEventQueue();
       await client.updateOverrides({
         'boldText': true,
+        'highContrast': true,
         'textScaling': [
           [1, 2],
         ],
       });
-      await client.updateOverrides({'textScaling': null});
+      await client.updateOverrides({'highContrast': null, 'textScaling': null});
       extension.callFromOtherClient({
         'viewId': '0',
         'overrides': jsonEncode({
@@ -273,14 +282,34 @@ void main() {
         <String, String>{},
         {'viewId': '0', 'overrides': anything},
       ]);
-      // Only the metrics that this client overrides and that the app still had
-      // are set again, with the values that they had. The metrics of other
-      // clients, including the ones that this client stopped overriding, are
-      // theirs to set again.
+      // The metrics in restoredMetrics that the app had are set again, with
+      // the values that the app had, whoever set them. The other metrics are
+      // left to the tools that set them.
+      const restored = {
+        'boldText': false,
+        'textScaling': [
+          [1, 3],
+        ],
+      };
+      expect(extension.registry, {'0': restored});
+      expect(client.overrides.value, restored);
+    });
+
+    test('a new client restores the metrics that the app had', () async {
+      await extension.register();
+      await pumpEventQueue();
+      await client.updateOverrides({'boldText': true});
+
+      // DevTools reloads, which creates a new client.
+      client.dispose();
+      client = ViewMetricsOverrideClient(restoredMetrics: restoredMetrics);
+      await pumpEventQueue();
+      await extension.hotRestart();
+      await pumpEventQueue();
+
       expect(extension.registry, {
-        '0': {'boldText': false},
+        '0': {'boldText': true},
       });
-      expect(client.overrides.value, {'boldText': false});
     });
 
     test(
@@ -289,21 +318,22 @@ void main() {
         await extension.register();
         await pumpEventQueue();
         await client.updateOverrides({'boldText': true});
-        extension.calls.clear();
+        extension.holdCalls = true;
         await extension.hotRestart();
-        // Let the new isolate be read, and the restore be sent.
-        for (var i = 0; i < 5 && extension.calls.length < 2; i++) {
-          await Future<void>.delayed(Duration.zero);
-        }
-        expect(extension.calls, [
-          <String, String>{},
-          {'viewId': '0', 'overrides': '{"boldText":true}'},
-        ]);
-        expect(extension.registry, isEmpty);
+        await pumpEventQueue();
+        // Answer the read of the new isolate, and hold the restore.
+        extension.releaseCall();
+        await pumpEventQueue();
+        expect(extension.heldCallCount, 1);
+        expect(extension.calls.last, {
+          'viewId': '0',
+          'overrides': '{"boldText":true}',
+        });
 
         // The app restarts again before it answers the restore, while a write
         // waits for the restore in the queue.
         unawaited(client.updateOverrides({'highContrast': true}));
+        extension.holdCalls = false;
         extension.calls.clear();
         await extension.hotRestart();
         await pumpEventQueue();
@@ -322,49 +352,48 @@ void main() {
     test('completes a call that a hot restart interrupts', () async {
       await extension.register();
       await pumpEventQueue();
+      extension.holdCalls = true;
       var completed = false;
       unawaited(
         client
             .updateOverrides({'boldText': true})
             .then((_) => completed = true),
       );
-      // The app restarts after the write is sent, and before it answers.
-      for (var i = 0; i < 5 && extension.calls.length < 2; i++) {
-        await Future<void>.microtask(() {});
-      }
-      expect(extension.calls, hasLength(2));
+      await pumpEventQueue();
+      expect(extension.heldCallCount, 1);
+      expect(completed, isFalse);
+
+      // The app restarts before it answers the write.
       await extension.hotRestart();
       await pumpEventQueue();
 
       expect(completed, isTrue);
     });
 
-    test(
-      'sets its metrics again after the next hot restart if a restore fails',
-      () async {
-        await extension.register();
-        await pumpEventQueue();
-        await client.updateOverrides({'boldText': true, 'highContrast': true});
-        extension.calls.clear();
-        await extension.hotRestart();
-        // Let the new isolate be read, and fail the restore that follows.
-        for (var i = 0; i < 5 && extension.calls.length < 2; i++) {
-          await Future<void>.delayed(Duration.zero);
-        }
-        expect(extension.calls, hasLength(2));
-        extension.nextCallError = callFailure;
-        await pumpEventQueue();
-        expect(extension.registry, isEmpty);
+    test('tries a failed restore again after the next hot restart', () async {
+      await extension.register();
+      await pumpEventQueue();
+      await client.updateOverrides({'boldText': true, 'highContrast': true});
+      extension.holdCalls = true;
+      await extension.hotRestart();
+      await pumpEventQueue();
+      // Answer the read of the new isolate, and fail the restore.
+      extension.releaseCall();
+      await pumpEventQueue();
+      expect(extension.calls.last, {'viewId': '0', 'overrides': anything});
+      extension.releaseCall(error: callFailure);
+      await pumpEventQueue();
+      expect(extension.registry, isEmpty);
 
-        // A metric that this client stops overriding is not restored anymore.
-        await client.updateOverrides({'highContrast': null});
-        await extension.hotRestart();
-        await pumpEventQueue();
+      // A metric that this client stops overriding is not restored anymore.
+      extension.holdCalls = false;
+      await client.updateOverrides({'highContrast': null});
+      await extension.hotRestart();
+      await pumpEventQueue();
 
-        expect(extension.registry, {
-          '0': {'boldText': true},
-        });
-      },
-    );
+      expect(extension.registry, {
+        '0': {'boldText': true},
+      });
+    });
   });
 }
