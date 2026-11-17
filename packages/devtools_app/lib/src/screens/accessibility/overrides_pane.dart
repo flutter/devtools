@@ -179,15 +179,20 @@ class _TextScaleOverrideState extends State<_TextScaleOverride> {
   static const _minTextScale = 0.5;
   static const _maxTextScale = 3.0;
   static const _textScaleDivisions = 25;
+  static const _systemTextScaleLabel = 'System Default';
+  static const _resetTooltip = 'Use the system text scale';
 
   /// The text scale that the slider shows while the user moves it, until the
   /// app answers the override.
   double? _sliderTextScale;
 
   Future<void> _overrideTextScale(double textScale) async {
-    await widget.controller.setTextScale(textScale);
-    if (mounted && _sliderTextScale == textScale) {
-      setState(() => _sliderTextScale = null);
+    try {
+      await widget.controller.setTextScale(textScale);
+    } finally {
+      if (mounted && _sliderTextScale == textScale) {
+        setState(() => _sliderTextScale = null);
+      }
     }
   }
 
@@ -214,7 +219,7 @@ class _TextScaleOverrideState extends State<_TextScaleOverride> {
                   // 1.0 is an override too, so the text scale of the platform
                   // is shown by name rather than as a factor.
                   textScale == null
-                      ? 'System default'
+                      ? _systemTextScaleLabel
                       : '${textScale.toStringAsFixed(2)}x',
                   style: theme.boldTextStyle,
                 ),
@@ -222,7 +227,7 @@ class _TextScaleOverrideState extends State<_TextScaleOverride> {
                 DevToolsButton.iconOnly(
                   icon: Icons.restart_alt,
                   outlined: false,
-                  tooltip: 'Use the system text scale',
+                  tooltip: _resetTooltip,
                   onPressed: enabled && appTextScale != null
                       ? () => unawaited(widget.controller.setTextScale(null))
                       : null,

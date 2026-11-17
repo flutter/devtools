@@ -151,15 +151,22 @@ class AccessibilityController extends DevToolsScreenController
   /// Overrides the text scale factor of the app with [factor], or stops
   /// overriding it if [factor] is null.
   ///
-  /// The override scales every font size linearly by [factor].
-  Future<void> setTextScale(double? factor) => _setOverride(
-    _textScalingMetric,
-    factor == null
-        ? null
-        : [
-            [1, factor],
-          ],
-  );
+  /// The override scales every font size linearly by [factor], which has to be
+  /// finite and not negative.
+  Future<void> setTextScale(double? factor) {
+    assert(
+      factor == null || (factor.isFinite && factor >= 0),
+      'The text scale factor must be finite and not negative, got $factor.',
+    );
+    return _setOverride(
+      _textScalingMetric,
+      factor == null
+          ? null
+          : [
+              [1, factor],
+            ],
+    );
+  }
 
   /// Makes the app use bold text, or the bold text setting of the platform
   /// again if [enabled] is false.
@@ -188,9 +195,12 @@ class AccessibilityController extends DevToolsScreenController
   /// Returns the ratio of the first point of [textScaling], which is the text
   /// scale factor that the app reports, or null if text scale is not
   /// overridden.
+  ///
+  /// Like the app, this only accepts a first point whose unscaled size is
+  /// greater than zero, and whose scaled size is not negative.
   static double? _textScaleFactor(Object? textScaling) {
     if (textScaling case [[final num unscaled, final num scaled], ...]) {
-      return scaled / unscaled;
+      if (unscaled > 0 && scaled >= 0) return scaled / unscaled;
     }
     return null;
   }

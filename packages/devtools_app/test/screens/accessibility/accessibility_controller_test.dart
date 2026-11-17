@@ -567,6 +567,23 @@ void main() {
         });
         expect(controller.textScale.value, 1.0);
       });
+
+      test('ignore a text scaling table without a valid first point', () async {
+        fakeExtension.registry['0'] = {
+          'textScaling': [
+            [0, 16],
+          ],
+        };
+        await fakeExtension.register();
+        await pumpEventQueue();
+
+        expect(controller.textScale.value, isNull);
+      });
+
+      test('setTextScale asserts a finite, non-negative factor', () {
+        expect(() => controller.setTextScale(double.nan), throwsAssertionError);
+        expect(() => controller.setTextScale(-1.0), throwsAssertionError);
+      });
     });
   });
 }

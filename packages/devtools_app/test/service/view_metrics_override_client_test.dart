@@ -48,6 +48,12 @@ void main() {
       );
     }
 
+    final callFailure = RPCError(
+      viewMetricsOverride,
+      RPCErrorKind.kServerError.code,
+      'Failed',
+    );
+
     setUp(() {
       connection = ViewMetricsOverrideServiceConnection();
       extension = connection.extension;
@@ -173,16 +179,11 @@ void main() {
     });
 
     test('failed calls keep the overrides and the restore', () async {
-      final error = RPCError(
-        viewMetricsOverride,
-        RPCErrorKind.kServerError.code,
-        'Failed',
-      );
       await extension.register();
       await pumpEventQueue();
       await client.updateOverrides({'boldText': true});
 
-      extension.nextCallError = error;
+      extension.nextCallError = callFailure;
       await client.updateOverrides({'highContrast': true});
       expect(extension.registry, {
         '0': {'boldText': true},
@@ -190,13 +191,31 @@ void main() {
       expect(client.overrides.value, {'boldText': true});
 
       // The first read after the hot restart fails, so the restore reads again.
-      extension.nextCallError = error;
+      extension.nextCallError = callFailure;
       await extension.hotRestart();
       await pumpEventQueue();
       expect(extension.registry, {
         '0': {'boldText': true},
       });
     });
+
+    test(
+      'a write reads the registry first if the app has not reported it',
+      () async {
+        extension.registry['0'] = {'platformBrightness': 'dark'};
+        // The read that follows the registration fails.
+        extension.nextCallError = callFailure;
+        await extension.register();
+        await pumpEventQueue();
+        expect(client.overrides.value, isEmpty);
+
+        await client.updateOverrides({'boldText': true});
+
+        expect(extension.registry, {
+          '0': {'platformBrightness': 'dark', 'boldText': true},
+        });
+      },
+    );
 
     test('writes run one at a time, each from the reply before it', () async {
       await extension.register();
@@ -208,6 +227,19 @@ void main() {
       ]);
 
       expect(extension.registry['0'], {'boldText': true, 'highContrast': true});
+    });
+
+    test('a call that throws does not stop the calls after it', () async {
+      await extension.register();
+      await pumpEventQueue();
+
+      // JSON cannot encode NaN, so this write throws before it is sent.
+      await client.updateOverrides({'textScaling': double.nan});
+      await client.updateOverrides({'boldText': true});
+
+      expect(extension.registry, {
+        '0': {'boldText': true},
+      });
     });
 
     test('sets its metrics again after a hot restart', () async {
@@ -226,6 +258,9 @@ void main() {
         'overrides': jsonEncode({
           'platformBrightness': 'dark',
           'boldText': false,
+          'textScaling': [
+            [1, 3],
+          ],
         }),
       });
       await pumpEventQueue();
@@ -238,9 +273,10 @@ void main() {
         <String, String>{},
         {'viewId': '0', 'overrides': anything},
       ]);
-      // Only the metrics that this client set and that the app still had are
-      // set again, with the values that they had. The metrics of other clients
-      // are theirs to set again.
+      // Only the metrics that this client overrides and that the app still had
+      // are set again, with the values that they had. The metrics of other
+      // clients, including the ones that this client stopped overriding, are
+      // theirs to set again.
       expect(extension.registry, {
         '0': {'boldText': false},
       });
@@ -277,6 +313,54 @@ void main() {
           <String, String>{},
           {'viewId': '0', 'overrides': '{"boldText":true}'},
         ]);
+        expect(extension.registry, {
+          '0': {'boldText': true},
+        });
+      },
+    );
+
+    test('completes a call that a hot restart interrupts', () async {
+      await extension.register();
+      await pumpEventQueue();
+      var completed = false;
+      unawaited(
+        client
+            .updateOverrides({'boldText': true})
+            .then((_) => completed = true),
+      );
+      // The app restarts after the write is sent, and before it answers.
+      for (var i = 0; i < 5 && extension.calls.length < 2; i++) {
+        await Future<void>.microtask(() {});
+      }
+      expect(extension.calls, hasLength(2));
+      await extension.hotRestart();
+      await pumpEventQueue();
+
+      expect(completed, isTrue);
+    });
+
+    test(
+      'sets its metrics again after the next hot restart if a restore fails',
+      () async {
+        await extension.register();
+        await pumpEventQueue();
+        await client.updateOverrides({'boldText': true, 'highContrast': true});
+        extension.calls.clear();
+        await extension.hotRestart();
+        // Let the new isolate be read, and fail the restore that follows.
+        for (var i = 0; i < 5 && extension.calls.length < 2; i++) {
+          await Future<void>.delayed(Duration.zero);
+        }
+        expect(extension.calls, hasLength(2));
+        extension.nextCallError = callFailure;
+        await pumpEventQueue();
+        expect(extension.registry, isEmpty);
+
+        // A metric that this client stops overriding is not restored anymore.
+        await client.updateOverrides({'highContrast': null});
+        await extension.hotRestart();
+        await pumpEventQueue();
+
         expect(extension.registry, {
           '0': {'boldText': true},
         });

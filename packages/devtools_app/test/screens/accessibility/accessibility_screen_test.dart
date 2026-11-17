@@ -33,6 +33,18 @@ void main() {
       );
     }
 
+    /// Finds [text] in the row of the text scale override, because the
+    /// brightness dropdown can show the same text.
+    Finder findInTextScaleRow(String text) {
+      return find.descendant(
+        of: find.ancestor(
+          of: find.text('Text Scale'),
+          matching: find.byType(Row),
+        ),
+        matching: find.text(text),
+      );
+    }
+
     setUp(() {
       final fakeServiceConnection = ViewMetricsOverrideServiceConnection();
       fakeExtension = fakeServiceConnection.extension;
@@ -114,7 +126,7 @@ void main() {
         // Text Scale controls
         expect(find.text('Text Scale'), findsOneWidget);
         expect(find.text('Scale the system font size.'), findsOneWidget);
-        expect(find.text('System default'), findsOneWidget);
+        expect(findInTextScaleRow('System Default'), findsOneWidget);
         expect(find.byType(Slider), findsOneWidget);
 
         // Switches
@@ -267,7 +279,7 @@ void main() {
 
         await tester.tap(find.byIcon(Icons.restart_alt));
         await tester.pumpAndSettle();
-        expect(find.text('System default'), findsOneWidget);
+        expect(findInTextScaleRow('System Default'), findsOneWidget);
         expect(fakeExtension.registry, isEmpty);
       },
     );
