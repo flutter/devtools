@@ -588,7 +588,7 @@ class FlutterFramesChartItem extends StatelessWidget {
                 child: Column(
                   children: [
                     // Dummy child so that the InkWell does not take up the entire column.
-                    const Expanded(child: SizedBox()),
+                    const Spacer(),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [ui, raster],

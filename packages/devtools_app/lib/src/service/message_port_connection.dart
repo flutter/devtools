@@ -30,3 +30,13 @@ const messagePortUriScheme = 'messageport';
 
 /// Whether [uri] has the [messagePortUriScheme].
 bool isMessagePortUri(Uri uri) => uri.isScheme(messagePortUriScheme);
+
+/// Parses [value] as a [messagePortUriScheme] URI, or returns `null` if [value]
+/// does not use the [messagePortUriScheme] or has an empty target origin path.
+Uri? parseMessagePortUri(String value) {
+  final uri = Uri.tryParse(value.trim())?.removeFragment();
+  if (uri == null || !isMessagePortUri(uri) || uri.path.isEmpty) {
+    return null;
+  }
+  return uri;
+}

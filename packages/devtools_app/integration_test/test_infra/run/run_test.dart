@@ -58,6 +58,7 @@ Future<void> runFlutterIntegrationTest(
           testApp = TestFlutterApp(
             appPath: testFileArgs.appPath,
             appDevice: testRunnerArgs.testAppDevice,
+            headless: testRunnerArgs.headless,
           );
         }
         debugLog('starting the test app');

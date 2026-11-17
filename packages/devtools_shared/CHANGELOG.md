@@ -7,10 +7,34 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 
 * Track providing package name for DevTools extensions to isolate extension enablement,
   deduplication, and asset loading.
+* Validated `DevToolsExtensionConfig.version` as a semantic version and used a collision-free
+  delimiter in `DevToolsExtensionConfig.identifier`.
 * Validate `rootPath`, `buildVariant`, `configuration`, and `target` parameters in
   `DeeplinkManager`.
 * Add `UniversalLinkSettings.fromErrorJson`, `UniversalLinkSettings.error`, and
   `UniversalLinkSettings.error` getter to surface iOS universal link settings errors.
+* `DeeplinkManager` now builds the environment for the `flutter` processes it
+  starts with `getEnvironment()` from `package:unified_analytics`, so
+  `DASH__TOOL` passes on this process's root tool. A known `ide` still overrides
+  it, and an unknown `ide` now falls back to the inherited root tool instead of
+  always using `devtools`. When `suppressAnalytics` is false, an inherited
+  `DASH__SUPPRESS_ANALYTICS=true` is now passed on instead of being reset to
+  `false`.
+* Require `package:unified_analytics` `^8.4.0`.
+* Require `POST` (with `devToolsRequestHeader`) or `OPTIONS` CORS preflight
+  requests and validate `Host`, `Origin`, and `Sec-Fetch-Site` headers in
+  `ServerApi.handle` to prevent cross-site and DNS rebinding requests, with
+  optional `disableOriginCheck` and `allowedOrigins` parameters.
+* Add `devToolsRequestHeader` constant (`X-DevTools-Request`).
+* Reject `file://` URIs with non-empty hosts (UNC paths), absolute, missing, or
+  non-directory `buildLocation` paths, and symbolic links resolving outside the
+  extension build or package root in `ExtensionsManager`, and store valid
+  resolved paths in `DevToolsExtensionConfig.extensionAssetsPath`.
+* Confine `devtoolsOptionsUri` in `api/extensionEnabledState` to currently
+  served extensions, reject symlinked `devtools_options.yaml` files, and prevent
+  recursive directory creation when looking up `devtools_options.yaml`.
+* Restrict `normalizeVmServiceUri` to allowed VM service schemes (`http`, `https`,
+    `ws`, `wss`, `sse`, `sses`) and loopback hosts (`localhost`, `127.0.0.0/8`, `::1`).
 
 # 14.0.0
 

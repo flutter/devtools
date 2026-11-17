@@ -5,6 +5,14 @@
 /// All server APIs prefix:
 const apiPrefix = 'api/';
 
+/// Custom HTTP header included on DevTools server API requests to force a CORS
+/// preflight `OPTIONS` request in browsers and prevent simple cross-origin
+/// `POST` requests.
+///
+/// This value must match the header sent in
+/// `packages/devtools_app/web/flutter_bootstrap.js`.
+const devToolsRequestHeader = 'X-DevTools-Request';
+
 /// Key used for any request or response to specify a value argument.
 const apiParameterValueKey = 'value';
 

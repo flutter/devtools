@@ -81,7 +81,10 @@ class OfflinePerformanceData {
   /// tab they exported from.
   final int selectedTab;
 
-  bool get isEmpty => perfettoTraceBinary == null;
+  bool get isEmpty =>
+      (perfettoTraceBinary == null || perfettoTraceBinary!.isEmpty) &&
+      frames.isEmpty &&
+      rebuildCountModel == null;
 
   /// The JSON serializable form of this data.
   ///

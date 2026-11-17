@@ -1270,7 +1270,7 @@ class InspectorObjectGroupManager {
   void _setNextNull() {
     _next = null;
     if (_pendingNext != null) {
-      _pendingNext!.complete(null);
+      _pendingNext!.complete();
       _pendingNext = null;
     }
   }
