@@ -23,17 +23,13 @@ extension _ExtensionsApiHandler on Never {
     final logs = <String>[];
     final rootFileUriString =
         queryParams[ExtensionsApi.packageRootUriPropertyName];
-    if (rootFileUriString != null && rootFileUriString.isNotEmpty) {
-      final rootFileUri = Uri.tryParse(rootFileUriString);
-      if (!rootFileUriString.startsWith('file://') ||
-          rootFileUri == null ||
-          rootFileUri.scheme != 'file' ||
-          rootFileUri.host.isNotEmpty) {
-        return api.badRequest(
-          'Invalid ${ExtensionsApi.packageRootUriPropertyName}: must be a '
-          'file:// URI with an empty host.',
-        );
-      }
+    if (rootFileUriString != null &&
+        rootFileUriString.isNotEmpty &&
+        !isValidLocalFileUriString(rootFileUriString)) {
+      return api.badRequest(
+        'Invalid ${ExtensionsApi.packageRootUriPropertyName}: must be a '
+        'file:// URI with an empty host.',
+      );
     }
     final result = <String, Object?>{};
 
@@ -103,9 +99,7 @@ extension _ExtensionsApiHandler on Never {
     // separators, so the check holds for Windows file URIs as well. Requiring
     // an empty host rejects UNC paths (e.g. `file://server/share/...`) and
     // keeps `toFilePath()` from throwing on a non-local authority.
-    final isFileUri =
-        devtoolsOptionsFileUri.scheme == 'file' &&
-        devtoolsOptionsFileUri.host.isEmpty;
+    final isFileUri = isValidLocalFileUri(devtoolsOptionsFileUri);
     final fileName = isFileUri
         ? p.basename(devtoolsOptionsFileUri.toFilePath())
         : '';
@@ -130,7 +124,7 @@ extension _ExtensionsApiHandler on Never {
         extensionsManager.devtoolsExtensions.any((ext) {
           final uri = Uri.tryParse(ext.devtoolsOptionsUri);
           if (uri == null) return false;
-          if (uri.scheme == 'file' && uri.host.isEmpty) {
+          if (isValidLocalFileUri(uri)) {
             // If these are equal, there's no need to call
             // _resolveOptionsFilePath again, so return early.
             final servedPathUnresolved = p.normalize(uri.toFilePath());
@@ -181,7 +175,7 @@ extension _ExtensionsApiHandler on Never {
   /// [uri] is not a local `file:` URI, its parent directory does not exist, or
   /// the `devtools_options.yaml` file itself is a symbolic link.
   static String? _resolveOptionsFilePath(Uri uri) {
-    if (uri.scheme != 'file' || uri.host.isNotEmpty) return null;
+    if (!isValidLocalFileUri(uri)) return null;
 
     final filePath = p.normalize(uri.toFilePath());
     if (p.basename(filePath) != devtoolsOptionsFileName) return null;

@@ -100,3 +100,53 @@ String _assertUriFormatAndReturn(String uriString) {
   );
   return uriString;
 }
+
+/// Returns whether [uri] is a valid local `file:` URI without an authority,
+/// query, fragment, or dot path traversal segments.
+///
+/// Requiring an empty authority rejects remote hosts, ports, user info, and
+/// Windows UNC paths (e.g. `file://server/share/...`). Requiring an absolute
+/// path without query or fragment components ensures [Uri.toFilePath] will not
+/// throw an [UnsupportedError].
+bool isValidLocalFileUri(Uri uri) {
+  if (uri.scheme != 'file' ||
+      uri.authority.isNotEmpty ||
+      !uri.hasAbsolutePath ||
+      uri.hasQuery ||
+      uri.hasFragment) {
+    return false;
+  }
+  for (final segment in uri.pathSegments) {
+    for (final part in segment.split(r'\')) {
+      if (part == '.' || part == '..') return false;
+    }
+  }
+  return true;
+}
+
+/// Returns whether [uriString] is a `file://` URI string without dot-segment
+/// traversal (`.` or `..`) that parses as a valid local `file:` URI via
+/// [isValidLocalFileUri].
+bool isValidLocalFileUriString(String? uriString) {
+  if (uriString == null || !uriString.startsWith(_fileUriPrefix)) {
+    return false;
+  }
+  final uri = Uri.tryParse(uriString);
+  if (uri == null || !isValidLocalFileUri(uri)) {
+    return false;
+  }
+  // Check raw segments before `Uri.tryParse` normalizes `.` and `..` away.
+  final rawPath = uriString.substring(_fileUriPrefix.length);
+  for (final segment in rawPath.split('/')) {
+    if (segment == '.' || segment == '..') return false;
+    try {
+      final decoded = Uri.decodeComponent(segment);
+      for (final part in decoded.split(r'\')) {
+        if (part == '.' || part == '..') return false;
+      }
+    } on ArgumentError {
+      return false;
+    }
+  }
+  return true;
+}

@@ -155,6 +155,86 @@ void main() {
       );
     }
   });
+
+  group('isValidLocalFileUri and isValidLocalFileUriString', () {
+    test('accepts valid POSIX and Windows local file URIs', () {
+      for (final valid in const [
+        'file:///Users/me/my_app',
+        'file:///Users/me/my%20app/.dart_tool',
+        'file:///app',
+        'file:///C:/my_app',
+        'file:///C:/Users/me/my_app',
+      ]) {
+        expect(isValidLocalFileUriString(valid), isTrue, reason: valid);
+        expect(isValidLocalFileUri(Uri.parse(valid)), isTrue, reason: valid);
+      }
+    });
+
+    test('rejects null, empty, relative, and non-file:// URI strings', () {
+      expect(isValidLocalFileUriString(null), isFalse);
+      expect(isValidLocalFileUriString(''), isFalse);
+      expect(isValidLocalFileUriString('/Users/me/my_app'), isFalse);
+      expect(isValidLocalFileUriString('file:/Users/me/my_app'), isFalse);
+      expect(isValidLocalFileUriString('file:relative/my_app'), isFalse);
+      expect(isValidLocalFileUriString('http://localhost/my_app'), isFalse);
+      expect(isValidLocalFileUriString('package:my_app/main.dart'), isFalse);
+      expect(isValidLocalFileUri(Uri.parse('/Users/me/my_app')), isFalse);
+      expect(isValidLocalFileUri(Uri.parse('relative/my_app')), isFalse);
+      expect(
+        isValidLocalFileUri(Uri.parse('http://localhost/my_app')),
+        isFalse,
+      );
+      expect(
+        isValidLocalFileUri(Uri.parse('package:my_app/main.dart')),
+        isFalse,
+      );
+    });
+
+    test('rejects non-empty authorities, queries, and fragments', () {
+      for (final invalid in const [
+        'file://server/share/my_app',
+        'file://localhost/Users/me/my_app',
+        'file://127.0.0.1/Users/me/my_app',
+        'file://user@/Users/me/my_app',
+        'file:///Users/me/my_app?query=1',
+        'file:///Users/me/my_app#fragment',
+      ]) {
+        expect(isValidLocalFileUriString(invalid), isFalse, reason: invalid);
+        expect(
+          isValidLocalFileUri(Uri.parse(invalid)),
+          isFalse,
+          reason: invalid,
+        );
+      }
+    });
+
+    test('rejects dot and dot-dot path traversal segments', () {
+      for (final traversalString in const [
+        'file:///Users/me/../other_app',
+        'file:///Users/me/./my_app',
+        'file:///Users/me/%2e%2e/other_app',
+        'file:///Users/me/%2e/my_app',
+        'file:///C:/Users/me%5c..%5cother_app',
+      ]) {
+        expect(
+          isValidLocalFileUriString(traversalString),
+          isFalse,
+          reason: traversalString,
+        );
+      }
+
+      for (final traversalUri in [
+        Uri.parse('file:///C:/Users/me%5c..%5cother_app'),
+        Uri.parse('file:///C:/Users/me%5c.%5cmy_app'),
+      ]) {
+        expect(
+          isValidLocalFileUri(traversalUri),
+          isFalse,
+          reason: '$traversalUri',
+        );
+      }
+    });
+  });
 }
 
 /// Sets up the directory structure for each test.
