@@ -9,6 +9,8 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:dtd/dtd.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/development_helpers.dart';
 import '../../shared/framework/screen.dart';
 import '../../shared/globals.dart';
@@ -31,8 +33,19 @@ class DTDToolsScreen extends Screen {
   Widget buildScreenBody(BuildContext _) => const DTDToolsScreenBody();
 }
 
-class DTDToolsScreenBody extends StatelessWidget {
+class DTDToolsScreenBody extends StatefulWidget {
   const DTDToolsScreenBody({super.key});
+
+  @override
+  State<DTDToolsScreenBody> createState() => _DTDToolsScreenBodyState();
+}
+
+class _DTDToolsScreenBodyState extends State<DTDToolsScreenBody> {
+  @override
+  void initState() {
+    super.initState();
+    ga.screen(gac.dtdTools);
+  }
 
   @override
   Widget build(BuildContext context) {

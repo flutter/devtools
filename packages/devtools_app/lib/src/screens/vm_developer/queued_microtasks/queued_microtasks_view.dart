@@ -161,7 +161,11 @@ class MicrotaskStackTraceView extends StatelessWidget {
 
 class QueuedMicrotasksView extends VMDeveloperView {
   const QueuedMicrotasksView()
-    : super(title: 'Queued Microtasks', icon: Icons.pending_actions);
+    : super(
+        title: 'Queued Microtasks',
+        icon: Icons.pending_actions,
+        gaEvent: gac.VmToolsEvents.queuedMicrotasks,
+      );
 
   @override
   bool get showIsolateSelector => true;
