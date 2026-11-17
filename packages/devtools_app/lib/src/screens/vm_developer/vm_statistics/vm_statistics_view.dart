@@ -18,7 +18,12 @@ import '../vm_service_private_extensions.dart';
 import 'vm_statistics_view_controller.dart';
 
 class VMStatisticsView extends VMDeveloperView {
-  const VMStatisticsView() : super(title: 'VM', icon: Icons.devices);
+  const VMStatisticsView()
+    : super(
+        title: 'VM',
+        icon: Icons.devices,
+        gaEvent: gac.VmToolsEvents.vmStatistics,
+      );
 
   @override
   Widget build(BuildContext context) => VMStatisticsViewBody();

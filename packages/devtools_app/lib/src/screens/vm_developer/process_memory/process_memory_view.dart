@@ -31,7 +31,11 @@ import 'process_memory_view_controller.dart';
 /// process's memory footprint.
 class VMProcessMemoryView extends VMDeveloperView {
   const VMProcessMemoryView()
-    : super(title: 'Process Memory', icon: Icons.memory);
+    : super(
+        title: 'Process Memory',
+        icon: Icons.memory,
+        gaEvent: gac.VmToolsEvents.processMemory,
+      );
 
   @override
   Widget build(BuildContext context) => VMProcessMemoryViewBody();
