@@ -11,6 +11,59 @@ import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('utils', () {
+    group('textSpansFromAnsi', () {
+      const defaultStyle = TextStyle();
+      // Theme surface colors used by DevTools (see devtools_app_shared).
+      const lightSurface = Color(0xFFFFFFFF);
+      const darkSurface = Color(0xFF1B1B1F);
+
+      test('adjusts low-contrast foreground for a light background', () {
+        // ansi-white is invisible on a white background.
+        final spans = textSpansFromAnsi(
+          '\x1B[37mhello\x1B[0m',
+          defaultStyle,
+          backgroundColor: lightSurface,
+        );
+        final color = spans.single.style!.color!;
+        expect(color.computeLuminance(), lessThan(1.0));
+        expect(color, isNot(equals(lightSurface)));
+      });
+
+      test('adjusts low-contrast foreground for a dark background', () {
+        // ansi-black is invisible on a near-black background.
+        final spans = textSpansFromAnsi(
+          '\x1B[30mhello\x1B[0m',
+          defaultStyle,
+          backgroundColor: darkSurface,
+        );
+        final color = spans.single.style!.color!;
+        expect(
+          color.computeLuminance(),
+          greaterThan(darkSurface.computeLuminance()),
+        );
+      });
+
+      test('keeps colors that already have sufficient contrast', () {
+        // ansi-red is legible on a white background and must be unchanged.
+        final spans = textSpansFromAnsi(
+          '\x1B[31mhello\x1B[0m',
+          defaultStyle,
+          backgroundColor: lightSurface,
+        );
+        expect(
+          spans.single.style!.color,
+          equals(const Color.fromRGBO(187, 0, 0, 1)),
+        );
+      });
+
+      test('does not adjust colors when no background is provided', () {
+        final spans = textSpansFromAnsi('\x1B[37mhello\x1B[0m', defaultStyle);
+        expect(
+          spans.single.style!.color,
+          equals(const Color.fromRGBO(255, 255, 255, 1)),
+        );
+      });
+    });
     group('durationText', () {
       test('infers unit based on duration', () {
         expect(durationText(Duration.zero), equals('0 μs'));
@@ -641,6 +694,67 @@ void main() {
     });
     test(' joins multiple items', () {
       expect(['A', 'B', 'C'].joinWithTrailing(':'), equals('A:B:C:'));
+    });
+  });
+
+  group('textSpansFromAnsi', () {
+    const defaultStyle = TextStyle(
+      color: Color(0xFFEEEEEE),
+      fontSize: 12.0,
+      fontFamily: 'Roboto',
+    );
+
+    test('uses the default style for text without ANSI codes', () {
+      final spans = textSpansFromAnsi('plain', defaultStyle);
+      expect(spans, hasLength(1));
+      expect(spans.first.text, 'plain');
+      expect(spans.first.style, defaultStyle);
+    });
+
+    test('keeps the default color when only a background is set', () {
+      final spans = textSpansFromAnsi('\x1B[45mmagenta\x1B[0m', defaultStyle);
+      expect(spans, hasLength(1));
+      final style = spans.first.style!;
+      expect(style.color, defaultStyle.color);
+      expect(style.backgroundColor, const Color.fromRGBO(187, 0, 187, 1));
+      expect(style.fontSize, defaultStyle.fontSize);
+      expect(style.fontFamily, defaultStyle.fontFamily);
+    });
+
+    test('keeps the default font when a foreground is set', () {
+      final spans = textSpansFromAnsi(
+        'plain \x1B[32mgreen\x1B[0m plain',
+        defaultStyle,
+      );
+      expect(spans.map((s) => s.text), ['plain ', 'green', ' plain']);
+      final style = spans[1].style!;
+      expect(style.color, const Color.fromRGBO(0, 187, 0, 1));
+      expect(style.fontSize, defaultStyle.fontSize);
+      expect(style.fontFamily, defaultStyle.fontFamily);
+    });
+
+    test('applies bold', () {
+      final spans = textSpansFromAnsi('\x1B[1mbold\x1B[0m', defaultStyle);
+      final style = spans.first.style!;
+      expect(style.fontWeight, FontWeight.bold);
+      expect(style.color, defaultStyle.color);
+      expect(style.fontSize, defaultStyle.fontSize);
+    });
+  });
+
+  group('stripAnsi', () {
+    test('returns text without ANSI codes unchanged', () {
+      expect(stripAnsi('plain text'), 'plain text');
+    });
+
+    test('removes ANSI codes', () {
+      expect(
+        stripAnsi(
+          '\x1B[45mComponentChanged<AuthState>\x1B[0m '
+          '\x1B[38;5;208morange\x1B[0m \x1B[1;32mbold green\x1B[0m',
+        ),
+        'ComponentChanged<AuthState> orange bold green',
+      );
     });
   });
 

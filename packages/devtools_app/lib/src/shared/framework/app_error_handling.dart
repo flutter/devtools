@@ -33,7 +33,7 @@ void setupErrorHandling(Future Function() appStartCallback) {
       () async {
         WidgetsFlutterBinding.ensureInitialized();
 
-        await _initializeSourceMapping();
+        await _fetchSourceMapping();
 
         final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
@@ -109,18 +109,18 @@ Future<void> _reportError(
   }
 }
 
-// ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9910) seems like a bug.
-SingleMapping? _cachedJsSourceMapping;
-
-// ignore: unused-code, TODO(https://github.com/flutter/devtools/issues/9910) seems like a bug.
-SingleMapping? _cachedWasmSourceMapping;
+Future<SingleMapping?>? _cachedSourceMapping;
 
 Future<SingleMapping?> _fetchSourceMapping() async {
-  final cachedSourceMapping = kIsWasm
-      ? _cachedWasmSourceMapping
-      : _cachedJsSourceMapping;
-
-  return cachedSourceMapping ?? (await _initializeSourceMapping());
+  final pendingSourceMapping = _cachedSourceMapping ??=
+      _initializeSourceMapping();
+  final sourceMapping = await pendingSourceMapping;
+  // Retry failed loads without letting an older failure clear a newer request.
+  if (sourceMapping == null &&
+      identical(_cachedSourceMapping, pendingSourceMapping)) {
+    _cachedSourceMapping = null;
+  }
+  return sourceMapping;
 }
 
 Future<SingleMapping?> _initializeSourceMapping() async {

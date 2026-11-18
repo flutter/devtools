@@ -156,5 +156,85 @@ extensions:
   - provider: true
   - custom_pkg: true''');
     });
+
+    test(
+      'returns error and does not create parent directory when parent does not '
+      'exist',
+      () {
+        final missingParentDir = Directory(
+          p.join(tmpDir.path, 'missing_parent'),
+        );
+        final missingOptionsUri = Uri.file(
+          p.join(missingParentDir.path, devtoolsOptionsFileName),
+        );
+        expect(
+          options.lookupExtensionEnabledState(
+            devtoolsOptionsUri: missingOptionsUri,
+            extensionName: 'foo',
+          ),
+          ExtensionEnabledState.error,
+        );
+        expect(
+          options.setExtensionEnabledState(
+            devtoolsOptionsUri: missingOptionsUri,
+            extensionName: 'foo',
+            enable: true,
+          ),
+          ExtensionEnabledState.error,
+        );
+        expect(missingParentDir.existsSync(), isFalse);
+      },
+    );
+
+    test(
+      'returns error and does not follow symlink when devtools_options.yaml is '
+      'a symlink',
+      () {
+        final targetFile = File(p.join(tmpDir.path, 'target.yaml'))
+          ..writeAsStringSync('original');
+        final brokenTargetFile = File(
+          p.join(tmpDir.path, 'broken_target.yaml'),
+        );
+
+        final optionsLink = Link(p.join(tmpDir.path, devtoolsOptionsFileName))
+          ..createSync(targetFile.path);
+        expect(
+          options.lookupExtensionEnabledState(
+            devtoolsOptionsUri: optionsUri,
+            extensionName: 'foo',
+          ),
+          ExtensionEnabledState.error,
+        );
+        expect(
+          options.setExtensionEnabledState(
+            devtoolsOptionsUri: optionsUri,
+            extensionName: 'foo',
+            enable: true,
+          ),
+          ExtensionEnabledState.error,
+        );
+        expect(targetFile.readAsStringSync(), 'original');
+
+        optionsLink
+          ..deleteSync()
+          ..createSync(brokenTargetFile.path);
+        expect(
+          options.lookupExtensionEnabledState(
+            devtoolsOptionsUri: optionsUri,
+            extensionName: 'foo',
+          ),
+          ExtensionEnabledState.error,
+        );
+        expect(
+          options.setExtensionEnabledState(
+            devtoolsOptionsUri: optionsUri,
+            extensionName: 'foo',
+            enable: true,
+          ),
+          ExtensionEnabledState.error,
+        );
+        expect(brokenTargetFile.existsSync(), isFalse);
+      },
+    );
   });
 }

@@ -455,13 +455,45 @@ List<DartObjectNode> createVariablesForBytes(
     variables.add(
       DartObjectNode.fromValue(
         name: '[$name]',
-        value: result[i],
+        value: _formatSimdValue(result[i]) ?? result[i],
         isolateRef: isolateRef,
         artificialName: true,
       ),
     );
   }
   return variables;
+}
+
+/// The number of decimal places used to display the lanes of a [Float32x4] or
+/// [Float64x2] value.
+const _simdFloatFractionDigits = 6;
+
+/// The number of hex digits used to display a 32-bit lane of an [Int32x4]
+/// value.
+const _simdInt32HexDigits = 8;
+
+/// Returns a display string for [value] if it is a SIMD value ([Int32x4],
+/// [Float32x4], or [Float64x2]), or null otherwise.
+///
+/// We format these values manually instead of relying on `toString()` because
+/// the output of `toString()` for SIMD types is platform dependent (the Dart
+/// VM returns the opaque string 'V128', and the web returns a different format
+/// than the VM historically did). Formatting the lanes ourselves ensures that
+/// users see the actual values on every platform.
+String? _formatSimdValue(Object? value) {
+  String formatFloat(double lane) =>
+      lane.toStringAsFixed(_simdFloatFractionDigits);
+  String formatInt32(int lane) =>
+      lane.toUnsigned(32).toRadixString(16).padLeft(_simdInt32HexDigits, '0');
+
+  return switch (value) {
+    Int32x4(:final x, :final y, :final z, :final w) =>
+      '[${[x, y, z, w].map(formatInt32).join(', ')}]',
+    Float32x4(:final x, :final y, :final z, :final w) =>
+      '[${[x, y, z, w].map(formatFloat).join(', ')}]',
+    Float64x2(:final x, :final y) => '[${[x, y].map(formatFloat).join(', ')}]',
+    _ => null,
+  };
 }
 
 List<DartObjectNode> createVariablesForSets(

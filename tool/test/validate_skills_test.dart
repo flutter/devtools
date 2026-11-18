@@ -23,6 +23,11 @@ void main() {
       final Configuration config = await ConfigParser.loadConfig(
         path: _configFilePath,
       );
+      expect(
+        config.parsingErrors,
+        isEmpty,
+        reason: 'Configuration parsing failed: ${config.parsingErrors}',
+      );
       final bool isValid = await validateSkills(config: config);
       expect(
         isValid,
