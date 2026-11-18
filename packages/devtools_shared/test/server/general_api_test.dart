@@ -741,6 +741,33 @@ void main() {
         }, timeout: const Timeout.factor(4));
 
         test(
+          'removes workspace root on disconnect even if directory was deleted',
+          () async {
+            await verifyWorkspaceRoots({});
+            final pkgDir = Directory(p.join(tempDir.path, 'deleted_pkg'))
+              ..createSync(recursive: true);
+            File(p.join(pkgDir.path, 'pubspec.yaml')).createSync();
+            final rootUri = Uri.file(pkgDir.path);
+
+            final addResponse = await updateWorkspaceRoots(
+              root: rootUri,
+              connected: true,
+            );
+            expect(addResponse.statusCode, HttpStatus.ok);
+            await verifyWorkspaceRoots({rootUri});
+
+            pkgDir.deleteSync(recursive: true);
+
+            final removeResponse = await updateWorkspaceRoots(
+              root: rootUri,
+              connected: false,
+            );
+            expect(removeResponse.statusCode, HttpStatus.ok);
+            await verifyWorkspaceRoots({});
+          },
+        );
+
+        test(
           'rejects filesystem root and symlinks to filesystem root',
           () async {
             await verifyWorkspaceRoots({});
@@ -975,6 +1002,57 @@ void main() {
             expect(response.message, isNull);
             expect(response.uri, isNotNull);
             expect(response.uri!.toFilePath(), endsWith(app!.directory.path));
+
+            final disconnectResponse =
+                await server.VmServiceHandler.detectRootPackageForVmService(
+                  vmServiceUriAsString: vmServiceUriString!,
+                  vmServiceUri: vmServiceUri!,
+                  connected: false,
+                  dtd: testDtdConnection!,
+                );
+            expect(disconnectResponse.success, true);
+            expect(disconnectResponse.message, isNull);
+            expect(disconnectResponse.uri, isNotNull);
+            expect(
+              disconnectResponse.uri!.toFilePath(),
+              endsWith(app!.directory.path),
+            );
+
+            // Verify the cache entry was removed on disconnect.
+            final secondDisconnect =
+                await server.VmServiceHandler.detectRootPackageForVmService(
+                  vmServiceUriAsString: vmServiceUriString!,
+                  vmServiceUri: vmServiceUri,
+                  connected: false,
+                  dtd: testDtdConnection!,
+                );
+            expect(secondDisconnect, (success: true, message: null, uri: null));
+          },
+        );
+
+        test(
+          'succeeds for a disconnect event even if pubspec.yaml was deleted',
+          () async {
+            final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
+            expect(vmServiceUri, isNotNull);
+            late server.DetectRootPackageResponse response;
+            await runWithRetry(
+              callback: () async {
+                response =
+                    await server.VmServiceHandler.detectRootPackageForVmService(
+                      vmServiceUriAsString: vmServiceUriString!,
+                      vmServiceUri: vmServiceUri!,
+                      connected: true,
+                      dtd: testDtdConnection!,
+                    );
+                if (!response.success) throw Exception('VM not ready');
+              },
+              maxRetries: 20,
+              retryDelay: const Duration(milliseconds: 500),
+            );
+            expect(response.success, true);
+
+            File(p.join(app!.directory.path, 'pubspec.yaml')).deleteSync();
 
             final disconnectResponse =
                 await server.VmServiceHandler.detectRootPackageForVmService(

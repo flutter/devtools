@@ -286,16 +286,11 @@ extension VmServiceHandler on Never {
         vmService = null;
       }
     } else {
-      final cachedRootForVmService =
-          _packageRootsForVmServiceConnections[vmServiceUriAsString];
+      final cachedRootForVmService = _packageRootsForVmServiceConnections
+          .remove(vmServiceUriAsString);
       if (cachedRootForVmService == null) {
         // If there is no root to remove, there is nothing for us to do.
         return (success: true, message: null, uri: null);
-      }
-      final validationError = _validateRootPackageUri(cachedRootForVmService);
-      if (validationError != null) {
-        _packageRootsForVmServiceConnections.remove(vmServiceUriAsString);
-        return (success: false, message: validationError, uri: null);
       }
       rootPackageUri = cachedRootForVmService;
     }
@@ -310,9 +305,11 @@ extension VmServiceHandler on Never {
     required bool connected,
     required ServerApi api,
   }) async {
-    final validationError = _validateRootPackageUri(rootFromVmService);
-    if (validationError != null) {
-      return api.badRequest(validationError);
+    if (connected) {
+      final validationError = _validateRootPackageUri(rootFromVmService);
+      if (validationError != null) {
+        return api.badRequest(validationError);
+      }
     }
     final currentRoots = (await dtd.getIDEWorkspaceRoots()).ideWorkspaceRoots
         .toSet();
