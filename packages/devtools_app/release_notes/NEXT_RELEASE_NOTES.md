@@ -35,6 +35,9 @@ such as black or white, are now adjusted to remain legible.
   [#10082](https://github.com/flutter/devtools/pull/10082)
 * Restricted VM service connection URIs to allowed schemes and loopback hosts.
   [#10091](https://github.com/flutter/devtools/pull/10091)
+* Validated package root URIs detected from VM service connections before
+  registering them as Dart Tooling Daemon (DTD) IDE workspace roots.
+  [#10096](https://github.com/flutter/devtools/pull/10096)
 
 ## Inspector updates
 
