@@ -31,9 +31,7 @@ final _log = Logger('view_metrics_override_client');
 /// implicit view, whose ID is 0.
 ///
 /// The registry lives in the main isolate of the app, so a hot restart empties
-/// it. When the extension is registered again on the new isolate, this client
-/// reads the registry and restores the [restoredMetrics] that the app had
-/// before the restart, with the values that they had, whoever set them.
+/// it. This client then reads the registry of the new isolate.
 ///
 /// See `FoundationServiceExtensions.viewMetricsOverride` in
 /// `package:flutter/foundation.dart` for the protocol.
@@ -46,7 +44,7 @@ class ViewMetricsOverrideClient extends DisposableController
   /// be created again for a new connection. Create only one client per
   /// connection: like two tools, two clients can overwrite each other's
   /// changes.
-  ViewMetricsOverrideClient({required this.restoredMetrics}) {
+  ViewMetricsOverrideClient() {
     final serviceManager = serviceConnection.serviceManager;
     addAutoDisposeListener(
       serviceManager.isolateManager.mainIsolate,
@@ -61,13 +59,6 @@ class ViewMetricsOverrideClient extends DisposableController
     _onMainIsolateChanged();
   }
 
-  /// The metrics that this client sets again after a hot restart if the app
-  /// had them, whoever set them, such as the metrics that a page shows.
-  ///
-  /// The other metrics are left to the tools that set them.
-  final Set<String> restoredMetrics;
-
-  /// The ID of the implicit view, as a key of the registry.
   static const _implicitViewId = '0';
 
   /// Whether the main isolate of the connected app has registered the
@@ -87,38 +78,20 @@ class ViewMetricsOverrideClient extends DisposableController
   /// Whether the current main isolate has reported its overrides.
   bool _overridesReported = false;
 
-  /// The metrics to set again once the extension is registered on the new
-  /// main isolate, with the values that they had on the previous one.
-  ///
-  /// They are kept until a restore succeeds, so that a restore that fails is
-  /// tried again on the next main isolate.
-  Map<String, Object?> _metricsToRestore = const {};
-
-  /// The number of times that the main isolate has changed, so that the calls
-  /// meant for an isolate that is gone are dropped, and their replies ignored.
+  /// Incremented when the main isolate changes, to drop the calls and replies
+  /// of the isolates that are gone.
   int _isolateGeneration = 0;
 
-  /// The [ServiceExtensionManager.hasServiceExtension] listenable of the
-  /// extension for the current main isolate.
-  ///
-  /// [ServiceExtensionManager] stops updating the listenables that it returned
-  /// once the main isolate exits, so this is looked up again for every main
-  /// isolate.
+  /// [ServiceExtensionManager.hasServiceExtension] for the current main
+  /// isolate, looked up again for every main isolate because it stops updating
+  /// once its isolate exits.
   ValueListenable<bool>? _hasExtension;
 
-  /// Completes when the last call that this client queued for the current
-  /// main isolate is done.
+  /// Completes when the last call queued for the current main isolate is done.
   ///
-  /// The calls run one at a time, so that replies apply in the order the calls
-  /// were made, and every write starts from the reply to the call before it.
+  /// Calls run one at a time, so that every write starts from the reply to the
+  /// call before it.
   Future<void> _lastCall = Future<void>.value();
-
-  /// Completes at the next change of the main isolate, or when this client is
-  /// disposed.
-  ///
-  /// The VM service never answers a call that is in flight when its isolate
-  /// exits, so the futures that [_queue] returns also complete when this does.
-  Completer<void> _nextMainIsolateChange = Completer<void>();
 
   /// Overrides the metrics in [metrics] for the implicit view, and keeps the
   /// other [overrides] that the view has.
@@ -132,22 +105,15 @@ class ViewMetricsOverrideClient extends DisposableController
   ///
   /// Does nothing while the extension is not [available]. A call that fails is
   /// logged, and leaves [overrides] as the app last reported them. The
-  /// returned future completes once the app answers, or once a hot restart
-  /// interrupts the call.
-  Future<void> updateOverrides(Map<String, Object?> metrics) => _queue(() {
-    // These values replace the ones that a pending restore would set.
-    _metricsToRestore = Map<String, Object?>.of(_metricsToRestore)
-      ..removeWhere((metric, _) => metrics.containsKey(metric));
-    return _write(metrics);
-  });
+  /// returned future completes once the app answers. It never completes if a
+  /// hot restart interrupts the call, because the VM service never answers it.
+  Future<void> updateOverrides(Map<String, Object?> metrics) =>
+      _queue(() => _write(metrics));
 
-  /// Runs [call] once the calls queued before it for the current main isolate
-  /// are done, unless the main isolate has changed or the extension is not
-  /// [available] by then.
+  /// Runs [call] after the calls queued before it, unless the main isolate has
+  /// changed or the extension is not [available] by then.
   ///
-  /// A call that throws is logged, so that the calls after it still run. The
-  /// returned future completes when [call] is done, or at the next change of
-  /// the main isolate, whichever comes first.
+  /// Logs what [call] throws, so that the calls after it still run.
   Future<void> _queue(Future<void> Function() call) {
     final isolateGeneration = _isolateGeneration;
     _lastCall = _lastCall.then((_) async {
@@ -166,26 +132,21 @@ class ViewMetricsOverrideClient extends DisposableController
         );
       }
     });
-    return Future.any<void>([_lastCall, _nextMainIsolateChange.future]);
+    return _lastCall;
   }
 
-  /// Reads the overrides of the app, and returns whether the app reported
-  /// them.
-  Future<bool> _read() => _call(const {});
+  Future<void> _read() => _call(const {});
 
-  /// Writes [metrics] over the overrides that the app last reported, and
-  /// returns whether the app applied them and reported its overrides.
-  Future<bool> _write(Map<String, Object?> metrics) async {
+  /// Writes [metrics] over the overrides that the app last reported.
+  Future<void> _write(Map<String, Object?> metrics) async {
     final isolateGeneration = _isolateGeneration;
     // A write that does not start from the overrides of the app could remove
     // the overrides that other clients set, so read them first if needed.
     if (!_overridesReported) await _read();
-    if (!_overridesReported || isolateGeneration != _isolateGeneration) {
-      return false;
-    }
+    if (!_overridesReported || isolateGeneration != _isolateGeneration) return;
     final viewOverrides = {..._overrides.value, ...metrics}
       ..removeWhere((_, value) => value == null);
-    return _call({
+    await _call({
       'viewId': _implicitViewId,
       'overrides': jsonEncode(viewOverrides),
     });
@@ -193,10 +154,7 @@ class ViewMetricsOverrideClient extends DisposableController
 
   /// Calls the extension with [parameters], and takes [overrides] from the
   /// reply.
-  ///
-  /// Returns whether the reply is for the current main isolate, and has the
-  /// expected format.
-  Future<bool> _call(Map<String, String> parameters) async {
+  Future<void> _call(Map<String, String> parameters) async {
     final isolateGeneration = _isolateGeneration;
     try {
       final response = await serviceConnection.serviceManager
@@ -204,23 +162,20 @@ class ViewMetricsOverrideClient extends DisposableController
             registrations.viewMetricsOverride,
             args: parameters,
           );
-      if (disposed || isolateGeneration != _isolateGeneration) return false;
-      return _takeOverridesFrom(response.json?['overrides']);
+      if (disposed || isolateGeneration != _isolateGeneration) return;
+      _takeOverridesFrom(response.json?['overrides']);
     } catch (e, st) {
       _log.warning(
         'Failed to call ${registrations.viewMetricsOverride}: $e',
         e,
         st,
       );
-      return false;
     }
   }
 
   /// Takes [overrides] from [registry], which is the `overrides` of a reply or
   /// the `value` of an event.
-  ///
-  /// Returns whether [registry] has the expected format.
-  bool _takeOverridesFrom(Object? registry) {
+  void _takeOverridesFrom(Object? registry) {
     final viewOverrides = registry is Map
         ? registry[_implicitViewId] ?? const <String, Object?>{}
         : null;
@@ -229,7 +184,7 @@ class ViewMetricsOverrideClient extends DisposableController
         'Unexpected overrides from ${registrations.viewMetricsOverride}: '
         '$registry',
       );
-      return false;
+      return;
     }
     _overridesReported = true;
     // Replies, and events about other views, often carry unchanged overrides
@@ -240,7 +195,6 @@ class ViewMetricsOverrideClient extends DisposableController
     )) {
       _overrides.value = Map.unmodifiable(viewOverrides);
     }
-    return true;
   }
 
   void _onExtensionEvent(Event event) {
@@ -265,19 +219,8 @@ class ViewMetricsOverrideClient extends DisposableController
   void _onMainIsolateChanged() {
     _isolateGeneration++;
     // The VM service never answers a call that is in flight when its isolate
-    // exits, so the calls for the new main isolate do not wait for older ones,
-    // and neither do the callers of the older ones.
+    // exits, so the calls for the new main isolate do not wait for older ones.
     _lastCall = Future<void>.value();
-    _nextMainIsolateChange.complete();
-    _nextMainIsolateChange = Completer<void>();
-    // A hot restart replaces the main isolate, and the registry with it, so
-    // remember the values that the app had for the metrics to restore.
-    final viewOverrides = _overrides.value;
-    _metricsToRestore = {
-      ..._metricsToRestore,
-      for (final metric in restoredMetrics)
-        if (viewOverrides.containsKey(metric)) metric: viewOverrides[metric],
-    };
     _overridesReported = false;
 
     final serviceManager = serviceConnection.serviceManager;
@@ -297,22 +240,11 @@ class ViewMetricsOverrideClient extends DisposableController
     final available = _hasExtension?.value ?? false;
     if (available == _available.value) return;
     _available.value = available;
-    if (!available) return;
-    unawaited(_queue(_read));
-    unawaited(_queue(_restoreMetrics));
-  }
-
-  Future<void> _restoreMetrics() async {
-    final metrics = _metricsToRestore;
-    if (metrics.isEmpty) return;
-    // If the write fails, or the main isolate changes during it, the next main
-    // isolate needs the metrics too.
-    if (await _write(metrics)) _metricsToRestore = const {};
+    if (available) unawaited(_queue(_read));
   }
 
   @override
   void dispose() {
-    _nextMainIsolateChange.complete();
     _available.dispose();
     _overrides.dispose();
     super.dispose();

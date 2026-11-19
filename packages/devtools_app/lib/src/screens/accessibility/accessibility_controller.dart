@@ -128,24 +128,12 @@ class AccessibilityController extends DevToolsScreenController
   static const _accessibleNavigationMetric = 'accessibleNavigation';
   static const _highContrastMetric = 'highContrast';
 
-  /// The metrics that the overrides pane shows, which the client sets again
-  /// after a hot restart, so that the pane shows the same overrides as before
-  /// the restart.
-  static const _paneMetrics = <String>{
-    _textScalingMetric,
-    _boldTextMetric,
-    _accessibleNavigationMetric,
-    _highContrastMetric,
-  };
-
   /// The client that overrides the text scale, bold text, screen reader and
   /// high contrast settings of the app, or null before [init].
   ViewMetricsOverrideClient? _viewMetricsOverrideClient;
 
   void _initViewMetricsOverrides() {
-    final client = _viewMetricsOverrideClient = ViewMetricsOverrideClient(
-      restoredMetrics: _paneMetrics,
-    );
+    final client = _viewMetricsOverrideClient = ViewMetricsOverrideClient();
     void updateFromApp() {
       final overrides = client.overrides.value;
       _overridesAvailable.value = client.available.value;

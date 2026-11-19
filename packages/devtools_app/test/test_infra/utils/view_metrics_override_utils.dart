@@ -38,13 +38,16 @@ class _ViewMetricsOverrideServiceManager extends FakeServiceManager {
     }
     final parameters = Map<String, String>.from(args ?? const {});
     extension.calls.add(parameters);
+    if (extension.holdCalls) return Completer<Response>().future;
     final isolate = isolateManager.mainIsolate.value;
-    final releaseError = await extension._waitToHandleCall();
-    // Like the VM service, never reply to a call whose isolate exits first.
+    // Like the VM service, reply after the caller has moved on, and never
+    // reply to a call whose isolate exits first.
+    await Future<void>.delayed(Duration.zero);
     if (isolateManager.mainIsolate.value != isolate) {
       return Completer<Response>().future;
     }
-    final error = releaseError ?? extension._takeNextCallError();
+    final error = extension.nextCallError;
+    extension.nextCallError = null;
     if (error != null) throw error;
     try {
       return extension._handle(parameters);
@@ -82,23 +85,11 @@ class FakeViewMetricsOverrideExtension {
   /// handled, such as an [RPCError].
   Object? nextCallError;
 
-  /// Whether the app holds the calls from DevTools until [releaseCall], so
-  /// that a test can act while a call is in flight.
-  ///
-  /// Otherwise, the app handles a call once the caller has moved on.
+  /// Whether the app leaves the calls from DevTools unanswered, so that a test
+  /// can hot restart the app while a call is in flight.
   bool holdCalls = false;
 
-  /// The number of calls from DevTools that the app holds.
-  int get heldCallCount => _heldCalls.length;
-  final _heldCalls = <Completer<Object?>>[];
-
   int _restarts = 0;
-
-  /// Lets the app handle the oldest call that it holds, or makes that call
-  /// throw [error] instead.
-  void releaseCall({Object? error}) {
-    _heldCalls.removeAt(0).complete(error);
-  }
 
   /// Registers the extension, as the binding of a debug Flutter app does, and
   /// sends the first frame.
@@ -120,11 +111,9 @@ class FakeViewMetricsOverrideExtension {
   /// registry.
   ///
   /// As a real app can, the new isolate registers the extension before it
-  /// becomes the main isolate. Like the VM service, the app never answers the
-  /// calls that it holds.
+  /// becomes the main isolate.
   Future<void> hotRestart() async {
     final isolateManager = _serviceManager.isolateManager as FakeIsolateManager;
-    _heldCalls.clear();
     // ServiceExtensionManager starts listening to the main isolate when the VM
     // service opens, so it reacts to the old isolate exiting before others.
     _serviceManager.serviceExtensionManager.fakeMainIsolateClosed();
@@ -135,25 +124,6 @@ class FakeViewMetricsOverrideExtension {
     isolateManager.setMainIsolate(
       IsolateRef(id: 'restarted_isolate_$_restarts', name: 'main'),
     );
-  }
-
-  /// Waits until the app handles a call from DevTools, and returns the error
-  /// that the call throws instead, if any.
-  Future<Object?> _waitToHandleCall() async {
-    if (!holdCalls) {
-      // Like the VM service, reply after the caller has moved on.
-      await Future<void>.delayed(Duration.zero);
-      return null;
-    }
-    final release = Completer<Object?>();
-    _heldCalls.add(release);
-    return release.future;
-  }
-
-  Object? _takeNextCallError() {
-    final error = nextCallError;
-    nextCallError = null;
-    return error;
   }
 
   Response _handle(Map<String, String> parameters) {
