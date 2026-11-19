@@ -263,10 +263,7 @@ extension on VmService {
           );
           if (packageConfig != null &&
               packageConfig.endsWith(packageConfigSuffix)) {
-            return packageConfig.substring(
-              0,
-              packageConfig.length - packageConfigSuffix.length - 1,
-            );
+            return p.posix.dirname(p.posix.dirname(packageConfig));
           }
         }
       } catch (_) {
