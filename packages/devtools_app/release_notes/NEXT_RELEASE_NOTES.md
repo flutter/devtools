@@ -117,7 +117,7 @@ TODO: Remove this section if there are not any updates.
 * Resolved the connected application's package root on the DevTools server via
   the VM service URI when serving DevTools extensions instead of accepting a
   package root file URI from the client.
-  [#TODO](https://github.com/flutter/devtools/pull/TODO)
+  [#10097](https://github.com/flutter/devtools/pull/10097)
 
 ## Advanced developer mode updates
 
