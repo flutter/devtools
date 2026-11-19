@@ -225,9 +225,7 @@ extension on VmService {
 
     // If a Dart library URI was returned, this may be a test target (i.e. a
     // VM service connection spawned from `dart test` or `flutter test`).
-    if (packageRootUriString != null &&
-        packageRootUriString.endsWith('.dart') &&
-        rootLib?.id != null) {
+    if (packageRootUriString.endsWith('.dart') && rootLib?.id != null) {
       packageRootUriString =
           (await _lookupTestTargetPackageRoot(
             isolateId: mainIsolate.id!,
