@@ -167,7 +167,8 @@ extension VmServicePackageRootExtension on VmService {
           }
         }
       } catch (_) {
-        // Fall back to import prefix lookup if evaluation fails.
+        // Older versions of package:test don't define `packageConfigLocation`;
+        // fall back to checking the `test` import prefix below.
       }
 
       final testTargetUri = (obj.dependencies ?? <LibraryDependency>[])
@@ -186,7 +187,7 @@ extension VmServicePackageRootExtension on VmService {
         }
       }
     } catch (_) {
-      // Fail gracefully if the test target lookup fails.
+      // Ignore errors; the caller will fall back to the root library URI.
     }
     return null;
   }

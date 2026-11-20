@@ -18,8 +18,7 @@ extension VmServiceHandler on Never {
   /// never be used.
   static final _packageRootsForVmServiceConnections = <String, Uri>{};
 
-  /// Registers a cached [rootPackageUri] for [vmServiceUriAsString] in
-  /// [_packageRootsForVmServiceConnections] for testing.
+  /// Caches [rootPackageUri] for [vmServiceUriAsString] in tests.
   @visibleForTesting
   static void setPackageRootForVmServiceForTesting(
     String vmServiceUriAsString,
@@ -37,8 +36,7 @@ extension VmServiceHandler on Never {
         rootPackageUri;
   }
 
-  /// Clears all cached package roots in [_packageRootsForVmServiceConnections]
-  /// for testing.
+  /// Clears cached package roots between tests.
   @visibleForTesting
   static void clearPackageRootsForTesting() {
     _packageRootsForVmServiceConnections.clear();

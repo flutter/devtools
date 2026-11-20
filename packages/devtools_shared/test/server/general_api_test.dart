@@ -791,8 +791,8 @@ void main() {
               endsWith(app!.directory.path),
             );
 
-            // A subsequent disconnect should find no cached entry because the
-            // first disconnect removed it from the cache.
+            // Disconnecting again should be a no-op since the cache entry was
+            // already removed.
             final secondDisconnectResponse =
                 await server.VmServiceHandler.detectRootPackageForVmService(
                   vmServiceUriAsString: vmServiceUriString!,

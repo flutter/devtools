@@ -34,26 +34,20 @@ typedef DevToolsExtensionsGroup = ({
 
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {
-  /// Creates an [ExtensionService] that detects both runtime and static
-  /// DevTools extensions.
+  /// Detects runtime and static DevTools extensions.
   ///
-  /// Pass [fixedVmServiceUri] to detect runtime extensions for a specific VM
-  /// service instead of listening to `serviceConnection.serviceManager`.
+  /// When [fixedVmServiceUri] is provided, runtime extensions are detected for
+  /// that VM service instead of listening to `serviceConnection.serviceManager`.
   ExtensionService({String? fixedVmServiceUri})
     : _fixedVmServiceUri = fixedVmServiceUri,
       _useGlobalServiceConnection = fixedVmServiceUri == null;
 
-  /// Creates an [ExtensionService] that only detects static DevTools
-  /// extensions for the IDE workspace.
+  /// Detects static DevTools extensions for the IDE workspace only.
   ExtensionService.forWorkspace()
     : _fixedVmServiceUri = null,
       _useGlobalServiceConnection = false;
 
-  /// A fixed VM service URI to detect runtime extensions for, if set.
   final String? _fixedVmServiceUri;
-
-  /// Whether to listen to `serviceConnection.serviceManager` for the connected
-  /// app.
   final bool _useGlobalServiceConnection;
 
   /// A listenable for the current set of DevTools extensions.
@@ -137,7 +131,6 @@ class ExtensionService extends DisposableController
     await _refresh();
     cancelListeners();
 
-    // Only listen to the VM service manager when tracking the connected app.
     if (_useGlobalServiceConnection) {
       addAutoDisposeListener(
         serviceConnection.serviceManager.connectedState,

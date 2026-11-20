@@ -133,8 +133,7 @@ class SidebarDevToolsExtensionsController extends DisposableController
       );
     }
 
-    // Omit [projectRootUri] and [vmServiceUri] to initialize the set of
-    // extensions available for the entire workspace.
+    // Initialize extensions available for the entire workspace.
     await _detectExtensions();
   }
 
@@ -179,10 +178,7 @@ class SidebarDevToolsExtensionsController extends DisposableController
       '(debug session lookup).',
     );
     final extensionService = vmServiceUri == null
-        ?
-          // A null [vmServiceUri] means this is a workspace-level lookup rather
-          // than a specific debug session.
-          ExtensionService.forWorkspace()
+        ? ExtensionService.forWorkspace()
         : ExtensionService(fixedVmServiceUri: vmServiceUri);
     assert(
       !_extensionServiceByRootUri.containsKey(projectRootUri),
