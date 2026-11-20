@@ -790,6 +790,21 @@ void main() {
               disconnectResponse.uri!.toFilePath(),
               endsWith(app!.directory.path),
             );
+
+            // A subsequent disconnect should find no cached entry because the
+            // first disconnect removed it from the cache.
+            final secondDisconnectResponse =
+                await server.VmServiceHandler.detectRootPackageForVmService(
+                  vmServiceUriAsString: vmServiceUriString!,
+                  vmServiceUri: vmServiceUri,
+                  connected: false,
+                  dtd: testDtdConnection!,
+                );
+            expect(secondDisconnectResponse, (
+              success: true,
+              message: null,
+              uri: null,
+            ));
           },
         );
       });

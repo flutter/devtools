@@ -39,6 +39,8 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
   `ExtensionsApi.packageRootUriPropertyName`, and resolve the connected
   application's package root on the server from `vmServiceUri` in
   `api/serveAvailableExtensions`.
+* Add `VmServicePackageRootExtension.rootPackageDirectoryForMainIsolate` to
+  `devtools_shared.dart`.
 
 # 14.0.0
 

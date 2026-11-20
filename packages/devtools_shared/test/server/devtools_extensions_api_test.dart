@@ -187,6 +187,45 @@ void main() {
       },
     );
 
+    test('returns static extensions with a warning for an uncached unreachable '
+        'loopback vmServiceUri', () async {
+      await initializeTestDirectory();
+      const unreachableVmServiceUri = 'ws://127.0.0.1:1/ws';
+      final response = await serveExtensions(
+        extensionsManager,
+        vmServiceUriOverride: unreachableVmServiceUri,
+      );
+      expect(response.statusCode, HttpStatus.ok);
+      _verifyAllExtensions(extensionsManager, includeRuntime: false);
+
+      final parsedResponse = json.decode(await response.readAsString()) as Map;
+      final warning =
+          parsedResponse[ExtensionsApi.extensionsResultWarningPropertyName];
+      expect(
+        warning,
+        contains('Error detecting project roots ($unreachableVmServiceUri)'),
+      );
+    });
+
+    test('fails with server error for an uncached unreachable loopback '
+        'vmServiceUri when no static extensions exist', () async {
+      await initializeTestDirectory(includeDependenciesWithExtensions: false);
+      const unreachableVmServiceUri = 'ws://127.0.0.1:1/ws';
+      final response = await serveExtensions(
+        extensionsManager,
+        vmServiceUriOverride: unreachableVmServiceUri,
+      );
+      expect(response.statusCode, HttpStatus.internalServerError);
+      expect(extensionsManager.devtoolsExtensions, isEmpty);
+
+      final parsedResponse = json.decode(await response.readAsString()) as Map;
+      final error = parsedResponse['error'];
+      expect(
+        error,
+        contains('Error detecting project roots ($unreachableVmServiceUri)'),
+      );
+    });
+
     test(
       'rejects non-loopback or invalid vmServiceUri and UNC packageRootUri',
       () async {

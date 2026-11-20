@@ -55,6 +55,7 @@ Future<T> _connectWithWebSocket<T extends VmService>({
   // the VM service.
   uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
   final ws = WebSocketChannel.connect(uri);
+  await ws.ready;
   final stream = ws.stream.handleError(onError);
   final service = serviceFactory(
     inStream: stream,

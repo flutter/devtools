@@ -21,6 +21,7 @@ extension _ExtensionsApiHandler on Never {
     if (missingRequiredParams != null) return missingRequiredParams;
 
     final logs = <String>[];
+    final warnings = <String>[];
     final vmServiceUriString =
         queryParams[ExtensionsApi.vmServiceUriPropertyName];
     String? rootFileUriString;
@@ -46,26 +47,33 @@ extension _ExtensionsApiHandler on Never {
               dtd: dartToolingDaemon,
             );
         if (!detectRootResponse.success) {
-          return api.serverError(detectRootResponse.message, logs);
+          warnings.add(
+            detectRootResponse.message ??
+                'Failed to detect root package for VM service '
+                    '($vmServiceUriString).',
+          );
+        } else {
+          rootFileUriString = detectRootResponse.uri?.toString();
         }
-        rootFileUriString = detectRootResponse.uri?.toString();
       } catch (e) {
-        return api.serverError('$e', logs);
+        warnings.add('$e');
       } finally {
         await dartToolingDaemon?.close();
       }
     }
+    final rootDetectionFailed = warnings.isNotEmpty;
     final result = <String, Object?>{};
 
     /// Helper to return a success response with all available extensions
     /// detected by [extensionsManager].
-    shelf.Response succeedWithAvailableExtensions({String? warning}) {
+    shelf.Response succeedWithAvailableExtensions() {
       final extensions = extensionsManager.devtoolsExtensions
           .map((p) => p.toJson())
           .toList();
       result[ExtensionsApi.extensionsResultPropertyName] = extensions;
-      if (warning != null) {
-        result[ExtensionsApi.extensionsResultWarningPropertyName] = warning;
+      if (warnings.isNotEmpty) {
+        result[ExtensionsApi.extensionsResultWarningPropertyName] = warnings
+            .join('\n');
       }
       return ServerApi._encodeResponse(
         ServerApi._wrapWithLogs(result, logs),
@@ -82,14 +90,19 @@ extension _ExtensionsApiHandler on Never {
     } on ExtensionParsingException catch (e) {
       // For [ExtensionParsingException]s, we should return a success response
       // with a warning message.
-      result[ExtensionsApi.extensionsResultWarningPropertyName] = e.message;
+      warnings.add(e.message);
     } catch (e) {
+      warnings.add('$e');
       // If any extensions were successfully detected, return a success response
       // with a warning.
       if (extensionsManager.devtoolsExtensions.isNotEmpty) {
-        return succeedWithAvailableExtensions(warning: '$e');
+        return succeedWithAvailableExtensions();
       }
-      return api.serverError('$e', logs);
+      return api.serverError(warnings.join('\n'), logs);
+    }
+
+    if (rootDetectionFailed && extensionsManager.devtoolsExtensions.isEmpty) {
+      return api.serverError(warnings.join('\n'), logs);
     }
 
     return succeedWithAvailableExtensions();

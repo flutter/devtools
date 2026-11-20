@@ -5,20 +5,16 @@
 import 'dart:async';
 import 'dart:core';
 
-import 'package:collection/collection.dart';
 import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../utils/auto_dispose.dart';
 import '../utils/utils.dart';
 import 'connected_app.dart';
 import 'dtd_manager.dart';
-import 'eval_on_dart_library.dart' hide SentinelException;
 import 'flutter_version.dart';
 import 'isolate_manager.dart';
 import 'isolate_state.dart';
@@ -506,119 +502,17 @@ class ServiceManager<T extends VmService> {
   /// `flutter test`). This is because the main isolate for test targets is
   /// running the test runner, and not the test library itself, so we have to do
   /// some extra work to find the package root of the test target.
+  // TODO(johnpryan): remove this in the next breaking release.
+  @Deprecated(
+    'Use VmService.rootPackageDirectoryForMainIsolate from devtools_shared instead.',
+  )
   Future<Uri?> connectedAppPackageRoot(DTDManager dtdManager) async {
-    var packageRootUriString = await rootPackageDirectoryForMainIsolate(
-      dtdManager,
-    );
-    _log.fine(
-      '[connectedAppPackageRoot] root package directory for main isolate: '
-      '$packageRootUriString',
-    );
-
-    // If a Dart library URI was returned, this may be a test target (i.e. a
-    // VM service connection spawned from `dart test` or `flutter test`).
-    if (packageRootUriString?.endsWith('.dart') ?? false) {
-      final rootLibrary = await _mainIsolateRootLibrary();
-      if (rootLibrary != null) {
-        packageRootUriString =
-            (await _lookupPackageRootByEval(rootLibrary)) ??
-            // TODO(kenz): remove this fallback once all test bootstrap
-            // generators include the `packageConfigLocation` constant we
-            // can evaluate.
-            await _lookupPackageRootByImportPrefix(rootLibrary, dtdManager);
-      }
-    }
-    _log.fine(
-      '[connectedAppPackageRoot] package root for test target: '
-      '$packageRootUriString',
-    );
+    final packageRootUriString = await service
+        ?.rootPackageDirectoryForMainIsolate(dtd: dtdManager.connection.value);
+    _log.fine('[connectedAppPackageRoot] package root: $packageRootUriString');
     return packageRootUriString == null
         ? null
         : Uri.parse(packageRootUriString);
-  }
-
-  Future<String?> _lookupPackageRootByEval(Library rootLibrary) async {
-    final eval = EvalOnDartLibrary(
-      rootLibrary.uri!,
-      service! as VmService,
-      serviceManager: this,
-      // Swallow exceptions since this evaluation may be called on an older
-      // version of package:test where we do not expect the evaluation to
-      // succeed.
-      logExceptions: false,
-    );
-    final evalDisposable = Disposable();
-    try {
-      final packageConfig = (await eval.evalInstance(
-        'packageConfigLocation',
-        isAlive: evalDisposable,
-      )).valueAsString;
-
-      // TODO(https://github.com/flutter/devtools/issues/7944): return the
-      // unmodified package config location. For this case, be sure to handle
-      // invalid values like the empty String or 'null'.
-      final packageConfigIdentifier = path.join(
-        '.dart_tool',
-        'package_config.json',
-      );
-      if (packageConfig?.endsWith(packageConfigIdentifier) ?? false) {
-        _log.fine(
-          '[connectedAppPackageRoot] detected test package config from root '
-          'library eval: $packageConfig.',
-        );
-        return packageConfig!.substring(
-          0,
-          // Minus 1 to remove the trailing slash.
-          packageConfig.length - packageConfigIdentifier.length - 1,
-        );
-      }
-    } catch (_) {
-      // Fail gracefully if the evaluation fails.
-    } finally {
-      evalDisposable.dispose();
-    }
-    return null;
-  }
-
-  Future<String?> _lookupPackageRootByImportPrefix(
-    Library rootLibrary,
-    DTDManager dtdManager,
-  ) async {
-    final testTargetFileUriString =
-        (rootLibrary.dependencies ?? <LibraryDependency>[])
-            .firstWhereOrNull((dep) => dep.prefix == 'test')
-            ?.target
-            ?.uri;
-    if (testTargetFileUriString != null) {
-      _log.fine(
-        '[connectedAppPackageRoot] detected test library from root library '
-        'imports: $testTargetFileUriString',
-      );
-      // TODO(https://github.com/flutter/devtools/issues/7944): return the
-      // unmodified package config location.
-      return await packageRootFromFileUriString(
-        testTargetFileUriString,
-        dtd: dtdManager.connection.value,
-      );
-    }
-    return null;
-  }
-
-  Future<Library?> _mainIsolateRootLibrary() async {
-    final ref =
-        (await isolateManager.waitForMainIsolateState())?.isolateNow?.rootLib;
-    if (ref == null) return null;
-    try {
-      final library = await service!.getObject(
-        isolateManager.mainIsolate.value!.id!,
-        ref.id!,
-      );
-      assert(library is Library);
-      return library as Library;
-    } on SentinelException catch (_) {
-      // Fail gracefully if the request to get the Library object fails.
-      return null;
-    }
   }
 
   // TODO(kenz): consider caching this value for the duration of the VM service
