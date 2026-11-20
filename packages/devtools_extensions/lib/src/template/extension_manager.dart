@@ -10,6 +10,14 @@ const _vmServiceQueryParameter = 'uri';
 const _dtdQueryParameter = 'dtdUri';
 
 class ExtensionManager {
+  ExtensionManager({@visibleForTesting bool? useSimulatedEnvironment})
+    : _useSimulatedEnvironmentOverride = useSimulatedEnvironment;
+
+  final bool? _useSimulatedEnvironmentOverride;
+
+  bool get _isSimulatedEnvironment =>
+      _useSimulatedEnvironmentOverride ?? _useSimulatedEnvironment;
+
   final _registeredEventHandlers =
       <DevToolsExtensionEventType, ExtensionEventHandler>{};
 
@@ -61,7 +69,7 @@ class ExtensionManager {
     }
 
     final vmServiceUri = queryParams[_vmServiceQueryParameter];
-    if (vmServiceUri == null && !_useSimulatedEnvironment) {
+    if (vmServiceUri == null && !_isSimulatedEnvironment) {
       // Request the vm service uri for the connected app. DevTools will
       // respond with a [DevToolsPluginEventType.connectedVmService] event
       // containing the currently connected app's vm service URI.
@@ -79,10 +87,44 @@ class ExtensionManager {
     _handleMessageListener = null;
   }
 
+  @visibleForTesting
+  void handleMessage(Event e) => _handleMessage(e);
+
   void _handleMessage(Event e) {
-    final extensionEvent = tryParseExtensionEvent(e);
+    if (!e.isMessageEvent) return;
+    final event = e as MessageEvent;
+
+    final expectedSource = _isSimulatedEnvironment ? window : window.parent;
+    final source = event.source;
+    if (expectedSource == null) return;
+    if (source == null) {
+      _log.warning(
+        'Ignoring message event with null source (origin: ${event.origin}).',
+      );
+      return;
+    }
+    if (!source.strictEquals(expectedSource).toDart) {
+      _log.fine(
+        'Ignoring message event from unexpected source '
+        '(origin: ${event.origin}).',
+      );
+      return;
+    }
+
+    final originAllowed = _isSimulatedEnvironment
+        ? event.origin == window.origin &&
+              isAllowedDevToolsOrigin(event.origin, windowOrigin: window.origin)
+        : isAllowedDevToolsOrigin(event.origin, windowOrigin: window.origin);
+    if (!originAllowed) {
+      _log.warning(
+        'Ignoring message event from unexpected origin: ${event.origin}',
+      );
+      return;
+    }
+
+    final extensionEvent = tryParseExtensionEvent(event);
     if (extensionEvent != null) {
-      _handleExtensionEvent(extensionEvent, e as MessageEvent);
+      _handleExtensionEvent(extensionEvent, event);
     }
   }
 
@@ -141,7 +183,7 @@ class ExtensionManager {
     DevToolsExtensionEvent event, {
     String? targetOrigin,
   }) {
-    final postWindow = _useSimulatedEnvironment ? window : window.parent;
+    final postWindow = _isSimulatedEnvironment ? window : window.parent;
     postWindow?.postMessage(
       {
         ...event.toJson(),

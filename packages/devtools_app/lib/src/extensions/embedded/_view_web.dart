@@ -7,9 +7,11 @@ import 'dart:js_interop';
 
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_app_shared/web_utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:devtools_extensions/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:logging/logging.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:web/web.dart';
 
@@ -20,6 +22,8 @@ import '../../shared/ui/common_widgets.dart';
 import '../../shared/utils/utils.dart';
 import '_controller_web.dart';
 import 'controller.dart';
+
+final _log = Logger('devtools_app/embedded_extension');
 
 class EmbeddedExtension extends StatefulWidget {
   const EmbeddedExtension({super.key, required this.controller});
@@ -33,14 +37,14 @@ class EmbeddedExtension extends StatefulWidget {
 class _EmbeddedExtensionState extends State<EmbeddedExtension>
     with AutoDisposeMixin {
   late final EmbeddedExtensionControllerImpl _embeddedExtensionController;
-  late final _ExtensionIFrameController iFrameController;
+  late final ExtensionIFrameController iFrameController;
 
   @override
   void initState() {
     super.initState();
     _embeddedExtensionController =
         widget.controller as EmbeddedExtensionControllerImpl;
-    iFrameController = _ExtensionIFrameController(_embeddedExtensionController)
+    iFrameController = ExtensionIFrameController(_embeddedExtensionController)
       ..init();
   }
 
@@ -68,10 +72,11 @@ class _EmbeddedExtensionState extends State<EmbeddedExtension>
   }
 }
 
-class _ExtensionIFrameController extends DisposableController
+@visibleForTesting
+class ExtensionIFrameController extends DisposableController
     with AutoDisposeControllerMixin
     implements DevToolsExtensionHostInterface {
-  _ExtensionIFrameController(this.embeddedExtensionController);
+  ExtensionIFrameController(this.embeddedExtensionController);
 
   final EmbeddedExtensionControllerImpl embeddedExtensionController;
 
@@ -101,10 +106,15 @@ class _ExtensionIFrameController extends DisposableController
   /// leaking listeners when an extension is disabled and re-enabled.
   EventListener? _handleMessageListener;
 
+  /// The expected HTTP(S) origin of the embedded extension iframe, computed
+  /// once during [init].
+  late final String? _expectedOrigin;
+
   @override
   void init() {
     _iFrameReady = Completer<void>();
     _extensionHandlerReady = Completer<void>();
+    _expectedOrigin = _computeExpectedExtensionOrigin();
 
     unawaited(
       embeddedExtensionController.extensionIFrame.onLoad.first.then((_) {
@@ -173,8 +183,52 @@ class _ExtensionIFrameController extends DisposableController
     );
   }
 
+  String? _computeExpectedExtensionOrigin() {
+    final uri = Uri.tryParse(embeddedExtensionController.extensionUrl);
+    if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) {
+      return null;
+    }
+    try {
+      return uri.origin;
+    } on StateError {
+      return null;
+    }
+  }
+
   void _handleMessage(Event e) {
-    final extensionEvent = tryParseExtensionEvent(e);
+    if (!e.isMessageEvent) return;
+    final event = e as MessageEvent;
+
+    final expectedSource =
+        embeddedExtensionController.extensionIFrame.contentWindow;
+    final source = event.source;
+    if (expectedSource == null) return;
+    if (source == null) {
+      _log.warning(
+        'Ignoring message event with null source (origin: ${event.origin}).',
+      );
+      return;
+    }
+    if (!source.strictEquals(expectedSource).toDart) {
+      _log.fine(
+        'Ignoring message event from unexpected source '
+        '(origin: ${event.origin}).',
+      );
+      return;
+    }
+
+    final expectedOrigin = _expectedOrigin;
+    if (expectedOrigin == null ||
+        event.origin.isEmpty ||
+        event.origin == 'null' ||
+        event.origin != expectedOrigin) {
+      _log.warning(
+        'Ignoring message event from unexpected origin: ${event.origin}',
+      );
+      return;
+    }
+
+    final extensionEvent = tryParseExtensionEvent(event);
     if (extensionEvent != null) {
       onEventReceived(
         extensionEvent,
