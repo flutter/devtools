@@ -22,6 +22,10 @@ To learn more about DevTools, check out the
   evaluate expressions and a debug-only screen is unavailable.
   [#4091](https://github.com/flutter/devtools/issues/4091)
 
+* Fixed an issue where Dart and Flutter web apps compiled with WebAssembly
+  (Wasm) or modern web libraries (such as `package:web`) were not recognized as
+  web applications. [#10045](https://github.com/flutter/devtools/pull/10045)
+
 TODO: Remove this section if there are not any updates.
 
 * Improved the readability of ANSI-colored text in the console and logging
