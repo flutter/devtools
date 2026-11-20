@@ -50,6 +50,9 @@ TODO: Remove this section if there are not any updates.
   missing the most recent timeline events. -
   [#10055](https://github.com/flutter/devtools/pull/10055),
   [#9731](https://github.com/flutter/devtools/issues/9731)
+* Fixed the Performance page loading forever when the connected app uses a
+  timeline recorder that DevTools cannot read from, such as systrace.
+  [#10054](https://github.com/flutter/devtools/pull/10054)
 
 ## CPU profiler updates
 
