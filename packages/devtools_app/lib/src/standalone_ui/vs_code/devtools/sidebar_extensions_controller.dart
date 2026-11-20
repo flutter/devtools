@@ -133,9 +133,9 @@ class SidebarDevToolsExtensionsController extends DisposableController
       );
     }
 
-    // Pass a null project root URI to initialize the set of extensions
-    // available for the entire workspace.
-    await _detectExtensions(null);
+    // Omit [projectRootUri] and [vmServiceUri] to initialize the set of
+    // extensions available for the entire workspace.
+    await _detectExtensions();
   }
 
   Future<void> _initExtensionsForDebugSessions() async {
@@ -146,7 +146,10 @@ class SidebarDevToolsExtensionsController extends DisposableController
           vmServiceUri != null &&
           !_searchedProjectRoots.contains(fileUri)) {
         _searchedProjectRoots.add(fileUri);
-        await _detectExtensions(fileUri, vmServiceUri: vmServiceUri);
+        await _detectExtensions(
+          projectRootUri: fileUri,
+          vmServiceUri: vmServiceUri,
+        );
       }
     }
   }
@@ -165,8 +168,8 @@ class SidebarDevToolsExtensionsController extends DisposableController
   // the workspace or for a debug session changes. We will likely need some
   // watch event from the IDE or analysis server to signal when any
   // package_config.json file in the workspace changes.
-  Future<void> _detectExtensions(
-    Uri? projectRootUri, {
+  Future<void> _detectExtensions({
+    Uri? projectRootUri,
     String? vmServiceUri,
   }) async {
     assert(
