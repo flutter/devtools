@@ -180,10 +180,10 @@ class SidebarDevToolsExtensionsController extends DisposableController
     );
     final extensionService = vmServiceUri == null
         ?
-          // A null [vmServiceUri] indicates a static-only extensions lookup for
-          // the workspace, rather than a lookup for a specific debug session.
+          // A null [vmServiceUri] means this is a workspace-level lookup rather
+          // than a specific debug session.
           ExtensionService.forWorkspace()
-        : ExtensionService.forVmService(vmServiceUri);
+        : ExtensionService(fixedVmServiceUri: vmServiceUri);
     assert(
       !_extensionServiceByRootUri.containsKey(projectRootUri),
       'The initialization for the ExtensionService for root uri '

@@ -34,8 +34,10 @@ void main() {
       resetDevToolsExtensionEnabledStates();
     });
 
-    test('initialize with forVmService', () async {
-      final service = ExtensionService.forVmService('ws://127.0.0.1:8181/ws');
+    test('initialize with fixedVmServiceUri', () async {
+      final service = ExtensionService(
+        fixedVmServiceUri: 'ws://127.0.0.1:8181/ws',
+      );
       expect(service.availableExtensions, isEmpty);
       expect(service.staticExtensions, isEmpty);
       expect(service.runtimeExtensions, isEmpty);
@@ -84,7 +86,9 @@ void main() {
     });
 
     test('setExtensionEnabledState', () async {
-      final service = ExtensionService.forVmService('ws://127.0.0.1:8181/ws');
+      final service = ExtensionService(
+        fixedVmServiceUri: 'ws://127.0.0.1:8181/ws',
+      );
       await service.initialize();
       expect(service.staticExtensions.length, 4);
       expect(service.runtimeExtensions.length, 3);
