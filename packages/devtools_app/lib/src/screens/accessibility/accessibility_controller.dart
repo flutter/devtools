@@ -50,7 +50,6 @@ class AccessibilityController extends DevToolsScreenController
   }
 
   void _initListeners() {
-    addAutoDisposeListener(brightness, _onBrightnessChanged);
     addAutoDisposeListener(textScale, _onTextScaleChanged);
     addAutoDisposeListener(boldText, _onBoldTextChanged);
     addAutoDisposeListener(screenReader, _onScreenReaderChanged);
@@ -94,33 +93,47 @@ class AccessibilityController extends DevToolsScreenController
   }
 
   void _initServiceExtensionStates() {
-    final state = serviceConnection.serviceManager.serviceExtensionManager
-        .getServiceExtensionState(extensions.brightnessMode.extension);
+    final serviceManager = serviceConnection.serviceManager;
+    late ValueListenable<ServiceExtensionState> state;
 
-    void updateFromDeviceState(ServiceExtensionState state) {
-      final newBrightness = !state.enabled || state.value == null
+    void updateFromDeviceState() {
+      final newBrightness = !state.value.enabled || state.value.value == null
           ? BrightnessOverride.system
           : BrightnessOverride.values.firstWhere(
-              (b) => b.value == state.value,
+              (b) => b.value == state.value.value,
               orElse: () => BrightnessOverride.system,
             );
-      brightness.value = newBrightness;
+      _brightness.value = newBrightness;
     }
 
-    updateFromDeviceState(state.value);
-    addAutoDisposeListener(state, () => updateFromDeviceState(state.value));
+    // ServiceExtensionManager stops updating the state that it returned once
+    // the main isolate exits, such as during a hot restart, so look the state
+    // up again whenever the main isolate changes.
+    void listenToDeviceState() {
+      cancelListener(updateFromDeviceState);
+      state = serviceManager.serviceExtensionManager.getServiceExtensionState(
+        extensions.brightnessMode.extension,
+      );
+      addAutoDisposeListener(state, updateFromDeviceState);
+      updateFromDeviceState();
+    }
+
+    listenToDeviceState();
+    addAutoDisposeListener(
+      serviceManager.isolateManager.mainIsolate,
+      listenToDeviceState,
+    );
   }
 
-  void _onBrightnessChanged() {
-    final value = brightness.value;
-    unawaited(
-      serviceConnection.serviceManager.serviceExtensionManager
-          .setServiceExtensionState(
-            extensions.brightnessMode.extension,
-            enabled: value != BrightnessOverride.system,
-            value: value.value,
-          ),
-    );
+  /// Overrides the brightness of the app with [value], or stops overriding it
+  /// if [value] is [BrightnessOverride.system].
+  Future<void> setBrightness(BrightnessOverride value) {
+    return serviceConnection.serviceManager.serviceExtensionManager
+        .setServiceExtensionState(
+          extensions.brightnessMode.extension,
+          enabled: value != BrightnessOverride.system,
+          value: value.value,
+        );
   }
 
   void _onTextScaleChanged() {
@@ -144,7 +157,10 @@ class AccessibilityController extends DevToolsScreenController
   final screenId = ScreenMetaData.accessibility.id;
 
   // --- Accessibility Overrides State ---
-  final brightness = ValueNotifier<BrightnessOverride>(
+
+  /// The brightness that DevTools last set, or that the app last reported.
+  ValueListenable<BrightnessOverride> get brightness => _brightness;
+  final _brightness = ValueNotifier<BrightnessOverride>(
     BrightnessOverride.system,
   );
   final textScale = ValueNotifier<double>(1.0);
@@ -321,7 +337,7 @@ class AccessibilityController extends DevToolsScreenController
   @override
   void dispose() {
     unawaited(_disposeSemanticsOnApp());
-    brightness.dispose();
+    _brightness.dispose();
     textScale.dispose();
     boldText.dispose();
     screenReader.dispose();
