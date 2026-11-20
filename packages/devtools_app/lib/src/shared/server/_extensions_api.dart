@@ -13,7 +13,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions({
   _log.fine('refreshAvailableExtensions for vmServiceUri: $vmServiceUri');
   if (debugDevToolsExtensions) {
     return debugHandleRefreshAvailableExtensions(
-      includeRuntime: vmServiceUri != null && vmServiceUri.isNotEmpty,
+      includeRuntime: !vmServiceUri.isNullOrEmpty,
     );
   }
   if (isDevToolsServerAvailable) {
