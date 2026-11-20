@@ -34,10 +34,8 @@ void main() {
       resetDevToolsExtensionEnabledStates();
     });
 
-    test('initialize when connected', () async {
-      final service = ExtensionService(
-        fixedVmServiceUri: 'ws://127.0.0.1:8181/ws',
-      );
+    test('initialize with forVmService', () async {
+      final service = ExtensionService.forVmService('ws://127.0.0.1:8181/ws');
       expect(service.availableExtensions, isEmpty);
       expect(service.staticExtensions, isEmpty);
       expect(service.runtimeExtensions, isEmpty);
@@ -61,12 +59,12 @@ void main() {
       expect(ignoredRuntimeExtensions.length, 0);
     });
 
-    test('initialize with ignoreServiceConnection', () async {
+    test('initialize with forWorkspace', () async {
       when(
         mockServiceManager.connectedState,
       ).thenReturn(ValueNotifier(const ConnectedState(false)));
 
-      final service = ExtensionService(ignoreServiceConnection: true);
+      final service = ExtensionService.forWorkspace();
       expect(service.staticExtensions, isEmpty);
       expect(service.runtimeExtensions, isEmpty);
       expect(service.availableExtensions, isEmpty);
@@ -86,9 +84,7 @@ void main() {
     });
 
     test('setExtensionEnabledState', () async {
-      final service = ExtensionService(
-        fixedVmServiceUri: 'ws://127.0.0.1:8181/ws',
-      );
+      final service = ExtensionService.forVmService('ws://127.0.0.1:8181/ws');
       await service.initialize();
       expect(service.staticExtensions.length, 4);
       expect(service.runtimeExtensions.length, 3);

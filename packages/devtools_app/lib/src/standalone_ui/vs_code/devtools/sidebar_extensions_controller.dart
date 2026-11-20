@@ -169,15 +169,18 @@ class SidebarDevToolsExtensionsController extends DisposableController
     Uri? projectRootUri, {
     String? vmServiceUri,
   }) async {
-    final extensionService = projectRootUri == null
+    assert(
+      (projectRootUri == null) == (vmServiceUri == null),
+      'projectRootUri ($projectRootUri) and vmServiceUri ($vmServiceUri) '
+      'must either both be null (workspace lookup) or both be non-null '
+      '(debug session lookup).',
+    );
+    final extensionService = vmServiceUri == null
         ?
-          // A null [projectRootUri] indicates that this is an extensions lookup
-          // for the entire workspace, not a debug session with a fixed root URI.
-          ExtensionService(ignoreServiceConnection: true)
-        : ExtensionService(
-            fixedVmServiceUri: vmServiceUri,
-            ignoreServiceConnection: true,
-          );
+          // A null [vmServiceUri] indicates a static-only extensions lookup for
+          // the workspace, rather than a lookup for a specific debug session.
+          ExtensionService.forWorkspace()
+        : ExtensionService.forVmService(vmServiceUri);
     assert(
       !_extensionServiceByRootUri.containsKey(projectRootUri),
       'The initialization for the ExtensionService for root uri '

@@ -36,7 +36,7 @@ void main() {
 
       setGlobal(
         ExtensionService,
-        ExtensionService(fixedVmServiceUri: 'ws://127.0.0.1:8181/ws'),
+        ExtensionService.forVmService('ws://127.0.0.1:8181/ws'),
       );
       await extensionService.initialize();
       expect(extensionService.staticExtensions.length, 4);

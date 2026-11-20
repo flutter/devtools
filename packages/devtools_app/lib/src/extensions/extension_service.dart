@@ -34,21 +34,35 @@ typedef DevToolsExtensionsGroup = ({
 
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {
-  ExtensionService({
-    this.fixedVmServiceUri,
-    this.ignoreServiceConnection = false,
-  });
+  /// Creates an [ExtensionService] that detects DevTools extensions for the
+  /// currently connected VM service (via `serviceConnection.serviceManager`)
+  /// as well as static extensions from DTD project roots.
+  ExtensionService()
+    : _fixedVmServiceUri = null,
+      _useGlobalServiceConnection = true;
+
+  /// Creates an [ExtensionService] that detects DevTools extensions for a
+  /// specific, fixed [vmServiceUri] as well as static extensions from DTD
+  /// project roots, without listening to the global `serviceConnection`.
+  ExtensionService.forVmService(String vmServiceUri)
+    : _fixedVmServiceUri = vmServiceUri,
+      _useGlobalServiceConnection = false;
+
+  /// Creates an [ExtensionService] that only detects static DevTools
+  /// extensions for the IDE workspace (via DTD project roots), without using
+  /// any VM service connection.
+  ExtensionService.forWorkspace()
+    : _fixedVmServiceUri = null,
+      _useGlobalServiceConnection = false;
 
   /// The fixed (unchanging) VM service URI for the application this
-  /// [ExtensionService] will manage DevTools extensions for.
-  ///
-  /// When null, the VM service URI will be retrieved from the
-  /// `serviceConnection.serviceManager`'s currently connected app.
-  final String? fixedVmServiceUri;
+  /// [ExtensionService] will manage DevTools extensions for, if constructed via
+  /// [ExtensionService.forVmService].
+  final String? _fixedVmServiceUri;
 
-  /// Whether to ignore the VM service connection for the context of this
-  /// service.
-  final bool ignoreServiceConnection;
+  /// Whether this service should track the global
+  /// `serviceConnection.serviceManager` for the currently connected app.
+  final bool _useGlobalServiceConnection;
 
   /// A listenable for the current set of DevTools extensions.
   ///
@@ -132,9 +146,8 @@ class ExtensionService extends DisposableController
     cancelListeners();
 
     // We only need to add VM service manager related listeners when we are
-    // interacting with the currently connected app (i.e. when
-    // [fixedVmServiceUri] is null).
-    if (fixedVmServiceUri == null && !ignoreServiceConnection) {
+    // tracking the currently connected app via the global service connection.
+    if (_useGlobalServiceConnection) {
       addAutoDisposeListener(
         serviceConnection.serviceManager.connectedState,
         () async {
@@ -171,9 +184,9 @@ class ExtensionService extends DisposableController
     _reset();
 
     String? vmServiceUri;
-    if (fixedVmServiceUri != null) {
-      vmServiceUri = fixedVmServiceUri;
-    } else if (!ignoreServiceConnection &&
+    if (_fixedVmServiceUri != null) {
+      vmServiceUri = _fixedVmServiceUri;
+    } else if (_useGlobalServiceConnection &&
         serviceConnection.serviceManager.connectedState.value.connected &&
         serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
             null) {
