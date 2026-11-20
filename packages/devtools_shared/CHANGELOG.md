@@ -35,6 +35,12 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
   recursive directory creation when looking up `devtools_options.yaml`.
 * Restrict `normalizeVmServiceUri` to allowed VM service schemes (`http`, `https`,
     `ws`, `wss`, `sse`, `sses`) and loopback hosts (`localhost`, `127.0.0.0/8`, `::1`).
+* Add `ExtensionsApi.vmServiceUriPropertyName`, deprecate
+  `ExtensionsApi.packageRootUriPropertyName`, and resolve the connected
+  application's package root on the server from `vmServiceUri` in
+  `api/serveAvailableExtensions`.
+* Add `VmServicePackageRootExtension.rootPackageDirectoryForMainIsolate` to
+  `devtools_shared.dart`.
 
 # 14.0.0
 

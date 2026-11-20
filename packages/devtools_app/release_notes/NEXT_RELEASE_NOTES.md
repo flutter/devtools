@@ -114,6 +114,10 @@ TODO: Remove this section if there are not any updates.
 * Validated DevTools extension version strings and prevented extension
   identifier collisions when serving extension assets.
   [#10090](https://github.com/flutter/devtools/pull/10090)
+* Resolved the connected application's package root on the DevTools server via
+  the VM service URI when serving DevTools extensions instead of accepting a
+  package root file URI from the client.
+  [#10097](https://github.com/flutter/devtools/pull/10097)
 
 ## Advanced developer mode updates
 

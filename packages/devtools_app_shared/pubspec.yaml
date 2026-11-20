@@ -22,7 +22,6 @@ dependencies:
   logging: ^1.1.1
   material_ui: ^1.4.0
   meta: ^1.9.1
-  path: ^1.8.0
   pointer_interceptor: ^0.10.1+1
   url_launcher: ^6.1.0
   vm_service: '>=13.0.0 <16.0.0'

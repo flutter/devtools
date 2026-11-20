@@ -113,10 +113,17 @@ abstract class ExtensionsApi {
       '${apiPrefix}serveAvailableExtensions';
 
   /// The property name for the query parameter passed along with
+  /// [apiServeAvailableExtensions] requests to the server that specifies the
+  /// VM service URI of the connected application whose runtime extensions are
+  /// being queried.
+  static const vmServiceUriPropertyName = 'vmServiceUri';
+
+  /// The property name for the query parameter passed along with
   /// extension-related requests to the server that describes the package root
   /// for the app whose extensions are being queried.
   ///
   /// This field is a `file://` URI string and NOT a path.
+  @Deprecated('Use vmServiceUriPropertyName instead.')
   static const packageRootUriPropertyName = 'packageRootUri';
 
   /// The property name for the query parameter, passed along with

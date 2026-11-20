@@ -790,6 +790,21 @@ void main() {
               disconnectResponse.uri!.toFilePath(),
               endsWith(app!.directory.path),
             );
+
+            // Disconnecting again should be a no-op since the cache entry was
+            // already removed.
+            final secondDisconnectResponse =
+                await server.VmServiceHandler.detectRootPackageForVmService(
+                  vmServiceUriAsString: vmServiceUriString!,
+                  vmServiceUri: vmServiceUri,
+                  connected: false,
+                  dtd: testDtdConnection!,
+                );
+            expect(secondDisconnectResponse, (
+              success: true,
+              message: null,
+              uri: null,
+            ));
           },
         );
       });

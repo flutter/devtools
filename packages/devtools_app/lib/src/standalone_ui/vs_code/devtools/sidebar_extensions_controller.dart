@@ -133,17 +133,22 @@ class SidebarDevToolsExtensionsController extends DisposableController
       );
     }
 
-    // Pass a null project root URI to initialize the set of extensions
-    // available for the entire workspace.
-    await _detectExtensions(null);
+    // Initialize extensions available for the entire workspace.
+    await _detectExtensions();
   }
 
   Future<void> _initExtensionsForDebugSessions() async {
     for (final debugSession in _debugSessions.values) {
       final fileUri = debugSession.projectRootFileUri;
-      if (fileUri != null && !_searchedProjectRoots.contains(fileUri)) {
+      final vmServiceUri = debugSession.vmServiceUri;
+      if (fileUri != null &&
+          vmServiceUri != null &&
+          !_searchedProjectRoots.contains(fileUri)) {
         _searchedProjectRoots.add(fileUri);
-        await _detectExtensions(fileUri);
+        await _detectExtensions(
+          projectRootUri: fileUri,
+          vmServiceUri: vmServiceUri,
+        );
       }
     }
   }
@@ -162,16 +167,19 @@ class SidebarDevToolsExtensionsController extends DisposableController
   // the workspace or for a debug session changes. We will likely need some
   // watch event from the IDE or analysis server to signal when any
   // package_config.json file in the workspace changes.
-  Future<void> _detectExtensions(Uri? projectRootUri) async {
-    final extensionService = projectRootUri == null
-        ?
-          // A null [projectRootUri] indicates that this is an extensions lookup
-          // for the entire workspace, not a debug session with a fixed root URI.
-          ExtensionService(ignoreServiceConnection: true)
-        : ExtensionService(
-            fixedAppRoot: projectRootUri,
-            ignoreServiceConnection: true,
-          );
+  Future<void> _detectExtensions({
+    Uri? projectRootUri,
+    String? vmServiceUri,
+  }) async {
+    assert(
+      (projectRootUri == null) == (vmServiceUri == null),
+      'projectRootUri ($projectRootUri) and vmServiceUri ($vmServiceUri) '
+      'must either both be null (workspace lookup) or both be non-null '
+      '(debug session lookup).',
+    );
+    final extensionService = vmServiceUri == null
+        ? ExtensionService.forWorkspace()
+        : ExtensionService(fixedVmServiceUri: vmServiceUri);
     assert(
       !_extensionServiceByRootUri.containsKey(projectRootUri),
       'The initialization for the ExtensionService for root uri '

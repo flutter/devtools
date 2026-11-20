@@ -23,7 +23,6 @@ import '../extensions/extension_enablement.dart';
 import '../extensions/extension_manager.dart';
 import '../service/service.dart';
 import '../service_utils.dart';
-import '../utils/file_utils.dart';
 import 'devtools_store.dart';
 import 'file_system.dart';
 import 'flutter_store.dart';
