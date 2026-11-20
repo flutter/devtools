@@ -91,6 +91,12 @@ abstract class BreakpointAndSourcePosition
 
   bool get resolved => breakpoint.resolved ?? false;
 
+  /// Whether this breakpoint pauses the isolate when it is hit.
+  ///
+  /// A missing value is treated as enabled, since breakpoints are enabled when
+  /// they are added.
+  bool get enabled => breakpoint.enabled ?? true;
+
   ScriptRef? get scriptRef;
 
   String? get scriptUri;
