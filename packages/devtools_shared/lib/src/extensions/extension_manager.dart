@@ -10,6 +10,7 @@ import 'package:extension_discovery/extension_discovery.dart';
 import 'package:path/path.dart' as path;
 
 import '../common.dart';
+import '../utils/file_utils.dart';
 import 'constants.dart';
 import 'extension_model.dart';
 
@@ -151,8 +152,7 @@ class ExtensionsManager {
     for (final extension in extensions) {
       final config = extension.config;
 
-      if (extension.rootUri.scheme != 'file' ||
-          extension.rootUri.host.isNotEmpty) {
+      if (!isValidLocalFileUri(extension.rootUri)) {
         parsingErrors.writeln(
           'Ignoring extension from package "${extension.package}": invalid '
           'package root URI "${extension.rootUri}" must be a file:// URI '
@@ -361,11 +361,7 @@ class ExtensionsManager {
 
   void _assertUriFormat(String? uriString) {
     if (uriString == null) return;
-    final uri = Uri.tryParse(uriString);
-    if (!uriString.startsWith('file://') ||
-        uri == null ||
-        uri.scheme != 'file' ||
-        uri.host.isNotEmpty) {
+    if (!isValidLocalFileUriString(uriString)) {
       throw ArgumentError.value(
         uriString,
         'uriString',
