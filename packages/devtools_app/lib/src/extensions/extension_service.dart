@@ -187,9 +187,7 @@ class ExtensionService extends DisposableController
     if (_fixedVmServiceUri != null) {
       vmServiceUri = _fixedVmServiceUri;
     } else if (_useGlobalServiceConnection &&
-        serviceConnection.serviceManager.connectedState.value.connected &&
-        serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
-            null) {
+        serviceConnection.serviceManager.connectedState.value.connected) {
       vmServiceUri = serviceConnection.serviceManager.serviceUri;
     }
 
