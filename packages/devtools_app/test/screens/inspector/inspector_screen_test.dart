@@ -11,6 +11,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_settings_dialog.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/screens/inspector/widget_details.dart';
+import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/ui/tab.dart';
@@ -253,6 +254,24 @@ void main() {
 
       // TODO(jacobr): also verify that the service extension buttons look
       // visually disabled.
+    },
+  );
+
+  testWidgetsWithWindowSize(
+    'shows the platform override dropdown',
+    windowSize,
+    (WidgetTester tester) async {
+      final platformExtension = extensions.togglePlatformMode.extension;
+      fakeExtensionManager.extensionValueOnDevice = {
+        platformExtension: 'android',
+      };
+      await fakeExtensionManager.fakeAddServiceExtension(platformExtension);
+      await fakeExtensionManager.fakeFrame();
+
+      await tester.pumpWidget(buildInspectorScreen());
+      await tester.pump();
+      expect(find.byKey(PlatformOverrideDropdown.dropdownKey), findsOneWidget);
+      expect(find.text('Android'), findsOneWidget);
     },
   );
 

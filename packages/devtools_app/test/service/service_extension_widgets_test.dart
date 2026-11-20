@@ -253,6 +253,67 @@ void main() {
       expect(checkboxWidget.onChanged, isNull);
     });
   });
+
+  group('PlatformOverrideDropdown', () {
+    final platformExtension = extensions.togglePlatformMode.extension;
+    late FakeServiceExtensionManager fakeExtensionManager;
+
+    setUp(() async {
+      fakeExtensionManager =
+          mockServiceManager.serviceExtensionManager
+              as FakeServiceExtensionManager;
+      await fakeExtensionManager.fakeFrame();
+    });
+
+    Future<void> pumpDropdown(WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(const Scaffold(body: Center(child: PlatformOverrideDropdown()))),
+      );
+    }
+
+    testWidgets('overrides the platform of the connected app', (
+      WidgetTester tester,
+    ) async {
+      fakeExtensionManager.extensionValueOnDevice = {
+        platformExtension: 'android',
+      };
+      await fakeExtensionManager.fakeAddServiceExtension(platformExtension);
+      await pumpDropdown(tester);
+      expect(find.text('Android'), findsOneWidget);
+
+      await tester.tap(find.byKey(PlatformOverrideDropdown.dropdownKey));
+      await tester.pumpAndSettle(); // finish the menu animation
+      expect(find.text('Fuchsia'), findsNothing);
+      expect(find.text('Windows'), findsOneWidget);
+      // The open menu shows each item again, so tap the last match.
+      await tester.tap(find.text('iOS').last);
+      await tester.pumpAndSettle(); // finish the menu animation
+
+      expect(
+        fakeExtensionManager.extensionValueOnDevice[platformExtension],
+        'iOS',
+      );
+      expect(find.text('iOS'), findsOneWidget);
+    });
+
+    testWidgets('lists a platform that DevTools does not know about', (
+      WidgetTester tester,
+    ) async {
+      fakeExtensionManager.extensionValueOnDevice = {
+        platformExtension: 'newPlatform',
+      };
+      await fakeExtensionManager.fakeAddServiceExtension(platformExtension);
+      await pumpDropdown(tester);
+      expect(find.text('newPlatform'), findsOneWidget);
+    });
+
+    testWidgets('is hidden when the service extension is not available', (
+      WidgetTester tester,
+    ) async {
+      await pumpDropdown(tester);
+      expect(find.byKey(PlatformOverrideDropdown.dropdownKey), findsNothing);
+    });
+  });
 }
 
 base class _UnavailableServiceExtensionManager

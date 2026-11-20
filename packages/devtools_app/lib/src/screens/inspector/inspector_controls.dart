@@ -72,6 +72,8 @@ class InspectorServiceExtensionButtonGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
+        const PlatformOverrideDropdown(),
+        const SizedBox(width: defaultSpacing),
         ServiceExtensionButtonGroup(
           fillColor: Theme.of(context).colorScheme.activeToggleButtonColor,
           minScreenWidthForText: serviceExtensionButtonsIncludeTextWidth,
