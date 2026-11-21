@@ -93,6 +93,13 @@ class ViewMetricsOverrideClient extends DisposableController
   /// call before it.
   Future<void> _lastCall = Future<void>.value();
 
+  /// Completes at the next change of the main isolate, or when this client is
+  /// disposed.
+  ///
+  /// The VM service never answers a call that is in flight when its isolate
+  /// exits, so the futures that [_queue] returns also complete when this does.
+  Completer<void> _nextMainIsolateChange = Completer<void>();
+
   /// Overrides the metrics in [metrics] for the implicit view, and keeps the
   /// other [overrides] that the view has.
   ///
@@ -105,15 +112,17 @@ class ViewMetricsOverrideClient extends DisposableController
   ///
   /// Does nothing while the extension is not [available]. A call that fails is
   /// logged, and leaves [overrides] as the app last reported them. The
-  /// returned future completes once the app answers. It never completes if a
-  /// hot restart interrupts the call, because the VM service never answers it.
+  /// returned future completes once the app answers, or once a hot restart
+  /// interrupts the call.
   Future<void> updateOverrides(Map<String, Object?> metrics) =>
       _queue(() => _write(metrics));
 
   /// Runs [call] after the calls queued before it, unless the main isolate has
   /// changed or the extension is not [available] by then.
   ///
-  /// Logs what [call] throws, so that the calls after it still run.
+  /// Logs what [call] throws, so that the calls after it still run. The
+  /// returned future completes when [call] is done, or at the next change of
+  /// the main isolate, whichever comes first.
   Future<void> _queue(Future<void> Function() call) {
     final isolateGeneration = _isolateGeneration;
     _lastCall = _lastCall.then((_) async {
@@ -132,7 +141,7 @@ class ViewMetricsOverrideClient extends DisposableController
         );
       }
     });
-    return _lastCall;
+    return Future.any<void>([_lastCall, _nextMainIsolateChange.future]);
   }
 
   Future<void> _read() => _call(const {});
@@ -219,8 +228,11 @@ class ViewMetricsOverrideClient extends DisposableController
   void _onMainIsolateChanged() {
     _isolateGeneration++;
     // The VM service never answers a call that is in flight when its isolate
-    // exits, so the calls for the new main isolate do not wait for older ones.
+    // exits, so the calls for the new main isolate do not wait for older ones,
+    // and neither do the callers of the older ones.
     _lastCall = Future<void>.value();
+    _nextMainIsolateChange.complete();
+    _nextMainIsolateChange = Completer<void>();
     _overridesReported = false;
 
     final serviceManager = serviceConnection.serviceManager;
@@ -245,6 +257,7 @@ class ViewMetricsOverrideClient extends DisposableController
 
   @override
   void dispose() {
+    _nextMainIsolateChange.complete();
     _available.dispose();
     _overrides.dispose();
     super.dispose();

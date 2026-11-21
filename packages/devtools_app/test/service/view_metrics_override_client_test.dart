@@ -235,6 +235,20 @@ void main() {
       });
     });
 
+    test('reads the registry of the new isolate after a hot restart', () async {
+      await extension.register();
+      await pumpEventQueue();
+      await client.updateOverrides({'boldText': true});
+      expect(client.overrides.value, {'boldText': true});
+
+      // A hot restart empties the registry, and the client reads the new one.
+      await extension.hotRestart();
+      await pumpEventQueue();
+
+      expect(client.available.value, isTrue);
+      expect(client.overrides.value, isEmpty);
+    });
+
     test(
       'does not wait for calls that an exited isolate never answers',
       () async {
@@ -242,8 +256,14 @@ void main() {
         await pumpEventQueue();
         await client.updateOverrides({'boldText': true});
         extension.holdCalls = true;
-        unawaited(client.updateOverrides({'highContrast': true}));
+        var interruptedWriteDone = false;
+        unawaited(
+          client
+              .updateOverrides({'highContrast': true})
+              .whenComplete(() => interruptedWriteDone = true),
+        );
         await pumpEventQueue();
+        expect(interruptedWriteDone, isFalse);
 
         // The app restarts before it answers the write, which empties the
         // registry.
@@ -252,6 +272,9 @@ void main() {
         unawaited(client.updateOverrides({'accessibleNavigation': true}));
         await pumpEventQueue();
 
+        // Neither the caller of the write nor the calls after it wait for the
+        // answer, which never comes.
+        expect(interruptedWriteDone, isTrue);
         expect(extension.registry, {
           '0': {'accessibleNavigation': true},
         });
