@@ -70,3 +70,6 @@ const getIssuesAndSemanticsTree =
 
 /// Service extension to dispose semantics on the connected app.
 const disposeSemantics = 'ext.flutter.accessibility.disposeSemantics';
+
+/// Service extension to override the view metrics of the connected app.
+const viewMetricsOverride = 'ext.flutter.viewMetricsOverride';
