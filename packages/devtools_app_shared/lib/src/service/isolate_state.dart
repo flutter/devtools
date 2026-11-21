@@ -47,7 +47,7 @@ class IsolateState {
     _isolateNow = null;
     _isolateLoadCompleter.safeComplete(
       null,
-      () => _isolateLoadCompleter = Completer()..complete(null),
+      () => _isolateLoadCompleter = Completer()..complete(),
     );
     _isPaused.dispose();
   }

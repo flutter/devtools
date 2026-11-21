@@ -45,7 +45,7 @@ class ValidateExtensionCommand extends Command {
     try {
       // TODO(kenz): try to use the the existing pub validator for this check. See
       // https://github.com/dart-lang/pub/blob/master/lib/src/validator/devtools_extension.dart.
-      _validateDirectoryContents(packagePath);
+      final packageName = _validateDirectoryContents(packagePath);
 
       // Try to parse the config.yaml file. This will throw an exception if there
       // are parsing errors.
@@ -53,7 +53,7 @@ class ValidateExtensionCommand extends Command {
         ..._configAsMap(packagePath),
         // These are generated on the DevTools server, so pass in stubbed
         // values for the sake of validation.
-        DevToolsExtensionConfig.packageNameKey: '',
+        DevToolsExtensionConfig.packageNameKey: packageName,
         DevToolsExtensionConfig.extensionAssetsPathKey: '',
         DevToolsExtensionConfig.devtoolsOptionsUriKey: '',
         DevToolsExtensionConfig.isPubliclyHostedKey: 'false',
@@ -63,6 +63,8 @@ class ValidateExtensionCommand extends Command {
       // If there are no exceptions at this point, the extension has successfully
       // been validated.
       stdout.writeln('Extension validation successful');
+    } on ExtensionValidationException catch (e) {
+      _logError(e.message);
     } on StateError catch (e) {
       _logError(e.message);
     } on FileSystemException catch (e) {
@@ -73,7 +75,18 @@ class ValidateExtensionCommand extends Command {
   }
 }
 
-void _validateDirectoryContents(String packagePath) {
+/// Exception thrown when validating a DevTools extension fails.
+class ExtensionValidationException implements Exception {
+  const ExtensionValidationException(this.message);
+
+  /// The message describing why extension validation failed.
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+String _validateDirectoryContents(String packagePath) {
   final packageDirectory = Directory(packagePath);
   if (!packageDirectory.existsSync()) {
     throw FileSystemException('${packageDirectory.path} directory not found');
@@ -119,16 +132,15 @@ See ${ValidateExtensionCommand.docUrl}.
 ''');
   }
 
-  // Ensure the extension's name is a valid identifier.
-  final configYaml = _configAsMap(packagePath);
-  final configName = configYaml['name'];
-  final underscoresAndLetters = RegExp(r'^[a-z0-9_]*$');
-  if (configName is! String || !underscoresAndLetters.hasMatch(configName)) {
-    throw StateError(
-      'The "name" field in config.yaml should only contain lowercase letters, '
-      'numbers, and underscores but instead was "$configName".',
+  // Ensure the pubspec.yaml contains a valid package name.
+  final pubspecYaml = loadYaml(pubspecFile.readAsStringSync());
+  final packageName = pubspecYaml is YamlMap ? pubspecYaml['name'] : null;
+  if (packageName is! String || packageName.isEmpty) {
+    throw const ExtensionValidationException(
+      'The pubspec.yaml file must contain a valid "name" field.',
     );
   }
+  return packageName;
 }
 
 Map<String, Object?> _configAsMap(String packagePath) {

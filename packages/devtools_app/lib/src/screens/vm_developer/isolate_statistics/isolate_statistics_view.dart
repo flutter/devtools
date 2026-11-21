@@ -24,7 +24,11 @@ import 'isolate_statistics_view_controller.dart';
 /// isolate.
 class IsolateStatisticsView extends VMDeveloperView {
   const IsolateStatisticsView()
-    : super(title: 'Isolates', icon: Icons.bar_chart);
+    : super(
+        title: 'Isolates',
+        icon: Icons.bar_chart,
+        gaEvent: gac.VmToolsEvents.isolateStatistics,
+      );
 
   @override
   bool get showIsolateSelector => true;

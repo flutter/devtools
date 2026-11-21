@@ -12,6 +12,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import '../service/connected_app/connection_info.dart';
+import '../service/message_port_connection.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/config_specific/import_export/import_export.dart';
@@ -274,7 +275,8 @@ class _ConnectInputState extends State<ConnectInput> with BlockingActionMixin {
       await routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notificationService.push('Successfully connected to $shortUri.');
-    } else if (normalizeVmServiceUri(uri) == null) {
+    } else if (parseMessagePortUri(uri) == null &&
+        normalizeVmServiceUri(uri) == null) {
       notificationService.push(
         'Failed to connect to the VM Service at "${connectDialogController.text}".\n'
         'The link was not valid.',

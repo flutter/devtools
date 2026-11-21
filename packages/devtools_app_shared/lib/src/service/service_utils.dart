@@ -88,6 +88,6 @@ Future<void> forEachIsolateHelper(
 ) async {
   final vm = await vmService.getVM();
   if (vm.isolates case final vmIsolates? when vmIsolates.isNotEmpty) {
-    await [for (final isolate in vmIsolates) callback(isolate)].wait;
+    await Future.wait([for (final isolate in vmIsolates) callback(isolate)]);
   }
 }

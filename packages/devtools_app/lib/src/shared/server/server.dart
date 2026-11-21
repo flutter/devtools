@@ -99,7 +99,10 @@ Future<Response?> request(String url) async {
   Response? response;
 
   try {
-    response = await post(buildDevToolsServerRequestUri(url));
+    response = await post(
+      buildDevToolsServerRequestUri(url),
+      headers: const {devToolsRequestHeader: '1'},
+    );
   } catch (_) {}
 
   return response;

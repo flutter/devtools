@@ -15,7 +15,12 @@ class TestFlutterApp extends IntegrationTestApp {
   TestFlutterApp({
     String appPath = 'test/test_infra/fixtures/flutter_app',
     TestAppDevice appDevice = TestAppDevice.flutterTester,
-  }) : super(appPath, appDevice);
+    bool headless = false,
+  }) : _headless = headless,
+       super(appPath, appDevice);
+
+  /// Whether to run web tests headlessly.
+  final bool _headless;
 
   String? _currentRunningAppId;
 
@@ -30,6 +35,8 @@ class TestFlutterApp extends IntegrationTestApp {
         testAppDevice.argName,
         // Do not serve DevTools from Flutter Tools.
         '--no-devtools',
+        if (_headless && testAppDevice == TestAppDevice.flutterChrome)
+          '--web-run-headless',
       ],
       workingDirectory: testAppPath,
     );

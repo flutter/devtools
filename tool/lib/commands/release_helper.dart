@@ -134,6 +134,8 @@ class ReleaseHelperCommand extends Command {
           'create',
           '--repo',
           'flutter/devtools',
+          '--head',
+          releaseBranch,
           '--draft',
           '--title',
           commitMessage,

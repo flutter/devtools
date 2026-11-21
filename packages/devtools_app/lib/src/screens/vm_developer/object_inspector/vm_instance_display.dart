@@ -171,7 +171,7 @@ class DisplayProvider extends StatelessWidget {
               children: textSpansFromAnsi(
                 variable.text ?? '',
                 theme.subtleFixedFontStyle,
-                isDarkTheme: theme.isDarkTheme,
+                backgroundColor: theme.colorScheme.surface,
               ),
             ),
           ),

@@ -75,7 +75,7 @@ class _DisplayProviderState extends State<DisplayProvider> {
             children: textSpansFromAnsi(
               widget.variable.text!,
               theme.subtleFixedFontStyle,
-              isDarkTheme: theme.isDarkTheme,
+              backgroundColor: theme.colorScheme.surface,
             ),
           ),
         ),

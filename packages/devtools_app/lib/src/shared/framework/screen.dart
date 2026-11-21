@@ -9,6 +9,7 @@ library;
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/service_extensions.dart' as extensions;
 import 'package:devtools_app_shared/shared.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
@@ -104,13 +105,6 @@ enum ScreenMetaData {
     icon: Icons.accessibility,
     requiresFlutter: true,
   ),
-  provider(
-    'provider',
-    title: 'Provider',
-    icon: Icons.attach_file,
-    requiresLibrary: 'package:provider/',
-    requiresDebugBuild: true,
-  ),
   appSize(
     'app-size',
     title: 'App Size',
@@ -155,6 +149,7 @@ enum ScreenMetaData {
     this.requiresAdvancedDeveloperMode = false,
     this.supportsWebServerDevice = false,
     this.worksWithOfflineData = false,
+    // ignore: unused_element_parameter, this is used in internally.
     this.requiresLibrary,
     this.tutorialVideoTimestamp,
     this.tutorialVideoUrl,
@@ -564,6 +559,18 @@ abstract class Screen {
     return (show: false, disabledReason: ScreenDisabledReason.requiresFlutter);
   }
   if (screen.requiresDebugBuild && connectedApp.isProfileBuildNow == true) {
+    // Build mode is inferred from expression evaluation. A debug-only service
+    // extension identifies a debug app whose expressions could not be compiled,
+    // for example when connecting without Flutter Tools.
+    if (connectedApp.isFlutterAppNow == true &&
+        serviceManager.serviceExtensionManager.isServiceExtensionAvailable(
+          extensions.debugAllowBanner.extension,
+        )) {
+      return (
+        show: false,
+        disabledReason: ScreenDisabledReason.expressionEvaluationUnavailable,
+      );
+    }
     _log.finest('screen requires debug build: returning false');
     return (
       show: false,
@@ -604,6 +611,12 @@ enum ScreenDisabledReason {
   requiresDartLibrary(null),
   requiresDartVm('requires the Dart VM, but it is not available.'),
   requiresDebugBuild('only supports debug builds.'),
+
+  /// A Flutter debug app was detected, but expression evaluation failed.
+  expressionEvaluationUnavailable(
+    'could not evaluate expressions. Try running "flutter attach" and '
+    'reconnecting DevTools.',
+  ),
   requiresFlutter('only supports Flutter applications.'),
   requiresAdvancedDeveloperMode(
     'only works when Advanced Developer Mode is enabled',

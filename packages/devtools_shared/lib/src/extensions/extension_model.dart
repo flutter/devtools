@@ -51,13 +51,25 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
       // Note that the field [requiresConnectionKey] is not required for
       // this check because it is optional.
     }) {
-      final underscoresAndLetters = RegExp(r'^[a-z0-9_]*$');
-      if (!underscoresAndLetters.hasMatch(name)) {
+      if (!_validPackageNameRegex.hasMatch(name)) {
         throw StateError(
           'The "name" field in the extension config.yaml should only contain '
           'lowercase letters, numbers, and underscores but instead was '
           '"$name". This should be a valid Dart package name that matches the '
           'package name this extension belongs to.',
+        );
+      }
+      if (packageName.isNotEmpty &&
+          !_validPackageNameRegex.hasMatch(packageName)) {
+        throw StateError(
+          'The "packageName" field should only contain lowercase letters, '
+          'numbers, and underscores but instead was "$packageName".',
+        );
+      }
+      if (!_validVersionRegex.hasMatch(version)) {
+        throw StateError(
+          'The "version" field in the extension config.yaml must be a valid '
+          'semantic version (e.g. "1.0.0"), but instead was "$version".',
         );
       }
 
@@ -113,6 +125,16 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
       }
     }
   }
+
+  /// Regular expression matching valid Dart package names (lowercase letters,
+  /// digits, and underscores).
+  static final _validPackageNameRegex = RegExp(r'^[a-z0-9_]+$');
+
+  /// Regular expression matching valid semantic version strings (disallowing
+  /// underscores, slashes, and whitespace).
+  static final _validVersionRegex = RegExp(
+    r'^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$',
+  );
 
   // The following keys are required in the extension's config.yaml file.
   static const nameKey = 'name';
@@ -241,9 +263,16 @@ class DevToolsExtensionConfig implements Comparable<DevToolsExtensionConfig> {
 
   String get displayName => name.toLowerCase();
 
-  String get identifier => packageName == displayName
+  /// The unique identifier for this extension configuration, used to look up
+  /// and serve extension assets.
+  ///
+  /// When [packageName] is non-empty and differs from [displayName], a hyphen
+  /// (`-`) separator is used between [packageName] and [displayName]. Because
+  /// neither [packageName] nor [displayName] may contain `-`, and [version]
+  /// may not contain `_`, this identifier is guaranteed to be collision-free.
+  String get identifier => packageName.isEmpty || packageName == displayName
       ? '${displayName}_$version'
-      : '${packageName}_${displayName}_$version';
+      : '$packageName-${displayName}_$version';
 
   String get analyticsSafeName => isPubliclyHosted ? name : 'private';
 
