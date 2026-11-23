@@ -45,6 +45,7 @@ extension _ExtensionsApiHandler on Never {
               vmServiceUri: vmServiceUri,
               connected: true,
               dtd: dartToolingDaemon,
+              cacheResult: false,
             );
         if (!detectRootResponse.success) {
           warnings.add(

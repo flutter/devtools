@@ -156,7 +156,19 @@ extension VmServicePackageRootExtension on VmService {
           'packageConfigLocation',
         );
         if (evalResult is InstanceRef) {
-          final packageConfig = evalResult.valueAsString;
+          var packageConfig = evalResult.valueAsString;
+          if (evalResult.valueAsStringIsTruncated == true &&
+              evalResult.id != null) {
+            final fullStringObj = await getObject(
+              isolateId,
+              evalResult.id!,
+              offset: 0,
+              count: evalResult.length,
+            );
+            if (fullStringObj is Instance) {
+              packageConfig = fullStringObj.valueAsString;
+            }
+          }
           final packageConfigSuffix = p.posix.join(
             '.dart_tool',
             'package_config.json',

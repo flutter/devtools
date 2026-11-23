@@ -10,12 +10,20 @@ extension VmServiceHandler on Never {
   /// Stores the calculated package roots for VM service connections that are
   /// initiated in [handleNotifyForVmServiceConnection].
   ///
-  /// This map is used to lookup package roots for a particular VM service when
+  /// Entries are populated when [detectRootPackageForVmService] is called with
+  /// `connected: true` and `cacheResult: true` (e.g., from
+  /// [handleNotifyForVmServiceConnection] when DevTools server started DTD).
+  ///
+  /// This map is used both to avoid redundant VM service lookups (including
+  /// from [_ExtensionsApiHandler.handleServeAvailableExtensions], which reads
+  /// from this cache without populating it since callers like
+  /// `ExtensionService(fixedVmServiceUri:)` do not send disconnect
+  /// notifications) and to look up the root to remove when
   /// [handleNotifyForVmServiceConnection] is called for a VM service disconnect
   /// in DevTools app.
   ///
-  /// If the Dart Tooling Daemon was not started by DevTools, this map will
-  /// never be used.
+  /// Entries are evicted on disconnect in [handleNotifyForVmServiceConnection]
+  /// even if the Dart Tooling Daemon was not started by DevTools.
   static final _packageRootsForVmServiceConnections = <String, Uri>{};
 
   /// Caches [rootPackageUri] for [vmServiceUriAsString] in tests.
@@ -58,10 +66,19 @@ extension VmServiceHandler on Never {
     final dtdUri = dtd?.localUri;
     final dtdSecret = dtd?.secret;
     if (dtdUri == null || dtdSecret == null) {
-      // If DevTools server did not start DTD, there is nothing for us to do.
-      // This assertion may change in the future if the DevTools server has
-      // other functionality that interacts with VM service connections from
-      // DevTools app clients.
+      // Even when DevTools server did not start DTD, evict any cached package
+      // root on disconnect so stale entries are not retained.
+      final connected = bool.tryParse(
+        queryParams[apiParameterVmServiceConnected]!,
+      );
+      if (connected == false) {
+        final vmServiceUri = normalizeVmServiceUri(
+          queryParams[apiParameterValueKey]!,
+        );
+        if (vmServiceUri != null) {
+          _packageRootsForVmServiceConnections.remove(vmServiceUri.toString());
+        }
+      }
       return api.success();
     }
 
@@ -135,6 +152,7 @@ extension VmServiceHandler on Never {
     required Uri vmServiceUri,
     required bool connected,
     required DartToolingDaemon? dtd,
+    bool cacheResult = true,
   }) async {
     final normalizedUriAsString = vmServiceUri.toString();
     final Uri rootPackageUri;
@@ -166,8 +184,10 @@ extension VmServiceHandler on Never {
           );
         }
         rootPackageUri = Uri.parse(root);
-        _packageRootsForVmServiceConnections[normalizedUriAsString] =
-            rootPackageUri;
+        if (cacheResult) {
+          _packageRootsForVmServiceConnections[normalizedUriAsString] =
+              rootPackageUri;
+        }
       } catch (e) {
         return (
           success: false,

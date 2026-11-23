@@ -4,6 +4,7 @@
 
 import 'package:devtools_shared/src/service_utils.dart';
 import 'package:test/test.dart';
+import 'package:vm_service/vm_service.dart';
 
 void main() {
   group('normalizeVmServiceUri', () {
@@ -124,4 +125,105 @@ void main() {
       expect(normalizeVmServiceUri('ftp://127.0.0.1:8181/'), isNull);
     });
   });
+
+  group('VmServicePackageRootExtension', () {
+    test('fetches full string when packageConfigLocation is truncated', () async {
+      final longPackageRoot =
+          'file:///Users/developer/${List.filled(6, 'very_long_directory_name').join('/')}/my_app';
+      final fullPackageConfigUri =
+          '$longPackageRoot/.dart_tool/package_config.json';
+      expect(fullPackageConfigUri.length, greaterThan(128));
+
+      final fakeVmService = _FakeVmServiceForTestTarget(
+        fullPackageConfigUri: fullPackageConfigUri,
+      );
+
+      final rootDir = await fakeVmService.rootPackageDirectoryForMainIsolate();
+      expect(rootDir, equals(longPackageRoot));
+      expect(fakeVmService.requestedFullStringOffset, equals(0));
+      expect(
+        fakeVmService.requestedFullStringCount,
+        equals(fullPackageConfigUri.length),
+      );
+    });
+  });
+}
+
+class _FakeVmServiceForTestTarget extends VmService {
+  _FakeVmServiceForTestTarget({required this.fullPackageConfigUri})
+    : super(const Stream.empty(), (_) {});
+
+  final String fullPackageConfigUri;
+  int? requestedFullStringOffset;
+  int? requestedFullStringCount;
+
+  static const _isolateId = 'isolates/1';
+  static const _rootLibId = 'libraries/1';
+  static const _packageConfigStringId = 'objects/package_config_string';
+
+  @override
+  Future<VM> getVM() async => VM(
+    isolates: [IsolateRef(id: _isolateId, name: 'main')],
+  );
+
+  @override
+  Future<Isolate> getIsolate(String isolateId) async => Isolate(
+    id: _isolateId,
+    name: 'main',
+    rootLib: LibraryRef(
+      id: _rootLibId,
+      uri: 'file:///tmp/test_runner/main.dart',
+    ),
+  );
+
+  @override
+  Future<UriList> lookupResolvedPackageUris(
+    String isolateId,
+    List<String> uris, {
+    bool? local,
+  }) async => UriList(uris: uris);
+
+  @override
+  Future<Response> evaluate(
+    String isolateId,
+    String targetId,
+    String expression, {
+    Map<String, String>? scope,
+    bool? disableBreakpoints,
+    String? idZoneId,
+  }) async {
+    expect(expression, equals('packageConfigLocation'));
+    return InstanceRef(
+      id: _packageConfigStringId,
+      kind: InstanceKind.kString,
+      valueAsString: fullPackageConfigUri.substring(0, 128),
+      valueAsStringIsTruncated: true,
+      length: fullPackageConfigUri.length,
+    );
+  }
+
+  @override
+  Future<Obj> getObject(
+    String isolateId,
+    String objectId, {
+    int? offset,
+    int? count,
+    String? idZoneId,
+  }) async {
+    if (objectId == _rootLibId) {
+      return Library(id: _rootLibId, dependencies: const []);
+    }
+    if (objectId == _packageConfigStringId) {
+      requestedFullStringOffset = offset;
+      requestedFullStringCount = count;
+      return Instance(
+        id: _packageConfigStringId,
+        kind: InstanceKind.kString,
+        valueAsString: fullPackageConfigUri,
+        valueAsStringIsTruncated: false,
+        length: fullPackageConfigUri.length,
+      );
+    }
+    throw UnimplementedError('Unexpected getObject($objectId)');
+  }
 }

@@ -603,6 +603,40 @@ void main() {
         expect(await response.readAsString(), isEmpty);
       });
 
+      test('evicts cached package root on disconnect when DTD is unavailable '
+          'or missing secret', () async {
+        addTearDown(server.VmServiceHandler.clearPackageRootsForTesting);
+
+        const vmServiceUriString = 'ws://127.0.0.1:8181/LEpVqqD7E_Y=/ws';
+        final vmServiceUri = normalizeVmServiceUri(vmServiceUriString)!;
+
+        for (final dtd in [null, DtdInfo(Uri.parse('ws://dtd/uri'))]) {
+          server.VmServiceHandler.setPackageRootForVmServiceForTesting(
+            vmServiceUriString,
+            Uri.parse('file:///Users/me/app'),
+          );
+
+          final response = await sendNotifyRequest(
+            dtd: dtd,
+            queryParameters: {
+              apiParameterValueKey: vmServiceUriString,
+              apiParameterVmServiceConnected: 'false',
+            },
+          );
+          expect(response.statusCode, HttpStatus.ok);
+
+          // Verify the cached entry was evicted by the disconnect notification.
+          final disconnectResponse =
+              await server.VmServiceHandler.detectRootPackageForVmService(
+                vmServiceUriAsString: vmServiceUriString,
+                vmServiceUri: vmServiceUri,
+                connected: false,
+                dtd: null,
+              );
+          expect(disconnectResponse, (success: true, message: null, uri: null));
+        }
+      });
+
       test('returns badRequest for invalid VM service argument', () async {
         final response = await sendNotifyRequest(
           dtd: DtdInfo(Uri.parse('ws://dtd/uri'), secret: 'fake_secret'),
@@ -711,9 +745,44 @@ void main() {
         });
 
         tearDown(() async {
+          server.VmServiceHandler.clearPackageRootsForTesting();
           await app?.kill();
           app = null;
           vmServiceUriString = null;
+        });
+
+        test('does not populate cache when cacheResult is false', () async {
+          final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
+          expect(vmServiceUri, isNotNull);
+          late server.DetectRootPackageResponse response;
+          await runWithRetry(
+            callback: () async {
+              response =
+                  await server.VmServiceHandler.detectRootPackageForVmService(
+                    vmServiceUriAsString: vmServiceUriString!,
+                    vmServiceUri: vmServiceUri!,
+                    connected: true,
+                    dtd: testDtdConnection!,
+                    cacheResult: false,
+                  );
+              if (!response.success) throw Exception('VM not ready');
+            },
+            maxRetries: 20,
+            retryDelay: const Duration(milliseconds: 500),
+          );
+          expect(response.success, true);
+          expect(response.message, isNull);
+          expect(response.uri, isNotNull);
+          expect(response.uri!.toFilePath(), endsWith(app!.directory.path));
+
+          final disconnectResponse =
+              await server.VmServiceHandler.detectRootPackageForVmService(
+                vmServiceUriAsString: vmServiceUriString!,
+                vmServiceUri: vmServiceUri!,
+                connected: false,
+                dtd: testDtdConnection!,
+              );
+          expect(disconnectResponse, (success: true, message: null, uri: null));
         });
 
         test('succeeds for a connect event', () async {
