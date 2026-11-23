@@ -208,33 +208,19 @@ void main() {
       }
     });
 
-    test('rejects dot and dot-dot path traversal segments', () {
-      for (final traversalString in const [
-        'file:///Users/me/../other_app',
-        'file:///Users/me/./my_app',
-        'file:///Users/me/%2e%2e/other_app',
-        'file:///Users/me/%2e/my_app',
-        'file:///C:/Users/me%5c..%5cother_app',
+    test('rejects encoded slashes, null bytes, and invalid file paths', () {
+      for (final invalid in [
         'file:///tmp/a%2f..%2fb',
         'file:///tmp/a%2Fb',
+        'file:///tmp/a%00b',
+        'file:///tmp/%FF',
+        if (Platform.isWindows) ...['file:///C:foo', 'file:///tmp/a%5cb'],
       ]) {
+        expect(isValidLocalFileUriString(invalid), isFalse, reason: invalid);
         expect(
-          isValidLocalFileUriString(traversalString),
+          isValidLocalFileUri(Uri.parse(invalid)),
           isFalse,
-          reason: traversalString,
-        );
-      }
-
-      for (final traversalUri in [
-        Uri.parse('file:///C:/Users/me%5c..%5cother_app'),
-        Uri.parse('file:///C:/Users/me%5c.%5cmy_app'),
-        Uri.parse('file:///tmp/a%2f..%2fb'),
-        Uri.parse('file:///tmp/a%2Fb'),
-      ]) {
-        expect(
-          isValidLocalFileUri(traversalUri),
-          isFalse,
-          reason: '$traversalUri',
+          reason: invalid,
         );
       }
     });

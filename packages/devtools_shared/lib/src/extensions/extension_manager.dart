@@ -155,8 +155,8 @@ class ExtensionsManager {
       if (!isValidLocalFileUri(extension.rootUri)) {
         parsingErrors.writeln(
           'Ignoring extension from package "${extension.package}": invalid '
-          'package root URI "${extension.rootUri}" must be a file:// URI '
-          'with an empty host.',
+          'package root URI "${extension.rootUri}" '
+          '$invalidLocalFileUriMessage',
         );
         continue;
       }
@@ -365,7 +365,7 @@ class ExtensionsManager {
       throw ArgumentError.value(
         uriString,
         'uriString',
-        'must be a file:// URI String with an empty host',
+        invalidLocalFileUriMessage,
       );
     }
   }

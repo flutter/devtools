@@ -650,16 +650,29 @@ void main() {
       });
 
       test(
-        'accepts existing directories with pubspec.yaml or .dart_tool/package_config.json',
+        'accepts existing directories with pubspec.yaml or .dart_tool/package_config.json and returns resolved URI',
         () {
           final pkgWithPubspec = Directory(p.join(tempDir.path, 'pkg_1'))
             ..createSync(recursive: true);
           File(p.join(pkgWithPubspec.path, 'pubspec.yaml')).createSync();
+          final resolvedPubspecPath = p.normalize(
+            pkgWithPubspec.resolveSymbolicLinksSync(),
+          );
           expect(
             server.VmServiceHandler.validateRootPackageUri(
               Uri.file(pkgWithPubspec.path),
             ),
-            isNull,
+            (resolvedUri: Uri.file(resolvedPubspecPath), error: null),
+          );
+
+          // A symlink pointing to a valid package resolves to the target URI.
+          final symlinkToPkg = Link(p.join(tempDir.path, 'pkg_link'))
+            ..createSync(pkgWithPubspec.path);
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(symlinkToPkg.path),
+            ),
+            (resolvedUri: Uri.file(resolvedPubspecPath), error: null),
           );
 
           final pkgWithConfig = Directory(p.join(tempDir.path, 'pkg_2'))
@@ -667,30 +680,33 @@ void main() {
           File(
             p.join(pkgWithConfig.path, '.dart_tool', 'package_config.json'),
           ).createSync(recursive: true);
+          final resolvedConfigPath = p.normalize(
+            pkgWithConfig.resolveSymbolicLinksSync(),
+          );
           expect(
             server.VmServiceHandler.validateRootPackageUri(
               Uri.file(pkgWithConfig.path),
             ),
-            isNull,
+            (resolvedUri: Uri.file(resolvedConfigPath), error: null),
           );
         },
       );
 
       test('rejects filesystem root and symlinks to filesystem root', () {
         final rootPrefix = p.rootPrefix(tempDir.path);
-        expect(
-          server.VmServiceHandler.validateRootPackageUri(Uri.file(rootPrefix)),
-          contains('filesystem root'),
+        final rootResult = server.VmServiceHandler.validateRootPackageUri(
+          Uri.file(rootPrefix),
         );
+        expect(rootResult.resolvedUri, isNull);
+        expect(rootResult.error, contains('filesystem root'));
 
         final symlinkToRoot = Link(p.join(tempDir.path, 'root_link'))
           ..createSync(rootPrefix);
-        expect(
-          server.VmServiceHandler.validateRootPackageUri(
-            Uri.file(symlinkToRoot.path),
-          ),
-          contains('filesystem root'),
+        final symlinkResult = server.VmServiceHandler.validateRootPackageUri(
+          Uri.file(symlinkToRoot.path),
         );
+        expect(symlinkResult.resolvedUri, isNull);
+        expect(symlinkResult.error, contains('filesystem root'));
       });
 
       test('rejects invalid local file URIs', () {
@@ -699,64 +715,89 @@ void main() {
         File(p.join(validPkg.path, 'pubspec.yaml')).createSync();
         final invalidUri = Uri.parse('${Uri.file(validPkg.path)}?query=1');
 
-        expect(
-          server.VmServiceHandler.validateRootPackageUri(invalidUri),
-          contains('must be an absolute file:// URI'),
+        final result = server.VmServiceHandler.validateRootPackageUri(
+          invalidUri,
         );
+        expect(result.resolvedUri, isNull);
+        expect(result.error, contains('must be an absolute file:// URI'));
       });
 
-      test('rejects user home directory (HOME and USERPROFILE)', () {
-        final homeDir =
-            Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
-        if (homeDir != null && homeDir.isNotEmpty) {
-          expect(
-            server.VmServiceHandler.validateRootPackageUri(Uri.file(homeDir)),
-            contains('home directory'),
-          );
+      test(
+        'rejects user home directory and its ancestors (HOME and USERPROFILE)',
+        () {
+          final homeDir =
+              Platform.environment['HOME'] ??
+              Platform.environment['USERPROFILE'];
+          if (homeDir != null && homeDir.isNotEmpty) {
+            expect(
+              server.VmServiceHandler.validateRootPackageUri(
+                Uri.file(homeDir),
+              ).error,
+              contains('home directory'),
+            );
 
-          // Also verify a symlink pointing to the home directory is rejected.
-          final symlinkToHome = Link(p.join(tempDir.path, 'home_link'))
-            ..createSync(homeDir);
+            // Also verify a symlink pointing to the home directory is rejected.
+            final symlinkToHome = Link(p.join(tempDir.path, 'home_link'))
+              ..createSync(homeDir);
+            expect(
+              server.VmServiceHandler.validateRootPackageUri(
+                Uri.file(symlinkToHome.path),
+              ).error,
+              contains('home directory'),
+            );
+          }
+
+          // Verify both HOME and USERPROFILE environment variables (and their
+          // ancestors) are rejected even when the directory contains a
+          // pubspec.yaml file.
+          final usersDir = Directory(p.join(tempDir.path, 'users'))
+            ..createSync(recursive: true);
+          File(p.join(usersDir.path, 'pubspec.yaml')).createSync();
+          final fakeHomePkg = Directory(p.join(usersDir.path, 'fake_home'))
+            ..createSync(recursive: true);
+          File(p.join(fakeHomePkg.path, 'pubspec.yaml')).createSync();
           expect(
             server.VmServiceHandler.validateRootPackageUri(
-              Uri.file(symlinkToHome.path),
-            ),
+              Uri.file(fakeHomePkg.path),
+            ).error,
+            isNull,
+          );
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(fakeHomePkg.path),
+              environment: {'HOME': fakeHomePkg.path},
+            ).error,
             contains('home directory'),
           );
-        }
-
-        // Verify both HOME and USERPROFILE environment variables are checked
-        // even when the directory contains a pubspec.yaml file.
-        final fakeHomePkg = Directory(p.join(tempDir.path, 'fake_home'))
-          ..createSync(recursive: true);
-        File(p.join(fakeHomePkg.path, 'pubspec.yaml')).createSync();
-        expect(
-          server.VmServiceHandler.validateRootPackageUri(
-            Uri.file(fakeHomePkg.path),
-          ),
-          isNull,
-        );
-        expect(
-          server.VmServiceHandler.validateRootPackageUri(
-            Uri.file(fakeHomePkg.path),
-            environment: {'HOME': fakeHomePkg.path},
-          ),
-          contains('home directory'),
-        );
-        expect(
-          server.VmServiceHandler.validateRootPackageUri(
-            Uri.file(fakeHomePkg.path),
-            environment: {'USERPROFILE': fakeHomePkg.path},
-          ),
-          contains('home directory'),
-        );
-      });
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(fakeHomePkg.path),
+              environment: {'USERPROFILE': fakeHomePkg.path},
+            ).error,
+            contains('home directory'),
+          );
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(usersDir.path),
+              environment: {'HOME': fakeHomePkg.path},
+            ).error,
+            contains('home directory or an ancestor of it'),
+          );
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(usersDir.path),
+              environment: {'USERPROFILE': fakeHomePkg.path},
+            ).error,
+            contains('home directory or an ancestor of it'),
+          );
+        },
+      );
 
       test('rejects directories that do not exist or lack package markers', () {
         // Non-existent directory.
         final nonExistentUri = Uri.file(p.join(tempDir.path, 'does_not_exist'));
         expect(
-          server.VmServiceHandler.validateRootPackageUri(nonExistentUri),
+          server.VmServiceHandler.validateRootPackageUri(nonExistentUri).error,
           contains('directory does not exist'),
         );
 
@@ -770,7 +811,7 @@ void main() {
         expect(
           server.VmServiceHandler.validateRootPackageUri(
             Uri.file(nonPackageDir.path),
-          ),
+          ).error,
           contains(
             'directory does not contain pubspec.yaml or '
             '.dart_tool/package_config.json',

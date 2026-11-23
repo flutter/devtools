@@ -38,11 +38,6 @@ part 'handlers/_storage.dart';
 part 'handlers/_survey.dart';
 part 'handlers/_vm_service.dart';
 
-/// Error description for invalid local `file://` URIs.
-const _invalidLocalFileUriMessage =
-    'must be an absolute file:// URI with no host, query, fragment, or '
-    '`.`/`..` segments.';
-
 /// The DevTools server API.
 ///
 /// This defines endpoints that serve all requests that come in over api/.
