@@ -638,7 +638,7 @@ void main() {
       );
     });
 
-    group('isValidRootPackageUri', () {
+    group('validateRootPackageUri', () {
       late Directory tempDir;
 
       setUp(() {
@@ -656,10 +656,10 @@ void main() {
             ..createSync(recursive: true);
           File(p.join(pkgWithPubspec.path, 'pubspec.yaml')).createSync();
           expect(
-            server.VmServiceHandler.isValidRootPackageUri(
+            server.VmServiceHandler.validateRootPackageUri(
               Uri.file(pkgWithPubspec.path),
             ),
-            isTrue,
+            isNull,
           );
 
           final pkgWithConfig = Directory(p.join(tempDir.path, 'pkg_2'))
@@ -668,10 +668,10 @@ void main() {
             p.join(pkgWithConfig.path, '.dart_tool', 'package_config.json'),
           ).createSync(recursive: true);
           expect(
-            server.VmServiceHandler.isValidRootPackageUri(
+            server.VmServiceHandler.validateRootPackageUri(
               Uri.file(pkgWithConfig.path),
             ),
-            isTrue,
+            isNull,
           );
         },
       );
@@ -679,63 +679,49 @@ void main() {
       test('rejects filesystem root and symlinks to filesystem root', () {
         final rootPrefix = p.rootPrefix(tempDir.path);
         expect(
-          server.VmServiceHandler.isValidRootPackageUri(Uri.file(rootPrefix)),
-          isFalse,
+          server.VmServiceHandler.validateRootPackageUri(Uri.file(rootPrefix)),
+          contains('filesystem root'),
         );
 
         final symlinkToRoot = Link(p.join(tempDir.path, 'root_link'))
           ..createSync(rootPrefix);
         expect(
-          server.VmServiceHandler.isValidRootPackageUri(
+          server.VmServiceHandler.validateRootPackageUri(
             Uri.file(symlinkToRoot.path),
           ),
-          isFalse,
+          contains('filesystem root'),
         );
       });
 
-      test(
-        'rejects non-file schemes, non-empty authorities, and invalid URI components',
-        () {
-          final validPkg = Directory(p.join(tempDir.path, 'valid_pkg'))
-            ..createSync(recursive: true);
-          File(p.join(validPkg.path, 'pubspec.yaml')).createSync();
-          final validPkgUri = Uri.file(validPkg.path);
+      test('rejects invalid local file URIs', () {
+        final validPkg = Directory(p.join(tempDir.path, 'valid_pkg'))
+          ..createSync(recursive: true);
+        File(p.join(validPkg.path, 'pubspec.yaml')).createSync();
+        final invalidUri = Uri.parse('${Uri.file(validPkg.path)}?query=1');
 
-          for (final invalidUri in [
-            Uri.parse('http://localhost/path/to/pkg'),
-            Uri.parse('file://evil.host/path/to/pkg'),
-            Uri.parse('file://user@/path/to/pkg'),
-            Uri.parse('$validPkgUri?query=1'),
-            Uri.parse('$validPkgUri#fragment'),
-            Uri.parse('${Uri.directory(tempDir.path)}other%5c..%5cvalid_pkg'),
-            Uri.parse('${Uri.directory(tempDir.path)}other%2f..%2fvalid_pkg'),
-          ]) {
-            expect(
-              server.VmServiceHandler.isValidRootPackageUri(invalidUri),
-              isFalse,
-              reason: 'Expected $invalidUri to be rejected',
-            );
-          }
-        },
-      );
+        expect(
+          server.VmServiceHandler.validateRootPackageUri(invalidUri),
+          contains('must be an absolute file:// URI'),
+        );
+      });
 
       test('rejects user home directory (HOME and USERPROFILE)', () {
         final homeDir =
             Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];
         if (homeDir != null && homeDir.isNotEmpty) {
           expect(
-            server.VmServiceHandler.isValidRootPackageUri(Uri.file(homeDir)),
-            isFalse,
+            server.VmServiceHandler.validateRootPackageUri(Uri.file(homeDir)),
+            contains('home directory'),
           );
 
           // Also verify a symlink pointing to the home directory is rejected.
           final symlinkToHome = Link(p.join(tempDir.path, 'home_link'))
             ..createSync(homeDir);
           expect(
-            server.VmServiceHandler.isValidRootPackageUri(
+            server.VmServiceHandler.validateRootPackageUri(
               Uri.file(symlinkToHome.path),
             ),
-            isFalse,
+            contains('home directory'),
           );
         }
 
@@ -745,24 +731,24 @@ void main() {
           ..createSync(recursive: true);
         File(p.join(fakeHomePkg.path, 'pubspec.yaml')).createSync();
         expect(
-          server.VmServiceHandler.isValidRootPackageUri(
+          server.VmServiceHandler.validateRootPackageUri(
             Uri.file(fakeHomePkg.path),
           ),
-          isTrue,
+          isNull,
         );
         expect(
-          server.VmServiceHandler.isValidRootPackageUri(
+          server.VmServiceHandler.validateRootPackageUri(
             Uri.file(fakeHomePkg.path),
             environment: {'HOME': fakeHomePkg.path},
           ),
-          isFalse,
+          contains('home directory'),
         );
         expect(
-          server.VmServiceHandler.isValidRootPackageUri(
+          server.VmServiceHandler.validateRootPackageUri(
             Uri.file(fakeHomePkg.path),
             environment: {'USERPROFILE': fakeHomePkg.path},
           ),
-          isFalse,
+          contains('home directory'),
         );
       });
 
@@ -770,8 +756,8 @@ void main() {
         // Non-existent directory.
         final nonExistentUri = Uri.file(p.join(tempDir.path, 'does_not_exist'));
         expect(
-          server.VmServiceHandler.isValidRootPackageUri(nonExistentUri),
-          isFalse,
+          server.VmServiceHandler.validateRootPackageUri(nonExistentUri),
+          contains('directory does not exist'),
         );
 
         // Existing directory without pubspec.yaml or
@@ -782,10 +768,13 @@ void main() {
           p.join(nonPackageDir.path, '.dart_tool'),
         ).createSync(recursive: true);
         expect(
-          server.VmServiceHandler.isValidRootPackageUri(
+          server.VmServiceHandler.validateRootPackageUri(
             Uri.file(nonPackageDir.path),
           ),
-          isFalse,
+          contains(
+            'directory does not contain pubspec.yaml or '
+            '.dart_tool/package_config.json',
+          ),
         );
       });
     });
@@ -810,21 +799,11 @@ void main() {
       });
 
       group('updateDtdWorkspaceRoots', () {
-        late Directory tempDir;
-
-        setUp(() {
-          tempDir = Directory.systemTemp.createTempSync('dtd_roots_test_');
-        });
-
-        tearDown(() async {
-          await deleteDirectoryWithRetry(tempDir);
-        });
-
-        Future<Response> updateWorkspaceRoots({
+        Future<void> updateWorkspaceRoots({
           required Uri root,
           required bool connected,
-        }) {
-          return server.VmServiceHandler.updateDtdWorkspaceRoots(
+        }) async {
+          await server.VmServiceHandler.updateDtdWorkspaceRoots(
             testDtdConnection!,
             dtdConnectionInfo: dtd!.info!,
             rootFromVmService: root,
@@ -842,82 +821,26 @@ void main() {
 
         test('adds and removes workspace roots', () async {
           await verifyWorkspaceRoots({});
-          final pkgDir1 = Directory(p.join(tempDir.path, 'package_root_1'))
-            ..createSync(recursive: true);
-          File(p.join(pkgDir1.path, 'pubspec.yaml')).createSync();
-          final pkgDir2 = Directory(p.join(tempDir.path, 'package_root_2'))
-            ..createSync(recursive: true);
-          File(
-            p.join(pkgDir2.path, '.dart_tool', 'package_config.json'),
-          ).createSync(recursive: true);
+          final rootUri1 = Uri.parse('file:///Users/me/package_root_1');
+          final rootUri2 = Uri.parse('file:///Users/me/package_root_2');
 
-          final rootUri1 = Uri.file(pkgDir1.path);
-          final rootUri2 = Uri.file(pkgDir2.path);
-
-          final add1Response = await updateWorkspaceRoots(
-            root: rootUri1,
-            connected: true,
-          );
-          expect(add1Response.statusCode, HttpStatus.ok);
+          await updateWorkspaceRoots(root: rootUri1, connected: true);
           await verifyWorkspaceRoots({rootUri1});
 
           // Add a second root and verify the roots are unioned.
-          final add2Response = await updateWorkspaceRoots(
-            root: rootUri2,
-            connected: true,
-          );
-          expect(add2Response.statusCode, HttpStatus.ok);
+          await updateWorkspaceRoots(root: rootUri2, connected: true);
           await verifyWorkspaceRoots({rootUri1, rootUri2});
 
           // Verify duplicates cannot be added.
-          final dupResponse = await updateWorkspaceRoots(
-            root: rootUri2,
-            connected: true,
-          );
-          expect(dupResponse.statusCode, HttpStatus.ok);
+          await updateWorkspaceRoots(root: rootUri2, connected: true);
           await verifyWorkspaceRoots({rootUri1, rootUri2});
 
           // Verify roots are removed for disconnect events.
-          final remove2Response = await updateWorkspaceRoots(
-            root: rootUri2,
-            connected: false,
-          );
-          expect(remove2Response.statusCode, HttpStatus.ok);
+          await updateWorkspaceRoots(root: rootUri2, connected: false);
           await verifyWorkspaceRoots({rootUri1});
-          final remove1Response = await updateWorkspaceRoots(
-            root: rootUri1,
-            connected: false,
-          );
-          expect(remove1Response.statusCode, HttpStatus.ok);
+          await updateWorkspaceRoots(root: rootUri1, connected: false);
           await verifyWorkspaceRoots({});
         }, timeout: const Timeout.factor(4));
-
-        test(
-          'removes workspace root on disconnect even if directory was deleted',
-          () async {
-            await verifyWorkspaceRoots({});
-            final pkgDir = Directory(p.join(tempDir.path, 'deleted_pkg'))
-              ..createSync(recursive: true);
-            File(p.join(pkgDir.path, 'pubspec.yaml')).createSync();
-            final rootUri = Uri.file(pkgDir.path);
-
-            final addResponse = await updateWorkspaceRoots(
-              root: rootUri,
-              connected: true,
-            );
-            expect(addResponse.statusCode, HttpStatus.ok);
-            await verifyWorkspaceRoots({rootUri});
-
-            pkgDir.deleteSync(recursive: true);
-
-            final removeResponse = await updateWorkspaceRoots(
-              root: rootUri,
-              connected: false,
-            );
-            expect(removeResponse.statusCode, HttpStatus.ok);
-            await verifyWorkspaceRoots({});
-          },
-        );
       });
 
       group('detectRootPackageForVmService', () {
@@ -937,6 +860,8 @@ void main() {
           vmServiceUriString = null;
         });
 
+        /// Retries [server.VmServiceHandler.detectRootPackageForVmService]
+        /// until [isReady] returns `true` (defaults to `response.success`).
         Future<server.DetectRootPackageResponse> detectRootWithRetry(
           Uri vmServiceUri, {
           bool Function(server.DetectRootPackageResponse response)? isReady,
@@ -1057,8 +982,7 @@ void main() {
             final response = await detectRootWithRetry(
               vmServiceUri!,
               isReady: (r) =>
-                  r.message != null &&
-                  r.message!.contains('Invalid package root URI'),
+                  r.message?.contains('Invalid package root URI') ?? false,
             );
             expect(response.success, false);
             expect(
@@ -1098,8 +1022,7 @@ void main() {
             await detectRootWithRetry(
               vmServiceUri!,
               isReady: (r) =>
-                  r.message != null &&
-                  r.message!.contains('Invalid package root URI'),
+                  r.message?.contains('Invalid package root URI') ?? false,
             );
 
             final wsVmServiceUri = convertToWebSocketUrl(

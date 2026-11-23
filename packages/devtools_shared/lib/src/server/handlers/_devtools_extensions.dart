@@ -27,9 +27,8 @@ extension _ExtensionsApiHandler on Never {
         rootFileUriString.isNotEmpty &&
         !isValidLocalFileUriString(rootFileUriString)) {
       return api.badRequest(
-        'Invalid ${ExtensionsApi.packageRootUriPropertyName}: must be an '
-        'absolute file:// URI with no host, query, fragment, or `.`/`..` '
-        'segments.',
+        'Invalid ${ExtensionsApi.packageRootUriPropertyName}: '
+        '$_invalidLocalFileUriMessage',
       );
     }
     final result = <String, Object?>{};

@@ -20,11 +20,6 @@ extension VmServiceHandler on Never {
   /// and Windows (`USERPROFILE`).
   static const _homeEnvVarKeys = ['HOME', 'USERPROFILE'];
 
-  /// Error description for invalid local `file://` package root URIs.
-  static const _invalidLocalFileUriMessage =
-      'must be an absolute file:// URI with no host, query, fragment, or '
-      '`.`/`..` segments.';
-
   /// Stores the calculated package roots for VM service connections that are
   /// initiated in [handleNotifyForVmServiceConnection].
   ///
@@ -36,22 +31,14 @@ extension VmServiceHandler on Never {
   /// never be used.
   static final _packageRootsForVmServiceConnections = <String, Uri>{};
 
-  /// Returns whether [rootPackageUri] is a valid Dart or Flutter package root
-  /// directory that can safely be registered as a DTD IDE workspace root.
-  @visibleForTesting
-  static bool isValidRootPackageUri(
-    Uri rootPackageUri, {
-    Map<String, String>? environment,
-  }) =>
-      _validateRootPackageUri(rootPackageUri, environment: environment) == null;
-
   /// Validates that [rootPackageUri] is a local `file://` URI pointing to an
   /// existing Dart or Flutter package directory, and not the filesystem root or
   /// the user's home directory.
   ///
   /// Returns `null` if [rootPackageUri] is valid, or an error message if it
   /// must be rejected.
-  static String? _validateRootPackageUri(
+  @visibleForTesting
+  static String? validateRootPackageUri(
     Uri rootPackageUri, {
     Map<String, String>? environment,
   }) {
@@ -285,7 +272,7 @@ extension VmServiceHandler on Never {
           );
         }
         rootPackageUri = Uri.parse(root);
-        final validationError = _validateRootPackageUri(rootPackageUri);
+        final validationError = validateRootPackageUri(rootPackageUri);
         if (validationError != null) {
           return (success: false, message: validationError, uri: null);
         }
