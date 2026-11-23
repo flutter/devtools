@@ -36,9 +36,7 @@ void main() {
 
       setGlobal(
         ExtensionService,
-        ExtensionService(
-          fixedAppRoot: Uri.parse('file:///Users/me/package_root_1'),
-        ),
+        ExtensionService(fixedVmServiceUri: 'ws://127.0.0.1:8181/ws'),
       );
       await extensionService.initialize();
       expect(extensionService.staticExtensions.length, 4);

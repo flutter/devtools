@@ -7,24 +7,19 @@ part of 'server.dart';
 /// Makes a request to the server to refresh the list of available extensions,
 /// serve their assets on the server, and return the list of available
 /// extensions here.
-Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
-  // TODO(https://github.com/flutter/devtools/issues/7944): pass the URI to the
-  // package config file instead of passing the app root and rebulding the URI
-  // to the package config file.
-  Uri? appRoot,
-) async {
-  _log.fine('refreshAvailableExtensions for app root: ${appRoot.toString()}');
+Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions({
+  String? vmServiceUri,
+}) async {
+  _log.fine('refreshAvailableExtensions for vmServiceUri: $vmServiceUri');
   if (debugDevToolsExtensions) {
     return debugHandleRefreshAvailableExtensions(
-      includeRuntime: appRoot != null,
+      includeRuntime: !vmServiceUri.isNullOrEmpty,
     );
   }
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: ExtensionsApi.apiServeAvailableExtensions,
-      queryParameters: {
-        ExtensionsApi.packageRootUriPropertyName: appRoot?.toString(),
-      },
+      queryParameters: {ExtensionsApi.vmServiceUriPropertyName: vmServiceUri},
     );
     final resp = await request(uri.toString());
     if (resp?.statusOk ?? false) {

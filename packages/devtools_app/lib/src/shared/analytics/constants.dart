@@ -20,6 +20,7 @@ part 'constants/_memory_constants.dart';
 part 'constants/_network_constants.dart';
 part 'constants/_performance_constants.dart';
 part 'constants/_property_editor_sidebar_constants.dart';
+part 'constants/_vm_tools_constants.dart';
 
 // Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).
@@ -41,6 +42,7 @@ final debugger = ScreenMetaData.debugger.id;
 final logging = ScreenMetaData.logging.id;
 final appSize = ScreenMetaData.appSize.id;
 final vmTools = ScreenMetaData.vmTools.id;
+final dtdTools = ScreenMetaData.dtdTools.id;
 const console = 'console';
 final simple = ScreenMetaData.simple.id;
 final deeplink = ScreenMetaData.deepLinks.id;

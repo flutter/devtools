@@ -23,13 +23,42 @@ extension VmServiceHandler on Never {
   /// Stores the calculated package roots for VM service connections that are
   /// initiated in [handleNotifyForVmServiceConnection].
   ///
-  /// This map is used to lookup package roots for a particular VM service when
+  /// Entries are populated when [detectRootPackageForVmService] is called with
+  /// `connected: true` and `cacheResult: true` (e.g., from
+  /// [handleNotifyForVmServiceConnection] when DevTools server started DTD).
+  ///
+  /// This map is used both to avoid redundant VM service lookups (including
+  /// from [_ExtensionsApiHandler.handleServeAvailableExtensions], which reads
+  /// from this cache without populating it since callers like
+  /// `ExtensionService(fixedVmServiceUri:)` do not send disconnect
+  /// notifications) and to look up the root to remove when
   /// [handleNotifyForVmServiceConnection] is called for a VM service disconnect
   /// in DevTools app.
-  ///
-  /// If the Dart Tooling Daemon was not started by DevTools, this map will
-  /// never be used.
   static final _packageRootsForVmServiceConnections = <String, Uri>{};
+
+  /// Caches [rootPackageUri] for [vmServiceUriAsString] in tests.
+  @visibleForTesting
+  static void setPackageRootForVmServiceForTesting(
+    String vmServiceUriAsString,
+    Uri rootPackageUri,
+  ) {
+    final normalizedUri = normalizeVmServiceUri(vmServiceUriAsString);
+    if (normalizedUri == null) {
+      throw ArgumentError.value(
+        vmServiceUriAsString,
+        'vmServiceUriAsString',
+        'Cannot normalize VM service URI',
+      );
+    }
+    _packageRootsForVmServiceConnections[normalizedUri.toString()] =
+        rootPackageUri;
+  }
+
+  /// Clears cached package roots between tests.
+  @visibleForTesting
+  static void clearPackageRootsForTesting() {
+    _packageRootsForVmServiceConnections.clear();
+  }
 
   /// Validates that [rootPackageUri] is a local `file://` URI pointing to an
   /// existing Dart or Flutter package directory, and not the filesystem root or
@@ -236,13 +265,17 @@ extension VmServiceHandler on Never {
     required String vmServiceUriAsString,
     required Uri vmServiceUri,
     required bool connected,
-    required DartToolingDaemon dtd,
+    required DartToolingDaemon? dtd,
+    bool cacheResult = true,
   }) async {
+    final normalizedUriAsString = vmServiceUri.toString();
     final Uri rootPackageUri;
     if (connected) {
-      // TODO(kenz): should we first try to lookup the root from
-      // [_packageRootsForVmServiceConnections]? Could the root library of the
-      // main isolate change during the lifetime of a VM service instance?
+      final cachedRoot =
+          _packageRootsForVmServiceConnections[normalizedUriAsString];
+      if (cachedRoot != null) {
+        return (success: true, message: null, uri: cachedRoot);
+      }
 
       VmService? vmService;
       try {
@@ -252,7 +285,9 @@ extension VmServiceHandler on Never {
           serviceFactory: VmService.defaultFactory,
         );
 
-        final root = await vmService.rootPackageDirectoryForMainIsolate(dtd);
+        final root = await vmService.rootPackageDirectoryForMainIsolate(
+          dtd: dtd,
+        );
         if (root == null) {
           return (
             success: false,
@@ -276,8 +311,10 @@ extension VmServiceHandler on Never {
         if (validationError != null) {
           return (success: false, message: validationError, uri: null);
         }
-        _packageRootsForVmServiceConnections[vmServiceUriAsString] =
-            rootPackageUri;
+        if (cacheResult) {
+          _packageRootsForVmServiceConnections[normalizedUriAsString] =
+              rootPackageUri;
+        }
       } catch (e) {
         return (
           success: false,
@@ -290,7 +327,7 @@ extension VmServiceHandler on Never {
       }
     } else {
       final cachedRootForVmService = _packageRootsForVmServiceConnections
-          .remove(vmServiceUriAsString);
+          .remove(normalizedUriAsString);
       if (cachedRootForVmService == null) {
         // If there is no root to remove, there is nothing for us to do.
         return (success: true, message: null, uri: null);
@@ -317,62 +354,6 @@ extension VmServiceHandler on Never {
         : (currentRoots..remove(rootFromVmService)).toList();
     await dtd.setIDEWorkspaceRoots(dtdConnectionInfo.secret!, newRoots);
     return api.success();
-  }
-}
-
-extension on VmService {
-  Future<String?> rootPackageDirectoryForMainIsolate(
-    DartToolingDaemon dtd,
-  ) async {
-    final fileUriString = await _rootLibraryForMainIsolate;
-    return fileUriString != null
-        ? await packageRootFromFileUriString(fileUriString, dtd: dtd)
-        : null;
-  }
-
-  Future<String?> get _rootLibraryForMainIsolate async {
-    final mainIsolate = await _detectMainIsolate;
-    final rootLib = mainIsolate.rootLib?.uri;
-    if (rootLib == null) return null;
-
-    final fileUriAsString = (await lookupResolvedPackageUris(mainIsolate.id!, [
-      rootLib,
-    ])).uris?.first;
-    return fileUriAsString;
-  }
-
-  /// Uses heuristics to detect the main isolate.
-  ///
-  /// Assumes an isolate is the main isolate if it meets any of the criteria in
-  /// the following order:
-  ///
-  /// 1. The isolate is the main Flutter isolate.
-  /// 2. The isolate has ':main(' in its name.
-  /// 3. The isolate is the first in the list of isolates on the VM.
-  Future<Isolate> get _detectMainIsolate async {
-    final isolateRefs = (await getVM()).isolates!;
-    final isolateCandidates = await isolateRefs
-        .map((ref) async => (ref: ref, isolate: await getIsolate(ref.id!)))
-        .wait;
-
-    Isolate? mainIsolate;
-    for (final isolate in isolateCandidates) {
-      final isFlutterIsolate = (isolate.isolate.extensionRPCs ?? []).any(
-        (ext) => ext.startsWith('ext.flutter'),
-      );
-      if (isFlutterIsolate) {
-        mainIsolate = isolate.isolate;
-        break;
-      }
-    }
-    mainIsolate ??= isolateCandidates
-        .firstWhereOrNull((isolate) => isolate.ref.name!.contains(':main('))
-        ?.isolate;
-
-    // Fallback to selecting the first isolate in the list.
-    mainIsolate ??= isolateCandidates.first.isolate;
-
-    return mainIsolate;
   }
 }
 

@@ -23,7 +23,11 @@ import 'object_viewport.dart';
 /// information about objects in the Dart VM.
 class ObjectInspectorView extends VMDeveloperView {
   ObjectInspectorView()
-    : super(title: 'Objects', icon: Icons.data_object_outlined);
+    : super(
+        title: 'Objects',
+        icon: Icons.data_object_outlined,
+        gaEvent: gac.VmToolsEvents.objectInspector,
+      );
 
   @override
   bool get showIsolateSelector => true;

@@ -855,6 +855,7 @@ void main() {
         });
 
         tearDown(() async {
+          server.VmServiceHandler.clearPackageRootsForTesting();
           await app?.kill();
           app = null;
           vmServiceUriString = null;
@@ -864,6 +865,7 @@ void main() {
         /// until [isReady] returns `true` (defaults to `response.success`).
         Future<server.DetectRootPackageResponse> detectRootWithRetry(
           Uri vmServiceUri, {
+          bool cacheResult = true,
           bool Function(server.DetectRootPackageResponse response)? isReady,
         }) async {
           late server.DetectRootPackageResponse response;
@@ -875,6 +877,7 @@ void main() {
                     vmServiceUri: vmServiceUri,
                     connected: true,
                     dtd: testDtdConnection!,
+                    cacheResult: cacheResult,
                   );
               final ready = isReady?.call(response) ?? response.success;
               if (!ready) {
@@ -886,6 +889,28 @@ void main() {
           );
           return response;
         }
+
+        test('does not populate cache when cacheResult is false', () async {
+          final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
+          expect(vmServiceUri, isNotNull);
+          final response = await detectRootWithRetry(
+            vmServiceUri!,
+            cacheResult: false,
+          );
+          expect(response.success, true);
+          expect(response.message, isNull);
+          expect(response.uri, isNotNull);
+          expect(response.uri!.toFilePath(), endsWith(app!.directory.path));
+
+          final disconnectResponse =
+              await server.VmServiceHandler.detectRootPackageForVmService(
+                vmServiceUriAsString: vmServiceUriString!,
+                vmServiceUri: vmServiceUri,
+                connected: false,
+                dtd: testDtdConnection!,
+              );
+          expect(disconnectResponse, (success: true, message: null, uri: null));
+        });
 
         test('succeeds for a connect event', () async {
           final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
@@ -970,6 +995,21 @@ void main() {
               disconnectResponse.uri!.toFilePath(),
               endsWith(app!.directory.path),
             );
+
+            // Disconnecting again should be a no-op since the cache entry was
+            // already removed.
+            final secondDisconnectResponse =
+                await server.VmServiceHandler.detectRootPackageForVmService(
+                  vmServiceUriAsString: vmServiceUriString!,
+                  vmServiceUri: vmServiceUri,
+                  connected: false,
+                  dtd: testDtdConnection!,
+                );
+            expect(secondDisconnectResponse, (
+              success: true,
+              message: null,
+              uri: null,
+            ));
           },
         );
 
