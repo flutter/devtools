@@ -507,6 +507,8 @@ class ServiceManager<T extends VmService> {
     'Use VmService.rootPackageDirectoryForMainIsolate from devtools_shared instead.',
   )
   Future<Uri?> connectedAppPackageRoot(DTDManager dtdManager) async {
+    final mainIsolateState = await isolateManager.waitForMainIsolateState();
+    if (mainIsolateState == null) return null;
     final packageRootUriString = await service
         ?.rootPackageDirectoryForMainIsolate(dtd: dtdManager.connection.value);
     _log.fine('[connectedAppPackageRoot] package root: $packageRootUriString');

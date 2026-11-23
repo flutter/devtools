@@ -21,9 +21,6 @@ extension VmServiceHandler on Never {
   /// notifications) and to look up the root to remove when
   /// [handleNotifyForVmServiceConnection] is called for a VM service disconnect
   /// in DevTools app.
-  ///
-  /// Entries are evicted on disconnect in [handleNotifyForVmServiceConnection]
-  /// even if the Dart Tooling Daemon was not started by DevTools.
   static final _packageRootsForVmServiceConnections = <String, Uri>{};
 
   /// Caches [rootPackageUri] for [vmServiceUriAsString] in tests.
@@ -66,19 +63,10 @@ extension VmServiceHandler on Never {
     final dtdUri = dtd?.localUri;
     final dtdSecret = dtd?.secret;
     if (dtdUri == null || dtdSecret == null) {
-      // Even when DevTools server did not start DTD, evict any cached package
-      // root on disconnect so stale entries are not retained.
-      final connected = bool.tryParse(
-        queryParams[apiParameterVmServiceConnected]!,
-      );
-      if (connected == false) {
-        final vmServiceUri = normalizeVmServiceUri(
-          queryParams[apiParameterValueKey]!,
-        );
-        if (vmServiceUri != null) {
-          _packageRootsForVmServiceConnections.remove(vmServiceUri.toString());
-        }
-      }
+      // If DevTools server did not start DTD, there is nothing for us to do.
+      // This assertion may change in the future if the DevTools server has
+      // other functionality that interacts with VM service connections from
+      // DevTools app clients.
       return api.success();
     }
 

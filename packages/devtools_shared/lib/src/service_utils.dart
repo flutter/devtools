@@ -120,21 +120,22 @@ extension VmServicePackageRootExtension on VmService {
     ])).uris?.first;
     if (fileUriString == null) return null;
 
-    var packageRootUriString = await packageRootFromFileUriString(
+    String? packageRootUriString = await packageRootFromFileUriString(
       fileUriString,
       dtd: dtd,
     );
 
     // If a Dart library URI was returned, this may be a test target (i.e. a
     // VM service connection spawned from `dart test` or `flutter test`).
-    if (packageRootUriString.endsWith('.dart') && rootLib?.id != null) {
-      packageRootUriString =
-          (await _lookupTestTargetPackageRoot(
-            isolateId: mainIsolate.id!,
-            rootLibraryId: rootLib!.id!,
-            dtd: dtd,
-          )) ??
-          packageRootUriString;
+    if (packageRootUriString.endsWith('.dart')) {
+      final rootLibId = rootLib?.id;
+      packageRootUriString = rootLibId != null
+          ? await _lookupTestTargetPackageRoot(
+              isolateId: mainIsolate.id!,
+              rootLibraryId: rootLibId,
+              dtd: dtd,
+            )
+          : null;
     }
 
     return packageRootUriString;
@@ -199,7 +200,7 @@ extension VmServicePackageRootExtension on VmService {
         }
       }
     } catch (_) {
-      // Ignore errors; the caller will fall back to the root library URI.
+      // Ignore errors and return null.
     }
     return null;
   }
@@ -215,9 +216,17 @@ extension VmServicePackageRootExtension on VmService {
   Future<Isolate?> get _detectMainIsolate async {
     final isolateRefs = (await getVM()).isolates;
     if (isolateRefs == null || isolateRefs.isEmpty) return null;
-    final isolateCandidates = await isolateRefs
-        .map((ref) async => (ref: ref, isolate: await getIsolate(ref.id!)))
-        .wait;
+    final isolateCandidates = (await isolateRefs.map((ref) async {
+      final id = ref.id;
+      if (id == null) return null;
+      try {
+        return (ref: ref, isolate: await getIsolate(id));
+      } on SentinelException {
+        // An isolate may exit between `getVM()` and `getIsolate()`.
+        return null;
+      }
+    }).wait).nonNulls.toList();
+    if (isolateCandidates.isEmpty) return null;
 
     Isolate? mainIsolate;
     for (final isolate in isolateCandidates) {
@@ -230,7 +239,9 @@ extension VmServicePackageRootExtension on VmService {
       }
     }
     mainIsolate ??= isolateCandidates
-        .firstWhereOrNull((isolate) => isolate.ref.name!.contains(':main('))
+        .firstWhereOrNull(
+          (isolate) => isolate.ref.name?.contains(':main(') ?? false,
+        )
         ?.isolate;
 
     // Fallback to selecting the first isolate in the list.

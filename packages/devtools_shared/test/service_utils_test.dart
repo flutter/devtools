@@ -146,6 +146,69 @@ void main() {
         equals(fullPackageConfigUri.length),
       );
     });
+
+    test('returns null when test target package root lookup fails', () async {
+      final fakeVmService = _FakeVmServiceForTestTarget(
+        fullPackageConfigUri: null,
+      );
+
+      final rootDir = await fakeVmService.rootPackageDirectoryForMainIsolate();
+      expect(rootDir, isNull);
+    });
+
+    test(
+      'skips isolates that throw SentinelException during getIsolate',
+      () async {
+        final fakeVmService = _FakeVmServiceWithIsolates(
+          isolateRefs: [
+            IsolateRef(id: 'isolates/exited', name: 'exited'),
+            IsolateRef(id: 'isolates/main', name: 'main'),
+          ],
+          isolatesById: {
+            'isolates/main': Isolate(
+              id: 'isolates/main',
+              name: 'main',
+              rootLib: LibraryRef(
+                id: 'libraries/1',
+                uri: 'file:///Users/developer/my_app/lib/main.dart',
+              ),
+            ),
+          },
+        );
+
+        final rootDir = await fakeVmService
+            .rootPackageDirectoryForMainIsolate();
+        expect(rootDir, equals('file:///Users/developer/my_app'));
+      },
+    );
+
+    test('returns null when all isolates throw SentinelException', () async {
+      final fakeVmService = _FakeVmServiceWithIsolates(
+        isolateRefs: [IsolateRef(id: 'isolates/exited', name: 'exited')],
+        isolatesById: const {},
+      );
+
+      final rootDir = await fakeVmService.rootPackageDirectoryForMainIsolate();
+      expect(rootDir, isNull);
+    });
+
+    test('handles isolates with null name without throwing', () async {
+      final fakeVmService = _FakeVmServiceWithIsolates(
+        isolateRefs: [IsolateRef(id: 'isolates/unnamed')],
+        isolatesById: {
+          'isolates/unnamed': Isolate(
+            id: 'isolates/unnamed',
+            rootLib: LibraryRef(
+              id: 'libraries/1',
+              uri: 'file:///Users/developer/my_app/lib/main.dart',
+            ),
+          ),
+        },
+      );
+
+      final rootDir = await fakeVmService.rootPackageDirectoryForMainIsolate();
+      expect(rootDir, equals('file:///Users/developer/my_app'));
+    });
   });
 }
 
@@ -153,7 +216,7 @@ class _FakeVmServiceForTestTarget extends VmService {
   _FakeVmServiceForTestTarget({required this.fullPackageConfigUri})
     : super(const Stream.empty(), (_) {});
 
-  final String fullPackageConfigUri;
+  final String? fullPackageConfigUri;
   int? requestedFullStringOffset;
   int? requestedFullStringCount;
 
@@ -193,12 +256,16 @@ class _FakeVmServiceForTestTarget extends VmService {
     String? idZoneId,
   }) async {
     expect(expression, equals('packageConfigLocation'));
+    final uri = fullPackageConfigUri;
+    if (uri == null) {
+      throw RPCError('evaluate', 113, 'Expression compilation error');
+    }
     return InstanceRef(
       id: _packageConfigStringId,
       kind: InstanceKind.kString,
-      valueAsString: fullPackageConfigUri.substring(0, 128),
+      valueAsString: uri.substring(0, 128),
       valueAsStringIsTruncated: true,
-      length: fullPackageConfigUri.length,
+      length: uri.length,
     );
   }
 
@@ -221,9 +288,42 @@ class _FakeVmServiceForTestTarget extends VmService {
         kind: InstanceKind.kString,
         valueAsString: fullPackageConfigUri,
         valueAsStringIsTruncated: false,
-        length: fullPackageConfigUri.length,
+        length: fullPackageConfigUri!.length,
       );
     }
     throw UnimplementedError('Unexpected getObject($objectId)');
   }
+}
+
+class _FakeVmServiceWithIsolates extends VmService {
+  _FakeVmServiceWithIsolates({
+    required this.isolateRefs,
+    required this.isolatesById,
+  }) : super(const Stream.empty(), (_) {});
+
+  final List<IsolateRef> isolateRefs;
+  final Map<String, Isolate> isolatesById;
+
+  @override
+  Future<VM> getVM() async => VM(isolates: isolateRefs);
+
+  @override
+  Future<Isolate> getIsolate(String isolateId) async {
+    final isolate = isolatesById[isolateId];
+    if (isolate == null) {
+      throw SentinelException.parse('getIsolate', {
+        'type': 'Sentinel',
+        'kind': SentinelKind.kCollected,
+        'valueAsString': '<collected>',
+      });
+    }
+    return isolate;
+  }
+
+  @override
+  Future<UriList> lookupResolvedPackageUris(
+    String isolateId,
+    List<String> uris, {
+    bool? local,
+  }) async => UriList(uris: uris);
 }
