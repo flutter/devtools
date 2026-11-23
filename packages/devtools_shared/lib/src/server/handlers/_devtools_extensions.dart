@@ -13,7 +13,7 @@ extension _ExtensionsApiHandler on Never {
     DtdInfo? dtd,
   ) async {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
-      [ExtensionsApi.packageRootUriPropertyName],
+      const [ExtensionsApi.vmServiceUriPropertyName],
       queryParams: queryParams,
       api: api,
       requestName: ExtensionsApi.apiServeAvailableExtensions,
@@ -21,31 +21,60 @@ extension _ExtensionsApiHandler on Never {
     if (missingRequiredParams != null) return missingRequiredParams;
 
     final logs = <String>[];
-    final rootFileUriString =
-        queryParams[ExtensionsApi.packageRootUriPropertyName];
-    if (rootFileUriString != null && rootFileUriString.isNotEmpty) {
-      final rootFileUri = Uri.tryParse(rootFileUriString);
-      if (!rootFileUriString.startsWith('file://') ||
-          rootFileUri == null ||
-          rootFileUri.scheme != 'file' ||
-          rootFileUri.host.isNotEmpty) {
+    final warnings = <String>[];
+    final vmServiceUriString =
+        queryParams[ExtensionsApi.vmServiceUriPropertyName];
+    String? rootFileUriString;
+    if (vmServiceUriString != null && vmServiceUriString.isNotEmpty) {
+      final vmServiceUri = normalizeVmServiceUri(vmServiceUriString);
+      if (vmServiceUri == null) {
         return api.badRequest(
-          'Invalid ${ExtensionsApi.packageRootUriPropertyName}: must be a '
-          'file:// URI with an empty host.',
+          'Cannot normalize VM service URI: $vmServiceUriString',
         );
       }
+
+      DartToolingDaemon? dartToolingDaemon;
+      try {
+        final dtdUri = dtd?.localUri;
+        if (dtdUri != null) {
+          dartToolingDaemon = await DartToolingDaemon.connect(dtdUri);
+        }
+        final detectRootResponse =
+            await VmServiceHandler.detectRootPackageForVmService(
+              vmServiceUriAsString: vmServiceUriString,
+              vmServiceUri: vmServiceUri,
+              connected: true,
+              dtd: dartToolingDaemon,
+              cacheResult: false,
+            );
+        if (!detectRootResponse.success) {
+          warnings.add(
+            detectRootResponse.message ??
+                'Failed to detect root package for VM service '
+                    '($vmServiceUriString).',
+          );
+        } else {
+          rootFileUriString = detectRootResponse.uri?.toString();
+        }
+      } catch (e) {
+        warnings.add('$e');
+      } finally {
+        await dartToolingDaemon?.close();
+      }
     }
+    final rootDetectionFailed = warnings.isNotEmpty;
     final result = <String, Object?>{};
 
     /// Helper to return a success response with all available extensions
     /// detected by [extensionsManager].
-    shelf.Response succeedWithAvailableExtensions({String? warning}) {
+    shelf.Response succeedWithAvailableExtensions() {
       final extensions = extensionsManager.devtoolsExtensions
           .map((p) => p.toJson())
           .toList();
       result[ExtensionsApi.extensionsResultPropertyName] = extensions;
-      if (warning != null) {
-        result[ExtensionsApi.extensionsResultWarningPropertyName] = warning;
+      if (warnings.isNotEmpty) {
+        result[ExtensionsApi.extensionsResultWarningPropertyName] = warnings
+            .join('\n');
       }
       return ServerApi._encodeResponse(
         ServerApi._wrapWithLogs(result, logs),
@@ -62,14 +91,19 @@ extension _ExtensionsApiHandler on Never {
     } on ExtensionParsingException catch (e) {
       // For [ExtensionParsingException]s, we should return a success response
       // with a warning message.
-      result[ExtensionsApi.extensionsResultWarningPropertyName] = e.message;
+      warnings.add(e.message);
     } catch (e) {
+      warnings.add('$e');
       // If any extensions were successfully detected, return a success response
       // with a warning.
       if (extensionsManager.devtoolsExtensions.isNotEmpty) {
-        return succeedWithAvailableExtensions(warning: '$e');
+        return succeedWithAvailableExtensions();
       }
-      return api.serverError('$e', logs);
+      return api.serverError(warnings.join('\n'), logs);
+    }
+
+    if (rootDetectionFailed && extensionsManager.devtoolsExtensions.isEmpty) {
+      return api.serverError(warnings.join('\n'), logs);
     }
 
     return succeedWithAvailableExtensions();
