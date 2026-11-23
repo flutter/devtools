@@ -55,6 +55,8 @@ Future<T> _connectWithWebSocket<T extends VmService>({
   // the VM service.
   uri = convertToWebSocketUrl(serviceProtocolUrl: uri);
   final ws = WebSocketChannel.connect(uri);
+  // Await `ws.ready` so connection failures surface here rather than escaping
+  // as an unhandled `WebSocketChannelException` from the unawaited future.
   await ws.ready;
   final stream = ws.stream.handleError(onError);
   final service = serviceFactory(
