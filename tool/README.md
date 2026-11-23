@@ -7,6 +7,30 @@ found in the LICENSE file or at https://developers.google.com/open-source/licens
 For instructions on how to release DevTools, please see
 [RELEASE_INSTRUCTIONS.md](https://github.com/flutter/devtools/blob/master/tool/RELEASE_INSTRUCTIONS.md).
 
+## Bisecting a Flutter SDK regression
+
+When a DevTools test starts failing after a Flutter candidate bump, use
+`dt flutter-bisect` to find the first Flutter commit that introduced the
+failure:
+
+```bash
+dt flutter-bisect \
+  --from <known-good-flutter-sha> \
+  --to <known-bad-flutter-sha> \
+  --test packages/devtools_app/path/to/failing_test.dart
+```
+
+The command checks out commits in `tool/flutter-sdk`, runs the test with that
+Flutter SDK, and binary-searches for the first bad commit.
+
+By default it first verifies that `--from` passes and `--to` fails. Pass
+`--skip-verify` to skip that check. Each step may take several minutes because
+Flutter artifacts may need to be downloaded. When finished, `tool/flutter-sdk`
+is restored to the version in `flutter-candidate.txt` (unless `--keep-sdk` is
+passed).
+
+Useful flags: `--dry-run`, `--package`, `--skip-verify`, `--keep-sdk`.
+
 ## Debug Logs
 
 Debug logs found in `Settings > Copy Logs` are saved such that they can be read by (lnav)[https://lnav.org/]
