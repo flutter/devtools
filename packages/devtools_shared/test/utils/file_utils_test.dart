@@ -215,6 +215,8 @@ void main() {
         'file:///Users/me/%2e%2e/other_app',
         'file:///Users/me/%2e/my_app',
         'file:///C:/Users/me%5c..%5cother_app',
+        'file:///tmp/a%2f..%2fb',
+        'file:///tmp/a%2Fb',
       ]) {
         expect(
           isValidLocalFileUriString(traversalString),
@@ -226,6 +228,8 @@ void main() {
       for (final traversalUri in [
         Uri.parse('file:///C:/Users/me%5c..%5cother_app'),
         Uri.parse('file:///C:/Users/me%5c.%5cmy_app'),
+        Uri.parse('file:///tmp/a%2f..%2fb'),
+        Uri.parse('file:///tmp/a%2Fb'),
       ]) {
         expect(
           isValidLocalFileUri(traversalUri),

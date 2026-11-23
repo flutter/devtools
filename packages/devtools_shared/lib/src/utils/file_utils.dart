@@ -117,6 +117,7 @@ bool isValidLocalFileUri(Uri uri) {
     return false;
   }
   for (final segment in uri.pathSegments) {
+    if (segment.contains('/')) return false;
     for (final part in segment.split(r'\')) {
       if (part == '.' || part == '..') return false;
     }
