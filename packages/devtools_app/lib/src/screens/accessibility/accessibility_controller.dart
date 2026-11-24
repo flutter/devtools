@@ -53,6 +53,7 @@ class AccessibilityController extends DevToolsScreenController
 
   void _initListeners() {
     addAutoDisposeListener(brightness, _onBrightnessChanged);
+    addAutoDisposeListener(screenReader, _onScreenReaderChanged);
     addAutoDisposeListener(semanticsRoots, _onSemanticsRootsChanged);
   }
 
@@ -121,15 +122,19 @@ class AccessibilityController extends DevToolsScreenController
     );
   }
 
+  void _onScreenReaderChanged() {
+    // TODO(hannah-hyj): Implement VM service extension call for screen reader / semantics debugger.
+    // e.g. using 'ext.flutter.showSemanticsDebugger'.
+  }
+
   // The metrics of `ext.flutter.viewMetricsOverride` that the overrides pane
   // controls. Brightness stays on `ext.flutter.brightnessOverride`.
   static const _textScalingMetric = 'textScaling';
   static const _boldTextMetric = 'boldText';
-  static const _accessibleNavigationMetric = 'accessibleNavigation';
   static const _highContrastMetric = 'highContrast';
 
-  /// The client that overrides the text scale, bold text, screen reader and
-  /// high contrast settings of the app, or null before [init].
+  /// The client that overrides the text scale, bold text and high contrast
+  /// settings of the app, or null before [init].
   ViewMetricsOverrideClient? _viewMetricsOverrideClient;
 
   void _initViewMetricsOverrides() {
@@ -139,7 +144,6 @@ class AccessibilityController extends DevToolsScreenController
       _overridesAvailable.value = client.available.value;
       _textScale.value = _textScaleFactor(overrides[_textScalingMetric]);
       _boldText.value = overrides[_boldTextMetric] == true;
-      _screenReader.value = overrides[_accessibleNavigationMetric] == true;
       _highContrast.value = overrides[_highContrastMetric] == true;
     }
 
@@ -172,11 +176,6 @@ class AccessibilityController extends DevToolsScreenController
   /// again if [enabled] is false.
   Future<void> setBoldText(bool enabled) =>
       _setFlagOverride(_boldTextMetric, enabled);
-
-  /// Makes the app behave as though a screen reader is on, or follow the
-  /// platform again if [enabled] is false.
-  Future<void> setScreenReader(bool enabled) =>
-      _setFlagOverride(_accessibleNavigationMetric, enabled);
 
   /// Makes the app use high contrast, or the high contrast setting of the
   /// platform again if [enabled] is false.
@@ -213,8 +212,8 @@ class AccessibilityController extends DevToolsScreenController
     BrightnessOverride.system,
   );
 
-  /// Whether the connected app supports the text scale, bold text, screen
-  /// reader and high contrast overrides.
+  /// Whether the connected app supports the text scale, bold text and high
+  /// contrast overrides.
   ///
   /// See [ViewMetricsOverrideClient.available] for the apps that do.
   ValueListenable<bool> get overridesAvailable => _overridesAvailable;
@@ -229,12 +228,9 @@ class AccessibilityController extends DevToolsScreenController
   ValueListenable<bool> get boldText => _boldText;
   final _boldText = ValueNotifier<bool>(false);
 
-  /// Whether the app is overridden to behave as though a screen reader is on.
-  ///
-  /// This overrides `AccessibilityFeatures.accessibleNavigation`, which
-  /// changes how widgets behave. It does not start a screen reader.
-  ValueListenable<bool> get screenReader => _screenReader;
-  final _screenReader = ValueNotifier<bool>(false);
+  /// Whether the Screen Reader Debugger switch is on. It is not connected to
+  /// the app yet.
+  final screenReader = ValueNotifier<bool>(false);
 
   /// Whether the app is overridden to use high contrast.
   ValueListenable<bool> get highContrast => _highContrast;
@@ -414,7 +410,7 @@ class AccessibilityController extends DevToolsScreenController
     _overridesAvailable.dispose();
     _textScale.dispose();
     _boldText.dispose();
-    _screenReader.dispose();
+    screenReader.dispose();
     _highContrast.dispose();
     semanticsRoots.dispose();
     selectedSemanticsNode.dispose();

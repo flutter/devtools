@@ -539,7 +539,6 @@ void main() {
             [100, 100],
           ],
           'boldText': true,
-          'accessibleNavigation': true,
           'highContrast': false,
         };
         expect(controller.overridesAvailable.value, isFalse);
@@ -551,7 +550,6 @@ void main() {
         // Like the app, the page reports the ratio of the first point.
         expect(controller.textScale.value, 2.0);
         expect(controller.boldText.value, isTrue);
-        expect(controller.screenReader.value, isTrue);
         expect(controller.highContrast.value, isFalse);
       });
 

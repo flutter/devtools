@@ -42,6 +42,13 @@ class AccessibilityOverridesPane extends StatelessWidget {
               _BrightnessOverride(controller: controller),
               const SizedBox(height: defaultSpacing),
               _ViewMetricsOverrides(controller: controller),
+              const SizedBox(height: defaultSpacing),
+              _SwitchOverride(
+                label: 'Screen Reader Debugger',
+                description: 'Debug and test screen reader layouts.',
+                value: controller.screenReader,
+                onChanged: (value) => controller.screenReader.value = value,
+              ),
             ],
           ),
         ),
@@ -139,13 +146,6 @@ class _ViewMetricsOverrides extends StatelessWidget {
               description: 'Forces all text in the application to be bold.',
               value: controller.boldText,
               onChanged: available ? controller.setBoldText : null,
-            ),
-            const SizedBox(height: defaultSpacing),
-            _SwitchOverride(
-              label: 'Screen Reader Debugger',
-              description: 'Debug and test screen reader layouts.',
-              value: controller.screenReader,
-              onChanged: available ? controller.setScreenReader : null,
             ),
             const SizedBox(height: defaultSpacing),
             _SwitchOverride(
@@ -265,7 +265,7 @@ class _SwitchOverride extends StatelessWidget {
   final String label;
   final String description;
 
-  /// Whether the app has this override on.
+  /// Whether this override is on.
   final ValueListenable<bool> value;
 
   /// Called when the user toggles the switch, or null to disable the switch.

@@ -201,23 +201,17 @@ void main() {
         await tester.pumpAndSettle();
         expect(controller.highContrast.value, isTrue);
 
-        // Brightness does not go through ext.flutter.viewMetricsOverride.
+        // Brightness does not go through ext.flutter.viewMetricsOverride, and
+        // the Screen Reader Debugger switch is not connected to the app yet.
         expect(fakeExtension.registry, {
-          '0': {
-            'boldText': true,
-            'accessibleNavigation': true,
-            'highContrast': true,
-          },
+          '0': {'boldText': true, 'highContrast': true},
         });
 
         // Turning a switch off lets the app use the setting of the platform.
         await tester.tap(boldTextSwitch);
         await tester.pumpAndSettle();
         expect(controller.boldText.value, isFalse);
-        expect(fakeExtension.registry['0'], {
-          'accessibleNavigation': true,
-          'highContrast': true,
-        });
+        expect(fakeExtension.registry['0'], {'highContrast': true});
       },
     );
 
@@ -233,9 +227,16 @@ void main() {
               widget is Tooltip &&
               (widget.message ?? '').contains('profile build'),
         );
-        for (final element in find.byType(Switch).evaluate()) {
-          expect((element.widget as Switch).onChanged, isNull);
+        for (final label in ['Bold Text', 'High Contrast']) {
+          expect(tester.widget<Switch>(findSwitchFor(label)).onChanged, isNull);
         }
+        // The Screen Reader Debugger switch does not use the extension.
+        expect(
+          tester
+              .widget<Switch>(findSwitchFor('Screen Reader Debugger'))
+              .onChanged,
+          isNotNull,
+        );
         expect(tester.widget<Slider>(find.byType(Slider)).onChanged, isNull);
         expect(unavailableTooltip, findsOneWidget);
 
