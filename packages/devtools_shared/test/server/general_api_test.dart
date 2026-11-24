@@ -725,9 +725,11 @@ void main() {
       test(
         'rejects user home directory and its ancestors (HOME and USERPROFILE)',
         () {
-          final homeDir =
-              Platform.environment['HOME'] ??
-              Platform.environment['USERPROFILE'];
+          final homeDir = Platform.isWindows
+              ? Platform.environment['USERPROFILE'] ??
+                    Platform.environment['HOME']
+              : Platform.environment['HOME'] ??
+                    Platform.environment['USERPROFILE'];
           if (homeDir != null && homeDir.isNotEmpty) {
             expect(
               server.VmServiceHandler.validateRootPackageUri(
@@ -886,10 +888,17 @@ void main() {
 
       group('detectRootPackageForVmService', () {
         TestDartApp? app;
+        late String resolvedAppDirectoryPath;
         String? vmServiceUriString;
 
         setUp(() async {
           app = TestDartApp();
+          // Resolve symlinks and Windows 8.3 short paths (e.g. `RUNNER~1` in
+          // `Directory.systemTemp` on Windows CI) so expectations match the
+          // canonical path returned by `validateRootPackageUri`.
+          resolvedAppDirectoryPath = p.normalize(
+            app!.directory.resolveSymbolicLinksSync(),
+          );
           vmServiceUriString = await app!.start();
           expect(vmServiceUriString, isNotEmpty);
           File(p.join(app!.directory.path, 'pubspec.yaml')).createSync();
@@ -941,7 +950,7 @@ void main() {
           expect(response.success, true);
           expect(response.message, isNull);
           expect(response.uri, isNotNull);
-          expect(response.uri!.toFilePath(), endsWith(app!.directory.path));
+          expect(response.uri!.toFilePath(), resolvedAppDirectoryPath);
 
           final disconnectResponse =
               await server.VmServiceHandler.detectRootPackageForVmService(
@@ -960,7 +969,7 @@ void main() {
           expect(response.success, true);
           expect(response.message, isNull);
           expect(response.uri, isNotNull);
-          expect(response.uri!.toFilePath(), endsWith(app!.directory.path));
+          expect(response.uri!.toFilePath(), resolvedAppDirectoryPath);
         });
 
         test('succeeds for a disconnect event when cache is empty', () async {
@@ -983,7 +992,7 @@ void main() {
             expect(response.success, true);
             expect(response.message, isNull);
             expect(response.uri, isNotNull);
-            expect(response.uri!.toFilePath(), endsWith(app!.directory.path));
+            expect(response.uri!.toFilePath(), resolvedAppDirectoryPath);
 
             final disconnectResponse =
                 await server.VmServiceHandler.detectRootPackageForVmService(
@@ -997,7 +1006,7 @@ void main() {
             expect(disconnectResponse.uri, isNotNull);
             expect(
               disconnectResponse.uri!.toFilePath(),
-              endsWith(app!.directory.path),
+              resolvedAppDirectoryPath,
             );
 
             // Verify the cache entry was removed on disconnect.
@@ -1034,7 +1043,7 @@ void main() {
             expect(disconnectResponse.uri, isNotNull);
             expect(
               disconnectResponse.uri!.toFilePath(),
-              endsWith(app!.directory.path),
+              resolvedAppDirectoryPath,
             );
 
             // Disconnecting again should be a no-op since the cache entry was
