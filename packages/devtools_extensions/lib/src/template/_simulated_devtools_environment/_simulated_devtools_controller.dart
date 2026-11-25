@@ -33,8 +33,22 @@ class SimulatedDevToolsController extends DisposableController
     });
   }
 
+  @visibleForTesting
+  void handleMessage(Event e) => _handleMessage(e);
+
   void _handleMessage(Event e) {
-    final extensionEvent = tryParseExtensionEvent(e);
+    if (!e.isMessageEvent) return;
+    final event = e as MessageEvent;
+    final source = event.source;
+    if (source == null || !source.strictEquals(window).toDart) {
+      return;
+    }
+    if (event.origin != window.origin ||
+        !isAllowedDevToolsOrigin(event.origin, windowOrigin: window.origin)) {
+      return;
+    }
+
+    final extensionEvent = tryParseExtensionEvent(event);
     if (extensionEvent != null) {
       // Do not handle messages that come from the
       // [_SimulatedDevToolsController] itself.

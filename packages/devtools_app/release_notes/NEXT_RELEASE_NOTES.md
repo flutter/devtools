@@ -121,6 +121,10 @@ TODO: Remove this section if there are not any updates.
   the VM service URI when serving DevTools extensions instead of accepting a
   package root file URI from the client.
   [#10097](https://github.com/flutter/devtools/pull/10097)
+* Validated `MessageEvent.origin` and `MessageEvent.source` on `postMessage`
+  events between DevTools and embedded DevTools extensions to reject messages
+  from untrusted origins or unexpected window sources.
+  [#10099](https://github.com/flutter/devtools/pull/10099)
 
 ## Advanced developer mode updates
 

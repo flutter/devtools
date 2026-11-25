@@ -4,6 +4,10 @@ Use of this source code is governed by a BSD-style license that can be
 found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 -->
 ## 0.5.2-wip
+* Validated `MessageEvent.origin` and `MessageEvent.source` in `ExtensionManager`
+  and `SimulatedDevToolsController` before processing `postMessage` events,
+  dropping messages from untrusted origins or unexpected window sources, and
+  added `isAllowedDevToolsOrigin` to `package:devtools_extensions/utils.dart`.
 * The minimum Dart SDK version is bumped to 3.11.0.
 * The minimum Flutter SDK version is bumped to 3.41.0.
 * Updates `devtools_shared` constraint to `^14.0.1`.
