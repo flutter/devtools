@@ -47,7 +47,9 @@ class AccessibilityOverridesPane extends StatelessWidget {
                 label: 'Screen Reader Debugger',
                 description: 'Debug and test screen reader layouts.',
                 value: controller.screenReader,
-                onChanged: (value) => controller.screenReader.value = value,
+                onChanged: (value) async {
+                  controller.screenReader.value = value;
+                },
               ),
             ],
           ),
@@ -121,15 +123,15 @@ class _BrightnessOverride extends StatelessWidget {
 }
 
 /// The controls of `ext.flutter.viewMetricsOverride`, which are disabled with
-/// a tooltip while the app does not support it.
+/// a tooltip while the app has not registered it.
 class _ViewMetricsOverrides extends StatelessWidget {
   const _ViewMetricsOverrides({required this.controller});
 
   final AccessibilityController controller;
 
   static const _unavailableMessage =
-      'Unavailable because the connected app is a profile build, or uses a '
-      'Flutter version that does not support these overrides.';
+      'Unavailable because the connected app has not started yet, is a profile '
+      'build, or uses a Flutter version that does not support these overrides.';
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +256,7 @@ class _TextScaleOverrideState extends State<_TextScaleOverride> {
   }
 }
 
-class _SwitchOverride extends StatelessWidget {
+class _SwitchOverride extends StatefulWidget {
   const _SwitchOverride({
     required this.label,
     required this.description,
@@ -269,22 +271,57 @@ class _SwitchOverride extends StatelessWidget {
   final ValueListenable<bool> value;
 
   /// Called when the user toggles the switch, or null to disable the switch.
-  final ValueChanged<bool>? onChanged;
+  ///
+  /// The switch shows the new value until the returned future completes.
+  final Future<void> Function(bool)? onChanged;
+
+  @override
+  State<_SwitchOverride> createState() => _SwitchOverrideState();
+}
+
+class _SwitchOverrideState extends State<_SwitchOverride> {
+  /// The value that the switch shows after the user toggles it, until the
+  /// change is done.
+  bool? _pendingValue;
+
+  /// Identifies the last toggle, so that the end of an earlier change does not
+  /// clear the value of a later one.
+  Object? _lastToggle;
+
+  Future<void> _toggle(
+    Future<void> Function(bool) onChanged,
+    bool value,
+  ) async {
+    final toggle = _lastToggle = Object();
+    setState(() => _pendingValue = value);
+    try {
+      await onChanged(value);
+    } finally {
+      if (mounted && identical(toggle, _lastToggle)) {
+        setState(() => _pendingValue = null);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final onChanged = widget.onChanged;
     return Row(
       children: [
         Expanded(
           child: _AccessibilityPanelLabel(
-            label: label,
-            description: description,
+            label: widget.label,
+            description: widget.description,
           ),
         ),
         ValueListenableBuilder<bool>(
-          valueListenable: value,
-          builder: (context, isOn, _) =>
-              DevToolsSwitch(value: isOn, onChanged: onChanged),
+          valueListenable: widget.value,
+          builder: (context, isOn, _) => DevToolsSwitch(
+            value: _pendingValue ?? isOn,
+            onChanged: onChanged == null
+                ? null
+                : (value) => unawaited(_toggle(onChanged, value)),
+          ),
         ),
       ],
     );

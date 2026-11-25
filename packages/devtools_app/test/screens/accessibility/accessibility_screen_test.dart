@@ -253,6 +253,34 @@ void main() {
     );
 
     testWidgetsWithWindowSize(
+      'a switch shows its new value until the app answers',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpAccessibilityScreen(tester);
+        await fakeExtension.register();
+        await tester.pumpAndSettle();
+
+        // The app does not answer, as while it is paused at a breakpoint.
+        fakeExtension.holdCalls = true;
+        final boldTextSwitch = findSwitchFor('Bold Text');
+        await tester.ensureVisible(boldTextSwitch);
+        await tester.pumpAndSettle();
+        await tester.tap(boldTextSwitch);
+        await tester.pumpAndSettle();
+        expect(tester.widget<Switch>(boldTextSwitch).value, isTrue);
+        expect(controller.boldText.value, isFalse);
+        expect(fakeExtension.registry, isEmpty);
+
+        // A hot restart ends the write, and the switch shows what the app
+        // reports again.
+        fakeExtension.holdCalls = false;
+        await fakeExtension.hotRestart();
+        await tester.pumpAndSettle();
+        expect(tester.widget<Switch>(boldTextSwitch).value, isFalse);
+      },
+    );
+
+    testWidgetsWithWindowSize(
       'text scale shows the override of the app, and the slider and reset change it',
       windowSize,
       (WidgetTester tester) async {
