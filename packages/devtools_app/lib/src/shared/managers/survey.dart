@@ -136,6 +136,8 @@ class SurveyService {
         final contents = json.decode(response.body) as Map<String, Object?>;
         return DevToolsSurvey.fromJson(contents);
       }
+    } on ClientException catch (e, st) {
+      _log.fine('Unable to fetch survey content: $e', e, st);
     } on Error catch (e, st) {
       _log.shout('Error fetching survey content: $e', e, st);
     }
