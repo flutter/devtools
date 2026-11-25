@@ -70,8 +70,8 @@ class ViewMetricsOverrideClient extends DisposableController
   /// them, such as `{'boldText': true}`.
   ///
   /// The map has the JSON format of `DebugViewMetricsOverride` in
-  /// `package:flutter/foundation.dart`. It is empty until the app first
-  /// reports its overrides.
+  /// `package:flutter/foundation.dart`. It is empty until the current main
+  /// isolate first reports its overrides.
   ValueListenable<Map<String, Object?>> get overrides => _overrides;
   final _overrides = ValueNotifier<Map<String, Object?>>(const {});
 
@@ -107,8 +107,10 @@ class ViewMetricsOverrideClient extends DisposableController
   /// value stops overriding the metric, so that the app uses the value that
   /// the platform reports.
   ///
-  /// A change that another client makes after this client last heard from the
-  /// app, and before the app receives this call, is lost.
+  /// The app only reports the changes that go through the extension, so a
+  /// change that app code makes with `debugSetViewMetricsOverride` is lost at
+  /// the next call. A change that another client makes after this client last
+  /// heard from the app, and before the app receives this call, is lost too.
   ///
   /// Does nothing while the extension is not [available]. A call that fails is
   /// logged, and leaves [overrides] as the app last reported them. The
@@ -234,6 +236,8 @@ class ViewMetricsOverrideClient extends DisposableController
     _nextMainIsolateChange.complete();
     _nextMainIsolateChange = Completer<void>();
     _overridesReported = false;
+    // The registry that the overrides describe is gone with its isolate.
+    _overrides.value = const {};
 
     final serviceManager = serviceConnection.serviceManager;
     cancelListener(_onAvailabilityChanged);

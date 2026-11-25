@@ -235,18 +235,34 @@ void main() {
       });
     });
 
+    test('forgets the overrides of an isolate that exits', () async {
+      await extension.register();
+      await pumpEventQueue();
+      await client.updateOverrides({'boldText': true});
+
+      // The read of the new isolate fails.
+      extension.nextCallError = callFailure;
+      await extension.hotRestart();
+      await pumpEventQueue();
+
+      expect(client.available.value, isTrue);
+      expect(client.overrides.value, isEmpty);
+    });
+
     test('reads the registry of the new isolate after a hot restart', () async {
       await extension.register();
       await pumpEventQueue();
       await client.updateOverrides({'boldText': true});
       expect(client.overrides.value, {'boldText': true});
 
-      // A hot restart empties the registry, and the client reads the new one.
       await extension.hotRestart();
+      // App code of the new isolate overrides a metric before the client reads
+      // the registry, which only the read reports.
+      extension.registry['0'] = {'highContrast': true};
       await pumpEventQueue();
 
       expect(client.available.value, isTrue);
-      expect(client.overrides.value, isEmpty);
+      expect(client.overrides.value, {'highContrast': true});
     });
 
     test(
@@ -281,5 +297,27 @@ void main() {
         expect(client.overrides.value, {'accessibleNavigation': true});
       },
     );
+
+    test('dispose completes the calls that the app has not answered', () async {
+      await extension.register();
+      await pumpEventQueue();
+      extension.holdCalls = true;
+      var writeDone = false;
+      unawaited(
+        client
+            .updateOverrides({'boldText': true})
+            .whenComplete(() => writeDone = true),
+      );
+      await pumpEventQueue();
+      expect(writeDone, isFalse);
+
+      client.dispose();
+      await pumpEventQueue();
+      expect(writeDone, isTrue);
+
+      // tearDown disposes the client again, so give it a new one.
+      extension.holdCalls = false;
+      client = ViewMetricsOverrideClient();
+    });
   });
 }
