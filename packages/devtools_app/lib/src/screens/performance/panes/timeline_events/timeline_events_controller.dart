@@ -132,6 +132,10 @@ class TimelineEventsController extends PerformanceFeatureController
 
   RateLimiter? _timelinePollingRateLimiter;
 
+  /// Whether the connected app uses a timeline recorder, such as systrace,
+  /// that does not store timeline events in the VM.
+  bool _vmTimelineUnavailable = false;
+
   @override
   Future<void> init() async {
     perfettoController.init();
@@ -158,10 +162,11 @@ class TimelineEventsController extends PerformanceFeatureController
 
     // Load available timeline events.
     await forceRefresh();
+    if (_vmTimelineUnavailable) return;
 
     _timelinePollingRateLimiter = RateLimiter(
       _timelinePollingRateLimit,
-      _pullPerfettoVmTimeline,
+      _maybePullPerfettoVmTimeline,
     );
 
     // Poll for new timeline events.
@@ -171,6 +176,24 @@ class TimelineEventsController extends PerformanceFeatureController
     _pollingTimer = Timer.periodic(_timelinePollingInterval, (_) {
       _timelinePollingRateLimiter!.scheduleRequest();
     });
+  }
+
+  /// Pulls the VM timeline, unless the VM has already reported that it does
+  /// not store timeline events for the connected app's recorder.
+  ///
+  /// The VM answers with [RPCErrorKind.kInvalidTimelineRequest] for recorders
+  /// such as systrace, so that error is handled here instead of failing
+  /// [init]. Any other error is rethrown.
+  Future<void> _maybePullPerfettoVmTimeline() async {
+    if (_vmTimelineUnavailable) return;
+    try {
+      await _pullPerfettoVmTimeline();
+    } on RPCError catch (e) {
+      if (e.code != RPCErrorKind.kInvalidTimelineRequest.code) rethrow;
+      _vmTimelineUnavailable = true;
+      _log.info(e.details ?? e.message);
+      pushVmTimelineUnavailableWarning();
+    }
   }
 
   /// Pulls the VM timeline events that have not been received yet.
@@ -359,7 +382,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
   Future<void> _forceRefresh() async {
     debugTraceCallback(() => _log.info('[forceRefresh]'));
-    await _pullPerfettoVmTimeline();
+    await _maybePullPerfettoVmTimeline();
     processTrackEvents();
     await loadPerfettoTrace();
   }
@@ -525,7 +548,7 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   void _maybePushNoTimelineEventsWarning() {
-    if (isActiveFeature) {
+    if (isActiveFeature && !_vmTimelineUnavailable) {
       pushNoTimelineEventsAvailableWarning();
     }
   }

@@ -168,5 +168,43 @@ void main() {
         expect(eventsController.fullPerfettoTrace, isEmpty);
       });
     });
+
+    test('init completes when the VM timeline is unavailable', () async {
+      final originalService = fakeServiceManager.serviceManager.service;
+      addTearDown(
+        () => fakeServiceManager.serviceManager.service = originalService,
+      );
+      final service = MockVmServiceWrapper();
+      fakeServiceManager.serviceManager.service = service;
+      when(service.setVMTimelineFlags(any)).thenAnswer((_) async => Success());
+      when(
+        service.getVMTimelineMicros(),
+      ).thenAnswer((_) async => Timestamp(timestamp: 0));
+      // The VM rejects timeline requests while the systrace recorder is used.
+      when(
+        service.getPerfettoVMTimeline(
+          timeOriginMicros: anyNamed('timeOriginMicros'),
+          timeExtentMicros: anyNamed('timeExtentMicros'),
+        ),
+      ).thenAnswer(
+        (_) async => throw RPCError(
+          'getPerfettoVMTimeline',
+          RPCErrorKind.kInvalidTimelineRequest.code,
+        ),
+      );
+      setGlobal(PreferencesController, PreferencesController());
+      setGlobal(NotificationService, NotificationService());
+      addTearDown(eventsController.dispose);
+
+      await eventsController.init();
+      await eventsController.forceRefresh();
+
+      expect(eventsController.status.value, EventsControllerStatus.ready);
+      verify(service.getVMTimelineMicros()).called(1);
+      expect(
+        notificationService.activeMessages.single.text,
+        contains('systrace'),
+      );
+    });
   });
 }
