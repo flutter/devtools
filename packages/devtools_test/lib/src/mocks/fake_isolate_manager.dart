@@ -46,6 +46,12 @@ base class FakeIsolateManager extends Fake with TestIsolateManager {
     _isolateCreatedController.add(isolate);
   }
 
+  /// Changes the main isolate, as [IsolateManager] does during a hot restart.
+  @visibleForTesting
+  void setMainIsolate(IsolateRef? isolate) {
+    _mainIsolate.value = isolate;
+  }
+
   @override
   ValueNotifier<List<IsolateRef>> get isolates {
     return _isolates ??= ValueNotifier([?_selectedIsolate.value]);

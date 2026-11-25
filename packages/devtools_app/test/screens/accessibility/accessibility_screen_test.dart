@@ -10,15 +10,17 @@ import 'dart:ui' show SemanticsFlag;
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
-import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mockito/mockito.dart';
 
+import '../../test_infra/utils/view_metrics_override_utils.dart';
+
 void main() {
   late AccessibilityScreen screen;
   late AccessibilityController controller;
+  late FakeViewMetricsOverrideExtension fakeExtension;
   const windowSize = Size(1000.0, 1000.0);
 
   group('Accessibility Screen', () {
@@ -31,8 +33,21 @@ void main() {
       );
     }
 
+    /// Finds [text] in the row of the text scale override, because the
+    /// brightness dropdown can show the same text.
+    Finder findInTextScaleRow(String text) {
+      return find.descendant(
+        of: find.ancestor(
+          of: find.text('Text Scale'),
+          matching: find.byType(Row),
+        ),
+        matching: find.text(text),
+      );
+    }
+
     setUp(() {
-      final fakeServiceConnection = FakeServiceConnectionManager();
+      final fakeServiceConnection = ViewMetricsOverrideServiceConnection();
+      fakeExtension = fakeServiceConnection.extension;
       when(
         fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
       ).thenReturn(false);
@@ -111,7 +126,7 @@ void main() {
         // Text Scale controls
         expect(find.text('Text Scale'), findsOneWidget);
         expect(find.text('Scale the system font size.'), findsOneWidget);
-        expect(find.text('1.00x'), findsOneWidget);
+        expect(findInTextScaleRow('System Default'), findsOneWidget);
         expect(find.byType(Slider), findsOneWidget);
 
         // Switches
@@ -134,19 +149,20 @@ void main() {
       },
     );
 
+    Finder findSwitchFor(String label) {
+      return find.descendant(
+        of: find.ancestor(of: find.text(label), matching: find.byType(Row)),
+        matching: find.byType(Switch),
+      );
+    }
+
     testWidgetsWithWindowSize(
-      'interacting with override controls updates controller state',
+      'interacting with override controls updates the app and the controller',
       windowSize,
       (WidgetTester tester) async {
         await pumpAccessibilityScreen(tester);
+        await fakeExtension.register();
         await tester.pumpAndSettle();
-
-        Finder findSwitchFor(String label) {
-          return find.descendant(
-            of: find.ancestor(of: find.text(label), matching: find.byType(Row)),
-            matching: find.byType(Switch),
-          );
-        }
 
         // 1. Test Brightness Dropdown
         expect(controller.brightness.value, BrightnessOverride.system);
@@ -184,6 +200,116 @@ void main() {
         await tester.tap(highContrastSwitch);
         await tester.pumpAndSettle();
         expect(controller.highContrast.value, isTrue);
+
+        // Brightness does not go through ext.flutter.viewMetricsOverride, and
+        // the Screen Reader Debugger switch is not connected to the app yet.
+        expect(fakeExtension.registry, {
+          '0': {'boldText': true, 'highContrast': true},
+        });
+
+        // Turning a switch off lets the app use the setting of the platform.
+        await tester.tap(boldTextSwitch);
+        await tester.pumpAndSettle();
+        expect(controller.boldText.value, isFalse);
+        expect(fakeExtension.registry['0'], {'highContrast': true});
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'disables the overrides and explains why while the app does not support them',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpAccessibilityScreen(tester);
+        await tester.pumpAndSettle();
+
+        final unavailableTooltip = find.byWidgetPredicate(
+          (widget) =>
+              widget is Tooltip &&
+              (widget.message ?? '').contains('profile build'),
+        );
+        for (final label in ['Bold Text', 'High Contrast']) {
+          expect(tester.widget<Switch>(findSwitchFor(label)).onChanged, isNull);
+        }
+        // The Screen Reader Debugger switch does not use the extension.
+        expect(
+          tester
+              .widget<Switch>(findSwitchFor('Screen Reader Debugger'))
+              .onChanged,
+          isNotNull,
+        );
+        expect(tester.widget<Slider>(find.byType(Slider)).onChanged, isNull);
+        expect(unavailableTooltip, findsOneWidget);
+
+        // The controls are enabled once the app registers the extension.
+        await fakeExtension.register();
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<Switch>(findSwitchFor('Bold Text')).onChanged,
+          isNotNull,
+        );
+        expect(tester.widget<Slider>(find.byType(Slider)).onChanged, isNotNull);
+        expect(unavailableTooltip, findsNothing);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'a switch shows its new value until the app answers',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpAccessibilityScreen(tester);
+        await fakeExtension.register();
+        await tester.pumpAndSettle();
+
+        // The app does not answer, as while it is paused at a breakpoint.
+        fakeExtension.holdCalls = true;
+        final boldTextSwitch = findSwitchFor('Bold Text');
+        await tester.ensureVisible(boldTextSwitch);
+        await tester.pumpAndSettle();
+        await tester.tap(boldTextSwitch);
+        await tester.pumpAndSettle();
+        expect(tester.widget<Switch>(boldTextSwitch).value, isTrue);
+        expect(controller.boldText.value, isFalse);
+        expect(fakeExtension.registry, isEmpty);
+
+        // A hot restart ends the write, and the switch shows what the app
+        // reports again.
+        fakeExtension.holdCalls = false;
+        await fakeExtension.hotRestart();
+        await tester.pumpAndSettle();
+        expect(tester.widget<Switch>(boldTextSwitch).value, isFalse);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'text scale shows the override of the app, and the slider and reset change it',
+      windowSize,
+      (WidgetTester tester) async {
+        fakeExtension.registry['0'] = {
+          'textScaling': [
+            [1.0, 4.0],
+          ],
+        };
+        await pumpAccessibilityScreen(tester);
+        await fakeExtension.register();
+        await tester.pumpAndSettle();
+
+        // The slider stays within its range.
+        expect(find.text('4.00x'), findsOneWidget);
+        expect(tester.widget<Slider>(find.byType(Slider)).value, 3.0);
+
+        await tester.drag(find.byType(Slider), const Offset(-1000, 0));
+        await tester.pumpAndSettle();
+        expect(find.text('0.50x'), findsOneWidget);
+        expect(fakeExtension.registry['0'], {
+          'textScaling': [
+            [1, 0.5],
+          ],
+        });
+
+        await tester.tap(find.byIcon(Icons.restart_alt));
+        await tester.pumpAndSettle();
+        expect(findInTextScaleRow('System Default'), findsOneWidget);
+        expect(fakeExtension.registry, isEmpty);
       },
     );
 
