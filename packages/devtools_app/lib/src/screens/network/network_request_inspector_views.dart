@@ -483,8 +483,8 @@ class HttpRequestCookiesView extends StatelessWidget {
           _buildCell(cookie.path),
           _buildCell(cookie.expires?.toString()),
           _buildCell(cookie.value!.length.toString()),
-          _buildIconCell(!cookie.httpOnly ? Icons.check : Icons.close),
-          _buildIconCell(!cookie.secure ? Icons.check : Icons.close),
+          _buildIconCell(cookie.httpOnly ? Icons.check : Icons.close),
+          _buildIconCell(cookie.secure ? Icons.check : Icons.close),
         ],
       ],
     );
