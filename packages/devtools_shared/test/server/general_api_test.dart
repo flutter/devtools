@@ -9,8 +9,10 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_shared/src/extensions/extension_manager.dart';
 import 'package:devtools_shared/src/server/server_api.dart' as server;
 import 'package:dtd/dtd.dart';
+import 'package:path/path.dart' as p;
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
+import 'package:vm_service/utils.dart';
 
 import '../fakes.dart';
 import '../helpers/helpers.dart';
@@ -636,6 +638,190 @@ void main() {
       );
     });
 
+    group('validateRootPackageUri', () {
+      late Directory tempDir;
+
+      setUp(() {
+        tempDir = Directory.systemTemp.createTempSync('root_pkg_valid_test_');
+      });
+
+      tearDown(() async {
+        await deleteDirectoryWithRetry(tempDir);
+      });
+
+      test(
+        'accepts existing directories with pubspec.yaml or .dart_tool/package_config.json and returns resolved URI',
+        () {
+          final pkgWithPubspec = Directory(p.join(tempDir.path, 'pkg_1'))
+            ..createSync(recursive: true);
+          File(p.join(pkgWithPubspec.path, 'pubspec.yaml')).createSync();
+          final resolvedPubspecPath = p.normalize(
+            pkgWithPubspec.resolveSymbolicLinksSync(),
+          );
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(pkgWithPubspec.path),
+            ),
+            (resolvedUri: Uri.file(resolvedPubspecPath), error: null),
+          );
+
+          // A symlink pointing to a valid package resolves to the target URI.
+          final symlinkToPkg = Link(p.join(tempDir.path, 'pkg_link'))
+            ..createSync(pkgWithPubspec.path);
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(symlinkToPkg.path),
+            ),
+            (resolvedUri: Uri.file(resolvedPubspecPath), error: null),
+          );
+
+          final pkgWithConfig = Directory(p.join(tempDir.path, 'pkg_2'))
+            ..createSync(recursive: true);
+          File(
+            p.join(pkgWithConfig.path, '.dart_tool', 'package_config.json'),
+          ).createSync(recursive: true);
+          final resolvedConfigPath = p.normalize(
+            pkgWithConfig.resolveSymbolicLinksSync(),
+          );
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(pkgWithConfig.path),
+            ),
+            (resolvedUri: Uri.file(resolvedConfigPath), error: null),
+          );
+        },
+      );
+
+      test('rejects filesystem root and symlinks to filesystem root', () {
+        final rootPrefix = p.rootPrefix(tempDir.path);
+        final rootResult = server.VmServiceHandler.validateRootPackageUri(
+          Uri.file(rootPrefix),
+        );
+        expect(rootResult.resolvedUri, isNull);
+        expect(rootResult.error, contains('filesystem root'));
+
+        final symlinkToRoot = Link(p.join(tempDir.path, 'root_link'))
+          ..createSync(rootPrefix);
+        final symlinkResult = server.VmServiceHandler.validateRootPackageUri(
+          Uri.file(symlinkToRoot.path),
+        );
+        expect(symlinkResult.resolvedUri, isNull);
+        expect(symlinkResult.error, contains('filesystem root'));
+      });
+
+      test('rejects invalid local file URIs', () {
+        final validPkg = Directory(p.join(tempDir.path, 'valid_pkg'))
+          ..createSync(recursive: true);
+        File(p.join(validPkg.path, 'pubspec.yaml')).createSync();
+        final invalidUri = Uri.parse('${Uri.file(validPkg.path)}?query=1');
+
+        final result = server.VmServiceHandler.validateRootPackageUri(
+          invalidUri,
+        );
+        expect(result.resolvedUri, isNull);
+        expect(result.error, contains('must be an absolute file:// URI'));
+      });
+
+      test(
+        'rejects user home directory and its ancestors (HOME and USERPROFILE)',
+        () {
+          final homeDir = Platform.isWindows
+              ? Platform.environment['USERPROFILE'] ??
+                    Platform.environment['HOME']
+              : Platform.environment['HOME'] ??
+                    Platform.environment['USERPROFILE'];
+          if (homeDir != null && homeDir.isNotEmpty) {
+            expect(
+              server.VmServiceHandler.validateRootPackageUri(
+                Uri.file(homeDir),
+              ).error,
+              contains('home directory'),
+            );
+
+            // Also verify a symlink pointing to the home directory is rejected.
+            final symlinkToHome = Link(p.join(tempDir.path, 'home_link'))
+              ..createSync(homeDir);
+            expect(
+              server.VmServiceHandler.validateRootPackageUri(
+                Uri.file(symlinkToHome.path),
+              ).error,
+              contains('home directory'),
+            );
+          }
+
+          // Verify both HOME and USERPROFILE environment variables (and their
+          // ancestors) are rejected even when the directory contains a
+          // pubspec.yaml file.
+          final usersDir = Directory(p.join(tempDir.path, 'users'))
+            ..createSync(recursive: true);
+          File(p.join(usersDir.path, 'pubspec.yaml')).createSync();
+          final fakeHomePkg = Directory(p.join(usersDir.path, 'fake_home'))
+            ..createSync(recursive: true);
+          File(p.join(fakeHomePkg.path, 'pubspec.yaml')).createSync();
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(fakeHomePkg.path),
+            ).error,
+            isNull,
+          );
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(fakeHomePkg.path),
+              environment: {'HOME': fakeHomePkg.path},
+            ).error,
+            contains('home directory'),
+          );
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(fakeHomePkg.path),
+              environment: {'USERPROFILE': fakeHomePkg.path},
+            ).error,
+            contains('home directory'),
+          );
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(usersDir.path),
+              environment: {'HOME': fakeHomePkg.path},
+            ).error,
+            contains('home directory or an ancestor of it'),
+          );
+          expect(
+            server.VmServiceHandler.validateRootPackageUri(
+              Uri.file(usersDir.path),
+              environment: {'USERPROFILE': fakeHomePkg.path},
+            ).error,
+            contains('home directory or an ancestor of it'),
+          );
+        },
+      );
+
+      test('rejects directories that do not exist or lack package markers', () {
+        // Non-existent directory.
+        final nonExistentUri = Uri.file(p.join(tempDir.path, 'does_not_exist'));
+        expect(
+          server.VmServiceHandler.validateRootPackageUri(nonExistentUri).error,
+          contains('directory does not exist'),
+        );
+
+        // Existing directory without pubspec.yaml or
+        // .dart_tool/package_config.json (only an empty .dart_tool dir).
+        final nonPackageDir = Directory(p.join(tempDir.path, 'not_a_pkg'))
+          ..createSync(recursive: true);
+        Directory(
+          p.join(nonPackageDir.path, '.dart_tool'),
+        ).createSync(recursive: true);
+        expect(
+          server.VmServiceHandler.validateRootPackageUri(
+            Uri.file(nonPackageDir.path),
+          ).error,
+          contains(
+            'directory does not contain pubspec.yaml or '
+            '.dart_tool/package_config.json',
+          ),
+        );
+      });
+    });
+
     group('endpoints that require DTD', () {
       TestDtdConnectionInfo? dtd;
       DartToolingDaemon? testDtdConnection;
@@ -702,12 +888,20 @@ void main() {
 
       group('detectRootPackageForVmService', () {
         TestDartApp? app;
+        late String resolvedAppDirectoryPath;
         String? vmServiceUriString;
 
         setUp(() async {
           app = TestDartApp();
+          // Resolve symlinks and Windows 8.3 short paths (e.g. `RUNNER~1` in
+          // `Directory.systemTemp` on Windows CI) so expectations match the
+          // canonical path returned by `validateRootPackageUri`.
+          resolvedAppDirectoryPath = p.normalize(
+            app!.directory.resolveSymbolicLinksSync(),
+          );
           vmServiceUriString = await app!.start();
           expect(vmServiceUriString, isNotEmpty);
+          File(p.join(app!.directory.path, 'pubspec.yaml')).createSync();
         });
 
         tearDown(() async {
@@ -717,34 +911,51 @@ void main() {
           vmServiceUriString = null;
         });
 
-        test('does not populate cache when cacheResult is false', () async {
-          final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
-          expect(vmServiceUri, isNotNull);
+        /// Retries [server.VmServiceHandler.detectRootPackageForVmService]
+        /// until [isReady] returns `true` (defaults to `response.success`).
+        Future<server.DetectRootPackageResponse> detectRootWithRetry(
+          Uri vmServiceUri, {
+          bool cacheResult = true,
+          bool Function(server.DetectRootPackageResponse response)? isReady,
+        }) async {
           late server.DetectRootPackageResponse response;
           await runWithRetry(
             callback: () async {
               response =
                   await server.VmServiceHandler.detectRootPackageForVmService(
                     vmServiceUriAsString: vmServiceUriString!,
-                    vmServiceUri: vmServiceUri!,
+                    vmServiceUri: vmServiceUri,
                     connected: true,
                     dtd: testDtdConnection!,
-                    cacheResult: false,
+                    cacheResult: cacheResult,
                   );
-              if (!response.success) throw Exception('VM not ready');
+              final ready = isReady?.call(response) ?? response.success;
+              if (!ready) {
+                throw Exception('VM not ready: ${response.message}');
+              }
             },
             maxRetries: 20,
             retryDelay: const Duration(milliseconds: 500),
           );
+          return response;
+        }
+
+        test('does not populate cache when cacheResult is false', () async {
+          final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
+          expect(vmServiceUri, isNotNull);
+          final response = await detectRootWithRetry(
+            vmServiceUri!,
+            cacheResult: false,
+          );
           expect(response.success, true);
           expect(response.message, isNull);
           expect(response.uri, isNotNull);
-          expect(response.uri!.toFilePath(), endsWith(app!.directory.path));
+          expect(response.uri!.toFilePath(), resolvedAppDirectoryPath);
 
           final disconnectResponse =
               await server.VmServiceHandler.detectRootPackageForVmService(
                 vmServiceUriAsString: vmServiceUriString!,
-                vmServiceUri: vmServiceUri!,
+                vmServiceUri: vmServiceUri,
                 connected: false,
                 dtd: testDtdConnection!,
               );
@@ -754,25 +965,11 @@ void main() {
         test('succeeds for a connect event', () async {
           final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
           expect(vmServiceUri, isNotNull);
-          late server.DetectRootPackageResponse response;
-          await runWithRetry(
-            callback: () async {
-              response =
-                  await server.VmServiceHandler.detectRootPackageForVmService(
-                    vmServiceUriAsString: vmServiceUriString!,
-                    vmServiceUri: vmServiceUri!,
-                    connected: true,
-                    dtd: testDtdConnection!,
-                  );
-              if (!response.success) throw Exception('VM not ready');
-            },
-            maxRetries: 20,
-            retryDelay: const Duration(milliseconds: 500),
-          );
+          final response = await detectRootWithRetry(vmServiceUri!);
           expect(response.success, true);
           expect(response.message, isNull);
           expect(response.uri, isNotNull);
-          expect(response.uri!.toFilePath(), endsWith(app!.directory.path));
+          expect(response.uri!.toFilePath(), resolvedAppDirectoryPath);
         });
 
         test('succeeds for a disconnect event when cache is empty', () async {
@@ -791,30 +988,16 @@ void main() {
           () async {
             final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
             expect(vmServiceUri, isNotNull);
-            late server.DetectRootPackageResponse response;
-            await runWithRetry(
-              callback: () async {
-                response =
-                    await server.VmServiceHandler.detectRootPackageForVmService(
-                      vmServiceUriAsString: vmServiceUriString!,
-                      vmServiceUri: vmServiceUri!,
-                      connected: true,
-                      dtd: testDtdConnection!,
-                    );
-                if (!response.success) throw Exception('VM not ready');
-              },
-              maxRetries: 20,
-              retryDelay: const Duration(milliseconds: 500),
-            );
+            final response = await detectRootWithRetry(vmServiceUri!);
             expect(response.success, true);
             expect(response.message, isNull);
             expect(response.uri, isNotNull);
-            expect(response.uri!.toFilePath(), endsWith(app!.directory.path));
+            expect(response.uri!.toFilePath(), resolvedAppDirectoryPath);
 
             final disconnectResponse =
                 await server.VmServiceHandler.detectRootPackageForVmService(
                   vmServiceUriAsString: vmServiceUriString!,
-                  vmServiceUri: vmServiceUri!,
+                  vmServiceUri: vmServiceUri,
                   connected: false,
                   dtd: testDtdConnection!,
                 );
@@ -823,7 +1006,44 @@ void main() {
             expect(disconnectResponse.uri, isNotNull);
             expect(
               disconnectResponse.uri!.toFilePath(),
-              endsWith(app!.directory.path),
+              resolvedAppDirectoryPath,
+            );
+
+            // Verify the cache entry was removed on disconnect.
+            final secondDisconnect =
+                await server.VmServiceHandler.detectRootPackageForVmService(
+                  vmServiceUriAsString: vmServiceUriString!,
+                  vmServiceUri: vmServiceUri,
+                  connected: false,
+                  dtd: testDtdConnection!,
+                );
+            expect(secondDisconnect, (success: true, message: null, uri: null));
+          },
+        );
+
+        test(
+          'succeeds for a disconnect event even if pubspec.yaml was deleted',
+          () async {
+            final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
+            expect(vmServiceUri, isNotNull);
+            final response = await detectRootWithRetry(vmServiceUri!);
+            expect(response.success, true);
+
+            File(p.join(app!.directory.path, 'pubspec.yaml')).deleteSync();
+
+            final disconnectResponse =
+                await server.VmServiceHandler.detectRootPackageForVmService(
+                  vmServiceUriAsString: vmServiceUriString!,
+                  vmServiceUri: vmServiceUri,
+                  connected: false,
+                  dtd: testDtdConnection!,
+                );
+            expect(disconnectResponse.success, true);
+            expect(disconnectResponse.message, isNull);
+            expect(disconnectResponse.uri, isNotNull);
+            expect(
+              disconnectResponse.uri!.toFilePath(),
+              resolvedAppDirectoryPath,
             );
 
             // Disconnecting again should be a no-op since the cache entry was
@@ -840,6 +1060,95 @@ void main() {
               message: null,
               uri: null,
             ));
+          },
+        );
+
+        test(
+          'rejects and does not cache root directory without package markers',
+          () async {
+            File(p.join(app!.directory.path, 'pubspec.yaml')).deleteSync();
+            final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
+            expect(vmServiceUri, isNotNull);
+            final response = await detectRootWithRetry(
+              vmServiceUri!,
+              isReady: (r) =>
+                  r.message?.contains('Invalid package root URI') ?? false,
+            );
+            expect(response.success, false);
+            expect(
+              response.message,
+              contains(
+                'directory does not contain pubspec.yaml or '
+                '.dart_tool/package_config.json',
+              ),
+            );
+            expect(response.uri, isNull);
+
+            // Verify the rejected root was not cached for disconnect.
+            final disconnectResponse =
+                await server.VmServiceHandler.detectRootPackageForVmService(
+                  vmServiceUriAsString: vmServiceUriString!,
+                  vmServiceUri: vmServiceUri,
+                  connected: false,
+                  dtd: testDtdConnection!,
+                );
+            expect(disconnectResponse, (
+              success: true,
+              message: null,
+              uri: null,
+            ));
+          },
+        );
+
+        test(
+          '$apiNotifyForVmServiceConnection rejects root without package markers and leaves DTD workspace roots empty',
+          () async {
+            File(p.join(app!.directory.path, 'pubspec.yaml')).deleteSync();
+            final vmServiceUri = normalizeVmServiceUri(vmServiceUriString!);
+            expect(vmServiceUri, isNotNull);
+
+            // Wait until the test app's main isolate is ready before invoking
+            // the full HTTP handler.
+            await detectRootWithRetry(
+              vmServiceUri!,
+              isReady: (r) =>
+                  r.message?.contains('Invalid package root URI') ?? false,
+            );
+
+            final wsVmServiceUri = convertToWebSocketUrl(
+              serviceProtocolUrl: Uri.parse(vmServiceUriString!),
+            ).toString();
+            final request = Request(
+              'post',
+              Uri(
+                scheme: 'https',
+                host: 'localhost',
+                path: apiNotifyForVmServiceConnection,
+                queryParameters: {
+                  apiParameterValueKey: wsVmServiceUri,
+                  apiParameterVmServiceConnected: 'true',
+                },
+              ),
+              headers: const {devToolsRequestHeader: '1'},
+            );
+            final response = await server.ServerApi.handle(
+              request,
+              extensionsManager: ExtensionsManager(),
+              deeplinkManager: FakeDeeplinkManager(),
+              dtd: dtd!.info,
+            );
+            expect(response.statusCode, HttpStatus.internalServerError);
+            expect(
+              await response.readAsString(),
+              contains(
+                'directory does not contain pubspec.yaml or '
+                '.dart_tool/package_config.json',
+              ),
+            );
+            final currentRoots =
+                (await testDtdConnection!.getIDEWorkspaceRoots())
+                    .ideWorkspaceRoots;
+            expect(currentRoots, isEmpty);
           },
         );
       });

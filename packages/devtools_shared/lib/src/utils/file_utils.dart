@@ -100,3 +100,40 @@ String _assertUriFormatAndReturn(String uriString) {
   );
   return uriString;
 }
+
+/// Error description for invalid local `file://` URIs.
+const invalidLocalFileUriMessage =
+    'must be an absolute file:// URI with no host, query, or fragment.';
+
+/// Returns whether [uri] is a valid local `file:` URI without an authority,
+/// query, fragment, or null bytes, and can be converted to a local file path.
+///
+/// Requiring an empty authority rejects remote hosts, ports, user info, and
+/// Windows UNC paths (e.g. `file://server/share/...`). Checking
+/// [Uri.toFilePath] ensures callers can convert [uri] without triggering an
+/// [UnsupportedError] or [FormatException].
+bool isValidLocalFileUri(Uri uri) {
+  if (uri.scheme != 'file' ||
+      uri.authority.isNotEmpty ||
+      !uri.hasAbsolutePath ||
+      uri.hasQuery ||
+      uri.hasFragment) {
+    return false;
+  }
+  try {
+    final filePath = uri.toFilePath();
+    return !filePath.contains('\x00');
+  } catch (_) {
+    return false;
+  }
+}
+
+/// Returns whether [uriString] is a `file://` URI string that parses as a valid
+/// local `file:` URI via [isValidLocalFileUri].
+bool isValidLocalFileUriString(String? uriString) {
+  if (uriString == null || !uriString.startsWith(_fileUriPrefix)) {
+    return false;
+  }
+  final uri = Uri.tryParse(uriString);
+  return uri != null && isValidLocalFileUri(uri);
+}

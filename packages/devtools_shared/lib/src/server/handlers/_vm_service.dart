@@ -7,6 +7,19 @@ part of '../server_api.dart';
 /// A namespace for VM service related server request handlers.
 @visibleForTesting
 extension VmServiceHandler on Never {
+  /// File name of a Dart or Flutter package manifest.
+  static const _pubspecYamlFileName = 'pubspec.yaml';
+
+  /// Name of the Dart tooling metadata directory in a package root.
+  static const _dartToolDirName = '.dart_tool';
+
+  /// File name of the package configuration file inside [_dartToolDirName].
+  static const _packageConfigJsonFileName = 'package_config.json';
+
+  /// Environment variables holding the user's home directory on POSIX (`HOME`)
+  /// and Windows (`USERPROFILE`).
+  static const _homeEnvVarKeys = ['HOME', 'USERPROFILE'];
+
   /// Stores the calculated package roots for VM service connections that are
   /// initiated in [handleNotifyForVmServiceConnection].
   ///
@@ -47,6 +60,138 @@ extension VmServiceHandler on Never {
     _packageRootsForVmServiceConnections.clear();
   }
 
+  /// Validates that [rootPackageUri] is a local `file://` URI pointing to an
+  /// existing Dart or Flutter package directory, and not the filesystem root or
+  /// the user's home directory (or an ancestor of it).
+  ///
+  /// Returns the symlink-resolved [Uri] if [rootPackageUri] is valid, or an
+  /// error message if it must be rejected.
+  @visibleForTesting
+  static ({Uri? resolvedUri, String? error}) validateRootPackageUri(
+    Uri rootPackageUri, {
+    Map<String, String>? environment,
+  }) {
+    if (!isValidLocalFileUri(rootPackageUri)) {
+      return (
+        resolvedUri: null,
+        error:
+            'Invalid package root URI ($rootPackageUri): '
+            '$invalidLocalFileUriMessage',
+      );
+    }
+
+    final dirPath = p.normalize(rootPackageUri.toFilePath());
+    final dir = Directory(dirPath);
+    if (!dir.existsSync()) {
+      return (
+        resolvedUri: null,
+        error:
+            'Invalid package root URI ($rootPackageUri): directory does not '
+            'exist.',
+      );
+    }
+
+    final String resolvedDirPath;
+    try {
+      resolvedDirPath = p.normalize(dir.resolveSymbolicLinksSync());
+    } on FileSystemException catch (e) {
+      return (
+        resolvedUri: null,
+        error:
+            'Invalid package root URI ($rootPackageUri): failed to resolve '
+            'symbolic links ($e).',
+      );
+    }
+
+    if (p.equals(resolvedDirPath, p.rootPrefix(resolvedDirPath))) {
+      return (
+        resolvedUri: null,
+        error:
+            'Invalid package root URI ($rootPackageUri): cannot be the '
+            'filesystem root.',
+      );
+    }
+
+    if (_isUserHomeOrAncestorDirectory(
+      resolvedDirPath,
+      environment: environment ?? Platform.environment,
+    )) {
+      return (
+        resolvedUri: null,
+        error:
+            'Invalid package root URI ($rootPackageUri): cannot be the user '
+            'home directory or an ancestor of it.',
+      );
+    }
+
+    final hasPubspec = File(
+      p.join(resolvedDirPath, _pubspecYamlFileName),
+    ).existsSync();
+    final hasPackageConfig = File(
+      p.join(resolvedDirPath, _dartToolDirName, _packageConfigJsonFileName),
+    ).existsSync();
+    if (!hasPubspec && !hasPackageConfig) {
+      return (
+        resolvedUri: null,
+        error:
+            'Invalid package root URI ($rootPackageUri): directory does not '
+            'contain $_pubspecYamlFileName or '
+            '$_dartToolDirName/$_packageConfigJsonFileName.',
+      );
+    }
+
+    return (resolvedUri: Uri.file(resolvedDirPath), error: null);
+  }
+
+  /// Returns whether [resolvedDirPath] matches or is an ancestor of the
+  /// current user's home directory from `HOME` or `USERPROFILE`.
+  static bool _isUserHomeOrAncestorDirectory(
+    String resolvedDirPath, {
+    required Map<String, String> environment,
+  }) {
+    for (final envKey in _homeEnvVarKeys) {
+      final homePath = environment[envKey];
+      if (homePath == null || homePath.isEmpty) continue;
+      final normalizedHome = p.normalize(homePath);
+      final resolvedHome =
+          _tryResolveSymbolicLinks(Directory(normalizedHome)) ?? normalizedHome;
+      if (p.equals(resolvedDirPath, resolvedHome) ||
+          p.isWithin(resolvedDirPath, resolvedHome)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Resolves symbolic links for [directory] if it exists, returning `null` if
+  /// it does not exist or resolution fails.
+  static String? _tryResolveSymbolicLinks(Directory directory) {
+    if (!directory.existsSync()) return null;
+    try {
+      return p.normalize(directory.resolveSymbolicLinksSync());
+    } on FileSystemException {
+      return null;
+    }
+  }
+
+  /// Handles an [apiNotifyForVmServiceConnection] request notifying the
+  /// DevTools server that a DevTools client connected to or disconnected from a
+  /// VM service.
+  ///
+  /// Expects [queryParams] to contain [apiParameterValueKey] (the VM service
+  /// URI) and [apiParameterVmServiceConnected] (`'true'` or `'false'`).
+  ///
+  /// When the DevTools server owns the Dart Tooling Daemon (DevTools was
+  /// launched outside of the IDE, and [dtd] has both a [DtdInfo.localUri] and a
+  /// [DtdInfo.secret]), this registers or unregisters the VM service with DTD,
+  /// resolves and validates the app's package root via
+  /// [detectRootPackageForVmService], and updates DTD's IDE workspace roots via
+  /// [updateDtdWorkspaceRoots].
+  ///
+  /// Returns a [ServerApi.success] no-op response via [api] if [dtd] is
+  /// unavailable or has no secret, [ServerApi.badRequest] if required
+  /// parameters are missing or invalid, or [ServerApi.serverError] if package
+  /// root detection or DTD communication fails.
   static Future<shelf.Response> handleNotifyForVmServiceConnection(
     ServerApi api,
     Map<String, String> queryParams,
@@ -171,7 +316,21 @@ extension VmServiceHandler on Never {
             uri: null,
           );
         }
-        rootPackageUri = Uri.parse(root);
+        final parsedRoot = Uri.tryParse(root);
+        if (parsedRoot == null) {
+          return (
+            success: false,
+            message:
+                'Invalid package root URI ($root): '
+                '$invalidLocalFileUriMessage',
+            uri: null,
+          );
+        }
+        final validationResult = validateRootPackageUri(parsedRoot);
+        if (validationResult.error != null) {
+          return (success: false, message: validationResult.error, uri: null);
+        }
+        rootPackageUri = validationResult.resolvedUri!;
         if (cacheResult) {
           _packageRootsForVmServiceConnections[normalizedUriAsString] =
               rootPackageUri;
