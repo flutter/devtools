@@ -12,6 +12,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:devtools_test/helpers.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as image;
 import 'package:material_ui/material_ui.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -355,5 +356,122 @@ void main() {
         await tester.pumpAndSettle(const Duration(seconds: 1));
       },
     );
+
+    group('copy headers and cookies', () {
+      Future<void> pumpInspector(WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrapWithControllers(
+            const NetworkRequestInspector(),
+            network: NetworkController(),
+            debugger: createMockDebuggerControllerWithDefaults(),
+          ),
+        );
+        screenControllers.lookup<NetworkController>().selectedRequest.value =
+            httpGetWithCookies;
+        await tester.pumpAndSettle();
+      }
+
+      /// Stops polling so no timers are pending when the test is disposed.
+      Future<void> stopPolling(WidgetTester tester) async {
+        await screenControllers.lookup<NetworkController>().stopRecording();
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+      }
+
+      testWidgets('copies all headers from the Headers tab', (tester) async {
+        await pumpInspector(tester);
+        await tester.tap(find.text('Headers'));
+        await tester.pumpAndSettle();
+
+        expect(clipboardContents, isEmpty);
+        await tester.tap(find.byType(CopyToClipboardControl));
+
+        expect(
+          clipboardContents,
+          HttpRequestHeadersView.copyText(httpGetWithCookies),
+        );
+        expect(
+          clipboardContents,
+          allOf(
+            startsWith('General\nmethod: GET\n'),
+            contains(
+              '\n\nResponse Headers\n'
+              'content-type: text/plain\n'
+              'set-cookie: sid=1; Path=/; HttpOnly\n'
+              'set-cookie: theme=dark; Expires=Wed, 21 Oct 2026 07:28:00 GMT; '
+              'SameSite=Lax',
+            ),
+            endsWith(
+              '\n\nRequest Headers\naccept: text/html, application/json',
+            ),
+          ),
+        );
+
+        await stopPolling(tester);
+      });
+
+      testWidgets('copies all cookies from the Cookies tab', (tester) async {
+        await pumpInspector(tester);
+        await tester.tap(find.text('Cookies'));
+        await tester.pumpAndSettle();
+
+        expect(clipboardContents, isEmpty);
+        await tester.tap(find.byType(CopyToClipboardControl));
+
+        expect(
+          clipboardContents,
+          'Response Cookies\n'
+          'sid=1; Path=/; HttpOnly\n'
+          'theme=dark; Expires=Wed, 21 Oct 2026 07:28:00 GMT; SameSite=Lax\n'
+          '\n'
+          'Request Cookies\n'
+          'a=b; c=d',
+        );
+
+        await stopPolling(tester);
+      });
+
+      testWidgets('cookie values are selectable', (tester) async {
+        await pumpInspector(tester);
+        await tester.tap(find.text('Cookies'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.ancestor(
+            of: find.byKey(HttpRequestCookiesView.responseCookiesKey),
+            matching: find.byType(SelectionArea),
+          ),
+          findsOneWidget,
+        );
+
+        await stopPolling(tester);
+      });
+    });
+
+    testWidgets('image metadata is selectable', (tester) async {
+      final pngBytes = image.encodePng(image.Image(width: 1, height: 1));
+      final imageJson = Map<String, Object?>.of(httpGetWithCookiesJson)
+        ..['response'] = {
+          ...httpGetWithCookiesJson['response'] as Map<String, Object?>,
+          'headers': {
+            'content-type': ['image/png'],
+          },
+          'cookies': [],
+        }
+        ..['responseBody'] = pngBytes;
+      final imageRequest = DartIOHttpRequestData(
+        HttpProfileRequest.parse(imageJson)!,
+        requestFullDataFromVmService: false,
+      );
+
+      await tester.pumpWidget(wrap(ImageResponseView(imageRequest)));
+
+      expect(
+        find.ancestor(
+          of: find.text('Dimensions: '),
+          matching: find.byType(SelectionArea),
+        ),
+        findsOneWidget,
+      );
+    });
   });
 }

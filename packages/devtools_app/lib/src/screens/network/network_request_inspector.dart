@@ -76,7 +76,13 @@ class NetworkRequestInspector extends StatelessWidget {
         ),
       if (data is DartIOHttpRequestData) ...[
         (
-          tab: _buildTab(tabName: NetworkRequestInspector._headersTabTitle),
+          tab: _buildTab(
+            tabName: NetworkRequestInspector._headersTabTitle,
+            trailing: HttpViewTrailingCopyButton(
+              data,
+              HttpRequestHeadersView.copyText,
+            ),
+          ),
           tabView: HttpRequestHeadersView(data),
         ),
         if (data.requestBody != null)
@@ -113,7 +119,13 @@ class NetworkRequestInspector extends StatelessWidget {
           ),
         if (data.hasCookies)
           (
-            tab: _buildTab(tabName: NetworkRequestInspector._cookiesTabTitle),
+            tab: _buildTab(
+              tabName: NetworkRequestInspector._cookiesTabTitle,
+              trailing: HttpViewTrailingCopyButton(
+                data,
+                HttpRequestCookiesView.copyText,
+              ),
+            ),
             tabView: HttpRequestCookiesView(data),
           ),
       ],

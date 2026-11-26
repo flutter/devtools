@@ -244,6 +244,74 @@ final httpPostJson = <String, Object?>{
   'requestBody': httpPostRequestBodyData,
   'responseBody': httpPostResponseBodyData,
 };
+final httpGetWithCookiesRequest = HttpProfileRequest.parse(
+  httpGetWithCookiesJson,
+)!;
+final httpGetWithCookies = DartIOHttpRequestData(
+  httpGetWithCookiesRequest,
+  requestFullDataFromVmService: false,
+);
+final httpGetWithCookiesJson = <String, Object?>{
+  'type': 'HttpProfileRequest',
+  'id': '3',
+  'isolateId': 'isolates/2013291945734727',
+  'method': 'GET',
+  'uri': 'https://example.com/account',
+  'events': [
+    {'timestamp': 6326808941, 'event': 'Connection established'},
+    {'timestamp': 6326808965, 'event': 'Request sent'},
+  ],
+  'startTime': 6326279935,
+  'endTime': 6326808974,
+  'request': {
+    'headers': {
+      'accept': ['text/html', 'application/json'],
+    },
+    'connectionInfo': {
+      'localPort': 45648,
+      'remoteAddress': '93.184.216.34',
+      'remotePort': 443,
+    },
+    'contentLength': 0,
+    'cookies': ['a=b', 'c=d'],
+    'followRedirects': true,
+    'maxRedirects': 5,
+    'method': 'GET',
+    'persistentConnection': true,
+    'uri': 'https://example.com/account',
+    'filterKey': 'HTTP/client',
+  },
+  'response': {
+    'startTime': 6327090749,
+    'headers': {
+      'content-type': ['text/plain'],
+      'set-cookie': [
+        'sid=1; Path=/; HttpOnly',
+        'theme=dark; Expires=Wed, 21 Oct 2026 07:28:00 GMT; SameSite=Lax',
+      ],
+    },
+    'compressionState': 'HttpClientResponseCompressionState.notCompressed',
+    'connectionInfo': {
+      'localPort': 45648,
+      'remoteAddress': '93.184.216.34',
+      'remotePort': 443,
+    },
+    'contentLength': 2,
+    'cookies': [
+      'sid=1; Path=/; HttpOnly',
+      'theme=dark; Expires=Wed, 21 Oct 2026 07:28:00 GMT; SameSite=Lax',
+    ],
+    'isRedirect': false,
+    'persistentConnection': true,
+    'reasonPhrase': 'OK',
+    'redirects': [],
+    'statusCode': 200,
+    'endTime': 6327091628,
+  },
+  'requestBody': [],
+  'responseBody': [111, 107],
+};
+
 final httpPostRequestBodyData = [
   ...[123, 10, 32, 34, 116, 105, 116, 108, 101, 34, 58, 32, 34, 102, 111, 111],
   ...[34, 44, 32, 34, 98, 111, 100, 121, 34, 58, 32, 34, 98, 97, 114, 34],
