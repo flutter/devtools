@@ -125,6 +125,36 @@ class BreakpointManager with DisposerMixin {
   Future<void> removeBreakpoint(Breakpoint breakpoint) =>
       _service.removeBreakpoint(_isolateRefId, breakpoint.id!);
 
+  /// Enables or disables [breakpoint] without removing it.
+  ///
+  /// A disabled breakpoint stays in [breakpointsWithLocation] but does not
+  /// pause the isolate. The VM reports the new state with a
+  /// [EventKind.kBreakpointUpdated] event, which updates
+  /// [breakpointsWithLocation].
+  ///
+  /// This is not supported for Dart web apps, because DWDS does not implement
+  /// the `setBreakpointState` RPC.
+  Future<void> setBreakpointEnabled(
+    Breakpoint breakpoint, {
+    required bool enabled,
+  }) => _service.setBreakpointState(_isolateRefId, breakpoint.id!, enabled);
+
+  /// Adds a breakpoint at [line] of the script with [scriptId], then disables
+  /// it if [enabled] is false.
+  ///
+  /// Used when re-establishing breakpoints, so that a breakpoint the user
+  /// disabled stays disabled.
+  Future<void> _addBreakpointWithState(
+    String scriptId,
+    int line, {
+    required bool enabled,
+  }) async {
+    final breakpoint = await addBreakpoint(scriptId, line);
+    if (!enabled) {
+      await setBreakpointEnabled(breakpoint, enabled: false);
+    }
+  }
+
   Future<void> toggleBreakpoint(ScriptRef script, int line) async {
     final selectedIsolate =
         serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
@@ -197,7 +227,11 @@ class BreakpointManager with DisposerMixin {
       for (final scriptRef in addedScripts) ...[
         for (final bp in breakpointsToRemove)
           if (scriptRef.uri == bp.scriptUri)
-            addBreakpoint(scriptRef.id!, bp.line!),
+            _addBreakpointWithState(
+              scriptRef.id!,
+              bp.line!,
+              enabled: bp.enabled,
+            ),
       ],
     ].wait;
   }
@@ -251,7 +285,11 @@ class BreakpointManager with DisposerMixin {
 
       final scriptId = newScriptRef?.id;
       if (scriptId != null && breakpointLine != null) {
-        await addBreakpoint(scriptId, breakpointLine);
+        await _addBreakpointWithState(
+          scriptId,
+          breakpointLine,
+          enabled: breakpoint.enabled,
+        );
       }
     }
   }
@@ -372,6 +410,7 @@ class BreakpointManager with DisposerMixin {
 
         break;
       case EventKind.kBreakpointResolved:
+      case EventKind.kBreakpointUpdated:
         final breakpoint = event.breakpoint!;
         _breakpoints.value = [
           for (final b in _breakpoints.value)
@@ -382,13 +421,14 @@ class BreakpointManager with DisposerMixin {
         await breakpointManager.createBreakpointWithLocation(breakpoint).then((
           bp,
         ) {
-          final list = _breakpointsWithLocation.value;
-          // Remove the bp with the older, unresolved information from the list.
-          list.removeWhere((breakpoint) => breakpoint.id == bp.id);
-          // Add the bp with the newer, resolved information.
-          list.add(bp);
-          list.sort();
-          _breakpointsWithLocation.value = list;
+          // Replace the bp that has the older information (unresolved, or a
+          // previous enabled state) with the newer one. Build a new list so
+          // that the notifier sees a different value and notifies listeners.
+          _breakpointsWithLocation.value = [
+            for (final b in _breakpointsWithLocation.value)
+              if (b.id != bp.id) b,
+            bp,
+          ]..sort();
         });
 
         break;

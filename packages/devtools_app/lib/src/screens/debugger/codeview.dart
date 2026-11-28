@@ -851,6 +851,9 @@ class Gutter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bpLineSet = Set.of(breakpoints.map((bp) => bp.line));
+    final enabledBpLineSet = Set.of(
+      breakpoints.where((bp) => bp.enabled).map((bp) => bp.line),
+    );
     final theme = Theme.of(context);
     final coverageLines = sourceReport.coverageHitLines.union(
       sourceReport.coverageMissedLines,
@@ -885,6 +888,7 @@ class Gutter extends StatelessWidget {
             lineNumber: lineNum,
             onPressed: () => onPressed(lineNum),
             isBreakpoint: bpLineSet.contains(lineNum),
+            isBreakpointEnabled: enabledBpLineSet.contains(lineNum),
             isExecutable: executableLines.contains(lineNum),
             isPausedHere: pausedFrame?.line == lineNum,
             allowInteraction: allowInteraction,
@@ -901,6 +905,7 @@ class GutterItem extends StatelessWidget {
     super.key,
     required this.lineNumber,
     required this.isBreakpoint,
+    this.isBreakpointEnabled = true,
     required this.isExecutable,
     required this.isPausedHere,
     required this.onPressed,
@@ -911,6 +916,12 @@ class GutterItem extends StatelessWidget {
   final int lineNumber;
 
   final bool isBreakpoint;
+
+  /// Whether the breakpoint on this line is enabled.
+  ///
+  /// Only used when [isBreakpoint] is true. A disabled breakpoint is drawn in
+  /// a muted color.
+  final bool isBreakpointEnabled;
 
   final bool isExecutable;
 
@@ -965,7 +976,12 @@ class GutterItem extends StatelessWidget {
                   child: Center(
                     child: createAnimatedCircleWidget(
                       isBreakpoint ? breakpointRadius : executableLineRadius,
-                      isBreakpoint ? breakpointColor : subtleColor,
+                      isBreakpoint
+                          ? breakpointMarkerColor(
+                              theme,
+                              enabled: isBreakpointEnabled,
+                            )
+                          : subtleColor,
                     ),
                   ),
                 ),

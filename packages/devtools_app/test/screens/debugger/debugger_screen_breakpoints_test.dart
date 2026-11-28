@@ -3,6 +3,7 @@
 // found in the LICENSE file or at https://developers.google.com/open-source/licenses/bsd.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/debugger/breakpoints.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/shared/diagnostics/primitives/source_location.dart';
 import 'package:devtools_app_shared/ui.dart';
@@ -89,5 +90,86 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  group('enabled checkbox', () {
+    final breakpointCheckbox = find.descendant(
+      of: find.byType(Breakpoints),
+      matching: find.byType(Checkbox),
+    );
+
+    testWidgetsWithWindowSize(
+      'reflects that the breakpoint is enabled',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpDebuggerScreen(tester, debuggerController);
+
+        expect(tester.widget<Checkbox>(breakpointCheckbox).value, isTrue);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'reflects that the breakpoint is disabled',
+      windowSize,
+      (WidgetTester tester) async {
+        final disabledBreakpoint = Breakpoint(
+          breakpointNumber: 2,
+          id: 'bp2',
+          resolved: false,
+          location: UnresolvedSourceLocation(
+            scriptUri: 'package:test/script.dart',
+            line: 20,
+          ),
+          enabled: false,
+        );
+        when(mockBreakpointManager.breakpointsWithLocation).thenReturn(
+          ValueNotifier([
+            BreakpointAndSourcePosition.create(
+              disabledBreakpoint,
+              const SourcePosition(line: 20, column: 1),
+            ),
+          ]),
+        );
+        addTearDown(
+          () => when(
+            mockBreakpointManager.breakpointsWithLocation,
+          ).thenReturn(ValueNotifier(breakpointsWithLocation)),
+        );
+
+        await pumpDebuggerScreen(tester, debuggerController);
+
+        expect(tester.widget<Checkbox>(breakpointCheckbox).value, isFalse);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'disables the breakpoint when unchecked',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpDebuggerScreen(tester, debuggerController);
+
+        await tester.tap(breakpointCheckbox);
+        await tester.pump();
+
+        verify(
+          mockBreakpointManager.setBreakpointEnabled(
+            breakpoints.first,
+            enabled: false,
+          ),
+        ).called(1);
+      },
+    );
+
+    testWidgetsWithWindowSize('is hidden for Dart web apps', windowSize, (
+      WidgetTester tester,
+    ) async {
+      final connectedApp = fakeServiceConnection.serviceManager.connectedApp!;
+      mockConnectedApp(connectedApp, isWebApp: true);
+      addTearDown(() => mockConnectedApp(connectedApp));
+
+      await pumpDebuggerScreen(tester, debuggerController);
+
+      expect(breakpointCheckbox, findsNothing);
+    });
   });
 }
